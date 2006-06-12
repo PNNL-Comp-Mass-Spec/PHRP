@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sections>
+  <section name="PeptideHitResultsProcRunner">
+    <item key="DMSConnectionStringIntegrated" value="Data Source=gigasax;Initial Catalog=DMS5_T3;Integrated Security=SSPI;" />
+    <item key="DMSConnectionString" value="Data Source=gigasax;Initial Catalog=DMS5_T3;User=dmsreader;Password=dms4fun" />
+    <item key="ObtainModificationDefinitionsFromDMS" value="False" />
+    <item key="PeptideHitResultsFileFormat" value="0" />
+  </section>
+  <section name="PeptideHitResultsProcessorOptions">
+    <item key="CreateModificationSummaryFile" value="True" />
+    
+    <item key="EnzymeMatchSpecLeftResidue" value="[KR]" />
+    <item key="EnzymeMatchSpecRightResidue" value="[^P]" />
+    
+    <item key="MassCorrectionTagsFilePath_SetViaCode" value="" />
+    <item key="ModificationDefinitionsFilePath_SetViaCode" value="" />
+    <item key="PeptideNTerminusMassChange_UseDefaultInCode" value="1.0078246" />
+    <item key="PeptideCTerminusMassChange_UseDefaultInCode" value="17.0027387" />
+  </section>
+</sections>

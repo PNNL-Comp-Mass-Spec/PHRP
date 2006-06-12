@@ -1,0 +1,41 @@
+PeptideHitResultsProcessor.dll Revision History
+
+Version 1.1.2322; May 11, 2006
+	- Updated the routine that parses out the scan number from the "description" note of the "fragment ion mass spectrum" element to look for the first number present if "scan=" is not present
+
+Version 1.1.2256; March 6, 2006
+	- Updated modification definition parsing routines to group modifications with the same modification mass (within 3 digits of precision) together
+		- For example, if both D and E are listed on separate lines of the _ModDefs.txt file with a modification mass of 14.0157, then they will both be assigned the same modification symbol and their stats will be grouped together in the _ModSummary.txt file
+
+Version 1.1.2249; February 27, 2006
+	- Updated the default mass correction tag list
+
+Version 1.1.2245; February 23, 2006
+	- Fixed bug that failed to label reversed sequence proteins with the ":reverse" tag in the _SeqToProteinMap.txt file
+	- Now auto-updating static modifications to be dynamic modifications if "refine, modification mass" is not blank (it is typically set to "none" if defined)
+	- Switched to case-insensitive matching of entries in the <group label="input parameters" type="parameters"> section of  the XTandem results file
+
+Version 1.1.2237; February 15, 2006
+	- Now creating file _ResultToSeqMap.txt 
+		- Links search result to Unique Sequence ID (used for both Sequest and XTandem results)
+	- Now creating file _SeqToProteinMap.txt
+		- Links Unique Sequence ID to protein name
+		- Also lists Cleavage_State, Terminus_State, Protein_Expectation_Value_Log(e), and Protein_Intensity_Log(I)
+		- The _SeqInfo.txt file no longer contains cleavage state and terminus state information
+	- Updated the parsing of Sequest Synopsis files to keep track of the first observation of a given peptide for a given XCorr in a given scan
+		- Only writing an entry to the _ResultToSeqMap.txt file for the first observation, but writing each protein found to the _SeqToProteinMap.txt file
+	- Updated the parsing of the XTandem results to write out all unique peptide sequences identified for a given scan (aka given group)
+		- Previously, was only saving the first peptide observed
+	- Updated the parsing of the XTandem results to track all of the proteins associated with each peptide observation
+		- Previously, was only saving the first protein listed for each peptide
+	- For XTandem results, the _xt.txt file no longer lists the protein name, protein expectation value, or protein intensity
+	- For XTandem results, the _xt.txt file now includes the Multiple_Protein_Count value for each search result (0 if the peptide is in one protein, 1 if in two proteins, etc.)
+	- Updated the _xt.txt file to include a sequentially numbered Result_ID column prior to the Group_ID column
+		- Necessary since a given group can have multiple, unique peptide sequences if the sequences all have the same hyperscore value
+		- The Result_ID value can be used to associate the _ResultToSeqMap.txt file to the _xt.txt file
+	- Updated the _xt.txt file to display the base-10 log of the peptide expectation value rather than the raw peptide expectation value
+
+Version 1.0.2207; January 16, 2006
+	- Initial stable release version
+	- Supports XTandem _xt.txt files and Sequest _syn.txt and _fht.txt files
+

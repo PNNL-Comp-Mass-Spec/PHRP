@@ -1,0 +1,28 @@
+Peptide Hit Results Processor Revision History
+
+Version 1.1.2322; May 11, 2006
+	- Updated the routine that parses out the scan number from the "description" note of the "fragment ion mass spectrum" element to look for the first number present if "scan=" is not present
+
+Version 1.1.2256; March 6, 2006
+	- Updated modification definition parsing routines to group modifications with the same modification mass together
+
+Version 1.1.2249; February 27, 2006
+	- Updated the default mass correction tag list
+
+Version 1.1.2245; February 23, 2006
+	- Fixed bug that failed to label reversed sequence proteins with the ":reverse" tag in the _SeqToProteinMap.txt file
+
+Version 1.1.2244; February 22, 2006
+	- Now updating static XTandem mods to dynamic XTandem mods if a dynamic mod with an identical mass is found or if the directive <note type="input" label="refine, modification mass">none</note> is present in the XTandem parameters
+
+Version 1.1.2237; February 15, 2006
+	- Updated to new version of PeptideHitResultsProcessor.dll
+		- The _SeqInfo.txt file no longer contains cleavage state and terminus state information
+		- The new version now creates files _ResultToSeqMap.txt and _SeqToProteinMap.txt in addition to _SeqInfo.txt and _ModDetails.txt
+		- The _xt.txt file no longer contains the protein name, protein expectation value, or protein intensity
+		- The _xt.txt file now includes the Multiple_Protein_Count value for each search result (0 if the peptide is in one protein, 1 if in two proteins, etc.)
+
+Version 1.0.2207; January 16, 2006
+	- Initial stable release version
+	- Supports XTandem _xt.txt files and Sequest _syn.txt and _fht.txt files
+
