@@ -624,7 +624,7 @@ Public Class clsSearchResultsBaseClass
         ' See if any protein or peptide terminus static mods are defined
         ' Peptide terminus static mods are always considered for a given peptide
         ' Protein terminus static mods are only considered if the peptide is at the appropriate terminus for the modification
-        ' In both cases, we only add the modification if the terminal residue does not already have the given modification associated with it
+        ' If blnAllowDuplicateModOnTerminus = False, then we only add the modification if the terminal residue does not already have the given modification associated with it
 
         Dim intModificationIndex As Integer
         Dim intIndexCompare As Integer
@@ -844,7 +844,8 @@ Public Class clsSearchResultsBaseClass
 
         ' First, look for any mods of type IsotopicMod
         ' Next, look for any mods of type TerminalPeptideStaticMod
-        ' Next, look for any mods of type  ProteinTerminusStaticMod
+        ' Next, look for any mods of type ProteinTerminusStaticMod
+        ' Finally, look for mods that are not Isotopic, Peptide Terminus Static, or Protein Terminus Static mods
         For intModificationTypeIterator = 0 To 2
             Select Case intModificationTypeIterator
                 Case 0
@@ -883,7 +884,7 @@ Public Class clsSearchResultsBaseClass
             Next intIndex
         Next intModificationTypeIterator
 
-        ' Now look for mods not of type ProteinTerminusStaticMod
+        ' Now look for mods not of type IsotopicMod, TerminalPeptideStaticMod, or ProteinTerminusStaticMod
         ' These should all have a non-zero value for ResidueLocInPeptide
         For intIndex = 0 To mSearchResultModificationCount - 1
             With mSearchResultModifications(intIndex)

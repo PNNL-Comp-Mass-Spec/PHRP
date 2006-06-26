@@ -145,6 +145,8 @@ Public Class clsSequestResultsProcessor
             ' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
             ' Since Sequest allows a terminal peptide residue to be modified twice, we'll allow that to happen,
             '  even though, biologically, that's typically not possible
+            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
+            '  (where two COOH groups are present)
             objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
 
             ' Compute the monoisotopic mass for this peptide

@@ -9,7 +9,7 @@ Option Strict On
 Public MustInherit Class clsPHRPBaseClass
 
     Public Sub New()
-        mFileDate = "February 15, 2006"
+        mFileDate = "June 26, 2006"
         InitializeLocalVariables()
     End Sub
 
@@ -767,6 +767,11 @@ Public MustInherit Class clsPHRPBaseClass
         Dim intUniqueSeqID As Integer   ' This ID is assigned using a hashtable containing mPeptideCleanSequence and mPeptideModDescription
         Dim blnExistingSequenceFound As Boolean
 
+        Dim intModificationTypeIterator As Integer
+        Dim eModificationType As clsModificationDefinition.eModificationTypeConstants
+        Dim intTerminusCode As Integer
+        Dim intResidueLocInPeptide As Integer
+
         With objSearchResult
             intUniqueSeqID = mUniqueSequences.GetNextUniqueSequenceID(.PeptideCleanSequence, .PeptideModDescription, blnExistingSequenceFound)
 
@@ -783,17 +788,65 @@ Public MustInherit Class clsPHRPBaseClass
                                     .PeptideModDescription & SEP_CHAR & _
                                     .PeptideMonoisotopicMass.ToString("0.0000000"))
 
-                    ' Write out the modifications (if any) to the ModDeetails file
+                    ' Write out the modifications (if any) to the ModDetails file
+
+                    ' First, look for any mods of type TerminalPeptideStaticMod
+                    ' Next, look for any mods of type ProteinTerminusStaticMod
+                    ' Finally, look for mods that are not Peptide Terminus Static or Protein Terminus Static mods
+                    For intModificationTypeIterator = 0 To 1
+                        Select Case intModificationTypeIterator
+                            Case 0
+                                eModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+                            Case 1
+                                eModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+                        End Select
+
+                        For intIndex = 0 To .SearchResultModificationCount - 1
+                            With .GetSearchResultModDetailsByIndex(intIndex)
+                                If .ModDefinition.ModificationType = eModificationType Then
+                                    Select Case .ModDefinition.TargetResidues
+                                        Case clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_SYMBOL_DMS
+                                            intTerminusCode = -1
+                                        Case clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+                                            intTerminusCode = -2
+                                        Case clsPeptideModificationContainer.N_TERMINAL_PROTEIN_SYMBOL_DMS
+                                            intTerminusCode = -3
+                                        Case clsPeptideModificationContainer.C_TERMINAL_PROTEIN_SYMBOL_DMS
+                                            intTerminusCode = -4
+                                        Case Else
+                                            ' Invalid target residue; set intTerminusCode to 0
+                                            intTerminusCode = 0
+                                    End Select
+
+                                    If intTerminusCode = 0 Then
+                                        intResidueLocInPeptide = .ResidueLocInPeptide
+                                    Else
+                                        intResidueLocInPeptide = intTerminusCode
+                                    End If
+
+                                    mModDetailsFile.WriteLine( _
+                                                    intUniqueSeqID.ToString & SEP_CHAR & _
+                                                    .ModDefinition.MassCorrectionTag & SEP_CHAR & _
+                                                    intResidueLocInPeptide.ToString)
+                                End If
+                            End With
+                        Next intIndex
+                    Next intModificationTypeIterator
+
+                    ' Now look for mods not of type TerminalPeptideStaticMod, or ProteinTerminusStaticMod
+                    ' These should all have a non-zero value for ResidueLocInPeptide
                     For intIndex = 0 To .SearchResultModificationCount - 1
                         With .GetSearchResultModDetailsByIndex(intIndex)
-                            mModDetailsFile.WriteLine( _
-                                            intUniqueSeqID.ToString & SEP_CHAR & _
-                                            .ModDefinition.MassCorrectionTag & SEP_CHAR & _
-                                            .ResidueLocInPeptide.ToString)
+                            If .ModDefinition.ModificationType <> clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod AndAlso _
+                               .ModDefinition.ModificationType <> clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
 
+                                mModDetailsFile.WriteLine( _
+                                                intUniqueSeqID.ToString & SEP_CHAR & _
+                                                .ModDefinition.MassCorrectionTag & SEP_CHAR & _
+                                                .ResidueLocInPeptide.ToString)
+                            End If
                         End With
                     Next intIndex
-
                 End If
             End If
 

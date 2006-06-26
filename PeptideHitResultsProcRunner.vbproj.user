@@ -11,7 +11,7 @@
                     RemoteDebugEnabled = "false"
                     RemoteDebugMachine = ""
                     StartAction = "Project"
-                    StartArguments = "/i:HyukKang_MSMS_2006May11_xt.xml"
+                    StartArguments = "/i:IMAC_HSP90_H304Q_061406_syn.txt /m:sequest_N14_NE_STY_Phos_Stat_Met_Iodo_Tryp_ModDefs.txt /t:Mass_Correction_Tags.txt"
                     StartPage = ""
                     StartProgram = ""
                     StartURL = ""
