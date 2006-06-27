@@ -2,9 +2,27 @@ Option Strict On
 
 ' This class can be used as a base class for peptide hit results processor classes
 '
+' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2006, Battelle Memorial Institute.  All Rights Reserved.
 ' Started January 6, 2006
+'
+' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' -------------------------------------------------------------------------------
+' 
+' Licensed under the Apache License, Version 2.0; you may not use this file except
+' in compliance with the License.  You may obtain a copy of the License at 
+' http://www.apache.org/licenses/LICENSE-2.0
+'
+' Notice: This computer software was prepared by Battelle Memorial Institute, 
+' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
+' Department of Energy (DOE).  All rights in the computer software are reserved 
+' by DOE on behalf of the United States Government and the Contractor as 
+' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
+' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
+' SOFTWARE.  This notice including this sentence must appear on any copies of 
+' this computer software.
 
 Public MustInherit Class clsPHRPBaseClass
 
@@ -63,6 +81,10 @@ Public MustInherit Class clsPHRPBaseClass
         Public ModificationType As clsModificationDefinition.eModificationTypeConstants
     End Structure
 
+    Friend Structure udtModNameAndResidueLocType
+        Dim ModName As String
+        Dim ResidueLocInPeptide As Integer
+    End Structure
 #End Region
 
 #Region "Classwide Variables"
@@ -767,10 +789,8 @@ Public MustInherit Class clsPHRPBaseClass
         Dim intUniqueSeqID As Integer   ' This ID is assigned using a hashtable containing mPeptideCleanSequence and mPeptideModDescription
         Dim blnExistingSequenceFound As Boolean
 
-        Dim intModificationTypeIterator As Integer
-        Dim eModificationType As clsModificationDefinition.eModificationTypeConstants
-        Dim intTerminusCode As Integer
-        Dim intResidueLocInPeptide As Integer
+        Dim udtModNameAndResidueLoc() As udtModNameAndResidueLocType
+        Dim intPointerArray() As Integer
 
         With objSearchResult
             intUniqueSeqID = mUniqueSequences.GetNextUniqueSequenceID(.PeptideCleanSequence, .PeptideModDescription, blnExistingSequenceFound)
@@ -788,65 +808,37 @@ Public MustInherit Class clsPHRPBaseClass
                                     .PeptideModDescription & SEP_CHAR & _
                                     .PeptideMonoisotopicMass.ToString("0.0000000"))
 
-                    ' Write out the modifications (if any) to the ModDetails file
 
-                    ' First, look for any mods of type TerminalPeptideStaticMod
-                    ' Next, look for any mods of type ProteinTerminusStaticMod
-                    ' Finally, look for mods that are not Peptide Terminus Static or Protein Terminus Static mods
-                    For intModificationTypeIterator = 0 To 1
-                        Select Case intModificationTypeIterator
-                            Case 0
-                                eModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-                            Case 1
-                                eModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
-                        End Select
+                    If .SearchResultModificationCount > 0 Then
+                        ReDim udtModNameAndResidueLoc(.SearchResultModificationCount - 1)
+                        ReDim intPointerArray(.SearchResultModificationCount - 1)
 
+                        If .SearchResultModificationCount = 1 Then
+                           intPointerArray(0) = 0
+                        Else
+                            ' Construct a pointer array so that we can search the modifications by .ResidueLocInPeptide
+                            For intIndex = 0 To .SearchResultModificationCount - 1
+                                With .GetSearchResultModDetailsByIndex(intIndex)
+                                    udtModNameAndResidueLoc(intIndex).ResidueLocInPeptide = .ResidueLocInPeptide
+                                    udtModNameAndResidueLoc(intIndex).ModName = .ModDefinition.MassCorrectionTag
+                                End With
+                                intPointerArray(intIndex) = intIndex
+                            Next intIndex
+
+                            Array.Sort(udtModNameAndResidueLoc, intPointerArray, New IModNameAndResidueLocComparer)
+                        End If
+
+                        ' Write out the modifications to the ModDetails file
+                        ' Note that mods of type IsotopicMod will have .ResidueLocInPeptide = 0; other mods will have positive .ResidueLocInPeptide values
                         For intIndex = 0 To .SearchResultModificationCount - 1
-                            With .GetSearchResultModDetailsByIndex(intIndex)
-                                If .ModDefinition.ModificationType = eModificationType Then
-                                    Select Case .ModDefinition.TargetResidues
-                                        Case clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_SYMBOL_DMS
-                                            intTerminusCode = -1
-                                        Case clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_SYMBOL_DMS
-                                            intTerminusCode = -2
-                                        Case clsPeptideModificationContainer.N_TERMINAL_PROTEIN_SYMBOL_DMS
-                                            intTerminusCode = -3
-                                        Case clsPeptideModificationContainer.C_TERMINAL_PROTEIN_SYMBOL_DMS
-                                            intTerminusCode = -4
-                                        Case Else
-                                            ' Invalid target residue; set intTerminusCode to 0
-                                            intTerminusCode = 0
-                                    End Select
-
-                                    If intTerminusCode = 0 Then
-                                        intResidueLocInPeptide = .ResidueLocInPeptide
-                                    Else
-                                        intResidueLocInPeptide = intTerminusCode
-                                    End If
-
-                                    mModDetailsFile.WriteLine( _
-                                                    intUniqueSeqID.ToString & SEP_CHAR & _
-                                                    .ModDefinition.MassCorrectionTag & SEP_CHAR & _
-                                                    intResidueLocInPeptide.ToString)
-                                End If
-                            End With
-                        Next intIndex
-                    Next intModificationTypeIterator
-
-                    ' Now look for mods not of type TerminalPeptideStaticMod, or ProteinTerminusStaticMod
-                    ' These should all have a non-zero value for ResidueLocInPeptide
-                    For intIndex = 0 To .SearchResultModificationCount - 1
-                        With .GetSearchResultModDetailsByIndex(intIndex)
-                            If .ModDefinition.ModificationType <> clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod AndAlso _
-                               .ModDefinition.ModificationType <> clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
-
+                            With .GetSearchResultModDetailsByIndex(intPointerArray(intIndex))
                                 mModDetailsFile.WriteLine( _
                                                 intUniqueSeqID.ToString & SEP_CHAR & _
                                                 .ModDefinition.MassCorrectionTag & SEP_CHAR & _
                                                 .ResidueLocInPeptide.ToString)
-                            End If
-                        End With
-                    Next intIndex
+                            End With
+                        Next intIndex
+                    End If
                 End If
             End If
 
@@ -919,6 +911,32 @@ Public MustInherit Class clsPHRPBaseClass
                 If xData.ModificationMass > yData.ModificationMass Then
                     Return 1
                 ElseIf xData.ModificationMass < yData.ModificationMass Then
+                    Return -1
+                Else
+                    Return 0
+                End If
+            End If
+        End Function
+    End Class
+
+    Friend Class IModNameAndResidueLocComparer
+        Implements System.Collections.IComparer
+
+        Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
+            Dim xData As udtModNameAndResidueLocType = CType(x, udtModNameAndResidueLocType)
+            Dim yData As udtModNameAndResidueLocType = CType(y, udtModNameAndResidueLocType)
+
+            If xData.ResidueLocInPeptide > yData.ResidueLocInPeptide Then
+                Return 1
+            ElseIf xData.ResidueLocInPeptide < yData.ResidueLocInPeptide Then
+                Return -1
+            Else
+                If xData.ModName Is Nothing Then xData.ModName = String.Empty
+                If yData.ModName Is Nothing Then yData.ModName = String.Empty
+
+                If xData.ModName > yData.ModName Then
+                    Return 1
+                ElseIf xData.ModName < yData.ModName Then
                     Return -1
                 Else
                     Return 0

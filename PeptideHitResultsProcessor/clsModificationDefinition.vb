@@ -2,10 +2,28 @@ Option Explicit On
 
 ' This class can be used as a base class for peptide hit results processor classes
 '
+' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Copyright 2006, Battelle Memorial Institute.  All Rights Reserved.
 ' Started January 6, 2006
-' Last updated March 6, 2006
+' Last updated June 26, 2006
+'
+' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' -------------------------------------------------------------------------------
+' 
+' Licensed under the Apache License, Version 2.0; you may not use this file except
+' in compliance with the License.  You may obtain a copy of the License at 
+' http://www.apache.org/licenses/LICENSE-2.0
+'
+' Notice: This computer software was prepared by Battelle Memorial Institute, 
+' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
+' Department of Energy (DOE).  All rights in the computer software are reserved 
+' by DOE on behalf of the United States Government and the Contractor as 
+' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
+' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
+' SOFTWARE.  This notice including this sentence must appear on any copies of 
+' this computer software.
 
 Public Class clsModificationDefinition
 
@@ -17,11 +35,11 @@ Public Class clsModificationDefinition
 
     Public Enum eModificationTypeConstants As Integer
         UnknownType = 0                         ' Unknown mod type on a residue; essentially treated as a dynamic mod
-        DynamicMod = 1                          ' Dynamic mod on a residue or peptide terminus; this mod is explicitly notated by XTandem; if a terminus mod, then the mod symbol is associated with the first or last residue in the peptide
-        StaticMod = 2                           ' Static mod on a residue or peptide terminus;  this mod is explicitly notated by XTandem; if a terminus mod, then the mod symbol is associated with the first or last residue in the peptide
+        DynamicMod = 1                          ' Dynamic mod on a residue or peptide terminus; supported by Sequest and notated via a modification symbol; this mod is explicitly notated by XTandem; if a terminus mod, then the mod symbol is associated with the first or last residue in the peptide
+        StaticMod = 2                           ' Static mod on a residue or peptide terminus; supported by Sequest but not explicitly notated; this mod is explicitly notated by XTandem; if a terminus mod, then the mod symbol is associated with the first or last residue in the peptide
         TerminalPeptideStaticMod = 3            ' Peptide terminus static mod (DMS Symbol is T); only used by Sequest since terminus mods are always dynamic in XTandem
-        IsotopicMod = 4                         ' e.g. N15, or C13; most likely not supported by XTandem
-        ProteinTerminusStaticMod = 5            ' Protein terminus static mod; this mod is supported by XTandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
+        IsotopicMod = 4                         ' e.g. N15, or C13; supported by Sequest; most likely not supported by XTandem
+        ProteinTerminusStaticMod = 5            ' Protein terminus static mod; supported by Sequest; this mod is also supported by XTandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
     End Enum
 
     Protected Const MASS_DIGITS_OF_PRECISION As Integer = 3

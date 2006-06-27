@@ -11,7 +11,7 @@
                     RemoteDebugEnabled = "false"
                     RemoteDebugMachine = ""
                     StartAction = "Project"
-                    StartArguments = "/i:IMAC_HSP90_H304Q_061406_syn.txt /m:sequest_N14_NE_STY_Phos_Stat_Met_Iodo_Tryp_ModDefs.txt /t:Mass_Correction_Tags.txt"
+                    StartArguments = "/i:AID_STM_001_091604_LCQb_01Oct04_Andro_0904-1_4-20_syn.txt /m:sequest_N14_formylated_Nterm_prot_ModDefs.txt"
                     StartPage = ""
                     StartProgram = ""
                     StartURL = ""
