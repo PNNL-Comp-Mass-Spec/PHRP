@@ -390,7 +390,7 @@ Public Class clsPeptideCleavageStateCalculator
         ' Examines strSequenceIn and splits apart into prefix, primary sequence, and suffix
         ' If more than one character is present before the first period or after the last period, then all characters are returned
 
-        ' Returns True if success, False if a failure
+        ' Returns True if success, False if prefix and suffix residues were not found
 
         Dim intPeriodLoc1 As Integer
         Dim intPeriodLoc2 As Integer

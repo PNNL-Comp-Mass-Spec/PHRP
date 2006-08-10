@@ -34,7 +34,7 @@ Public Class clsSequestResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "March 6, 2006"
+        MyBase.mFileDate = "July 20, 2006"
         InitializeLocalVariables()
     End Sub
 
@@ -498,8 +498,7 @@ Public Class clsSequestResultsProcessor
                     Exit Try
                 End If
 
-                MyBase.mProgressStepDescription = "Parsing " & System.IO.Path.GetFileName(strInputFilePath)
-                MyBase.ResetProgress()
+                MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
 
                 If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
                     Try

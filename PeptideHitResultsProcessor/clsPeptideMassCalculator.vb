@@ -135,15 +135,16 @@ Public Class clsPeptideMassCalculator
         ' Computes the mass for sequence strSequence
         ' Returns -1 if an error
 
+        Dim strPrimarySequence As String
         Dim chChar As Char
         Dim intAAIndex As Integer
         Dim dblMass As Double = 0
         Dim intValidResidueCount As Short = 0
 
         If mRemovePrefixAndSuffixIfPresent Then
-            If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, strSequence, Nothing, Nothing) Then
-                mErrorMessage = "Error calling SplitPrefixAndSuffixFromSequence for " & strSequence
-                Return -1
+            If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, strPrimarySequence, Nothing, Nothing) Then
+                ' Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
+                strPrimarySequence = String.Copy(strSequence)
             End If
         End If
 

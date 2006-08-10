@@ -27,7 +27,7 @@ Option Strict On
 Public MustInherit Class clsPHRPBaseClass
 
     Public Sub New()
-        mFileDate = "June 26, 2006"
+        mFileDate = "July 20, 2006"
         InitializeLocalVariables()
     End Sub
 
@@ -735,11 +735,12 @@ Public MustInherit Class clsPHRPBaseClass
     End Function
 
     Protected Sub ResetProgress()
-        RaiseEvent ProgressReset()
+        ResetProgress(String.Empty)
     End Sub
 
     Protected Sub ResetProgress(ByVal strProgressStepDescription As String)
-        UpdateProgress(strProgressStepDescription, 0)
+        mProgressStepDescription = String.Copy(strProgressStepDescription)
+        mProgressPercentComplete = 0
         RaiseEvent ProgressReset()
     End Sub
 

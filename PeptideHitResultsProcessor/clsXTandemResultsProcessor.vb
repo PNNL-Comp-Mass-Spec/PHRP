@@ -34,7 +34,7 @@ Public Class clsXTandemResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "May 11, 2006"
+        MyBase.mFileDate = "July 20, 2006"
         InitializeLocalVariables()
     End Sub
 
@@ -1304,8 +1304,7 @@ Public Class clsXTandemResultsProcessor
                     Exit Try
                 End If
 
-                MyBase.mProgressStepDescription = "Parsing " & System.IO.Path.GetFileName(strInputFilePath)
-                MyBase.ResetProgress()
+                MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
 
                 If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
                     Try
