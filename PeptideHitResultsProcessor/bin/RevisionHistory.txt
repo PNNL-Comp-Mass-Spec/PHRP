@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.1.2494; October 30, 2006
+	- Moved function ExtractCleanSequenceFromSequenceWithMods from clsSearchResultsBaseClass.vb to clsPeptideCleavageStateCalculator.vb
+
 Version 1.1.2412; August 9, 2006
 	- Updated the ComputeSequenceMass() function in clsPeptideMassCalculator to allow input sequences to not contain prefix or suffix residues
 	- Minor updates to the ResetProgress function

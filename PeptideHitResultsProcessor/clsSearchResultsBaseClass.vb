@@ -455,34 +455,6 @@ Public Class clsSearchResultsBaseClass
         Return eResidueTerminusState
     End Function
 
-    Public Function ExtractCleanSequenceFromSequenceWithMods(ByVal strSequenceWithMods As String, ByVal blnCheckForPrefixAndSuffixResidues As Boolean) As String
-        Dim strPrimarySequence As String
-        Dim strPrefix As String
-        Dim strSuffix As String
-
-        Dim chChar As Char
-        Dim strCleanSequence As String
-
-        strCleanSequence = String.Empty
-        If Not strSequenceWithMods Is Nothing Then
-            If blnCheckForPrefixAndSuffixResidues Then
-                If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
-                    strPrimarySequence = String.Copy(strSequenceWithMods)
-                End If
-            Else
-                strPrimarySequence = String.Copy(strSequenceWithMods)
-            End If
-
-            For Each chChar In strPrimarySequence
-                If Char.IsLetter(chChar) Then
-                    strCleanSequence &= chChar
-                End If
-            Next chChar
-        End If
-
-        Return strCleanSequence
-    End Function
-
     Public Function GetSearchResultModDetailsByIndex(ByVal intIndex As Integer, ByRef chResidue As Char, ByRef intResidueLocInPeptide As Integer, ByRef dblModificationMass As Double, ByRef chAffectedAtom As Char) As Boolean
         ' Returns True if intIndex is valid; otherwise, returns false
 
@@ -814,8 +786,8 @@ Public Class clsSearchResultsBaseClass
         End If
 
         If blnAutoPopulateCleanSequence Then
-            ' Note: This will call ComputePeptideCleavageStateInProtein()
-            Me.PeptideCleanSequence = ExtractCleanSequenceFromSequenceWithMods(strPrimarySequence, False)
+            ' Note: Property PeptideCleanSequence will call ComputePeptideCleavageStateInProtein()
+            Me.PeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPrimarySequence, False)
         End If
 
         mPeptideSequenceWithMods = String.Copy(strPrimarySequence)

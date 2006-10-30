@@ -1,6 +1,7 @@
 Option Strict On
 
 ' This class will compute the cleavage state and terminus state of a given peptide sequence.  
+' It can also be used to remove modification symbols from a sequence using ExtractCleanSequenceFromSequenceWithMods
 
 ' The sequence can simply contain single-letter amino acid symbols (capital letters) or a mix 
 '  of amino acid symbols and modification symbols, for example:
@@ -262,6 +263,38 @@ Public Class clsPeptideCleavageStateCalculator
 
         Return ePeptideTerminusState
 
+    End Function
+
+    Public Shared Function ExtractCleanSequenceFromSequenceWithMods(ByVal strSequenceWithMods As String, ByVal blnCheckForPrefixAndSuffixResidues As Boolean) As String
+        ' Parses strSequenceWithMods to remove any non-letter characters (*, #, +, 8, etc.)
+        ' Optionally removes prefix and suffix letters
+        ' Returns the clean sequence
+
+        Dim strPrimarySequence As String
+        Dim strPrefix As String
+        Dim strSuffix As String
+
+        Dim chChar As Char
+        Dim strCleanSequence As String
+
+        strCleanSequence = String.Empty
+        If Not strSequenceWithMods Is Nothing Then
+            If blnCheckForPrefixAndSuffixResidues Then
+                If Not SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
+                    strPrimarySequence = String.Copy(strSequenceWithMods)
+                End If
+            Else
+                strPrimarySequence = String.Copy(strSequenceWithMods)
+            End If
+
+            For Each chChar In strPrimarySequence
+                If Char.IsLetter(chChar) Then
+                    strCleanSequence &= chChar
+                End If
+            Next chChar
+        End If
+
+        Return strCleanSequence
     End Function
 
     Private Function FindLetterNearestEnd(ByVal strText As String) As Char
