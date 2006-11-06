@@ -243,20 +243,31 @@ Public Class clsPeptideMassCalculator
             If intCurrentCharge = intDesiredCharge Then
                 dblNewMZ = dblMassMZ
             Else
-                If intCurrentCharge = 1 Then
-                    dblNewMZ = dblMassMZ
-                ElseIf intCurrentCharge <= 0 Then
-                    dblNewMZ = dblMassMZ + MASS_PROTON
-                Else
-                    dblNewMZ = (dblMassMZ * intCurrentCharge) - MASS_PROTON * (intCurrentCharge - 1)
-                End If
-
-                If intDesiredCharge > 1 Then
-                    dblNewMZ = (dblNewMZ + MASS_PROTON * (intDesiredCharge - 1)) / intDesiredCharge
-                ElseIf intDesiredCharge = 0 Then
-                    dblNewMZ -= MASS_PROTON
-                End If
-            End If
+	            If intCurrentCharge = 1 Then
+	                dblNewMZ = dblMassMZ
+	            ElseIf intCurrentCharge > 1 Then
+	                ' Convert dblMassMZ to M+H
+	                dblNewMZ = (dblMassMZ * intCurrentCharge) - MASS_PROTON * (intCurrentCharge - 1)
+	            ElseIf intCurrentCharge = 0 Then
+	                ' Convert dblMassMZ (which is neutral) to M+H and store in dblNewMZ
+	                dblNewMZ = dblMassMZ + MASS_PROTON
+	            Else
+	                ' Negative charges are not supported; return 0
+	                Return 0
+	            End If
+	
+	            If intDesiredCharge > 1 Then
+	                dblNewMZ = (dblNewMZ + MASS_PROTON * (intDesiredCharge - 1)) / intDesiredCharge
+	            ElseIf intDesiredCharge = 1 Then
+	                ' Return M+H, which is currently stored in dblNewMZ
+	            ElseIf intDesiredCharge = 0 Then
+	                ' Return the neutral mass
+	                dblNewMZ -= MASS_PROTON
+	            Else
+	                ' Negative charges are not supported; return 0
+	                dblNewMZ = 0
+	            End If
+	        End If
         Catch ex As Exception
             ' Error occurred
             dblNewMZ = 0

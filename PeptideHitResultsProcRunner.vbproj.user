@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <VisualBasic LastOpenVersion = "7.10.3077" >
         <Build>
-            <Settings ReferencePath = "D:\My Documents\Projects\DataMining\PeptideHitResultsProcRunner\PeptideHitResultsProcessor\bin\;D:\My Documents\Projects\DataMining\PeptideHitResultsProcRunner\bin\" >
+            <Settings ReferencePath = "D:\My Documents\Projects\DataMining\PeptideHitResultsProcRunner\PeptideHitResultsProcessor\bin\;D:\My Documents\Projects\DataMining\PeptideHitResultsProcRunner\bin\;D:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\" >
                 <Config
                     Name = "Debug"
                     EnableASPDebugging = "false"
@@ -11,7 +11,7 @@
                     RemoteDebugEnabled = "false"
                     RemoteDebugMachine = ""
                     StartAction = "Project"
-                    StartArguments = "/i:AID_STM_001_091604_LCQb_01Oct04_Andro_0904-1_4-20_syn.txt /m:sequest_N14_formylated_Nterm_prot_ModDefs.txt"
+                    StartArguments = "/i:Grouped_SynFile_Original_Scans.txt /m:STY_Phos_ModDefs.txt"
                     StartPage = ""
                     StartProgram = ""
                     StartURL = ""

@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "May 11, 2006"
+    Public Const PROGRAM_DATE As String = "October 6, 2006"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional

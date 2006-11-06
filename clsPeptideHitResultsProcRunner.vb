@@ -30,7 +30,7 @@ Public Class clsPeptideHitResultsProcRunner
     Inherits clsProcessFilesBaseClass
 
     Public Sub New()
-        MyBase.mFileDate = "March 6, 2006"
+        MyBase.mFileDate = "October 30, 2006"
         InitializeLocalVariables()
     End Sub
 
@@ -261,6 +261,7 @@ Public Class clsPeptideHitResultsProcRunner
         ' Returns True if success, False if failure
 
         Dim strStatusMessage As String
+        Dim strMessage As String
 
         Dim ePeptideHitResultsFormat As ePeptideHitResultsFileFormatConstants
 
@@ -313,6 +314,13 @@ Public Class clsPeptideHitResultsProcRunner
                                 blnSuccess = True
                             Else
                                 blnSuccess = False
+                            End If
+
+                            strMessage = "Warning: Could not determine the format of the input file.  It must end in " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, or .xml"
+                            If MyBase.ShowMessages Then
+                                System.Windows.Forms.MessageBox.Show(strMessage, "Warning", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
+                            Else
+                                Console.WriteLine(strMessage)
                             End If
                         Else
                             Select Case ePeptideHitResultsFormat
