@@ -3,6 +3,7 @@
 6xC13N15	7.0172	-
 9xC13N15	10.0273	-
 Acetyl  	42.0106	-
+AlkSulf 	-25.0316	-
 AmAdipic	-1.031634	-
 Aminaton	15.0109	-
 AmOxButa	-2.01565	-
@@ -10,7 +11,7 @@ BioPeoAm	356.1882	-
 Biotinyl	89.0061	-
 C12_PIC 	119.038	-
 C13_PIC 	125.0581	-
-Carbamyl	43.0059	-
+Carbamyl	43.005814	-
 Cys_EDTI	117.0248	-
 DCAT_D0 	42.0375	-
 DCAT_D3 	44.9957	-
@@ -21,13 +22,15 @@ DiffDeut	1.0063	-
 DuMtO18 	19.0387	-
 EDPHeavy	253.1032	-
 EDPLight	246.0819	-
+EDT+Iodo	133.002	-
 EDT_Addn	75.9805	-
 EDT_D0  	177.1055	-
 EDT_D0C7	253.0819	-
 EDT_D4C7	257.0819	-
-EDT+Iodo	133.002	-
 EtShD0  	44.0085	-
+Farnesyl	307.197	-
 Formyl  	27.9949	-
+Furylium	78.01057	-
 GamGluAl	-43.053433	-
 GluCPD4 	550.1953	-
 Guanid  	42.0218	-
@@ -48,9 +51,10 @@ IodoAcid	58.0055	-
 Iso_C13 	1.00335	C
 Iso_N15 	0.9971	N
 Iso_O18 	2.0042	O
+itrac   	145	-
 Lipoyl  	188.033	-
-Met_2O18	18.0243	-
-Met_O18 	16.02	-
+Met_2O18	18.0241	-
+Met_O18 	16.0199	-
 Methyl  	14.0157	-
 MinusH2O	-18.0106	-
 MTSLAddn	184.076	-
@@ -74,6 +78,7 @@ PhosphH 	95.9612	-
 Plus1Oxy	15.9949	-
 Plus2Oxy	31.9898	-
 Plus3Oxy	47.9847	-
+Pyrylium	108.02113	-
 ROBLOSS 	-11.876	-
 SATA_Alk	131.0041	-
 SATA_Hvy	129.9963	-
@@ -87,7 +92,7 @@ SulfoNHS	226.0776	-
 TriAcetK	126.0318	-
 TrypPD4 	494.74	-
 Two_O18 	4.0085	-
-Ubiq_02 	114.1	-
+Ubiq_02 	114.042927	-
 Ubiq_H  	104.0473	-
 Ubiq_H02	233.1583	-
 Ubiq_H03	176.1255	-

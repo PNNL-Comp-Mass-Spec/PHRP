@@ -11,7 +11,7 @@
                     RemoteDebugEnabled = "false"
                     RemoteDebugMachine = ""
                     StartAction = "Project"
-                    StartArguments = "/i:Grouped_SynFile_Original_Scans.txt /m:STY_Phos_ModDefs.txt"
+                    StartArguments = "/i:VP2P14_P_LTQ_1_25Mar06_Draco_06-01-13_flyrev_results.xml"
                     StartPage = ""
                     StartProgram = ""
                     StartURL = ""

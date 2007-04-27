@@ -1,5 +1,10 @@
 Peptide Hit Results Processor Revision History
 
+Version 1.1.2673; April 27, 2007
+	- Updates to PeptideHitResultsProcessor.dll:
+		- Added support for scan numbers specified by "scan 1234" instead of "scan=1234" in the "description" note of the "fragment ion mass spectrum" element 
+		- Now looking for the text ":reversed" in the protein description, in addition to the protein label; if found, the protein name will end in :reversed
+
 Version 1.1.2494; October 30, 2006
 	- Updated to inform user when unable to auto-determine the format of the input file
 

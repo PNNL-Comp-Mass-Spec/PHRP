@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.1.2664; April 18, 2007
+	- Added support for scan numbers specified by "scan 1234" instead of "scan=1234" in the "description" note of the "fragment ion mass spectrum" element 
+	- Now looking for the text ":reversed" in the protein description, in addition to the protein label; if found, the protein name will end in :reversed
+
 Version 1.1.2494; October 30, 2006
 	- Moved function ExtractCleanSequenceFromSequenceWithMods from clsSearchResultsBaseClass.vb to clsPeptideCleavageStateCalculator.vb
 

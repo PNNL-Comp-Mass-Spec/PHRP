@@ -87,7 +87,7 @@
                 <Reference
                     Name = "PeptideHitResultsProcessor"
                     AssemblyName = "PeptideHitResultsProcessor"
-                    HintPath = "PeptideHitResultsProcessor\bin\PeptideHitResultsProcessor.dll"
+                    HintPath = "bin\PeptideHitResultsProcessor.dll"
                 />
             </References>
             <Imports>

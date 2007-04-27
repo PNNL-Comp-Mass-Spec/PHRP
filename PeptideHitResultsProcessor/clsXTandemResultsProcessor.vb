@@ -34,7 +34,7 @@ Public Class clsXTandemResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "July 20, 2006"
+        MyBase.mFileDate = "April 18, 2007"
         InitializeLocalVariables()
     End Sub
 
@@ -57,7 +57,11 @@ Public Class clsXTandemResultsProcessor
     Private Const XML_ERROR_ROOT_LEVEL_INVALID As String = "The data at the root level is invalid"
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
-    Private Const SCAN_NUMBER_EXTRACTION_REGEX As String = "\d+"
+    Private Const SCAN_NUMBER_EXTRACTION_REGEX_A As String = "scan\s*(\d+)"
+    Private Const SCAN_NUMBER_EXTRACTION_REGEX_B As String = "\d+"
+
+    Private Const REVERSED_PROTEIN_SEQUENCE_INDICATOR As String = ":reversed"
+    Private Const PROTEIN_DESCRIPTION_LABEL As String = "description"
 
     Private Enum eCurrentXMLDataFileSectionConstants As Integer
         UnknownFile = 0
@@ -93,7 +97,8 @@ Public Class clsXTandemResultsProcessor
     Protected mNextResultID As Integer
     Protected mLookForReverseSequenceTag As Boolean
 
-    Private mScanNumberRegEx As System.Text.RegularExpressions.Regex
+    Private mScanNumberRegExA As System.Text.RegularExpressions.Regex
+    Private mScanNumberRegExB As System.Text.RegularExpressions.Regex
 #End Region
 
 #Region "Properties"
@@ -171,7 +176,8 @@ Public Class clsXTandemResultsProcessor
         Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
 
         Try
-            mScanNumberRegEx = New System.Text.RegularExpressions.Regex(SCAN_NUMBER_EXTRACTION_REGEX, REGEX_OPTIONS)
+            mScanNumberRegExA = New System.Text.RegularExpressions.Regex(SCAN_NUMBER_EXTRACTION_REGEX_A, REGEX_OPTIONS)
+            mScanNumberRegExB = New System.Text.RegularExpressions.Regex(SCAN_NUMBER_EXTRACTION_REGEX_B, REGEX_OPTIONS)
         Catch ex As Exception
             ' Ignore errors here
         End Try
@@ -518,6 +524,7 @@ Public Class clsXTandemResultsProcessor
         ' There is a separate entry in objSearchResults() for each protein encountered
 
         Const SCAN_FLAG_TEXT As String = "scan="
+        Const GROUP_LABEL_PROTEIN As String = "protein"
         Const GROUP_LABEL_FRAG_ION As String = "fragment ion mass spectrum"
 
         ' The following are static to avoid re-reserving space for them for every XTandem results file entry
@@ -561,6 +568,7 @@ Public Class clsXTandemResultsProcessor
         Dim blnSuccess As Boolean
         Dim blnUpdateModOccurrenceCounts As Boolean
         Dim blnUpdateResultToSeqMapFile As Boolean
+        Dim blnScanFound As Boolean
 
         Dim blnProteinSequenceParsed As Boolean
         Dim blnDomainParsed As Boolean
@@ -573,7 +581,7 @@ Public Class clsXTandemResultsProcessor
         blnSuccess = False
 
         strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL
-        strCurrentGroupLabel = "Protein"
+        strCurrentGroupLabel = GROUP_LABEL_PROTEIN
 
         Try
             ' Reset the first entry in objSearchResults
@@ -649,6 +657,10 @@ Public Class clsXTandemResultsProcessor
                                 ' However, if mLookForReverseSequenceTag = True then we need to look for ":reversed" at the end of the description
                                 .ProteinName = XMLTextReaderGetAttributeValue(objXMLReader, "label", String.Empty)
                                 .ProteinName = TruncateProteinName(.ProteinName)
+
+                                ' For proteins with long descriptions, the ":reversed" tag is not present in the label attribute
+                                '  and is instead in the <note label="description"> element (a sub-element of the <protein> element
+                                ' We'll check for this case later in this function
 
                                 ' Reset the Protein Sequence Parsed and Domain Parsed flags
                                 blnProteinSequenceParsed = False
@@ -734,12 +746,36 @@ Public Class clsXTandemResultsProcessor
                             End If
 
                         Case XTANDEM_XML_ELEMENT_NAME_NOTE
-                            If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_SUPPORT And _
+                            If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL AndAlso _
+                               strCurrentGroupLabel = GROUP_LABEL_PROTEIN AndAlso mLookForReverseSequenceTag Then
+                                ' Examine the label attribute of this note
+
+                                strValue = XMLTextReaderGetAttributeValue(objXMLReader, "label", String.Empty)
+
+                                If strValue = PROTEIN_DESCRIPTION_LABEL Then
+                                    ' Check whether this note ends in ":reversed"
+                                    ' If it does, then make sure objSearchResults(intSearchResultCount - 1).ProteinName ends in :reversed
+
+                                    ' Advance the reader before grabbing the inner text
+                                    If objXMLReader.Read() Then
+                                        ' Read the note's inner text
+                                        strValue = XMLTextReaderGetInnerText(objXMLReader)
+
+                                        If strValue.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR) Then
+                                            If Not objSearchResults(intSearchResultCount - 1).ProteinName.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR) Then
+                                                objSearchResults(intSearchResultCount - 1).ProteinName &= REVERSED_PROTEIN_SEQUENCE_INDICATOR
+                                            End If
+                                        End If
+                                    End If
+                                End If
+
+                            ElseIf strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_SUPPORT AndAlso _
                                strCurrentGroupLabel = GROUP_LABEL_FRAG_ION Then
                                 ' This note should contain the scan number
                                 ' Read the note's inner text
                                 strValue = XMLTextReaderGetInnerText(objXMLReader)
                                 If Not strValue Is Nothing Then
+                                    blnScanFound = False
                                     intIndex = strValue.IndexOf(SCAN_FLAG_TEXT)
                                     If intIndex >= 0 Then
                                         strValue = strValue.Substring(intIndex + SCAN_FLAG_TEXT.Length).Trim
@@ -747,29 +783,47 @@ Public Class clsXTandemResultsProcessor
                                         intIndex = strValue.IndexOf(" "c)
                                         If intIndex > 0 Then
                                             objSearchResults(0).Scan = strValue.Substring(0, intIndex)
-                                        Else
-                                            objSearchResults(0).Scan = strValue
+                                            blnScanFound = True
                                         End If
 
-                                        ' Copy the scan value from the first result to the other results
-                                        For intSearchResultIndex = 1 To intSearchResultCount - 1
-                                            objSearchResults(intSearchResultIndex).Scan = objSearchResults(0).Scan
-                                        Next intSearchResultIndex
-                                    Else
+                                    End If
+
+                                    If Not blnScanFound Then
                                         ' Note does not contain SCAN_FLAG_TEXT
-                                        ' Extract out the first number present
+
                                         Try
-                                            With mScanNumberRegEx.Match(strValue)
-                                                If .Success Then
-                                                    objSearchResults(0).Scan = .Value
-                                                Else
-                                                    objSearchResults(0).Scan = strValue
+                                            ' Look for the word "scan" followed by whitespace, followed by a number
+                                            With mScanNumberRegExA.Match(strValue)
+                                                If .Success AndAlso .Groups.Count > 1 Then
+                                                    objSearchResults(0).Scan = .Groups(1).Value
+                                                    blnScanFound = True
                                                 End If
                                             End With
                                         Catch ex As Exception
                                             ' Ignore errors here
                                         End Try
+
+                                        If Not blnScanFound Then
+                                            ' Still no match; extract out the first number present
+                                            Try
+                                                With mScanNumberRegExB.Match(strValue)
+                                                    If .Success Then
+                                                        objSearchResults(0).Scan = .Value
+                                                    Else
+                                                        objSearchResults(0).Scan = strValue
+                                                    End If
+                                                End With
+                                            Catch ex As Exception
+                                                ' Ignore errors here
+                                            End Try
+                                        End If
                                     End If
+
+                                    ' Copy the scan value from the first result to the other results
+                                    For intSearchResultIndex = 1 To intSearchResultCount - 1
+                                        objSearchResults(intSearchResultIndex).Scan = objSearchResults(0).Scan
+                                    Next intSearchResultIndex
+
                                 End If
                             End If
                         Case Else
@@ -1361,8 +1415,6 @@ Public Class clsXTandemResultsProcessor
     End Sub
 
     Private Function TruncateProteinName(ByVal strProteinNameAndDescription As String) As String
-
-        Const REVERSED_PROTEIN_SEQUENCE_INDICATOR As String = ":reversed"
 
         Dim intIndex As Integer
         Dim blnIsReversed As Boolean
