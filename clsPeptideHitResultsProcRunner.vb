@@ -201,7 +201,7 @@ Public Class clsPeptideHitResultsProcRunner
 
         Const OPTIONS_SECTION As String = "PeptideHitResultsProcRunner"
 
-        Dim objSettingsFile As New PRISM.Files.XmlSettingsFileAccessor
+        Dim objSettingsFile As New XmlSettingsFileAccessor
         Dim ioFile As System.IO.File
         Dim ioPath As System.IO.Path
 

@@ -1,5 +1,8 @@
 Peptide Hit Results Processor Revision History
 
+Version 1.1.2991; March 10, 2008
+	- Removed SharedVBNetRoutines.dll
+
 Version 1.1.2673; April 27, 2007
 	- Updates to PeptideHitResultsProcessor.dll:
 		- Added support for scan numbers specified by "scan 1234" instead of "scan=1234" in the "description" note of the "fragment ion mass spectrum" element 

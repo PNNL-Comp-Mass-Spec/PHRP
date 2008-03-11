@@ -11,7 +11,7 @@
                     RemoteDebugEnabled = "false"
                     RemoteDebugMachine = ""
                     StartAction = "Project"
-                    StartArguments = "/i:VP2P14_P_LTQ_1_25Mar06_Draco_06-01-13_flyrev_results.xml"
+                    StartArguments = "/i:O18_O16_RasEff_HRas16May07_Phoenix_07-03-08_syn.txt /m:sequest_N14_NE_Dyn_CTerm_O18_Stat_C_Iodo_MonoParent_ModDefs.txt"
                     StartPage = ""
                     StartProgram = ""
                     StartURL = ""

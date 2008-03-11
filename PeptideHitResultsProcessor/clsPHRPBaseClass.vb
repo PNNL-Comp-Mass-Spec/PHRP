@@ -579,7 +579,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         Const OPTIONS_SECTION As String = "PeptideHitResultsProcessorOptions"
 
-        Dim objSettingsFile As New PRISM.Files.XmlSettingsFileAccessor
+        Dim objSettingsFile As New XmlSettingsFileAccessor
         Dim ioFile As System.IO.File
         Dim ioPath As System.IO.Path
 

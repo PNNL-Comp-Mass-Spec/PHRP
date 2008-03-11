@@ -698,6 +698,8 @@ Public Class clsXTandemResultsProcessor
 
                                     ' Note: the expectation value was already populated from the group level; we'll update it to the value stored for each protein in case it's different for different proteins
                                     .PeptideExpectationValue = ConvertEValueToBase10Log(XMLTextReaderGetAttributeValue(objXMLReader, "expect", String.Empty))
+
+                                    ' Note: This is the theoretical, monoisotopic MH+ mass for the peptide
                                     .PeptideMH = XMLTextReaderGetAttributeValue(objXMLReader, "mh", String.Empty)
 
                                     .PeptideDeltaMass = XMLTextReaderGetAttributeValue(objXMLReader, "delta", String.Empty)

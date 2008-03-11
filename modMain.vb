@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "April 27, 2007"
+    Public Const PROGRAM_DATE As String = "March 10, 2008"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -64,7 +64,7 @@ Module modMain
         ' Returns 0 if no error, error code if an error
 
         Dim intReturnCode As Integer
-        Dim objParseCommandLine As New SharedVBNetRoutines.clsParseCommandLine
+        Dim objParseCommandLine As New clsParseCommandLine
         Dim blnProceed As Boolean
 
         ''Dim objTest As New clsPeptideCleavageStateCalculator
@@ -149,7 +149,7 @@ Module modMain
 
     End Function
 
-    Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As SharedVBNetRoutines.clsParseCommandLine) As Boolean
+    Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As clsParseCommandLine) As Boolean
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String

@@ -146,6 +146,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "clsXmlSettingsFileAccessor.vb"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "clsXTandemResultsProcessor.vb"
                     SubType = "Code"
                     BuildAction = "Compile"
