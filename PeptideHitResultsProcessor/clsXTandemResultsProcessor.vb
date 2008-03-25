@@ -34,7 +34,7 @@ Public Class clsXTandemResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "April 18, 2007"
+        MyBase.mFileDate = "March 25, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -57,8 +57,10 @@ Public Class clsXTandemResultsProcessor
     Private Const XML_ERROR_ROOT_LEVEL_INVALID As String = "The data at the root level is invalid"
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
-    Private Const SCAN_NUMBER_EXTRACTION_REGEX_A As String = "scan\s*(\d+)"
-    Private Const SCAN_NUMBER_EXTRACTION_REGEX_B As String = "\d+"
+    Private Const SCAN_NUMBER_EXTRACTION_REGEX_A As String = "scan=(\d+)"
+    Private Const SCAN_NUMBER_EXTRACTION_REGEX_B As String = "scan\s*(\d+)"
+    Private Const SCAN_NUMBER_EXTRACTION_REGEX_C As String = "(\d+)\.\d+\.\d\.dta"
+    Private Const SCAN_NUMBER_EXTRACTION_REGEX_D As String = "\d+"
 
     Private Const REVERSED_PROTEIN_SEQUENCE_INDICATOR As String = ":reversed"
     Private Const PROTEIN_DESCRIPTION_LABEL As String = "description"
@@ -99,6 +101,8 @@ Public Class clsXTandemResultsProcessor
 
     Private mScanNumberRegExA As System.Text.RegularExpressions.Regex
     Private mScanNumberRegExB As System.Text.RegularExpressions.Regex
+    Private mScanNumberRegExC As System.Text.RegularExpressions.Regex
+    Private mScanNumberRegExD As System.Text.RegularExpressions.Regex
 #End Region
 
 #Region "Properties"
@@ -178,6 +182,8 @@ Public Class clsXTandemResultsProcessor
         Try
             mScanNumberRegExA = New System.Text.RegularExpressions.Regex(SCAN_NUMBER_EXTRACTION_REGEX_A, REGEX_OPTIONS)
             mScanNumberRegExB = New System.Text.RegularExpressions.Regex(SCAN_NUMBER_EXTRACTION_REGEX_B, REGEX_OPTIONS)
+            mScanNumberRegExC = New System.Text.RegularExpressions.Regex(SCAN_NUMBER_EXTRACTION_REGEX_C, REGEX_OPTIONS)
+            mScanNumberRegExD = New System.Text.RegularExpressions.Regex(SCAN_NUMBER_EXTRACTION_REGEX_D, REGEX_OPTIONS)
         Catch ex As Exception
             ' Ignore errors here
         End Try
@@ -523,7 +529,6 @@ Public Class clsXTandemResultsProcessor
         ' Note: The number of valid entries in objSearchResults() is given by intSearchResultCount; objSearchResults() is expanded but never shrunk
         ' There is a separate entry in objSearchResults() for each protein encountered
 
-        Const SCAN_FLAG_TEXT As String = "scan="
         Const GROUP_LABEL_PROTEIN As String = "protein"
         Const GROUP_LABEL_FRAG_ION As String = "fragment ion mass spectrum"
 
@@ -774,28 +779,32 @@ Public Class clsXTandemResultsProcessor
                             ElseIf strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_SUPPORT AndAlso _
                                strCurrentGroupLabel = GROUP_LABEL_FRAG_ION Then
                                 ' This note should contain the scan number
+                                ' For _Dta.txt files created at PNNL, it should look something like: "   scan=15118 cs=3"
+                                ' For DTA-based files converted to .MGF and processed by X!Tandem: "MyDataset.300.300.2.dta"
+
                                 ' Read the note's inner text
                                 strValue = XMLTextReaderGetInnerText(objXMLReader)
                                 If Not strValue Is Nothing Then
                                     blnScanFound = False
-                                    intIndex = strValue.IndexOf(SCAN_FLAG_TEXT)
-                                    If intIndex >= 0 Then
-                                        strValue = strValue.Substring(intIndex + SCAN_FLAG_TEXT.Length).Trim
 
-                                        intIndex = strValue.IndexOf(" "c)
-                                        If intIndex > 0 Then
-                                            objSearchResults(0).Scan = strValue.Substring(0, intIndex)
-                                            blnScanFound = True
-                                        End If
-
-                                    End If
+                                    ' Look for the word "scan" followed by an equals sign, followed by a number
+                                    ' For example, "   scan=15118 cs=3"
+                                    Try
+                                        With mScanNumberRegExA.Match(strValue)
+                                            If .Success AndAlso .Groups.Count > 1 Then
+                                                objSearchResults(0).Scan = .Groups(1).Value
+                                                blnScanFound = True
+                                            End If
+                                        End With
+                                    Catch ex As Exception
+                                        ' Ignore errors here
+                                    End Try
 
                                     If Not blnScanFound Then
-                                        ' Note does not contain SCAN_FLAG_TEXT
-
+                                        ' No match; look for the word "scan" followed by whitespace, followed by a number
+                                        ' For example, "scan 300"
                                         Try
-                                            ' Look for the word "scan" followed by whitespace, followed by a number
-                                            With mScanNumberRegExA.Match(strValue)
+                                            With mScanNumberRegExB.Match(strValue)
                                                 If .Success AndAlso .Groups.Count > 1 Then
                                                     objSearchResults(0).Scan = .Groups(1).Value
                                                     blnScanFound = True
@@ -804,21 +813,36 @@ Public Class clsXTandemResultsProcessor
                                         Catch ex As Exception
                                             ' Ignore errors here
                                         End Try
+                                    End If
 
-                                        If Not blnScanFound Then
-                                            ' Still no match; extract out the first number present
-                                            Try
-                                                With mScanNumberRegExB.Match(strValue)
-                                                    If .Success Then
-                                                        objSearchResults(0).Scan = .Value
-                                                    Else
-                                                        objSearchResults(0).Scan = strValue
-                                                    End If
-                                                End With
-                                            Catch ex As Exception
-                                                ' Ignore errors here
-                                            End Try
-                                        End If
+                                    If Not blnScanFound Then
+                                        ' No match; see if the description resembles a .Dta file name
+                                        ' For example, "MyDataset.300.300.2.dta"
+                                        Try
+                                            With mScanNumberRegExC.Match(strValue)
+                                                If .Success AndAlso .Groups.Count > 1 Then
+                                                    objSearchResults(0).Scan = .Groups(1).Value
+                                                    blnScanFound = True
+                                                End If
+                                            End With
+                                        Catch ex As Exception
+                                            ' Ignore errors here
+                                        End Try
+                                    End If
+
+                                    If Not blnScanFound Then
+                                        ' Still no match; extract out the first number present
+                                        Try
+                                            With mScanNumberRegExD.Match(strValue)
+                                                If .Success Then
+                                                    objSearchResults(0).Scan = .Value
+                                                Else
+                                                    objSearchResults(0).Scan = strValue
+                                                End If
+                                            End With
+                                        Catch ex As Exception
+                                            ' Ignore errors here
+                                        End Try
                                     End If
 
                                     ' Copy the scan value from the first result to the other results

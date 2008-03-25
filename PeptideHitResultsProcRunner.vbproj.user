@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <VisualBasic LastOpenVersion = "7.10.3077" >
         <Build>
-            <Settings ReferencePath = "D:\My Documents\Projects\DataMining\PeptideHitResultsProcRunner\PeptideHitResultsProcessor\bin\;D:\My Documents\Projects\DataMining\PeptideHitResultsProcRunner\bin\;D:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\" >
+            <Settings ReferencePath = "D:\My Documents\Projects\DataMining\PeptideHitResultsProcRunner\PeptideHitResultsProcessor\bin\;D:\My Documents\Projects\DataMining\PeptideHitResultsProcRunner\bin\;D:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\;D:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PeptideHitResultsProcessor\bin\" >
                 <Config
                     Name = "Debug"
                     EnableASPDebugging = "false"
@@ -11,7 +11,7 @@
                     RemoteDebugEnabled = "false"
                     RemoteDebugMachine = ""
                     StartAction = "Project"
-                    StartArguments = "/i:O18_O16_RasEff_HRas16May07_Phoenix_07-03-08_syn.txt /m:sequest_N14_NE_Dyn_CTerm_O18_Stat_C_Iodo_MonoParent_ModDefs.txt"
+                    StartArguments = "/i:EIF_NAF_10NPI_1_15Jan06_Doc_05-11-10_xt.XML /m:sequest_N14_NE_Dyn_Met_Ox_Stat_Cys_Iodo_ModDefs.txt"
                     StartPage = ""
                     StartProgram = ""
                     StartURL = ""
