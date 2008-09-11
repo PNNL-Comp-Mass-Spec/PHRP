@@ -38,6 +38,7 @@ Public MustInherit Class clsPHRPBaseClass
     Public Const XTANDEM_RESULTS_FILE_SUFFIX As String = "_xt.xml"
     Public Const SEQUEST_SYNOPSIS_FILE_SUFFIX As String = "_syn.txt"
     Public Const SEQUEST_FIRST_HITS_FILE_SUFFIX As String = "_fht.txt"
+    Public Const INSPECT_RESULTS_FILE_SUFFIX As String = "_inspect.txt"
 
     Public Const FILENAME_SUFFIX_RESULT_TO_SEQ_MAP As String = "_ResultToSeqMap.txt"
     Public Const FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP As String = "_SeqToProteinMap.txt"
@@ -52,6 +53,7 @@ Public MustInherit Class clsPHRPBaseClass
         SequestSynopsisFile = 1
         SequestFirstHitsFile = 2
         XTandemXMLFile = 3
+        InSpectTXTFile = 4
     End Enum
 
     Public Enum ePHRPErrorCodes
@@ -279,6 +281,9 @@ Public MustInherit Class clsPHRPBaseClass
                 Case ePeptideHitResultsFileFormatConstants.XTandemXMLFile
                     Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & XTANDEM_RESULTS_FILE_SUFFIX)
 
+                Case ePeptideHitResultsFileFormatConstants.InSpectTXTFile
+                    Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & INSPECT_RESULTS_FILE_SUFFIX)
+
                 Case Else
                     ' Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
                     ' Call AutoDefinePeptideHitResultsFilePath below sending it only strSourceFolderPath
@@ -289,7 +294,7 @@ Public MustInherit Class clsPHRPBaseClass
     End Function
 
     Public Shared Function AutoDefinePeptideHitResultsFilePath(ByVal strSourceFolderPath As String) As String
-        ' Looks for a file ending in _syn.txt, _fht.txt, or _xt.xml in folder strSourceFolderPath
+        ' Looks for a file ending in _syn.txt, _fht.txt, _xt.xml, or _inspect.txt in folder strSourceFolderPath
         ' Returns the first matching file found
 
         Dim ioFolderInfo As System.IO.DirectoryInfo
@@ -307,6 +312,8 @@ Public MustInherit Class clsPHRPBaseClass
                         strMatchSpec = "*" & SEQUEST_FIRST_HITS_FILE_SUFFIX
                     Case 2
                         strMatchSpec = "*" & XTANDEM_RESULTS_FILE_SUFFIX
+                    Case 2
+                        strMatchSpec = "*" & INSPECT_RESULTS_FILE_SUFFIX
                 End Select
 
                 ioFolderInfo = New System.IO.DirectoryInfo(strSourceFolderPath)
@@ -379,6 +386,9 @@ Public MustInherit Class clsPHRPBaseClass
 
         ElseIf System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE.ToLower) Then
             Return ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
+
+        ElseIf System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE.ToLower) Then
+            Return ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
         Else
             ' Unknown extension

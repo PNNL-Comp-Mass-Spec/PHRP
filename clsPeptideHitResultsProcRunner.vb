@@ -326,11 +326,16 @@ Public Class clsPeptideHitResultsProcRunner
                             Select Case ePeptideHitResultsFormat
                                 Case ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile
                                     mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsSequestResultsProcessor
+
                                 Case ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
                                     mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsSequestResultsProcessor
 
                                 Case ePeptideHitResultsFileFormatConstants.XTandemXMLFile
                                     mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsXTandemResultsProcessor
+
+                                Case ePeptideHitResultsFileFormatConstants.InSpectTXTFile
+                                    mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsInSpecTResultsProcessor
+
                                 Case Else
                                     ' Unknown format
                                     blnSuccess = False

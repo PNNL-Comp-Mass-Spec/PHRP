@@ -53,7 +53,7 @@ Public Class clsPeptideCleavageStateCalculator
 
     Public Enum ePeptideCleavageStateConstants As Integer
         NonSpecific = 0                         ' e.g. Non-tryptic
-        Partial = 1                             ' e.g. Partially tryptic
+        [Partial] = 1                             ' e.g. Partially tryptic
         Full = 2                                ' e.g. Fully tryptic
     End Enum
 
@@ -194,7 +194,7 @@ Public Class clsPeptideCleavageStateCalculator
                 If blnRuleMatchStart AndAlso blnRuleMatchEnd Then
                     ePeptideCleavageState = ePeptideCleavageStateConstants.Full
                 ElseIf blnRuleMatchStart OrElse blnRuleMatchEnd Then
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.Partial
+                    ePeptideCleavageState = ePeptideCleavageStateConstants.[Partial]
                 Else
                     ' Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
                 End If

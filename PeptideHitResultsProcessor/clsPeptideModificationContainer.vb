@@ -42,6 +42,9 @@ Public Class clsPeptideModificationContainer
     Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "["c
     Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "]"c
 
+    Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "["c
+    Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "]"c
+
     Public Enum eResidueTerminusStateConstants As Integer
         None = 0                        ' The residue is in the middle of the peptide
         PeptideNTerminus = 1            ' The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
