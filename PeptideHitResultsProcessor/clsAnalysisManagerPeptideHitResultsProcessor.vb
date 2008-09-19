@@ -250,6 +250,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
                 Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile, clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
                     m_PeptideHitResultsProcessor = New clsSequestResultsProcessor
 
+                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
+                    m_PeptideHitResultsProcessor = New clsInSpecTResultsProcessor
+
                 Case Else
                     ' Unknown format; cannot continue
                     LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " & m_PeptideHitResultsFileFormat.ToString, Nothing)
@@ -363,6 +366,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
         ElseIf m_AnalysisToolName.ToLower.IndexOf("sequest") >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
+        ElseIf m_AnalysisToolName.ToLower.IndexOf("inspect") >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
+            'return true for Inspect tool, we don't need other files
         Else
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
         End If
