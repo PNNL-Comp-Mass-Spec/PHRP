@@ -68,6 +68,11 @@ Public Class clsInSpecTResultsProcessor
         DBFilePos = 18
         SpecFilePos = 19
     End Enum
+    Private Const SCAN_NUMBER_EXTRACTION_REGEX_C As String = "(\d+)\.\d+\.\d+\.dta"
+    Private mScanNumberRegExC As System.Text.RegularExpressions.Regex
+
+    Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
+
 
 #End Region
 
@@ -572,7 +577,11 @@ Public Class clsInSpecTResultsProcessor
 
             With objSearchResult
                 .SpectrumFile = strSplitLine(eInspectFileColumns.SpectrumFile)
-                .Scan = strSplitLine(eInspectFileColumns.Scan)
+                If strSplitLine(eInspectFileColumns.Scan) = "0" Then
+                    .Scan = convertScanNum(strSplitLine(eInspectFileColumns.SpectrumFile))
+                Else
+                    .Scan = strSplitLine(eInspectFileColumns.Scan)
+                End If
                 .Annotation = ReplaceTerminus(strSplitLine(eInspectFileColumns.Annotation))
                 .Protein = TruncateProteinName(strSplitLine(eInspectFileColumns.Protein))
                 .Charge = strSplitLine(eInspectFileColumns.Charge)
@@ -608,7 +617,25 @@ Public Class clsInSpecTResultsProcessor
 
         Return blnValidSearchResult
     End Function
+    Private Function convertScanNum(ByVal spectrumFile As String) As String
+        mScanNumberRegExC = New System.Text.RegularExpressions.Regex(SCAN_NUMBER_EXTRACTION_REGEX_C, REGEX_OPTIONS)
 
+        Dim scanNum As String = ""
+        ' See if strValue resembles a .Dta file name
+        ' For example, "MyDataset.300.300.2.dta"
+        Try
+            With mScanNumberRegExC.Match(spectrumFile)
+                If .Success AndAlso .Groups.Count > 1 Then
+                    scanNum = .Groups(1).Value
+                End If
+            End With
+        Catch ex As Exception
+            ' Ignore errors here
+            Return ""
+        End Try
+
+        Return scanNum
+    End Function
     ' Main processing function
     Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
         ' Returns True if success, False if failure
