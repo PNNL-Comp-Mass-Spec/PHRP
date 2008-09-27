@@ -130,9 +130,9 @@ Public Class clsPeptideCleavageStateCalculator
     End Sub
 
     Public Function ComputeCleavageState(ByVal strSequenceWithPrefixAndSuffix As String) As ePeptideCleavageStateConstants
-        Dim strPrimarySequence As String
-        Dim strPrefix As String
-        Dim strSuffix As String
+        Dim strPrimarySequence As String = String.Empty
+        Dim strPrefix As String = String.Empty
+        Dim strSuffix As String = String.Empty
 
         If SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, strPrimarySequence, strPrefix, strSuffix) Then
             Return ComputeCleavageState(strPrimarySequence, strPrefix, strSuffix)
@@ -206,9 +206,9 @@ Public Class clsPeptideCleavageStateCalculator
     End Function
 
     Public Function ComputeTerminusState(ByVal strSequenceWithPrefixAndSuffix As String) As ePeptideTerminusStateConstants
-        Dim strPrimarySequence As String
-        Dim strPrefix As String
-        Dim strSuffix As String
+        Dim strPrimarySequence As String = String.Empty
+        Dim strPrefix As String = String.Empty
+        Dim strSuffix As String = String.Empty
 
         If SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, strPrimarySequence, strPrefix, strSuffix) Then
             Return ComputeTerminusState(strPrimarySequence, strPrefix, strSuffix)
@@ -270,9 +270,9 @@ Public Class clsPeptideCleavageStateCalculator
         ' Optionally removes prefix and suffix letters
         ' Returns the clean sequence
 
-        Dim strPrimarySequence As String
-        Dim strPrefix As String
-        Dim strSuffix As String
+        Dim strPrimarySequence As String = String.Empty
+        Dim strPrefix As String = String.Empty
+        Dim strSuffix As String = String.Empty
 
         Dim chChar As Char
         Dim strCleanSequence As String

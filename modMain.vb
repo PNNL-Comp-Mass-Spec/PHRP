@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "March 25, 2008"
+    Public Const PROGRAM_DATE As String = "September 26, 2008"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -196,14 +196,13 @@ Module modMain
     Private Sub ShowProgramHelp()
 
         Dim strSyntax As String
-        Dim ioPath As System.IO.Path
 
         Try
 
             strSyntax = "This program reads in an XTandem results file (XML format) or Sequest Synopsis/First Hits file and creates a tab-delimited text file with the data.  "
             strSyntax &= "It will insert modification symbols into the peptide sequences for modified peptides.  Parallel files will be created containing sequence info and modification details.  "
             strSyntax &= "The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass." & ControlChars.NewLine & ControlChars.NewLine
-            strSyntax &= "Program syntax:" & ControlChars.NewLine & ioPath.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+            strSyntax &= "Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location)
             strSyntax &= " /I:InputFilePath_xt.xml [/O:OutputFolderPath] [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath] [/T:MassCorrectionTagsFilePath] [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/W] [/D] [/Q]" & ControlChars.NewLine & ControlChars.NewLine
             strSyntax &= "The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), or a Sequest First Hits file (_fht.txt)." & ControlChars.NewLine
             strSyntax &= "The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file." & ControlChars.NewLine
@@ -235,14 +234,14 @@ Module modMain
             strSyntax &= "this computer software." & ControlChars.NewLine
 
             If Not mQuietMode Then
-                MsgBox(strSyntax, MsgBoxStyle.Information Or MsgBoxStyle.OKOnly, "Syntax")
+                MsgBox(strSyntax, MsgBoxStyle.Information Or MsgBoxStyle.OkOnly, "Syntax")
             End If
 
         Catch ex As Exception
             If mQuietMode Then
                 Throw New System.Exception("Error displaying the program syntax", ex)
             Else
-                MsgBox("Error displaying the program syntax: " & ControlChars.NewLine & ex.Message, MsgBoxStyle.Exclamation Or MsgBoxStyle.OKOnly, "Error")
+                MsgBox("Error displaying the program syntax: " & ControlChars.NewLine & ex.Message, MsgBoxStyle.Exclamation Or MsgBoxStyle.OkOnly, "Error")
             End If
         End Try
 

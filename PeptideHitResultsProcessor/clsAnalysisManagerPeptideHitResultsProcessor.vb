@@ -239,8 +239,6 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         ' Initializes m_PeptideHitResultsProcessor, then starts a separate thread 
         ' to process the file
 
-        Dim strParameterFilePath As String
-
         Try
             'Initialize m_PeptideHitResultsProcessor
             Select Case m_PeptideHitResultsFileFormat
@@ -368,7 +366,6 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
         ElseIf m_AnalysisToolName.ToLower.IndexOf("inspect") >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
-            'return true for Inspect tool, we don't need other files
         Else
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
         End If

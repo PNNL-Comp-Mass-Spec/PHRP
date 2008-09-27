@@ -30,8 +30,9 @@ Public Class clsSearchResultsInSpecT
 #Region "Classwide Variables"
 
     Protected mSpectrumFile As String
-    Protected mAnnotation As String
-    Protected mProtein As String
+    ' Scan: tracked by the base class
+    ' Annotation: aka Peptide, which is tracked by the base class
+    ' Protein: tracked by the base class
     Protected mMQScore As String
     Protected mLength As String
     Protected mTotalPRMScore As String
@@ -57,22 +58,6 @@ Public Class clsSearchResultsInSpecT
         End Get
         Set(ByVal Value As String)
             mSpectrumFile = Value
-        End Set
-    End Property
-    Public Property Annotation() As String
-        Get
-            Return mAnnotation
-        End Get
-        Set(ByVal Value As String)
-            mAnnotation = Value
-        End Set
-    End Property
-    Public Property Protein() As String
-        Get
-            Return mProtein
-        End Get
-        Set(ByVal Value As String)
-            mProtein = Value
         End Set
     End Property
     Public Property MQScore() As String
@@ -206,10 +191,6 @@ Public Class clsSearchResultsInSpecT
         MyBase.Clear()
 
         mSpectrumFile = String.Empty
-        mScan = String.Empty
-        mAnnotation = String.Empty
-        mProtein = String.Empty
-        mCharge = String.Empty
         mMQScore = String.Empty
         mLength = String.Empty
         mTotalPRMScore = String.Empty

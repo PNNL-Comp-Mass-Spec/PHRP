@@ -176,7 +176,7 @@ Public Class clsSequestResultsProcessor
         Dim strPreviousXCorr As String
 
         ' Note that synopsis files are normally sorted on XCorr descending, with lines
-        '  duplicated when  peptide search results are mapped to multiple proteins
+        '  duplicated when peptide search results are mapped to multiple proteins
         ' In order to prevent duplicate entries from being made to the ResultToSeqMap file,
         '  we will keep track of the scan, charge, and peptide information parsed for each unique XCorr encountered
 
@@ -189,10 +189,7 @@ Public Class clsSequestResultsProcessor
 
         Dim objSearchResult As clsSearchResultsSequest
 
-        Dim intIndex As Integer
         Dim intResultsProcessed As Integer
-
-        Dim objModificationDefinition As clsModificationDefinition
 
         Dim blnSuccess As Boolean
         Dim blnValidSearchResult As Boolean
@@ -220,7 +217,7 @@ Public Class clsSequestResultsProcessor
                 UpdateSearchResultEnzymeAndTerminusInfo(objSearchResult)
 
                 ' Open the input file and parse it
-                ' Initialize the stream reader and the XML Text Reader
+                ' Initialize the stream reader
                 srDataFile = New System.IO.StreamReader(strInputFilePath)
 
                 strErrorLog = String.Empty
@@ -318,10 +315,6 @@ Public Class clsSequestResultsProcessor
 
         Dim strSplitLine() As String
         Dim strPeptideSequenceWithMods As String
-        Dim strPeptidePreResidues As String
-        Dim strPeptidePostResidues As String
-
-        Dim strPrimarySequence As String
 
         Dim blnValidSearchResult As Boolean
         blnValidSearchResult = False
@@ -476,7 +469,6 @@ Public Class clsSequestResultsProcessor
         ' Returns True if success, False if failure
 
         Dim ioInputFile As System.IO.FileInfo
-        Dim ioOutputFile As System.IO.FileInfo
 
         Dim strInputFilePathFull As String
 

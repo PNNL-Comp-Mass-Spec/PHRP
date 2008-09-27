@@ -3,7 +3,7 @@
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
-"ProjectName" = "8:PeptideHitResultsProcRunner_Installer"
+"ProjectName" = "8:PeptideHitResultsProcessor_Installer"
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
@@ -27,12 +27,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_19FCFA1F411EA8DFDAFEBF68D1257CE5"
-        "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_2FEC358A4FEC44E896FE1538E3FF5FAC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -51,18 +45,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_7BB3E881D14ACACAB48A1B929FB5E8EF"
-        "OwnerKey" = "8:_19FCFA1F411EA8DFDAFEBF68D1257CE5"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_7BB3E881D14ACACAB48A1B929FB5E8EF"
-        "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_971467F477AB481080BAB3E87916B2D3"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -76,19 +58,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_7BB3E881D14ACACAB48A1B929FB5E8EF"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_19FCFA1F411EA8DFDAFEBF68D1257CE5"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -116,6 +86,19 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5.SP1"
+                    {
+                    "Name" = "8:.NET Framework 3.5 SP1"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5.SP1"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
             }
         }
         "Release"
@@ -123,7 +106,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\PeptideHitResultsProcRunner_Installer.msi"
+        "OutputFilename" = "8:Release\\PeptideHitResultsProcessor_Installer.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -140,6 +123,19 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5.SP1"
+                    {
+                    "Name" = "8:.NET Framework 3.5 SP1"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5.SP1"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
             }
         }
     }
@@ -189,37 +185,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_19FCFA1F411EA8DFDAFEBF68D1257CE5"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PeptideHitResultsProcessor, Version=1.1.3006.20981, Culture=neutral"
-                "ScatterAssemblies"
-                {
-                    "_19FCFA1F411EA8DFDAFEBF68D1257CE5"
-                    {
-                    "Name" = "8:PeptideHitResultsProcessor.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:PeptideHitResultsProcessor.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_5AB1A6DB5284425792AD22627243D745"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2FEC358A4FEC44E896FE1538E3FF5FAC"
@@ -280,37 +245,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7BB3E881D14ACACAB48A1B929FB5E8EF"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PRISM, Version=1.0.2008.29786, Culture=neutral"
-                "ScatterAssemblies"
-                {
-                    "_7BB3E881D14ACACAB48A1B929FB5E8EF"
-                    {
-                    "Name" = "8:PRISM.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:PRISM.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_5AB1A6DB5284425792AD22627243D745"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_971467F477AB481080BAB3E87916B2D3"
@@ -420,14 +354,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PeptideHitResultsProcessor"
-        "ProductCode" = "8:{EFF3521F-8C22-449C-8419-BCB8AE809943}"
-        "PackageCode" = "8:{FD9A3CF0-C2FB-4C10-A1E2-6533178BC96C}"
+        "ProductCode" = "8:{9281113C-6554-4AFD-8641-18C6F9A44BB3}"
+        "PackageCode" = "8:{6BFC43A8-33B3-4040-A79A-9D1589CB9991}"
         "UpgradeCode" = "8:{36FC1927-8EED-476F-8562-582B0F670156}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.1.1"
+        "ProductVersion" = "8:1.1.6"
         "Manufacturer" = "8:Battelle Memorial Institute"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

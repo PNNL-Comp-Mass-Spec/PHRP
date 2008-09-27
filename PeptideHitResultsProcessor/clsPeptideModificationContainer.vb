@@ -271,6 +271,7 @@ Public Class clsPeptideModificationContainer
             End If
         Next intMassDigitsOfPrecisionCurrent
 
+        Return String.Empty
 
     End Function
 
@@ -279,10 +280,8 @@ Public Class clsPeptideModificationContainer
         ' Note: If chModificationSymbol does not match any of the mods, then a modification with a mass of 0 is returned
 
         Dim intIndex As Integer
-        Dim intNewModIndex As Integer
 
         Dim objModificationDefinition As clsModificationDefinition
-        Dim strTargetResidues As String
 
         blnExistingModFound = False
         If Not chTargetResidue = Nothing OrElse eResidueTerminusState <> eResidueTerminusStateConstants.None Then

@@ -367,7 +367,6 @@ Public Class clsXTandemResultsProcessor
 
         Dim intGroupElementReaderDepth As Integer
 
-        Dim intIndex As Integer
         Dim intSearchResultIndex As Integer
         Dim intResultsProcessed As Integer
 
@@ -579,7 +578,6 @@ Public Class clsXTandemResultsProcessor
         Dim blnDomainParsed As Boolean
 
         Dim strValue As String
-        Dim dblNewDeltaMass As Double
 
         blnProteinSequenceParsed = False
         blnDomainParsed = False
@@ -1306,7 +1304,6 @@ Public Class clsXTandemResultsProcessor
         Dim chTargetResidue As Char
         Dim strValue As String
 
-        Dim intIndex As Integer
         Dim intResidueLocInPeptide As Integer
 
         Dim intModifiedResiduePosInProtein As Integer

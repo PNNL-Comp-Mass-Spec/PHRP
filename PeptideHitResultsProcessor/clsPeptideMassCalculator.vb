@@ -135,7 +135,7 @@ Public Class clsPeptideMassCalculator
         ' Computes the mass for sequence strSequence
         ' Returns -1 if an error
 
-        Dim strPrimarySequence As String
+        Dim strPrimarySequence As String = String.Empty
         Dim chChar As Char
         Dim intAAIndex As Integer
         Dim dblMass As Double = 0

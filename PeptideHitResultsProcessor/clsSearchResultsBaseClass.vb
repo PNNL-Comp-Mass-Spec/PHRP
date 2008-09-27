@@ -71,7 +71,7 @@ Public Class clsSearchResultsBaseClass
     Protected mPeptideCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
     Protected mPeptideTerminusState As clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants
 
-    Protected mPeptideMH As String                  ' In XTandem this is the monoisotopic MH; in Sequest is is the average mass MH
+    Protected mPeptideMH As String                  ' In XTandem this is the monoisotopic MH; in Sequest is is the average mass MH; in Inspect, this value is 0
     Protected mPeptideDeltaMass As String           ' Difference in mass between the peptide's mass and the parent ion mass (i.e. the mass chosen for fragmentation)
 
     Protected mPeptideModDescription As String
@@ -388,9 +388,6 @@ Public Class clsSearchResultsBaseClass
 
     Public Sub ComputeMonoisotopicMass()
         Dim intIndex As Integer
-
-        Dim chTargetResidue As Char
-        Dim eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants
 
         ' Ths array is static to avoid re-reserving memory for it on every function call
         Static udtPeptideSequenceModInfo() As clsPeptideMassCalculator.udtPeptideSequenceModInfoType
@@ -768,9 +765,9 @@ Public Class clsSearchResultsBaseClass
         ' If blnAutoPopulateCleanSequence = True, then populates mPeptideCleanSequence, 
         '  which automatically calls ComputePeptideCleavageStateInProtein
 
-        Dim strPrimarySequence As String        ' Sequence with mods, but without the prefix or suffix residues
-        Dim strPrefix As String
-        Dim strSuffix As String
+        Dim strPrimarySequence As String = String.Empty       ' Sequence with mods, but without the prefix or suffix residues
+        Dim strPrefix As String = String.Empty
+        Dim strSuffix As String = String.Empty
 
         If blnCheckForPrefixAndSuffixResidues Then
             If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then

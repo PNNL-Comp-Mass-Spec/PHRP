@@ -301,10 +301,10 @@ Public MustInherit Class clsPHRPBaseClass
         Dim ioFileInfo As System.IO.FileInfo
         Dim intIndex As Integer
 
-        Dim strMatchSpec As String
+        Dim strMatchSpec As String = String.Empty
 
         Try
-            For intIndex = 0 To 2
+            For intIndex = 0 To 3
                 Select Case intIndex
                     Case 0
                         strMatchSpec = "*" & SEQUEST_SYNOPSIS_FILE_SUFFIX
@@ -312,7 +312,7 @@ Public MustInherit Class clsPHRPBaseClass
                         strMatchSpec = "*" & SEQUEST_FIRST_HITS_FILE_SUFFIX
                     Case 2
                         strMatchSpec = "*" & XTANDEM_RESULTS_FILE_SUFFIX
-                    Case 2
+                    Case 3
                         strMatchSpec = "*" & INSPECT_RESULTS_FILE_SUFFIX
                 End Select
 
@@ -590,8 +590,6 @@ Public MustInherit Class clsPHRPBaseClass
         Const OPTIONS_SECTION As String = "PeptideHitResultsProcessorOptions"
 
         Dim objSettingsFile As New XmlSettingsFileAccessor
-        Dim ioFile As System.IO.File
-        Dim ioPath As System.IO.Path
 
         Dim strLeftResidueRegEx As String, strRightResidueRegEx As String
         Dim blnValueNotPresent As Boolean
@@ -603,10 +601,10 @@ Public MustInherit Class clsPHRPBaseClass
                 Return True
             End If
 
-            If Not ioFile.Exists(strParameterFilePath) Then
+            If Not System.IO.File.Exists(strParameterFilePath) Then
                 ' See if strParameterFilePath points to a file in the same directory as the application
-                strParameterFilePath = ioPath.Combine(ioPath.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), ioPath.GetFileName(strParameterFilePath))
-                If Not ioFile.Exists(strParameterFilePath) Then
+                strParameterFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), System.IO.Path.GetFileName(strParameterFilePath))
+                If Not System.IO.File.Exists(strParameterFilePath) Then
                     SetErrorCode(ePHRPErrorCodes.ParameterFileNotFound)
                     Return False
                 End If

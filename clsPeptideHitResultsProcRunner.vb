@@ -30,7 +30,7 @@ Public Class clsPeptideHitResultsProcRunner
     Inherits clsProcessFilesBaseClass
 
     Public Sub New()
-        MyBase.mFileDate = "October 30, 2006"
+        MyBase.mFileDate = "September 26, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -202,8 +202,6 @@ Public Class clsPeptideHitResultsProcRunner
         Const OPTIONS_SECTION As String = "PeptideHitResultsProcRunner"
 
         Dim objSettingsFile As New XmlSettingsFileAccessor
-        Dim ioFile As System.IO.File
-        Dim ioPath As System.IO.Path
 
         Dim intValue As Integer
 
@@ -214,10 +212,10 @@ Public Class clsPeptideHitResultsProcRunner
                 Return True
             End If
 
-            If Not ioFile.Exists(strParameterFilePath) Then
+            If Not System.IO.File.Exists(strParameterFilePath) Then
                 ' See if strParameterFilePath points to a file in the same directory as the application
-                strParameterFilePath = ioPath.Combine(ioPath.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), ioPath.GetFileName(strParameterFilePath))
-                If Not ioFile.Exists(strParameterFilePath) Then
+                strParameterFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), System.IO.Path.GetFileName(strParameterFilePath))
+                If Not System.IO.File.Exists(strParameterFilePath) Then
                     MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.ParameterFileNotFound)
                     Return False
                 End If
