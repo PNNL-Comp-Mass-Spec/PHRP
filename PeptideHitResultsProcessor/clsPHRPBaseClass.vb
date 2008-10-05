@@ -27,7 +27,7 @@ Option Strict On
 Public MustInherit Class clsPHRPBaseClass
 
     Public Sub New()
-        mFileDate = "July 20, 2006"
+        mFileDate = "October 4, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -102,6 +102,8 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected mMassCorrectionTagsFilePath As String
     Protected mModificationDefinitionsFilePath As String
+    Protected mSearchToolParameterFilePath As String            ' At present, only used by clsInSpecTResultsProcessor
+
     Protected mEnzymeMatchSpec As clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType
     Protected mPeptideNTerminusMassChange As Double             ' This is ignored if equal to 0; typical non-zero value is 1.0078246
     Protected mPeptideCTerminusMassChange As Double             ' This is ignored if equal to 0; typical non-zero value is 17.0027387
@@ -227,6 +229,14 @@ Public MustInherit Class clsPHRPBaseClass
         End Get
     End Property
 
+    Public Property SearchToolParameterFilePath() As String
+        Get
+            Return mSearchToolParameterFilePath
+        End Get
+        Set(ByVal value As String)
+            mSearchToolParameterFilePath = value
+        End Set
+    End Property
     Public Property WarnMissingParameterFileSection() As Boolean
         Get
             Return mWarnMissingParameterFileSection
@@ -504,6 +514,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
+        mSearchToolParameterFilePath = String.Empty
 
         mEnzymeMatchSpec = clsPeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec()
 
@@ -623,6 +634,7 @@ Public MustInherit Class clsPHRPBaseClass
                 Else
                     mMassCorrectionTagsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", mMassCorrectionTagsFilePath)
                     mModificationDefinitionsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", mModificationDefinitionsFilePath)
+                    mSearchToolParameterFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", mSearchToolParameterFilePath)
 
                     mCreateModificationSummaryFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", mCreateModificationSummaryFile)
 

@@ -345,7 +345,7 @@ Public Class clsPeptideModificationContainer
         ' If chTargetResidue is defined, then returns the first modification with the given mass and containing the residue in .TargetResidues
         '  If no match is found, then looks for the first modification with the given mass and no defined .TargetResidues
         '  If no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True
-        ' If chTargetResidue is nothing, then performs follows similar logic, but skips defined modifications with defined .TargetResidues
+        ' If chTargetResidue is nothing, then follows similar logic, but skips defined modifications with defined .TargetResidues
 
         Dim intIndex As Integer
         Dim intNewModIndex As Integer

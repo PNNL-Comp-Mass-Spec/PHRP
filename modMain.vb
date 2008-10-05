@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "September 26, 2008"
+    Public Const PROGRAM_DATE As String = "October 4, 2008"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -36,6 +36,7 @@ Module modMain
 
     Private mMassCorrectionTagsFilePath As String               ' Optional
     Private mModificationDefinitionsFilePath As String          ' Optional
+    Private mSearchToolParameterFilePath As String              ' Optional
 
     Private mOutputFolderAlternatePath As String                ' Optional
     Private mRecreateFolderHierarchyInAlternatePath As Boolean  ' Optional
@@ -43,6 +44,7 @@ Module modMain
     Private mRecurseFolders As Boolean
     Private mRecurseFoldersMaxLevels As Integer
 
+    Private mLogMessagesToFile As Boolean
     Private mQuietMode As Boolean
 
     Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
@@ -92,9 +94,13 @@ Module modMain
 
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
+        mSearchToolParameterFilePath = String.Empty
 
         mRecurseFolders = False
         mRecurseFoldersMaxLevels = 0
+
+        mQuietMode = False
+        mLogMessagesToFile = False
 
         Try
             blnProceed = False
@@ -107,12 +113,16 @@ Module modMain
                 intReturnCode = -1
             Else
                 mPeptideHitResultsProcRunner = New clsPeptideHitResultsProcRunner
-                mPeptideHitResultsProcRunner.ShowMessages = Not mQuietMode
 
                 With mPeptideHitResultsProcRunner
+                    .ShowMessages = Not mQuietMode
+                    .LogMessagesToFile = mLogMessagesToFile
+
                     ' Note: These options will get overridden if defined in the parameter file
                     .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath
                     .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
+                    .SearchToolParameterFilePath = mSearchToolParameterFilePath
+
                     .WarnMissingParameterFileSection = True
                 End With
 
@@ -128,7 +138,7 @@ Module modMain
                     Else
                         intReturnCode = mPeptideHitResultsProcRunner.ErrorCode
                         If intReturnCode <> 0 AndAlso Not mQuietMode Then
-                            MsgBox("Error while processing: " & mPeptideHitResultsProcRunner.GetErrorMessage(), MsgBoxStyle.Exclamation Or MsgBoxStyle.OKOnly, "Error")
+                            Console.WriteLine("Error while processing: " & mPeptideHitResultsProcRunner.GetErrorMessage())
                         End If
                     End If
                 End If
@@ -140,7 +150,7 @@ Module modMain
             If mQuietMode Then
                 Throw ex
             Else
-                MsgBox("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message, MsgBoxStyle.Exclamation Or MsgBoxStyle.OKOnly, "Error")
+                Console.WriteLine("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message)
             End If
             intReturnCode = -1
         End Try
@@ -152,8 +162,8 @@ Module modMain
     Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As clsParseCommandLine) As Boolean
         ' Returns True if no problems; otherwise, returns false
 
-        Dim strValue As String
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "S", "A", "R", "Q"}
+        Dim strValue As String = String.Empty
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "S", "A", "R", "Q"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -167,6 +177,7 @@ Module modMain
                     If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = strValue
                     If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = strValue
                     If .RetrieveValueForParameter("T", strValue) Then mMassCorrectionTagsFilePath = strValue
+                    If .RetrieveValueForParameter("N", strValue) Then mSearchToolParameterFilePath = strValue
 
                     If .RetrieveValueForParameter("S", strValue) Then
                         mRecurseFolders = True
@@ -187,7 +198,7 @@ Module modMain
             If mQuietMode Then
                 Throw New System.Exception("Error parsing the command line parameters", ex)
             Else
-                MsgBox("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message, MsgBoxStyle.Exclamation Or MsgBoxStyle.OKOnly, "Error")
+                Console.WriteLine("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message)
             End If
         End Try
 
@@ -199,55 +210,60 @@ Module modMain
 
         Try
 
-            strSyntax = "This program reads in an XTandem results file (XML format) or Sequest Synopsis/First Hits file and creates a tab-delimited text file with the data.  "
-            strSyntax &= "It will insert modification symbols into the peptide sequences for modified peptides.  Parallel files will be created containing sequence info and modification details.  "
-            strSyntax &= "The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass." & ControlChars.NewLine & ControlChars.NewLine
-            strSyntax &= "Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location)
-            strSyntax &= " /I:InputFilePath_xt.xml [/O:OutputFolderPath] [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath] [/T:MassCorrectionTagsFilePath] [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/W] [/D] [/Q]" & ControlChars.NewLine & ControlChars.NewLine
-            strSyntax &= "The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), or a Sequest First Hits file (_fht.txt)." & ControlChars.NewLine
-            strSyntax &= "The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file." & ControlChars.NewLine
-            strSyntax &= "The parameter file path is optional.  If included, it should point to a valid XML parameter file." & ControlChars.NewLine
-            strSyntax &= "Use /M to specify the file containing the modification definitions.  This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces)." & ControlChars.NewLine
-            strSyntax &= "Use /T to specify the file containing the mass correction tag info.  This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long)." & ControlChars.NewLine
-            strSyntax &= "Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine." & ControlChars.NewLine
-            strSyntax &= "When using /S, you can redirect the output of the results using /A." & ControlChars.NewLine
-            strSyntax &= "When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined)." & ControlChars.NewLine
-            strSyntax &= "The optional /Q switch will suppress all error messages." & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, or Inspect search result file, and creates a tab-delimited text file with the data.  ")
+            Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides.  Parallel files will be created containing sequence info and modification details.  ")
+            Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
+            Console.WriteLine()
+            Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
+                                        " /I:InputFilePath_xt.xml [/O:OutputFolderPath]")
+            Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
+            Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]")
+            Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/W] [/D] [/Q]")
+            Console.WriteLine()
+            Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), or an Inspect results file (_inspect.txt).")
+            Console.WriteLine("The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file.")
+            Console.WriteLine("The parameter file path is optional.  If included, it should point to a valid XML parameter file.")
+            Console.WriteLine()
+            Console.WriteLine("Use /M to specify the file containing the modification definitions.  This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).")
+            Console.WriteLine("Use /T to specify the file containing the mass correction tag info.  This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).")
+            Console.WriteLine("Use /N to specify the parameter file provided to the search tool.  This is only used when processing Inspect files.")
+            Console.WriteLine()
+            Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
+            Console.WriteLine("When using /S, you can redirect the output of the results using /A.")
+            Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).")
+            Console.WriteLine("The optional /Q switch will suppress all error messages.")
+            Console.WriteLine()
 
-            strSyntax &= "Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006" & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006")
+            Console.WriteLine()
 
-            strSyntax &= "This is version " & System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")" & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("This is version " & System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")")
+            Console.WriteLine()
 
-            strSyntax &= "E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com" & ControlChars.NewLine
-            strSyntax &= "Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/" & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com")
+            Console.WriteLine("Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/")
+            Console.WriteLine()
 
-            strSyntax &= "Licensed under the Apache License, Version 2.0; you may not use this file except in compliance with the License.  "
-            strSyntax &= "You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0" & ControlChars.NewLine & ControlChars.NewLine
+            Console.WriteLine("Licensed under the Apache License, Version 2.0; you may not use this file except in compliance with the License.  " & _
+                              "You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0")
+            Console.WriteLine()
 
-            strSyntax &= "Notice: This computer software was prepared by Battelle Memorial Institute, "
-            strSyntax &= "hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the "
-            strSyntax &= "Department of Energy (DOE).  All rights in the computer software are reserved "
-            strSyntax &= "by DOE on behalf of the United States Government and the Contractor as "
-            strSyntax &= "provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY "
-            strSyntax &= "WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS "
-            strSyntax &= "SOFTWARE.  This notice including this sentence must appear on any copies of "
-            strSyntax &= "this computer software." & ControlChars.NewLine
-
-            If Not mQuietMode Then
-                MsgBox(strSyntax, MsgBoxStyle.Information Or MsgBoxStyle.OkOnly, "Syntax")
-            End If
+            Console.WriteLine("Notice: This computer software was prepared by Battelle Memorial Institute, " & _
+                              "hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the " & _
+                              "Department of Energy (DOE).  All rights in the computer software are reserved " & _
+                              "by DOE on behalf of the United States Government and the Contractor as " & _
+                              "provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY " & _
+                              "WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS " & _
+                              "SOFTWARE.  This notice including this sentence must appear on any copies of " & _
+                              "this computer software.")
 
         Catch ex As Exception
-            If mQuietMode Then
-                Throw New System.Exception("Error displaying the program syntax", ex)
-            Else
-                MsgBox("Error displaying the program syntax: " & ControlChars.NewLine & ex.Message, MsgBoxStyle.Exclamation Or MsgBoxStyle.OkOnly, "Error")
-            End If
+            Console.WriteLine("Error displaying the program syntax: " & ex.Message)
         End Try
 
     End Sub
 
-    Private Sub mXTandemResultsConverter_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single) Handles mPeptideHitResultsProcRunner.ProgressChanged
+    Private Sub mPeptideHitResultsProcRunner_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single) Handles mPeptideHitResultsProcRunner.ProgressChanged
         Const PERCENT_REPORT_INTERVAL As Integer = 25
         Const PROGRESS_DOT_INTERVAL_MSEC As Integer = 250
 
@@ -266,7 +282,7 @@ Module modMain
         End If
     End Sub
 
-    Private Sub mXTandemResultsConverter_ProgressReset() Handles mPeptideHitResultsProcRunner.ProgressReset
+    Private Sub mPeptideHitResultsProcRunner_ProgressReset() Handles mPeptideHitResultsProcRunner.ProgressReset
         mLastProgressReportTime = DateTime.Now
         mLastProgressReportValue = 0
     End Sub

@@ -1,5 +1,10 @@
 Peptide Hit Results Processor Revision History
 
+Version 1.2.3199; October 4, 2008
+	- Expanded support for Inspect results files
+		- Now reads the parameter file provided to Inspect so that the modification names and masses can be determined
+		- Now reads the _PeptideToProteinMapping.txt file so that the PHRP files can include all of the proteins for each peptide
+
 Version 1.2.3191; September 26, 2008
 	- Converted solution to VB .NET 2008
 	- Added support for Inspect results files

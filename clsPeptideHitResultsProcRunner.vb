@@ -30,7 +30,7 @@ Public Class clsPeptideHitResultsProcRunner
     Inherits clsProcessFilesBaseClass
 
     Public Sub New()
-        MyBase.mFileDate = "September 26, 2008"
+        MyBase.mFileDate = "October 4, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -58,6 +58,7 @@ Public Class clsPeptideHitResultsProcRunner
 
     Protected mMassCorrectionTagsFilePath As String
     Protected mModificationDefinitionsFilePath As String
+    Protected mSearchToolParameterFilePath As String
 
     Protected WithEvents mPeptideHitResultsProcessor As PeptideHitResultsProcessor.clsPHRPBaseClass
 
@@ -96,6 +97,15 @@ Public Class clsPeptideHitResultsProcRunner
         End Get
         Set(ByVal Value As ePeptideHitResultsFileFormatConstants)
             mPeptideHitResultsFileFormat = Value
+        End Set
+    End Property
+
+    Public Property SearchToolParameterFilePath() As String
+        Get
+            Return mSearchToolParameterFilePath
+        End Get
+        Set(ByVal value As String)
+            mSearchToolParameterFilePath = value
         End Set
     End Property
 
@@ -154,6 +164,8 @@ Public Class clsPeptideHitResultsProcRunner
 
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
+        mSearchToolParameterFilePath = String.Empty
+
         mWarnMissingParameterFileSection = True
 
         mLocalErrorCode = eResultsProcessorErrorCodes.NoError
@@ -223,9 +235,7 @@ Public Class clsPeptideHitResultsProcRunner
 
             If objSettingsFile.LoadSettings(strParameterFilePath) Then
                 If Not objSettingsFile.SectionPresent(OPTIONS_SECTION) Then
-                    If MyBase.ShowMessages Then
-                        System.Windows.Forms.MessageBox.Show("The node '<section name=""" & OPTIONS_SECTION & """> was not found in the parameter file: " & strParameterFilePath, "Invalid File", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-                    End If
+                    ShowErrorMessage("The node '<section name=""" & OPTIONS_SECTION & """> was not found in the parameter file: " & strParameterFilePath)
                     MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.InvalidParameterFile)
                     Return False
                 Else
@@ -242,11 +252,7 @@ Public Class clsPeptideHitResultsProcRunner
             End If
 
         Catch ex As Exception
-            If MyBase.ShowMessages Then
-                System.Windows.Forms.MessageBox.Show("Error in LoadParameterFileSettings:" & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-            Else
-                Throw New System.Exception("Error in LoadParameterFileSettings", ex)
-            End If
+            HandleException("Error in LoadParameterFileSettings", ex)
             Return False
         End Try
 
@@ -263,7 +269,6 @@ Public Class clsPeptideHitResultsProcRunner
 
         Dim ePeptideHitResultsFormat As ePeptideHitResultsFileFormatConstants
 
-        Dim blnGeneralTextFile As Boolean
         Dim blnSuccess As Boolean
 
         If blnResetErrorCode Then
@@ -272,10 +277,8 @@ Public Class clsPeptideHitResultsProcRunner
 
         If Not LoadParameterFileSettings(strParameterFilePath) Then
             strStatusMessage = "Parameter file load error: " & strParameterFilePath
-            If MyBase.ShowMessages Then
-                System.Windows.Forms.MessageBox.Show(strStatusMessage, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-            End If
-            Console.WriteLine(strStatusMessage)
+            ShowErrorMessage(strStatusMessage)
+
             If MyBase.ErrorCode = clsProcessFilesBaseClass.eProcessFilesErrorCodes.NoError Then
                 MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.InvalidParameterFile)
             End If
@@ -284,18 +287,17 @@ Public Class clsPeptideHitResultsProcRunner
 
         Try
             If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
-                Console.WriteLine("Input file name is empty")
+                ShowMessage("Input file name is empty")
                 MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.InvalidInputFilePath)
             Else
-
-                MyBase.mProgressStepDescription = "Parsing " & System.IO.Path.GetFileName(strInputFilePath)
-                Console.WriteLine()
-                Console.WriteLine(MyBase.ProgressStepDescription)
-                MyBase.ResetProgress()
-
+                ' Note that CleanupFilePaths() will update mOutputFolderPath, which is used by LogMessage()
                 If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
                     MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.FilePathError)
                 Else
+                    MyBase.mProgressStepDescription = "Parsing " & System.IO.Path.GetFileName(strInputFilePath)
+                    LogMessage(MyBase.mProgressStepDescription)
+                    MyBase.ResetProgress()
+
                     Try
                         If mPeptideHitResultsFileFormat = ePeptideHitResultsFileFormatConstants.AutoDetermine Then
                             ePeptideHitResultsFormat = PeptideHitResultsProcessor.clsPHRPBaseClass.DetermineResultsFileFormat(strInputFilePath)
@@ -315,11 +317,7 @@ Public Class clsPeptideHitResultsProcRunner
                             End If
 
                             strMessage = "Warning: Could not determine the format of the input file.  It must end in " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, or .xml"
-                            If MyBase.ShowMessages Then
-                                System.Windows.Forms.MessageBox.Show(strMessage, "Warning", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-                            Else
-                                Console.WriteLine(strMessage)
-                            End If
+                            ShowMessage(strMessage)
                         Else
                             Select Case ePeptideHitResultsFormat
                                 Case ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile
@@ -346,31 +344,25 @@ Public Class clsPeptideHitResultsProcRunner
                                 With mPeptideHitResultsProcessor
                                     .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath
                                     .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
+                                    .SearchToolParameterFilePath = mSearchToolParameterFilePath
+
                                     .WarnMissingParameterFileSection = mWarnMissingParameterFileSection
                                 End With
                                 blnSuccess = mPeptideHitResultsProcessor.ProcessFile(strInputFilePath, strOutputFolderPath, strParameterFilePath)
                                 If Not blnSuccess Then
-                                    Console.WriteLine(mPeptideHitResultsProcessor.ErrorMessage)
+                                    ShowErrorMessage(mPeptideHitResultsProcessor.ErrorMessage)
                                 End If
                             End If
 
                         End If
 
                     Catch ex As Exception
-                        If MyBase.ShowMessages Then
-                            System.Windows.Forms.MessageBox.Show("Error calling ParseXTandemResultsFile" & ControlChars.NewLine & ex.message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-                        Else
-                            Throw New System.Exception("Error calling ParseXTandemResultsFile", ex)
-                        End If
+                        HandleException("Error calling ParseXTandemResultsFile", ex)
                     End Try
                 End If
             End If
         Catch ex As Exception
-            If MyBase.ShowMessages Then
-                System.Windows.Forms.MessageBox.Show("Error in ProcessFile:" & ControlChars.NewLine & ex.Message, "Error", Windows.Forms.MessageBoxButtons.OK, Windows.Forms.MessageBoxIcon.Exclamation)
-            Else
-                Throw New System.Exception("Error in ProcessFile", ex)
-            End If
+            HandleException("Error in ProcessFile", ex)
         End Try
 
         Return blnSuccess

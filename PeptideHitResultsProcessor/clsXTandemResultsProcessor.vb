@@ -860,7 +860,7 @@ Public Class clsXTandemResultsProcessor
                             ' End element found for the current group
 
                             ' Typically each group will consist of entries all having the same sequence and modifications (but different protein names)
-                            ' However, occassionaly a group will contain a mix of peptide sequences (only occurs if they all had the exact same hyperscore)
+                            ' However, occasionally a group will contain a mix of peptide sequences (only occurs if they all had the exact same hyperscore)
                             ' In order to check for this, we will construct a pointer array of Sequence and Mods to SearchResultIndex and use this to determine
                             '  which entries should be written to the _xt.txt file and to the ResultToSeqMap file
                             ' We will also use this pointer array to keep track of the number of proteins listed for each peptide
