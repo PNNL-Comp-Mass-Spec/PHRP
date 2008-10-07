@@ -38,7 +38,10 @@ Public MustInherit Class clsPHRPBaseClass
     Public Const XTANDEM_RESULTS_FILE_SUFFIX As String = "_xt.xml"
     Public Const SEQUEST_SYNOPSIS_FILE_SUFFIX As String = "_syn.txt"
     Public Const SEQUEST_FIRST_HITS_FILE_SUFFIX As String = "_fht.txt"
+
     Public Const INSPECT_RESULTS_FILE_SUFFIX As String = "_inspect.txt"
+    Public Const INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX As String = "_fht.txt"
+    Public Const INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX As String = "_Fscore_fht.txt"
 
     Public Const FILENAME_SUFFIX_RESULT_TO_SEQ_MAP As String = "_ResultToSeqMap.txt"
     Public Const FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP As String = "_SeqToProteinMap.txt"

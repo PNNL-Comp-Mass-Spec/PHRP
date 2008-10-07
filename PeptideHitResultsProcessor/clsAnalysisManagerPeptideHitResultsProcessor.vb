@@ -19,30 +19,31 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
 #Region "Classwide variables"
 
-    Protected m_SourceFolderPath As String = ""
-    Protected m_OutFolderPath As String = ""
-    Protected m_PeptideHitResultsFileName As String = ""
+    Protected m_SourceFolderPath As String = String.Empty
+    Protected m_OutFolderPath As String = String.Empty
+    Protected m_PeptideHitResultsFileName As String = String.Empty
     Protected m_PeptideHitResultsFileFormat As clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
 
-    Protected m_MassCorrectionTagsFileName As String = ""
-    Protected m_ModificationDefinitionsFileName As String = ""
+    Protected m_MassCorrectionTagsFileName As String = String.Empty
+    Protected m_ModificationDefinitionsFileName As String = String.Empty
 
     Protected m_MiscParams As System.Collections.Specialized.StringDictionary
     Protected m_DebugLevel As Integer = 0
     Protected m_Logger As PRISM.Logging.ILogger
 
-    Protected m_AnalysisToolName As String = ""
-    Protected m_DSName As String = ""
-    Protected m_ParameterFileName As String = ""
-    Protected m_SettingsFileName As String = ""
+    Protected m_AnalysisToolName As String = String.Empty
+    Protected m_DSName As String = String.Empty
+    Protected m_ParameterFileName As String = String.Empty
+    Protected m_SettingsFileName As String = String.Empty
 
-    Protected m_SettingsFilePath As String = ""     ' Path to the settings file
+    Protected m_ParameterFilePath As String = String.Empty
+    Protected m_SettingsFilePath As String = String.Empty     ' Path to the settings file
 
-    Protected m_PeptideHitResultsFilePath As String = ""
-    Protected m_MassCorrectionTagsFilePath As String = ""
-    Protected m_ModificationDefinitionsFilePath As String = ""
+    Protected m_PeptideHitResultsFilePath As String = String.Empty
+    Protected m_MassCorrectionTagsFilePath As String = String.Empty
+    Protected m_ModificationDefinitionsFilePath As String = String.Empty
 
-    Protected m_ErrMsg As String = ""
+    Protected m_ErrMsg As String = String.Empty
 
     Protected m_Status As IPeptideHitResultsProcessor.ProcessStatus
     Protected m_Results As IPeptideHitResultsProcessor.ProcessResults
@@ -262,6 +263,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             With m_PeptideHitResultsProcessor
                 .MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath
                 .ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath
+                .SearchToolParameterFilePath = m_ParameterFilePath
             End With
 
             m_thThread = New System.Threading.Thread(AddressOf ProcessPeptideHitResultsFileWork)
@@ -355,6 +357,8 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             Return False
         End If
 
+        'Define the parameter file path; this is passed as the search tool parameter file
+        m_ParameterFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_ParameterFileName)
 
         'Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
         m_SettingsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_SettingsFileName)
@@ -396,6 +400,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             m_ModificationDefinitionsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_ModificationDefinitionsFileName)
         End If
 
+
+        'Parameter file exists?
+        If Not VerifyFileExists(m_ParameterFilePath) Then Return False 'Error msg handled by VerifyFileExists
 
         'Settings file exists?
         If Not VerifyFileExists(m_SettingsFilePath) Then Return False 'Error msg handled by VerifyFileExists

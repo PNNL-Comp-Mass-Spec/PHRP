@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.2.3199; October 4, 2008
+	- Converted solution to VB .NET 2008
+	- Added support for Inspect results files
+
 Version 1.1.3006; March 25, 2008
 	- Added support for scan numbers specified by "MyDataset.300.300.2.dta" where "300" is the scan number
 

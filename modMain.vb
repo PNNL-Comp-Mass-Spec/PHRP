@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "October 4, 2008"
+    Public Const PROGRAM_DATE As String = "October 7, 2008"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -205,8 +205,6 @@ Module modMain
     End Function
 
     Private Sub ShowProgramHelp()
-
-        Dim strSyntax As String
 
         Try
 

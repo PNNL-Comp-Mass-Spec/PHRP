@@ -45,6 +45,8 @@ Public Class clsSearchResultsInSpecT
     Protected mFScore As String
     Protected mDeltaScore As String
     Protected mDeltaScoreOther As String
+    Protected mRankTotalPRMScore As String
+    Protected mRankFScore As String
     Protected mRecordNumber As String
     Protected mDBFilePos As String
     Protected mSpecFilePos As String
@@ -156,6 +158,22 @@ Public Class clsSearchResultsInSpecT
             mDeltaScoreOther = Value
         End Set
     End Property
+    Public Property RankTotalPRMScore() As String
+        Get
+            Return mRankTotalPRMScore
+        End Get
+        Set(ByVal value As String)
+            mRankTotalPRMScore = value
+        End Set
+    End Property
+    Public Property RankFScore() As String
+        Get
+            Return mRankFScore
+        End Get
+        Set(ByVal value As String)
+            mRankFScore = value
+        End Set
+    End Property
     Public Property RecordNumber() As String
         Get
             Return mRecordNumber
@@ -203,6 +221,8 @@ Public Class clsSearchResultsInSpecT
         mFScore = String.Empty
         mDeltaScore = String.Empty
         mDeltaScoreOther = String.Empty
+        mRankTotalPRMScore = String.Empty
+        mRankFScore = String.Empty
         mRecordNumber = String.Empty
         mDBFilePos = String.Empty
         mSpecFilePos = String.Empty

@@ -361,9 +361,9 @@ Public Class clsPeptideModificationContainer
             ' First compare against modifications with 1 or more residues in .TargetResidues
             For intIndex = 0 To mModificationCount - 1
                 If (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
-                   mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
-                   mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
-                   mModifications(intIndex).TargetResidues.Length > 0 Then
+                    mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
+                    mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
+                    mModifications(intIndex).TargetResidues.Length > 0 Then
                     If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
                         ' Matching mass found
                         ' Now see if .TargetResidues contains chTargetResidue

@@ -1,5 +1,11 @@
 Peptide Hit Results Processor Revision History
 
+Version 1.2.3202; October 7, 2008
+	- Now computing RankTotalPRMScore and RankFScore and writing to the _inspect_syn.txt and _inspect_fht.txt files
+	- Now creating an additional FHT file, where the top match for each scan is chosen using FScore instead of TotalPRMScore
+	- Updated to work with additional Inspect mod types: static, cterminal peptide, and nterminal peptide
+	- Renamed inspect peptide to protein map file to end in _inspect_PepToProtMap.txt
+
 Version 1.2.3199; October 4, 2008
 	- Expanded support for Inspect results files
 		- Now reads the parameter file provided to Inspect so that the modification names and masses can be determined
