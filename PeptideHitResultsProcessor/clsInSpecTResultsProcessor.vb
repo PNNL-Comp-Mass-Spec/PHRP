@@ -46,9 +46,11 @@ Public Class clsInSpecTResultsProcessor
 
     Private Const UNKNOWN_INSPECT_MOD_SYMBOL As Char = "?"c
 
-    ' When writing the synopsis file, we keep data with a pValue below 0.2 Or a TotalPRMScore over 50; this is an OR, not an AND
+    ' When writing the synopsis file, we keep data that passes any of these thresholds (thus, it's an OR comparison, not an AND comparison)
+    ' pValue <= 0.2 Or TotalPRMScore >= 50 or FScore >= 0
     Public Const PVALUE_THRESHOLD As Single = 0.2
     Public Const TOTALPRMSCORE_THRESHOLD As Single = 50
+    Public Const FSCORE_THRESHOLD As Single = 0
 
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
@@ -762,16 +764,17 @@ Public Class clsInSpecTResultsProcessor
                                 ReDim Preserve udtPepToProteinMapping(udtPepToProteinMapping.Length * 2 - 1)
                             End If
 
+                            ' Replace any mod text names in the peptide sequence with the appropriate mod symbols
+                            ' In addition, replace the * terminus symbols with dashes
+                            strMTSCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(strSplitLine(0)), udtInspectModInfo)
+
                             With udtPepToProteinMapping(intProteinCount)
-                                .Peptide = String.Copy(strSplitLine(0))
+                                .Peptide = strMTSCompatiblePeptide
                                 .Protein = String.Copy(strSplitLine(1))
                                 Integer.TryParse(strSplitLine(2), .ResidueStart)
                                 Integer.TryParse(strSplitLine(3), .ResidueEnd)
                             End With
 
-                            ' Replace any mod text names in the peptide sequence with the appropriate mod symbols
-                            ' In addition, replace the * terminus symbols with dashes
-                            strMTSCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(strSplitLine(0)), udtInspectModInfo)
 
                             swOutFile.WriteLine(strMTSCompatiblePeptide & ControlChars.Tab & _
                                                 strSplitLine(1) & ControlChars.Tab & _
@@ -1550,7 +1553,8 @@ Public Class clsInSpecTResultsProcessor
         ' Now store or write out the matches that pass the filters
         For intIndex = 0 To intCurrentScanResultsCount - 1
             If udtSearchResultsCurrentScan(intIndex).PValueNum <= PVALUE_THRESHOLD OrElse _
-               udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD Then
+               udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse _
+               udtSearchResultsCurrentScan(intIndex).FScoreNum >= FSCORE_THRESHOLD Then
                 StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
             End If
         Next intIndex

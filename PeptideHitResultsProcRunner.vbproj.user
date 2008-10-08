@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>/i:Lowdose_control_IMAC_top10c_inspect.txt /m:Inspect_Dyn_STYPhosCtermMet_Stat_DEMet_FTHybrid_ModDefs.txt /n:Inspect_Dyn_STYPhosCtermMet_Stat_DEMet_FTHybrid.txt</StartArguments>
+    <StartArguments>/i:Lowdose_control_IMAC_top10c_inspect.txt /m:Inspect_Dyn_STYPhosCtermMet_Stat_DEMet_FTHybrid_ModDefs.txt /n:Inspect_Dyn_STYPhosCtermMet_Stat_DEMet_FTHybrid.txt /t:Mass_Correction_Tags.txt</StartArguments>
   </PropertyGroup>
 </Project>
