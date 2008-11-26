@@ -1,12 +1,13 @@
 Peptide Hit Results Processor Revision History
 
+Version 1.2.3219; October 24, 2008
+	- Updated PeptideHitResultsProcessor.dll to compute DeltaNormMQScore and DeltaNormTotalPRMScore for Inspect (these values are similar to DelCn2 for Sequest)
+
+Version 1.2.3212; October 17, 2008
+	- Additional Inspect processing updates to PeptideHitResultsProcessor.dll
+
 Version 1.2.3202; October 7, 2008
-	- Now computing RankTotalPRMScore and RankFScore and writing to the _inspect_syn.txt and _inspect_fht.txt files
-	- Now creating an additional FHT file, where the top match for each scan is chosen using FScore instead of TotalPRMScore
-	- Updated to work with additional Inspect mod types: static, cterminal peptide, and nterminal peptide
-	- Renamed inspect peptide to protein map file to end in _inspect_PepToProtMap.txt
-	- Altered the filters for including a search result in the _inspect_syn.txt file
-		- Including data that has pValue <= 0.2 Or TotalPRMScore >= 50 Or FScore >= 0
+	- New version of PeptideHitResultsProcessor.dll with expanded Inspect support
 
 Version 1.2.3199; October 4, 2008
 	- Expanded support for Inspect results files

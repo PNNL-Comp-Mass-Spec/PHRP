@@ -32,7 +32,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "October 7, 2008"
+        MyBase.mFileDate = "October 24, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -61,6 +61,7 @@ Public Class clsInSpecTResultsProcessor
     Private Const PHOS_MOD_MASS As String = "79.9663"
     Private Const PHOS_MOD_RESIDUES As String = "STY"
 
+    ' These columns correspond to the tab-delimited file created directly by Inspect
     Public Enum eInspectResultsFileColumns As Integer
         SpectrumFile = 0
         Scan = 1
@@ -84,6 +85,7 @@ Public Class clsInSpecTResultsProcessor
         SpecFilePos = 19
     End Enum
 
+    ' These columns correspond to the Synopsis and First-Hits files created by this class
     Public Enum eInspectSynFileColumns As Integer
         ResultID = 0
         Scan = 1
@@ -102,11 +104,14 @@ Public Class clsInSpecTResultsProcessor
         FScore = 14
         DeltaScore = 15
         DeltaScoreOther = 16
-        RankTotalPRMScore = 17                  ' Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
-        RankFScore = 18                         ' Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
-        RecordNumber = 18
-        DBFilePos = 19
-        SpecFilePos = 20
+        DeltaNormMQScore = 17                   ' Computed as  (MQScore(n) - MQScore(n+1)) / MQScore(n); storing -100 for the lowest scoring result in each set (since MQScores can be negative)
+        DeltaNormTotalPRMScore = 18             ' Computed as  (TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n); storing 0 for the lowest scoring result in each set
+        RankTotalPRMScore = 19                  ' Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
+        RankFScore = 20                         ' Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
+        MH = 21                                 ' Currently storing 0 in this column since Inspect doesn't provide this value
+        RecordNumber = 22
+        DBFilePos = 23
+        SpecFilePos = 24
     End Enum
 
     Protected Enum eInspectModType As Integer
@@ -133,23 +138,27 @@ Public Class clsInSpecTResultsProcessor
         Public Protein As String
         Public Charge As String
         Public ChargeNum As Short
-        Public MQScore As String
-        Public Length As String
+        Public MQScore As String                ' Higher values are better scores; note that MQScore can be negative
+        Public MQScoreNum As Single             ' Store the value of the string for quick reference when sorting
+        Public Length As Integer
         Public TotalPRMScore As String          ' Higher values are better scores
         Public TotalPRMScoreNum As Single       ' We store the value of the string for quick reference when sorting
         Public MedianPRMScore As String
         Public FractionY As String
         Public FractionB As String
         Public Intensity As String
-        Public NTT As String
+        Public NTT As Integer
         Public pValue As String                 ' Lower values are better scores
-        Public PValueNum As Single
+        Public PValueNum As Single              ' Store the value of the string for quick reference when sorting
         Public FScore As String                 ' Higher values are better scores
-        Public FScoreNum As Single
+        Public FScoreNum As Single              ' Store the value of the string for quick reference when sorting
         Public DeltaScore As String
         Public DeltaScoreOther As String
+        Public DeltaNormMQScore As Single
+        Public DeltaNormTotalPRMScore As Single
         Public RankTotalPRMScore As Integer
         Public RankFScore As Integer
+        Public MH As Double
         Public RecordNumber As String
         Public DBFilePos As String
         Public SpecFilePos As String
@@ -163,22 +172,26 @@ Public Class clsInSpecTResultsProcessor
             Charge = String.Empty
             ChargeNum = 0
             MQScore = String.Empty
-            Length = String.Empty
+            MQScoreNum = 0
+            Length = 0
             TotalPRMScore = String.Empty
             TotalPRMScoreNum = 0
             MedianPRMScore = String.Empty
             FractionY = String.Empty
             FractionB = String.Empty
             Intensity = String.Empty
-            NTT = String.Empty
+            NTT = 0
             pValue = String.Empty
             PValueNum = 0
             FScore = String.Empty
             FScoreNum = 0
             DeltaScore = String.Empty
             DeltaScoreOther = String.Empty
+            DeltaNormMQScore = 0
+            DeltaNormTotalPRMScore = 0
             RankTotalPRMScore = 0
             RankFScore = 0
+            MH = 0
             RecordNumber = String.Empty
             DBFilePos = String.Empty
             SpecFilePos = String.Empty
@@ -278,14 +291,18 @@ Public Class clsInSpecTResultsProcessor
     End Sub
 
     ''' <summary>
-    ''' Sorts the data by descending TotalPRMScore, than ranks each entry
+    ''' Sorts the data by descending TotalPRMScore, than ranks each entry; in addition, computes normalized delta score (DeltaNorm) values
     ''' </summary>
     ''' <param name="udtSearchResultsCurrentScan"></param>
     ''' <param name="intCurrentScanResultsCount"></param>
     ''' <remarks></remarks>
-    Private Sub AssignRankValues(ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, ByVal intCurrentScanResultsCount As Integer)
+    Private Sub AssignRankAndDeltaNormValues(ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, ByVal intCurrentScanResultsCount As Integer)
+
+        Const DeltaNormMQScore_If_Undefined As Single = 100
+        Const DeltaNormTotalPRMScore_If_Undefined As Single = 0
 
         Static objSortScanChargeFScore As New InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
+        Static objSortScanChargeMQScore As New InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
         Static objSortScanChargeTotalPRMDesc As New InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
 
         Dim intIndex As Integer
@@ -315,6 +332,21 @@ Public Class clsInSpecTResultsProcessor
             udtSearchResultsCurrentScan(intIndex).RankFScore = intCurrentRank
         Next intIndex
 
+
+        ' Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending MQScore (note that MQScore can be negative)
+        ' All of the data in udtSearchResultsCurrentScan should have the same scan number
+        Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeMQScore)
+
+        For intIndex = 0 To intCurrentScanResultsCount - 1
+            If intIndex < intCurrentScanResultsCount - 1 AndAlso _
+               udtSearchResultsCurrentScan(intIndex).ChargeNum = udtSearchResultsCurrentScan(intIndex + 1).ChargeNum Then
+                udtSearchResultsCurrentScan(intIndex).DeltaNormMQScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan(intIndex).MQScoreNum, udtSearchResultsCurrentScan(intIndex + 1).MQScoreNum, DeltaNormMQScore_If_Undefined)
+            Else
+                udtSearchResultsCurrentScan(intIndex).DeltaNormMQScore = 0
+            End If
+        Next intIndex
+
+
         ' Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending PValue
         ' All of the data in udtSearchResultsCurrentScan should have the same scan number
         Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeTotalPRMDesc)
@@ -332,6 +364,14 @@ Public Class clsInSpecTResultsProcessor
             End If
 
             udtSearchResultsCurrentScan(intIndex).RankTotalPRMScore = intCurrentRank
+
+            If intIndex < intCurrentScanResultsCount - 1 AndAlso _
+               udtSearchResultsCurrentScan(intIndex).ChargeNum = udtSearchResultsCurrentScan(intIndex + 1).ChargeNum Then
+                udtSearchResultsCurrentScan(intIndex).DeltaNormTotalPRMScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum, udtSearchResultsCurrentScan(intIndex + 1).TotalPRMScoreNum, DeltaNormTotalPRMScore_If_Undefined)
+            Else
+                udtSearchResultsCurrentScan(intIndex).DeltaNormTotalPRMScore = 0
+            End If
+
         Next intIndex
 
     End Sub
@@ -530,9 +570,23 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
+    Private Function ComputeDeltaNormScore(ByVal sngCurrentScore As Single, ByVal sngNextScore As Single, ByVal sngValueIfCurrentScoreZero As Single) As Single
+        Try
+            If sngCurrentScore <> 0 Then
+                Return Math.Abs((sngCurrentScore - sngNextScore) / sngCurrentScore)
+            Else
+                Return sngValueIfCurrentScoreZero
+            End If
+        Catch ex As Exception
+            Return sngValueIfCurrentScoreZero
+        End Try
+    End Function
+
     Private Function CIntSafe(ByVal strValue As String, ByVal intDefaultValue As Integer) As Integer
         Try
-            Return Integer.Parse(strValue)
+            ' Note: Integer.Parse() fails if strValue contains a decimal point, even if it is "8.000"
+            ' Thus, we're using CInt() instead
+            Return CInt(strValue)
         Catch ex As Exception
             ' Error converting strValue to a number; return the default
             Return intDefaultValue
@@ -896,7 +950,7 @@ Public Class clsInSpecTResultsProcessor
 
                             If objSearchResult.TotalPRMScore = strPreviousTotalPRMScore Then
                                 ' New result has the same TotalPRMScore as the previous result
-                                ' See if htPeptidesFoundForTotalPRMScoreLevel contains the peptide, scan, charge, and MH
+                                ' See if htPeptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
 
                                 If htPeptidesFoundForTotalPRMScoreLevel.ContainsKey(strKey) Then
                                     blnFirstMatchForGroup = False
@@ -1001,10 +1055,10 @@ Public Class clsInSpecTResultsProcessor
     End Function
 
     Private Function ParseInSpectSynopsisFileEntry(ByRef strLineIn As String, _
-                                                  ByRef udtInspectModInfo() As udtModInfoType, _
-                                                  ByRef udtSearchResult As udtInspectSearchResultType, _
-                                                  ByRef strErrorLog As String, _
-                                                  ByVal intResultsProcessed As Integer) As Boolean
+                                                   ByRef udtInspectModInfo() As udtModInfoType, _
+                                                   ByRef udtSearchResult As udtInspectSearchResultType, _
+                                                   ByRef strErrorLog As String, _
+                                                   ByVal intResultsProcessed As Integer) As Boolean
 
         ' Parses the entries in an Inspect results file
         ' The expected header line is:
@@ -1056,18 +1110,20 @@ Public Class clsInSpecTResultsProcessor
                     .ChargeNum = CShort(CIntSafe(.Charge, 0))
 
                     .MQScore = strSplitLine(eInspectResultsFileColumns.MQScore)
-                    .Length = strSplitLine(eInspectResultsFileColumns.Length)
+                    .MQScoreNum = CSngSafe(.MQScore, 0)
+
+                    .Length = CIntSafe(strSplitLine(eInspectResultsFileColumns.Length), 0)
 
                     .TotalPRMScore = strSplitLine(eInspectResultsFileColumns.TotalPRMScore)
                     .TotalPRMScoreNum = CSngSafe(.TotalPRMScore, 0)
 
                     .MedianPRMScore = strSplitLine(eInspectResultsFileColumns.MedianPRMScore)
-                    .FractionY = strSplitLine(eInspectResultsFileColumns.FractionY)
-                    .FractionB = strSplitLine(eInspectResultsFileColumns.FractionB)
+                    .FractionY = RemoveExtraneousDigits(strSplitLine(eInspectResultsFileColumns.FractionY))
+                    .FractionB = RemoveExtraneousDigits(strSplitLine(eInspectResultsFileColumns.FractionB))
                     .Intensity = strSplitLine(eInspectResultsFileColumns.Intensity)
-                    .NTT = strSplitLine(eInspectResultsFileColumns.NTT)
+                    .NTT = CIntSafe(strSplitLine(eInspectResultsFileColumns.NTT), 0)
 
-                    .pValue = strSplitLine(eInspectResultsFileColumns.pvalue)
+                    .pValue = RemoveExtraneousDigits(strSplitLine(eInspectResultsFileColumns.pvalue))
                     .PValueNum = CSngSafe(.pValue, 0)
 
                     .FScore = strSplitLine(eInspectResultsFileColumns.FScore)
@@ -1075,6 +1131,7 @@ Public Class clsInSpecTResultsProcessor
 
                     .DeltaScore = strSplitLine(eInspectResultsFileColumns.DeltaScore)
                     .DeltaScoreOther = strSplitLine(eInspectResultsFileColumns.DeltaScoreOther)
+
                     .RecordNumber = strSplitLine(eInspectResultsFileColumns.RecordNumber)
                     .DBFilePos = strSplitLine(eInspectResultsFileColumns.DBFilePos)
                     .SpecFilePos = strSplitLine(eInspectResultsFileColumns.SpecFilePos)
@@ -1099,6 +1156,39 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
+    Private Function NumToString(ByVal intNumber As Integer, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
+        Return intNumber.ToString()
+    End Function
+
+    Private Function NumToString(ByVal sngNumber As Single, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
+        Return NumToString(CDbl(sngNumber), intDigitsOfPrecision, blnRemoveDecimalsWhenZero)
+    End Function
+
+    Private Function NumToString(ByVal dblNumber As Double, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
+        Static strFormatString As String = "0"
+        Static intFormatStringPrecision As Integer = 0
+
+        If blnRemoveDecimalsWhenZero AndAlso dblNumber = 0 Then
+            Return "0"
+        Else
+            If intFormatStringPrecision <> intDigitsOfPrecision Then
+                ' Update strFormatString
+                If intDigitsOfPrecision <= 0 Then
+                    strFormatString = "0"
+                Else
+                    strFormatString = "0."
+                    For intIndex As Integer = 0 To intDigitsOfPrecision
+                        strFormatString &= "0"
+                    Next
+                End If
+                intFormatStringPrecision = intDigitsOfPrecision
+            End If
+
+            Return dblNumber.ToString(strFormatString)
+        End If
+
+    End Function
+
     Private Function ParseInSpectSynFileEntry(ByRef strLineIn As String, _
                                               ByRef objSearchResult As clsSearchResultsInSpecT, _
                                               ByRef strErrorLog As String, _
@@ -1107,7 +1197,7 @@ Public Class clsInSpecTResultsProcessor
 
         ' Parses the entries in an Inspect Synopsis file
         ' The expected header line is:
-        ' ResultID	Scan	Peptide	Protein	Charge	MQScore	Length	TotalPRMScore	MedianPRMScore	FractionY	FractionB	Intensity	NTT	PValue	FScore	DeltaScore	DeltaScoreOther	RankTotalPRMScore   RankFScore  RecordNumber	DBFilePos	SpecFilePos
+        ' ResultID	Scan	Peptide	Protein	Charge	MQScore	Length	TotalPRMScore	MedianPRMScore	FractionY	FractionB	Intensity	NTT	PValue	FScore	DeltaScore	DeltaScoreOther	DeltaNormMQScore   DeltaNormTotalPRMScore RankTotalPRMScore   RankFScore  MH  RecordNumber	DBFilePos	SpecFilePos
 
         Dim strSplitLine() As String
 
@@ -1208,8 +1298,11 @@ Public Class clsInSpecTResultsProcessor
                 .FScore = strSplitLine(eInspectSynFileColumns.FScore)
                 .DeltaScore = strSplitLine(eInspectSynFileColumns.DeltaScore)
                 .DeltaScoreOther = strSplitLine(eInspectSynFileColumns.DeltaScoreOther)
+                .DeltaNormMQScore = strSplitLine(eInspectSynFileColumns.DeltaNormMQScore)
+                .DeltaNormTotalPRMScore = strSplitLine(eInspectSynFileColumns.DeltaNormTotalPRMScore)
                 .RankTotalPRMScore = strSplitLine(eInspectSynFileColumns.RankTotalPRMScore)
                 .RankFScore = strSplitLine(eInspectSynFileColumns.RankFScore)
+                .PeptideMH = strSplitLine(eInspectSynFileColumns.MH)
                 .RecordNumber = strSplitLine(eInspectSynFileColumns.RecordNumber)
                 .DBFilePos = strSplitLine(eInspectSynFileColumns.DBFilePos)
                 .SpecFilePos = strSplitLine(eInspectSynFileColumns.SpecFilePos)
@@ -1328,7 +1421,7 @@ Public Class clsInSpecTResultsProcessor
 
                         blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.SynFile)
 
-                        ' Load the PeptideToProteinMap information; if any modified peptides are present, then write out an updated _inspect_PepToProtMap.txt file with the new mod symbols
+                        ' Load the PeptideToProteinMap information; if any modified peptides are present, then write out an updated _inspect_PepToProtMap.txt file with the new mod symbols (file will be named _PepToProtMapMTS.txt)
                         ' If the file doesn't exist, then a warning will be displayed, but processing will continue
                         strPepToProteinMapFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(strInputFilePathFull), System.IO.Path.GetFileNameWithoutExtension(strInputFilePathFull) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
 
@@ -1359,6 +1452,39 @@ Public Class clsInSpecTResultsProcessor
         End Try
 
         Return blnSuccess
+
+    End Function
+
+    Private Function RemoveExtraneousDigits(ByVal strValue As String) As String
+        ' If strValue ends in .0000, then remove the .0000 portion
+        Static reNumPlusZeroes As System.Text.RegularExpressions.Regex
+        Static reAllZeroes As System.Text.RegularExpressions.Regex
+
+        Dim reMatch As System.Text.RegularExpressions.Match
+
+        If reNumPlusZeroes Is Nothing Then
+            reNumPlusZeroes = New System.Text.RegularExpressions.Regex("(\.\d*[1-9])0+$", Text.RegularExpressions.RegexOptions.Compiled)
+            reAllZeroes = New System.Text.RegularExpressions.Regex("\.0+$", Text.RegularExpressions.RegexOptions.Compiled)
+        End If
+
+        If strValue Is Nothing OrElse strValue.Length = 0 Then
+            Return String.Empty
+        Else
+            reMatch = reAllZeroes.Match(strValue)
+            If reMatch.Success AndAlso reMatch.Index > 0 Then
+                strValue = strValue.Substring(0, reMatch.Index)
+            Else
+                reMatch = reNumPlusZeroes.Match(strValue)
+                If reMatch.Success AndAlso reMatch.Index > 0 Then
+                    If reMatch.Groups.Count > 1 Then
+                        ' Number is of the form 1.0030 or 1.300 or 1.030
+                        strValue = strValue.Substring(0, reMatch.Index) & reMatch.Groups(1).Value
+                    End If
+                End If
+            End If
+
+            Return strValue
+        End If
 
     End Function
 
@@ -1516,7 +1642,7 @@ Public Class clsInSpecTResultsProcessor
         Dim intIndex As Integer
         Dim intCurrentCharge As Short = Short.MinValue
 
-        AssignRankValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
+        AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
 
         ' Sort udtFilteredSearchResults by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on objSortComparer)
         ' All of the data in udtSearchResultsCurrentScan should have the same scan number
@@ -1544,7 +1670,7 @@ Public Class clsInSpecTResultsProcessor
         Dim intIndex As Integer
         Dim intCurrentCharge As Short = Short.MinValue
 
-        AssignRankValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
+        AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
 
         ' Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
         ' All of the data in udtSearchResultsCurrentScan should have the same scan number
@@ -1607,38 +1733,40 @@ Public Class clsInSpecTResultsProcessor
             swResultFile.WriteLine("ResultID" & ControlChars.Tab & _
                                    "Scan" & ControlChars.Tab & _
                                    "Peptide" & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.Protein) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.Charge) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.MQScore) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.Length) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.TotalPRMScore) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.MedianPRMScore) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.FractionY) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.FractionB) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.Intensity) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.NTT) & ControlChars.Tab & _
+                                   "Protein" & ControlChars.Tab & _
+                                   "Charge" & ControlChars.Tab & _
+                                   "MQScore" & ControlChars.Tab & _
+                                   "Length" & ControlChars.Tab & _
+                                   "TotalPRMScore" & ControlChars.Tab & _
+                                   "MedianPRMScore" & ControlChars.Tab & _
+                                   "FractionY" & ControlChars.Tab & _
+                                   "FractionB" & ControlChars.Tab & _
+                                   "Intensity" & ControlChars.Tab & _
+                                   "NTT" & ControlChars.Tab & _
                                    "PValue" & ControlChars.Tab & _
                                    "FScore" & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.DeltaScore) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.DeltaScoreOther) & ControlChars.Tab & _
+                                   "DeltaScore" & ControlChars.Tab & _
+                                   "DeltaScoreOther" & ControlChars.Tab & _
+                                   "DeltaNormMQScore" & ControlChars.Tab & _
+                                   "DeltaNormTotalPRMScore" & ControlChars.Tab & _
                                    "RankTotalPRMScore" & ControlChars.Tab & _
                                    "RankFScore" & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.RecordNumber) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.DBFilePos) & ControlChars.Tab & _
-                                   strSplitLine(eInspectResultsFileColumns.SpecFilePos))
-
+                                   "MH" & ControlChars.Tab & _
+                                   "RecordNumber" & ControlChars.Tab & _
+                                   "DBFilePos" & ControlChars.Tab & _
+                                   "SpecFilePos" & ControlChars.Tab)
         Catch ex As Exception
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                strErrorLog &= "Error writing first hits header" & ControlChars.NewLine
+                strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
             End If
         End Try
 
     End Sub
 
     Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
-                                     ByRef swResultFile As System.IO.StreamWriter, _
-                                     ByRef udtSearchResult As udtInspectSearchResultType, _
-                                     ByRef strErrorLog As String)
+                                        ByRef swResultFile As System.IO.StreamWriter, _
+                                        ByRef udtSearchResult As udtInspectSearchResultType, _
+                                        ByRef strErrorLog As String)
 
         Try
             swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
@@ -1658,15 +1786,18 @@ Public Class clsInSpecTResultsProcessor
                                    udtSearchResult.FScore & ControlChars.Tab & _
                                    udtSearchResult.DeltaScore & ControlChars.Tab & _
                                    udtSearchResult.DeltaScoreOther & ControlChars.Tab & _
+                                   NumToString(udtSearchResult.DeltaNormMQScore, 4, True) & ControlChars.Tab & _
+                                   NumToString(udtSearchResult.DeltaNormTotalPRMScore, 4, True) & ControlChars.Tab & _
                                    udtSearchResult.RankTotalPRMScore & ControlChars.Tab & _
                                    udtSearchResult.RankFScore & ControlChars.Tab & _
+                                   NumToString(udtSearchResult.MH, 5, True) & ControlChars.Tab & _
                                    udtSearchResult.RecordNumber & ControlChars.Tab & _
                                    udtSearchResult.DBFilePos & ControlChars.Tab & _
-                                   udtSearchResult.SpecFilePos & ControlChars.Tab)
+                                   udtSearchResult.SpecFilePos)
 
         Catch ex As Exception
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                strErrorLog &= "Error writing first hits record" & ControlChars.NewLine
+                strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
             End If
         End Try
 
@@ -1782,6 +1913,44 @@ Public Class clsInSpecTResultsProcessor
                         Return 1
                     Else
                         ' FScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
+                        If xData.TotalPRMScoreNum > yData.TotalPRMScoreNum Then
+                            Return -1
+                        ElseIf xData.TotalPRMScoreNum < yData.TotalPRMScoreNum Then
+                            Return 1
+                        Else
+                            Return 0
+                        End If
+                    End If
+                End If
+            End If
+
+        End Function
+    End Class
+
+    Protected Class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
+        Implements System.Collections.IComparer
+
+        Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
+            Dim xData As udtInspectSearchResultType = CType(x, udtInspectSearchResultType)
+            Dim yData As udtInspectSearchResultType = CType(y, udtInspectSearchResultType)
+
+            If xData.ScanNum > yData.ScanNum Then
+                Return 1
+            ElseIf xData.ScanNum < yData.ScanNum Then
+                Return -1
+            Else
+                If xData.ChargeNum > yData.ChargeNum Then
+                    Return 1
+                ElseIf xData.ChargeNum < yData.ChargeNum Then
+                    Return -1
+                Else
+                    ' Charge is the same; check MQScore (sort on descending MQScore)
+                    If xData.MQScoreNum > yData.MQScoreNum Then
+                        Return -1
+                    ElseIf xData.MQScoreNum < yData.MQScoreNum Then
+                        Return 1
+                    Else
+                        ' MQScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
                         If xData.TotalPRMScoreNum > yData.TotalPRMScoreNum Then
                             Return -1
                         ElseIf xData.TotalPRMScoreNum < yData.TotalPRMScoreNum Then

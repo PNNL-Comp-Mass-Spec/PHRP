@@ -1,5 +1,24 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.2.3219; October 24, 2008
+	- Updated to compute DeltaNormMQScore and DeltaNormTotalPRMScore for Inspect (these values are similar to DelCn2 for Sequest)
+		- The new values are written to the First Hits and Synopsis files
+	- Added column MH to the Synopsis and First Hits files
+		- At present, displaying a value of 0 for MH since Inspect doesn't report MH and computing it can be tricky
+	- Now truncating extranneous zeroes from FractionY, FractionB, and PValue values
+		- For example, 0.750 becomes 0.75 and 0.400 becomes 0.4
+
+Version 1.2.3212; October 17, 2008
+	- When processing Inspect results, now converting peptide length and NTT values to integers (e.g., Inspect writes out 2.000 instead of 2)
+
+Version 1.2.3202; October 7, 2008
+	- Now computing RankTotalPRMScore and RankFScore and writing to the _inspect_syn.txt and _inspect_fht.txt files
+	- Now creating an additional FHT file, where the top match for each scan is chosen using FScore instead of TotalPRMScore
+	- Updated to work with additional Inspect mod types: static, cterminal peptide, and nterminal peptide
+	- Renamed inspect peptide to protein map file to end in _inspect_PepToProtMap.txt
+	- Altered the filters for including a search result in the _inspect_syn.txt file
+		- Including data that has pValue <= 0.2 Or TotalPRMScore >= 50 Or FScore >= 0
+
 Version 1.2.3199; October 4, 2008
 	- Converted solution to VB .NET 2008
 	- Added support for Inspect results files
