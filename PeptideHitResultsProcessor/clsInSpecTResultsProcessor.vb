@@ -32,7 +32,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "October 24, 2008"
+        MyBase.mFileDate = "December 1, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -1726,7 +1726,7 @@ Public Class clsInSpecTResultsProcessor
                                      ByRef strErrorLog As String)
         Dim strSplitLine As String()
 
-        'Replace some header names with new name
+        ' Replace some header names with new names
         Try
             strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
 
@@ -1754,7 +1754,7 @@ Public Class clsInSpecTResultsProcessor
                                    "MH" & ControlChars.Tab & _
                                    "RecordNumber" & ControlChars.Tab & _
                                    "DBFilePos" & ControlChars.Tab & _
-                                   "SpecFilePos" & ControlChars.Tab)
+                                   "SpecFilePos")
         Catch ex As Exception
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
                 strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
