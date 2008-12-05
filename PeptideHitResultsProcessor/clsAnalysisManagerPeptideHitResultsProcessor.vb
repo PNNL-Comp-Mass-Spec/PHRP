@@ -48,7 +48,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
     Protected m_Status As IPeptideHitResultsProcessor.ProcessStatus
     Protected m_Results As IPeptideHitResultsProcessor.ProcessResults
 
-    Protected m_PeptideHitResultsProcessor As clsPHRPBaseClass
+    Protected WithEvents m_PeptideHitResultsProcessor As clsPHRPBaseClass
 
     Protected m_thThread As System.Threading.Thread
 
@@ -467,4 +467,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     End Function
 
-  End Class
+    Private Sub m_PeptideHitResultsProcessor_ErrorOccurred(ByVal ErrorMessage As String) Handles m_PeptideHitResultsProcessor.ErrorOccurred
+        LogErrors("PeptideHitResultsProcessor", ErrorMessage, Nothing, True)
+    End Sub
+End Class

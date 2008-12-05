@@ -27,7 +27,7 @@ Option Strict On
 Public MustInherit Class clsPHRPBaseClass
 
     Public Sub New()
-        mFileDate = "October 4, 2008"
+        mFileDate = "December 5, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -126,6 +126,8 @@ Public MustInherit Class clsPHRPBaseClass
     Public Event ProgressReset()
     Public Event ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single)     ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
     Public Event ProgressComplete()
+
+    Public Event ErrorOccurred(ByVal ErrorMessage As String)
 
     Protected mProgressStepDescription As String = String.Empty
     Protected mProgressPercentComplete As Single        ' Ranges from 0 to 100, but can contain decimal percentage values
@@ -896,6 +898,7 @@ Public MustInherit Class clsPHRPBaseClass
         If strMessage Is Nothing Then strMessage = String.Empty
         mErrorMessage = String.Copy(strMessage)
         If strMessage.Length > 0 Then
+            RaiseEvent ErrorOccurred(mErrorMessage)
             Console.WriteLine(mErrorMessage)
         End If
     End Sub

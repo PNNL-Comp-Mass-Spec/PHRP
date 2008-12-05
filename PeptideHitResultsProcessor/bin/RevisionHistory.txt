@@ -1,5 +1,10 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.2.3261; December 5, 2008
+	- Now raising an error if the Inspect parameter file cannot be found
+	- Added event ErrorOccured to clsPHRPBaseClass
+	- clsAnalysisManagerPeptideHitResultsProcessor is now logging any errors raised by clsPHRPBaseClass
+
 Version 1.2.3257; December 1, 2008
 	- Fixed bug that included an extra tab at the end of the header line in Inspect First Hits and Synopsis files
 

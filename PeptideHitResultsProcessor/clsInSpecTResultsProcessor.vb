@@ -32,7 +32,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "December 1, 2008"
+        MyBase.mFileDate = "December 5, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -622,6 +622,8 @@ Public Class clsInSpecTResultsProcessor
             intUnnamedModID = 0
 
             If strInspectParameterFilePath Is Nothing OrElse strInspectParameterFilePath.Length = 0 Then
+                SetErrorMessage("Inspect Parameter File name not defined; unable to extract mod info")
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
                 Return False
             End If
 
@@ -1425,9 +1427,10 @@ Public Class clsInSpecTResultsProcessor
                         ' If the file doesn't exist, then a warning will be displayed, but processing will continue
                         strPepToProteinMapFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(strInputFilePathFull), System.IO.Path.GetFileNameWithoutExtension(strInputFilePathFull) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
 
+                        MyBase.ResetProgress("Loading the PepToProtein map file: " & System.IO.Path.GetFileName(strPepToProteinMapFilePath))
                         Console.WriteLine()
                         Console.WriteLine()
-                        Console.WriteLine("Loading the PepToProtein map file: " & System.IO.Path.GetFileName(strPepToProteinMapFilePath))
+                        Console.WriteLine(MyBase.ProgressStepDescription)
 
                         LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, strOutputFolderPath, udtInspectModInfo, udtPepToProteinMapping)
 
@@ -1439,6 +1442,10 @@ Public Class clsInSpecTResultsProcessor
                         Console.WriteLine(MyBase.ProgressStepDescription)
 
                         blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, udtPepToProteinMapping, False)
+
+                        If blnSuccess Then
+                            MyBase.OperationComplete()
+                        End If
 
                     Catch ex As Exception
                         SetErrorMessage("Error calling CreateFHTorSYNResultsFile" & ex.Message)
