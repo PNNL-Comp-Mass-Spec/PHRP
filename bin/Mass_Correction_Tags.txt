@@ -118,6 +118,7 @@ Sulf-10 	-35.0316	-
 Sulf2-10	-19.0367	-
 Sulfate 	80.9663	-
 SulfoNHS	226.0776	-
+Sulfur  	36.066	-
 SumoEstr	498.2417	-
 Sumoylat	484.226	-
 TriAcetK	126.0318	-

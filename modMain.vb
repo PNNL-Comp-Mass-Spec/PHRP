@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "October 17, 2008"
+    Public Const PROGRAM_DATE As String = "December 5, 2008"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -163,7 +163,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "S", "A", "R", "Q"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "S", "A", "R", "L", "Q"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -188,6 +188,7 @@ Module modMain
                     If .RetrieveValueForParameter("A", strValue) Then mOutputFolderAlternatePath = strValue
                     If .RetrieveValueForParameter("R", strValue) Then mRecreateFolderHierarchyInAlternatePath = True
 
+                    If .RetrieveValueForParameter("L", strValue) Then mLogMessagesToFile = True
                     If .RetrieveValueForParameter("Q", strValue) Then mQuietMode = True
                 End With
 
@@ -216,7 +217,7 @@ Module modMain
                                         " /I:InputFilePath_xt.xml [/O:OutputFolderPath]")
             Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
             Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]")
-            Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/W] [/D] [/Q]")
+            Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L] [/Q]")
             Console.WriteLine()
             Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), or an Inspect results file (_inspect.txt).")
             Console.WriteLine("The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file.")
@@ -229,7 +230,8 @@ Module modMain
             Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
             Console.WriteLine("When using /S, you can redirect the output of the results using /A.")
             Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).")
-            Console.WriteLine("The optional /Q switch will suppress all error messages.")
+            Console.WriteLine()
+            Console.WriteLine("Use /L to log messages to a file.  Use the optional /Q switch will suppress all error messages.")
             Console.WriteLine()
 
             Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006")

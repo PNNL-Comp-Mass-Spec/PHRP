@@ -30,7 +30,7 @@ Public Class clsPeptideHitResultsProcRunner
     Inherits clsProcessFilesBaseClass
 
     Public Sub New()
-        MyBase.mFileDate = "October 4, 2008"
+        MyBase.mFileDate = "December 5, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -351,6 +351,9 @@ Public Class clsPeptideHitResultsProcRunner
                                 blnSuccess = mPeptideHitResultsProcessor.ProcessFile(strInputFilePath, strOutputFolderPath, strParameterFilePath)
                                 If Not blnSuccess Then
                                     ShowErrorMessage(mPeptideHitResultsProcessor.ErrorMessage)
+                                Else
+                                    LogMessage("Processing Complete")
+                                    OperationComplete()
                                 End If
                             End If
 
@@ -391,6 +394,10 @@ Public Class clsPeptideHitResultsProcRunner
 
     End Sub
 
+    Private Sub mPeptideHitResultsProcessor_ErrorOccurred(ByVal ErrorMessage As String) Handles mPeptideHitResultsProcessor.ErrorOccurred
+        LogMessage(ErrorMessage, eMessageTypeConstants.ErrorMsg)
+    End Sub
+
     Private Sub mPeptideHitResultsProcessor_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single) Handles mPeptideHitResultsProcessor.ProgressChanged
         UpdateProgress(taskDescription, percentComplete)
     End Sub
@@ -402,4 +409,5 @@ Public Class clsPeptideHitResultsProcRunner
     Private Sub mPeptideHitResultsProcessor_ProgressReset() Handles mPeptideHitResultsProcessor.ProgressReset
         ResetProgress()
     End Sub
+
 End Class

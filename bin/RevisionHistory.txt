@@ -1,5 +1,10 @@
 Peptide Hit Results Processor Revision History
 
+Version 1.2.3261; December 5, 2008
+	- Updated PeptideHitResultsProcessor.dll that includes event ErrorOccured
+	- Added switch /L which enables logging to a file
+		- will log any errors raised by PeptideHitResultsProcessor.dll
+
 Version 1.2.3219; October 24, 2008
 	- Updated PeptideHitResultsProcessor.dll to compute DeltaNormMQScore and DeltaNormTotalPRMScore for Inspect (these values are similar to DelCn2 for Sequest)
 

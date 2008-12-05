@@ -55,12 +55,6 @@
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
-        "MsmSig" = "8:_UNDEFINED"
-        }
     }
     "Configurations"
     {
@@ -354,14 +348,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PeptideHitResultsProcessor"
-        "ProductCode" = "8:{9281113C-6554-4AFD-8641-18C6F9A44BB3}"
-        "PackageCode" = "8:{6BFC43A8-33B3-4040-A79A-9D1589CB9991}"
+        "ProductCode" = "8:{9DFCB89D-22C2-40EA-B791-705AF788C558}"
+        "PackageCode" = "8:{FD6CCB34-7DC7-42D6-B600-5E81F34BBDFA}"
         "UpgradeCode" = "8:{36FC1927-8EED-476F-8562-582B0F670156}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.1.6"
+        "ProductVersion" = "8:1.1.7"
         "Manufacturer" = "8:Battelle Memorial Institute"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
