@@ -1,5 +1,11 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.2.3264; December 8, 2008
+	- Added support for Inspect modifications starting with a plus sign followed by the modification mass
+		- For example: S.SPATLNSR+14.V
+		- These are typically used for N-terminal and C-terminal mods
+		- If found, then the mass value is compared to the mass values of the known mods; if a match is found within 0.5 Da, then the plus sign and number are replaced with the mod symbol
+
 Version 1.2.3261; December 5, 2008
 	- Now raising an error if the Inspect parameter file cannot be found
 	- Added event ErrorOccured to clsPHRPBaseClass

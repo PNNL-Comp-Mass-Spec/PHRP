@@ -27,7 +27,7 @@ Option Strict On
 Public MustInherit Class clsPHRPBaseClass
 
     Public Sub New()
-        mFileDate = "December 5, 2008"
+        mFileDate = "December 8, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -107,6 +107,8 @@ Public MustInherit Class clsPHRPBaseClass
     Protected mModificationDefinitionsFilePath As String
     Protected mSearchToolParameterFilePath As String            ' At present, only used by clsInSpecTResultsProcessor
 
+    Protected mInspectSynopsisFilePValueThreshold As Single     ' Only used by clsInSpecTResultsProcessor; note that lower p-values are higher confidence results
+
     Protected mEnzymeMatchSpec As clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType
     Protected mPeptideNTerminusMassChange As Double             ' This is ignored if equal to 0; typical non-zero value is 1.0078246
     Protected mPeptideCTerminusMassChange As Double             ' This is ignored if equal to 0; typical non-zero value is 17.0027387
@@ -185,6 +187,14 @@ Public MustInherit Class clsPHRPBaseClass
         End Get
     End Property
 
+    Public Property InspectSynopsisFilePValueThreshold() As Single
+        Get
+            Return mInspectSynopsisFilePValueThreshold
+        End Get
+        Set(ByVal value As Single)
+            mInspectSynopsisFilePValueThreshold = value
+        End Set
+    End Property
     Public Property MassCorrectionTagsFilePath() As String
         Get
             Return mMassCorrectionTagsFilePath
@@ -520,6 +530,8 @@ Public MustInherit Class clsPHRPBaseClass
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
         mSearchToolParameterFilePath = String.Empty
+
+        mInspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
         mEnzymeMatchSpec = clsPeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec()
 

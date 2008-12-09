@@ -30,7 +30,7 @@ Public Class clsPeptideHitResultsProcRunner
     Inherits clsProcessFilesBaseClass
 
     Public Sub New()
-        MyBase.mFileDate = "December 5, 2008"
+        MyBase.mFileDate = "December 8, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -59,6 +59,7 @@ Public Class clsPeptideHitResultsProcRunner
     Protected mMassCorrectionTagsFilePath As String
     Protected mModificationDefinitionsFilePath As String
     Protected mSearchToolParameterFilePath As String
+    Protected mInspectSynopsisFilePValueThreshold As Single
 
     Protected WithEvents mPeptideHitResultsProcessor As PeptideHitResultsProcessor.clsPHRPBaseClass
 
@@ -67,6 +68,15 @@ Public Class clsPeptideHitResultsProcRunner
 #End Region
 
 #Region "Properties"
+
+    Public Property InspectSynopsisFilePValueThreshold() As Single
+        Get
+            Return mInspectSynopsisFilePValueThreshold
+        End Get
+        Set(ByVal value As Single)
+            mInspectSynopsisFilePValueThreshold = value
+        End Set
+    End Property
     Public ReadOnly Property LocalErrorCode() As eResultsProcessorErrorCodes
         Get
             Return mLocalErrorCode
@@ -165,6 +175,8 @@ Public Class clsPeptideHitResultsProcRunner
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
         mSearchToolParameterFilePath = String.Empty
+
+        mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
         mWarnMissingParameterFileSection = True
 
@@ -345,6 +357,7 @@ Public Class clsPeptideHitResultsProcRunner
                                     .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath
                                     .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
                                     .SearchToolParameterFilePath = mSearchToolParameterFilePath
+                                    .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
 
                                     .WarnMissingParameterFileSection = mWarnMissingParameterFileSection
                                 End With

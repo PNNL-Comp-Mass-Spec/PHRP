@@ -1,4 +1,7 @@
-Peptide Hit Results Processor Revision History
+Peptide Hit Results Proc Runner Revision History
+
+Version 1.2.3264; December 8, 2008
+	- Added support for Inspect modifications starting with a plus sign followed by the modification mass, for example: S.SPATLNSR+14.V
 
 Version 1.2.3261; December 5, 2008
 	- Updated PeptideHitResultsProcessor.dll that includes event ErrorOccured

@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "December 5, 2008"
+    Public Const PROGRAM_DATE As String = "December 8, 2008"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -37,6 +37,7 @@ Module modMain
     Private mMassCorrectionTagsFilePath As String               ' Optional
     Private mModificationDefinitionsFilePath As String          ' Optional
     Private mSearchToolParameterFilePath As String              ' Optional
+    Private mInspectSynopsisFilePValueThreshold As Single              ' Optional
 
     Private mOutputFolderAlternatePath As String                ' Optional
     Private mRecreateFolderHierarchyInAlternatePath As Boolean  ' Optional
@@ -95,6 +96,7 @@ Module modMain
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
         mSearchToolParameterFilePath = String.Empty
+        mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
         mRecurseFolders = False
         mRecurseFoldersMaxLevels = 0
@@ -123,6 +125,7 @@ Module modMain
                     .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
                     .SearchToolParameterFilePath = mSearchToolParameterFilePath
 
+                    .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
                     .WarnMissingParameterFileSection = True
                 End With
 
@@ -163,7 +166,7 @@ Module modMain
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "S", "A", "R", "L", "Q"}
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "SynPvalue", "S", "A", "R", "L", "Q"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -178,6 +181,12 @@ Module modMain
                     If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = strValue
                     If .RetrieveValueForParameter("T", strValue) Then mMassCorrectionTagsFilePath = strValue
                     If .RetrieveValueForParameter("N", strValue) Then mSearchToolParameterFilePath = strValue
+
+                    If .RetrieveValueForParameter("SynPvalue", strValue) Then
+                        If IsNumeric(strValue) Then
+                            mInspectSynopsisFilePValueThreshold = CSng(strValue)
+                        End If
+                    End If
 
                     If .RetrieveValueForParameter("S", strValue) Then
                         mRecurseFolders = True
@@ -216,7 +225,7 @@ Module modMain
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
                                         " /I:InputFilePath_xt.xml [/O:OutputFolderPath]")
             Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
-            Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]")
+            Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] [/SynPvalue:0.2]")
             Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L] [/Q]")
             Console.WriteLine()
             Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), or an Inspect results file (_inspect.txt).")
@@ -226,6 +235,8 @@ Module modMain
             Console.WriteLine("Use /M to specify the file containing the modification definitions.  This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).")
             Console.WriteLine("Use /T to specify the file containing the mass correction tag info.  This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).")
             Console.WriteLine("Use /N to specify the parameter file provided to the search tool.  This is only used when processing Inspect files.")
+            Console.WriteLine()
+            Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file.  The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD.ToString() & " or an FScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD & " will also be included in the synopsis file.")
             Console.WriteLine()
             Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
             Console.WriteLine("When using /S, you can redirect the output of the results using /A.")

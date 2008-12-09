@@ -32,7 +32,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "December 5, 2008"
+        MyBase.mFileDate = "December 8, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -48,13 +48,14 @@ Public Class clsInSpecTResultsProcessor
 
     ' When writing the synopsis file, we keep data that passes any of these thresholds (thus, it's an OR comparison, not an AND comparison)
     ' pValue <= 0.2 Or TotalPRMScore >= 50 or FScore >= 0
-    Public Const PVALUE_THRESHOLD As Single = 0.2
+    Public Const DEFAULT_SYN_FILE_PVALUE_THRESHOLD As Single = 0.2
     Public Const TOTALPRMSCORE_THRESHOLD As Single = 50
     Public Const FSCORE_THRESHOLD As Single = 0
 
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
     Private Const DTA_FILENAME_SCAN_NUMBER_REGEX As String = "(\d+)\.\d+\.\d+\.dta"
+    Private Const INSPECT_MOD_MASS_REGEX As String = "\+(\d+)"
     Private Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
 
     Private Const PHOS_MOD_NAME As String = "phos"
@@ -1508,6 +1509,9 @@ Public Class clsInSpecTResultsProcessor
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
 
+        Dim intModMass As Integer
+
+        Static reModMassRegEx As New System.Text.RegularExpressions.Regex(INSPECT_MOD_MASS_REGEX, REGEX_OPTIONS)
 
         If strPeptide.Length >= 4 Then
             If strPeptide.Chars(1) = "."c AndAlso _
@@ -1522,6 +1526,33 @@ Public Class clsInSpecTResultsProcessor
         For intIndex = 0 To udtInspectModInfo.Length - 1
             If udtInspectModInfo(intIndex).ModType <> eInspectModType.StaticMod Then
                 strPeptide = strPeptide.Replace(udtInspectModInfo(intIndex).ModName, udtInspectModInfo(intIndex).ModSymbol)
+
+                If udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
+                    ' Inspect notates C-terminal mods like this: R.HVIFLAER+14.R
+                    ' Look for this using reModMassRegEx
+
+
+                    With reModMassRegEx.Match(strPeptide)
+                        If .Success AndAlso .Groups.Count > 1 Then
+                            Try
+                                intModMass = CInt(.Groups(1).Value)
+
+                                ' Compare the mod mass in the specification to this Mod's mod mass
+                                ' If they are less than 0.5 Da apart, then assume we have a match; yes, this assumption is a bit flaky
+                                If Math.Abs(intModMass - CDbl(udtInspectModInfo(intIndex).ModMass)) <= 0.5 Then
+                                    ' Match found
+
+                                    strPeptide = strPeptide.Replace(.Value, udtInspectModInfo(intIndex).ModSymbol)
+                                End If
+
+                            Catch ex As Exception
+                                Throw New Exception("Error comparing mod mass in peptide to mod mass in udtInspectModInfo", ex)
+                            End Try
+
+                        End If
+                    End With
+                End If
+
             End If
         Next intIndex
 
@@ -1685,7 +1716,7 @@ Public Class clsInSpecTResultsProcessor
 
         ' Now store or write out the matches that pass the filters
         For intIndex = 0 To intCurrentScanResultsCount - 1
-            If udtSearchResultsCurrentScan(intIndex).PValueNum <= PVALUE_THRESHOLD OrElse _
+            If udtSearchResultsCurrentScan(intIndex).PValueNum <= mInspectSynopsisFilePValueThreshold OrElse _
                udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse _
                udtSearchResultsCurrentScan(intIndex).FScoreNum >= FSCORE_THRESHOLD Then
                 StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
