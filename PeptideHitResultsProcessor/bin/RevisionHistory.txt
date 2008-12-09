@@ -1,5 +1,10 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.2.3265; December 9, 2008
+	- Improved support for N-terminal and C-terminal Inspect modifications
+		- Now requiring that N-terminal modifications actually be at the N-terminus of the peptide
+		- Now requiring that C-terminal modifications actually be at the C-terminus
+
 Version 1.2.3264; December 8, 2008
 	- Added support for Inspect modifications starting with a plus sign followed by the modification mass
 		- For example: S.SPATLNSR+14.V

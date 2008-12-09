@@ -32,7 +32,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "December 8, 2008"
+        MyBase.mFileDate = "December 9, 2008"
         InitializeLocalVariables()
     End Sub
 
@@ -55,7 +55,9 @@ Public Class clsInSpecTResultsProcessor
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
     Private Const DTA_FILENAME_SCAN_NUMBER_REGEX As String = "(\d+)\.\d+\.\d+\.dta"
-    Private Const INSPECT_MOD_MASS_REGEX As String = "\+(\d+)"
+    Private Const INSPECT_NTERMINAL_MOD_MASS_REGEX As String = "^\+(\d+)"
+    Private Const INSPECT_CTERMINAL_MOD_MASS_REGEX As String = "\+(\d+)$"
+
     Private Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
 
     Private Const PHOS_MOD_NAME As String = "phos"
@@ -1509,9 +1511,13 @@ Public Class clsInSpecTResultsProcessor
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
 
+        Dim strPeptideNew As String = String.Empty
+
         Dim intModMass As Integer
 
-        Static reModMassRegEx As New System.Text.RegularExpressions.Regex(INSPECT_MOD_MASS_REGEX, REGEX_OPTIONS)
+        Static reNTerminalModMassRegEx As New System.Text.RegularExpressions.Regex(INSPECT_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
+        Static reCTerminalModMassRegEx As New System.Text.RegularExpressions.Regex(INSPECT_CTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
+        Dim reMatch As System.Text.RegularExpressions.Match
 
         If strPeptide.Length >= 4 Then
             If strPeptide.Chars(1) = "."c AndAlso _
@@ -1523,34 +1529,64 @@ Public Class clsInSpecTResultsProcessor
             End If
         End If
 
+        ' strPeptide should now be the clean peptide, without the prefix or suffix residues
         For intIndex = 0 To udtInspectModInfo.Length - 1
             If udtInspectModInfo(intIndex).ModType <> eInspectModType.StaticMod Then
                 strPeptide = strPeptide.Replace(udtInspectModInfo(intIndex).ModName, udtInspectModInfo(intIndex).ModSymbol)
 
-                If udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
-                    ' Inspect notates C-terminal mods like this: R.HVIFLAER+14.R
-                    ' Look for this using reModMassRegEx
+                If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Or _
+                   udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
 
+                    If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Then
+                        ' Inspect notates N-terminal mods like this: R.+14HVIFLAER.R   (Note: This behavior is not yet confirmed)
+                        ' Look for this using reNTerminalModMassRegEx
+                        reMatch = reNTerminalModMassRegEx.Match(strPeptide)
 
-                    With reModMassRegEx.Match(strPeptide)
-                        If .Success AndAlso .Groups.Count > 1 Then
-                            Try
-                                intModMass = CInt(.Groups(1).Value)
+                    ElseIf udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
+                        ' Inspect notates C-terminal mods like this: R.HVIFLAER+14.R
+                        ' Look for this using reCTerminalModMassRegEx
+                        reMatch = reCTerminalModMassRegEx.Match(strPeptide)
 
-                                ' Compare the mod mass in the specification to this Mod's mod mass
-                                ' If they are less than 0.5 Da apart, then assume we have a match; yes, this assumption is a bit flaky
-                                If Math.Abs(intModMass - CDbl(udtInspectModInfo(intIndex).ModMass)) <= 0.5 Then
-                                    ' Match found
+                    Else
+                        ' This code should never be reached
+                        reMatch = Nothing
+                    End If
 
-                                    strPeptide = strPeptide.Replace(.Value, udtInspectModInfo(intIndex).ModSymbol)
-                                End If
+                    If Not reMatch Is Nothing Then
+                        With reMatch
+                            If .Success AndAlso .Groups.Count > 1 Then
+                                ' Match found
+                                Try
+                                    intModMass = CInt(.Groups(1).Value)
 
-                            Catch ex As Exception
-                                Throw New Exception("Error comparing mod mass in peptide to mod mass in udtInspectModInfo", ex)
-                            End Try
+                                    ' Compare the mod mass in the specification to this Mod's mod mass
+                                    ' If they are less than 0.5 Da apart, then assume we have a match; yes, this assumption is a bit flaky
+                                    If Math.Abs(intModMass - CDbl(udtInspectModInfo(intIndex).ModMass)) <= 0.5 Then
+                                        ' Match found
+                                        ' Replace the matched region with .ModSymbol
 
-                        End If
-                    End With
+                                        If .Groups(0).Index > 0 Then
+                                            strPeptideNew = strPeptide.Substring(0, .Groups(0).Index)
+                                        Else
+                                            strPeptideNew = String.Empty
+                                        End If
+
+                                        strPeptideNew &= udtInspectModInfo(intIndex).ModSymbol
+
+                                        If .Groups(0).Index + .Groups(0).Length < strPeptide.Length Then
+                                            strPeptideNew &= strPeptide.Substring(.Groups(0).Index + .Groups(0).Length)
+                                        End If
+
+                                        strPeptide = String.Copy(strPeptideNew)
+                                    End If
+
+                                Catch ex As Exception
+                                    Throw New Exception("Error comparing mod mass in peptide to mod mass in udtInspectModInfo", ex)
+                                End Try
+
+                            End If
+                        End With
+                    End If
                 End If
 
             End If

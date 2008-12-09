@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.2.3265; December 9, 2008
+	- Improved support for N-terminal and C-terminal Inspect modifications
+
 Version 1.2.3264; December 8, 2008
 	- Added support for Inspect modifications starting with a plus sign followed by the modification mass, for example: S.SPATLNSR+14.V
 
