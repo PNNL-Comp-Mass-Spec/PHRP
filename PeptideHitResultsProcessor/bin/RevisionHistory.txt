@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.2.3294; January 7, 2009
+	- Added support for Inspect results files with 22 columns (added PrecursorMZ and PrecursorError)
+	- Added additional debug logic to clsAnalysisManagerPeptideHitResultsProcessor.vb
+
 Version 1.2.3265; December 9, 2008
 	- Improved support for N-terminal and C-terminal Inspect modifications
 		- Now requiring that N-terminal modifications actually be at the N-terminus of the peptide

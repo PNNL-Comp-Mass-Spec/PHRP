@@ -52,6 +52,8 @@ Public Class clsSearchResultsInSpecT
     Protected mRecordNumber As String
     Protected mDBFilePos As String
     Protected mSpecFilePos As String
+    Protected mPrecursorMZ As String
+    Protected mPrecursorError As String
 
 #End Region
 
@@ -217,6 +219,22 @@ Public Class clsSearchResultsInSpecT
             mSpecFilePos = Value
         End Set
     End Property
+    Public Property PrecursorMZ() As String
+        Get
+            Return mPrecursorMZ
+        End Get
+        Set(ByVal value As String)
+            mPrecursorMZ = value
+        End Set
+    End Property
+    Public Property PrecursorError() As String
+        Get
+            Return mPrecursorError
+        End Get
+        Set(ByVal value As String)
+            mPrecursorError = value
+        End Set
+    End Property
 #End Region
 
     Public Sub New(ByRef objPeptideMods As clsPeptideModificationContainer)
@@ -247,7 +265,8 @@ Public Class clsSearchResultsInSpecT
         mRecordNumber = String.Empty
         mDBFilePos = String.Empty
         mSpecFilePos = String.Empty
-
+        mPrecursorMZ = String.Empty
+        mPrecursorError = String.Empty
     End Sub
 
 End Class

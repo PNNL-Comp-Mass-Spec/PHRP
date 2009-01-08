@@ -33,11 +33,11 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     Protected m_AnalysisToolName As String = String.Empty
     Protected m_DSName As String = String.Empty
-    Protected m_ParameterFileName As String = String.Empty
-    Protected m_SettingsFileName As String = String.Empty
+    Protected m_ParameterFileName As String = String.Empty      ' Peptide search tool parameter file name
+    Protected m_SettingsFileName As String = String.Empty       ' XML settings file with section PeptideHitResultsProcessorOptions
 
-    Protected m_ParameterFilePath As String = String.Empty
-    Protected m_SettingsFilePath As String = String.Empty     ' Path to the settings file
+    Protected m_ParameterFilePath As String = String.Empty      ' Peptide search tool parameter file name
+    Protected m_SettingsFilePath As String = String.Empty       ' XML settings file with section PeptideHitResultsProcessorOptions
 
     Protected m_PeptideHitResultsFilePath As String = String.Empty
     Protected m_MassCorrectionTagsFilePath As String = String.Empty
@@ -264,6 +264,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
                 .MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath
                 .ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath
                 .SearchToolParameterFilePath = m_ParameterFilePath
+                .InspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
             End With
 
             m_thThread = New System.Threading.Thread(AddressOf ProcessPeptideHitResultsFileWork)
@@ -327,6 +328,11 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             Return False
         End If
 
+        If Me.DebugLevel >= 3 Then
+            m_Logger.PostEntry("Setup params: OutFolderPath = " & m_OutFolderPath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            m_Logger.PostEntry("Setup params: SourceFolderPath = " & m_SourceFolderPath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+        End If
+
         'Source directory exists?
         If Not VerifyDirExists(m_SourceFolderPath) Then Return False 'Error msg handled by VerifyDirExists
 
@@ -370,8 +376,21 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
         ElseIf m_AnalysisToolName.ToLower.IndexOf("inspect") >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
-        Else
+        ElseIf m_AnalysisToolName.ToLower.IndexOf("dataextractor") >= 0 Then
+            ' Data Extractor step-tool; we'll need to auto-determine the results format
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
+        Else
+            ' Unrecognized analysis tool name
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
+        End If
+
+        If Me.DebugLevel >= 3 Then
+            m_Logger.PostEntry("Setup params: AnalysisToolName = " & m_AnalysisToolName, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            m_Logger.PostEntry("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+
+            m_Logger.PostEntry("Setup params: DSName = " & m_DSName, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            m_Logger.PostEntry("Setup params: SettingsFilePath = " & m_SettingsFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            m_Logger.PostEntry("Setup params: ParameterFilePath = " & m_ParameterFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
         End If
 
         'Define the peptide hit results file name
@@ -379,6 +398,10 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, m_SourceFolderPath, m_DSName)
         Else
             m_PeptideHitResultsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_PeptideHitResultsFileName)
+        End If
+
+        If Me.DebugLevel >= 3 Then
+            m_Logger.PostEntry("Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
         End If
 
         'Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
@@ -400,6 +423,11 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             m_ModificationDefinitionsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_ModificationDefinitionsFileName)
         End If
 
+        If Me.DebugLevel >= 3 Then
+            m_Logger.PostEntry("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            m_Logger.PostEntry("Setup params: MassCorrectionTagsFilePath = " & m_MassCorrectionTagsFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            m_Logger.PostEntry("Setup params: ModificationDefinitionsFilePath = " & m_ModificationDefinitionsFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+        End If
 
         'Parameter file exists?
         If Not VerifyFileExists(m_ParameterFilePath) Then Return False 'Error msg handled by VerifyFileExists
@@ -442,6 +470,38 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     End Sub
 
+    Protected Sub UpdateProgress(ByVal strProgressStepDescription As String, ByVal sngPercentComplete As Single)
+        Static strProgressStepDescriptionSaved As String = String.Empty
+        Static sngProgressPercentComplete As Single = 0
+
+        Dim blnDescriptionChanged As Boolean = False
+
+        If strProgressStepDescription <> strProgressStepDescriptionSaved Then
+            blnDescriptionChanged = True
+        End If
+
+        strProgressStepDescriptionSaved = String.Copy(strProgressStepDescription)
+        If sngPercentComplete < 0 Then
+            sngPercentComplete = 0
+        ElseIf sngPercentComplete > 100 Then
+            sngPercentComplete = 100
+        End If
+        sngProgressPercentComplete = sngPercentComplete
+
+        If blnDescriptionChanged And Me.DebugLevel >= 2 Then
+            If sngProgressPercentComplete = 0 Then
+                m_Logger.PostEntry(strProgressStepDescriptionSaved, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+
+            Else
+                m_Logger.PostEntry(strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)", _
+                                   PRISM.Logging.ILogger.logMsgType.logDebug, True)
+
+            End If
+        End If
+
+        ' RaiseEvent ProgressChanged(Me.ProgressStepDescription, Me.ProgressPercentComplete)
+    End Sub
+
     Protected Overridable Function VerifyDirExists(ByVal TestDir As String) As Boolean
 
         'Verifies that the specified directory exists
@@ -470,4 +530,17 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
     Private Sub m_PeptideHitResultsProcessor_ErrorOccurred(ByVal ErrorMessage As String) Handles m_PeptideHitResultsProcessor.ErrorOccurred
         LogErrors("PeptideHitResultsProcessor", ErrorMessage, Nothing, True)
     End Sub
+
+    Private Sub mPeptideHitResultsProcessor_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single) Handles m_PeptideHitResultsProcessor.ProgressChanged
+        UpdateProgress(taskDescription, percentComplete)
+    End Sub
+
+    Private Sub mPeptideHitResultsProcessor_ProgressComplete() Handles m_PeptideHitResultsProcessor.ProgressComplete
+        ' OperationComplete()
+    End Sub
+
+    Private Sub mPeptideHitResultsProcessor_ProgressReset() Handles m_PeptideHitResultsProcessor.ProgressReset
+        ' ResetProgress()
+    End Sub
+
 End Class

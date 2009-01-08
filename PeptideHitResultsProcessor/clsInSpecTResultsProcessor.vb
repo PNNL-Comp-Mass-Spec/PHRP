@@ -86,6 +86,8 @@ Public Class clsInSpecTResultsProcessor
         RecordNumber = 17
         DBFilePos = 18
         SpecFilePos = 19
+        PrecursorMZ = 20
+        PrecursorError = 21
     End Enum
 
     ' These columns correspond to the Synopsis and First-Hits files created by this class
@@ -115,6 +117,8 @@ Public Class clsInSpecTResultsProcessor
         RecordNumber = 22
         DBFilePos = 23
         SpecFilePos = 24
+        PrecursorMZ = 25
+        PrecursorError = 26
     End Enum
 
     Protected Enum eInspectModType As Integer
@@ -165,6 +169,8 @@ Public Class clsInSpecTResultsProcessor
         Public RecordNumber As String
         Public DBFilePos As String
         Public SpecFilePos As String
+        Public PrecursorMZ As String
+        Public PrecursorError As String
 
         Public Sub Clear()
             SpectrumFile = String.Empty
@@ -198,6 +204,8 @@ Public Class clsInSpecTResultsProcessor
             RecordNumber = String.Empty
             DBFilePos = String.Empty
             SpecFilePos = String.Empty
+            PrecursorMZ = String.Empty
+            PrecursorError = String.Empty
         End Sub
     End Structure
 
@@ -497,12 +505,12 @@ Public Class clsInSpecTResultsProcessor
                         ' Initialize udtSearchResult
                         udtSearchResult.Clear()
 
-                        blnValidSearchResult = ParseInSpectSynopsisFileEntry(strLineIn, udtInspectModInfo, udtSearchResult, strErrorLog, intResultsProcessed)
+                        blnValidSearchResult = ParseInspectResultsFileEntry(strLineIn, udtInspectModInfo, udtSearchResult, strErrorLog, intResultsProcessed)
 
                         If Not blnValidSearchResult Then
                             If intResultsProcessed = 0 Then
                                 ' This is the first line; write it as the header
-                                WriteFileHeader(strLineIn, swResultFile, strErrorLog)
+                                WriteSynFHTFileHeader(strLineIn, swResultFile, strErrorLog)
                             End If
                         Else
                             If intPreviousScan <> Int32.MinValue AndAlso intPreviousScan <> udtSearchResult.ScanNum Then
@@ -583,6 +591,35 @@ Public Class clsInSpecTResultsProcessor
         Catch ex As Exception
             Return sngValueIfCurrentScoreZero
         End Try
+    End Function
+
+    Private Function ComputePeptideMHFromPrecursorInfo(ByVal strPrecursorMZ As String, ByVal strPrecursorError As String, ByVal strCharge As String) As Double
+        Dim dblPrecursorMZ As Double
+        Dim dblPrecursorError As Double
+        Dim intCharge As Integer
+        Dim dblPeptideMH As Double = 0
+
+        If strPrecursorMZ Is Nothing OrElse strPrecursorMZ.Length = 0 OrElse strPrecursorMZ = "0" Then
+            ' Precursor m/z is undefined; cannot continue
+            dblPeptideMH = 0
+        ElseIf strPrecursorError Is Nothing OrElse strPrecursorError.Length = 0 Then
+            ' Precursor error is undefined; cannot continue
+            dblPeptideMH = 0
+        Else
+            intCharge = CIntSafe(strCharge, -1)
+
+            If intCharge >= 1 Then
+                If Double.TryParse(strPrecursorMZ, dblPrecursorMZ) Then
+                    If Double.TryParse(strPrecursorError, dblPrecursorError) Then
+                        ' Note: the October 2008 version of Inspect uses an Absolute Value function when computing the PrecursorError
+                        ' The version used by PNNL does not use Absolute Value
+                        dblPeptideMH = (dblPrecursorMZ - dblPrecursorError) * intCharge - intCharge * clsPeptideMassCalculator.MASS_PROTON
+                    End If
+                End If
+            End If
+        End If
+
+        Return dblPeptideMH
     End Function
 
     Private Function CIntSafe(ByVal strValue As String, ByVal intDefaultValue As Integer) As Integer
@@ -1059,15 +1096,15 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
-    Private Function ParseInSpectSynopsisFileEntry(ByRef strLineIn As String, _
-                                                   ByRef udtInspectModInfo() As udtModInfoType, _
-                                                   ByRef udtSearchResult As udtInspectSearchResultType, _
-                                                   ByRef strErrorLog As String, _
-                                                   ByVal intResultsProcessed As Integer) As Boolean
+    Private Function ParseInspectResultsFileEntry(ByRef strLineIn As String, _
+                                                  ByRef udtInspectModInfo() As udtModInfoType, _
+                                                  ByRef udtSearchResult As udtInspectSearchResultType, _
+                                                  ByRef strErrorLog As String, _
+                                                  ByVal intResultsProcessed As Integer) As Boolean
 
         ' Parses the entries in an Inspect results file
         ' The expected header line is:
-        ' #SpectrumFile	Scan#	Annotation	Protein	Charge	MQScore	Length	TotalPRMScore	MedianPRMScore	FractionY	FractionB	Intensity	NTT	p-value	F-Score	DeltaScore	DeltaScoreOther	RecordNumber	DBFilePos	SpecFilePos	
+        ' #SpectrumFile	Scan#	Annotation	Protein	Charge	MQScore	Length	TotalPRMScore	MedianPRMScore	FractionY	FractionB	Intensity	NTT	p-value	F-Score	DeltaScore	DeltaScoreOther	RecordNumber	DBFilePos	SpecFilePos PrecursorMZ	PrecursorError
 
         Dim strSplitLine() As String
 
@@ -1140,6 +1177,15 @@ Public Class clsInSpecTResultsProcessor
                     .RecordNumber = strSplitLine(eInspectResultsFileColumns.RecordNumber)
                     .DBFilePos = strSplitLine(eInspectResultsFileColumns.DBFilePos)
                     .SpecFilePos = strSplitLine(eInspectResultsFileColumns.SpecFilePos)
+
+                    If strSplitLine.Length >= eInspectResultsFileColumns.PrecursorError + 1 Then
+                        ' Inspect version 2008-10-14 added these two Precursor mass columns
+                        .PrecursorMZ = strSplitLine(eInspectResultsFileColumns.PrecursorMZ)
+                        .PrecursorError = strSplitLine(eInspectResultsFileColumns.PrecursorError)
+                    Else
+                        .PrecursorMZ = "0"
+                        .PrecursorError = "0"
+                    End If
                 End With
 
                 blnValidSearchResult = True
@@ -1151,7 +1197,7 @@ Public Class clsInSpecTResultsProcessor
                 If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
                     strErrorLog &= "Error parsing InSpecT Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
                 Else
-                    strErrorLog &= "Error parsing InSpecT Results in ParseInSpectSynopsisFileEntry" & ControlChars.NewLine
+                    strErrorLog &= "Error parsing InSpecT Results in ParseInspectResultsFileEntry" & ControlChars.NewLine
                 End If
             End If
             blnValidSearchResult = False
@@ -1202,7 +1248,7 @@ Public Class clsInSpecTResultsProcessor
 
         ' Parses the entries in an Inspect Synopsis file
         ' The expected header line is:
-        ' ResultID	Scan	Peptide	Protein	Charge	MQScore	Length	TotalPRMScore	MedianPRMScore	FractionY	FractionB	Intensity	NTT	PValue	FScore	DeltaScore	DeltaScoreOther	DeltaNormMQScore   DeltaNormTotalPRMScore RankTotalPRMScore   RankFScore  MH  RecordNumber	DBFilePos	SpecFilePos
+        ' ResultID	Scan	Peptide	Protein	Charge	MQScore	Length	TotalPRMScore	MedianPRMScore	FractionY	FractionB	Intensity	NTT	PValue	FScore	DeltaScore	DeltaScoreOther	DeltaNormMQScore   DeltaNormTotalPRMScore RankTotalPRMScore   RankFScore  MH  RecordNumber	DBFilePos	SpecFilePos PrecursorMZ PrecursorError
 
         Dim strSplitLine() As String
 
@@ -1235,7 +1281,15 @@ Public Class clsInSpecTResultsProcessor
                 .ResultID = Integer.Parse(strSplitLine(eInspectSynFileColumns.ResultID))
                 .Scan = strSplitLine(eInspectSynFileColumns.Scan)
                 .Charge = strSplitLine(eInspectSynFileColumns.Charge)
-                .PeptideMH = "0"
+
+                If strSplitLine.Length >= eInspectSynFileColumns.PrecursorMZ + 1 Then
+                    .PeptideMH = ComputePeptideMHFromPrecursorInfo(strSplitLine(eInspectSynFileColumns.PrecursorMZ), _
+                                                                   strSplitLine(eInspectSynFileColumns.PrecursorError), _
+                                                                   .Charge).ToString("0.0000")
+                Else
+                    .PeptideMH = "0"
+                End If
+
                 .ProteinName = strSplitLine(eInspectSynFileColumns.Protein)
                 .MultipleProteinCount = "0"
 
@@ -1289,7 +1343,11 @@ Public Class clsInSpecTResultsProcessor
                 ' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
                 .ComputePeptideCleavageStateInProtein()
 
-                .PeptideDeltaMass = "0"
+                If strSplitLine.Length >= eInspectSynFileColumns.PrecursorError + 1 Then
+                    .PeptideDeltaMass = strSplitLine(eInspectSynFileColumns.PrecursorError)
+                Else
+                    .PeptideDeltaMass = "0"
+                End If
 
                 .MQScore = strSplitLine(eInspectSynFileColumns.MQScore)
                 .Length = strSplitLine(eInspectSynFileColumns.Length)
@@ -1311,6 +1369,7 @@ Public Class clsInSpecTResultsProcessor
                 .RecordNumber = strSplitLine(eInspectSynFileColumns.RecordNumber)
                 .DBFilePos = strSplitLine(eInspectSynFileColumns.DBFilePos)
                 .SpecFilePos = strSplitLine(eInspectSynFileColumns.SpecFilePos)
+                ' Note: .PrecursorMZ and .PrecursorError were processed earlier in this function
             End With
 
             blnValidSearchResult = True
@@ -1795,11 +1854,12 @@ Public Class clsInSpecTResultsProcessor
         End With
     End Sub
 
-    Private Sub WriteFileHeader(ByRef strLineIn As String, _
-                                     ByRef swResultFile As System.IO.StreamWriter, _
-                                     ByRef strErrorLog As String)
+    Private Sub WriteSynFHTFileHeader(ByRef strLineIn As String, _
+                                ByRef swResultFile As System.IO.StreamWriter, _
+                                ByRef strErrorLog As String)
         Dim strSplitLine As String()
 
+        ' Write out the header line for synopsis / first hits files
         ' Replace some header names with new names
         Try
             strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
@@ -1828,7 +1888,9 @@ Public Class clsInSpecTResultsProcessor
                                    "MH" & ControlChars.Tab & _
                                    "RecordNumber" & ControlChars.Tab & _
                                    "DBFilePos" & ControlChars.Tab & _
-                                   "SpecFilePos")
+                                   "SpecFilePos" & ControlChars.Tab & _
+                                   "PrecursorMZ" & ControlChars.Tab & _
+                                   "PrecursorError")
         Catch ex As Exception
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
                 strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
@@ -1842,6 +1904,7 @@ Public Class clsInSpecTResultsProcessor
                                         ByRef udtSearchResult As udtInspectSearchResultType, _
                                         ByRef strErrorLog As String)
 
+        ' Writes an entry to a synopsis or first hits file
         Try
             swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
                                    udtSearchResult.Scan & ControlChars.Tab & _
@@ -1867,7 +1930,9 @@ Public Class clsInSpecTResultsProcessor
                                    NumToString(udtSearchResult.MH, 5, True) & ControlChars.Tab & _
                                    udtSearchResult.RecordNumber & ControlChars.Tab & _
                                    udtSearchResult.DBFilePos & ControlChars.Tab & _
-                                   udtSearchResult.SpecFilePos)
+                                   udtSearchResult.SpecFilePos & ControlChars.Tab & _
+                                   udtSearchResult.PrecursorMZ & ControlChars.Tab & _
+                                   udtSearchResult.PrecursorError)
 
         Catch ex As Exception
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then

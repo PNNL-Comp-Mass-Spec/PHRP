@@ -415,12 +415,4 @@ Public Class clsPeptideHitResultsProcRunner
         UpdateProgress(taskDescription, percentComplete)
     End Sub
 
-    Private Sub mPeptideHitResultsProcessor_ProgressComplete() Handles mPeptideHitResultsProcessor.ProgressComplete
-        OperationComplete()
-    End Sub
-
-    Private Sub mPeptideHitResultsProcessor_ProgressReset() Handles mPeptideHitResultsProcessor.ProgressReset
-        ResetProgress()
-    End Sub
-
 End Class

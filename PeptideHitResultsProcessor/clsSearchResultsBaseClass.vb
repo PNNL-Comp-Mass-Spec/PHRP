@@ -71,7 +71,7 @@ Public Class clsSearchResultsBaseClass
     Protected mPeptideCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
     Protected mPeptideTerminusState As clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants
 
-    Protected mPeptideMH As String                  ' In XTandem this is the monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, this value is 0
+    Protected mPeptideMH As String                  ' In XTandem this is the monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, this is the monoisotopic MH, computed using the PrecursorMZ and PrecursorError values reported by Inspect
     Protected mPeptideDeltaMass As String           ' Difference in mass between the peptide's mass and the parent ion mass (i.e. the mass chosen for fragmentation)
 
     Protected mPeptideModDescription As String
