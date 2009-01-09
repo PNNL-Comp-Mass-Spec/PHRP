@@ -71,8 +71,8 @@ Public Class clsSearchResultsBaseClass
     Protected mPeptideCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
     Protected mPeptideTerminusState As clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants
 
-    Protected mPeptideMH As String                  ' In XTandem this is the monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, this is the monoisotopic MH, computed using the PrecursorMZ and PrecursorError values reported by Inspect
-    Protected mPeptideDeltaMass As String           ' Difference in mass between the peptide's mass and the parent ion mass (i.e. the mass chosen for fragmentation)
+    Protected mPeptideMH As String                  ' In XTandem this is the theoretical monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, this is the monoisotopic MH, computed by this application
+    Protected mPeptideDeltaMass As String           ' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation); in Sequest this is Theoretical Mass - Observed Mass; The XTandem XML file stores DelM as Observed - Theoretical, but PHRP negates this to match Sequest; Inspect stores this value as Observed - Theoretical, but PHRP negates this to match Sequest
 
     Protected mPeptideModDescription As String
     Protected mPeptideMonoisotopicMass As Double

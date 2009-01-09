@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.2.3295; January 8, 2009
+	- PeptideHitResultsProcessor.dll has updated Inspect support
+
 Version 1.2.3294; January 7, 2009
 	- PeptideHitResultsProcessor.dll has updated Inspect support and additional debugging
 

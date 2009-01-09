@@ -707,8 +707,8 @@ Public Class clsXTandemResultsProcessor
 
                                     .PeptideDeltaMass = XMLTextReaderGetAttributeValue(objXMLReader, "delta", String.Empty)
 
-                                    ' Note: .peptideDeltaMass is stored in the X!Tandem XML file as "ParentIonMass - ObservedMass"
-                                    ' However, in MTS .peptideDeltaMass is "ObservedMass - ParentIonMass"
+                                    ' Note: .peptideDeltaMass is stored in the X!Tandem XML file as "Observed_Mass - Theoretical_Mass"
+                                    ' However, in MTS .peptideDeltaMass is "Theoretical - Observed"
                                     ' Therefore, we will negate .peptideDeltaMass
                                     Try
                                         .PeptideDeltaMass = (-Double.Parse(.PeptideDeltaMass)).ToString

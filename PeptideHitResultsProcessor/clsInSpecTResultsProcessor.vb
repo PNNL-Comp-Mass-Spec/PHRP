@@ -32,7 +32,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "December 9, 2008"
+        MyBase.mFileDate = "January 8, 2009"
         InitializeLocalVariables()
     End Sub
 
@@ -113,7 +113,7 @@ Public Class clsInSpecTResultsProcessor
         DeltaNormTotalPRMScore = 18             ' Computed as  (TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n); storing 0 for the lowest scoring result in each set
         RankTotalPRMScore = 19                  ' Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
         RankFScore = 20                         ' Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
-        MH = 21                                 ' Currently storing 0 in this column since Inspect doesn't provide this value
+        MH = 21                                 ' Theoretical monoisotopic peptide mass (computed by PHRP)
         RecordNumber = 22
         DBFilePos = 23
         SpecFilePos = 24
@@ -594,6 +594,8 @@ Public Class clsInSpecTResultsProcessor
     End Function
 
     Private Function ComputePeptideMHFromPrecursorInfo(ByVal strPrecursorMZ As String, ByVal strPrecursorError As String, ByVal strCharge As String) As Double
+        ' Compute the theoretical peptide MH using the precursor m/z value and the precursor error values
+
         Dim dblPrecursorMZ As Double
         Dim dblPrecursorError As Double
         Dim intCharge As Integer
@@ -620,6 +622,7 @@ Public Class clsInSpecTResultsProcessor
         End If
 
         Return dblPeptideMH
+
     End Function
 
     Private Function CIntSafe(ByVal strValue As String, ByVal intDefaultValue As Integer) As Integer
@@ -1182,10 +1185,14 @@ Public Class clsInSpecTResultsProcessor
                         ' Inspect version 2008-10-14 added these two Precursor mass columns
                         .PrecursorMZ = strSplitLine(eInspectResultsFileColumns.PrecursorMZ)
                         .PrecursorError = strSplitLine(eInspectResultsFileColumns.PrecursorError)
+
+                        .MH = ComputePeptideMHFromPrecursorInfo(.PrecursorMZ, .PrecursorError, .Charge)
                     Else
                         .PrecursorMZ = "0"
                         .PrecursorError = "0"
+                        .MH = 0
                     End If
+
                 End With
 
                 blnValidSearchResult = True
@@ -1282,14 +1289,6 @@ Public Class clsInSpecTResultsProcessor
                 .Scan = strSplitLine(eInspectSynFileColumns.Scan)
                 .Charge = strSplitLine(eInspectSynFileColumns.Charge)
 
-                If strSplitLine.Length >= eInspectSynFileColumns.PrecursorMZ + 1 Then
-                    .PeptideMH = ComputePeptideMHFromPrecursorInfo(strSplitLine(eInspectSynFileColumns.PrecursorMZ), _
-                                                                   strSplitLine(eInspectSynFileColumns.PrecursorError), _
-                                                                   .Charge).ToString("0.0000")
-                Else
-                    .PeptideMH = "0"
-                End If
-
                 .ProteinName = strSplitLine(eInspectSynFileColumns.Protein)
                 .MultipleProteinCount = "0"
 
@@ -1345,6 +1344,16 @@ Public Class clsInSpecTResultsProcessor
 
                 If strSplitLine.Length >= eInspectSynFileColumns.PrecursorError + 1 Then
                     .PeptideDeltaMass = strSplitLine(eInspectSynFileColumns.PrecursorError)
+
+                    ' Note: .peptideDeltaMass is stored in the Inspect results file as "Observed_Mass - Theoretical_Mass"
+                    ' However, in MTS .peptideDeltaMass is "Theoretical - Observed"
+                    ' Therefore, we will negate .peptideDeltaMass
+                    Try
+                        .PeptideDeltaMass = (-Double.Parse(.PeptideDeltaMass)).ToString
+                    Catch ex As Exception
+                        ' Error; Leave .peptideDeltaMass unchanged
+                    End Try
+
                 Else
                     .PeptideDeltaMass = "0"
                 End If
@@ -1369,7 +1378,8 @@ Public Class clsInSpecTResultsProcessor
                 .RecordNumber = strSplitLine(eInspectSynFileColumns.RecordNumber)
                 .DBFilePos = strSplitLine(eInspectSynFileColumns.DBFilePos)
                 .SpecFilePos = strSplitLine(eInspectSynFileColumns.SpecFilePos)
-                ' Note: .PrecursorMZ and .PrecursorError were processed earlier in this function
+                ' Note: .PrecursorError was processed earlier in this function (and .PrecursorMZ is ignored here)
+
             End With
 
             blnValidSearchResult = True

@@ -1,5 +1,11 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.2.3295; January 8, 2009
+	- Now computing and storing MH in Inspect Syn and FHT files
+		- The MH value is the peptide's theoretical monoisotopic mass value converted to MH (by adding a proton, 1.00727649 Da)
+	- Now storing DeltaMass as negative the PrecursorError value computed by Inspect
+		- This is done to be consistent with Sequest and XTandem, where the synopsis files list DeltaMass as Theoretical Mass - Observed Mass
+
 Version 1.2.3294; January 7, 2009
 	- Added support for Inspect results files with 22 columns (added PrecursorMZ and PrecursorError)
 	- Added additional debug logic to clsAnalysisManagerPeptideHitResultsProcessor.vb
