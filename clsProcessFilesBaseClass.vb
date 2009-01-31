@@ -11,7 +11,7 @@ Option Strict On
 Public MustInherit Class clsProcessFilesBaseClass
 
     Public Sub New()
-        mFileDate = "October 3, 2008"
+        mFileDate = "January 16, 2009"
         mErrorCode = eProcessFilesErrorCodes.NoError
         mProgressStepDescription = String.Empty
 
@@ -566,7 +566,7 @@ Public MustInherit Class clsProcessFilesBaseClass
             End If
 
         Catch ex As Exception
-            Debug.Assert(False, ex.Message)
+            HandleException("Error in ProcessFilesAndRecurseFolders", ex)
             blnSuccess = False
         End Try
 
@@ -591,7 +591,7 @@ Public MustInherit Class clsProcessFilesBaseClass
             ioInputFolderInfo = New System.IO.DirectoryInfo(strInputFolderPath)
         Catch ex As Exception
             ' Input folder path error
-            Debug.Assert(False, ex.Message)
+            HandleException("Error in RecurseFoldersWork", ex)
             mErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath
             Return False
         End Try
@@ -607,7 +607,7 @@ Public MustInherit Class clsProcessFilesBaseClass
             End If
         Catch ex As Exception
             ' Output file path error
-            Debug.Assert(False, ex.Message)
+            HandleException("Error in RecurseFoldersWork", ex)
             mErrorCode = eProcessFilesErrorCodes.InvalidOutputFolderPath
             Return False
         End Try
@@ -631,7 +631,7 @@ Public MustInherit Class clsProcessFilesBaseClass
                 End If
             Next intExtensionIndex
         Catch ex As Exception
-            Debug.Assert(False, ex.Message)
+            HandleException("Error in RecurseFoldersWork", ex)
             mErrorCode = eProcessFilesErrorCodes.UnspecifiedError
             Return False
         End Try
@@ -665,7 +665,7 @@ Public MustInherit Class clsProcessFilesBaseClass
                 Next intExtensionIndex
             Next ioFileMatch
         Catch ex As Exception
-            Debug.Assert(False, ex.Message)
+            HandleException("Error in RecurseFoldersWork", ex)
             mErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath
             Return False
         End Try
