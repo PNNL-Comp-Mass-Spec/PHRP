@@ -109,8 +109,8 @@ Public Class clsInSpecTResultsProcessor
         FScore = 14
         DeltaScore = 15
         DeltaScoreOther = 16
-        DeltaNormMQScore = 17                   ' Computed as  (MQScore(n) - MQScore(n+1)) / MQScore(n); storing -100 for the lowest scoring result in each set (since MQScores can be negative)
-        DeltaNormTotalPRMScore = 18             ' Computed as  (TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n); storing 0 for the lowest scoring result in each set
+        DeltaNormMQScore = 17                   ' Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, then also storing 0.   This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
+        DeltaNormTotalPRMScore = 18             ' Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, then also storing 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
         RankTotalPRMScore = 19                  ' Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
         RankFScore = 20                         ' Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
         MH = 21                                 ' Theoretical monoisotopic peptide mass (computed by PHRP)
@@ -309,7 +309,7 @@ Public Class clsInSpecTResultsProcessor
     ''' <remarks></remarks>
     Private Sub AssignRankAndDeltaNormValues(ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, ByVal intCurrentScanResultsCount As Integer)
 
-        Const DeltaNormMQScore_If_Undefined As Single = 100
+        Const DeltaNormMQScore_If_Undefined As Single = 0
         Const DeltaNormTotalPRMScore_If_Undefined As Single = 0
 
         Static objSortScanChargeFScore As New InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc

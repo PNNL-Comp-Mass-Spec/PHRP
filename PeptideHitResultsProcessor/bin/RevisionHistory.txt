@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.2.3413; May 6, 2009
+	- Now storing 0 for DeltaNormMQScore if MQScore is 0 (previously was storing 100)
+
 Version 1.2.3295; January 8, 2009
 	- Now computing and storing MH in Inspect Syn and FHT files
 		- The MH value is the peptide's theoretical monoisotopic mass value converted to MH (by adding a proton, 1.00727649 Da)
