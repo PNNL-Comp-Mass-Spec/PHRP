@@ -1,5 +1,4 @@
 Imports System.Collections.Specialized
-Imports PRISM.Logging
 
 Public Interface IPeptideHitResultsProcessor
     'Defines minimum required functionality for classes that will process peptide hit results files
@@ -32,7 +31,6 @@ Public Interface IPeptideHitResultsProcessor
         Dim ModificationDefinitionsFileName As String       ' If this is empty then it will be auto-defined using: System.IO.Path.GetFileNameWithoutExtension(ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX where MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt"
         Dim MiscParams As StringDictionary
         Dim DebugLevel As Integer
-        Dim Logger As ILogger
 
         Dim AnalysisToolName As String
         Dim DatasetName As String
@@ -60,7 +58,6 @@ Public Interface IPeptideHitResultsProcessor
     ReadOnly Property PercentComplete() As Single   ' Progress indicator, value between 0 and 100
     Property DebugLevel() As Integer 'Allows control of debug information verbosity; 0=minimum, 5=maximum verbosity
 
-    WriteOnly Property Logger() As ILogger  'Logger for debug messages
 #End Region
 
 #Region "Methods"

@@ -29,7 +29,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     Protected m_MiscParams As System.Collections.Specialized.StringDictionary
     Protected m_DebugLevel As Integer = 0
-    Protected m_Logger As PRISM.Logging.ILogger
+    'Protected m_Logger As PRISM.Logging.ILogger
 
     Protected m_AnalysisToolName As String = String.Empty
     Protected m_DSName As String = String.Empty
@@ -88,11 +88,11 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End Get
     End Property
 
-    Public WriteOnly Property Logger() As PRISM.Logging.ILogger Implements IPeptideHitResultsProcessor.Logger
-        Set(ByVal Value As PRISM.Logging.ILogger)
-            m_Logger = Value
-        End Set
-    End Property
+    'Public WriteOnly Property Logger() As PRISM.Logging.ILogger Implements IPeptideHitResultsProcessor.Logger
+    '    Set(ByVal Value As PRISM.Logging.ILogger)
+    '        m_Logger = Value
+    '    End Set
+    'End Property
 
     Public Property MassCorrectionTagsFileName() As String Implements IPeptideHitResultsProcessor.MassCorrectionTagsFileName
         Get
@@ -204,7 +204,6 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
             m_MiscParams = .MiscParams
             m_DebugLevel = .DebugLevel
-            m_Logger = .Logger
 
             m_AnalysisToolName = .AnalysisToolName
             m_DSName = .DatasetName
@@ -311,10 +310,10 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         'Initializes module variables and verifies mandatory parameters have been propery specified
 
         'Logger
-        If m_Logger Is Nothing Then
-            m_ErrMsg = "Logging object not set"
-            Return False
-        End If
+        'If m_Logger Is Nothing Then
+        '    m_ErrMsg = "Logging object not set"
+        '    Return False
+        'End If
 
         'Output folder name
         If m_OutFolderPath = "" Then
@@ -329,8 +328,8 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         If Me.DebugLevel >= 3 Then
-            m_Logger.PostEntry("Setup params: OutFolderPath = " & m_OutFolderPath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
-            m_Logger.PostEntry("Setup params: SourceFolderPath = " & m_SourceFolderPath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: OutFolderPath = " & m_OutFolderPath)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: SourceFolderPath = " & m_SourceFolderPath)
         End If
 
         'Source directory exists?
@@ -385,12 +384,12 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         If Me.DebugLevel >= 3 Then
-            m_Logger.PostEntry("Setup params: AnalysisToolName = " & m_AnalysisToolName, PRISM.Logging.ILogger.logMsgType.logDebug, True)
-            m_Logger.PostEntry("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: AnalysisToolName = " & m_AnalysisToolName)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
 
-            m_Logger.PostEntry("Setup params: DSName = " & m_DSName, PRISM.Logging.ILogger.logMsgType.logDebug, True)
-            m_Logger.PostEntry("Setup params: SettingsFilePath = " & m_SettingsFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
-            m_Logger.PostEntry("Setup params: ParameterFilePath = " & m_ParameterFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: DSName = " & m_DSName)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: SettingsFilePath = " & m_SettingsFilePath)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: ParameterFilePath = " & m_ParameterFilePath)
         End If
 
         'Define the peptide hit results file name
@@ -401,7 +400,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         If Me.DebugLevel >= 3 Then
-            m_Logger.PostEntry("Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath)
         End If
 
         'Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
@@ -424,9 +423,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         If Me.DebugLevel >= 3 Then
-            m_Logger.PostEntry("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString, PRISM.Logging.ILogger.logMsgType.logDebug, True)
-            m_Logger.PostEntry("Setup params: MassCorrectionTagsFilePath = " & m_MassCorrectionTagsFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
-            m_Logger.PostEntry("Setup params: ModificationDefinitionsFilePath = " & m_ModificationDefinitionsFilePath, PRISM.Logging.ILogger.logMsgType.logDebug, True)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: MassCorrectionTagsFilePath = " & m_MassCorrectionTagsFilePath)
+            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: ModificationDefinitionsFilePath = " & m_ModificationDefinitionsFilePath)
         End If
 
         'Parameter file exists?
@@ -464,10 +463,6 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         Trace.WriteLine(Now.ToLongTimeString & "; " & m_ErrMsg, strSource)
         Console.WriteLine(Now.ToLongTimeString & "; " & m_ErrMsg, strSource)
 
-        If Not m_Logger Is Nothing Then
-            m_Logger.PostError(m_ErrMsg, ex, blnLogLocalOnly)
-        End If
-
     End Sub
 
     Protected Sub UpdateProgress(ByVal strProgressStepDescription As String, ByVal sngPercentComplete As Single)
@@ -490,12 +485,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
         If blnDescriptionChanged And Me.DebugLevel >= 2 Then
             If sngProgressPercentComplete = 0 Then
-                m_Logger.PostEntry(strProgressStepDescriptionSaved, PRISM.Logging.ILogger.logMsgType.logDebug, True)
-
+                clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, strProgressStepDescriptionSaved)
             Else
-                m_Logger.PostEntry(strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)", _
-                                   PRISM.Logging.ILogger.logMsgType.logDebug, True)
-
+                clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)")
             End If
         End If
 
