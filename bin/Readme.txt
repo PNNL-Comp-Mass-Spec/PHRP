@@ -7,6 +7,10 @@ modification details, and protein information.  The user can optionally provide
 a modification definition file that specifies the symbol to use for each 
 modification mass.
 
+Example syntax:
+PeptideHitResultsProcRunner.exe /i:ExampleXTandemData_xt.xml /m:Inspect_NoMods_ModDefs.txt
+
+
 -------------------------------------------------------------------------------
 Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 Copyright 2006, Battelle Memorial Institute.  All Rights Reserved.

@@ -29,7 +29,6 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     Protected m_MiscParams As System.Collections.Specialized.StringDictionary
     Protected m_DebugLevel As Integer = 0
-    'Protected m_Logger As PRISM.Logging.ILogger
 
     Protected m_AnalysisToolName As String = String.Empty
     Protected m_DSName As String = String.Empty
@@ -87,12 +86,6 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             Return m_ErrMsg
         End Get
     End Property
-
-    'Public WriteOnly Property Logger() As PRISM.Logging.ILogger Implements IPeptideHitResultsProcessor.Logger
-    '    Set(ByVal Value As PRISM.Logging.ILogger)
-    '        m_Logger = Value
-    '    End Set
-    'End Property
 
     Public Property MassCorrectionTagsFileName() As String Implements IPeptideHitResultsProcessor.MassCorrectionTagsFileName
         Get
@@ -462,6 +455,8 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
         Trace.WriteLine(Now.ToLongTimeString & "; " & m_ErrMsg, strSource)
         Console.WriteLine(Now.ToLongTimeString & "; " & m_ErrMsg, strSource)
+
+        clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.ERROR, m_ErrMsg)
 
     End Sub
 

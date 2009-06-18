@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" ToolsVersion="3.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{101064E4-F653-4E4E-9C61-3BD11EA0B197}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -75,10 +75,6 @@
     <Reference Include="AnalysisManagerProg, Version=2.0.3454.13814, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\AnalysisManagerRelease\NexGenPipeline\AM_Program\bin\AnalysisManagerProg.exe</HintPath>
-    </Reference>
-    <Reference Include="PRISM">
-      <Name>PRISM</Name>
-      <HintPath>bin\PRISM.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>

@@ -1,5 +1,10 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.3.3455; June 17, 2009
+	- Updated clsAnalysisManagerPeptideHitResultsProcessor.vb to work with the new version of the Analysis Tool Manager (AnalysisManagerProg.exe) that uses log4net.dll
+	- Requires that AnalysisManagerProg.exe be present if clsAnalysisManagerPeptideHitResultsProcessor is used
+	- No longer uses PRISM.Dll
+
 Version 1.2.3413; May 6, 2009
 	- Now storing 0 for DeltaNormMQScore if MQScore is 0 (previously was storing 100)
 

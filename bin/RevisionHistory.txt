@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.3.3455; June 17, 2009
+	- New version of PeptideHitResultsProcessor.dll that uses AnalysisManagerProg.exe instead of PRISM.Dll
+
 Version 1.2.3295; January 8, 2009
 	- PeptideHitResultsProcessor.dll has updated Inspect support
 
