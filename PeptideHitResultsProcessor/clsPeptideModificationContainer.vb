@@ -84,6 +84,7 @@ Public Class clsPeptideModificationContainer
     ' which the auto-addition method sometimes incorrectly notes
     Protected mStandardRefinementModifications() As clsModificationDefinition
 
+    Protected mConsiderModSymbolWhenFindingIdenticalMods As Boolean
 #End Region
 
 #Region "Properties"
@@ -97,6 +98,15 @@ Public Class clsPeptideModificationContainer
         Get
             Return mModificationCount
         End Get
+    End Property
+
+    Public Property ConsiderModSymbolWhenFindingIdenticalMods() As Boolean
+        Get
+            Return mConsiderModSymbolWhenFindingIdenticalMods
+        End Get
+        Set(ByVal value As Boolean)
+            mConsiderModSymbolWhenFindingIdenticalMods = value
+        End Set
     End Property
 #End Region
 
@@ -117,22 +127,42 @@ Public Class clsPeptideModificationContainer
 
         blnMatchFound = False
 
-        ' See if any of the existing modifications match objModificationDefinition, ignoring .ModificationSymbol and .TargetResidues
+        ' See if any of the existing modifications match objModificationDefinition, ignoring .TargetResidues and possibly ignoring .ModificationSymbol
         For intModificationIndex = 0 To mModificationCount - 1
             If mModifications(intModificationIndex).EquivalentMassTypeTagAndAtom(objModificationDefinition) Then
-                With mModifications(intModificationIndex)
-                    If .ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
-                       .ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
-                        ' Matching dynamic or static modification definitions
-                        ' Merge the two modifications by making sure each of the residues in objModificationDefinition.TargetResidues is present in .TargetResidues
-                        For Each chChar In objModificationDefinition.TargetResidues
-                            If Not .TargetResiduesContain(chChar) Then
-                                .TargetResidues &= chChar
-                            End If
-                        Next chChar
-                    End If
-                End With
+
                 blnMatchFound = True
+
+                If mConsiderModSymbolWhenFindingIdenticalMods Then
+                    If objModificationDefinition.ModificationSymbol <> mModifications(intModificationIndex).ModificationSymbol Then
+                        ' Symbols differ; add this as a new modification definition
+                        blnMatchFound = False
+                    End If
+                End If
+
+                If blnMatchFound Then
+                    With mModifications(intModificationIndex)
+                        If .ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
+                           .ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+                            ' Matching dynamic or static modification definitions
+                            ' Merge the two modifications by making sure each of the residues in objModificationDefinition.TargetResidues is present in .TargetResidues
+                            For Each chChar In objModificationDefinition.TargetResidues
+                                If Not .TargetResiduesContain(chChar) Then
+                                    .TargetResidues &= chChar
+                                End If
+                            Next chChar
+
+                            If Not blnUseNextAvailableModificationSymbol Then
+                                ' See if the new modification symbol is different than the already-defined symbol
+                                If objModificationDefinition.ModificationSymbol <> .ModificationSymbol Then
+
+                                End If
+                            End If
+
+                        End If
+                    End With
+                End If
+               
             End If
             If blnMatchFound Then Exit For
         Next intModificationIndex
@@ -276,7 +306,7 @@ Public Class clsPeptideModificationContainer
     End Function
 
     Public Function LookupDynamicModificationDefinitionByTargetInfo(ByVal chModificationSymbol As Char, ByVal chTargetResidue As Char, ByVal eResidueTerminusState As eResidueTerminusStateConstants, ByRef blnExistingModFound As Boolean) As clsModificationDefinition
-        ' Looks for a modification of type .DynamicMod or type .UnknownType in mModifications have .ModificationSymbol = chModificationSymbol and chTargetResidue in .TargetResidues
+        ' Looks for a modification of type .DynamicMod or type .UnknownType in mModifications having .ModificationSymbol = chModificationSymbol and chTargetResidue in .TargetResidues
         ' Note: If chModificationSymbol does not match any of the mods, then a modification with a mass of 0 is returned
 
         Dim intIndex As Integer
@@ -341,7 +371,12 @@ Public Class clsPeptideModificationContainer
 
     End Function
 
-    Public Function LookupModificationDefinitionByMass(ByVal dblModificationMass As Double, ByVal chTargetResidue As Char, ByVal eResidueTerminusState As eResidueTerminusStateConstants, ByRef blnExistingModFound As Boolean, ByVal blnAddToModificationListIfUnknown As Boolean, Optional ByVal MassDigitsOfPrecision As Byte = MASS_DIGITS_OF_PRECISION) As clsModificationDefinition
+    Public Function LookupModificationDefinitionByMass(ByVal dblModificationMass As Double, _
+                                                       ByVal chTargetResidue As Char, _
+                                                       ByVal eResidueTerminusState As eResidueTerminusStateConstants, _
+                                                       ByRef blnExistingModFound As Boolean, _
+                                                       ByVal blnAddToModificationListIfUnknown As Boolean, _
+                                                       Optional ByVal MassDigitsOfPrecision As Byte = MASS_DIGITS_OF_PRECISION) As clsModificationDefinition
         ' If chTargetResidue is defined, then returns the first modification with the given mass and containing the residue in .TargetResidues
         '  If no match is found, then looks for the first modification with the given mass and no defined .TargetResidues
         '  If no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True

@@ -1,4 +1,4 @@
-Option Explicit On 
+Option Strict On
 
 ' This class can be used as a base class for peptide hit results processor classes
 '

@@ -27,7 +27,7 @@ Option Strict On
 Public MustInherit Class clsPHRPBaseClass
 
     Public Sub New()
-        mFileDate = "December 8, 2008"
+        mFileDate = "October 2, 2009"
         InitializeLocalVariables()
     End Sub
 

@@ -268,6 +268,9 @@ Module modMain
                               "SOFTWARE.  This notice including this sentence must appear on any copies of " & _
                               "this computer software.")
 
+            ' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
+            System.Threading.Thread.Sleep(750)
+
         Catch ex As Exception
             Console.WriteLine("Error displaying the program syntax: " & ex.Message)
         End Try

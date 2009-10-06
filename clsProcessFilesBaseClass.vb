@@ -11,7 +11,7 @@ Option Strict On
 Public MustInherit Class clsProcessFilesBaseClass
 
     Public Sub New()
-        mFileDate = "June 17, 2009"
+        mFileDate = "June 22, 2009"
         mErrorCode = eProcessFilesErrorCodes.NoError
         mProgressStepDescription = String.Empty
 
@@ -202,6 +202,35 @@ Public MustInherit Class clsProcessFilesBaseClass
         Return blnSuccess
     End Function
 
+    Protected Function CleanupInputFilePath(ByRef strInputFilePath As String) As Boolean
+        ' Returns True if success, False if failure
+
+        Dim ioFileInfo As System.IO.FileInfo
+        Dim blnSuccess As Boolean
+
+        Try
+            ' Make sure strInputFilePath points to a valid file
+            ioFileInfo = New System.IO.FileInfo(strInputFilePath)
+
+            If Not ioFileInfo.Exists() Then
+                If Me.ShowMessages Then
+                    ShowErrorMessage("Input file not found: " & strInputFilePath)
+                Else
+                    LogMessage("Input file not found: " & strInputFilePath, eMessageTypeConstants.ErrorMsg)
+                End If
+
+                mErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath
+                blnSuccess = False
+            Else
+                blnSuccess = True
+            End If
+
+        Catch ex As Exception
+            HandleException("Error cleaning up the file paths", ex)
+        End Try
+
+        Return blnSuccess
+    End Function
     Protected Function GetBaseClassErrorMessage() As String
         ' Returns String.Empty if no error
 
@@ -422,9 +451,9 @@ Public MustInherit Class clsProcessFilesBaseClass
                 If intMatchCount = 0 Then
                     If mErrorCode = eProcessFilesErrorCodes.NoError Then
                         If Me.ShowMessages Then
-                            ShowErrorMessage("No match was found for the input file path:" & strInputFilePath)
+                            ShowErrorMessage("No match was found for the input file path: " & strInputFilePath)
                         Else
-                            LogMessage("No match was found for the input file path:" & strInputFilePath, eMessageTypeConstants.ErrorMsg)
+                            LogMessage("No match was found for the input file path: " & strInputFilePath, eMessageTypeConstants.ErrorMsg)
                         End If
                     End If
                 Else

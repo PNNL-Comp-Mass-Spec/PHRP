@@ -1,4 +1,4 @@
-Option Explicit On 
+Option Strict On
 
 ' This class can be used to track the peptide details for a given MS/MS search result
 ' It can track peptide residue level modifications and static, peptide-wide modifications
@@ -85,10 +85,17 @@ Public Class clsSearchResultsBaseClass
 
     Protected mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
     Protected mPeptideSeqMassCalculator As clsPeptideMassCalculator
+
+    Protected mErrorMessage As String = ""
 #End Region
 
 #Region "Properties"
 
+    Public ReadOnly Property ErrorMessage() As String
+        Get
+            Return mErrorMessage
+        End Get
+    End Property
     Public Property ResultID() As Integer
         Get
             Return mResultID
@@ -498,13 +505,31 @@ Public Class clsSearchResultsBaseClass
             mPeptideSeqMassCalculator.RemovePrefixAndSuffixIfPresent = False
         End If
 
+        mErrorMessage = String.Empty
+
         Me.Clear()
     End Sub
 
-    Public Sub SearchResultAddDynamicModification(ByVal chModificationSymbol As Char, ByVal chTargetResidue As Char, ByVal intResidueLocInPeptide As Integer, ByVal eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants, ByVal blnUpdateModOccurrenceCounts As Boolean)
+    ''' <summary>
+    ''' Associates the given modification symbol with the given residue
+    ''' If the modification symbol is unknown, then will return False
+    ''' </summary>
+    ''' <param name="chModificationSymbol"></param>
+    ''' <param name="chTargetResidue"></param>
+    ''' <param name="intResidueLocInPeptide"></param>
+    ''' <param name="eResidueTerminusState"></param>
+    ''' <param name="blnUpdateModOccurrenceCounts"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function SearchResultAddDynamicModification(ByVal chModificationSymbol As Char, _
+                                                       ByVal chTargetResidue As Char, _
+                                                       ByVal intResidueLocInPeptide As Integer, _
+                                                       ByVal eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants, _
+                                                       ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
 
         Dim objModificationDefinition As clsModificationDefinition
         Dim blnExistingModFound As Boolean
+        Dim blnSuccess As Boolean = False
 
         blnExistingModFound = False
 
@@ -514,8 +539,9 @@ Public Class clsSearchResultsBaseClass
         If blnExistingModFound Then
             If intResidueLocInPeptide < 1 Then
                 ' Invalid position; ignore this modification
+                mErrorMessage = "Invalid value for intResidueLocInPeptide: " & intResidueLocInPeptide.ToString
             Else
-                SearchResultAddModification( _
+                blnSuccess = SearchResultAddModification( _
                                     objModificationDefinition, _
                                     chTargetResidue, _
                                     intResidueLocInPeptide, _
@@ -524,20 +550,45 @@ Public Class clsSearchResultsBaseClass
             End If
         End If
 
-    End Sub
+        Return blnSuccess
 
-    Public Sub SearchResultAddModification(ByVal dblModificationMass As Double, ByVal chTargetResidue As Char, ByVal intResidueLocInPeptide As Integer, ByVal eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants, ByVal blnUpdateModOccurrenceCounts As Boolean)
+    End Function
+
+    ''' <summary>
+    ''' Associates the given modification mass with the given residue
+    ''' If the modification mass is unknown, then will auto-add it to the list of known modifications
+    ''' </summary>
+    ''' <param name="dblModificationMass"></param>
+    ''' <param name="chTargetResidue"></param>
+    ''' <param name="intResidueLocInPeptide"></param>
+    ''' <param name="eResidueTerminusState"></param>
+    ''' <param name="blnUpdateModOccurrenceCounts"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function SearchResultAddModification(ByVal dblModificationMass As Double, _
+                                                ByVal chTargetResidue As Char, _
+                                                ByVal intResidueLocInPeptide As Integer, _
+                                                ByVal eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants, _
+                                                ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
 
         Dim objModificationDefinition As clsModificationDefinition
         Dim blnExistingModFound As Boolean
+        Dim blnSuccess As Boolean = False
 
         If intResidueLocInPeptide < 1 Then
             ' Invalid position; ignore this modification
+            mErrorMessage = "Invalid value for intResidueLocInPeptide: " & intResidueLocInPeptide.ToString
         Else
             ' Lookup the modification definition given the modification information
-            objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(dblModificationMass, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
+            ' If the modification mass is unknown, then will auto-add it to the list of known modifications
+            objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass( _
+                                                dblModificationMass, _
+                                                chTargetResidue, _
+                                                eResidueTerminusState, _
+                                                blnExistingModFound, _
+                                                True)
 
-            SearchResultAddModification( _
+            blnSuccess = SearchResultAddModification( _
                                 objModificationDefinition, _
                                 chTargetResidue, _
                                 intResidueLocInPeptide, _
@@ -545,12 +596,31 @@ Public Class clsSearchResultsBaseClass
                                 blnUpdateModOccurrenceCounts)
         End If
 
-    End Sub
+        Return blnSuccess
 
-    Public Sub SearchResultAddModification(ByRef objModificationDefinition As clsModificationDefinition, ByVal chTargetResidue As Char, ByVal intResidueLocInPeptide As Integer, ByVal eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants, ByVal blnUpdateModOccurrenceCounts As Boolean)
+    End Function
+
+    ''' <summary>
+    ''' Associates the given modification with the given residue
+    ''' </summary>
+    ''' <param name="objModificationDefinition"></param>
+    ''' <param name="chTargetResidue"></param>
+    ''' <param name="intResidueLocInPeptide"></param>
+    ''' <param name="eResidueTerminusState"></param>
+    ''' <param name="blnUpdateModOccurrenceCounts"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function SearchResultAddModification(ByRef objModificationDefinition As clsModificationDefinition, _
+                                                ByVal chTargetResidue As Char, _
+                                                ByVal intResidueLocInPeptide As Integer, _
+                                                ByVal eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants, _
+                                                ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+
+        Dim blnSuccess As Boolean = False
 
         If intResidueLocInPeptide < 1 And objModificationDefinition.ModificationType <> clsModificationDefinition.eModificationTypeConstants.IsotopicMod Then
             ' Invalid position; ignore this modification
+            mErrorMessage = "Invalid value for intResidueLocInPeptide: " & intResidueLocInPeptide.ToString & " (objModificationDefinition.ModificationType = " & objModificationDefinition.ModificationType.ToString & ")"
         Else
             ' Possibly expand mSearchResultModifications
             If mSearchResultModificationCount >= mSearchResultModifications.Length Then
@@ -570,16 +640,27 @@ Public Class clsSearchResultsBaseClass
             End With
 
             mSearchResultModificationCount += 1
+
+            blnSuccess = True
         End If
 
-    End Sub
+        Return blnSuccess
 
-    Public Sub SearchResultAddIsotopicModifications(ByVal blnUpdateModOccurrenceCounts As Boolean)
+    End Function
+
+    ''' <summary>
+    ''' Adds any defined isotopic modifications to the peptide
+    ''' </summary>
+    ''' <param name="blnUpdateModOccurrenceCounts"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function SearchResultAddIsotopicModifications(ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Dim intIndex As Integer
+        Dim blnSuccess As Boolean = False
 
         For intIndex = 0 To mPeptideMods.ModificationCount - 1
             If mPeptideMods.GetModificationTypeByIndex(intIndex) = clsModificationDefinition.eModificationTypeConstants.IsotopicMod Then
-                SearchResultAddModification( _
+                blnSuccess = SearchResultAddModification( _
                                     mPeptideMods.GetModificationByIndex(intIndex), _
                                     clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, _
                                     0, _
@@ -588,7 +669,9 @@ Public Class clsSearchResultsBaseClass
             End If
         Next intIndex
 
-    End Sub
+        Return blnSuccess
+
+    End Function
 
     Public Sub SearchResultAddStaticTerminusMods(ByVal blnAllowDuplicateModOnTerminus As Boolean, ByVal blnUpdateModOccurrenceCounts As Boolean)
         ' See if any protein or peptide terminus static mods are defined

@@ -84,7 +84,8 @@ Public Class clsSequestResultsProcessor
 #Region "Properties"
 #End Region
 
-    Private Sub AddDynamicAndStaticResidueMods(ByRef objSearchResult As clsSearchResultsSequest, ByVal blnUpdateModOccurrenceCounts As Boolean)
+    Private Function AddDynamicAndStaticResidueMods(ByRef objSearchResult As clsSearchResultsSequest, _
+                                                    ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
         ' Step through .PeptideSequenceWithMods
         ' For each residue, check if a static mod is defined that affects that residue
         ' For each mod symbol, determine the modification and add to objSearchResult
@@ -97,8 +98,13 @@ Public Class clsSequestResultsProcessor
         Dim chMostRecentLetter As Char
         Dim intResidueLocInPeptide As Integer
 
+        Dim blnSuccess As Boolean
+
         chMostRecentLetter = "-"c
         intResidueLocInPeptide = 0
+
+        ' Assume success for now
+        blnSuccess = True
 
         With objSearchResult
             strSequence = .PeptideSequenceWithMods
@@ -115,12 +121,27 @@ Public Class clsSequestResultsProcessor
 
                             If objModificationDefinition.TargetResiduesContain(chChar) Then
                                 ' Match found; add this modification
-                                .SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+                                blnSuccess = .SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+
+                                If Not blnSuccess Then
+                                    ' Error adding this static mod
+                                    SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
+                                    mErrorMessage = "Error calling objSearchResult.SearchResultAddModification for peptide '" & strSequence & "': " & .ErrorMessage
+                                    Exit For
+                                End If
                             End If
                         End If
                     Next intModIndex
                 ElseIf Char.IsLetter(chMostRecentLetter) Then
-                    .SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+                    blnSuccess = .SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+
+                    If Not blnSuccess Then
+                        ' Error adding this dynamic mod
+                        SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
+                        mErrorMessage = "Error calling objSearchResult.SearchResultAddDynamicModification for peptide '" & strSequence & "': " & .ErrorMessage
+                        Exit For
+                    End If
+
                 Else
                     ' We found a modification symbol but chMostRecentLetter is not a letter
                     ' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
@@ -128,7 +149,9 @@ Public Class clsSequestResultsProcessor
 
             Next intIndex
         End With
-    End Sub
+
+        Return blnSuccess
+    End Function
 
     Private Function AddModificationsAndComputeMass(ByRef objSearchResult As clsSearchResultsSequest, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
@@ -136,11 +159,16 @@ Public Class clsSequestResultsProcessor
         Dim blnSuccess As Boolean
 
         Try
+            ' Assume success for now
+            blnSuccess = True
+
             ' If any modifications of type IsotopicMod are defined, add them to the Search Result Mods now
             objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
 
             ' Parse .PeptideSequenceWithMods to determine the modified residues present
-            AddDynamicAndStaticResidueMods(objSearchResult, blnUpdateModOccurrenceCounts)
+            If Not AddDynamicAndStaticResidueMods(objSearchResult, blnUpdateModOccurrenceCounts) Then
+                blnSuccess = False
+            End If
 
             ' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
             ' Since Sequest allows a terminal peptide residue to be modified twice, we'll allow that to happen,
@@ -155,7 +183,6 @@ Public Class clsSequestResultsProcessor
             ' Populate .PeptideModDescription
             objSearchResult.UpdateModDescription()
 
-            blnSuccess = True
         Catch ex As Exception
             blnSuccess = False
         End Try
@@ -264,7 +291,12 @@ Public Class clsSequestResultsProcessor
                             blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
                             If Not blnSuccess Then
                                 If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                                    strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'" & ControlChars.NewLine
+                                    strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'"
+                                    If Not mErrorMessage Is Nothing AndAlso mErrorMessage.Length > 0 Then
+                                        strErrorLog &= ": " & mErrorMessage
+                                        mErrorMessage = String.Empty
+                                    End If
+                                    strErrorLog &= ControlChars.NewLine
                                 End If
                             End If
                             MyBase.SaveResultsFileEntrySeqInfo(CType(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
@@ -286,9 +318,10 @@ Public Class clsSequestResultsProcessor
                 ' Inform the user if any errors occurred
                 If strErrorLog.Length > 0 Then
                     SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+                    blnSuccess = False
+                Else
+                    blnSuccess = True
                 End If
-
-                blnSuccess = True
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
@@ -484,6 +517,9 @@ Public Class clsSequestResultsProcessor
                 SetErrorMessage("Input file name is empty")
                 SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
             Else
+
+                ' Set this to true since Sequest param files can have the same mod mass on different residues, and those residues may use different symbols
+                mPeptideMods.ConsiderModSymbolWhenFindingIdenticalMods = True
 
                 blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
                 If Not blnSuccess Then

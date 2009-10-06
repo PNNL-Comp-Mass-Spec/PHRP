@@ -1,5 +1,11 @@
 Peptide Hit Results Proc Runner Revision History
 
+Verion 1.3.3562; October 2, 2009
+	- Now returning False if unknown modification symbols are found when processing Sequest results
+
+Version 1.3.3561; October 1, 2009
+	- New version of PeptideHitResultsProcessor.dll
+
 Version 1.3.3455; June 17, 2009
 	- New version of PeptideHitResultsProcessor.dll that uses AnalysisManagerProg.exe instead of PRISM.Dll
 

@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>/i:QC_Shew_07_02_pt5_27Aug07_Sphinx_07-04-11_inspect.txt /m:Inspect_NoMods_FTHybrid_ModDefs.txt /n:Inspect_NoMods_FTHybrid.txt /t:Mass_Correction_Tags.txt</StartArguments>
+    <StartArguments>/i:Seq200906111645_Auto503384\iTRAQlabelingefficiency3a_6Jun09_Owl_09-04-07_syn.txt /m:Seq200906111645_Auto503384\sequest_N14_Tryp_DynMetOx_DynITRAQ_YKNTerm_0pt5Frag_ModDefs.txt</StartArguments>
   </PropertyGroup>
 </Project>
