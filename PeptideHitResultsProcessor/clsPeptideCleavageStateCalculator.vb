@@ -17,7 +17,12 @@ Option Strict On
 ' Use EnzymeMatchSpec to specify the residues to match for cleavage
 
 ' The default cleavage specification is for trypsin: [KR]|[^P]
+
+' Note: Function SplitPrefixAndSuffixFromSequence will change peptides that look like:
+'      E.TGMLTQKFARSLGMLAVDNQARV..   to   E.TGMLTQKFARSLGMLAVDNQARV.
+'   or ..TGMLTQKFARSLGMLAVDNQARV.R   to   .TGMLTQKFARSLGMLAVDNQARV.R
 '
+
 ' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Program started January 4, 2006
@@ -422,6 +427,8 @@ Public Class clsPeptideCleavageStateCalculator
     Public Shared Function SplitPrefixAndSuffixFromSequence(ByVal strSequenceIn As String, ByRef strPrimarySequence As String, ByRef strPrefix As String, ByRef strSuffix As String) As Boolean
         ' Examines strSequenceIn and splits apart into prefix, primary sequence, and suffix
         ' If more than one character is present before the first period or after the last period, then all characters are returned
+        ' If the peptide starts with ".." then it is auto-changed to start with "."
+        ' If the peptide ends with ".." then it is auto-changed to end with "."
 
         ' Returns True if success, False if prefix and suffix residues were not found
 
@@ -438,6 +445,14 @@ Public Class clsPeptideCleavageStateCalculator
         If strSequenceIn Is Nothing OrElse strSequenceIn.Length = 0 Then
             Return False
         Else
+            If strSequenceIn.StartsWith("..") AndAlso strSequenceIn.Length > 2 Then
+                strSequenceIn = "." & strSequenceIn.Substring(2)
+            End If
+
+            If strSequenceIn.EndsWith("..") AndAlso strSequenceIn.Length > 2 Then
+                strSequenceIn = strSequenceIn.Substring(0, strSequenceIn.Length - 2) & "."
+            End If
+
             strPrimarySequence = String.Copy(strSequenceIn)
 
             ' See if strSequenceIn contains two periods

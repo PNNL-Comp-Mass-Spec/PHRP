@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.3.3597; November 6, 2009
+	- Updated to allow for peptides that start with ".." or end with ".."
+
 Version 1.3.3561; October 1, 2009
 	- Now allowing Sequest ModDefs files to contain multiple modification symbols for the same mod mass but different residues
 

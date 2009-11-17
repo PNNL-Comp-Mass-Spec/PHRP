@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "January 8, 2009"
+    Public Const PROGRAM_DATE As String = "November 6, 2009"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -70,7 +70,7 @@ Module modMain
         Dim objParseCommandLine As New clsParseCommandLine
         Dim blnProceed As Boolean
 
-        ''Dim objTest As New clsPeptideCleavageStateCalculator
+        ''Dim objTest As New PeptideHitResultsProcessor.clsPeptideCleavageStateCalculator
         ''Dim strSeq, strCleanSeq, strPrefix, strSuffix As String
         ''strSeq = "A.BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = "-.BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
@@ -79,13 +79,17 @@ Module modMain
         ''strSeq = "A.BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = "BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = "FA.BCDE.FG" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = "BCDE." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = ".BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = ".F." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = "F..E" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = "AF..EF" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
         ''strSeq = "AFF..EF" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-
+        ''strSeq = "E.TGMLTQKFARSLGMLAVDNQARV.." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "..TGMLTQKFARSLGMLAVDNQARV.R" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "..TGMLTQKFARSLGMLAVDNQARV.." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''
         ''Return 0
 
         intReturnCode = 0
