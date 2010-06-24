@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>/i:MG_Merc_27_2\MG_merc_27_2_MG_merc_004_2Feb09_Sphinx_08-11-22_syn.txt /M:MG_Merc_27_2\sequest_N14_NE_Dyn_Cys_Iodo_PMA_ModDefs.txt</StartArguments>
+    <StartArguments>/I:"F:\My Documents\DataAnalysis\2009\2009December_MitoDatasets_HeeJung\AnalysisJob_Import_Work\Mito_OG12_4ug_090709\Seq200912131730_Manual553183\*_syn.txt" /M:"F:\My Documents\DataAnalysis\2009\2009December_MitoDatasets_HeeJung\AnalysisJob_Import_Work\sequest_N14_NE_Dyn_C_Iodo_Met_Oxy_N-term_Carbamyl_ModDefs.txt" /T:"F:\My Documents\DataAnalysis\2009\2009December_MitoDatasets_HeeJung\AnalysisJob_Import_Work\Mass_Correction_Tags.txt"</StartArguments>
   </PropertyGroup>
 </Project>

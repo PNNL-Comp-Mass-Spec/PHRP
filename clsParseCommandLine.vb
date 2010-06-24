@@ -233,7 +233,7 @@ Public Class clsParseCommandLine
             If intMillisecondsBetweenDots = 0 Then intMillisecondsBetweenDots = intMillisecondsToPause
 
             intTotalIterations = CInt(Math.Round(intMillisecondsToPause / intMillisecondsBetweenDots, 0))
-        Catch ex As Exception
+        Catch ex As System.Exception
             intTotalIterations = 1
         End Try
 

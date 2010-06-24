@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "November 6, 2009"
+    Public Const PROGRAM_DATE As String = "June 24, 2010"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -46,6 +46,7 @@ Module modMain
     Private mRecurseFoldersMaxLevels As Integer
 
     Private mLogMessagesToFile As Boolean
+    Private mLogFilePath As String = String.Empty
     Private mQuietMode As Boolean
 
     Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
@@ -107,6 +108,7 @@ Module modMain
 
         mQuietMode = False
         mLogMessagesToFile = False
+        mLogFilePath = String.Empty
 
         Try
             blnProceed = False
@@ -123,6 +125,7 @@ Module modMain
                 With mPeptideHitResultsProcRunner
                     .ShowMessages = Not mQuietMode
                     .LogMessagesToFile = mLogMessagesToFile
+                    .LogFilePath = mLogFilePath
 
                     ' Note: These options will get overridden if defined in the parameter file
                     .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath
@@ -201,7 +204,14 @@ Module modMain
                     If .RetrieveValueForParameter("A", strValue) Then mOutputFolderAlternatePath = strValue
                     If .RetrieveValueForParameter("R", strValue) Then mRecreateFolderHierarchyInAlternatePath = True
 
-                    If .RetrieveValueForParameter("L", strValue) Then mLogMessagesToFile = True
+                    If .RetrieveValueForParameter("L", strValue) Then
+                        mLogMessagesToFile = True
+
+                        If Not strValue Is Nothing AndAlso strValue.Length > 0 Then
+                            mLogFilePath = strValue.Trim(""""c)
+                        End If
+                    End If
+
                     If .RetrieveValueForParameter("Q", strValue) Then mQuietMode = True
                 End With
 
@@ -230,7 +240,7 @@ Module modMain
                                         " /I:InputFilePath_xt.xml [/O:OutputFolderPath]")
             Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
             Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] [/SynPvalue:0.2]")
-            Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L] [/Q]")
+            Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
             Console.WriteLine()
             Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), or an Inspect results file (_inspect.txt).")
             Console.WriteLine("The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file.")
@@ -246,7 +256,8 @@ Module modMain
             Console.WriteLine("When using /S, you can redirect the output of the results using /A.")
             Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).")
             Console.WriteLine()
-            Console.WriteLine("Use /L to log messages to a file.  Use the optional /Q switch will suppress all error messages.")
+            Console.WriteLine("Use /L to specify that a log file should be created.  Use /L:LogFilePath to specify the name (or full path) for the log file.")
+            Console.WriteLine("Use the optional /Q switch will suppress all error messages.")
             Console.WriteLine()
 
             Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006")
