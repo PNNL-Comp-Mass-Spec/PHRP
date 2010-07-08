@@ -28,7 +28,7 @@ Option Strict On
 ' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "June 24, 2010"
+    Public Const PROGRAM_DATE As String = "July 8, 2010"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -116,7 +116,10 @@ Module modMain
                 If SetOptionsUsingCommandLineParameters(objParseCommandLine) Then blnProceed = True
             End If
 
-            If Not blnProceed OrElse objParseCommandLine.NeedToShowHelp OrElse objParseCommandLine.ParameterCount = 0 OrElse mInputFilePath.Length = 0 Then
+            If Not blnProceed OrElse _
+               objParseCommandLine.NeedToShowHelp OrElse _
+               objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse _
+               mInputFilePath.Length = 0 Then
                 ShowProgramHelp()
                 intReturnCode = -1
             Else
@@ -182,7 +185,12 @@ Module modMain
             Else
                 With objParseCommandLine
                     ' Query objParseCommandLine to see if various parameters are present
-                    If .RetrieveValueForParameter("I", strValue) Then mInputFilePath = strValue
+                    If .RetrieveValueForParameter("I", strValue) Then
+                        mInputFilePath = strValue
+                    ElseIf .NonSwitchParameterCount > 0 Then
+                        mInputFilePath = .RetrieveNonSwitchParameter(0)
+                    End If
+
                     If .RetrieveValueForParameter("O", strValue) Then mOutputFolderName = strValue
                     If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = strValue
                     If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = strValue
@@ -237,7 +245,7 @@ Module modMain
             Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
             Console.WriteLine()
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
-                                        " /I:InputFilePath_xt.xml [/O:OutputFolderPath]")
+                                        " /I:InputFilePath [/O:OutputFolderPath]")
             Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
             Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] [/SynPvalue:0.2]")
             Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")

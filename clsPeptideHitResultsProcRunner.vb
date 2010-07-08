@@ -30,7 +30,7 @@ Public Class clsPeptideHitResultsProcRunner
     Inherits clsProcessFilesBaseClass
 
     Public Sub New()
-        MyBase.mFileDate = "December 9, 2008"
+        MyBase.mFileDate = PROGRAM_DATE
         InitializeLocalVariables()
     End Sub
 

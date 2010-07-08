@@ -593,8 +593,8 @@ Public MustInherit Class clsProcessFilesBaseClass
                         ioFolderInfo = New System.IO.DirectoryInfo(strOutputFolderAlternatePath)
                         If Not ioFolderInfo.Exists Then ioFolderInfo.Create()
                     Catch ex As Exception
-                        Debug.Assert(False, ex.Message)
                         mErrorCode = clsProcessFilesBaseClass.eProcessFilesErrorCodes.InvalidOutputFolderPath
+                        ShowErrorMessage("Error validating the alternate output folder path in ProcessFilesAndRecurseFolders:" & ex.Message)
                         Return False
                     End Try
                 End If
