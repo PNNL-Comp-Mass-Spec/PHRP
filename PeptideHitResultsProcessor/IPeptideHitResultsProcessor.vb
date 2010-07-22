@@ -36,6 +36,9 @@ Public Interface IPeptideHitResultsProcessor
         Dim DatasetName As String
         Dim ParameterFileName As String                     ' Parameter file for the job
         Dim SettingsFileName As String                      ' Contains XML settings for PeptideHitResultsProcessor
+
+        Dim CreateInspectSynopsisFile As Boolean
+        Dim CreateInspectFirstHitsFile As Boolean
     End Structure
 #End Region
 
@@ -58,6 +61,9 @@ Public Interface IPeptideHitResultsProcessor
     Property DatasetName() As String
     Property ParameterFileName() As String
     Property SettingsFileName() As String
+
+    Property CreateInspectSynopsisFile() As Boolean
+    Property CreateInspectFirstHitsFile() As Boolean
 
     WriteOnly Property MiscParams() As StringDictionary 'For passing miscelleneous parameters (not presently used)
     ReadOnly Property Status() As IPeptideHitResultsProcessor.ProcessStatus 'Allows calling program to get current status

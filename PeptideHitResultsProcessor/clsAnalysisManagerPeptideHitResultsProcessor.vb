@@ -38,6 +38,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
     Protected m_ParameterFilePath As String = String.Empty      ' Peptide search tool parameter file name
     Protected m_SettingsFilePath As String = String.Empty       ' XML settings file with section PeptideHitResultsProcessorOptions
 
+    Protected m_CreateInspectFirstHitsFile As Boolean
+    Protected m_CreateInspectSynopsisFile As Boolean
+
     Protected m_PeptideHitResultsFilePath As String = String.Empty
     Protected m_MassCorrectionTagsFilePath As String = String.Empty
     Protected m_ModificationDefinitionsFilePath As String = String.Empty
@@ -69,6 +72,24 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End Get
         Set(ByVal Value As String)
             m_AnalysisToolName = Value
+        End Set
+    End Property
+
+    Public Property CreateInspectFirstHitsFile() As Boolean Implements IPeptideHitResultsProcessor.CreateInspectFirstHitsFile
+        Get
+            Return m_CreateInspectFirstHitsFile
+        End Get
+        Set(ByVal value As Boolean)
+            m_CreateInspectFirstHitsFile = value
+        End Set
+    End Property
+
+    Public Property CreateInspectSynopsisFile() As Boolean Implements IPeptideHitResultsProcessor.CreateInspectSynopsisFile
+        Get
+            Return m_CreateInspectSynopsisFile
+        End Get
+        Set(ByVal value As Boolean)
+            m_CreateInspectSynopsisFile = value
         End Set
     End Property
 
@@ -211,6 +232,10 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             m_DSName = .DatasetName
             m_ParameterFileName = .ParameterFileName
             m_SettingsFileName = .SettingsFileName
+
+            m_CreateInspectFirstHitsFile = .CreateInspectFirstHitsFile
+            m_CreateInspectSynopsisFile = .CreateInspectSynopsisFile
+
         End With
 
     End Sub
