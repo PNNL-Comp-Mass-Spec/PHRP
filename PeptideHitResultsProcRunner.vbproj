@@ -86,7 +86,7 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PeptideHitResultsProcessor, Version=1.3.3455.30908, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="PeptideHitResultsProcessor, Version=1.3.3855.20504, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>PeptideHitResultsProcessor\bin\PeptideHitResultsProcessor.dll</HintPath>
     </Reference>

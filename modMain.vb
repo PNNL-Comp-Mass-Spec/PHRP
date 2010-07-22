@@ -14,21 +14,9 @@ Option Strict On
 ' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
-' Licensed under the Apache License, Version 2.0; you may not use this file except
-' in compliance with the License.  You may obtain a copy of the License at 
-' http://www.apache.org/licenses/LICENSE-2.0
-'
-' Notice: This computer software was prepared by Battelle Memorial Institute, 
-' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
-' Department of Energy (DOE).  All rights in the computer software are reserved 
-' by DOE on behalf of the United States Government and the Contractor as 
-' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
-' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
-' SOFTWARE.  This notice including this sentence must appear on any copies of 
-' this computer software.
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "July 8, 2010"
+    Public Const PROGRAM_DATE As String = "July 22, 2010"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -52,17 +40,6 @@ Module modMain
     Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
     Private mLastProgressReportTime As System.DateTime
     Private mLastProgressReportValue As Integer
-
-    Private Sub DisplayProgressPercent(ByVal intPercentComplete As Integer, ByVal blnAddCarriageReturn As Boolean)
-        If blnAddCarriageReturn Then
-            Console.WriteLine()
-        End If
-        If intPercentComplete > 100 Then intPercentComplete = 100
-        Console.Write("Processing: " & intPercentComplete.ToString & "% ")
-        If blnAddCarriageReturn Then
-            Console.WriteLine()
-        End If
-    End Sub
 
     Public Function Main() As Integer
         ' Returns 0 if no error, error code if an error
@@ -160,16 +137,29 @@ Module modMain
             End If
 
         Catch ex As Exception
-            If mQuietMode Then
-                Throw ex
-            Else
-                Console.WriteLine("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message)
-            End If
+            Console.WriteLine("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message)
             intReturnCode = -1
         End Try
 
         Return intReturnCode
 
+    End Function
+
+    Private Sub DisplayProgressPercent(ByVal intPercentComplete As Integer, ByVal blnAddCarriageReturn As Boolean)
+        If blnAddCarriageReturn Then
+            Console.WriteLine()
+        End If
+        If intPercentComplete > 100 Then intPercentComplete = 100
+        Console.Write("Processing: " & intPercentComplete.ToString & "% ")
+        If blnAddCarriageReturn Then
+            Console.WriteLine()
+        End If
+    End Sub
+
+    Private Function GetAppVersion() As String
+        'Return System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")"
+
+        Return System.Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString & " (" & PROGRAM_DATE & ")"
     End Function
 
     Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As clsParseCommandLine) As Boolean
@@ -227,11 +217,7 @@ Module modMain
             End If
 
         Catch ex As Exception
-            If mQuietMode Then
-                Throw New System.Exception("Error parsing the command line parameters", ex)
-            Else
-                Console.WriteLine("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message)
-            End If
+            Console.WriteLine("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message)
         End Try
 
     End Function
@@ -245,7 +231,7 @@ Module modMain
             Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
             Console.WriteLine()
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
-                                        " /I:InputFilePath [/O:OutputFolderPath]")
+                                        " InputFilePath [/O:OutputFolderPath]")
             Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
             Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] [/SynPvalue:0.2]")
             Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
@@ -269,27 +255,12 @@ Module modMain
             Console.WriteLine()
 
             Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006")
-            Console.WriteLine()
+            Console.WriteLine("Version: " & GetAppVersion())
 
-            Console.WriteLine("This is version " & System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")")
             Console.WriteLine()
 
             Console.WriteLine("E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com")
             Console.WriteLine("Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/")
-            Console.WriteLine()
-
-            Console.WriteLine("Licensed under the Apache License, Version 2.0; you may not use this file except in compliance with the License.  " & _
-                              "You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0")
-            Console.WriteLine()
-
-            Console.WriteLine("Notice: This computer software was prepared by Battelle Memorial Institute, " & _
-                              "hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the " & _
-                              "Department of Energy (DOE).  All rights in the computer software are reserved " & _
-                              "by DOE on behalf of the United States Government and the Contractor as " & _
-                              "provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY " & _
-                              "WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS " & _
-                              "SOFTWARE.  This notice including this sentence must appear on any copies of " & _
-                              "this computer software.")
 
             ' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
             System.Threading.Thread.Sleep(750)

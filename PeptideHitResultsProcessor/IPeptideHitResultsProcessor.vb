@@ -39,6 +39,14 @@ Public Interface IPeptideHitResultsProcessor
     End Structure
 #End Region
 
+#Region "Events"
+    Event ErrorOccurred(ByVal strMessage As String)
+    Event DebugEvent(ByVal strMessage As String)
+
+    ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
+    Event ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single)
+#End Region
+
 #Region "Properties"
     Property SourceFolderPath() As String ' (in) – path to folder containing the peptide hit results file
     Property OutputFolderPath() As String ' (in) – path to folder where processed file is to be placed

@@ -27,7 +27,7 @@ Option Strict On
 Public MustInherit Class clsPHRPBaseClass
 
     Public Sub New()
-        mFileDate = "October 2, 2009"
+        mFileDate = "July 22, 2010"
         InitializeLocalVariables()
     End Sub
 
@@ -49,7 +49,6 @@ Public MustInherit Class clsPHRPBaseClass
     Public Const FILENAME_SUFFIX_SEQ_INFO As String = "_SeqInfo.txt"
     Public Const FILENAME_SUFFIX_MOD_DETAILS As String = "_ModDetails.txt"
     Public Const FILENAME_SUFFIX_MOD_SUMMARY As String = "_ModSummary.txt"
-
 
     Public Enum ePeptideHitResultsFileFormatConstants As Integer
         AutoDetermine = 0
@@ -103,6 +102,10 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected mCreateModificationSummaryFile As Boolean
 
+    ' The following two options are only used by the clsInSpecTResultsProcessor
+    Protected mCreateInspectSynopsisFile As Boolean
+    Protected mCreateInspectFirstHitsFile As Boolean
+
     Protected mMassCorrectionTagsFilePath As String
     Protected mModificationDefinitionsFilePath As String
     Protected mSearchToolParameterFilePath As String            ' At present, only used by clsInSpecTResultsProcessor
@@ -151,6 +154,24 @@ Public MustInherit Class clsPHRPBaseClass
         End Get
         Set(ByVal Value As Boolean)
             mCreateModificationSummaryFile = Value
+        End Set
+    End Property
+
+    Public Property CreateInspectFirstHitsFile() As Boolean
+        Get
+            Return mCreateInspectFirstHitsFile
+        End Get
+        Set(ByVal value As Boolean)
+            mCreateInspectFirstHitsFile = value
+        End Set
+    End Property
+
+    Public Property CreateInspectSynopsisFile() As Boolean
+        Get
+            Return mCreateInspectSynopsisFile
+        End Get
+        Set(ByVal value As Boolean)
+            mCreateInspectSynopsisFile = value
         End Set
     End Property
 
@@ -293,7 +314,9 @@ Public MustInherit Class clsPHRPBaseClass
         Return blnExistingMapFound
     End Function
 
-    Public Shared Function AutoDefinePeptideHitResultsFilePath(ByVal ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants, ByVal strSourceFolderPath As String, ByVal strBaseName As String) As String
+    Public Shared Function AutoDefinePeptideHitResultsFilePath(ByVal ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants, _
+                                                               ByVal strSourceFolderPath As String, _
+                                                               ByVal strBaseName As String) As String
 
         If Not strBaseName Is Nothing AndAlso strBaseName.Length > 0 Then
             Select Case ePeptideHitResultFileFormat
@@ -526,6 +549,9 @@ Public MustInherit Class clsPHRPBaseClass
         mWarnMissingParameterFileSection = False
 
         mCreateModificationSummaryFile = True
+
+        mCreateInspectFirstHitsFile = True
+        mCreateInspectSynopsisFile = True
 
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty

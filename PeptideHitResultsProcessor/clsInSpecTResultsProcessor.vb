@@ -32,7 +32,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "January 8, 2009"
+        MyBase.mFileDate = "July 22, 2010"
         InitializeLocalVariables()
     End Sub
 
@@ -1459,62 +1459,68 @@ Public Class clsInSpecTResultsProcessor
                         ' Resolve the mods in mInspectModInfo with the ModDefs mods
                         ResolveInspectModsWithModDefinitions(udtInspectModInfo)
 
+                        If MyBase.mCreateInspectFirstHitsFile Then
 
-                        ' Create the first hits output file
-                        MyBase.ResetProgress("Creating the FHT file (top TotalPRMScore)")
-                        Console.WriteLine()
-                        Console.WriteLine(MyBase.ProgressStepDescription)
+                            ' Create the first hits output file
+                            MyBase.ResetProgress("Creating the FHT file (top TotalPRMScore)")
+                            Console.WriteLine()
+                            Console.WriteLine(MyBase.ProgressStepDescription)
 
-                        strOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
-                        strOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX)
+                            strOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+                            strOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX)
 
-                        blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyTotalPRM)
-
-
-                        ' Create the first hits output file
-                        MyBase.ResetProgress("Creating the FHT file (top FScore)")
-                        Console.WriteLine()
-                        Console.WriteLine()
-                        Console.WriteLine(MyBase.ProgressStepDescription)
-
-                        strOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
-                        strOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX)
-
-                        blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyFScore)
+                            blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyTotalPRM)
 
 
-                        ' Create the synopsis output file
-                        MyBase.ResetProgress("Creating the SYN file")
-                        Console.WriteLine()
-                        Console.WriteLine()
-                        Console.WriteLine(MyBase.ProgressStepDescription)
+                            ' Create the first hits output file
+                            MyBase.ResetProgress("Creating the FHT file (top FScore)")
+                            Console.WriteLine()
+                            Console.WriteLine()
+                            Console.WriteLine(MyBase.ProgressStepDescription)
 
-                        'Define the synopsis output file name based on strInputFilePath
-                        strSynOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
-                        strSynOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strSynOutputFilePath & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+                            strOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+                            strOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX)
 
-                        blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.SynFile)
+                            blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyFScore)
 
-                        ' Load the PeptideToProteinMap information; if any modified peptides are present, then write out an updated _inspect_PepToProtMap.txt file with the new mod symbols (file will be named _PepToProtMapMTS.txt)
-                        ' If the file doesn't exist, then a warning will be displayed, but processing will continue
-                        strPepToProteinMapFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(strInputFilePathFull), System.IO.Path.GetFileNameWithoutExtension(strInputFilePathFull) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
+                        End If
 
-                        MyBase.ResetProgress("Loading the PepToProtein map file: " & System.IO.Path.GetFileName(strPepToProteinMapFilePath))
-                        Console.WriteLine()
-                        Console.WriteLine()
-                        Console.WriteLine(MyBase.ProgressStepDescription)
+                        If MyBase.mCreateInspectSynopsisFile Then
 
-                        LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, strOutputFolderPath, udtInspectModInfo, udtPepToProteinMapping)
+                            ' Create the synopsis output file
+                            MyBase.ResetProgress("Creating the SYN file")
+                            Console.WriteLine()
+                            Console.WriteLine()
+                            Console.WriteLine(MyBase.ProgressStepDescription)
+
+                            'Define the synopsis output file name based on strInputFilePath
+                            strSynOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+                            strSynOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strSynOutputFilePath & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+
+                            blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.SynFile)
+
+                            ' Load the PeptideToProteinMap information; if any modified peptides are present, then write out an updated _inspect_PepToProtMap.txt file with the new mod symbols (file will be named _PepToProtMapMTS.txt)
+                            ' If the file doesn't exist, then a warning will be displayed, but processing will continue
+                            strPepToProteinMapFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(strInputFilePathFull), System.IO.Path.GetFileNameWithoutExtension(strInputFilePathFull) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
+
+                            MyBase.ResetProgress("Loading the PepToProtein map file: " & System.IO.Path.GetFileName(strPepToProteinMapFilePath))
+                            Console.WriteLine()
+                            Console.WriteLine()
+                            Console.WriteLine(MyBase.ProgressStepDescription)
+
+                            LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, strOutputFolderPath, udtInspectModInfo, udtPepToProteinMapping)
 
 
-                        ' Create the other PHRP-specific files
-                        MyBase.ResetProgress("Creating the PHRP files for " & System.IO.Path.GetFileName(strSynOutputFilePath))
-                        Console.WriteLine()
-                        Console.WriteLine()
-                        Console.WriteLine(MyBase.ProgressStepDescription)
+                            ' Create the other PHRP-specific files
+                            MyBase.ResetProgress("Creating the PHRP files for " & System.IO.Path.GetFileName(strSynOutputFilePath))
+                            Console.WriteLine()
+                            Console.WriteLine()
+                            Console.WriteLine(MyBase.ProgressStepDescription)
 
-                        blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, udtPepToProteinMapping, False)
+                            blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, udtPepToProteinMapping, False)
 
+                        End If
+                      
                         If blnSuccess Then
                             MyBase.OperationComplete()
                         End If

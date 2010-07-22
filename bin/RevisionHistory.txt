@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.3.3855; July 22, 2010
+	- New version of PeptideHitResultsProcessor.dll
+		- Removed dependence on AnalysisManagerProg.exe
+
 Version 1.3.3841; July 8, 2010
 	- Now supports specifying the input filename without using /I:
 

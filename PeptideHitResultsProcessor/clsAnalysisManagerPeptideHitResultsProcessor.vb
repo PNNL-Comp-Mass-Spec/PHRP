@@ -53,6 +53,15 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
 #End Region
 
+#Region "Events"
+    Public Event ErrorOccurred(ByVal strMessage As String) Implements IPeptideHitResultsProcessor.ErrorOccurred
+    Public Event DebugEvent(ByVal strMessage As String) Implements IPeptideHitResultsProcessor.DebugEvent
+
+    ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
+    Public Event ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single) Implements IPeptideHitResultsProcessor.ProgressChanged
+
+#End Region
+
 #Region "Properties"
     Public Property AnalysisToolName() As String Implements IPeptideHitResultsProcessor.AnalysisToolName
         Get
@@ -302,12 +311,6 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
         'Initializes module variables and verifies mandatory parameters have been propery specified
 
-        'Logger
-        'If m_Logger Is Nothing Then
-        '    m_ErrMsg = "Logging object not set"
-        '    Return False
-        'End If
-
         'Output folder name
         If m_OutFolderPath = "" Then
             m_ErrMsg = "Output folder path not specified"
@@ -321,8 +324,8 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         If Me.DebugLevel >= 3 Then
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: OutFolderPath = " & m_OutFolderPath)
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: SourceFolderPath = " & m_SourceFolderPath)
+            RaiseEvent DebugEvent("Setup params: OutFolderPath = " & m_OutFolderPath)
+            RaiseEvent DebugEvent("Setup params: SourceFolderPath = " & m_SourceFolderPath)
         End If
 
         'Source directory exists?
@@ -377,12 +380,12 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         If Me.DebugLevel >= 3 Then
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: AnalysisToolName = " & m_AnalysisToolName)
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
+            RaiseEvent DebugEvent("Setup params: AnalysisToolName = " & m_AnalysisToolName)
+            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
 
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: DSName = " & m_DSName)
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: SettingsFilePath = " & m_SettingsFilePath)
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: ParameterFilePath = " & m_ParameterFilePath)
+            RaiseEvent DebugEvent("Setup params: DSName = " & m_DSName)
+            RaiseEvent DebugEvent("Setup params: SettingsFilePath = " & m_SettingsFilePath)
+            RaiseEvent DebugEvent("Setup params: ParameterFilePath = " & m_ParameterFilePath)
         End If
 
         'Define the peptide hit results file name
@@ -393,7 +396,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         If Me.DebugLevel >= 3 Then
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath)
+            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath)
         End If
 
         'Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
@@ -416,9 +419,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         If Me.DebugLevel >= 3 Then
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: MassCorrectionTagsFilePath = " & m_MassCorrectionTagsFilePath)
-            clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, "Setup params: ModificationDefinitionsFilePath = " & m_ModificationDefinitionsFilePath)
+            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
+            RaiseEvent DebugEvent("Setup params: MassCorrectionTagsFilePath = " & m_MassCorrectionTagsFilePath)
+            RaiseEvent DebugEvent("Setup params: ModificationDefinitionsFilePath = " & m_ModificationDefinitionsFilePath)
         End If
 
         'Parameter file exists?
@@ -456,7 +459,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         Trace.WriteLine(Now.ToLongTimeString & "; " & m_ErrMsg, strSource)
         Console.WriteLine(Now.ToLongTimeString & "; " & m_ErrMsg, strSource)
 
-        clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.ERROR, m_ErrMsg)
+        RaiseEvent ErrorOccurred(m_ErrMsg)
 
     End Sub
 
@@ -480,13 +483,13 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
         If blnDescriptionChanged And Me.DebugLevel >= 2 Then
             If sngProgressPercentComplete = 0 Then
-                clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, strProgressStepDescriptionSaved)
+                RaiseEvent DebugEvent(strProgressStepDescriptionSaved)
             Else
-                clsLogTools.WriteLog(clsLogTools.LoggerTypes.LogFile, clsLogTools.LogLevels.DEBUG, strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)")
+                RaiseEvent DebugEvent(strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)")
             End If
         End If
 
-        ' RaiseEvent ProgressChanged(Me.ProgressStepDescription, Me.ProgressPercentComplete)
+        RaiseEvent ProgressChanged(strProgressStepDescription, sngPercentComplete)
     End Sub
 
     Protected Overridable Function VerifyDirExists(ByVal TestDir As String) As Boolean
