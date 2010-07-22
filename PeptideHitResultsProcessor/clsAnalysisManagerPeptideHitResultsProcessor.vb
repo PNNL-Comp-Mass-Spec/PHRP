@@ -291,6 +291,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
                 .ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath
                 .SearchToolParameterFilePath = m_ParameterFilePath
                 .InspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+
+                .CreateInspectFirstHitsFile = m_CreateInspectFirstHitsFile
+                .CreateInspectSynopsisFile = m_CreateInspectSynopsisFile
             End With
 
             m_thThread = New System.Threading.Thread(AddressOf ProcessPeptideHitResultsFileWork)
