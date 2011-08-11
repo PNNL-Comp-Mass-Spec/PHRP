@@ -1,5 +1,10 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.4.4239; August 10, 2011
+	- Updated to Visual Studio 2010
+	- Changed parameter MiscParams in IPeptideHitResultsProcessor to type System.Collections.Generic.List(Of String)
+	- Added support for MSGFDB results
+
 Version 1.3.3855; July 22, 2010
 	- Removed dependence on AnalysisManagerProg.exe
 	- Added new events and properties to interface IPeptideHitResultsProcessor

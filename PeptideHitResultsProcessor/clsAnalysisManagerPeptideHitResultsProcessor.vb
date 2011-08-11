@@ -27,7 +27,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
     Protected m_MassCorrectionTagsFileName As String = String.Empty
     Protected m_ModificationDefinitionsFileName As String = String.Empty
 
-    Protected m_MiscParams As System.Collections.Specialized.StringDictionary
+    Protected m_MiscParams As System.Collections.Generic.Dictionary(Of String, String)
     Protected m_DebugLevel As Integer = 0
 
     Protected m_AnalysisToolName As String = String.Empty
@@ -126,8 +126,8 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End Set
     End Property
 
-    Public WriteOnly Property MiscParams() As System.Collections.Specialized.StringDictionary Implements IPeptideHitResultsProcessor.MiscParams
-        Set(ByVal Value As System.Collections.Specialized.StringDictionary)
+    Public WriteOnly Property MiscParams() As System.Collections.Generic.Dictionary(Of String, String) Implements IPeptideHitResultsProcessor.MiscParams
+        Set(ByVal Value As System.Collections.Generic.Dictionary(Of String, String))
             m_MiscParams = Value
         End Set
     End Property
@@ -262,9 +262,12 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     End Function
 
+    ''' <summary>
+    ''' Initializes m_PeptideHitResultsProcessor then starts a separate thread to process the file
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Protected Overridable Function ProcessPeptideHitResultsFile() As IPeptideHitResultsProcessor.ProcessStatus
-        ' Initializes m_PeptideHitResultsProcessor, then starts a separate thread 
-        ' to process the file
 
         Try
             'Initialize m_PeptideHitResultsProcessor

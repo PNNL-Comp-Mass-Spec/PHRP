@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.4.4239; August 10, 2011
+	- Updated to Visual Studio 2010
+	- Added command line switches /InsFHT and /InsSyn
+
 Version 1.3.3855; July 22, 2010
 	- New version of PeptideHitResultsProcessor.dll
 		- Removed dependence on AnalysisManagerProg.exe

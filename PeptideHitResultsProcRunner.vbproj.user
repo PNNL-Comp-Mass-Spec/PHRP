@@ -1,4 +1,5 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartArguments>/i:QC_Shew_07_02_pt5_27Aug07_Sphinx_07-04-11_inspect.txt /m:Inspect_NoMods_FTHybrid_ModDefs.txt /n:Inspect_NoMods_FTHybrid.txt /t:Mass_Correction_Tags.txt</StartArguments>
   </PropertyGroup>

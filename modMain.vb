@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "July 22, 2010"
+    Public Const PROGRAM_DATE As String = "August 10, 2011"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -25,7 +25,10 @@ Module modMain
     Private mMassCorrectionTagsFilePath As String               ' Optional
     Private mModificationDefinitionsFilePath As String          ' Optional
     Private mSearchToolParameterFilePath As String              ' Optional
-    Private mInspectSynopsisFilePValueThreshold As Single              ' Optional
+
+    Private mCreateInspectFirstHitsFile As Boolean
+    Private mCreateInspectSynopsisFile As Boolean
+    Private mInspectSynopsisFilePValueThreshold As Single       ' Optional
 
     Private mOutputFolderAlternatePath As String                ' Optional
     Private mRecreateFolderHierarchyInAlternatePath As Boolean  ' Optional
@@ -78,6 +81,10 @@ Module modMain
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
         mSearchToolParameterFilePath = String.Empty
+        
+        ' These should default to True
+        mCreateInspectFirstHitsFile = True
+        mCreateInspectSynopsisFile = True
         mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
         mRecurseFolders = False
@@ -112,8 +119,11 @@ Module modMain
                     .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
                     .SearchToolParameterFilePath = mSearchToolParameterFilePath
 
-                    .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
                     .WarnMissingParameterFileSection = True
+
+                    .CreateInspectFirstHitsFile = mCreateInspectFirstHitsFile
+                    .CreateInspectSynopsisFile = mCreateInspectSynopsisFile
+                    .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
                 End With
 
                 If mRecurseFolders Then
@@ -162,11 +172,42 @@ Module modMain
         Return System.Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString & " (" & PROGRAM_DATE & ")"
     End Function
 
+    ''' <summary>
+    ''' Parse out True/False or Yes/No or T/F or Y/N or 1/0 from strValue
+    ''' </summary>
+    ''' <param name="strValue">Text to parse</param>
+    ''' <param name="blnValue">Output parameter</param>
+    ''' <returns>True if successfully parsed strValue; the result of the parse is in blnValue</returns>
+    ''' <remarks></remarks>
+    Private Function ParseBoolean(ByVal strValue As String, ByRef blnValue As Boolean) As Boolean
+
+        If String.IsNullOrEmpty(strValue) Then Return False
+
+        If Boolean.TryParse(strValue, blnValue) Then
+            Return True
+        Else
+            Select Case strValue.ToUpper().Chars(0)
+                Case "T"c, "Y"c, "1"c
+                    ' True or Yes or 1
+                    blnValue = True
+                    Return True
+                Case "F"c, "N"c, "0"c
+                    ' False or No or 0
+                    blnValue = False
+                    Return True
+            End Select
+        End If
+
+        Return False
+
+    End Function
+
     Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As clsParseCommandLine) As Boolean
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
-        Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "SynPvalue", "S", "A", "R", "L", "Q"}
+        Dim blnValue As Boolean
+        Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
 
         Try
             ' Make sure no invalid parameters are present
@@ -186,6 +227,18 @@ Module modMain
                     If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = strValue
                     If .RetrieveValueForParameter("T", strValue) Then mMassCorrectionTagsFilePath = strValue
                     If .RetrieveValueForParameter("N", strValue) Then mSearchToolParameterFilePath = strValue
+
+                    If .RetrieveValueForParameter("InsFHT", strValue) Then
+                        If ParseBoolean(strValue, blnValue) Then
+                            mCreateInspectFirstHitsFile = blnValue
+                        End If
+                    End If
+
+                    If .RetrieveValueForParameter("InsSyn", strValue) Then
+                        If ParseBoolean(strValue, blnValue) Then
+                            mCreateInspectSynopsisFile = blnValue
+                        End If
+                    End If
 
                     If .RetrieveValueForParameter("SynPvalue", strValue) Then
                         If IsNumeric(strValue) Then
@@ -234,6 +287,7 @@ Module modMain
                                         " InputFilePath [/O:OutputFolderPath]")
             Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
             Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] [/SynPvalue:0.2]")
+            Console.WriteLine(" [/InsFHT:True|False] [/InsSyn:True|False]")
             Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
             Console.WriteLine()
             Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), or an Inspect results file (_inspect.txt).")
@@ -245,6 +299,8 @@ Module modMain
             Console.WriteLine("Use /N to specify the parameter file provided to the search tool.  This is only used when processing Inspect files.")
             Console.WriteLine()
             Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file.  The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD.ToString() & " or an FScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD & " will also be included in the synopsis file.")
+            Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_inspect_fht.txt) when processing Inspect results")
+            Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_inspect_syn.txt) when processing Inspect results")
             Console.WriteLine()
             Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
             Console.WriteLine("When using /S, you can redirect the output of the results using /A.")

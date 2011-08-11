@@ -29,7 +29,7 @@ Public Interface IPeptideHitResultsProcessor
         Dim PeptideHitResultsFileName As String             ' If this is empty then it will be auto-defined using: DatasetName & XTANDEM_RESULTS_FILE_SUFFIX
         Dim MassCorrectionTagsFileName As String            ' If this is empty then it will be auto-defined using: Const DEFAULT_MASS_CORRECTION_TAGS_FILENAME = "Mass_Correction_Tags.txt"
         Dim ModificationDefinitionsFileName As String       ' If this is empty then it will be auto-defined using: System.IO.Path.GetFileNameWithoutExtension(ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX where MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt"
-        Dim MiscParams As StringDictionary
+        Dim MiscParams As System.Collections.Generic.Dictionary(Of String, String)
         Dim DebugLevel As Integer
 
         Dim AnalysisToolName As String
@@ -65,7 +65,7 @@ Public Interface IPeptideHitResultsProcessor
     Property CreateInspectSynopsisFile() As Boolean
     Property CreateInspectFirstHitsFile() As Boolean
 
-    WriteOnly Property MiscParams() As StringDictionary 'For passing miscelleneous parameters (not presently used)
+    WriteOnly Property MiscParams() As System.Collections.Generic.Dictionary(Of String, String)    'For passing miscelleneous parameters (not presently used)
     ReadOnly Property Status() As IPeptideHitResultsProcessor.ProcessStatus 'Allows calling program to get current status
     ReadOnly Property Results() As IPeptideHitResultsProcessor.ProcessResults  'Allows calling program to determine if processing succeeded
     ReadOnly Property ErrMsg() As String  'Error message describing any errors encountered

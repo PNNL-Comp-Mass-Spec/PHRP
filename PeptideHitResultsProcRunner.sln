@@ -1,8 +1,8 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PeptideHitResultsProcRunner", "PeptideHitResultsProcRunner.vbproj", "{76DE4362-C584-4C8B-8F27-4AFF61FB4BD7}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PeptideHitResultsProcRunner_Installer", "PeptideHitResultsProcessor_Installer\PeptideHitResultsProcessor_Installer.vdproj", "{D846AC95-E27F-460B-963F-54132067D7A0}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PeptideHitResultsProcessor_Installer", "PeptideHitResultsProcessor_Installer\PeptideHitResultsProcessor_Installer.vdproj", "{D846AC95-E27F-460B-963F-54132067D7A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

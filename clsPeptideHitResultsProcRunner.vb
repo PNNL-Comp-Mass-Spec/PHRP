@@ -59,6 +59,10 @@ Public Class clsPeptideHitResultsProcRunner
     Protected mMassCorrectionTagsFilePath As String
     Protected mModificationDefinitionsFilePath As String
     Protected mSearchToolParameterFilePath As String
+
+    ' These should default to True
+    Protected mCreateInspectFirstHitsFile As Boolean = True
+    Protected mCreateInspectSynopsisFile As Boolean = True
     Protected mInspectSynopsisFilePValueThreshold As Single
 
     Protected WithEvents mPeptideHitResultsProcessor As PeptideHitResultsProcessor.clsPHRPBaseClass
@@ -69,6 +73,24 @@ Public Class clsPeptideHitResultsProcRunner
 
 #Region "Properties"
 
+    Public Property CreateInspectFirstHitsFile() As Boolean
+        Get
+            Return mCreateInspectFirstHitsFile
+        End Get
+        Set(ByVal value As Boolean)
+            mCreateInspectFirstHitsFile = value
+        End Set
+    End Property
+
+    Public Property CreateInspectSynopsisFile() As Boolean
+        Get
+            Return mCreateInspectSynopsisFile
+        End Get
+        Set(ByVal value As Boolean)
+            mCreateInspectSynopsisFile = value
+        End Set
+    End Property
+
     Public Property InspectSynopsisFilePValueThreshold() As Single
         Get
             Return mInspectSynopsisFilePValueThreshold
@@ -77,6 +99,7 @@ Public Class clsPeptideHitResultsProcRunner
             mInspectSynopsisFilePValueThreshold = value
         End Set
     End Property
+
     Public ReadOnly Property LocalErrorCode() As eResultsProcessorErrorCodes
         Get
             Return mLocalErrorCode
@@ -176,6 +199,8 @@ Public Class clsPeptideHitResultsProcRunner
         mModificationDefinitionsFilePath = String.Empty
         mSearchToolParameterFilePath = String.Empty
 
+        mCreateInspectFirstHitsFile = False
+        mCreateInspectSynopsisFile = False
         mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
         mWarnMissingParameterFileSection = True
@@ -357,6 +382,9 @@ Public Class clsPeptideHitResultsProcRunner
                                     .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath
                                     .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
                                     .SearchToolParameterFilePath = mSearchToolParameterFilePath
+
+                                    .CreateInspectFirstHitsFile = mCreateInspectFirstHitsFile
+                                    .CreateInspectSynopsisFile = mCreateInspectSynopsisFile
                                     .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
 
                                     .WarnMissingParameterFileSection = mWarnMissingParameterFileSection
