@@ -1,5 +1,12 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.4.4247; August 18, 2011
+	- Added support for MSGFDB results
+	- Now reading the column headers from Sequest and Inspect _syn.txt files
+		- Allows for columns to be added or missing and for results to still proceed properly
+	- X!Tandem _xt.txt files and Inspect _syn.txt and _fht.txt files now have column DelM_PPM
+	- The MH column in Inspect _syn.txt and _fht.txt files is now (M+H)+ instead of uncharged monoisotopic mass
+
 Version 1.4.4239; August 10, 2011
 	- Updated to Visual Studio 2010
 	- Changed parameter MiscParams in IPeptideHitResultsProcessor to type System.Collections.Generic.List(Of String)
