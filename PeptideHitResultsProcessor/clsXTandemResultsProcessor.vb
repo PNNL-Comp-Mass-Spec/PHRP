@@ -12,8 +12,8 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Program started January 2, 2006
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -127,6 +127,9 @@ Public Class clsXTandemResultsProcessor
 
             ' Compute the monoisotopic mass for this peptide
             objSearchResult.ComputeMonoisotopicMass()
+
+            ' Update PeptideDeltaMassCorrectedPpm
+            objSearchResult.ComputeDelMCorrected()
 
             ' Populate .PeptideSequenceWithMods and .PeptideModDescription
             ' Note that this function will call .AddSearchResultModificationsToCleanSequence() then .UpdateModDescription()
@@ -350,10 +353,10 @@ Public Class clsXTandemResultsProcessor
     Protected Function ParseXTandemResultsFile(ByVal strInputFilePath As String, ByVal strOutputFilePath As String, Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile
 
-        Dim srDataFile As System.IO.StreamReader
-        Dim objXMLReader As System.Xml.XmlTextReader
+        Dim srDataFile As System.IO.StreamReader = Nothing
+        Dim objXMLReader As System.Xml.XmlTextReader = Nothing
 
-        Dim swPeptideResultsFile As System.IO.StreamWriter
+        Dim swPeptideResultsFile As System.IO.StreamWriter = Nothing
 
         Dim strModificationSummaryFilePath As String
 
@@ -372,7 +375,7 @@ Public Class clsXTandemResultsProcessor
 
         Dim blnSuccess As Boolean
 
-        Dim strErrorLog As String
+        Dim strErrorLog As String = String.Empty
 
         Try
             ' Possibly reset the mass correction tags and Mod Definitions
@@ -433,7 +436,8 @@ Public Class clsXTandemResultsProcessor
                                     "b_score" & SEP_CHAR & _
                                     "b_ions" & SEP_CHAR & _
                                     "Delta_Mass" & SEP_CHAR & _
-                                    "Peptide_Intensity_Log(I)")
+                                    "Peptide_Intensity_Log(I)" & SEP_CHAR & _
+                                    "DelM_PPM")
 
                 ' Create the additional output files
                 blnSuccess = MyBase.InitializeSequenceOutputFiles(strOutputFilePath)
@@ -905,7 +909,7 @@ Public Class clsXTandemResultsProcessor
                                     ' See if htSeqsWithMods contains strSequenceWithMods
                                     If htSeqsWithMods.ContainsKey(strSequenceWithMods) Then
                                         ' Increment the protein count for this peptide
-                                        htSeqsWithMods(strSequenceWithMods) = CType(htSeqsWithMods(strSequenceWithMods), Integer) + 1
+                                        htSeqsWithMods(strSequenceWithMods) = DirectCast(htSeqsWithMods(strSequenceWithMods), Integer) + 1
                                     Else
                                         htSeqsWithMods.Add(strSequenceWithMods, 1)
                                     End If
@@ -918,7 +922,7 @@ Public Class clsXTandemResultsProcessor
                                 strSequenceWithMods = objSearchResults(intSearchResultIndex).PeptideCleanSequence & "_" & objSearchResults(intSearchResultIndex).PeptideModDescription
 
                                 Try
-                                    intProteinCount = CType(htSeqsWithMods(strSequenceWithMods), Integer)
+                                    intProteinCount = DirectCast(htSeqsWithMods(strSequenceWithMods), Integer)
                                 Catch ex As Exception
                                     intProteinCount = 1
                                 End Try
@@ -956,7 +960,7 @@ Public Class clsXTandemResultsProcessor
                                     SaveXTandemResultsFileEntry(objSearchResults(intSearchResultIndex), swPeptideResultsFile)
                                 End If
 
-                                MyBase.SaveResultsFileEntrySeqInfo(CType(objSearchResults(intSearchResultIndex), clsSearchResultsBaseClass), blnUpdateResultToSeqMapFile)
+                                MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResults(intSearchResultIndex), clsSearchResultsBaseClass), blnUpdateResultToSeqMapFile)
 
                             Next intSearchResultIndex
 
@@ -1432,7 +1436,8 @@ Public Class clsXTandemResultsProcessor
                                 .PeptideBScore & SEP_CHAR & _
                                 .PeptideBIons & SEP_CHAR & _
                                 .PeptideDeltaMass & SEP_CHAR & _
-                                .PeptideIntensity)
+                                .PeptideIntensity & SEP_CHAR & _
+                                MyBase.NumToString(.PeptideDeltaMassCorrectedPpm, 4, True))
         End With
 
     End Sub

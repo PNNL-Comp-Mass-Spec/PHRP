@@ -7,8 +7,8 @@ Option Strict On
 ' Copyright 2006, Battelle Memorial Institute.  All Rights Reserved.
 ' Started January 6, 2006
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -27,7 +27,7 @@ Option Strict On
 Public MustInherit Class clsPHRPBaseClass
 
     Public Sub New()
-        mFileDate = "July 22, 2010"
+        mFileDate = "August 18, 2011"
         InitializeLocalVariables()
     End Sub
 
@@ -43,6 +43,8 @@ Public MustInherit Class clsPHRPBaseClass
     Public Const INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX As String = "_fht.txt"
     Public Const INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX As String = "_Fscore_fht.txt"
 
+    Public Const MSGFDB_RESULTS_FILE_SUFFIX As String = "_msgfdb.txt"
+
     Public Const FILENAME_SUFFIX_RESULT_TO_SEQ_MAP As String = "_ResultToSeqMap.txt"
     Public Const FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP As String = "_SeqToProteinMap.txt"
 
@@ -56,6 +58,7 @@ Public MustInherit Class clsPHRPBaseClass
         SequestFirstHitsFile = 2
         XTandemXMLFile = 3
         InSpectTXTFile = 4
+        MSGFDbTXTFile = 5
     End Enum
 
     Public Enum ePHRPErrorCodes
@@ -103,14 +106,17 @@ Public MustInherit Class clsPHRPBaseClass
     Protected mCreateModificationSummaryFile As Boolean
 
     ' The following two options are only used by the clsInSpecTResultsProcessor
-    Protected mCreateInspectSynopsisFile As Boolean
-    Protected mCreateInspectFirstHitsFile As Boolean
+    Protected mCreateInspectOrMSGFDbSynopsisFile As Boolean
+    Protected mCreateInspectOrMSGFDbFirstHitsFile As Boolean
 
     Protected mMassCorrectionTagsFilePath As String
     Protected mModificationDefinitionsFilePath As String
     Protected mSearchToolParameterFilePath As String            ' At present, only used by clsInSpecTResultsProcessor
 
     Protected mInspectSynopsisFilePValueThreshold As Single     ' Only used by clsInSpecTResultsProcessor; note that lower p-values are higher confidence results
+
+    Protected mMSGFDBSynopsisFilePValueThreshold As Single      ' Only used by clsMSGFDBResultsProcessor; note that lower p-values are higher confidence results
+    Protected mMSGFDBSynopsisFileSpecProbThreshold As Single    ' Only used by clsMSGFDBResultsProcessor; note that lower SpecProb values are higher confidence results
 
     Protected mEnzymeMatchSpec As clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType
     Protected mPeptideNTerminusMassChange As Double             ' This is ignored if equal to 0; typical non-zero value is 1.0078246
@@ -159,19 +165,37 @@ Public MustInherit Class clsPHRPBaseClass
 
     Public Property CreateInspectFirstHitsFile() As Boolean
         Get
-            Return mCreateInspectFirstHitsFile
+            Return mCreateInspectOrMSGFDbFirstHitsFile
         End Get
         Set(ByVal value As Boolean)
-            mCreateInspectFirstHitsFile = value
+            mCreateInspectOrMSGFDbFirstHitsFile = value
         End Set
     End Property
 
     Public Property CreateInspectSynopsisFile() As Boolean
         Get
-            Return mCreateInspectSynopsisFile
+            Return mCreateInspectOrMSGFDbSynopsisFile
         End Get
         Set(ByVal value As Boolean)
-            mCreateInspectSynopsisFile = value
+            mCreateInspectOrMSGFDbSynopsisFile = value
+        End Set
+    End Property
+
+    Public Property CreateMSGFDBFirstHitsFile() As Boolean
+        Get
+            Return mCreateInspectOrMSGFDbFirstHitsFile
+        End Get
+        Set(ByVal value As Boolean)
+            mCreateInspectOrMSGFDbFirstHitsFile = value
+        End Set
+    End Property
+
+    Public Property CreateMSGFDBSynopsisFile() As Boolean
+        Get
+            Return mCreateInspectOrMSGFDbSynopsisFile
+        End Get
+        Set(ByVal value As Boolean)
+            mCreateInspectOrMSGFDbSynopsisFile = value
         End Set
     End Property
 
@@ -216,6 +240,7 @@ Public MustInherit Class clsPHRPBaseClass
             mInspectSynopsisFilePValueThreshold = value
         End Set
     End Property
+
     Public Property MassCorrectionTagsFilePath() As String
         Get
             Return mMassCorrectionTagsFilePath
@@ -231,6 +256,24 @@ Public MustInherit Class clsPHRPBaseClass
         End Get
         Set(ByVal Value As String)
             mModificationDefinitionsFilePath = Value
+        End Set
+    End Property
+
+    Public Property MSGFDBSynopsisFilePValueThreshold() As Single
+        Get
+            Return mMSGFDBSynopsisFilePValueThreshold
+        End Get
+        Set(value As Single)
+            mMSGFDBSynopsisFilePValueThreshold = value
+        End Set
+    End Property
+
+    Public Property MSGFDBSynopsisFileSpecProbThreshold As Single
+        Get
+            Return mMSGFDBSynopsisFileSpecProbThreshold
+        End Get
+        Set(value As Single)
+            mMSGFDBSynopsisFileSpecProbThreshold = value
         End Set
     End Property
 
@@ -287,33 +330,6 @@ Public MustInherit Class clsPHRPBaseClass
         mAbortProcessing = True
     End Sub
 
-    Protected Function CheckSeqToProteinMapDefined(ByVal intUniqueSeqID As Integer, ByVal strProteinName As String) As Boolean
-        ' Returns True if the sequence to protein map was already defined
-        ' Returns False if the mapping was not defined (will also update mSeqToProteinMap)
-
-        Dim strKey As String
-        Dim blnExistingMapFound As Boolean
-
-        blnExistingMapFound = False
-
-        Try
-            If strProteinName Is Nothing Then strProteinName = String.Empty
-
-            strKey = intUniqueSeqID.ToString & UNIQUE_SEQ_TO_PROTEIN_MAP_SEP & strProteinName
-
-            If mSeqToProteinMap.ContainsKey(strKey) Then
-                blnExistingMapFound = True
-            Else
-                mSeqToProteinMap.Add(strKey, 1)
-                blnExistingMapFound = False
-            End If
-        Catch ex As Exception
-            blnExistingMapFound = False
-        End Try
-
-        Return blnExistingMapFound
-    End Function
-
     Public Shared Function AutoDefinePeptideHitResultsFilePath(ByVal ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants, _
                                                                ByVal strSourceFolderPath As String, _
                                                                ByVal strBaseName As String) As String
@@ -331,6 +347,9 @@ Public MustInherit Class clsPHRPBaseClass
 
                 Case ePeptideHitResultsFileFormatConstants.InSpectTXTFile
                     Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & INSPECT_RESULTS_FILE_SUFFIX)
+
+                Case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+                    Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & MSGFDB_RESULTS_FILE_SUFFIX)
 
                 Case Else
                     ' Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
@@ -376,6 +395,33 @@ Public MustInherit Class clsPHRPBaseClass
 
         ' No match; return empty
         Return String.Empty
+    End Function
+
+    Protected Function CheckSeqToProteinMapDefined(ByVal intUniqueSeqID As Integer, ByVal strProteinName As String) As Boolean
+        ' Returns True if the sequence to protein map was already defined
+        ' Returns False if the mapping was not defined (will also update mSeqToProteinMap)
+
+        Dim strKey As String
+        Dim blnExistingMapFound As Boolean
+
+        blnExistingMapFound = False
+
+        Try
+            If strProteinName Is Nothing Then strProteinName = String.Empty
+
+            strKey = intUniqueSeqID.ToString & UNIQUE_SEQ_TO_PROTEIN_MAP_SEP & strProteinName
+
+            If mSeqToProteinMap.ContainsKey(strKey) Then
+                blnExistingMapFound = True
+            Else
+                mSeqToProteinMap.Add(strKey, 1)
+                blnExistingMapFound = False
+            End If
+        Catch ex As Exception
+            blnExistingMapFound = False
+        End Try
+
+        Return blnExistingMapFound
     End Function
 
     Protected Function CleanupFilePaths(ByRef strInputFilePath As String, ByRef strOutputFolderPath As String) As Boolean
@@ -438,6 +484,9 @@ Public MustInherit Class clsPHRPBaseClass
         ElseIf System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE.ToLower) Then
             Return ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
+        ElseIf System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE.ToLower) Then
+            Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+
         Else
             ' Unknown extension
             Return ePeptideHitResultsFileFormatConstants.AutoDetermine
@@ -477,6 +526,112 @@ Public MustInherit Class clsPHRPBaseClass
         Catch ex As Exception
         End Try
     End Sub
+
+    Protected Sub ComputePseudoPeptideLocInProtein(ByRef objSearchResult As clsSearchResultsBaseClass)
+
+        With objSearchResult
+
+            ' Set these to 1 and 10000 since MSGFDB, Sequest, and Inspect results files do not contain protein sequence information
+            ' If we find later that the peptide sequence spans the length of the protein, we'll revise .ProteinSeqResidueNumberEnd as needed
+            .ProteinSeqResidueNumberStart = 1
+            .ProteinSeqResidueNumberEnd = 10000
+
+            If .PeptidePreResidues.Trim.EndsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST) Then
+                ' The peptide is at the N-Terminus of the protein
+                .PeptideLocInProteinStart = .ProteinSeqResidueNumberStart
+                .PeptideLocInProteinEnd = .PeptideLocInProteinStart + .PeptideCleanSequence.Length - 1
+
+                If .PeptidePostResidues.Trim.Chars(0) = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST Then
+                    ' The peptide spans the entire length of the protein
+                    .ProteinSeqResidueNumberEnd = .PeptideLocInProteinEnd
+                Else
+                    If .PeptideLocInProteinEnd > .ProteinSeqResidueNumberEnd Then
+                        ' The peptide is more than 10000 characters long; this is highly unlikely, but we'll update .ProteinSeqResidueNumberEnd as needed
+                        .ProteinSeqResidueNumberEnd = .PeptideLocInProteinEnd + 1
+                    End If
+                End If
+            ElseIf .PeptidePostResidues.Trim.StartsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST) Then
+                ' The peptide is at the C-Terminus of the protein
+                .PeptideLocInProteinEnd = .ProteinSeqResidueNumberEnd
+                .PeptideLocInProteinStart = .PeptideLocInProteinEnd - .PeptideCleanSequence.Length + 1
+
+                If .PeptideLocInProteinStart < .ProteinSeqResidueNumberStart Then
+                    ' The peptide is more than 10000 characters long; this is highly unlikely
+                    .ProteinSeqResidueNumberEnd = .ProteinSeqResidueNumberStart + 1 + .PeptideCleanSequence.Length
+                    .PeptideLocInProteinEnd = .ProteinSeqResidueNumberEnd
+                    .PeptideLocInProteinStart = .PeptideLocInProteinEnd - .PeptideCleanSequence.Length + 1
+                End If
+            Else
+                .PeptideLocInProteinStart = .ProteinSeqResidueNumberStart + 1
+                .PeptideLocInProteinEnd = .PeptideLocInProteinStart + .PeptideCleanSequence.Length - 1
+
+                If .PeptideLocInProteinEnd > .ProteinSeqResidueNumberEnd Then
+                    ' The peptide is more than 10000 characters long; this is highly unlikely, but we'll update .ProteinSeqResidueNumberEnd as needed
+                    .ProteinSeqResidueNumberEnd = .PeptideLocInProteinEnd + 1
+                End If
+            End If
+
+        End With
+
+    End Sub
+
+    ''' <summary>
+    ''' If intColumnIndex is >= 0 then updates strValue with the value at strSplitLine(intColumnIndex)
+    ''' Otherwise, updates strValue to String.Empty
+    ''' </summary>
+    ''' <returns>True if intColumnIndex >= 0</returns>
+    ''' <remarks></remarks>
+    Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef strValue As String) As Boolean
+        Return GetColumnValue(strSplitLine, intColumnIndex, strValue, String.Empty)
+    End Function
+
+    ''' <summary>
+    ''' If intColumnIndex is >= 0 then updates intValue with the value at strSplitLine(intColumnIndex)
+    ''' Otherwise, updates intValue to 0
+    ''' </summary>
+    ''' <returns>True if intColumnIndex >= 0</returns>
+    ''' <remarks></remarks>
+    Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef intValue As Integer) As Boolean
+        Return GetColumnValue(strSplitLine, intColumnIndex, intValue, 0)
+    End Function
+
+    ''' <summary>
+    ''' If intColumnIndex is >= 0 then updates strValue with the value at strSplitLine(intColumnIndex)
+    ''' Otherwise, updates strValue to strValueIfMissing
+    ''' </summary>
+    ''' <returns>True if intColumnIndex >= 0</returns>
+    ''' <remarks></remarks>
+    Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef strValue As String, ByVal strValueIfMissing As String) As Boolean
+        If intColumnIndex >= 0 Then
+            strValue = String.Copy(strSplitLine(intColumnIndex))
+            Return True
+        Else
+            strValue = String.Copy(strValueIfMissing)
+            Return False
+        End If
+    End Function
+
+    ''' <summary>
+    ''' If intColumnIndex is >= 0 then updates intValue with the value at strSplitLine(intColumnIndex)
+    ''' Otherwise, updates strValue to intValueIfMissing
+    ''' </summary>
+    ''' <returns>True if intColumnIndex >= 0</returns>
+    ''' <remarks></remarks>
+    Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef intValue As Integer, ByVal intValueIfMissing As Integer) As Boolean
+        Dim strValue As String = String.Empty
+
+        If GetColumnValue(strSplitLine, intColumnIndex, strValue, intValueIfMissing.ToString) Then
+            If Integer.TryParse(strValue, intValue) Then
+                Return True
+            Else
+                intValue = intValueIfMissing
+                Return False
+            End If
+        Else
+            intValue = intValueIfMissing
+            Return False
+        End If
+    End Function
 
     Protected Function GetErrorMessage() As String
         ' Returns String.Empty if no error
@@ -550,14 +705,17 @@ Public MustInherit Class clsPHRPBaseClass
 
         mCreateModificationSummaryFile = True
 
-        mCreateInspectFirstHitsFile = True
-        mCreateInspectSynopsisFile = True
+        mCreateInspectOrMSGFDbFirstHitsFile = True
+        mCreateInspectOrMSGFDbSynopsisFile = True
 
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
         mSearchToolParameterFilePath = String.Empty
 
         mInspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+
+        mMSGFDBSynopsisFilePValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+        mMSGFDBSynopsisFileSpecProbThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD
 
         mEnzymeMatchSpec = clsPeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec()
 
@@ -711,6 +869,39 @@ Public MustInherit Class clsPHRPBaseClass
         End Try
 
         Return True
+
+    End Function
+
+    Protected Function NumToString(ByVal intNumber As Integer, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
+        Return intNumber.ToString()
+    End Function
+
+    Protected Function NumToString(ByVal sngNumber As Single, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
+        Return NumToString(CDbl(sngNumber), intDigitsOfPrecision, blnRemoveDecimalsWhenZero)
+    End Function
+
+    Protected Function NumToString(ByVal dblNumber As Double, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
+        Static strFormatString As String = "0"
+        Static intFormatStringPrecision As Integer = 0
+
+        If blnRemoveDecimalsWhenZero AndAlso dblNumber = 0 Then
+            Return "0"
+        Else
+            If intFormatStringPrecision <> intDigitsOfPrecision Then
+                ' Update strFormatString
+                If intDigitsOfPrecision <= 0 Then
+                    strFormatString = "0"
+                Else
+                    strFormatString = "0."
+                    For intIndex As Integer = 0 To intDigitsOfPrecision
+                        strFormatString &= "0"
+                    Next
+                End If
+                intFormatStringPrecision = intDigitsOfPrecision
+            End If
+
+            Return dblNumber.ToString(strFormatString)
+        End If
 
     End Function
 
@@ -965,8 +1156,8 @@ Public MustInherit Class clsPHRPBaseClass
         Implements System.Collections.IComparer
 
         Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-            Dim xData As udtSearchOptionModificationInfoType = CType(x, udtSearchOptionModificationInfoType)
-            Dim yData As udtSearchOptionModificationInfoType = CType(y, udtSearchOptionModificationInfoType)
+            Dim xData As udtSearchOptionModificationInfoType = DirectCast(x, udtSearchOptionModificationInfoType)
+            Dim yData As udtSearchOptionModificationInfoType = DirectCast(y, udtSearchOptionModificationInfoType)
 
             If xData.SortOrder > yData.SortOrder Then
                 Return 1
@@ -988,8 +1179,8 @@ Public MustInherit Class clsPHRPBaseClass
         Implements System.Collections.IComparer
 
         Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-            Dim xData As udtModNameAndResidueLocType = CType(x, udtModNameAndResidueLocType)
-            Dim yData As udtModNameAndResidueLocType = CType(y, udtModNameAndResidueLocType)
+            Dim xData As udtModNameAndResidueLocType = DirectCast(x, udtModNameAndResidueLocType)
+            Dim yData As udtModNameAndResidueLocType = DirectCast(y, udtModNameAndResidueLocType)
 
             If xData.ResidueLocInPeptide > yData.ResidueLocInPeptide Then
                 Return 1

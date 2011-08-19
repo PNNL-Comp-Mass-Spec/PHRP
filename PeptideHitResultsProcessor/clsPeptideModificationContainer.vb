@@ -10,8 +10,8 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Program started January 5, 2006
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -329,16 +329,51 @@ Public Class clsPeptideModificationContainer
                         End If
 
                         If Not blnExistingModFound AndAlso eResidueTerminusState <> eResidueTerminusStateConstants.None Then
+
                             Select Case eResidueTerminusState
-                                Case eResidueTerminusStateConstants.PeptideNTerminus, eResidueTerminusStateConstants.ProteinNTerminus, eResidueTerminusStateConstants.ProteinNandCCTerminus
+                                Case eResidueTerminusStateConstants.ProteinNTerminus, eResidueTerminusStateConstants.ProteinNandCCTerminus
+                                    If mModifications(intIndex).TargetResiduesContain(N_TERMINAL_PROTEIN_SYMBOL_DMS) Then
+                                        blnExistingModFound = True
+                                    End If
+                                Case eResidueTerminusStateConstants.PeptideNTerminus
                                     If mModifications(intIndex).TargetResiduesContain(N_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
                                         blnExistingModFound = True
                                     End If
-                                Case eResidueTerminusStateConstants.PeptideCTerminus, eResidueTerminusStateConstants.ProteinCTerminus
-                                    If mModifications(intIndex).TargetResiduesContain(C_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
-                                        blnExistingModFound = True
-                                    End If
                             End Select
+
+                            If Not blnExistingModFound Then
+                                Select Case eResidueTerminusState
+                                    Case eResidueTerminusStateConstants.ProteinCTerminus, eResidueTerminusStateConstants.ProteinNandCCTerminus
+                                        If mModifications(intIndex).TargetResiduesContain(C_TERMINAL_PROTEIN_SYMBOL_DMS) Then
+                                            blnExistingModFound = True
+                                        End If
+                                    Case eResidueTerminusStateConstants.PeptideCTerminus
+                                        If mModifications(intIndex).TargetResiduesContain(C_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
+                                            blnExistingModFound = True
+                                        End If
+                                End Select
+                            End If
+
+                            If Not blnExistingModFound AndAlso _
+                                (eResidueTerminusState = eResidueTerminusStateConstants.ProteinNTerminus OrElse _
+                                 eResidueTerminusState = eResidueTerminusStateConstants.ProteinNandCCTerminus) Then
+
+                                ' Protein N-Terminus residue could also match a Peptide N-terminal mod; check for this
+                                If mModifications(intIndex).TargetResiduesContain(N_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
+                                    blnExistingModFound = True
+                                End If
+                            End If
+
+                            If Not blnExistingModFound AndAlso _
+                                (eResidueTerminusState = eResidueTerminusStateConstants.ProteinCTerminus OrElse _
+                                 eResidueTerminusState = eResidueTerminusStateConstants.ProteinNandCCTerminus) Then
+
+                                ' Protein C-Terminus residue could also match a Peptide C-terminal mod; check for this
+                                If mModifications(intIndex).TargetResiduesContain(C_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
+                                    blnExistingModFound = True
+                                End If
+                            End If
+
                         End If
 
                         If blnExistingModFound Then
@@ -432,17 +467,20 @@ Public Class clsPeptideModificationContainer
         ' Compare against modifications with empty .TargetResidues
         For intIndex = 0 To mModificationCount - 1
             If (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
-               mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
-               mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
-               mModifications(intIndex).TargetResidues.Length = 0 Then
+                mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
+                mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
+                mModifications(intIndex).TargetResidues.Length = 0 Then
+
                 If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
                     ' Matching mass found
                     Return mModifications(intIndex)
                 End If
+
             End If
         Next intIndex
 
         ' Still no match; look for the modification mass and residue in mStandardRefinementModifications
+        ' Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing
         If Not chTargetResidue = Nothing Then
             For intIndex = 0 To mStandardRefinementModifications.Length - 1
                 If Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
@@ -479,6 +517,7 @@ Public Class clsPeptideModificationContainer
         Else
             strTargetResidues = chTargetResidue
         End If
+
         If eResidueTerminusState <> eResidueTerminusStateConstants.None Then
             ' Assume this is a terminus mod
             Select Case eResidueTerminusState

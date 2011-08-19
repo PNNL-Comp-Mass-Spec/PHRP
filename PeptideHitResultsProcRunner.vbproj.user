@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>/i:QC_Shew_07_02_pt5_27Aug07_Sphinx_07-04-11_inspect.txt /m:Inspect_NoMods_FTHybrid_ModDefs.txt /n:Inspect_NoMods_FTHybrid.txt /t:Mass_Correction_Tags.txt</StartArguments>
+    <StartArguments>QC_Shew_11_03_0pt5_10uL_18Aug11_Cougar_11-05-36_syn.txt /T:Mass_Correction_Tags.txt /M:sequest_N14_NE_Dyn_Met_Oxy_ModDefs.txt</StartArguments>
   </PropertyGroup>
 </Project>

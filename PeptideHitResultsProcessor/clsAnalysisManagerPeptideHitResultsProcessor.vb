@@ -281,6 +281,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
                 Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
                     m_PeptideHitResultsProcessor = New clsInSpecTResultsProcessor
 
+                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+                    m_PeptideHitResultsProcessor = New clsMSGFDBResultsProcessor
+
                 Case Else
                     ' Unknown format; cannot continue
                     LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " & m_PeptideHitResultsFileFormat.ToString, Nothing)
@@ -398,10 +401,16 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         'Define the peptide hit results format based on the analysis tool name
         If m_AnalysisToolName.ToLower.IndexOf("xtandem") >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
+
         ElseIf m_AnalysisToolName.ToLower.IndexOf("sequest") >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
+
         ElseIf m_AnalysisToolName.ToLower.IndexOf("inspect") >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
+
+        ElseIf m_AnalysisToolName.ToLower.IndexOf("msgfdb") >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+
         ElseIf m_AnalysisToolName.ToLower.IndexOf("dataextractor") >= 0 Then
             ' Data Extractor step-tool; we'll need to auto-determine the results format
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine

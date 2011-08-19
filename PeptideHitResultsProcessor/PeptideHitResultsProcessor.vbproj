@@ -102,6 +102,7 @@
     <Compile Include="clsModificationDefinition.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="clsMSGFDBResultsProcessor.vb" />
     <Compile Include="clsPeptideCleavageStateCalculator.vb">
       <SubType>Code</SubType>
     </Compile>
@@ -118,6 +119,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="clsSearchResultsInSpecT.vb" />
+    <Compile Include="clsSearchResultsMSGFDB.vb" />
     <Compile Include="clsSearchResultsSequest.vb">
       <SubType>Code</SubType>
     </Compile>

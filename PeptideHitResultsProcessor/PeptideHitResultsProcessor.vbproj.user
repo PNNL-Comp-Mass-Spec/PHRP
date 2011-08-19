@@ -22,7 +22,8 @@
     <RemoteDebugMachine>
     </RemoteDebugMachine>
     <StartAction>Project</StartAction>
-    <StartArguments>/I:"F:\My Documents\DataAnalysis\2009\2009December_MitoDatasets_HeeJung\AnalysisJob_Import_Work\Mito_OG12_4ug_090709\Seq200912131730_Manual553183\*_syn.txt" /M:sequest_N14_NE_Dyn_C_Iodo_Met_Oxy_N-term_Carbamyl_ModDefs.txt /T:Mass_Correction_Tags.txt</StartArguments>
+    <StartArguments>
+    </StartArguments>
     <StartPage>
     </StartPage>
     <StartProgram>

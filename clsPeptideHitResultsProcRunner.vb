@@ -9,8 +9,8 @@ Imports PeptideHitResultsProcessor.clsPHRPBaseClass
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Program started January 6, 2006
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -61,8 +61,8 @@ Public Class clsPeptideHitResultsProcRunner
     Protected mSearchToolParameterFilePath As String
 
     ' These should default to True
-    Protected mCreateInspectFirstHitsFile As Boolean = True
-    Protected mCreateInspectSynopsisFile As Boolean = True
+    Protected mCreateInspectOrMSGFDBFirstHitsFile As Boolean = True
+    Protected mCreateInspectOrMSGFDBSynopsisFile As Boolean = True
     Protected mInspectSynopsisFilePValueThreshold As Single
 
     Protected WithEvents mPeptideHitResultsProcessor As PeptideHitResultsProcessor.clsPHRPBaseClass
@@ -73,21 +73,21 @@ Public Class clsPeptideHitResultsProcRunner
 
 #Region "Properties"
 
-    Public Property CreateInspectFirstHitsFile() As Boolean
+    Public Property CreateInspectOrMSGFDbFirstHitsFile() As Boolean
         Get
-            Return mCreateInspectFirstHitsFile
+            Return mCreateInspectOrMSGFDBFirstHitsFile
         End Get
         Set(ByVal value As Boolean)
-            mCreateInspectFirstHitsFile = value
+            mCreateInspectOrMSGFDBFirstHitsFile = value
         End Set
     End Property
 
-    Public Property CreateInspectSynopsisFile() As Boolean
+    Public Property CreateInspectOrMSGFDbSynopsisFile() As Boolean
         Get
-            Return mCreateInspectSynopsisFile
+            Return mCreateInspectOrMSGFDBSynopsisFile
         End Get
         Set(ByVal value As Boolean)
-            mCreateInspectSynopsisFile = value
+            mCreateInspectOrMSGFDBSynopsisFile = value
         End Set
     End Property
 
@@ -199,8 +199,8 @@ Public Class clsPeptideHitResultsProcRunner
         mModificationDefinitionsFilePath = String.Empty
         mSearchToolParameterFilePath = String.Empty
 
-        mCreateInspectFirstHitsFile = False
-        mCreateInspectSynopsisFile = False
+        mCreateInspectOrMSGFDBFirstHitsFile = False
+        mCreateInspectOrMSGFDBSynopsisFile = False
         mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
         mWarnMissingParameterFileSection = True
@@ -369,6 +369,9 @@ Public Class clsPeptideHitResultsProcRunner
                                 Case ePeptideHitResultsFileFormatConstants.InSpectTXTFile
                                     mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsInSpecTResultsProcessor
 
+                                Case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+                                    mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMSGFDBResultsProcessor
+
                                 Case Else
                                     ' Unknown format
                                     blnSuccess = False
@@ -383,9 +386,12 @@ Public Class clsPeptideHitResultsProcRunner
                                     .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
                                     .SearchToolParameterFilePath = mSearchToolParameterFilePath
 
-                                    .CreateInspectFirstHitsFile = mCreateInspectFirstHitsFile
-                                    .CreateInspectSynopsisFile = mCreateInspectSynopsisFile
+                                    .CreateInspectFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
+                                    .CreateInspectSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
                                     .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
+
+                                    .CreateMSGFDBFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
+                                    .CreateMSGFDBSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
 
                                     .WarnMissingParameterFileSection = mWarnMissingParameterFileSection
                                 End With

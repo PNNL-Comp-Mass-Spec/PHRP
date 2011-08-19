@@ -10,13 +10,13 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Program started January 2, 2006
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "August 10, 2011"
+    Public Const PROGRAM_DATE As String = "August 18, 2011"
 
     Private mInputFilePath As String
     Private mOutputFolderName As String                         ' Optional
@@ -26,9 +26,13 @@ Module modMain
     Private mModificationDefinitionsFilePath As String          ' Optional
     Private mSearchToolParameterFilePath As String              ' Optional
 
-    Private mCreateInspectFirstHitsFile As Boolean
-    Private mCreateInspectSynopsisFile As Boolean
+    Private mCreateInspectOrMSGFDBFirstHitsFile As Boolean
+    Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
+
     Private mInspectSynopsisFilePValueThreshold As Single       ' Optional
+
+    Private mMSGFDBSynopsisFilePValueThreshold As Single
+    Private mMSGFDBSynopsisFileSpecProbThreshold As Single
 
     Private mOutputFolderAlternatePath As String                ' Optional
     Private mRecreateFolderHierarchyInAlternatePath As Boolean  ' Optional
@@ -81,11 +85,14 @@ Module modMain
         mMassCorrectionTagsFilePath = String.Empty
         mModificationDefinitionsFilePath = String.Empty
         mSearchToolParameterFilePath = String.Empty
-        
+
         ' These should default to True
-        mCreateInspectFirstHitsFile = True
-        mCreateInspectSynopsisFile = True
+        mCreateInspectOrMSGFDBFirstHitsFile = True
+        mCreateInspectOrMSGFDBSynopsisFile = True
         mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+
+        mMSGFDBSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+        mMSGFDBSynopsisFileSpecProbThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD
 
         mRecurseFolders = False
         mRecurseFoldersMaxLevels = 0
@@ -121,8 +128,8 @@ Module modMain
 
                     .WarnMissingParameterFileSection = True
 
-                    .CreateInspectFirstHitsFile = mCreateInspectFirstHitsFile
-                    .CreateInspectSynopsisFile = mCreateInspectSynopsisFile
+                    .CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
+                    .CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
                     .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
                 End With
 
@@ -156,11 +163,13 @@ Module modMain
     End Function
 
     Private Sub DisplayProgressPercent(ByVal intPercentComplete As Integer, ByVal blnAddCarriageReturn As Boolean)
+
         If blnAddCarriageReturn Then
             Console.WriteLine()
         End If
         If intPercentComplete > 100 Then intPercentComplete = 100
         Console.Write("Processing: " & intPercentComplete.ToString & "% ")
+
         If blnAddCarriageReturn Then
             Console.WriteLine()
         End If
@@ -230,13 +239,13 @@ Module modMain
 
                     If .RetrieveValueForParameter("InsFHT", strValue) Then
                         If ParseBoolean(strValue, blnValue) Then
-                            mCreateInspectFirstHitsFile = blnValue
+                            mCreateInspectOrMSGFDBFirstHitsFile = blnValue
                         End If
                     End If
 
                     If .RetrieveValueForParameter("InsSyn", strValue) Then
                         If ParseBoolean(strValue, blnValue) Then
-                            mCreateInspectSynopsisFile = blnValue
+                            mCreateInspectOrMSGFDBSynopsisFile = blnValue
                         End If
                     End If
 
@@ -299,8 +308,8 @@ Module modMain
             Console.WriteLine("Use /N to specify the parameter file provided to the search tool.  This is only used when processing Inspect files.")
             Console.WriteLine()
             Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file.  The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD.ToString() & " or an FScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD & " will also be included in the synopsis file.")
-            Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_inspect_fht.txt) when processing Inspect results")
-            Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_inspect_syn.txt) when processing Inspect results")
+            Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when processing Inspect or MSGF-DB results")
+            Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when processing Inspect or MSGF-DB results")
             Console.WriteLine()
             Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
             Console.WriteLine("When using /S, you can redirect the output of the results using /A.")
@@ -315,8 +324,8 @@ Module modMain
 
             Console.WriteLine()
 
-            Console.WriteLine("E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com")
-            Console.WriteLine("Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/")
+            Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
+            Console.WriteLine("Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/")
 
             ' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
             System.Threading.Thread.Sleep(750)

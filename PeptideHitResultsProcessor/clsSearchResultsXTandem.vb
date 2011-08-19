@@ -7,8 +7,8 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Program started January 7, 2006
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -43,6 +43,9 @@ Public Class clsSearchResultsXTandem
 
     Protected mPeptideIntensity As String
     Protected mPeptideIntensityMax As String
+
+    Protected mPeptideDeltaMassCorrectedPpm As Double
+
 #End Region
 
 #Region "Properties"
@@ -132,6 +135,14 @@ Public Class clsSearchResultsXTandem
             mPeptideIntensityMax = Value
         End Set
     End Property
+    Public Property PeptideDeltaMassCorrectedPpm() As Double
+        Get
+            Return mPeptideDeltaMassCorrectedPpm
+        End Get
+        Set(value As Double)
+            mPeptideDeltaMassCorrectedPpm = value
+        End Set
+    End Property
 #End Region
 
     Public Sub New(ByRef objPeptideMods As clsPeptideModificationContainer)
@@ -156,6 +167,45 @@ Public Class clsSearchResultsXTandem
 
         mPeptideIntensity = String.Empty
         mPeptideIntensityMax = String.Empty
+
+        mPeptideDeltaMassCorrectedPpm = 0
+    End Sub
+
+    Public Sub ComputeDelMCorrected()
+
+        Dim dblDelM As Double
+        Dim intCorrectionCount As Integer = 0
+
+        Dim dblPrecursorMonoMass As Double
+
+        Dim blnParseError As Boolean = False
+
+        ' Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
+        ' (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
+        If Double.TryParse(mPeptideDeltaMass, dblDelM) Then
+
+            ' Negate dblDelM so that it represents observed - theoretical
+            dblDelM = -dblDelM
+
+            ' Compute the original value for the precursor monoisotopic mass
+            Dim dblParentIonMH As Double
+            If Double.TryParse(MyBase.ParentIonMH, dblParentIonMH) Then
+                dblPrecursorMonoMass = dblParentIonMH - clsPeptideMassCalculator.MASS_PROTON
+            Else
+                blnParseError = True
+            End If
+
+            If blnParseError Then
+                dblPrecursorMonoMass = mPeptideMonoisotopicMass + dblDelM
+            End If
+
+            Dim blnAdjustPrecursorMassForC13 As Boolean = True
+            mPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPublic(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, mPeptideMonoisotopicMass)
+
+        Else
+            mPeptideDeltaMassCorrectedPpm = 0
+        End If
+
     End Sub
 
     Protected Sub ComputePeptideDeltaCn2()
@@ -169,4 +219,5 @@ Public Class clsSearchResultsXTandem
             mPeptideDeltaCn2 = 0
         End Try
     End Sub
+
 End Class

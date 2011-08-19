@@ -12,8 +12,8 @@ Option Strict On
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 ' Program started January 2, 2006
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -34,7 +34,7 @@ Public Class clsSequestResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "July 20, 2006"
+        MyBase.mFileDate = "August 18, 2011"
         InitializeLocalVariables()
     End Sub
 
@@ -42,11 +42,12 @@ Public Class clsSequestResultsProcessor
     Public Const FILENAME_SUFFIX_FIRST_HITS_FILE As String = "_fht"
     Public Const FILENAME_SUFFIX_SYNOPSIS_FILE As String = "_syn"
 
-    Private Const SYNOPSIS_OR_FIRST_HITS_FILE_COLUMN_COUNT_EXPECTED As Integer = 19
-    Private Const ADDITIONAL_COLUMN_COUNT_APPENDED As Integer = 5
+    Private Const SEQUEST_SYN_FILE_MIN_COL_COUNT As Integer = 5
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
-    Public Enum eSynopsisFileColumns As Integer
+    ' These columns correspond to the tab-delimited file created directly by MSGF-DB
+    Protected Const SequestSynopsisFileColCount As Integer = 27
+    Public Enum eSequestSynopsisFileColumns As Integer
         RowIndex = 0
         Scan = 1
         NumScans = 2
@@ -63,15 +64,19 @@ Public Class clsSequestResultsProcessor
         RankXC = 13
         DelM = 14
         XcRatio = 15
-        PassFilt = 16
-        MScore = 17
+        PassFilt = 16                   ' Legacy/unused
+        MScore = 17                     ' Legacy/unused
         NTT = 18                        ' Number of tryptic terminii
-        Cleavage_State = 19             ' This column and the ones after it are computed by this program and appened to the input file or saved in a new file
-        Terminus_State = 20
-        Mod_Count = 21
-        Mod_Description = 22
-        Monoisotopic_Mass = 23
+        IonsObserved = 19               ' Added in August 2011
+        IonsExpected = 20               ' Added in August 2011 
+        DelMPPM = 21                    ' Added in August 2011
+        Cleavage_State = 22             ' This column and the ones after it are computed by this program and appended to the input file or saved in a new file
+        Terminus_State = 23
+        Mod_Count = 24
+        Mod_Description = 25
+        Monoisotopic_Mass = 26
     End Enum
+
 #End Region
 
 #Region "Structures"
@@ -219,10 +224,14 @@ Public Class clsSequestResultsProcessor
         Dim intResultsProcessed As Integer
 
         Dim blnSuccess As Boolean
+        Dim blnDataLine As Boolean
         Dim blnValidSearchResult As Boolean
         Dim blnFirstMatchForGroup As Boolean
 
-        Dim strErrorLog As String
+        Dim blnHeaderParsed As Boolean
+        Dim intColumnMapping() As Integer = Nothing
+
+        Dim strErrorLog As String = String.Empty
 
         Try
             ' Possibly reset the mass correction tags and Mod Definitions
@@ -249,6 +258,7 @@ Public Class clsSequestResultsProcessor
 
                 strErrorLog = String.Empty
                 intResultsProcessed = 0
+                blnHeaderParsed = False
 
                 ' Create the output files
                 blnSuccess = MyBase.InitializeSequenceOutputFiles(strInputFilePath)
@@ -258,7 +268,25 @@ Public Class clsSequestResultsProcessor
 
                     strLineIn = srDataFile.ReadLine
                     If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
-                        blnValidSearchResult = ParseSequestResultsFileEntry(strLineIn, objSearchResult, strErrorLog, intResultsProcessed)
+
+                        blnDataLine = True
+
+                        If Not blnHeaderParsed Then
+                            blnSuccess = ParseSequestSynFileHeaderLine(strLineIn, intColumnMapping)
+                            If blnSuccess Then
+                                blnDataLine = False
+                            Else
+                                ' Error parsing header; assume this is a data line
+                                blnDataLine = True
+                            End If
+                            blnHeaderParsed = True
+                        End If
+
+                        If blnDataLine Then
+                            blnValidSearchResult = ParseSequestResultsFileEntry(strLineIn, intColumnMapping, objSearchResult, strErrorLog)
+                        Else
+                            blnValidSearchResult = False
+                        End If
 
                         If blnValidSearchResult Then
                             strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.NumScans & "_" & objSearchResult.Charge & "_" & objSearchResult.PeptideMH
@@ -299,7 +327,7 @@ Public Class clsSequestResultsProcessor
                                     strErrorLog &= ControlChars.NewLine
                                 End If
                             End If
-                            MyBase.SaveResultsFileEntrySeqInfo(CType(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
+                            MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
                         End If
 
                         ' Update the progress
@@ -344,46 +372,16 @@ Public Class clsSequestResultsProcessor
 
     End Function
 
-    Private Function ParseSequestResultsFileEntry(ByRef strLineIn As String, ByRef objSearchResult As clsSearchResultsSequest, ByRef strErrorLog As String, ByVal intResultsProcessed As Integer) As Boolean
+    Private Function ParseSequestResultsFileEntry(ByRef strLineIn As String, _
+                                                  ByRef intColumnMapping() As Integer, _
+                                                  ByRef objSearchResult As clsSearchResultsSequest, _
+                                                  ByRef strErrorLog As String) As Boolean
 
-        Dim strSplitLine() As String
-        Dim strPeptideSequenceWithMods As String
+        Dim strSplitLine() As String = Nothing
+        Dim strPeptideSequenceWithMods As String = String.Empty
 
         Dim blnValidSearchResult As Boolean
         blnValidSearchResult = False
-
-        ' The following are the headers in the synopsis file
-        ' "RowIndex"
-        ' "Scan"
-        ' "NumScans"
-        ' "Charge"
-        ' "MH"
-        ' "XCorr"
-        ' "DeltaCn"
-        ' "Sp"
-        ' "Reference"
-        ' "MO"                  ' Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
-        ' "Peptide"
-        ' "DeltaCn2"
-        ' "RankSP"
-        ' "RankXC"
-        ' "DelM"
-        ' "XcRatio"
-        ' "PassFilt"
-        ' "MScore"
-        ' "NTT"
-
-
-        ' "Cleavage_State"
-        ' "Terminus_State"
-        ' "Mod_Count"
-        ' "Mod_Description"
-        ' "Monoisotopic_Mass"
-        ' "Cleavage_State"
-        ' "Terminus_State"
-        ' "Mod_Count"
-        ' "Mod_Description"
-        ' "Monoisotopic_Mass"
 
         Try
             ' Set this to False for now
@@ -393,95 +391,63 @@ Public Class clsSequestResultsProcessor
             objSearchResult.Clear()
 
             strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
-            If strSplitLine.Length < SYNOPSIS_OR_FIRST_HITS_FILE_COLUMN_COUNT_EXPECTED Then
+            If strSplitLine.Length < SEQUEST_SYN_FILE_MIN_COL_COUNT Then
                 Exit Try
             End If
 
-            If intResultsProcessed = 0 Then
-                ' This is the first line of the file; it may be a header row
-                ' Determine this by seeing if any of the first three columns contains a number
-                If Not (clsPHRPBaseClass.IsNumber(strSplitLine(0)) OrElse _
-                   clsPHRPBaseClass.IsNumber(strSplitLine(1)) OrElse _
-                   clsPHRPBaseClass.IsNumber(strSplitLine(2))) Then
-                    ' This is a header line; skip it
-                    blnValidSearchResult = False
-                    Exit Try
-                End If
-            End If
-
             With objSearchResult
-                .ResultID = Integer.Parse(strSplitLine(eSynopsisFileColumns.RowIndex))
-                .Scan = strSplitLine(eSynopsisFileColumns.Scan)
-                .NumScans = strSplitLine(eSynopsisFileColumns.NumScans)
-                .Charge = strSplitLine(eSynopsisFileColumns.Charge)
-                .PeptideMH = strSplitLine(eSynopsisFileColumns.PeptideMH)
-                .PeptideXCorr = strSplitLine(eSynopsisFileColumns.XCorr)
-                .PeptideDeltaCn = strSplitLine(eSynopsisFileColumns.DeltaCn)
-                .PeptideSp = strSplitLine(eSynopsisFileColumns.Sp)
-                .ProteinName = strSplitLine(eSynopsisFileColumns.ProteinName)
-                .MultipleProteinCount = strSplitLine(eSynopsisFileColumns.MultipleProteinCount)
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RowIndex), .ResultID) Then
+                    Throw New EvaluateException("RowIndex column is missing or invalid")
+                End If
 
-                ' Set these to 1 and 10000 since Sequest results files do not contain protein sequence information
-                ' If we find later that the peptide sequence spans the length of the protein, we'll revise .ProteinSeqResidueNumberEnd as needed
-                .ProteinSeqResidueNumberStart = 1
-                .ProteinSeqResidueNumberEnd = 10000
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Scan), .Scan)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NumScans), .NumScans)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Charge), .Charge)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideMH), .PeptideMH)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XCorr), .PeptideXCorr)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn), .PeptideDeltaCn)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Sp), .PeptideSp)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.ProteinName), .ProteinName)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MultipleProteinCount), .MultipleProteinCount)
 
-                strPeptideSequenceWithMods = strSplitLine(eSynopsisFileColumns.PeptideSequence)
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideSequence), strPeptideSequenceWithMods) Then
+                    Throw New EvaluateException("Peptide column is missing or invalid")
+                End If
 
                 ' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 .SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
 
-                If .PeptidePreResidues.Trim.EndsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST) Then
-                    ' The peptide is at the N-Terminus of the protein
-                    .PeptideLocInProteinStart = .ProteinSeqResidueNumberStart
-                    .PeptideLocInProteinEnd = .PeptideLocInProteinStart + .PeptideCleanSequence.Length - 1
+            End With
 
-                    If .PeptidePostResidues.Trim.Chars(0) = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST Then
-                        ' The peptide spans the entire length of the protein
-                        .ProteinSeqResidueNumberEnd = .PeptideLocInProteinEnd
-                    Else
-                        If .PeptideLocInProteinEnd > .ProteinSeqResidueNumberEnd Then
-                            ' The peptide is more than 10000 characters long; this is highly unlikely, but we'll update .ProteinSeqResidueNumberEnd as needed
-                            .ProteinSeqResidueNumberEnd = .PeptideLocInProteinEnd + 1
-                        End If
-                    End If
-                ElseIf .PeptidePostResidues.Trim.StartsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST) Then
-                    ' The peptide is at the C-Terminus of the protein
-                    .PeptideLocInProteinEnd = .ProteinSeqResidueNumberEnd
-                    .PeptideLocInProteinStart = .PeptideLocInProteinEnd - .PeptideCleanSequence.Length + 1
+            Dim objSearchResultBase As clsSearchResultsBaseClass
+            objSearchResultBase = DirectCast(objSearchResult, clsSearchResultsBaseClass)
 
-                    If .PeptideLocInProteinStart < .ProteinSeqResidueNumberStart Then
-                        ' The peptide is more than 10000 characters long; this is highly unlikely
-                        .ProteinSeqResidueNumberEnd = .ProteinSeqResidueNumberStart + 1 + .PeptideCleanSequence.Length
-                        .PeptideLocInProteinEnd = .ProteinSeqResidueNumberEnd
-                        .PeptideLocInProteinStart = .PeptideLocInProteinEnd - .PeptideCleanSequence.Length + 1
-                    End If
-                Else
-                    .PeptideLocInProteinStart = .ProteinSeqResidueNumberStart + 1
-                    .PeptideLocInProteinEnd = .PeptideLocInProteinStart + .PeptideCleanSequence.Length - 1
+            MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
 
-                    If .PeptideLocInProteinEnd > .ProteinSeqResidueNumberEnd Then
-                        ' The peptide is more than 10000 characters long; this is highly unlikely, but we'll update .ProteinSeqResidueNumberEnd as needed
-                        .ProteinSeqResidueNumberEnd = .PeptideLocInProteinEnd + 1
-                    End If
-                End If
+            With objSearchResult
 
                 ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
                 ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
                 ' will all be based on the first protein since Sequest only outputs the prefix and suffix letters for the first protein
                 .ComputePeptideCleavageStateInProtein()
 
-                .PeptideDeltaCn2 = strSplitLine(eSynopsisFileColumns.DeltaCn2)
-                .PeptideRankSP = strSplitLine(eSynopsisFileColumns.RankSP)
-                .PeptideRankXC = strSplitLine(eSynopsisFileColumns.RankXC)
-                .PeptideDeltaMass = strSplitLine(eSynopsisFileColumns.DelM)
-                .PeptideXcRatio = strSplitLine(eSynopsisFileColumns.XcRatio)
-                .PeptidePassFilt = strSplitLine(eSynopsisFileColumns.PassFilt)
-                .PeptideMScore = strSplitLine(eSynopsisFileColumns.MScore)
-                .PeptideNTT = strSplitLine(eSynopsisFileColumns.NTT)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn2), .PeptideDeltaCn2)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankSP), .PeptideRankSP)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankXC), .PeptideRankXC)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelM), .PeptideDeltaMass)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XcRatio), .PeptideXcRatio)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PassFilt), .PeptidePassFilt)           ' Legacy/Unused
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MScore), .PeptideMScore)               ' Legacy/Unused
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NTT), .PeptideNTT)
+
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsObserved), .IonsObserved)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsExpected), .IonsExpected)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelMPPM), .DelMPPM)
+
             End With
 
             blnValidSearchResult = True
+
         Catch ex As Exception
             ' Error parsing this row from the synopsis or first hits file
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
@@ -547,6 +513,71 @@ Public Class clsSequestResultsProcessor
         End Try
 
         Return blnSuccess
+
+    End Function
+
+    Private Function ParseSequestSynFileHeaderLine(ByVal strLineIn As String, _
+                                                   ByRef intColumnMapping() As Integer) As Boolean
+
+        ' Parse the header line
+
+        Dim strSplitLine() As String
+        Dim eResultFileColumn As eSequestSynopsisFileColumns
+        Dim lstColumnNames As System.Collections.Generic.SortedDictionary(Of String, eSequestSynopsisFileColumns)
+        lstColumnNames = New System.Collections.Generic.SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+
+        ReDim intColumnMapping(SequestSynopsisFileColCount - 1)
+
+        lstColumnNames.Add("HitNum", eSequestSynopsisFileColumns.RowIndex)
+        lstColumnNames.Add("ScanNum", eSequestSynopsisFileColumns.Scan)
+        lstColumnNames.Add("ScanCount", eSequestSynopsisFileColumns.NumScans)
+        lstColumnNames.Add("ChargeState", eSequestSynopsisFileColumns.Charge)
+        lstColumnNames.Add("MH", eSequestSynopsisFileColumns.PeptideMH)
+        lstColumnNames.Add("XCorr", eSequestSynopsisFileColumns.XCorr)
+        lstColumnNames.Add("DelCn", eSequestSynopsisFileColumns.DeltaCn)
+        lstColumnNames.Add("Sp", eSequestSynopsisFileColumns.Sp)
+        lstColumnNames.Add("Reference", eSequestSynopsisFileColumns.ProteinName)
+        lstColumnNames.Add("MultiProtein", eSequestSynopsisFileColumns.MultipleProteinCount)                     ' Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
+        lstColumnNames.Add("Peptide", eSequestSynopsisFileColumns.PeptideSequence)
+        lstColumnNames.Add("DelCn2", eSequestSynopsisFileColumns.DeltaCn2)
+        lstColumnNames.Add("RankSP", eSequestSynopsisFileColumns.RankSP)
+        lstColumnNames.Add("RankXC", eSequestSynopsisFileColumns.RankXC)
+        lstColumnNames.Add("DelM", eSequestSynopsisFileColumns.DelM)
+        lstColumnNames.Add("XcRatio", eSequestSynopsisFileColumns.XcRatio)
+        lstColumnNames.Add("PassFilt", eSequestSynopsisFileColumns.PassFilt)                ' Legacy/unused
+        lstColumnNames.Add("MScore", eSequestSynopsisFileColumns.MScore)                    ' Legacy/unused
+        lstColumnNames.Add("NumTrypticEnds", eSequestSynopsisFileColumns.NTT)
+        lstColumnNames.Add("Ions_Observed", eSequestSynopsisFileColumns.IonsObserved)
+        lstColumnNames.Add("Ions_Expected", eSequestSynopsisFileColumns.IonsExpected)
+        lstColumnNames.Add("DelM_PPM", eSequestSynopsisFileColumns.DelMPPM)
+
+        ' The following columns are computed by this program and appended to the input file or saved in a new file
+        lstColumnNames.Add("Cleavage_State", eSequestSynopsisFileColumns.Cleavage_State)
+        lstColumnNames.Add("Terminus_State", eSequestSynopsisFileColumns.Terminus_State)
+        lstColumnNames.Add("Mod_Count", eSequestSynopsisFileColumns.Mod_Count)
+        lstColumnNames.Add("Mod_Description", eSequestSynopsisFileColumns.Mod_Description)
+        lstColumnNames.Add("Monoisotopic_Mass", eSequestSynopsisFileColumns.Monoisotopic_Mass)
+
+        Try
+            ' Initialize each entry in intColumnMapping to -1
+            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+                intColumnMapping(intIndex) = -1
+            Next
+
+            strSplitLine = strLineIn.Split(ControlChars.Tab)
+            For intIndex As Integer = 0 To strSplitLine.Length - 1
+                If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
+                    ' Recognized column name; update intColumnMapping
+                    intColumnMapping(eResultFileColumn) = intIndex
+                End If
+            Next
+
+        Catch ex As Exception
+            SetErrorMessage("Error parsing header in Sequest synopsis file: " & ex.Message)
+            Return False
+        End Try
+
+        Return True
 
     End Function
 

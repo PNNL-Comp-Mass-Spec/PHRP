@@ -11,8 +11,8 @@ Option Strict On
 ' Program started January 7, 2006
 ' Last updated June 26, 2006
 '
-' E-mail: matthew.monroe@pnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -28,10 +28,11 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
-Public Class clsSearchResultsBaseClass
+Public MustInherit Class clsSearchResultsBaseClass
 
 #Region "Constants and Enums"
     Protected Const MASS_DIGITS_OF_PRECISION As Integer = 3
+    Public Const MASS_C13 As Double = 1.00335483
 #End Region
 
 #Region "Structures"
@@ -46,7 +47,7 @@ Public Class clsSearchResultsBaseClass
 #Region "Classwide Variables"
     ' Note: Many of these variables typically hold numbers but we're storing the numbers as strings
     '       to prevent the numeric representation from changing when converting to a number then back to a string
-    Protected mResultID As Integer                              ' RowIndex for Synopsis/First Hits files; auto-assigned for XTandem
+    Protected mResultID As Integer                              ' RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, and MSGFDB
     Protected mGroupID As Integer                               ' Group ID assigned by XTandem
     Protected mScan As String
     Protected mCharge As String
@@ -71,11 +72,13 @@ Public Class clsSearchResultsBaseClass
     Protected mPeptideCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
     Protected mPeptideTerminusState As clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants
 
-    Protected mPeptideMH As String                  ' In XTandem this is the theoretical monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, this is the monoisotopic MH, computed by this application
-    Protected mPeptideDeltaMass As String           ' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation); in Sequest this is Theoretical Mass - Observed Mass; The XTandem XML file stores DelM as Observed - Theoretical, but PHRP negates this to match Sequest; Inspect stores this value as Observed - Theoretical, but PHRP negates this to match Sequest
+    Protected mPeptideMH As String                  ' In XTandem this is the theoretical monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect and MSGFDB, this is the theoretical monoisotopic MH; note that this is (M+H)+
+    Protected mPeptideDeltaMass As String           ' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation); in Sequest this is Theoretical Mass - Observed Mass; The XTandem XML file stores DelM as Observed - Theoretical, but PHRP negates this to match Sequest; Inspect stores this value as Observed - Theoretical, but PHRP negates this to match Sequest; MSGFDB stores this value as Observed - Theoretical, but PHRP negates this to match Sequest
+
+    'Protected mPeptideDeltaMassCorrectedPpm As Double         ' Computed using either mPeptideDeltaMass (negating to bring back to Observed minus Theoretical) or using PrecursorMass - mPeptideMonoisotopicMass; In either case, we must add/subtract 1 until value is between -0.5 and 0.5, then convert to ppm (using mPeptideMonoisotopicMass for ppm basis)
 
     Protected mPeptideModDescription As String
-    Protected mPeptideMonoisotopicMass As Double
+    Protected mPeptideMonoisotopicMass As Double                ' Theoretical (computed) monoisotopic mass for a given peptide sequence, including any modified residues
 
     ' List of modifications present in the current peptide
     Protected mSearchResultModificationCount As Integer
@@ -176,7 +179,6 @@ Public Class clsSearchResultsBaseClass
             mProteinSeqResidueNumberStart = Value
         End Set
     End Property
-
     Public Property ProteinSeqResidueNumberEnd() As Integer
         Get
             Return mProteinSeqResidueNumberEnd
@@ -264,7 +266,15 @@ Public Class clsSearchResultsBaseClass
             mPeptideDeltaMass = Value
         End Set
     End Property
-
+    '' Unused
+    ''Public Property PeptideDeltaMassCorrectedPpm() As Double
+    ''    Get
+    ''        Return mPeptideDeltaMassCorrectedPpm
+    ''    End Get
+    ''    Set(ByVal Value As Double)
+    ''        mPeptideDeltaMassCorrectedPpm = Value
+    ''    End Set
+    ''End Property
     Public Property PeptideModDescription() As String
         Get
             Return mPeptideModDescription
@@ -366,7 +376,7 @@ Public Class clsSearchResultsBaseClass
 
         mPeptideMH = String.Empty
         mPeptideDeltaMass = String.Empty
-
+        
         mPeptideModDescription = String.Empty
         mPeptideMonoisotopicMass = 0
 
@@ -393,6 +403,60 @@ Public Class clsSearchResultsBaseClass
 
     End Sub
 
+    '' Unused
+    ''Protected MustOverride Sub ComputeDelMCorrected()
+
+    '' Unused
+    ''Protected Sub ComputeDelMCorrectedWork(ByVal dblDelM As Double, _
+    ''                                       ByVal dblPrecursorMonoMass As Double, _
+    ''                                       ByVal blnAdjustPrecursorMassForC13 As Boolean)
+
+    ''    mPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPublic(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, mPeptideMonoisotopicMass)
+
+    ''End Sub
+
+    Public Shared Function ComputeDelMCorrectedPublic(ByVal dblDelM As Double, _
+                                                      ByVal dblPrecursorMonoMass As Double, _
+                                                      ByVal blnAdjustPrecursorMassForC13 As Boolean, _
+                                                      ByVal dblPeptideMonoisotopicMass As Double) As Double
+
+        Dim intCorrectionCount As Integer = 0
+
+        ' Examine dblDelM to determine which isotope was chosen
+        If dblDelM >= -0.5 Then
+            ' This is the typical case
+            Do While dblDelM > 0.5
+                dblDelM -= MASS_C13
+                intCorrectionCount += 1
+            Loop
+        Else
+            ' This happens less often; but we'll still account for it
+            ' In this case, intCorrectionCount will be negative
+            Do While dblDelM < -0.5
+                dblDelM += MASS_C13
+                intCorrectionCount -= 1
+            Loop
+        End If
+
+        If intCorrectionCount <> 0 Then
+            If blnAdjustPrecursorMassForC13 Then
+                ' Adjust the precursor mono mass based on intCorrectionCount
+                dblPrecursorMonoMass -= intCorrectionCount * MASS_C13
+            End If
+
+            ' Compute a new DelM value
+            dblDelM = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
+        End If
+
+        Return clsPeptideMassCalculator.MassToPPM(dblDelM, dblPeptideMonoisotopicMass)
+
+    End Function
+
+    ''' <summary>
+    ''' Computes the theoretical monoisotopic mass for the given peptide
+    ''' Also updates mPeptideDeltaMassCorrectedPpm
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Sub ComputeMonoisotopicMass()
         Dim intIndex As Integer
 
@@ -417,6 +481,10 @@ Public Class clsSearchResultsBaseClass
         Next intIndex
 
         mPeptideMonoisotopicMass = mPeptideSeqMassCalculator.ComputeSequenceMass(mPeptideCleanSequence, mSearchResultModificationCount, udtPeptideSequenceModInfo)
+
+        '' Unused
+        ' Update mPeptideDeltaMassCorrectedPpm
+        ''ComputeDelMCorrected()
 
     End Sub
 
@@ -548,6 +616,10 @@ Public Class clsSearchResultsBaseClass
                                     eResidueTerminusState, _
                                     blnUpdateModOccurrenceCounts)
             End If
+        Else
+            ' Modification not found
+            mErrorMessage = "Modification symbol not found: " & chModificationSymbol & "; TerminusState = " & eResidueTerminusState.ToString()
+            blnSuccess = False
         End If
 
         Return blnSuccess
@@ -927,8 +999,8 @@ Public Class clsSearchResultsBaseClass
         Implements System.Collections.IComparer
 
         Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-            Dim xData As udtSearchResultModificationsType = CType(x, udtSearchResultModificationsType)
-            Dim yData As udtSearchResultModificationsType = CType(y, udtSearchResultModificationsType)
+            Dim xData As udtSearchResultModificationsType = DirectCast(x, udtSearchResultModificationsType)
+            Dim yData As udtSearchResultModificationsType = DirectCast(y, udtSearchResultModificationsType)
 
             If xData.ResidueLocInPeptide > yData.ResidueLocInPeptide Then
                 Return 1

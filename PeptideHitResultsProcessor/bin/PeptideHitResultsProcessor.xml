@@ -6,11 +6,125 @@ PeptideHitResultsProcessor
 </name>
 </assembly>
 <members>
-<member name="M:PeptideHitResultsProcessor.clsAnalysisManagerPeptideHitResultsProcessor.ProcessPeptideHitResultsFile">
+<member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.AddDynamicAndStaticResidueMods(PeptideHitResultsProcessor.clsSearchResultsMSGFDB@,System.Boolean)">
+	<summary>
+ Step through .PeptideSequenceWithMods
+ For each residue, check if a static mod is defined that affects that residue
+ For each mod symbol, determine the modification and add to objSearchResult
+ </summary>
+	<param name="objSearchResult"></param>
+	<param name="blnUpdateModOccurrenceCounts"></param>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.AssignRankAndDeltaNormValues(PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtMSGFDBSearchResultType[]@,System.Int32,System.Int32)">
+	<summary>
+ Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb
+ </summary>
+	<param name="udtSearchResults"></param>
+	<param name="intStartIndex"></param>
+	<param name="intEndIndex"></param>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.ComputeDelMCorrectedPPM(System.Double,System.Double,System.Int32,System.Double,System.Boolean)">
+	<summary>
+ This function should only be called when column PMError(Da) is present (and PMError(ppm) is not present)
+ </summary>
+	<param name="dblPrecursorErrorDa">Mass error (Observed - theoretical)</param>
+	<param name="dblPrecursorMZ"></param>
+	<param name="intCharge"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.ConvertMGSFModMassesToSymbols(System.String,System.String@,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtModInfoType[]@,System.Boolean,System.Boolean,System.Double@)">
+	<summary>
+ Parses the digits in strModValues to convert them to one or more modification symbols
+ </summary>
+	<param name="strModDigits">Example: +57.021 or +79.9663+14.0157 or -18.0106</param>
+	<param name="strModSymbols"></param>
+	<returns>True if success; false if a problem</returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.CreateFHTorSYNResultsFile(System.String,System.String,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtModInfoType[]@,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.eFilteredOutputFileTypeConstants,System.Boolean)">
+	<summary>
+ This routine creates a first hits file or synopsis file from the output from MSGF-DB
+ The synopsis file includes every result with a p-value below a set threshold or a SpecProb below a certain threshold
+ The first-hits file includes the results with the lowest SpecProb (for each scan and charge)
+ </summary>
+	<param name="strInputFilePath"></param>
+	<param name="strOutputFilePath"></param>
+	<param name="udtMSGFDBModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
+	<param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
+	<param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.ExtractModInfoFromMSGFDBModsFile(System.String,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtModInfoType[]@)">
+	<summary>
+ Extracts mod info from either a MSGF-DB param file or from a MSGFDB_Mods.txt file
+ </summary>
+	<param name="strMSGFDBParamFilePath"></param>
+	<param name="udtModList"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.LoadPeptideToProteinMapInfo(System.String,System.String,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtModInfoType[]@,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtPepToProteinMappingType[]@)">
+	<summary>
+ Load the PeptideToProteinMap information; in addition, writes out an updated _inspect_PepToProtMap.txt file with the new mod symbols and corrected terminii symbols
+ </summary>
+	<param name="strPepToProteinMapFilePath"></param>
+	<param name="strOutputFolderPath"></param>
+	<param name="udtMSGFDBModInfo"></param>
+	<param name="udtPepToProteinMapping"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.ReplaceMSGFModTextWithSymbol(System.String,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtModInfoType[]@,System.Double@)">
+	<summary>
+ Replaces modification name text in peptide sequences with modification symbols (uses case-sensitive comparisons)
+ </summary>
+	<param name="strPeptide"></param>
+	<param name="udtMSGFDBModInfo">This function assumes that each entry in udtMSGFDBModInfo() has both .ModName and .ModSymbol defined</param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.TruncateProteinName(System.String)">
+	<summary>
+ Return the text up to (but not including) the first space in strProteinNameAndDescription
+ </summary>
+	<param name="strProteinNameAndDescription"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsAnalysisManagerPeptideHitResultsProcessor.ProcessPeptideHitResultsFile">
 	<summary>
  Initializes m_PeptideHitResultsProcessor then starts a separate thread to process the file
  </summary>
 	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsPHRPBaseClass.GetColumnValue(System.String[]@,System.Int32,System.String@)">
+	<summary>
+ If intColumnIndex is &gt;= 0 then updates strValue with the value at strSplitLine(intColumnIndex)
+ Otherwise, updates strValue to String.Empty
+ </summary>
+	<returns>True if intColumnIndex &gt;= 0</returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsPHRPBaseClass.GetColumnValue(System.String[]@,System.Int32,System.Int32@)">
+	<summary>
+ If intColumnIndex is &gt;= 0 then updates intValue with the value at strSplitLine(intColumnIndex)
+ Otherwise, updates intValue to 0
+ </summary>
+	<returns>True if intColumnIndex &gt;= 0</returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsPHRPBaseClass.GetColumnValue(System.String[]@,System.Int32,System.String@,System.String)">
+	<summary>
+ If intColumnIndex is &gt;= 0 then updates strValue with the value at strSplitLine(intColumnIndex)
+ Otherwise, updates strValue to strValueIfMissing
+ </summary>
+	<returns>True if intColumnIndex &gt;= 0</returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsPHRPBaseClass.GetColumnValue(System.String[]@,System.Int32,System.Int32@,System.Int32)">
+	<summary>
+ If intColumnIndex is &gt;= 0 then updates intValue with the value at strSplitLine(intColumnIndex)
+ Otherwise, updates strValue to intValueIfMissing
+ </summary>
+	<returns>True if intColumnIndex &gt;= 0</returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsSearchResultsBaseClass.ComputeMonoisotopicMass">
+	<summary>
+ Computes the theoretical monoisotopic mass for the given peptide
+ Also updates mPeptideDeltaMassCorrectedPpm
+ </summary>
 	<remarks></remarks>
 </member><member name="M:PeptideHitResultsProcessor.clsSearchResultsBaseClass.SearchResultAddDynamicModification(System.Char,System.Char,System.Int32,PeptideHitResultsProcessor.clsPeptideModificationContainer.eResidueTerminusStateConstants,System.Boolean)">
 	<summary>
