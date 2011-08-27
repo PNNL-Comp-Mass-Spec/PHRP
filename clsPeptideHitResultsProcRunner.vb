@@ -344,16 +344,9 @@ Public Class clsPeptideHitResultsProcRunner
 
                         If ePeptideHitResultsFormat = ePeptideHitResultsFileFormatConstants.AutoDetermine Then
                             ' If ePeptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
-                            ' Return True if strInputFilePath ends in .txt, otherwise return false
-                            ' Determine the file type and call the appropriate class
-                            If System.IO.Path.GetExtension(strInputFilePath).ToLower = ".txt" Then
-                                ' General text file; we won't process it but we will set blnSuccess = True
-                                blnSuccess = True
-                            Else
-                                blnSuccess = False
-                            End If
+                            blnSuccess = False
 
-                            strMessage = "Warning: Could not determine the format of the input file.  It must end in " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, or .xml"
+                            strMessage = "Error: Could not determine the format of the input file.  It must end in " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, or .xml"
                             ShowMessage(strMessage)
                         Else
                             Select Case ePeptideHitResultsFormat

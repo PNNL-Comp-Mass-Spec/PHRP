@@ -30,6 +30,9 @@ Public Class clsSearchResultsMSGFDB
     Public Property RankSpecProb As String
     Public Property PValue As String
 
+    Public Property FDR As String           ' Only present if searched using -tda 1
+    Public Property PepFDR As String        ' Only present if searched using -tda 1
+
     Public Property PrecursorMZ As String
     Public Property MSGFDbComputedDelM As String
     Public Property MSGFDbComputedDelMPPM As String
@@ -53,6 +56,9 @@ Public Class clsSearchResultsMSGFDB
         SpecProb = String.Empty
         RankSpecProb = String.Empty
         PValue = String.Empty
+
+        FDR = String.Empty
+        PepFDR = String.Empty
 
         PrecursorMZ = String.Empty
         MSGFDbComputedDelM = String.Empty
