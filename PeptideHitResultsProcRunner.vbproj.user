@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>QC_Shew_11_03_0pt5_10uL_18Aug11_Cougar_11-05-36_syn.txt /T:Mass_Correction_Tags.txt /M:sequest_N14_NE_Dyn_Met_Oxy_ModDefs.txt</StartArguments>
+    <StartArguments>MSGFDB\Tao-PlasNNC-2_15Oct04_pegasus_0804-4_msgfdb.txt /n:MSGFDB\MSGFDB_PartTryp_MetOx_StatCysAlk.txt /m:MSGFDB\MSGFDB_PartTryp_MetOx_StatCysAlk_ModDefs.txt /T:Mass_Correction_Tags.txt</StartArguments>
   </PropertyGroup>
 </Project>

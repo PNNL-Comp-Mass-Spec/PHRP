@@ -18,7 +18,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "August 23, 2011"
+        MyBase.mFileDate = "August 29, 2011"
         InitializeLocalVariables()
     End Sub
 
@@ -1805,7 +1805,6 @@ Public Class clsMSGFDBResultsProcessor
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
 
-        Dim strPeptideNew As String = String.Empty
         Dim strModSymbols As String = String.Empty
 
         Dim blnNterminalMod As Boolean
@@ -1858,9 +1857,10 @@ Public Class clsMSGFDBResultsProcessor
         ' Any mod mass at the end must be considered a C-terminal mod 
 
         ' Need to start at the first letter
-        ' If we had N-terminal mods, they're currently notated like this:
+        ' If we had N-terminal mods, they're currently notated like this: _.+42.011MDHTPQSQLK.L or _.+42.011+57.021MNDR.Q)
         ' We want things to look like this: -.#MDHTPQSQLK.L or -.#*MNDRQLNHR.S
-        ' (since the original file look like this: _.+42.011MDHTPQSQLK.L or _.+42.011+57.021MNDR.Q)
+
+        ' Static mods will not have a mod mass listed; we do not add mod symbols for static mods, but we do increment dblTotalModMass
 
         intIndex = 0
         Do While intIndex < strPeptide.Length AndAlso Not Char.IsLetter(strPeptide.Chars(intIndex))
@@ -1870,7 +1870,23 @@ Public Class clsMSGFDBResultsProcessor
         Do While intIndex < strPeptide.Length
 
             If Char.IsLetter(strPeptide.Chars(intIndex)) Then
+
+                Dim objModificationDefinition As clsModificationDefinition
+
+                For intModIndex As Integer = 0 To mPeptideMods.ModificationCount - 1
+                    If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+                        objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+
+                        If objModificationDefinition.TargetResiduesContain(strPeptide.Chars(intIndex)) Then
+                            ' Match found; update dblTotalModMass but do not add a static mod symbol
+                            dblTotalModMass += objModificationDefinition.ModificationMass
+                            Exit For
+                        End If
+                    End If
+                Next intModIndex
+
                 intIndex += 1
+
             Else
                 ' Found a mod; find the extent of the mod digits
                 reMatch = reModMassRegEx.Match(strPeptide, intIndex)
@@ -1911,6 +1927,7 @@ Public Class clsMSGFDBResultsProcessor
         Loop
 
         If intIndexFirstLetter > 0 AndAlso intIndexFirstLetter < strPeptide.Length Then
+            Dim strPeptideNew As String
             strPeptideNew = strPeptide.Chars(intIndexFirstLetter) & strPeptide.Substring(0, intIndexFirstLetter)
             If intIndexFirstLetter < strPeptide.Length - 1 Then
                 strPeptideNew &= strPeptide.Substring(intIndexFirstLetter + 1)

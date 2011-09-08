@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.4.4257; August 29, 2011
+	- New version of PeptideHitResultsProcessor.dll
+		- Fixed mass computation bug for MSGFDB results with static mods
+
 Version 1.4.4252; August 23, 2011
 	- New version of PeptideHitResultsProcessor.dll
 		- Now reads/writes columns FDR and pepFDR for MSGFDB results

@@ -1,5 +1,11 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.4.4257; August 29, 2011
+	- Fixed mass computation bug for MSGFDB results with static mods
+
+Version 1.4.4252; August 23, 2011
+	- Added support for columns FDR and pepFDR in MSGFDB results
+
 Version 1.4.4247; August 18, 2011
 	- Added support for MSGFDB results
 	- Now reading the column headers from Sequest and Inspect _syn.txt files

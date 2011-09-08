@@ -927,7 +927,7 @@ Public Class clsInSpecTResultsProcessor
     End Function
 
     Private Function ParseInspectSynFileHeaderLine(ByVal strLineIn As String, _
-                                               ByRef intColumnMapping() As Integer) As Boolean
+                                                   ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
