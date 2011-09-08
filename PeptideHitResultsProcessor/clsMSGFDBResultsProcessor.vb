@@ -18,7 +18,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "September 7, 2011"
+        MyBase.mFileDate = "September 8, 2011"
         InitializeLocalVariables()
     End Sub
 
@@ -931,7 +931,7 @@ Public Class clsMSGFDBResultsProcessor
         Return GetCleanSequence(strSequenceWithMods, strPrefix, strSuffix)
     End Function
 
-    Protected Function GetCleanSequence(ByVal strSequenceWithMods As String, ByVal strPrefix As String, ByVal strSuffix As String) As String
+    Protected Function GetCleanSequence(ByVal strSequenceWithMods As String, ByRef strPrefix As String, ByRef strSuffix As String) As String
 
         Dim strPrimarySequence As String = String.Empty
         strPrefix = String.Empty

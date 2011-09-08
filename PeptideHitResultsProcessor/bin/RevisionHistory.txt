@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.4.4268; September 8, 2011
+	- Fixed tryptic state computation bug when processing MSGFDB results
+
 Version 1.4.4267; September 7, 2011
 	- Renamed column headers in the MSGFDB synopsis and first-hits file
 		- SpecProb is now MSGFDB_SpecProb
