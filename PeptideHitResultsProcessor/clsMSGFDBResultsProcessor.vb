@@ -18,7 +18,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "August 29, 2011"
+        MyBase.mFileDate = "September 7, 2011"
         InitializeLocalVariables()
     End Sub
 
@@ -1521,8 +1521,8 @@ Public Class clsMSGFDBResultsProcessor
         lstColumnNames.Add("NTT", eMSFDBSynFileColumns.NTT)
         lstColumnNames.Add("DeNovoScore", eMSFDBSynFileColumns.DeNovoScore)
         lstColumnNames.Add("MSGFScore", eMSFDBSynFileColumns.MSGFScore)
-        lstColumnNames.Add("SpecProb", eMSFDBSynFileColumns.SpecProb)
-        lstColumnNames.Add("RankSpecProb", eMSFDBSynFileColumns.RankSpecProb)
+        lstColumnNames.Add("MSGFDB_SpecProb", eMSFDBSynFileColumns.SpecProb)
+        lstColumnNames.Add("Rank_MSGFDB_SpecProb", eMSFDBSynFileColumns.RankSpecProb)
         lstColumnNames.Add("PValue", eMSFDBSynFileColumns.PValue)
         lstColumnNames.Add("FDR", eMSFDBSynFileColumns.FDR)
         lstColumnNames.Add("PepFDR", eMSFDBSynFileColumns.PepFDR)
@@ -2211,8 +2211,8 @@ Public Class clsMSGFDBResultsProcessor
                                    "NTT" & ControlChars.Tab & _
                                    "DeNovoScore" & ControlChars.Tab & _
                                    "MSGFScore" & ControlChars.Tab & _
-                                   "SpecProb" & ControlChars.Tab & _
-                                   "RankSpecProb" & ControlChars.Tab & _
+                                   "MSGFDB_SpecProb" & ControlChars.Tab & _
+                                   "Rank_MSGFDB_SpecProb" & ControlChars.Tab & _
                                    "PValue" & _
                                    strSuffix)
 
@@ -2234,7 +2234,7 @@ Public Class clsMSGFDBResultsProcessor
         ' Writes an entry to a synopsis or first hits file
         Try
             ' Columns:
-            ' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  SpecProb  RankSpecProb  PValue  FDR  PepFDR
+            ' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb  Rank_MSGFDB_SpecProb  PValue  FDR  PepFDR
 
             Dim strSuffix As String = String.Empty
             If blnIncludeFDRandPepFDR Then

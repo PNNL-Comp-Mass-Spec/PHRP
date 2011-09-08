@@ -1,5 +1,10 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.4.4267; September 7, 2011
+	- Renamed column headers in the MSGFDB synopsis and first-hits file
+		- SpecProb is now MSGFDB_SpecProb
+		- RankSpecProb is now Rank_MSGFDB_SpecProb
+
 Version 1.4.4257; August 29, 2011
 	- Fixed mass computation bug for MSGFDB results with static mods
 
