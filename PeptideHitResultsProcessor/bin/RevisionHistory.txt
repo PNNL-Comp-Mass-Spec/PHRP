@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.4.4286; September 26, 2011
+	- Switched from .Now to .UtcNow
+
 Version 1.4.4268; September 8, 2011
 	- Fixed tryptic state computation bug when processing MSGFDB results
 

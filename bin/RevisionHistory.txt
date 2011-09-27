@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.4.286; September 26, 2011
+	- Updated program syntax
+
 Version 1.4.4268; September 8, 2011
 	- Fixed tryptic state computation bug when processing MSGFDB results
 

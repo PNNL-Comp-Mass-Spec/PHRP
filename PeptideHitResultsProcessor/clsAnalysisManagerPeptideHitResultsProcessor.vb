@@ -496,8 +496,8 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             End If
         End If
 
-        Trace.WriteLine(Now.ToLongTimeString & "; " & m_ErrMsg, strSource)
-        Console.WriteLine(Now.ToLongTimeString & "; " & m_ErrMsg, strSource)
+        Trace.WriteLine(System.DateTime.Now().ToLongTimeString & "; " & m_ErrMsg, strSource)
+        Console.WriteLine(System.DateTime.Now().ToLongTimeString & "; " & m_ErrMsg, strSource)
 
         RaiseEvent ErrorOccurred(m_ErrMsg)
 
