@@ -1,6 +1,10 @@
 Peptide Hit Results Proc Runner Revision History
 
-Version 1.4.286; September 26, 2011
+Version 1.4.4293; October 3, 2011
+	- New version of PeptideHitResultsProcessor.dll
+		- Fixes bug that incorrectly computed Rank_MSGFDB_SpecProb as 2 for the final entry in the MSGFDB results file
+
+Version 1.4.4286; September 26, 2011
 	- Updated program syntax
 
 Version 1.4.4268; September 8, 2011

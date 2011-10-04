@@ -18,7 +18,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "September 8, 2011"
+		MyBase.mFileDate = "October 3 2011"
         InitializeLocalVariables()
     End Sub
 
@@ -531,9 +531,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim srDataFile As System.IO.StreamReader
         Dim swResultFile As System.IO.StreamWriter
 
-        Dim intPreviousScan As Integer
-
-        Dim strLineIn As String
+		Dim strLineIn As String
         Dim protein As String = String.Empty
 
         Dim udtSearchResult As udtMSGFDBSearchResultType
@@ -627,59 +625,48 @@ Public Class clsMSGFDBResultsProcessor
                 Dim intStartIndex As Integer = 0
                 Dim intEndIndex As Integer
 
-                If intSearchResultsCount > 0 Then
-                    intPreviousScan = udtSearchResults(0).ScanNum
-                Else
-                    intPreviousScan = Int32.MinValue
-                End If
+				intStartIndex = 0
+				intEndIndex = 0
+				Do While intStartIndex < intSearchResultsCount
+					intEndIndex = intStartIndex
+					Do While intEndIndex + 1 < intSearchResultsCount AndAlso udtSearchResults(intEndIndex + 1).ScanNum = udtSearchResults(intStartIndex).ScanNum
+						intEndIndex += 1
+					Loop
 
-                For intIndex As Integer = 0 To intSearchResultsCount - 1
+					' Store the results for this scan
+					If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
+						StoreSynMatches(swResultFile, intResultID, udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+					Else
+						StoreTopFHTMatch(swResultFile, intResultID, udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+					End If
 
-                    If (intPreviousScan <> udtSearchResults(intIndex).ScanNum) OrElse _
-                        intIndex = intSearchResultsCount - 1 Then
+					intStartIndex = intEndIndex + 1
+				Loop
 
-                        If intIndex = intSearchResultsCount - 1 Then
-                            intEndIndex = intIndex
-                        Else
-                            intEndIndex = intIndex - 1
-                        End If
+				' Sort the data in udtFilteredSearchResults then write out to disk
+				SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, blnIncludeFDRandPepFDR)
 
-                        ' New scan encountered or last result; call either StoreTopFHTMatch or StoreSynMatches to store the results
-                        If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-                            StoreSynMatches(swResultFile, intResultID, udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-                        Else
-                            StoreTopFHTMatch(swResultFile, intResultID, udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-                        End If
+				' Inform the user if any errors occurred
+				If strErrorLog.Length > 0 Then
+					SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+				End If
 
-                        intPreviousScan = udtSearchResults(intIndex).ScanNum
-                        intStartIndex = intIndex
-                    End If
-                Next
+				blnSuccess = True
 
-                ' Sort the data in udtFilteredSearchResults then write out to disk
-                SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, blnIncludeFDRandPepFDR)
-
-                ' Inform the user if any errors occurred
-                If strErrorLog.Length > 0 Then
-                    SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
-                End If
-
-                blnSuccess = True
-
-            Catch ex As Exception
-                SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-                blnSuccess = False
-            Finally
-                If Not srDataFile Is Nothing Then
-                    srDataFile.Close()
-                    srDataFile = Nothing
-                End If
-                If Not swResultFile Is Nothing Then
-                    swResultFile.Close()
-                    swResultFile = Nothing
-                End If
-            End Try
+			Catch ex As Exception
+				SetErrorMessage(ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+				blnSuccess = False
+			Finally
+				If Not srDataFile Is Nothing Then
+					srDataFile.Close()
+					srDataFile = Nothing
+				End If
+				If Not swResultFile Is Nothing Then
+					swResultFile.Close()
+					swResultFile = Nothing
+				End If
+			End Try
         Catch ex As Exception
             SetErrorMessage(ex.Message)
             SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
@@ -2324,7 +2311,7 @@ Public Class clsMSGFDBResultsProcessor
             Dim yData As udtMSGFDBSearchResultType = DirectCast(y, udtMSGFDBSearchResultType)
 
             If xData.SpecProbNum > yData.SpecProbNum Then
-                Return 1
+				Return 1
             ElseIf xData.SpecProbNum < yData.SpecProbNum Then
                 Return -1
             Else
