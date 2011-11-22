@@ -17,7 +17,7 @@ PeptideHitResultsProcessor
 	<remarks></remarks>
 </member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.AssignRankAndDeltaNormValues(PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtMSGFDBSearchResultType[]@,System.Int32,System.Int32)">
 	<summary>
- Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb
+ Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb)
  </summary>
 	<param name="udtSearchResults"></param>
 	<param name="intStartIndex"></param>

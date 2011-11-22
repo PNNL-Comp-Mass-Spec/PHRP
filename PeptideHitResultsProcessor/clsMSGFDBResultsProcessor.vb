@@ -18,7 +18,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-		MyBase.mFileDate = "October 3 2011"
+		MyBase.mFileDate = "November 21 2011"
         InitializeLocalVariables()
     End Sub
 
@@ -118,7 +118,8 @@ Public Class clsMSGFDBResultsProcessor
         Public SpectrumFile As String
         Public SpecIndex As String
         Public Scan As String
-        Public ScanNum As Integer
+		Public ScanNum As Integer
+		Public ScanCount As Integer
         Public FragMethod As String
         Public PrecursorMZ As String
         Public PMErrorDa As String              ' Corresponds to PMError(Da); MSGFDB stores this value as Observed - Theoretical
@@ -142,7 +143,8 @@ Public Class clsMSGFDBResultsProcessor
         Public Sub Clear()
             SpectrumFile = String.Empty
             SpecIndex = String.Empty
-            ScanNum = 0
+			ScanNum = 0
+			ScanCount = 1
             FragMethod = String.Empty
             PrecursorMZ = String.Empty
             PMErrorDa = String.Empty
@@ -263,7 +265,7 @@ Public Class clsMSGFDBResultsProcessor
     End Sub
 
     ''' <summary>
-    ''' Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb
+	''' Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb)
     ''' </summary>
     ''' <param name="udtSearchResults"></param>
     ''' <param name="intStartIndex"></param>
@@ -1296,6 +1298,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim strSplitLine() As String = Nothing
 
         Dim blnValidSearchResult As Boolean
+		Dim intSlashIndex As Integer
 
         Try
             ' Set this to False for now
@@ -1316,8 +1319,20 @@ Public Class clsMSGFDBResultsProcessor
 
                     If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Scan), .Scan) Then
                         Throw New EvaluateException("Scan column is missing or invalid")
-                    End If
-                    .ScanNum = CIntSafe(.Scan, 0)
+					End If
+
+					intSlashIndex = .Scan.IndexOf("/")
+					If intSlashIndex > 0 Then
+						' This is a merged spectrum and thus scan number looks like: 3010/3011/3012
+						.ScanNum = CIntSafe(.Scan.Substring(0, intSlashIndex), 0)
+						.ScanCount = .Scan.Split("/"c).Length
+
+						' Now update .Scan to only contain the first scan number used (since downstream processing tools expect this to simply be an integer)
+						.Scan = .ScanNum.ToString()
+					Else
+						.ScanNum = CIntSafe(.Scan, 0)
+						.ScanCount = 1
+					End If
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FragMethod), .FragMethod)
                     GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PrecursorMZ), .PrecursorMZ)
@@ -2076,7 +2091,7 @@ Public Class clsMSGFDBResultsProcessor
 
         AssignRankAndDeltaNormValues(udtSearchResults, intStartIndex, intEndIndex)
 
-        ' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
+		' The calling procedure should have already sorted by scan, charge, and SpecProb; no need to re-sort
 
         ' Now store or write out the first match for each charge for this scan
         For intIndex = intStartIndex To intEndIndex
@@ -2184,24 +2199,25 @@ Public Class clsMSGFDBResultsProcessor
                 strSuffix = ControlChars.Tab & "FDR" & ControlChars.Tab & "PepFDR"
             End If
 
-            swResultFile.WriteLine("ResultID" & ControlChars.Tab & _
-                                   "Scan" & ControlChars.Tab & _
-                                   "FragMethod" & ControlChars.Tab & _
-                                   "SpecIndex" & ControlChars.Tab & _
-                                   "Charge" & ControlChars.Tab & _
-                                   "PrecursorMZ" & ControlChars.Tab & _
-                                   "DelM" & ControlChars.Tab & _
-                                   "DelM_PPM" & ControlChars.Tab & _
-                                   "MH" & ControlChars.Tab & _
-                                   "Peptide" & ControlChars.Tab & _
-                                   "Protein" & ControlChars.Tab & _
-                                   "NTT" & ControlChars.Tab & _
-                                   "DeNovoScore" & ControlChars.Tab & _
-                                   "MSGFScore" & ControlChars.Tab & _
-                                   "MSGFDB_SpecProb" & ControlChars.Tab & _
-                                   "Rank_MSGFDB_SpecProb" & ControlChars.Tab & _
-                                   "PValue" & _
-                                   strSuffix)
+			swResultFile.WriteLine("ResultID" & ControlChars.Tab & _
+								   "Scan" & ControlChars.Tab & _
+								   "ScanCount" & ControlChars.Tab & _
+								   "FragMethod" & ControlChars.Tab & _
+								   "SpecIndex" & ControlChars.Tab & _
+								   "Charge" & ControlChars.Tab & _
+								   "PrecursorMZ" & ControlChars.Tab & _
+								   "DelM" & ControlChars.Tab & _
+								   "DelM_PPM" & ControlChars.Tab & _
+								   "MH" & ControlChars.Tab & _
+								   "Peptide" & ControlChars.Tab & _
+								   "Protein" & ControlChars.Tab & _
+								   "NTT" & ControlChars.Tab & _
+								   "DeNovoScore" & ControlChars.Tab & _
+								   "MSGFScore" & ControlChars.Tab & _
+								   "MSGFDB_SpecProb" & ControlChars.Tab & _
+								   "Rank_MSGFDB_SpecProb" & ControlChars.Tab & _
+								   "PValue" & _
+								   strSuffix)
 
 
         Catch ex As Exception
@@ -2221,31 +2237,32 @@ Public Class clsMSGFDBResultsProcessor
         ' Writes an entry to a synopsis or first hits file
         Try
             ' Columns:
-            ' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb  Rank_MSGFDB_SpecProb  PValue  FDR  PepFDR
+			' ResultID  Scan ScanCount FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb  Rank_MSGFDB_SpecProb  PValue  FDR  PepFDR
 
             Dim strSuffix As String = String.Empty
             If blnIncludeFDRandPepFDR Then
                 strSuffix = ControlChars.Tab & udtSearchResult.FDR & ControlChars.Tab & udtSearchResult.PepFDR
             End If
 
-            swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
-                                   udtSearchResult.Scan & ControlChars.Tab & _
-                                   udtSearchResult.FragMethod & ControlChars.Tab & _
-                                   udtSearchResult.SpecIndex & ControlChars.Tab & _
-                                   udtSearchResult.Charge & ControlChars.Tab & _
-                                   udtSearchResult.PrecursorMZ & ControlChars.Tab & _
-                                   udtSearchResult.PMErrorDa & ControlChars.Tab & _
-                                   udtSearchResult.PMErrorPPM & ControlChars.Tab & _
-                                   udtSearchResult.MH & ControlChars.Tab & _
-                                   udtSearchResult.Peptide & ControlChars.Tab & _
-                                   udtSearchResult.Protein & ControlChars.Tab & _
-                                   udtSearchResult.NTT & ControlChars.Tab & _
-                                   udtSearchResult.DeNovoScore & ControlChars.Tab & _
-                                   udtSearchResult.MSGFScore & ControlChars.Tab & _
-                                   udtSearchResult.SpecProb & ControlChars.Tab & _
-                                   udtSearchResult.RankSpecProb & ControlChars.Tab & _
-                                   udtSearchResult.PValue & _
-                                   strSuffix)
+			swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
+								   udtSearchResult.Scan & ControlChars.Tab & _
+								   udtSearchResult.ScanCount & ControlChars.Tab & _
+								   udtSearchResult.FragMethod & ControlChars.Tab & _
+								   udtSearchResult.SpecIndex & ControlChars.Tab & _
+								   udtSearchResult.Charge & ControlChars.Tab & _
+								   udtSearchResult.PrecursorMZ & ControlChars.Tab & _
+								   udtSearchResult.PMErrorDa & ControlChars.Tab & _
+								   udtSearchResult.PMErrorPPM & ControlChars.Tab & _
+								   udtSearchResult.MH & ControlChars.Tab & _
+								   udtSearchResult.Peptide & ControlChars.Tab & _
+								   udtSearchResult.Protein & ControlChars.Tab & _
+								   udtSearchResult.NTT & ControlChars.Tab & _
+								   udtSearchResult.DeNovoScore & ControlChars.Tab & _
+								   udtSearchResult.MSGFScore & ControlChars.Tab & _
+								   udtSearchResult.SpecProb & ControlChars.Tab & _
+								   udtSearchResult.RankSpecProb & ControlChars.Tab & _
+								   udtSearchResult.PValue & _
+								   strSuffix)
 
         Catch ex As Exception
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
