@@ -40,7 +40,7 @@ PeptideHitResultsProcessor
 	<param name="strModSymbols"></param>
 	<returns>True if success; false if a problem</returns>
 	<remarks></remarks>
-</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.CreateFHTorSYNResultsFile(System.String,System.String,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtModInfoType[]@,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.eFilteredOutputFileTypeConstants,System.Boolean)">
+</member><member name="M:PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.CreateFHTorSYNResultsFile(System.String,System.String,System.String,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.udtModInfoType[]@,PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.eFilteredOutputFileTypeConstants,System.Boolean)">
 	<summary>
  This routine creates a first hits file or synopsis file from the output from MSGF-DB
  The synopsis file includes every result with a p-value below a set threshold or a SpecProb below a certain threshold

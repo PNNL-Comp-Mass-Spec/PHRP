@@ -1,5 +1,10 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.4.4349; November 28, 2011
+	- Now writing out a separate entry to the synopsis or first-hits file for each scan involved in a merged result reported by MSGFDB
+		- Removed column ScanCount from the _msgfdb_syn.txt and _msgfdb_fht.txt files
+	- Now creating a ScanGroupInfo.txt file when MSGFDB merged spectra are processed
+
 Version 1.4.4342; November 21, 2011
 	- Updated to support MSGFDB search results with merged spectra (scan numbers of the form 3010/3011/3012)
 		- Added column ScanCount to _msgfdb_syn.txt and _msgfdb_fht.txt files

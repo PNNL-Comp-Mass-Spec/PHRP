@@ -18,7 +18,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-		MyBase.mFileDate = "November 21 2011"
+		MyBase.mFileDate = "November 28, 2011"
         InitializeLocalVariables()
     End Sub
 
@@ -119,8 +119,7 @@ Public Class clsMSGFDBResultsProcessor
         Public SpecIndex As String
         Public Scan As String
 		Public ScanNum As Integer
-		Public ScanCount As Integer
-        Public FragMethod As String
+		Public FragMethod As String
         Public PrecursorMZ As String
         Public PMErrorDa As String              ' Corresponds to PMError(Da); MSGFDB stores this value as Observed - Theoretical
         Public PMErrorPPM As String             ' Corresponds to PMError(ppm); MSGFDB stores this value as Observed - Theoretical
@@ -144,8 +143,7 @@ Public Class clsMSGFDBResultsProcessor
             SpectrumFile = String.Empty
             SpecIndex = String.Empty
 			ScanNum = 0
-			ScanCount = 1
-            FragMethod = String.Empty
+			FragMethod = String.Empty
             PrecursorMZ = String.Empty
             PMErrorDa = String.Empty
             PMErrorPPM = String.Empty
@@ -183,6 +181,11 @@ Public Class clsMSGFDBResultsProcessor
         Public ResidueEnd As Integer
     End Structure
 
+	Protected Structure udtScanGroupInfoType
+		Public ScanGroupID As Integer
+		Public Charge As Short
+		Public Scan As Integer
+	End Structure
 #End Region
 
 #Region "Classwide Variables"
@@ -193,19 +196,23 @@ Public Class clsMSGFDBResultsProcessor
 #Region "Properties"
 #End Region
 
-    Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
-                                                ByRef udtSearchResultsCurrentScan() As udtMSGFDBSearchResultType, _
-                                                ByRef udtSearchResult As udtMSGFDBSearchResultType, _
-                                                ByRef strErrorLog As String)
+	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
+												ByRef udtSearchResultsCurrentScan() As udtMSGFDBSearchResultType, _
+												ByRef lstSearchResults As System.Collections.Generic.List(Of udtMSGFDBSearchResultType), _
+												ByRef strErrorLog As String)
 
-        If intCurrentScanResultsCount >= udtSearchResultsCurrentScan.Length Then
-            ReDim Preserve udtSearchResultsCurrentScan(udtSearchResultsCurrentScan.Length * 2 - 1)
-        End If
+		For Each udtSearchResult As udtMSGFDBSearchResultType In lstSearchResults
 
-        udtSearchResultsCurrentScan(intCurrentScanResultsCount) = udtSearchResult
-        intCurrentScanResultsCount += 1
+			If intCurrentScanResultsCount >= udtSearchResultsCurrentScan.Length Then
+				ReDim Preserve udtSearchResultsCurrentScan(udtSearchResultsCurrentScan.Length * 2 - 1)
+			End If
 
-    End Sub
+			udtSearchResultsCurrentScan(intCurrentScanResultsCount) = udtSearchResult
+			intCurrentScanResultsCount += 1
+
+		Next
+
+	End Sub
 
     ''' <summary>
     ''' Step through .PeptideSequenceWithMods
@@ -263,6 +270,31 @@ Public Class clsMSGFDBResultsProcessor
             Next intIndex
         End With
     End Sub
+
+	Protected Sub AppendToScanGroupDetails(lstScanGroupDetails As System.Collections.Generic.List(Of udtScanGroupInfoType), _
+	   ByRef htScanGroupCombo As System.Collections.Generic.Dictionary(Of String, Boolean), _
+	   ByVal udtScanGroupInfo As udtScanGroupInfoType, _
+	   ByRef intCurrentScanGroupID As Integer, _
+	   ByRef intNextScanGroupID As Integer)
+
+		Dim strChargeScanComboText As String
+
+		strChargeScanComboText = udtScanGroupInfo.Charge.ToString & "_" & udtScanGroupInfo.Scan.ToString()
+
+		If Not htScanGroupCombo.ContainsKey(strChargeScanComboText) Then
+			If intCurrentScanGroupID < 0 Then
+				intCurrentScanGroupID = intNextScanGroupID
+				intNextScanGroupID += 1
+			End If
+
+			udtScanGroupInfo.ScanGroupID = intCurrentScanGroupID
+
+			lstScanGroupDetails.Add(udtScanGroupInfo)
+			htScanGroupCombo.Add(strChargeScanComboText, True)
+		End If
+
+	End Sub
+
 
     ''' <summary>
 	''' Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb)
@@ -524,108 +556,118 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function CreateFHTorSYNResultsFile(ByVal strInputFilePath As String, _
-                                                 ByVal strOutputFilePath As String, _
-                                                 ByRef udtMSGFDBModInfo() As udtModInfoType, _
-                                                 ByVal eFilteredOutputFileType As eFilteredOutputFileTypeConstants, _
-                                                 Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+	Protected Function CreateFHTorSYNResultsFile(ByVal strInputFilePath As String, _
+												 ByVal strOutputFilePath As String, _
+												 ByVal strScanGroupFilePath As String, _
+												 ByRef udtMSGFDBModInfo() As udtModInfoType, _
+												 ByVal eFilteredOutputFileType As eFilteredOutputFileTypeConstants, _
+												 Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
 
-        Dim srDataFile As System.IO.StreamReader
-        Dim swResultFile As System.IO.StreamWriter
+		Dim srDataFile As System.IO.StreamReader
+		Dim swResultFile As System.IO.StreamWriter
 
 		Dim strLineIn As String
-        Dim protein As String = String.Empty
+		Dim protein As String = String.Empty
 
-        Dim udtSearchResult As udtMSGFDBSearchResultType
-        udtSearchResult.Clear()
+		Dim lstSearchResults As New System.Collections.Generic.List(Of udtMSGFDBSearchResultType)
 
-        Dim intSearchResultsCount As Integer
-        Dim udtSearchResults() As udtMSGFDBSearchResultType
+		Dim intSearchResultsCount As Integer
+		Dim udtSearchResults() As udtMSGFDBSearchResultType
 
-        Dim intFilteredSearchResultCount As Integer
-        Dim udtFilteredSearchResults() As udtMSGFDBSearchResultType
+		Dim intFilteredSearchResultCount As Integer
+		Dim udtFilteredSearchResults() As udtMSGFDBSearchResultType
 
-        Dim blnHeaderParsed As Boolean
-        Dim blnIncludeFDRandPepFDR As Boolean = False
+		Dim blnHeaderParsed As Boolean
+		Dim blnIncludeFDRandPepFDR As Boolean = False
 
-        Dim intColumnMapping() As Integer = Nothing
+		Dim intColumnMapping() As Integer = Nothing
 
-        Dim intResultsProcessed As Integer
-        Dim intResultID As Integer = 0
+		Dim intResultsProcessed As Integer
 
-        Dim blnSuccess As Boolean
-        Dim blnValidSearchResult As Boolean
+		Dim intNextScanGroupID As Integer
+		Dim lstScanGroupDetails As New System.Collections.Generic.List(Of udtScanGroupInfoType)
+		Dim htScanGroupCombo As New System.Collections.Generic.Dictionary(Of String, Boolean)
 
-        Dim strErrorLog As String = String.Empty
+		Dim blnSuccess As Boolean
+		Dim blnValidSearchResult As Boolean
 
-        Try
+		Dim strErrorLog As String = String.Empty
 
-            Try
-                ' Open the input file and parse it
-                ' Initialize the stream reader and the stream Text writer
-                srDataFile = New System.IO.StreamReader(New System.IO.FileStream(strInputFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+		Try
 
-                swResultFile = New System.IO.StreamWriter(New System.IO.FileStream(strOutputFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+			Try
+				' Open the input file and parse it
+				' Initialize the stream reader and the stream Text writer
+				srDataFile = New System.IO.StreamReader(New System.IO.FileStream(strInputFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
-                strErrorLog = String.Empty
-                intResultsProcessed = 0
-                blnHeaderParsed = False
+				swResultFile = New System.IO.StreamWriter(New System.IO.FileStream(strOutputFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
 
-                ' Initialize array that will hold all of the records in the MSGFDB result file
-                intSearchResultsCount = 0
-                ReDim udtSearchResults(999)
+				Dim ioResultFile As System.IO.FileInfo
+				ioResultFile = New System.IO.FileInfo(strOutputFilePath)
 
-                ' Initialize the array that will hold all of the records that will ultimately be written out to disk
-                intFilteredSearchResultCount = 0
-                ReDim udtFilteredSearchResults(999)
+				strErrorLog = String.Empty
+				intResultsProcessed = 0
+				blnHeaderParsed = False
 
-                ' Parse the input file
-                Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
-                    strLineIn = srDataFile.ReadLine
-                    If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
+				intNextScanGroupID = 1
+				lstScanGroupDetails.Clear()
+				htScanGroupCombo.Clear()
 
-                        If Not blnHeaderParsed Then
-                            blnSuccess = ParseMSGFDBResultsFileHeaderLine(strLineIn, intColumnMapping)
-                            If Not blnSuccess Then
-                                ' Error parsing header
-                                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-                                Exit Try
-                            End If
-                            blnHeaderParsed = True
+				' Initialize array that will hold all of the records in the MSGFDB result file
+				intSearchResultsCount = 0
+				ReDim udtSearchResults(999)
 
-                            If intColumnMapping(eMSGFDBResultsFileColumns.FDR) >= 0 Or intColumnMapping(eMSGFDBResultsFileColumns.PepFDR) >= 0 Then
-                                blnIncludeFDRandPepFDR = True
-                            Else
-                                blnIncludeFDRandPepFDR = False
-                            End If
+				' Initialize the array that will hold all of the records that will ultimately be written out to disk
+				intFilteredSearchResultCount = 0
+				ReDim udtFilteredSearchResults(999)
 
-                            ' Write the header line
-                            WriteSynFHTFileHeader(swResultFile, strErrorLog, blnIncludeFDRandPepFDR)
-                        Else
+				' Parse the input file
+				Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+					strLineIn = srDataFile.ReadLine
+					If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
-                            blnValidSearchResult = ParseMSGFDBResultsFileEntry(strLineIn, udtMSGFDBModInfo, udtSearchResult, _
-                                                                               strErrorLog, intResultsProcessed, _
-                                                                               intColumnMapping)
+						If Not blnHeaderParsed Then
+							blnSuccess = ParseMSGFDBResultsFileHeaderLine(strLineIn, intColumnMapping)
+							If Not blnSuccess Then
+								' Error parsing header
+								SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+								Exit Try
+							End If
+							blnHeaderParsed = True
 
-                            If blnValidSearchResult Then
-                                AddCurrentRecordToSearchResults(intSearchResultsCount, udtSearchResults, udtSearchResult, strErrorLog)
-                            End If
+							If intColumnMapping(eMSGFDBResultsFileColumns.FDR) >= 0 Or intColumnMapping(eMSGFDBResultsFileColumns.PepFDR) >= 0 Then
+								blnIncludeFDRandPepFDR = True
+							Else
+								blnIncludeFDRandPepFDR = False
+							End If
 
-                            ' Update the progress
-                            UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
-                            intResultsProcessed += 1
-                        End If
-                    End If
-                Loop
+							' Write the header line
+							WriteSynFHTFileHeader(swResultFile, strErrorLog, blnIncludeFDRandPepFDR)
+						Else
 
-                ' Sort the SearchResults by scan, charge, and ascending SpecProb
-                Array.Sort(udtSearchResults, 0, intSearchResultsCount, New MSGFDBSearchResultsComparerScanChargeSpecProbPeptide)
+							blnValidSearchResult = ParseMSGFDBResultsFileEntry(strLineIn, udtMSGFDBModInfo, lstSearchResults, _
+							   strErrorLog, intResultsProcessed, _
+							   intColumnMapping, intNextScanGroupID, lstScanGroupDetails, htScanGroupCombo)
 
-                ' Now filter the data
+							If blnValidSearchResult Then
+								AddCurrentRecordToSearchResults(intSearchResultsCount, udtSearchResults, lstSearchResults, strErrorLog)
+							End If
 
-                ' Initialize variables
-                Dim intStartIndex As Integer = 0
-                Dim intEndIndex As Integer
+							' Update the progress
+							UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+							intResultsProcessed += 1
+						End If
+					End If
+				Loop
+
+				' Sort the SearchResults by scan, charge, and ascending SpecProb
+				Array.Sort(udtSearchResults, 0, intSearchResultsCount, New MSGFDBSearchResultsComparerScanChargeSpecProbPeptide)
+
+				' Now filter the data
+
+				' Initialize variables
+				Dim intStartIndex As Integer = 0
+				Dim intEndIndex As Integer
 
 				intStartIndex = 0
 				intEndIndex = 0
@@ -637,9 +679,9 @@ Public Class clsMSGFDBResultsProcessor
 
 					' Store the results for this scan
 					If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-						StoreSynMatches(swResultFile, intResultID, udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+						StoreSynMatches(udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
 					Else
-						StoreTopFHTMatch(swResultFile, intResultID, udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+						StoreTopFHTMatch(udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
 					End If
 
 					intStartIndex = intEndIndex + 1
@@ -647,6 +689,12 @@ Public Class clsMSGFDBResultsProcessor
 
 				' Sort the data in udtFilteredSearchResults then write out to disk
 				SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, blnIncludeFDRandPepFDR)
+
+				' Write out the scan group info
+
+				If Not String.IsNullOrEmpty(strScanGroupFilePath) Then
+					StoreScanGroupInfo(strScanGroupFilePath, lstScanGroupDetails)
+				End If
 
 				' Inform the user if any errors occurred
 				If strErrorLog.Length > 0 Then
@@ -669,15 +717,15 @@ Public Class clsMSGFDBResultsProcessor
 					swResultFile = Nothing
 				End If
 			End Try
-        Catch ex As Exception
-            SetErrorMessage(ex.Message)
-            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-            blnSuccess = False
-        End Try
+		Catch ex As Exception
+			SetErrorMessage(ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+			blnSuccess = False
+		End Try
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
     Private Function ComputeMass(ByVal strEmpiricalformula As String) As Double
         ' CompositionStr (C[Num]H[Num]N[Num]O[Num]S[Num]P[Num])
@@ -1286,159 +1334,236 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
-    Private Function ParseMSGFDBResultsFileEntry(ByRef strLineIn As String, _
-                                                 ByRef udtMSGFDBModInfo() As udtModInfoType, _
-                                                 ByRef udtSearchResult As udtMSGFDBSearchResultType, _
-                                                 ByRef strErrorLog As String, _
-                                                 ByVal intResultsProcessed As Integer, _
-                                                 ByRef intColumnMapping() As Integer) As Boolean
+	Private Function ParseMSGFDBResultsFileEntry(ByRef strLineIn As String, _
+	   ByRef udtMSGFDBModInfo() As udtModInfoType, _
+	   ByRef lstSearchResults As System.Collections.Generic.List(Of udtMSGFDBSearchResultType), _
+	   ByRef strErrorLog As String, _
+	   ByVal intResultsProcessed As Integer, _
+	   ByRef intColumnMapping() As Integer, _
+	   ByRef intNextScanGroupID As Integer, _
+	   ByRef lstScanGroupDetails As System.Collections.Generic.List(Of udtScanGroupInfoType), _
+	   ByRef htScanGroupCombo As System.Collections.Generic.Dictionary(Of String, Boolean)) As Boolean
 
-        ' Parses an entry from the MSGF-DB results file
+		' Parses an entry from the MSGF-DB results file
 
-        Dim strSplitLine() As String = Nothing
+		Dim udtSearchResult As udtMSGFDBSearchResultType = New udtMSGFDBSearchResultType
+		Dim strSplitLine() As String = Nothing
 
-        Dim blnValidSearchResult As Boolean
+		Dim intScanCount As Integer = 1
+		Dim strSplitResult() As String = Nothing
+
+		Dim udtMergedScanInfo() As udtMSGFDBSearchResultType = Nothing
+
+		Dim blnValidSearchResult As Boolean
 		Dim intSlashIndex As Integer
 
-        Try
-            ' Set this to False for now
-            blnValidSearchResult = False
+		Try
+			' Set this to False for now
+			blnValidSearchResult = False
 
-            ' Reset udtSearchResult
-            udtSearchResult.Clear()
+			' Reset lstSearchResults
+			If lstSearchResults Is Nothing Then
+				lstSearchResults = New System.Collections.Generic.List(Of udtMSGFDBSearchResultType)
+			Else
+				lstSearchResults.Clear()
+			End If
 
-            strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
+			udtSearchResult.Clear()
+			strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
 
-            If strSplitLine.Length >= 13 Then
+			If strSplitLine.Length >= 13 Then
 
-                With udtSearchResult
-                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpectrumFile), .SpectrumFile) Then
-                        Throw New EvaluateException("SpectrumFile column is missing or invalid")
-                    End If
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecIndex), .SpecIndex)
-
-                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Scan), .Scan) Then
-                        Throw New EvaluateException("Scan column is missing or invalid")
+				With udtSearchResult
+					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpectrumFile), .SpectrumFile) Then
+						Throw New EvaluateException("SpectrumFile column is missing or invalid")
 					End If
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecIndex), .SpecIndex)
+
+					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Scan), .Scan) Then
+						Throw New EvaluateException("Scan column is missing or invalid")
+					End If
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FragMethod), .FragMethod)
 
 					intSlashIndex = .Scan.IndexOf("/")
 					If intSlashIndex > 0 Then
 						' This is a merged spectrum and thus scan number looks like: 3010/3011/3012
-						.ScanNum = CIntSafe(.Scan.Substring(0, intSlashIndex), 0)
-						.ScanCount = .Scan.Split("/"c).Length
+						' Split the Scan list on the slash
+						' Later in this function, we'll append lstSearchResults with this scan plus the other scans
 
-						' Now update .Scan to only contain the first scan number used (since downstream processing tools expect this to simply be an integer)
-						.Scan = .ScanNum.ToString()
+						strSplitResult = .Scan.Split("/"c)
+						intScanCount = strSplitResult.Length
+						ReDim udtMergedScanInfo(intScanCount - 1)
+
+						For intIndex As Integer = 0 To intScanCount - 1
+							udtMergedScanInfo(intIndex) = New udtMSGFDBSearchResultType
+							udtMergedScanInfo(intIndex).Clear()
+							udtMergedScanInfo(intIndex).Scan = strSplitResult(intIndex)
+							udtMergedScanInfo(intIndex).ScanNum = CIntSafe(strSplitResult(intIndex), 0)
+						Next
+
+						' Now split SpecIndex and store in udtMergedScanInfo
+						strSplitResult = .SpecIndex.Split("/"c)
+
+						For intIndex As Integer = 0 To strSplitResult.Length - 1
+							If intIndex >= udtMergedScanInfo.Length Then
+								' There are more entries for SpecIndex than there are for Scan#; this is unexpected
+								Exit For
+							End If
+							udtMergedScanInfo(intIndex).SpecIndex = strSplitResult(intIndex)
+						Next
+
+						' Now split FragMethod and store in udtMergedScanInfo
+						strSplitResult = .FragMethod.Split("/"c)
+
+						For intIndex As Integer = 0 To strSplitResult.Length - 1
+							If intIndex >= udtMergedScanInfo.Length Then
+								' There are more entries for FragMethod than there are for Scan#; this is unexpected
+								Exit For
+							End If
+							udtMergedScanInfo(intIndex).FragMethod = strSplitResult(intIndex)
+						Next
+
 					Else
 						.ScanNum = CIntSafe(.Scan, 0)
-						.ScanCount = 1
+						intScanCount = 1
 					End If
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FragMethod), .FragMethod)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PrecursorMZ), .PrecursorMZ)
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PrecursorMZ), .PrecursorMZ)
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Charge), .Charge)
-                    .ChargeNum = CShort(CIntSafe(.Charge, 0))
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Charge), .Charge)
+					.ChargeNum = CShort(CIntSafe(.Charge, 0))
 
-                    ' PMError could be in PPM or Da; header line will have PMError(ppm) or PMError(Da)
-                    Dim dblPrecursorErrorDa As Double
+					' PMError could be in PPM or Da; header line will have PMError(ppm) or PMError(Da)
+					Dim dblPrecursorErrorDa As Double
 
-                    If intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM) >= 0 Then
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM), .PMErrorPPM)
-                    Else
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorDa), .PMErrorDa)
-                        dblPrecursorErrorDa = CDblSafe(.PMErrorDa, 0)
-                        .PMErrorPPM = String.Empty              ' We'll populate this column later in this function
-                    End If
-
-
-                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Peptide), .Peptide) Then
-                        Throw New EvaluateException("Peptide column is missing or invalid")
-                    End If
-
-                    ' Replace any mod text values in the peptide sequence with the appropriate mod symbols
-                    ' In addition, replace the _ terminus symbols with dashes
-                    Dim dblTotalModMass As Double
-                    .Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), udtMSGFDBModInfo, dblTotalModMass)
-
-                    ' Compute monoisotopic mass of the peptide
-                    Dim dblPeptideMonoisotopicMass As Double
-                    dblPeptideMonoisotopicMass = ComputePeptideMass(.Peptide, dblTotalModMass)
+					If intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM) >= 0 Then
+						GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM), .PMErrorPPM)
+					Else
+						GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorDa), .PMErrorDa)
+						dblPrecursorErrorDa = CDblSafe(.PMErrorDa, 0)
+						.PMErrorPPM = String.Empty				' We'll populate this column later in this function
+					End If
 
 
-                    ' Store the monoisotopic MH value in .MH; note that this is (M+H)+
-                    .MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 5, True)
+					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Peptide), .Peptide) Then
+						Throw New EvaluateException("Peptide column is missing or invalid")
+					End If
 
-                    If Not String.IsNullOrEmpty(.PMErrorPPM) Then
+					' Replace any mod text values in the peptide sequence with the appropriate mod symbols
+					' In addition, replace the _ terminus symbols with dashes
+					Dim dblTotalModMass As Double
+					.Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), udtMSGFDBModInfo, dblTotalModMass)
 
-                        ' Convert the ppm-based PM Error to Da-based
-
-                        Dim dblPMErrorPPM As Double
-                        Dim dblPrecursorMZ As Double
-
-                        If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
-                            ' Note that since .PMErrorPPM is present, the Precursor m/z is a C13-corrected m/z value
-                            ' In other words, it may not be the actual m/z selected for fragmentation.
-
-                            If Double.TryParse(.PMErrorPPM, dblPMErrorPPM) Then
-                                dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
-
-                                ' Note that this will be a C13-corrected precursor error; not the true precursor error
-                                .PMErrorDa = NumToString(dblPrecursorErrorDa, 5, True)
-                            End If
-                        End If
-
-                    Else
-
-                        Dim dblPrecursorMZ As Double
-                        If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
-                            Dim dblPeptideDeltaMassCorrectedPpm As Double
-
-                            dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMZ, _
-                                                                                      .ChargeNum, dblPeptideMonoisotopicMass, True)
-
-                            .PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 4, True)
-
-                        End If
-
-                    End If
+					' Compute monoisotopic mass of the peptide
+					Dim dblPeptideMonoisotopicMass As Double
+					dblPeptideMonoisotopicMass = ComputePeptideMass(.Peptide, dblTotalModMass)
 
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Protein), .Protein)
-                    .Protein = TruncateProteinName(.Protein)
+					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
+					.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 5, True)
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.DeNovoScore), .DeNovoScore)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.MSGFScore), .MSGFScore)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecProb), .SpecProb)
-                    If Not Double.TryParse(.SpecProb, .SpecProbNum) Then .SpecProbNum = 0
+					If Not String.IsNullOrEmpty(.PMErrorPPM) Then
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue), .PValue)
-                    If Not Double.TryParse(.PValue, .PValueNum) Then .PValueNum = 0
+						' Convert the ppm-based PM Error to Da-based
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR), .FDR)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR), .PepFDR)
+						Dim dblPMErrorPPM As Double
+						Dim dblPrecursorMZ As Double
 
-                    .NTT = ComputeCleaveageState(.Peptide).ToString()
-                End With
+						If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
+							' Note that since .PMErrorPPM is present, the Precursor m/z is a C13-corrected m/z value
+							' In other words, it may not be the actual m/z selected for fragmentation.
 
-                blnValidSearchResult = True
-            End If
+							If Double.TryParse(.PMErrorPPM, dblPMErrorPPM) Then
+								dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
 
-        Catch ex As Exception
-            ' Error parsing this row from the synopsis or first hits file
-            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
-                    strErrorLog &= "Error parsing MSGF-DB Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
-                Else
-                    strErrorLog &= "Error parsing MSGF-DB Results in ParseMSGFDBResultsFileEntry" & ControlChars.NewLine
-                End If
-            End If
-            blnValidSearchResult = False
-        End Try
+								' Note that this will be a C13-corrected precursor error; not the true precursor error
+								.PMErrorDa = NumToString(dblPrecursorErrorDa, 5, True)
+							End If
+						End If
 
-        Return blnValidSearchResult
+					Else
 
-    End Function
+						Dim dblPrecursorMZ As Double
+						If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
+							Dim dblPeptideDeltaMassCorrectedPpm As Double
+
+							dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMZ, _
+							 .ChargeNum, dblPeptideMonoisotopicMass, True)
+
+							.PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 4, True)
+
+						End If
+
+					End If
+
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Protein), .Protein)
+					.Protein = TruncateProteinName(.Protein)
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.DeNovoScore), .DeNovoScore)
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.MSGFScore), .MSGFScore)
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecProb), .SpecProb)
+					If Not Double.TryParse(.SpecProb, .SpecProbNum) Then .SpecProbNum = 0
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue), .PValue)
+					If Not Double.TryParse(.PValue, .PValueNum) Then .PValueNum = 0
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR), .FDR)
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR), .PepFDR)
+
+					.NTT = ComputeCleaveageState(.Peptide).ToString()
+				End With
+
+				Dim udtScanGroupInfo As udtScanGroupInfoType
+				Dim intCurrentScanGroupID As Integer = -1
+
+				udtScanGroupInfo.Charge = udtSearchResult.ChargeNum
+
+				If intScanCount > 1 Then
+					' Append one entry to lstSearchResults for each item in udtMergedScanInfo()
+
+					For intIndex As Integer = 0 To intScanCount - 1
+						udtSearchResult.Scan = udtMergedScanInfo(intIndex).Scan
+						udtSearchResult.ScanNum = udtMergedScanInfo(intIndex).ScanNum
+
+						udtSearchResult.SpecIndex = udtMergedScanInfo(intIndex).SpecIndex
+						udtSearchResult.FragMethod = udtMergedScanInfo(intIndex).FragMethod
+
+						lstSearchResults.Add(udtSearchResult)
+
+						' Append an entry to lstScanGroupDetails
+						udtScanGroupInfo.Scan = udtSearchResult.ScanNum
+						AppendToScanGroupDetails(lstScanGroupDetails, htScanGroupCombo, udtScanGroupInfo, intCurrentScanGroupID, intNextScanGroupID)
+					Next
+				Else
+					' This is not a merged result; simply append udtSearchResult to lstSearchResults
+					lstSearchResults.Add(udtSearchResult)
+
+					' Also append an entry to lstScanGroupDetails
+					udtScanGroupInfo.Scan = udtSearchResult.ScanNum
+					AppendToScanGroupDetails(lstScanGroupDetails, htScanGroupCombo, udtScanGroupInfo, intCurrentScanGroupID, intNextScanGroupID)
+
+				End If
+
+				blnValidSearchResult = True
+			End If
+
+		Catch ex As Exception
+			' Error parsing this row from the MSGF-DB results file
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+					strErrorLog &= "Error parsing MSGF-DB Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+				Else
+					strErrorLog &= "Error parsing MSGF-DB Results in ParseMSGFDBResultsFileEntry" & ControlChars.NewLine
+				End If
+			End If
+			blnValidSearchResult = False
+		End Try
+
+		Return blnValidSearchResult
+
+	End Function
 
     Private Function ParseMSGFDBResultsFileHeaderLine(ByVal strLineIn As String, _
                                                       ByRef intColumnMapping() As Integer) As Boolean
@@ -1678,6 +1803,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim strOutputFilePath As String
         Dim strSynOutputFilePath As String
         Dim strPepToProteinMapFilePath As String
+		Dim strScanGroupFilePath As String
 
         Dim udtMSGFDBModInfo() As udtModInfoType
         Dim udtPepToProteinMapping() As udtPepToProteinMappingType
@@ -1732,7 +1858,9 @@ Public Class clsMSGFDBResultsProcessor
                             strOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
                             strOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strOutputFilePath & SEQUEST_FIRST_HITS_FILE_SUFFIX)
 
-                            blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtMSGFDBModInfo, eFilteredOutputFileTypeConstants.FHTFile)
+							strScanGroupFilePath = String.Empty
+
+							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, strScanGroupFilePath, udtMSGFDBModInfo, eFilteredOutputFileTypeConstants.FHTFile)
 
                         End If
 
@@ -1745,10 +1873,13 @@ Public Class clsMSGFDBResultsProcessor
                             Console.WriteLine(MyBase.ProgressStepDescription)
 
                             'Define the synopsis output file name based on strInputFilePath
-                            strSynOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
-                            strSynOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strSynOutputFilePath & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+							strSynOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+							strSynOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strSynOutputFilePath & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
-                            blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, udtMSGFDBModInfo, eFilteredOutputFileTypeConstants.SynFile)
+							strScanGroupFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+							strScanGroupFilePath = System.IO.Path.Combine(strOutputFolderPath, strScanGroupFilePath & "_ScanGroupInfo.txt")
+
+							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, udtMSGFDBModInfo, eFilteredOutputFileTypeConstants.SynFile)
 
                             ' Load the PeptideToProteinMap information; if any modified peptides are present, then write out an updated _inspect_PepToProtMap.txt file with the new mod symbols (file will be named _PepToProtMapMTS.txt)
                             ' If the file doesn't exist, then a warning will be displayed, but processing will continue
@@ -2044,21 +2175,19 @@ Public Class clsMSGFDBResultsProcessor
         End If
     End Sub
 
-    Protected Sub StoreSearchResult(ByRef swResultFile As System.IO.StreamWriter, _
-                                    ByRef intResultID As Integer, _
-                                    ByRef udtSearchResult As udtMSGFDBSearchResultType, _
-                                    ByRef intFilteredSearchResultCount As Integer, _
-                                    ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
-                                    ByRef strErrorLog As String)
+	Protected Sub StoreSearchResult(ByRef udtSearchResult As udtMSGFDBSearchResultType, _
+									ByRef intFilteredSearchResultCount As Integer, _
+									ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
+									ByRef strErrorLog As String)
 
-        If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
-            ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
-        End If
+		If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
+			ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
+		End If
 
-        udtFilteredSearchResults(intFilteredSearchResultCount) = udtSearchResult
-        intFilteredSearchResultCount += 1
+		udtFilteredSearchResults(intFilteredSearchResultCount) = udtSearchResult
+		intFilteredSearchResultCount += 1
 
-    End Sub
+	End Sub
 
     Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As System.IO.StreamWriter, _
                                                   ByVal intFilteredSearchResultCount As Integer, _
@@ -2077,35 +2206,72 @@ Public Class clsMSGFDBResultsProcessor
 
     End Sub
 
-    Private Sub StoreTopFHTMatch(ByRef swResultFile As System.IO.StreamWriter, _
-                                 ByRef intResultID As Integer, _
-                                 ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
-                                 ByVal intStartIndex As Integer, _
-                                 ByVal intEndIndex As Integer, _
-                                 ByRef intFilteredSearchResultCount As Integer, _
-                                 ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
-                                 ByRef strErrorLog As String)
+	Private Sub StoreScanGroupInfo(ByVal strScanGroupFilePath As String, ByRef lstScanGroupDetails As System.Collections.Generic.List(Of udtScanGroupInfoType))
 
-        Dim intIndex As Integer
-        Dim intCurrentCharge As Short = Short.MinValue
+		Dim intScanGroupIDPrevious As Integer
+		Dim blnCreateFile As Boolean
 
-        AssignRankAndDeltaNormValues(udtSearchResults, intStartIndex, intEndIndex)
+		Dim swScanGroupFile As System.IO.StreamWriter
+
+		Try
+
+			' Only create the ScanGroup file if one or more scan groups exist
+			' Step through lstScanGroupDetails to check for this
+			intScanGroupIDPrevious = -1
+			blnCreateFile = False
+			For Each udtScanGroupInfo As udtScanGroupInfoType In lstScanGroupDetails
+				If udtScanGroupInfo.ScanGroupID = intScanGroupIDPrevious Then
+					blnCreateFile = True
+					Exit For
+				End If
+				intScanGroupIDPrevious = udtScanGroupInfo.ScanGroupID
+			Next
+
+			If blnCreateFile Then
+				swScanGroupFile = New System.IO.StreamWriter(New System.IO.FileStream(strScanGroupFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+
+				swScanGroupFile.WriteLine("Scan_Group_ID" & ControlChars.Tab & "Charge" & ControlChars.Tab & "Scan")
+
+				For Each udtScanGroupInfo As udtScanGroupInfoType In lstScanGroupDetails
+					With udtScanGroupInfo
+						swScanGroupFile.WriteLine(.ScanGroupID & ControlChars.Tab & .Charge & ControlChars.Tab & .Scan)
+					End With
+				Next
+
+				swScanGroupFile.Close()
+			End If
+
+		Catch ex As Exception
+			SetErrorMessage("Error creating ScanGroupInfo file: " & ex.Message)
+		End Try
+
+	End Sub
+
+	Private Sub StoreTopFHTMatch(ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
+		 ByVal intStartIndex As Integer, _
+		 ByVal intEndIndex As Integer, _
+		 ByRef intFilteredSearchResultCount As Integer, _
+		 ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
+		 ByRef strErrorLog As String)
+
+		Dim intIndex As Integer
+		Dim intCurrentCharge As Short = Short.MinValue
+
+		AssignRankAndDeltaNormValues(udtSearchResults, intStartIndex, intEndIndex)
 
 		' The calling procedure should have already sorted by scan, charge, and SpecProb; no need to re-sort
 
-        ' Now store or write out the first match for each charge for this scan
-        For intIndex = intStartIndex To intEndIndex
-            If intIndex = intStartIndex OrElse intCurrentCharge <> udtSearchResults(intIndex).ChargeNum Then
-                StoreSearchResult(swResultFile, intResultID, udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-                intCurrentCharge = udtSearchResults(intIndex).ChargeNum
-            End If
-        Next intIndex
+		' Now store or write out the first match for each charge for this scan
+		For intIndex = intStartIndex To intEndIndex
+			If intIndex = intStartIndex OrElse intCurrentCharge <> udtSearchResults(intIndex).ChargeNum Then
+				StoreSearchResult(udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+				intCurrentCharge = udtSearchResults(intIndex).ChargeNum
+			End If
+		Next intIndex
 
-    End Sub
+	End Sub
 
-    Private Sub StoreSynMatches(ByRef swResultFile As System.IO.StreamWriter, _
-                                ByRef intResultID As Integer, _
-                                ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
+    Private Sub StoreSynMatches(ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
                                 ByVal intStartIndex As Integer, _
                                 ByVal intEndIndex As Integer, _
                                 ByRef intFilteredSearchResultCount As Integer, _
@@ -2123,7 +2289,7 @@ Public Class clsMSGFDBResultsProcessor
         For intIndex = intStartIndex To intEndIndex
             If udtSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse _
                udtSearchResults(intIndex).SpecProbNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
-                StoreSearchResult(swResultFile, intResultID, udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+				StoreSearchResult(udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
             End If
         Next intIndex
 
@@ -2201,7 +2367,6 @@ Public Class clsMSGFDBResultsProcessor
 
 			swResultFile.WriteLine("ResultID" & ControlChars.Tab & _
 								   "Scan" & ControlChars.Tab & _
-								   "ScanCount" & ControlChars.Tab & _
 								   "FragMethod" & ControlChars.Tab & _
 								   "SpecIndex" & ControlChars.Tab & _
 								   "Charge" & ControlChars.Tab & _
@@ -2237,7 +2402,7 @@ Public Class clsMSGFDBResultsProcessor
         ' Writes an entry to a synopsis or first hits file
         Try
             ' Columns:
-			' ResultID  Scan ScanCount FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb  Rank_MSGFDB_SpecProb  PValue  FDR  PepFDR
+			' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb  Rank_MSGFDB_SpecProb  PValue  FDR  PepFDR
 
             Dim strSuffix As String = String.Empty
             If blnIncludeFDRandPepFDR Then
@@ -2246,7 +2411,6 @@ Public Class clsMSGFDBResultsProcessor
 
 			swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
 								   udtSearchResult.Scan & ControlChars.Tab & _
-								   udtSearchResult.ScanCount & ControlChars.Tab & _
 								   udtSearchResult.FragMethod & ControlChars.Tab & _
 								   udtSearchResult.SpecIndex & ControlChars.Tab & _
 								   udtSearchResult.Charge & ControlChars.Tab & _
