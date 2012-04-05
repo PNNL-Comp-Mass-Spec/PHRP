@@ -56,6 +56,11 @@ Public MustInherit Class clsPHRPParser
 
 	End Sub
 
+#Region "Functions overridden by derived classes"
+	Protected MustOverride Sub DefineColumnHeaders()
+	Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
+#End Region
+
 	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
 		mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
 	End Sub
@@ -65,8 +70,6 @@ Public MustInherit Class clsPHRPParser
 		objPSM.SetScore(strScoreColumnName, PHRPReader.clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders))
 
 	End Sub
-
-	Protected MustOverride Sub DefineColumnHeaders()
 
 	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
 		If String.IsNullOrEmpty(strBaseMessage) Then
@@ -80,7 +83,6 @@ Public MustInherit Class clsPHRPParser
 		clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
 	End Sub
 
-	Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
 
 	Protected Sub ReportError(ByVal strErrorMessage As String)
 		mErrorMessage = strErrorMessage

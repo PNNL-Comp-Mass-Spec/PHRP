@@ -126,81 +126,95 @@ Public Class clsPeptideCleavageStateCalculator
         SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin)
     End Sub
 
-    Public Function ComputeCleavageState(ByVal strSequenceWithPrefixAndSuffix As String) As ePeptideCleavageStateConstants
-        Dim strPrimarySequence As String = String.Empty
-        Dim strPrefix As String = String.Empty
-        Dim strSuffix As String = String.Empty
+	Public Shared Function CleavageStateToShort(ByVal eCleavageState As ePeptideCleavageStateConstants) As Short
 
-        If SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, strPrimarySequence, strPrefix, strSuffix) Then
-            Return ComputeCleavageState(strPrimarySequence, strPrefix, strSuffix)
-        Else
-            Return ePeptideCleavageStateConstants.NonSpecific
-        End If
-    End Function
+		Select Case eCleavageState
+			Case ePeptideCleavageStateConstants.Full
+				Return 2S
+			Case ePeptideCleavageStateConstants.Partial
+				Return 1S
+			Case ePeptideCleavageStateConstants.NonSpecific
+				Return 0S
+			Case Else
+				Return 0S
+		End Select
+	End Function
+	
+	Public Function ComputeCleavageState(ByVal strSequenceWithPrefixAndSuffix As String) As ePeptideCleavageStateConstants
+		Dim strPrimarySequence As String = String.Empty
+		Dim strPrefix As String = String.Empty
+		Dim strSuffix As String = String.Empty
 
-    Public Function ComputeCleavageState(ByVal strCleanSequence As String, ByVal strPrefixResidues As String, ByVal strSuffixResidues As String) As ePeptideCleavageStateConstants
-        ' Determine the cleavage state of strCleanSequence utilizing the rules specified in mEnzymeMatchSpec
+		If SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, strPrimarySequence, strPrefix, strSuffix) Then
+			Return ComputeCleavageState(strPrimarySequence, strPrefix, strSuffix)
+		Else
+			Return ePeptideCleavageStateConstants.NonSpecific
+		End If
+	End Function
 
-        Dim chSequenceStart As Char, chSequenceEnd As Char
-        Dim chPrefix As Char
-        Dim chSuffix As Char
+	Public Function ComputeCleavageState(ByVal strCleanSequence As String, ByVal strPrefixResidues As String, ByVal strSuffixResidues As String) As ePeptideCleavageStateConstants
+		' Determine the cleavage state of strCleanSequence utilizing the rules specified in mEnzymeMatchSpec
 
-        Dim ePeptideCleavageState As ePeptideCleavageStateConstants = ePeptideCleavageStateConstants.NonSpecific
-        Dim ePeptideTerminusState As ePeptideTerminusStateConstants = ePeptideTerminusStateConstants.None
-        Dim blnRuleMatchStart As Boolean
-        Dim blnRuleMatchEnd As Boolean
+		Dim chSequenceStart As Char, chSequenceEnd As Char
+		Dim chPrefix As Char
+		Dim chSuffix As Char
 
-        If Not strCleanSequence Is Nothing AndAlso strCleanSequence.Length > 0 Then
-            ' Find the letter closest to the end of strPrefixResidues
-            chPrefix = FindLetterNearestEnd(strPrefixResidues)
+		Dim ePeptideCleavageState As ePeptideCleavageStateConstants = ePeptideCleavageStateConstants.NonSpecific
+		Dim ePeptideTerminusState As ePeptideTerminusStateConstants = ePeptideTerminusStateConstants.None
+		Dim blnRuleMatchStart As Boolean
+		Dim blnRuleMatchEnd As Boolean
 
-            ' Find the letter closest to the start of strSuffixResidues
-            chSuffix = FindLetterNearestStart(strSuffixResidues)
+		If Not strCleanSequence Is Nothing AndAlso strCleanSequence.Length > 0 Then
+			' Find the letter closest to the end of strPrefixResidues
+			chPrefix = FindLetterNearestEnd(strPrefixResidues)
 
-            ' Find the letter closest to the start of strCleanSequence
-            chSequenceStart = FindLetterNearestStart(strCleanSequence)
+			' Find the letter closest to the start of strSuffixResidues
+			chSuffix = FindLetterNearestStart(strSuffixResidues)
 
-            ' Find the letter closest to the end of strCleanSequence
-            chSequenceEnd = FindLetterNearestEnd(strCleanSequence)
+			' Find the letter closest to the start of strCleanSequence
+			chSequenceStart = FindLetterNearestStart(strCleanSequence)
 
-            ' Determine the terminus state of this peptide
-            ePeptideTerminusState = ComputeTerminusState(chPrefix, chSuffix)
+			' Find the letter closest to the end of strCleanSequence
+			chSequenceEnd = FindLetterNearestEnd(strCleanSequence)
 
-            If ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
-                ' The peptide spans the entire length of the protein; mark it as fully tryptic
-                ePeptideCleavageState = ePeptideCleavageStateConstants.Full
-            ElseIf ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus Then
-                ' Peptides at the N-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
-                If TestCleavageRule(chSequenceEnd, chSuffix) Then
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.Full
-                Else
-                    ' Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
-                End If
-            ElseIf ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus Then
-                ' Peptides at the C-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
-                If TestCleavageRule(chPrefix, chSequenceStart) Then
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.Full
-                Else
-                    ' Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
-                End If
-            Else
-                ' Check whether chPrefix matches mLeftRegEx and chSequenceStart matches mRightRegEx
-                blnRuleMatchStart = TestCleavageRule(chPrefix, chSequenceStart)
-                blnRuleMatchEnd = TestCleavageRule(chSequenceEnd, chSuffix)
+			' Determine the terminus state of this peptide
+			ePeptideTerminusState = ComputeTerminusState(chPrefix, chSuffix)
 
-                If blnRuleMatchStart AndAlso blnRuleMatchEnd Then
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.Full
-                ElseIf blnRuleMatchStart OrElse blnRuleMatchEnd Then
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.[Partial]
-                Else
-                    ' Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
-                End If
-            End If
-        End If
+			If ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
+				' The peptide spans the entire length of the protein; mark it as fully tryptic
+				ePeptideCleavageState = ePeptideCleavageStateConstants.Full
+			ElseIf ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus Then
+				' Peptides at the N-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
+				If TestCleavageRule(chSequenceEnd, chSuffix) Then
+					ePeptideCleavageState = ePeptideCleavageStateConstants.Full
+				Else
+					' Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
+				End If
+			ElseIf ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus Then
+				' Peptides at the C-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
+				If TestCleavageRule(chPrefix, chSequenceStart) Then
+					ePeptideCleavageState = ePeptideCleavageStateConstants.Full
+				Else
+					' Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
+				End If
+			Else
+				' Check whether chPrefix matches mLeftRegEx and chSequenceStart matches mRightRegEx
+				blnRuleMatchStart = TestCleavageRule(chPrefix, chSequenceStart)
+				blnRuleMatchEnd = TestCleavageRule(chSequenceEnd, chSuffix)
 
-        Return ePeptideCleavageState
+				If blnRuleMatchStart AndAlso blnRuleMatchEnd Then
+					ePeptideCleavageState = ePeptideCleavageStateConstants.Full
+				ElseIf blnRuleMatchStart OrElse blnRuleMatchEnd Then
+					ePeptideCleavageState = ePeptideCleavageStateConstants.[Partial]
+				Else
+					' Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
+				End If
+			End If
+		End If
 
-    End Function
+		Return ePeptideCleavageState
+
+	End Function
 
 	Public Function ComputeNumberOfMissedCleavages(ByVal strSequenceWithPrefixAndSuffix As String) As Short
 		Dim strPrimarySequence As String = String.Empty
@@ -235,325 +249,325 @@ Public Class clsPeptideCleavageStateCalculator
 
 	End Function
 
-    Public Function ComputeTerminusState(ByVal strSequenceWithPrefixAndSuffix As String) As ePeptideTerminusStateConstants
-        Dim strPrimarySequence As String = String.Empty
-        Dim strPrefix As String = String.Empty
-        Dim strSuffix As String = String.Empty
+	Public Function ComputeTerminusState(ByVal strSequenceWithPrefixAndSuffix As String) As ePeptideTerminusStateConstants
+		Dim strPrimarySequence As String = String.Empty
+		Dim strPrefix As String = String.Empty
+		Dim strSuffix As String = String.Empty
 
-        If SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, strPrimarySequence, strPrefix, strSuffix) Then
-            Return ComputeTerminusState(strPrimarySequence, strPrefix, strSuffix)
-        Else
-            Return ePeptideTerminusStateConstants.None
-        End If
-    End Function
+		If SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, strPrimarySequence, strPrefix, strSuffix) Then
+			Return ComputeTerminusState(strPrimarySequence, strPrefix, strSuffix)
+		Else
+			Return ePeptideTerminusStateConstants.None
+		End If
+	End Function
 
-    Public Function ComputeTerminusState(ByVal chPrefix As Char, ByVal chSuffix As Char) As ePeptideTerminusStateConstants
+	Public Function ComputeTerminusState(ByVal chPrefix As Char, ByVal chSuffix As Char) As ePeptideTerminusStateConstants
 
-        Dim ePeptideTerminusState As ePeptideTerminusStateConstants = ePeptideTerminusStateConstants.None
+		Dim ePeptideTerminusState As ePeptideTerminusStateConstants = ePeptideTerminusStateConstants.None
 
-        If Array.BinarySearch(mTerminusSymbols, chPrefix) >= 0 Then
-            ' Prefix character matches a terminus symbol
-            If Array.BinarySearch(mTerminusSymbols, chSuffix) >= 0 Then
-                ' The peptide spans the entire length of the protein
-                ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus
-            Else
-                ' The peptide is located at the protein's N-terminus
-                ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus
-            End If
-        ElseIf Array.BinarySearch(mTerminusSymbols, chSuffix) >= 0 Then
-            ' Suffix character matches a terminus symbol
-            ' The peptide is located at the protein's C-terminus
-            ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus
-        Else
-            ' Leave ePeptideTerminusState = ePeptideTerminusStateConstants.None
-        End If
+		If Array.BinarySearch(mTerminusSymbols, chPrefix) >= 0 Then
+			' Prefix character matches a terminus symbol
+			If Array.BinarySearch(mTerminusSymbols, chSuffix) >= 0 Then
+				' The peptide spans the entire length of the protein
+				ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus
+			Else
+				' The peptide is located at the protein's N-terminus
+				ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus
+			End If
+		ElseIf Array.BinarySearch(mTerminusSymbols, chSuffix) >= 0 Then
+			' Suffix character matches a terminus symbol
+			' The peptide is located at the protein's C-terminus
+			ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus
+		Else
+			' Leave ePeptideTerminusState = ePeptideTerminusStateConstants.None
+		End If
 
-        Return ePeptideTerminusState
+		Return ePeptideTerminusState
 
-    End Function
+	End Function
 
-    Public Function ComputeTerminusState(ByVal strCleanSequence As String, ByVal strPrefixResidues As String, ByVal strSuffixResidues As String) As ePeptideTerminusStateConstants
-        ' Determine the terminus state of strCleanSequence
+	Public Function ComputeTerminusState(ByVal strCleanSequence As String, ByVal strPrefixResidues As String, ByVal strSuffixResidues As String) As ePeptideTerminusStateConstants
+		' Determine the terminus state of strCleanSequence
 
-        Dim chPrefix As Char
-        Dim chSuffix As Char
-        Dim ePeptideTerminusState As ePeptideTerminusStateConstants = ePeptideTerminusStateConstants.None
+		Dim chPrefix As Char
+		Dim chSuffix As Char
+		Dim ePeptideTerminusState As ePeptideTerminusStateConstants = ePeptideTerminusStateConstants.None
 
-        If strCleanSequence Is Nothing OrElse strCleanSequence.Length = 0 Then
-            ePeptideTerminusState = ePeptideTerminusStateConstants.None
-        Else
-            ' Find the letter closest to the end of strPrefixResidues
-            chPrefix = FindLetterNearestEnd(strPrefixResidues)
+		If strCleanSequence Is Nothing OrElse strCleanSequence.Length = 0 Then
+			ePeptideTerminusState = ePeptideTerminusStateConstants.None
+		Else
+			' Find the letter closest to the end of strPrefixResidues
+			chPrefix = FindLetterNearestEnd(strPrefixResidues)
 
-            ' Find the letter closest to the start of strSuffixResidues
-            chSuffix = FindLetterNearestStart(strSuffixResidues)
+			' Find the letter closest to the start of strSuffixResidues
+			chSuffix = FindLetterNearestStart(strSuffixResidues)
 
-            ePeptideTerminusState = ComputeTerminusState(chPrefix, chSuffix)
-        End If
+			ePeptideTerminusState = ComputeTerminusState(chPrefix, chSuffix)
+		End If
 
-        Return ePeptideTerminusState
+		Return ePeptideTerminusState
 
-    End Function
+	End Function
 
-    Public Shared Function ExtractCleanSequenceFromSequenceWithMods(ByVal strSequenceWithMods As String, ByVal blnCheckForPrefixAndSuffixResidues As Boolean) As String
-        ' Parses strSequenceWithMods to remove any non-letter characters (*, #, +, 8, etc.)
-        ' Optionally removes prefix and suffix letters
-        ' Returns the clean sequence
+	Public Shared Function ExtractCleanSequenceFromSequenceWithMods(ByVal strSequenceWithMods As String, ByVal blnCheckForPrefixAndSuffixResidues As Boolean) As String
+		' Parses strSequenceWithMods to remove any non-letter characters (*, #, +, 8, etc.)
+		' Optionally removes prefix and suffix letters
+		' Returns the clean sequence
 
-        Dim strPrimarySequence As String = String.Empty
-        Dim strPrefix As String = String.Empty
-        Dim strSuffix As String = String.Empty
+		Dim strPrimarySequence As String = String.Empty
+		Dim strPrefix As String = String.Empty
+		Dim strSuffix As String = String.Empty
 
-        Dim chChar As Char
-        Dim strCleanSequence As String
+		Dim chChar As Char
+		Dim strCleanSequence As String
 
-        strCleanSequence = String.Empty
-        If Not strSequenceWithMods Is Nothing Then
-            If blnCheckForPrefixAndSuffixResidues Then
-                If Not SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
-                    strPrimarySequence = String.Copy(strSequenceWithMods)
-                End If
-            Else
-                strPrimarySequence = String.Copy(strSequenceWithMods)
-            End If
+		strCleanSequence = String.Empty
+		If Not strSequenceWithMods Is Nothing Then
+			If blnCheckForPrefixAndSuffixResidues Then
+				If Not SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
+					strPrimarySequence = String.Copy(strSequenceWithMods)
+				End If
+			Else
+				strPrimarySequence = String.Copy(strSequenceWithMods)
+			End If
 
-            For Each chChar In strPrimarySequence
-                If Char.IsLetter(chChar) Then
-                    strCleanSequence &= chChar
-                End If
-            Next chChar
-        End If
+			For Each chChar In strPrimarySequence
+				If Char.IsLetter(chChar) Then
+					strCleanSequence &= chChar
+				End If
+			Next chChar
+		End If
 
-        Return strCleanSequence
-    End Function
+		Return strCleanSequence
+	End Function
 
-    Private Function FindLetterNearestEnd(ByVal strText As String) As Char
-        Dim intIndex As Integer
-        Dim chMatch As Char
+	Private Function FindLetterNearestEnd(ByVal strText As String) As Char
+		Dim intIndex As Integer
+		Dim chMatch As Char
 
-        If strText Is Nothing OrElse strText.Length = 0 Then
-            chMatch = TERMINUS_SYMBOL_SEQUEST
-        Else
-            intIndex = strText.Length - 1
-            chMatch = strText.Chars(intIndex)
-            Do While Not (Char.IsLetter(chMatch) OrElse Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) AndAlso intIndex > 0
-                intIndex -= 1
-                chMatch = strText.Chars(intIndex)
-            Loop
-        End If
+		If strText Is Nothing OrElse strText.Length = 0 Then
+			chMatch = TERMINUS_SYMBOL_SEQUEST
+		Else
+			intIndex = strText.Length - 1
+			chMatch = strText.Chars(intIndex)
+			Do While Not (Char.IsLetter(chMatch) OrElse Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) AndAlso intIndex > 0
+				intIndex -= 1
+				chMatch = strText.Chars(intIndex)
+			Loop
+		End If
 
-        Return chMatch
+		Return chMatch
 
-    End Function
+	End Function
 
-    Private Function FindLetterNearestStart(ByVal strText As String) As Char
-        Dim intIndex As Integer
-        Dim chMatch As Char
+	Private Function FindLetterNearestStart(ByVal strText As String) As Char
+		Dim intIndex As Integer
+		Dim chMatch As Char
 
-        If strText Is Nothing OrElse strText.Length = 0 Then
-            chMatch = TERMINUS_SYMBOL_SEQUEST
-        Else
-            intIndex = 0
-            chMatch = strText.Chars(intIndex)
-            Do While Not (Char.IsLetter(chMatch) OrElse Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) AndAlso intIndex < strText.Length - 1
-                intIndex += 1
-                chMatch = strText.Chars(intIndex)
-            Loop
-        End If
+		If strText Is Nothing OrElse strText.Length = 0 Then
+			chMatch = TERMINUS_SYMBOL_SEQUEST
+		Else
+			intIndex = 0
+			chMatch = strText.Chars(intIndex)
+			Do While Not (Char.IsLetter(chMatch) OrElse Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) AndAlso intIndex < strText.Length - 1
+				intIndex += 1
+				chMatch = strText.Chars(intIndex)
+			Loop
+		End If
 
-        Return chMatch
+		Return chMatch
 
-    End Function
+	End Function
 
-    Public Shared Function GetDefaultEnzymeMatchSpec() As udtEnzymeMatchSpecType
-        Dim udtEnzymeMatchSpec As udtEnzymeMatchSpecType
-        With udtEnzymeMatchSpec
-            .LeftResidueRegEx = TRYPSIN_LEFT_RESIDUE_REGEX
-            .RightResidueRegEx = TRYPSIN_RIGHT_RESIDUE_REGEX
-        End With
-        Return udtEnzymeMatchSpec
-    End Function
+	Public Shared Function GetDefaultEnzymeMatchSpec() As udtEnzymeMatchSpecType
+		Dim udtEnzymeMatchSpec As udtEnzymeMatchSpecType
+		With udtEnzymeMatchSpec
+			.LeftResidueRegEx = TRYPSIN_LEFT_RESIDUE_REGEX
+			.RightResidueRegEx = TRYPSIN_RIGHT_RESIDUE_REGEX
+		End With
+		Return udtEnzymeMatchSpec
+	End Function
 
-    Private Sub InitializeRegExObjects()
-        Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
+	Private Sub InitializeRegExObjects()
+		Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
 
-        If mEnzymeMatchSpec.LeftResidueRegEx Is Nothing OrElse mEnzymeMatchSpec.RightResidueRegEx Is Nothing Then
-            ' Note that calling SetStandardEnzymeMatchSpec will cause this sub to also be called
-            SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin)
-            Exit Sub
-        End If
+		If mEnzymeMatchSpec.LeftResidueRegEx Is Nothing OrElse mEnzymeMatchSpec.RightResidueRegEx Is Nothing Then
+			' Note that calling SetStandardEnzymeMatchSpec will cause this sub to also be called
+			SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin)
+			Exit Sub
+		End If
 
-        Try
-            mLeftRegEx = New System.Text.RegularExpressions.Regex(mEnzymeMatchSpec.LeftResidueRegEx, REGEX_OPTIONS)
-            mRightRegEx = New System.Text.RegularExpressions.Regex(mEnzymeMatchSpec.RightResidueRegEx, REGEX_OPTIONS)
-        Catch ex As Exception
-            ' Ignore errors here
-        End Try
+		Try
+			mLeftRegEx = New System.Text.RegularExpressions.Regex(mEnzymeMatchSpec.LeftResidueRegEx, REGEX_OPTIONS)
+			mRightRegEx = New System.Text.RegularExpressions.Regex(mEnzymeMatchSpec.RightResidueRegEx, REGEX_OPTIONS)
+		Catch ex As Exception
+			' Ignore errors here
+		End Try
 
-    End Sub
+	End Sub
 
-    Public Sub SetEnzymeMatchSpec(ByVal strLeftResidueRegEx As String, ByVal strRightResidueRegEx As String)
-        If Not strLeftResidueRegEx Is Nothing AndAlso Not strRightResidueRegEx Is Nothing Then
-            If strLeftResidueRegEx.Length = 0 Then strLeftResidueRegEx = "[A-Z]"
-            If strRightResidueRegEx.Length = 0 Then strRightResidueRegEx = "[A-Z]"
+	Public Sub SetEnzymeMatchSpec(ByVal strLeftResidueRegEx As String, ByVal strRightResidueRegEx As String)
+		If Not strLeftResidueRegEx Is Nothing AndAlso Not strRightResidueRegEx Is Nothing Then
+			If strLeftResidueRegEx.Length = 0 Then strLeftResidueRegEx = "[A-Z]"
+			If strRightResidueRegEx.Length = 0 Then strRightResidueRegEx = "[A-Z]"
 
-            If strLeftResidueRegEx = GENERIC_RESIDUE_SYMBOL OrElse strLeftResidueRegEx = "[" & GENERIC_RESIDUE_SYMBOL & "]" Then
-                strLeftResidueRegEx = "[A-Z]"
-            End If
+			If strLeftResidueRegEx = GENERIC_RESIDUE_SYMBOL OrElse strLeftResidueRegEx = "[" & GENERIC_RESIDUE_SYMBOL & "]" Then
+				strLeftResidueRegEx = "[A-Z]"
+			End If
 
-            If strRightResidueRegEx = GENERIC_RESIDUE_SYMBOL OrElse strRightResidueRegEx = "[" & GENERIC_RESIDUE_SYMBOL & "]" Then
-                strRightResidueRegEx = "[A-Z]"
-            End If
+			If strRightResidueRegEx = GENERIC_RESIDUE_SYMBOL OrElse strRightResidueRegEx = "[" & GENERIC_RESIDUE_SYMBOL & "]" Then
+				strRightResidueRegEx = "[A-Z]"
+			End If
 
-            If strLeftResidueRegEx = "[^" & GENERIC_RESIDUE_SYMBOL & "]" Then
-                strLeftResidueRegEx = "[^A-Z]"
-            End If
+			If strLeftResidueRegEx = "[^" & GENERIC_RESIDUE_SYMBOL & "]" Then
+				strLeftResidueRegEx = "[^A-Z]"
+			End If
 
-            If strRightResidueRegEx = "[^" & GENERIC_RESIDUE_SYMBOL & "]" Then
-                strRightResidueRegEx = "[^A-Z]"
-            End If
+			If strRightResidueRegEx = "[^" & GENERIC_RESIDUE_SYMBOL & "]" Then
+				strRightResidueRegEx = "[^A-Z]"
+			End If
 
-            mEnzymeMatchSpec.LeftResidueRegEx = strLeftResidueRegEx
-            mEnzymeMatchSpec.RightResidueRegEx = strRightResidueRegEx
-        End If
+			mEnzymeMatchSpec.LeftResidueRegEx = strLeftResidueRegEx
+			mEnzymeMatchSpec.RightResidueRegEx = strRightResidueRegEx
+		End If
 
-        InitializeRegExObjects()
-    End Sub
+		InitializeRegExObjects()
+	End Sub
 
-    Public Sub SetStandardEnzymeMatchSpec(ByVal eStandardCleavageAgent As eStandardCleavageAgentConstants)
+	Public Sub SetStandardEnzymeMatchSpec(ByVal eStandardCleavageAgent As eStandardCleavageAgentConstants)
 
-        Select Case eStandardCleavageAgent
-            Case eStandardCleavageAgentConstants.Trypsin
-                SetEnzymeMatchSpec(TRYPSIN_LEFT_RESIDUE_REGEX, TRYPSIN_RIGHT_RESIDUE_REGEX)
-            Case eStandardCleavageAgentConstants.TrypsinWithoutProlineRule
-                SetEnzymeMatchSpec("[KR]", "[A-Z]")
-            Case eStandardCleavageAgentConstants.TrypsinPlusFVLEY
-                SetEnzymeMatchSpec("[KRFYVEL]", "[A-Z]")
-            Case eStandardCleavageAgentConstants.Chymotrypsin
-                SetEnzymeMatchSpec("[FWYL]", "[A-Z]")
-            Case eStandardCleavageAgentConstants.ChymotrypsinAndTrypsin
-                SetEnzymeMatchSpec("[FWYLKR]", "[A-Z]")
+		Select Case eStandardCleavageAgent
+			Case eStandardCleavageAgentConstants.Trypsin
+				SetEnzymeMatchSpec(TRYPSIN_LEFT_RESIDUE_REGEX, TRYPSIN_RIGHT_RESIDUE_REGEX)
+			Case eStandardCleavageAgentConstants.TrypsinWithoutProlineRule
+				SetEnzymeMatchSpec("[KR]", "[A-Z]")
+			Case eStandardCleavageAgentConstants.TrypsinPlusFVLEY
+				SetEnzymeMatchSpec("[KRFYVEL]", "[A-Z]")
+			Case eStandardCleavageAgentConstants.Chymotrypsin
+				SetEnzymeMatchSpec("[FWYL]", "[A-Z]")
+			Case eStandardCleavageAgentConstants.ChymotrypsinAndTrypsin
+				SetEnzymeMatchSpec("[FWYLKR]", "[A-Z]")
 
-            Case eStandardCleavageAgentConstants.V8_aka_GluC
-                SetEnzymeMatchSpec("[ED]", "[A-Z]")
-            Case eStandardCleavageAgentConstants.CyanBr
-                SetEnzymeMatchSpec("[M]", "[A-Z]")
-            Case eStandardCleavageAgentConstants.EndoArgC
-                SetEnzymeMatchSpec("[R]", "[A-Z]")
-            Case eStandardCleavageAgentConstants.EndoLysC
-                SetEnzymeMatchSpec("[K]", "[A-Z]")
-            Case eStandardCleavageAgentConstants.EndoAspN
-                SetEnzymeMatchSpec("[A-Z]", "[D]")
-            Case Else
-                ' Unknown agent; leave unchanged
-        End Select
-    End Sub
+			Case eStandardCleavageAgentConstants.V8_aka_GluC
+				SetEnzymeMatchSpec("[ED]", "[A-Z]")
+			Case eStandardCleavageAgentConstants.CyanBr
+				SetEnzymeMatchSpec("[M]", "[A-Z]")
+			Case eStandardCleavageAgentConstants.EndoArgC
+				SetEnzymeMatchSpec("[R]", "[A-Z]")
+			Case eStandardCleavageAgentConstants.EndoLysC
+				SetEnzymeMatchSpec("[K]", "[A-Z]")
+			Case eStandardCleavageAgentConstants.EndoAspN
+				SetEnzymeMatchSpec("[A-Z]", "[D]")
+			Case Else
+				' Unknown agent; leave unchanged
+		End Select
+	End Sub
 
-    Public Shared Function SplitPrefixAndSuffixFromSequence(ByVal strSequenceIn As String, ByRef strPrimarySequence As String, ByRef strPrefix As String, ByRef strSuffix As String) As Boolean
-        ' Examines strSequenceIn and splits apart into prefix, primary sequence, and suffix
-        ' If more than one character is present before the first period or after the last period, then all characters are returned
-        ' If the peptide starts with ".." then it is auto-changed to start with "."
-        ' If the peptide ends with ".." then it is auto-changed to end with "."
+	Public Shared Function SplitPrefixAndSuffixFromSequence(ByVal strSequenceIn As String, ByRef strPrimarySequence As String, ByRef strPrefix As String, ByRef strSuffix As String) As Boolean
+		' Examines strSequenceIn and splits apart into prefix, primary sequence, and suffix
+		' If more than one character is present before the first period or after the last period, then all characters are returned
+		' If the peptide starts with ".." then it is auto-changed to start with "."
+		' If the peptide ends with ".." then it is auto-changed to end with "."
 
-        ' Returns True if success, False if prefix and suffix residues were not found
+		' Returns True if success, False if prefix and suffix residues were not found
 
-        Dim intPeriodLoc1 As Integer
-        Dim intPeriodLoc2 As Integer
-        Dim blnSuccess As Boolean
+		Dim intPeriodLoc1 As Integer
+		Dim intPeriodLoc2 As Integer
+		Dim blnSuccess As Boolean
 
-        strPrefix = String.Empty
-        strSuffix = String.Empty
-        strPrimarySequence = String.Empty
+		strPrefix = String.Empty
+		strSuffix = String.Empty
+		strPrimarySequence = String.Empty
 
-        blnSuccess = False
+		blnSuccess = False
 
-        If strSequenceIn Is Nothing OrElse strSequenceIn.Length = 0 Then
-            Return False
-        Else
-            If strSequenceIn.StartsWith("..") AndAlso strSequenceIn.Length > 2 Then
-                strSequenceIn = "." & strSequenceIn.Substring(2)
-            End If
+		If strSequenceIn Is Nothing OrElse strSequenceIn.Length = 0 Then
+			Return False
+		Else
+			If strSequenceIn.StartsWith("..") AndAlso strSequenceIn.Length > 2 Then
+				strSequenceIn = "." & strSequenceIn.Substring(2)
+			End If
 
-            If strSequenceIn.EndsWith("..") AndAlso strSequenceIn.Length > 2 Then
-                strSequenceIn = strSequenceIn.Substring(0, strSequenceIn.Length - 2) & "."
-            End If
+			If strSequenceIn.EndsWith("..") AndAlso strSequenceIn.Length > 2 Then
+				strSequenceIn = strSequenceIn.Substring(0, strSequenceIn.Length - 2) & "."
+			End If
 
-            strPrimarySequence = String.Copy(strSequenceIn)
+			strPrimarySequence = String.Copy(strSequenceIn)
 
-            ' See if strSequenceIn contains two periods
-            intPeriodLoc1 = strSequenceIn.IndexOf("."c)
-            If intPeriodLoc1 >= 0 Then
-                intPeriodLoc2 = strSequenceIn.LastIndexOf("."c)
+			' See if strSequenceIn contains two periods
+			intPeriodLoc1 = strSequenceIn.IndexOf("."c)
+			If intPeriodLoc1 >= 0 Then
+				intPeriodLoc2 = strSequenceIn.LastIndexOf("."c)
 
-                If intPeriodLoc2 > intPeriodLoc1 + 1 Then
-                    ' Sequence contains two periods with letters between the periods, 
-                    ' For example, A.BCDEFGHIJK.L or ABCD.BCDEFGHIJK.L
-                    ' Extract out the text between the periods
-                    strPrimarySequence = strSequenceIn.Substring(intPeriodLoc1 + 1, intPeriodLoc2 - intPeriodLoc1 - 1)
-                    If intPeriodLoc1 > 0 Then
-                        strPrefix = strSequenceIn.Substring(0, intPeriodLoc1)
-                    End If
-                    strSuffix = strSequenceIn.Substring(intPeriodLoc2 + 1)
+				If intPeriodLoc2 > intPeriodLoc1 + 1 Then
+					' Sequence contains two periods with letters between the periods, 
+					' For example, A.BCDEFGHIJK.L or ABCD.BCDEFGHIJK.L
+					' Extract out the text between the periods
+					strPrimarySequence = strSequenceIn.Substring(intPeriodLoc1 + 1, intPeriodLoc2 - intPeriodLoc1 - 1)
+					If intPeriodLoc1 > 0 Then
+						strPrefix = strSequenceIn.Substring(0, intPeriodLoc1)
+					End If
+					strSuffix = strSequenceIn.Substring(intPeriodLoc2 + 1)
 
-                    blnSuccess = True
-                ElseIf intPeriodLoc2 = intPeriodLoc1 + 1 Then
-                    ' Peptide contains two periods in a row
-                    If intPeriodLoc1 <= 1 Then
-                        strPrimarySequence = String.Empty
+					blnSuccess = True
+				ElseIf intPeriodLoc2 = intPeriodLoc1 + 1 Then
+					' Peptide contains two periods in a row
+					If intPeriodLoc1 <= 1 Then
+						strPrimarySequence = String.Empty
 
-                        If intPeriodLoc1 > 0 Then
-                            strPrefix = strSequenceIn.Substring(0, intPeriodLoc1)
-                        End If
-                        strSuffix = strSequenceIn.Substring(intPeriodLoc2 + 1)
+						If intPeriodLoc1 > 0 Then
+							strPrefix = strSequenceIn.Substring(0, intPeriodLoc1)
+						End If
+						strSuffix = strSequenceIn.Substring(intPeriodLoc2 + 1)
 
-                        blnSuccess = True
-                    Else
-                        ' Leave the sequence unchanged
-                        strPrimarySequence = String.Copy(strSequenceIn)
-                        blnSuccess = False
-                    End If
-                ElseIf intPeriodLoc1 = intPeriodLoc2 Then
-                    ' Peptide only contains one period
-                    If intPeriodLoc1 = 0 Then
-                        strPrimarySequence = strSequenceIn.Substring(1)
-                        blnSuccess = True
-                    ElseIf intPeriodLoc1 = strSequenceIn.Length - 1 Then
-                        strPrimarySequence = strSequenceIn.Substring(0, intPeriodLoc1)
-                        blnSuccess = True
-                    ElseIf intPeriodLoc1 = 1 AndAlso strSequenceIn.Length > 2 Then
-                        strPrimarySequence = strSequenceIn.Substring(intPeriodLoc1 + 1)
-                        strPrefix = strSequenceIn.Substring(0, intPeriodLoc1)
-                        blnSuccess = True
-                    ElseIf intPeriodLoc1 = strSequenceIn.Length - 2 Then
-                        strPrimarySequence = strSequenceIn.Substring(0, intPeriodLoc1)
-                        strSuffix = strSequenceIn.Substring(intPeriodLoc1 + 1)
-                        blnSuccess = True
-                    Else
-                        ' Leave the sequence unchanged
-                        strPrimarySequence = String.Copy(strSequenceIn)
-                    End If
-                End If
-            End If
-        End If
+						blnSuccess = True
+					Else
+						' Leave the sequence unchanged
+						strPrimarySequence = String.Copy(strSequenceIn)
+						blnSuccess = False
+					End If
+				ElseIf intPeriodLoc1 = intPeriodLoc2 Then
+					' Peptide only contains one period
+					If intPeriodLoc1 = 0 Then
+						strPrimarySequence = strSequenceIn.Substring(1)
+						blnSuccess = True
+					ElseIf intPeriodLoc1 = strSequenceIn.Length - 1 Then
+						strPrimarySequence = strSequenceIn.Substring(0, intPeriodLoc1)
+						blnSuccess = True
+					ElseIf intPeriodLoc1 = 1 AndAlso strSequenceIn.Length > 2 Then
+						strPrimarySequence = strSequenceIn.Substring(intPeriodLoc1 + 1)
+						strPrefix = strSequenceIn.Substring(0, intPeriodLoc1)
+						blnSuccess = True
+					ElseIf intPeriodLoc1 = strSequenceIn.Length - 2 Then
+						strPrimarySequence = strSequenceIn.Substring(0, intPeriodLoc1)
+						strSuffix = strSequenceIn.Substring(intPeriodLoc1 + 1)
+						blnSuccess = True
+					Else
+						' Leave the sequence unchanged
+						strPrimarySequence = String.Copy(strSequenceIn)
+					End If
+				End If
+			End If
+		End If
 
-        Return blnSuccess
-    End Function
+		Return blnSuccess
+	End Function
 
-    Public Function TestCleavageRule(ByVal chLeftChar As Char, ByVal chRightChar As Char) As Boolean
-        ' Returns true if the characters match the cleavage rule
+	Public Function TestCleavageRule(ByVal chLeftChar As Char, ByVal chRightChar As Char) As Boolean
+		' Returns true if the characters match the cleavage rule
 
-        With mLeftRegEx.Match(chLeftChar)
-            If .Success Then
-                With mRightRegEx.Match(chRightChar)
-                    If .Success Then
-                        Return True
-                    End If
-                End With
-            End If
-        End With
+		With mLeftRegEx.Match(chLeftChar)
+			If .Success Then
+				With mRightRegEx.Match(chRightChar)
+					If .Success Then
+						Return True
+					End If
+				End With
+			End If
+		End With
 
-        Return False
+		Return False
 
-    End Function
+	End Function
 
 End Class

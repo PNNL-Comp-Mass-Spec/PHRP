@@ -143,6 +143,16 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	Public ReadOnly Property ProteinFirst() As String
+		Get
+			If mProteins.Count = 0 Then
+				Return String.Empty
+			Else
+				Return mProteins(0)
+			End If
+		End Get
+	End Property
+
 	Public Property PrecursorNeutralMass As Double
 		Get
 			Return mPrecursorNeutralMass
@@ -272,7 +282,7 @@ Public Class clsPSM
 
 	End Function
 
-	Public Function GetScoreInt(ByVal strScoreName As String) As Double
+	Public Function GetScoreInt(ByVal strScoreName As String) As Integer
 		Return GetScoreInt(strScoreName, 0)
 	End Function
 
