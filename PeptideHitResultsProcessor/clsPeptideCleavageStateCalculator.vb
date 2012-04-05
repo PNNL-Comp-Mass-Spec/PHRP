@@ -208,7 +208,7 @@ Public Class clsPeptideCleavageStateCalculator
 		Dim strSuffix As String = String.Empty
 		Dim strPreviousLetter As String
 
-		Dim intNumMissedCleavages As Integer = 0
+		Dim intNumMissedCleavages As Short = 0
 
 		If SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, strPrimarySequence, strPrefix, strSuffix) Then
 			If Not String.IsNullOrWhiteSpace(strPrimarySequence) Then
@@ -221,7 +221,7 @@ Public Class clsPeptideCleavageStateCalculator
 
 						If Not String.IsNullOrEmpty(strPreviousLetter) Then
 							If TestCleavageRule(strPreviousLetter.Chars(0), chCurrent) Then
-								intNumMissedCleavages += 1
+								intNumMissedCleavages += 1S
 							End If
 						End If
 
