@@ -1,4 +1,14 @@
-﻿Option Strict On
+﻿'*********************************************************************************************************
+' Written by Matthew Monroe for the US Department of Energy 
+' Pacific Northwest National Laboratory, Richland, WA
+'
+' Created 04/03/2012
+'
+' This class reads MSGF scores from a tab-delimited _msgf.txt file
+'
+'*********************************************************************************************************
+
+Option Strict On
 
 Public Class clsMSGFResultsReader
 
@@ -18,6 +28,9 @@ Public Class clsMSGFResultsReader
 	Protected mErrorMessage As String = String.Empty
 #End Region
 
+	''' <summary>
+	''' Error message
+	''' </summary>
 	Public ReadOnly Property ErrorMessage As String
 		Get
 			If String.IsNullOrEmpty(mErrorMessage) Then
@@ -28,6 +41,10 @@ Public Class clsMSGFResultsReader
 		End Get
 	End Property
 
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <remarks></remarks>
 	Public Sub New()
 		mColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)
 	End Sub
@@ -51,6 +68,11 @@ Public Class clsMSGFResultsReader
 
 	End Sub
 
+	''' <summary>
+	''' Open a tab-delimited MSGF results file and read the data
+	''' </summary>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
 	Public Function ReadMSGFData(ByVal strInputFilePath As String) As System.Collections.Generic.Dictionary(Of Integer, String)
 
 		Dim lstMSGFData As System.Collections.Generic.Dictionary(Of Integer, String)

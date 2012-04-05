@@ -2,7 +2,7 @@
 ' Written by Matthew Monroe for the US Department of Energy 
 ' Pacific Northwest National Laboratory, Richland, WA
 '
-' Created 07/20/2010
+' Created 04/04/2012
 '
 ' This class parses data lines from Xtandem _xt.txt files
 '
@@ -42,12 +42,20 @@ Public Class clsPHRPParserXTandem
 
 	Protected mProteinByResultID As System.Collections.Generic.SortedList(Of Integer, String)
 
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
 		MyBase.New(strDatasetName, strInputFilePath)
 
+		mProteinByResultID = New System.Collections.Generic.SortedList(Of Integer, String)
 		LoadXTandemResultProteins()
-	End Sub
 
+		mInitialized = True
+	End Sub
 
 	Protected Overrides Sub DefineColumnHeaders()
 
@@ -113,6 +121,7 @@ Public Class clsPHRPParserXTandem
 		Catch ex As Exception
 			HandleException("Error loading X!Tandem protein results", ex)
 			blnSuccess = False
+			If Not mInitialized Then Throw New Exception(mErrorMessage, ex)
 		End Try
 
 		Return blnSuccess
@@ -287,17 +296,30 @@ Public Class clsPHRPParserXTandem
 
 	End Function
 
+	''' <summary>
+	''' Parse the data line read from a PHRP results file
+	''' </summary>
+	''' <param name="strLine">Data line</param>
+	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
+	''' <param name="objPSM">clsPSM object (output)</param>
+	''' <returns>True if success, false if an error</returns>
 	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
 
 		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
+		Dim strPeptide As String
 		Dim strProtein As String = String.Empty
+
 		Dim dblPrecursorMH As Double
 
 		Dim blnSuccess As Boolean
 
 		Try
 
-			objPSM.Clear()
+			If objPSM Is Nothing Then
+				objPSM = New clsPSM
+			Else
+				objPSM.Clear()
+			End If
 
 			With objPSM
 				.ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100)
@@ -305,8 +327,8 @@ Public Class clsPHRPParserXTandem
 					' Data line is not valid
 				Else
 					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_Result_ID, mColumnHeaders, 0)
-					.Peptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders)
-					.UpdateCleavageInfo(mCleavageStateCalculator)
+					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders)
+					.SetPeptide(strPeptide, mCleavageStateCalculator)
 
 					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
 

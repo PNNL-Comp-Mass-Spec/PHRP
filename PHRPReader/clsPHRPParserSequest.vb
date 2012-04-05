@@ -2,7 +2,7 @@
 ' Written by Matthew Monroe for the US Department of Energy 
 ' Pacific Northwest National Laboratory, Richland, WA
 '
-' Created 07/20/2010
+' Created 04/04/2012
 '
 ' This class parses data lines from Sequest _syn.txt and _fht.txt ifles
 '
@@ -38,10 +38,16 @@ Public Class clsPHRPParserSequest
 	Public Const DATA_COLUMN_NumTrypticEnds As String = "NumTrypticEnds"
 	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
 		MyBase.New(strDatasetName, strInputFilePath)
+		mInitialized = True
 	End Sub
-
 
 	Protected Overrides Sub DefineColumnHeaders()
 
@@ -92,9 +98,17 @@ Public Class clsPHRPParserSequest
 		Return strDatasetName & "_syn_SeqToProteinMap.txt"
 	End Function
 
+	''' <summary>
+	''' Parse the data line read from a PHRP results file
+	''' </summary>
+	''' <param name="strLine">Data line</param>
+	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
+	''' <param name="objPSM">clsPSM object (output)</param>
+	''' <returns>True if success, false if an error</returns>
 	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
 
 		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
+		Dim strPeptide As String
 		Dim strProtein As String
 
 		Dim dblPrecursorMH As Double
@@ -106,7 +120,11 @@ Public Class clsPHRPParserSequest
 
 		Try
 
-			objPSM.Clear()
+			If objPSM Is Nothing Then
+				objPSM = New clsPSM
+			Else
+				objPSM.Clear()
+			End If
 
 			With objPSM
 				.ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_ScanNum, mColumnHeaders, -100)
@@ -114,8 +132,8 @@ Public Class clsPHRPParserSequest
 					' Data line is not valid
 				Else
 					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_HitNum, mColumnHeaders, 0)
-					.Peptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
-					.UpdateCleavageInfo(mCleavageStateCalculator)
+					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
+					.SetPeptide(strPeptide, mCleavageStateCalculator)
 
 					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_ChargeState, mColumnHeaders, 0), Short)
 

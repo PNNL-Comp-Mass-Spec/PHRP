@@ -9,8 +9,6 @@
 '
 ' It also integrates MSGF results with the peptide hit search results
 ' 
-' The class must be derived by a sub-class customized for the specific analysis tool (Sequest, X!Tandem, Inspect, etc.)
-'
 '*********************************************************************************************************
 
 Option Strict On
@@ -74,10 +72,13 @@ Public Class clsPHRPReader
 	Protected mSkipDuplicatePSMs As Boolean
 	Protected mLoadMSGFResults As Boolean
 	Protected mLoadModDefs As Boolean
+	Protected mEchoMessagesToConsole As Boolean
 
 	Protected mCanRead As Boolean
+	Protected mInitialized As Boolean
+
 	Protected mSourceFile As System.IO.StreamReader
-	Protected mPHRPParser As clsPHRPParser
+	Protected WithEvents mPHRPParser As clsPHRPParser
 
 	' This list contains mod symbols as the key and the corresponding mod mass (stored as a string 
 	'  to retain the same number of Sig Figs as the _ModSummary.txt file)
@@ -113,6 +114,12 @@ Public Class clsPHRPReader
 
 #Region "Properties"
 
+	''' <summary>
+	''' Returns True if the input file was successfully opened and data remains to be read
+	''' </summary>
+	''' <value></value>
+	''' <returns>True if the file is readable</returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property CanRead() As Boolean
 		Get
 			Return mCanRead
@@ -123,6 +130,15 @@ Public Class clsPHRPReader
 		Get
 			Return mPSMCurrent
 		End Get
+	End Property
+
+	Public Property EchoMessagesToConsole As Boolean
+		Get
+			Return mEchoMessagesToConsole
+		End Get
+		Set(value As Boolean)
+			mEchoMessagesToConsole = value
+		End Set
 	End Property
 
 	Public ReadOnly Property ErrorMessage() As String
@@ -165,18 +181,53 @@ Public Class clsPHRPReader
 	End Property
 #End Region
 
+	''' <summary>
+	''' Constructor that auto-determines the PeptideHit result type based on the filename
+	''' </summary>
+	''' <param name="strInputFilePath">Input file to read</param>
+	''' <remarks>Sets LoadModDefs to True and LoadMSGFResults to true</remarks>
 	Public Sub New(ByVal strInputFilePath As String)
-
-		Reset()
-		mCanRead = InitializeReader(strInputFilePath, ePeptideHitResultType.Unknown)
-
+		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModDefs:=True, blnLoadMSGFResults:=True)
 	End Sub
 
+	''' <summary>
+	''' Constructor where the PeptideHit result type is explicitly set
+	''' </summary>
+	''' <param name="strInputFilePath">Input file to read</param>
+	''' <param name="eResultType">Source file PeptideHit result type</param>
+	''' <remarks>Sets LoadModDefs to True and LoadMSGFResults to true</remarks>
 	Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType)
+		Me.New(strInputFilePath, eResultType, blnLoadModDefs:=True, blnLoadMSGFResults:=True)
+	End Sub
+
+	''' <summary>
+	''' Constructor that auto-determines the PeptideHit result type based on the filename
+	''' </summary>
+	''' <param name="strInputFilePath">Input file to read</param>
+	''' <param name="blnLoadModDefs">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
+	''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
+	''' <remarks></remarks>
+	Public Sub New(ByVal strInputFilePath As String, ByVal blnLoadModDefs As Boolean, ByVal blnLoadMSGFResults As Boolean)
+		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModDefs, blnLoadMSGFResults)
+	End Sub
+
+	''' <summary>
+	''' Constructor where the PeptideHit result type is explicitly set
+	''' </summary>
+	''' <param name="strInputFilePath">Input file to read</param>
+	''' ''' <param name="eResultType">Source file PeptideHit result type</param>
+	''' <param name="blnLoadModDefs">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
+	''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
+	''' <remarks></remarks>
+	Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal blnLoadModDefs As Boolean, ByVal blnLoadMSGFResults As Boolean)
 
 		Reset()
-		mCanRead = InitializeReader(strInputFilePath, eResultType)
+		mLoadModDefs = blnLoadModDefs
+		mLoadMSGFResults = blnLoadMSGFResults
 
+		InitializeReader(strInputFilePath, eResultType)
+
+		mInitialized = True
 	End Sub
 
 	Private Sub Reset()
@@ -210,6 +261,7 @@ Public Class clsPHRPReader
 			If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
 				ReportError("Input file name is empty")
 				SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath)
+				If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
 			Else
 				' Confirm that the source file exists
 				' Make sure strInputFilePath points to a valid file
@@ -222,12 +274,14 @@ Public Class clsPHRPReader
 				If Not fiFileInfo.Exists Then
 					ReportError("Input file not found: " & strInputFilePath)
 					SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath)
+					If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
 				Else
 
 					' Note that the following populates mDatasetName
 					blnSuccess = ValidateInputFiles(strInputFilePath, eResultType, strSearchToolParamFilePath, strModSummaryFilePath)
 					If Not blnSuccess Then
 						SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, True)
+						If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
 						Return False
 					End If
 
@@ -236,6 +290,7 @@ Public Class clsPHRPReader
 						blnSuccess = ReadModSummaryFile(strModSummaryFilePath, mDynamicMods, mStaticMods)
 						If Not blnSuccess Then
 							SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, True)
+							If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
 							Return False
 						End If
 					End If
@@ -248,6 +303,7 @@ Public Class clsPHRPReader
 
 		Catch ex As Exception
 			HandleException("Error in InitializeReader", ex)
+			If Not mInitialized Then Throw New Exception(mErrorMessage, ex)
 		End Try
 
 		Return blnSuccess
@@ -256,7 +312,7 @@ Public Class clsPHRPReader
 
 	Protected Function InitializeParser(ByVal eResultType As ePeptideHitResultType) As Boolean
 
-		Dim blnSuccess As Boolean
+		Dim blnSuccess As Boolean = True
 
 		Try
 
@@ -308,12 +364,33 @@ Public Class clsPHRPReader
 
 		Catch ex As Exception
 			HandleException("Error in InitializeParser", ex)
+			If Not mInitialized Then Throw New Exception(mErrorMessage, ex)
 		End Try
 
 		Return blnSuccess
 
 	End Function
 
+	''' <summary>
+	''' Auto-determine the dataset name using the input file path
+	''' </summary>
+	''' <param name="strFilePath"></param>
+	''' <returns>Dataset name</returns>
+	''' <remarks>Returns an empty string if unable to determine the dataset name</remarks>
+	Public Shared Function AutoDetermineDatasetName(ByVal strFilePath As String) As String
+		Dim eResultType As ePeptideHitResultType
+
+		eResultType = AutoDetermineResultType(strFilePath)
+		Return AutoDetermineDatasetName(strFilePath, eResultType)
+	End Function
+
+	''' <summary>
+	''' Auto-determine the dataset name using the input file path and specified PeptideHit result type
+	''' </summary>
+	''' <param name="strFilePath"></param>
+	''' <param name="eResultType"></param>
+	''' <returns>Dataset name</returns>
+	''' <remarks>Returns an empty string if unable to determine the dataset name</remarks>
 	Public Shared Function AutoDetermineDatasetName(ByVal strFilePath As String, ByVal eResultType As ePeptideHitResultType) As String
 
 		Dim strDatasetName As String = String.Empty
@@ -353,10 +430,15 @@ Public Class clsPHRPReader
 
 	End Function
 
+	''' <summary>
+	''' Determine the PeptideHit result type given the input file path
+	''' </summary>
+	''' <param name="strFilePath"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Shared Function AutoDetermineResultType(ByVal strFilePath As String) As ePeptideHitResultType
 
 		Dim strFilePathLcase As String
-		Dim srInFile As System.IO.StreamReader
 
 		Dim strHeaderLine As String
 
@@ -378,27 +460,28 @@ Public Class clsPHRPReader
 				ElseIf strFilePathLcase.EndsWith("_syn.txt") OrElse strFilePathLcase.EndsWith("_fht.txt") Then
 					' Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
 
-					srInFile = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+					Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
 
-					If srInFile.Peek() >= 0 Then
-						strHeaderLine = srInFile.ReadLine().ToLower
+						If srInFile.Peek() >= 0 Then
+							strHeaderLine = srInFile.ReadLine().ToLower
 
-						If strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_MQScore.ToLower) AndAlso _
-						 strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore.ToLower) Then
-							eResultType = ePeptideHitResultType.Inspect
+							If strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_MQScore.ToLower) AndAlso _
+							   strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore.ToLower) Then
+								eResultType = ePeptideHitResultType.Inspect
 
-						ElseIf strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore) AndAlso _
-						 strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore) Then
-							eResultType = ePeptideHitResultType.MSGFDB
+							ElseIf strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore) AndAlso _
+							   strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore) Then
+								eResultType = ePeptideHitResultType.MSGFDB
 
-						ElseIf strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_XCorr.ToLower) AndAlso _
-						 strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_DelCn.ToLower) Then
-							eResultType = ePeptideHitResultType.Sequest
+							ElseIf strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_XCorr.ToLower) AndAlso _
+							   strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_DelCn.ToLower) Then
+								eResultType = ePeptideHitResultType.Sequest
 
+							End If
 						End If
-					End If
 
-					srInFile.Close()
+					End Using
+
 				End If
 			End If
 
@@ -407,8 +490,16 @@ Public Class clsPHRPReader
 		End Try
 
 		Return eResultType
+
 	End Function
 
+	''' <summary>
+	''' Returns the default ModSummary file name for the given PeptideHit result type
+	''' </summary>
+	''' <param name="eResultType"></param>
+	''' <param name="strDatasetName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Shared Function GetModSummaryFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim strModSummaryName As String = String.Empty
@@ -606,6 +697,11 @@ Public Class clsPHRPReader
 
 	End Function
 
+	''' <summary>
+	''' Examines the string to determine if it is numeric
+	''' </summary>
+	''' <param name="strData"></param>
+	''' <returns>True if a number, otherwise false</returns>
 	Public Shared Function IsNumber(ByVal strData As String) As Boolean
 
 		If Double.TryParse(strData, 0) Then
@@ -756,6 +852,8 @@ Public Class clsPHRPReader
 			strLineIn = mSourceFile.ReadLine()
 			mLinesRead += 1
 			blnSuccess = True
+		Else
+			mCanRead = False
 		End If
 
 		If blnSuccess Then
@@ -768,7 +866,9 @@ Public Class clsPHRPReader
 					If Not clsPHRPReader.IsNumber(strSplitLine(0)) Then
 						' Parse the header line to confirm the column ordering
 						mPHRPParser.ParseColumnHeaders(strSplitLine)
-						blnSkipLine = True
+
+						mHeaderLineParsed = True
+						Return Me.MoveNext()
 					End If
 
 					mHeaderLineParsed = True
@@ -1035,10 +1135,12 @@ Public Class clsPHRPReader
 
 	Protected Sub ReportError(ByVal strErrorMessage As String)
 		mErrorMessage = strErrorMessage
+		If mEchoMessagesToConsole Then Console.WriteLine(strErrorMessage)
 		RaiseEvent ErrorEvent(strErrorMessage)
 	End Sub
 
 	Protected Sub ReportWarning(ByVal strWarningMessage As String)
+		If mEchoMessagesToConsole Then Console.WriteLine(strWarningMessage)
 		RaiseEvent WarningEvent(strWarningMessage)
 	End Sub
 
@@ -1057,6 +1159,7 @@ Public Class clsPHRPReader
 	End Sub
 
 	Protected Sub ShowMessage(ByVal strMessage As String)
+		If mEchoMessagesToConsole Then Console.WriteLine(strMessage)
 		RaiseEvent MessageEvent(strMessage)
 	End Sub
 
@@ -1132,6 +1235,18 @@ Public Class clsPHRPReader
 		Return True
 
 	End Function
+
+	Private Sub mPHRPParser_ErrorEvent(strErrorMessage As String) Handles mPHRPParser.ErrorEvent
+		ReportError(strErrorMessage)
+	End Sub
+
+	Private Sub mPHRPParser_MessageEvent(strMessage As String) Handles mPHRPParser.MessageEvent
+		ShowMessage(strMessage)
+	End Sub
+
+	Private Sub mPHRPParser_WarningEvent(strWarningMessage As String) Handles mPHRPParser.WarningEvent
+		ReportWarning(strWarningMessage)
+	End Sub
 
 #Region "IDisposable Support"
 	Private disposedValue As Boolean ' To detect redundant calls

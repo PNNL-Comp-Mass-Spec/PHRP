@@ -1,5 +1,3 @@
-Option Strict On
-
 ' This class will compute the mass of a given peptide sequence.  The sequence
 '  must consist of only capital letters, though if RemovePrefixAndSuffixIfPresent = True, then
 '  characters up to the first . and after the last . in the sequence will be removed
@@ -18,14 +16,8 @@ Option Strict On
 ' in compliance with the License.  You may obtain a copy of the License at 
 ' http://www.apache.org/licenses/LICENSE-2.0
 '
-' Notice: This computer software was prepared by Battelle Memorial Institute, 
-' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
-' Department of Energy (DOE).  All rights in the computer software are reserved 
-' by DOE on behalf of the United States Government and the Contractor as 
-' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
-' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
-' SOFTWARE.  This notice including this sentence must appear on any copies of 
-' this computer software.
+
+Option Strict On
 
 Public Class clsPeptideMassCalculator
 
@@ -111,6 +103,10 @@ Public Class clsPeptideMassCalculator
     End Property
 #End Region
 
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <remarks></remarks>
     Public Sub New()
         mErrorMessage = String.Empty
         mRemovePrefixAndSuffixIfPresent = True
@@ -131,6 +127,12 @@ Public Class clsPeptideMassCalculator
         End With
     End Sub
 
+	''' <summary>
+	''' Compute the mass of peptide sequence strSequence.  If modification symbols are present, returns -1
+	''' </summary>
+	''' <param name="strSequence"></param>
+	''' <returns></returns>
+	''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
     Public Function ComputeSequenceMass(ByVal strSequence As String) As Double
         ' Computes the mass for sequence strSequence
         ' Returns -1 if an error
@@ -155,7 +157,8 @@ Public Class clsPeptideMassCalculator
 
             Try
                 If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
-                    mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strSequence
+					mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strSequence
+					intValidResidueCount = 0
                     dblMass = -1
                     Exit For
                 Else
@@ -175,6 +178,12 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
+	''' <summary>
+	''' Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
+	''' </summary>
+	''' <param name="strSequence"></param>
+	''' <returns></returns>
+	''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
     Public Function ComputeSequenceMass(ByVal strSequence As String, ByVal intModCount As Integer, ByRef udtResidueModificationInfo() As udtPeptideSequenceModInfoType) As Double
         ' Computes the mass for sequence strSequence using the mods in udtResidueModificationInfo()
         ' Returns -1 if an error
@@ -232,6 +241,14 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
+	''' <summary>
+	''' Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
+	''' </summary>
+	''' <param name="dblMassMZ"></param>
+	''' <param name="intCurrentCharge"></param>
+	''' <param name="intDesiredCharge"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
     Public Shared Function ConvoluteMass(ByVal dblMassMZ As Double, ByVal intCurrentCharge As Integer, Optional ByVal intDesiredCharge As Integer = 1) As Double
         ' Converts dblMassMZ to the MZ that would appear at the given intDesiredCharge
         ' If intCurrentCharge = 0, then assumes dblMassMZ is the neutral, monoisotopic mass
@@ -313,6 +330,12 @@ Public Class clsPeptideMassCalculator
         Next chChar
     End Sub
 
+	''' <summary>
+	''' Returns a structure with the number of atoms of C, H, N, O, and S in the specified amino acid
+	''' </summary>
+	''' <param name="chAminoAcidSymbol"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
     Public Function GetAminoAcidAtomCounts(ByVal chAminoAcidSymbol As Char) As udtAtomCountsType
         ' Returns the atom counts if success, 0 if an error
 
@@ -330,6 +353,12 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
+	''' <summary>
+	''' Returns the mass of the specified amino acid
+	''' </summary>
+	''' <param name="chAminoAcidSymbol"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
     Public Function GetAminoAcidMass(ByVal chAminoAcidSymbol As Char) As Double
         ' Returns the mass if success, 0 if an error
 
@@ -386,26 +415,55 @@ Public Class clsPeptideMassCalculator
         ResetTerminusMasses()
     End Sub
 
+	''' <summary>
+	''' Converts dblMassToConvert to ppm, based on the value of dblCurrentMZ
+	''' </summary>
+	''' <param name="dblMassToConvert"></param>
+	''' <param name="dblCurrentMZ"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
     Public Shared Function MassToPPM(ByVal dblMassToConvert As Double, ByVal dblCurrentMZ As Double) As Double
-        ' Converts dblMassToConvert to ppm, based on the value of dblCurrentMZ
-
-        Return dblMassToConvert * 1000000.0 / dblCurrentMZ
+		Return dblMassToConvert * 1000000.0 / dblCurrentMZ
     End Function
 
+	''' <summary>
+	''' Converts and MH mass to the uncharged (neutral) mass
+	''' </summary>
+	''' <param name="dblMH"></param>
+	''' <returns></returns>
+	''' <remarks>Equivalent to ConvoluteMass(dblMH, 1, 0)</remarks>
     Public Shared Function MHToMonoisotopicMass(ByVal dblMH As Double) As Double
         Return ConvoluteMass(dblMH, 1, 0)
     End Function
 
+	''' <summary>
+	''' Converts an uncharged (neutral) mass to the m/z value for the specified charge
+	''' </summary>
+	''' <param name="dblMonoisotopicMass"></param>
+	''' <param name="intDesiredCharge"></param>
+	''' <returns></returns>
+	''' <remarks>Equivalent to ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)</remarks>
     Public Shared Function MonoisotopicMassToMZ(ByVal dblMonoisotopicMass As Double, ByVal intDesiredCharge As Integer) As Double
         Return ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)
     End Function
 
+	''' <summary>
+	''' Converts from a ppm value to a mass value, using the specified m/z as a reference point
+	''' </summary>
+	''' <param name="dblPPMToConvert"></param>
+	''' <param name="dblCurrentMZ"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
     Public Shared Function PPMToMass(ByVal dblPPMToConvert As Double, ByVal dblCurrentMZ As Double) As Double
         ' Converts dblPPMToConvert to a mass value, which is dependent on dblCurrentMZ
 
         Return dblPPMToConvert / 1000000.0 * dblCurrentMZ
     End Function
 
+	''' <summary>
+	''' Reset the N and C terminus default mass values
+	''' </summary>
+	''' <remarks></remarks>
     Public Sub ResetTerminusMasses()
         ' See comment in Sub InitializeAminoAcidData concerning these masses
 
@@ -413,6 +471,13 @@ Public Class clsPeptideMassCalculator
         mPeptideCTerminusMass = DEFAULT_C_TERMINUS_MASS_CHANGE
     End Sub
 
+	''' <summary>
+	''' Defines the number of C, H, N, O, and S atoms in an amino acid
+	''' </summary>
+	''' <param name="chAminoAcidSymbol"></param>
+	''' <param name="udtAtomCounts"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
     Public Function SetAminoAcidAtomCounts(ByVal chAminoAcidSymbol As Char, ByVal udtAtomCounts As udtAtomCountsType) As Boolean
         ' Returns True if success, False if an invalid amino acid symbol
 
@@ -433,6 +498,13 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
+	''' <summary>
+	''' Defines a custom mass for an amino acid
+	''' </summary>
+	''' <param name="chAminoAcidSymbol"></param>
+	''' <param name="dblMass"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
     Public Function SetAminoAcidMass(ByVal chAminoAcidSymbol As Char, ByVal dblMass As Double) As Boolean
         ' Returns True if success, False if an invalid amino acid symbol
 

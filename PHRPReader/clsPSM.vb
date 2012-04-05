@@ -118,14 +118,10 @@ Public Class clsPSM
 		End Set
 	End Property
 
-	Public Property Peptide() As String
+	Public ReadOnly Property Peptide() As String
 		Get
 			Return mPeptide
-		End Get
-		Set(value As String)
-			mPeptide = value
-			UpdateCleanSequence(mPeptide)
-		End Set
+		End Get		
 	End Property
 
 	Public ReadOnly Property PeptideCleanSequence() As String
@@ -139,7 +135,11 @@ Public Class clsPSM
 			Return mPeptideWithNumericMods
 		End Get
 		Set(value As String)
-			mPeptideWithNumericMods = value
+			If String.IsNullOrEmpty(value) Then
+				mPeptideWithNumericMods = String.Empty
+			Else
+				mPeptideWithNumericMods = value
+			End If
 		End Set
 	End Property
 
@@ -188,12 +188,31 @@ Public Class clsPSM
 
 #End Region
 
+	''' <summary>
+	''' Constructor; auto-calls Clear()
+	''' </summary>
+	''' <remarks></remarks>
+	Public Sub New()
+		mProteins = New System.Collections.Generic.List(Of String)
+		mAdditionalScores = New System.Collections.Generic.Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
+		Me.Clear()
+	End Sub
+
+	''' <summary>
+	''' Add a new protein to associate with this peptide
+	''' </summary>
+	''' <param name="strProteinName"></param>
+	''' <remarks></remarks>
 	Public Sub AddProtein(strProteinName As String)
 		If Not String.IsNullOrWhiteSpace(strProteinName) AndAlso Not mProteins.Contains(strProteinName) Then
 			mProteins.Add(strProteinName)
 		End If
 	End Sub
 
+	''' <summary>
+	''' Reset the peptide to default values (and empty strings)
+	''' </summary>
+	''' <remarks></remarks>
 	Public Sub Clear()
 		mScanNumber = 0
 		mPeptide = String.Empty
@@ -217,6 +236,11 @@ Public Class clsPSM
 		mAdditionalScores.Clear()
 	End Sub
 
+	''' <summary>
+	''' Duplicate this PSM object and return a new one
+	''' </summary>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Function Clone() As clsPSM
 		Dim objNew As clsPSM
 
@@ -225,7 +249,7 @@ Public Class clsPSM
 		With objNew
 			.ResultID = mResultID
 			.ScanNumber = mScanNumber
-			.Peptide = mPeptide				' Note: this will auto-update mPeptideCleanSequence in objNew
+			.SetPeptide(mPeptide)				' Note: this will auto-update mPeptideCleanSequence in objNew
 			.PeptideWithNumericMods = mPeptideWithNumericMods
 			.Charge = mCharge
 			.CollisionMode = mCollisionMode
@@ -253,9 +277,18 @@ Public Class clsPSM
 	End Function
 
 	Protected Sub UpdateCleanSequence(strPeptide As String)
-		mPeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, True)
+		If String.IsNullOrEmpty(strPeptide) Then
+			mPeptideCleanSequence = String.Empty
+		Else
+			mPeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, True)
+		End If
 	End Sub
-	
+
+	''' <summary>
+	''' Returns the value stored for the specified score
+	''' </summary>
+	''' <param name="strScoreName">Score name</param>
+	''' <returns>Score if defined, otherwise an empty string</returns>
 	Public Function GetScore(ByVal strScoreName As String) As String
 		Dim strScoreValue As String = String.Empty
 		If mAdditionalScores.TryGetValue(strScoreName, strScoreValue) Then
@@ -265,10 +298,23 @@ Public Class clsPSM
 		End If
 	End Function
 
+	''' <summary>
+	'''  Returns the value stored for the specified score (as a double)
+	''' </summary>
+	''' <param name="strScoreName">Score name</param>
+	''' <returns>Score if defined, otherwise 0</returns>
+	''' <remarks></remarks>
 	Public Function GetScoreDbl(ByVal strScoreName As String) As Double
 		Return GetScoreDbl(strScoreName, 0)
 	End Function
 
+	''' <summary>
+	'''  Returns the value stored for the specified score (as a double)
+	''' </summary>
+	''' <param name="strScoreName">Score name</param>
+	''' <param name="dblValueIfMissing">Value to return if the score is not defined</param>
+	''' <returns>Score if defined, otherwise dblValueIfMissing</returns>
+	''' <remarks></remarks>
 	Public Function GetScoreDbl(ByVal strScoreName As String, ByVal dblValueIfMissing As Double) As Double
 		Dim strScoreValue As String
 		Dim dblScore As Double
@@ -282,10 +328,23 @@ Public Class clsPSM
 
 	End Function
 
+	''' <summary>
+	'''  Returns the value stored for the specified score (as an integer)
+	''' </summary>
+	''' <param name="strScoreName">Score name</param>
+	''' <returns>Score if defined, otherwise 0</returns>
+	''' <remarks></remarks>
 	Public Function GetScoreInt(ByVal strScoreName As String) As Integer
 		Return GetScoreInt(strScoreName, 0)
 	End Function
 
+	''' <summary>
+	'''  Returns the value stored for the specified score (as an integer)
+	''' </summary>
+	''' <param name="strScoreName">Score name</param>
+	''' <param name="intValueIfMissing">Value to return if the score is not defined</param>
+	''' <returns>Score if defined, otherwise intValueIfMissing</returns>
+	''' <remarks></remarks>
 	Public Function GetScoreInt(ByVal strScoreName As String, ByVal intValueIfMissing As Integer) As Integer
 		Dim strScoreValue As String
 		Dim intScore As Integer
@@ -299,6 +358,37 @@ Public Class clsPSM
 
 	End Function
 
+	''' <summary>
+	''' Update the peptide sequence (auto-determines the clean sequence)
+	''' </summary>
+	''' <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
+	''' <remarks>Does not update the cleavage state info</remarks>
+	Public Sub SetPeptide(ByVal strPeptide As String)
+		If String.IsNullOrEmpty(strPeptide) Then
+			mPeptide = strPeptide
+		Else
+			mPeptide = strPeptide
+		End If
+		UpdateCleanSequence(mPeptide)
+	End Sub
+
+	''' <summary>
+	''' Update the peptide sequence (auto-determines the clean sequence); also auto-update the the cleavage state info
+	''' </summary>
+	''' <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
+	''' <param name="objCleavageStateCalculator">Cleavage state calculator object</param>
+	''' <remarks></remarks>
+	Public Sub SetPeptide(ByVal strPeptide As String, objCleavageStateCalculator As clsPeptideCleavageStateCalculator)
+		SetPeptide(strPeptide)
+		UpdateCleavageInfo(objCleavageStateCalculator)
+	End Sub
+
+	''' <summary>
+	''' Add/update an additional score to associate with this peptide
+	''' </summary>
+	''' <param name="strScoreName"></param>
+	''' <param name="strScoreValue"></param>
+	''' <remarks></remarks>
 	Public Sub SetScore(strScoreName As String, strScoreValue As String)
 		If mAdditionalScores.ContainsKey(strScoreName) Then
 			mAdditionalScores(strScoreName) = strScoreValue
@@ -307,6 +397,11 @@ Public Class clsPSM
 		End If
 	End Sub
 
+	''' <summary>
+	''' Auto-determine the number of missed cleavages, cleavage state, and number of tryptic terminii based on the peptide sequence
+	''' </summary>
+	''' <param name="objCleavageStateCalculator"></param>
+	''' <remarks></remarks>
 	Public Sub UpdateCleavageInfo(objCleavageStateCalculator As clsPeptideCleavageStateCalculator)
 
 		mNumMissedCleavages = objCleavageStateCalculator.ComputeNumberOfMissedCleavages(mPeptide)
@@ -323,9 +418,4 @@ Public Class clsPSM
 
 	End Sub
 
-	Public Sub New()
-		mProteins = New System.Collections.Generic.List(Of String)
-		mAdditionalScores = New System.Collections.Generic.Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
-		Me.Clear()
-	End Sub
 End Class

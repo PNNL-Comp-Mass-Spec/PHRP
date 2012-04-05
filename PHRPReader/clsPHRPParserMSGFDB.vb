@@ -2,7 +2,7 @@
 ' Written by Matthew Monroe for the US Department of Energy 
 ' Pacific Northwest National Laboratory, Richland, WA
 '
-' Created 07/20/2010
+' Created 04/04/2012
 '
 ' This class parses data lines from MSGFDB msgfdb_syn.txt files
 '
@@ -35,10 +35,16 @@ Public Class clsPHRPParserMSGFDB
 	Public Const DATA_COLUMN_FDR As String = "FDR"
 	Public Const DATA_COLUMN_PepFDR As String = "PepFDR"
 
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
 		MyBase.New(strDatasetName, strInputFilePath)
+		mInitialized = True
 	End Sub
-
 
 	Protected Overrides Sub DefineColumnHeaders()
 
@@ -83,17 +89,30 @@ Public Class clsPHRPParserMSGFDB
 		Return strDatasetName & "_msgfdb_syn_SeqToProteinMap.txt"
 	End Function
 
+	''' <summary>
+	''' Parse the data line read from a PHRP results file
+	''' </summary>
+	''' <param name="strLine">Data line</param>
+	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
+	''' <param name="objPSM">clsPSM object (output)</param>
+	''' <returns>True if success, false if an error</returns>
 	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
 
 		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
+		Dim strPeptide As String
 		Dim strProtein As String
+
 		Dim dblPrecursorMZ As Double
 
 		Dim blnSuccess As Boolean
 
 		Try
 
-			objPSM.Clear()
+			If objPSM Is Nothing Then
+				objPSM = New clsPSM
+			Else
+				objPSM.Clear()
+			End If
 
 			With objPSM
 				.ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100)
@@ -101,8 +120,8 @@ Public Class clsPHRPParserMSGFDB
 					' Data line is not valid
 				Else
 					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
-					.Peptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
-					.UpdateCleavageInfo(mCleavageStateCalculator)
+					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
+					.SetPeptide(strPeptide, mCleavageStateCalculator)
 
 					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
 
@@ -117,7 +136,7 @@ Public Class clsPHRPParserMSGFDB
 					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
 					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
-					.MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFScore, mColumnHeaders)
+					.MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders)
 
 					blnSuccess = True
 				End If
@@ -126,6 +145,7 @@ Public Class clsPHRPParserMSGFDB
 			If blnSuccess Then
 				' Store the remaining scores
 				AddScore(objPSM, strColumns, DATA_COLUMN_DeNovoScore)
+				AddScore(objPSM, strColumns, DATA_COLUMN_MSGFScore)
 				AddScore(objPSM, strColumns, DATA_COLUMN_MSGFDB_SpecProb)
 				AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb)
 				AddScore(objPSM, strColumns, DATA_COLUMN_PValue)

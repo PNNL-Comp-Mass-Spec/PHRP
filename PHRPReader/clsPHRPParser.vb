@@ -5,6 +5,7 @@
 ' Created 04/04/2012
 '
 ' This class is the base class for classes used to parse PHRP data lines
+' It must be derived by a sub-class customized for the specific analysis tool (Sequest, X!Tandem, Inspect, etc.)
 '
 '*********************************************************************************************************
 
@@ -17,6 +18,7 @@ Public MustInherit Class clsPHRPParser
 	Protected mDatasetName As String
 	Protected mInputFilePath As String
 	Protected mInputFolderPath As String
+	Protected mInitialized As Boolean
 
 	' Column headers in the synopsis file and first hits file
 	Protected mColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
@@ -34,6 +36,12 @@ Public MustInherit Class clsPHRPParser
 	Public Event WarningEvent(ByVal strWarningMessage As String)
 #End Region
 
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <param name="strDatasetName">Dataset Name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
 
 		mDatasetName = strDatasetName
@@ -66,8 +74,14 @@ Public MustInherit Class clsPHRPParser
 	End Sub
 
 	Protected Sub AddScore(ByRef objPSM As clsPSM, ByRef strColumns() As String, ByVal strScoreColumnName As String)
+		Const NOT_FOUND As String = "==SCORE_NOT_FOUND=="
 
-		objPSM.SetScore(strScoreColumnName, PHRPReader.clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders))
+		Dim strValue As String
+		strValue = PHRPReader.clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders, NOT_FOUND)
+
+		If strValue <> NOT_FOUND Then
+			objPSM.SetScore(strScoreColumnName, strValue)
+		End If
 
 	End Sub
 
@@ -79,10 +93,14 @@ Public MustInherit Class clsPHRPParser
 		ReportError(strBaseMessage & ": " & ex.Message)
 	End Sub
 
+	''' <summary>
+	''' Parse the column names in strSplitLine and update the local column header mapping
+	''' </summary>
+	''' <param name="strSplitLine"></param>
+	''' <remarks></remarks>
 	Public Sub ParseColumnHeaders(ByRef strSplitLine() As String)
 		clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
 	End Sub
-
 
 	Protected Sub ReportError(ByVal strErrorMessage As String)
 		mErrorMessage = strErrorMessage
