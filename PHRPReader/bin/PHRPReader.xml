@@ -1,0 +1,68 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+PHRPReader
+</name>
+</assembly>
+<members>
+<member name="M:PHRPReader.clsPHRPReader.AddDynamicAndStaticMods(System.String,System.String@)">
+	<summary>
+ Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
+ </summary>
+	<returns>True if success, false if an error</returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.OpenDataFile">
+	<summary>
+ Opens the data file for reading
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[]@,System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@)">
+	<summary>
+ Returns the string stored in the given named column (using objColumnHeaders to dereference column name with column index)
+ </summary>
+	<returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[]@,System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@,System.String)">
+	<summary>
+ Returns the string stored in the given named column (using objColumnHeaders to dereference column name with column index)
+ </summary>
+	<returns>The text in the specified column; strValueIfMissing if the specific column name is not recognized</returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[]@,System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@,System.Int32)">
+	<summary>
+ Returns the value stored in the given named column (using objColumnHeaders to dereference column name with column index)
+ </summary>
+	<returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[]@,System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@,System.Double)">
+	<summary>
+ Returns the value stored in the given named column (using objColumnHeaders to dereference column name with column index)
+ </summary>
+	<returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.ParseColumnHeaders(System.String[],System.Collections.Generic.SortedDictionary{System.String,System.Int32}@)">
+	<summary>
+ Updates the column name to column index mapping in objColumnHeaders
+ </summary>
+	<param name="strColumns">Column names read from the input file</param>
+	<param name="objColumnHeaders">Column mapping dictionary object to update</param>
+	<remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.CurrentCultureIgnoreCase)</remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.MoveNext">
+	<summary>
+ Reads the next line from a synopsis file or first hits file
+ </summary>
+	<returns>True if a line was read, false if not more data is available</returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.ReadModSummaryFile(System.String,System.Collections.Generic.SortedDictionary{System.String,System.String}@,System.Collections.Generic.SortedDictionary{System.String,System.String}@)">
+	<summary>
+ Reads the data in strModSummaryFilePath.  Populates objDynamicMods and objStaticMods with the modification definitions
+ </summary>
+	<param name="strModSummaryFilePath">Path to the PHRP Mod Summary file to read</param>
+	<param name="objDynamicMods">List with mod symbols as the key and the corresponding mod mass</param>
+	<param name="objStaticMods">List with amino acid names as the key and the corresponding mod mass</param>
+	<returns>True if success; false if an error</returns>
+</member>
+</members>
+</doc>
