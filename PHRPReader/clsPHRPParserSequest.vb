@@ -169,6 +169,7 @@ Public Class clsPHRPParserSequest
 				AddScore(objPSM, strColumns, DATA_COLUMN_XcRatio)
 				AddScore(objPSM, strColumns, DATA_COLUMN_Ions_Observed)
 				AddScore(objPSM, strColumns, DATA_COLUMN_Ions_Expected)
+				AddScore(objPSM, strColumns, DATA_COLUMN_NumTrypticEnds)
 
 			End If
 
