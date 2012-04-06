@@ -325,10 +325,6 @@ Public Class clsPHRPReader
 
 				Case ePeptideHitResultType.XTandem
 
-					' Convert X!Tandem results to input format required for MSGF
-					mPHRPParser = New clsPHRPParserXTandem(mDatasetName, mInputFilePath)
-
-
 					' Make sure a few more files are present for X!Tandem so that we can extract the protein names and include these in the MSGF files
 					Dim strFileToCheck As String
 					strFileToCheck = System.IO.Path.Combine(mInputFolderPath, mDatasetName & clsPHRPReader.XT_RESULT_TO_SEQ_MAP_SUFFIX)
@@ -340,6 +336,11 @@ Public Class clsPHRPReader
 							ShowMessage("Warning: X!Tandem Seq to Protein Map file not found (" & System.IO.Path.GetFileName(strFileToCheck) & "); protein names will be blank")
 						End If
 					End If
+
+
+					' Convert X!Tandem results to input format required for MSGF
+					' Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
+					mPHRPParser = New clsPHRPParserXTandem(mDatasetName, mInputFilePath)
 
 
 				Case ePeptideHitResultType.Inspect
@@ -382,6 +383,7 @@ Public Class clsPHRPReader
 
 		eResultType = AutoDetermineResultType(strFilePath)
 		Return AutoDetermineDatasetName(strFilePath, eResultType)
+
 	End Function
 
 	''' <summary>
@@ -426,6 +428,13 @@ Public Class clsPHRPReader
 
 		End Select
 
+		If String.IsNullOrEmpty(strDatasetName) Then
+			Dim strFilePathTrimmed As String = String.Empty
+			If AutoTrimExtraSuffix(strFilePath, strFilePathTrimmed) Then
+				strDatasetName = AutoDetermineDatasetName(strFilePathTrimmed, eResultType)
+			End If
+		End If
+
 		Return strDatasetName
 
 	End Function
@@ -438,49 +447,62 @@ Public Class clsPHRPReader
 	''' <remarks></remarks>
 	Public Shared Function AutoDetermineResultType(ByVal strFilePath As String) As ePeptideHitResultType
 
-		Dim strFilePathLcase As String
+		Dim strFilePathLCase As String
 
 		Dim strHeaderLine As String
 
 		Dim eResultType As ePeptideHitResultType
 		eResultType = ePeptideHitResultType.Unknown
 
-		strFilePathLcase = strFilePath.ToLower
+		strFilePathLCase = strFilePath.ToLower()
 
 		Try
-			If strFilePathLcase.ToLower.EndsWith("_xt.txt") Then
+			If strFilePathLCase.EndsWith("_xt.txt") Then
 				eResultType = ePeptideHitResultType.XTandem
 			Else
-				If strFilePathLcase.EndsWith("_msgfdb_syn.txt") OrElse strFilePathLcase.EndsWith("_msgfdb_fht.txt") Then
+				If strFilePathLCase.EndsWith("_msgfdb_syn.txt") OrElse strFilePathLCase.EndsWith("_msgfdb_fht.txt") Then
 					eResultType = ePeptideHitResultType.MSGFDB
 
-				ElseIf strFilePathLcase.EndsWith("_inspect_syn.txt") OrElse strFilePathLcase.EndsWith("_inspect_fht.txt") Then
+				ElseIf strFilePathLCase.EndsWith("_inspect_syn.txt") OrElse strFilePathLCase.EndsWith("_inspect_fht.txt") Then
 					eResultType = ePeptideHitResultType.Inspect
 
-				ElseIf strFilePathLcase.EndsWith("_syn.txt") OrElse strFilePathLcase.EndsWith("_fht.txt") Then
+				ElseIf strFilePathLCase.EndsWith("_syn.txt") OrElse strFilePathLCase.EndsWith("_fht.txt") Then
 					' Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
 
-					Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+					If Not System.IO.File.Exists(strFilePath) Then
+						' File doesn't exist; assume Sequest
+						eResultType = ePeptideHitResultType.Sequest
+					Else
 
-						If srInFile.Peek() >= 0 Then
-							strHeaderLine = srInFile.ReadLine().ToLower
+						Try
+							Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
 
-							If strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_MQScore.ToLower) AndAlso _
-							   strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore.ToLower) Then
-								eResultType = ePeptideHitResultType.Inspect
+								If srInFile.Peek() >= 0 Then
+									strHeaderLine = srInFile.ReadLine().ToLower
 
-							ElseIf strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore) AndAlso _
-							   strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore) Then
-								eResultType = ePeptideHitResultType.MSGFDB
+									If strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_MQScore.ToLower) AndAlso _
+									   strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore.ToLower) Then
+										eResultType = ePeptideHitResultType.Inspect
 
-							ElseIf strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_XCorr.ToLower) AndAlso _
-							   strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_DelCn.ToLower) Then
-								eResultType = ePeptideHitResultType.Sequest
+									ElseIf strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore) AndAlso _
+									   strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore) Then
+										eResultType = ePeptideHitResultType.MSGFDB
 
-							End If
-						End If
+									ElseIf strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_XCorr.ToLower) AndAlso _
+									   strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_DelCn.ToLower) Then
+										eResultType = ePeptideHitResultType.Sequest
 
-					End Using
+									End If
+								End If
+
+							End Using
+
+						Catch ex As Exception
+							' Error reading file; assume Sequest
+							eResultType = ePeptideHitResultType.Sequest
+						End Try
+
+					End If
 
 				End If
 			End If
@@ -489,7 +511,39 @@ Public Class clsPHRPReader
 			Throw ex
 		End Try
 
+		If eResultType = ePeptideHitResultType.Unknown Then
+			Dim strFilePathTrimmed As String = String.Empty
+			If AutoTrimExtraSuffix(strFilePath, strFilePathTrimmed) Then
+				eResultType = AutoDetermineResultType(strFilePathTrimmed)
+			End If
+		End If
+
 		Return eResultType
+
+	End Function
+
+	Protected Shared Function AutoTrimExtraSuffix(ByVal strFilePath As String, ByRef strFilePathTrimmed As String) As Boolean
+
+		' Check whether strfilePathLCase ends in other known PHRP extensions
+		Dim lstExtraSuffixes As System.Collections.Generic.List(Of String)
+		lstExtraSuffixes = New System.Collections.Generic.List(Of String)
+
+		lstExtraSuffixes.Add("_ResultToSeqMap.txt")
+		lstExtraSuffixes.Add("_SeqToProteinMap.txt")
+		lstExtraSuffixes.Add("_SeqInfo.txt")
+		lstExtraSuffixes.Add("_MSGF.txt")
+
+		For Each strSuffix As String In lstExtraSuffixes
+			If strFilePath.ToLower().EndsWith(strSuffix.ToLower()) Then
+
+				strFilePathTrimmed = strFilePath.Substring(0, strFilePath.Length - strSuffix.Length) & ".txt"
+				Return True
+
+				Exit For
+			End If
+		Next
+
+		Return False
 
 	End Function
 
@@ -697,6 +751,114 @@ Public Class clsPHRPReader
 
 	End Function
 
+	Public Shared Function GetPHRPFirstHitsFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+
+		Dim strPHRPResultsFileName As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				' Sequest: _fht.txt
+				strPHRPResultsFileName = clsPHRPParserSequest.GetPHRPFirstHitsFileName(strDatasetName)
+
+			Case ePeptideHitResultType.XTandem
+				' X!Tandem does not have a first-hits file; strPHRPResultsFileName will be an empty string
+				strPHRPResultsFileName = clsPHRPParserXTandem.GetPHRPFirstHitsFileName(strDatasetName)
+
+			Case ePeptideHitResultType.Inspect
+				' Inspect: _inspect_fht.txt
+				strPHRPResultsFileName = clsPHRPParserInspect.GetPHRPFirstHitsFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSGFDB
+				' MSGFDB: _msgfdb_fht.txt
+				strPHRPResultsFileName = clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(strDatasetName)
+
+		End Select
+
+		Return strPHRPResultsFileName
+
+	End Function
+
+	Public Shared Function GetPHRPSynopsisFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+
+		Dim strPHRPResultsFileName As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				' Sequest: _syn.txt
+				strPHRPResultsFileName = clsPHRPParserSequest.GetPHRPSynopsisFileName(strDatasetName)
+
+			Case ePeptideHitResultType.XTandem
+				' X!Tandem: _xt.txt
+				strPHRPResultsFileName = clsPHRPParserXTandem.GetPHRPSynopsisFileName(strDatasetName)
+
+			Case ePeptideHitResultType.Inspect
+				' Inspect: _inspect_syn.txt
+				strPHRPResultsFileName = clsPHRPParserInspect.GetPHRPSynopsisFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSGFDB
+				' MSGFDB: _msgfdb_syn.txt
+				strPHRPResultsFileName = clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(strDatasetName)
+
+		End Select
+
+		Return strPHRPResultsFileName
+
+	End Function
+
+	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+
+		Dim strPHRPResultsFileName As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				' Sequest: _syn.txt
+				strPHRPResultsFileName = clsPHRPParserSequest.GetPHRPResultToSeqMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.XTandem
+				' X!Tandem: _xt.txt
+				strPHRPResultsFileName = clsPHRPParserXTandem.GetPHRPResultToSeqMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.Inspect
+				' Inspect: _inspect_syn.txt
+				strPHRPResultsFileName = clsPHRPParserInspect.GetPHRPResultToSeqMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSGFDB
+				' MSGFDB: _msgfdb_syn.txt
+				strPHRPResultsFileName = clsPHRPParserMSGFDB.GetPHRPResultToSeqMapFileName(strDatasetName)
+
+		End Select
+
+		Return strPHRPResultsFileName
+
+	End Function
+
+	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+
+		Dim strPHRPResultsFileName As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				' Sequest: _syn.txt
+				strPHRPResultsFileName = clsPHRPParserSequest.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.XTandem
+				' X!Tandem: _xt.txt
+				strPHRPResultsFileName = clsPHRPParserXTandem.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.Inspect
+				' Inspect: _inspect_syn.txt
+				strPHRPResultsFileName = clsPHRPParserInspect.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSGFDB
+				' MSGFDB: _msgfdb_syn.txt
+				strPHRPResultsFileName = clsPHRPParserMSGFDB.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+		End Select
+
+		Return strPHRPResultsFileName
+
+	End Function
+
 	''' <summary>
 	''' Examines the string to determine if it is numeric
 	''' </summary>
@@ -891,7 +1053,7 @@ Public Class clsPHRPReader
 								mPSMCurrent.PeptideWithNumericMods = strPeptideWithMods
 							End If
 						End If
-					
+
 
 						Dim strMSGFSpecProb As String = String.Empty
 						If mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, strMSGFSpecProb) Then
@@ -1062,7 +1224,7 @@ Public Class clsPHRPReader
 						strSplitLine = strLineIn.Split(ControlChars.Tab)
 
 						If Not blnHeaderLineParsed Then
-							If strSplitLine(0).ToLower() = MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower Then
+							If strSplitLine(0).ToLower() = MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower() Then
 								' Parse the header line to confirm the column ordering
 								clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
 								blnSkipLine = True

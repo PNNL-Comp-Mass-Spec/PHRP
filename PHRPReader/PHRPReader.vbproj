@@ -73,6 +73,7 @@
     <Compile Include="clsPHRPParserMSGFDB.vb" />
     <Compile Include="clsPHRPParserSequest.vb" />
     <Compile Include="clsPHRPParserXTandem.vb" />
+    <Compile Include="clsPHRPSeqMapReader.vb" />
     <Compile Include="clsPSM.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
   </ItemGroup>
