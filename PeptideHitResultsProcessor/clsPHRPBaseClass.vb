@@ -894,10 +894,7 @@ Public MustInherit Class clsPHRPBaseClass
 				If intDigitsOfPrecision <= 0 Then
 					strFormatString = "0"
 				Else
-					strFormatString = "0."
-					For intIndex As Integer = 0 To intDigitsOfPrecision
-						strFormatString &= "0"
-					Next
+					strFormatString = "0." & New String("0"c, intDigitsOfPrecision)					
 				End If
 				intFormatStringPrecision = intDigitsOfPrecision
 			End If

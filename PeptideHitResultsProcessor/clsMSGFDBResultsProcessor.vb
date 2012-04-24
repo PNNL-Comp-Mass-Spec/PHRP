@@ -1231,7 +1231,6 @@ Public Class clsMSGFDBResultsProcessor
 
 									MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
 
-
 									If udtPepToProteinMapping.Length > 0 Then
 										' Add the additional proteins for this peptide
 
@@ -1261,9 +1260,6 @@ Public Class clsMSGFDBResultsProcessor
 									End If
 
 								End If
-
-								' ToDo: Write out this line to an updated _Syn.txt file since we have now computed .PeptideDeltaMassCorrectedPpm
-
 
 								' Update the progress
 								UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
@@ -1434,7 +1430,7 @@ Public Class clsMSGFDBResultsProcessor
 
 
 					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
-					.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 5, True)
+					.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
 
 					If Not String.IsNullOrEmpty(.PMErrorPPM) Then
 
@@ -1451,7 +1447,7 @@ Public Class clsMSGFDBResultsProcessor
 								dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
 
 								' Note that this will be a C13-corrected precursor error; not the true precursor error
-								.PMErrorDa = NumToString(dblPrecursorErrorDa, 5, True)
+								.PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
 							End If
 						End If
 
@@ -1464,7 +1460,7 @@ Public Class clsMSGFDBResultsProcessor
 							dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMZ, _
 							 .ChargeNum, dblPeptideMonoisotopicMass, True)
 
-							.PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 4, True)
+							.PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 5, True)
 
 						End If
 

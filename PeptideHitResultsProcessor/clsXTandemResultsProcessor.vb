@@ -1401,24 +1401,24 @@ Public Class clsXTandemResultsProcessor
             mNextResultID += 1
 
             ' Write the results to the output file
-            swPeptideResultsFile.WriteLine( _
-                                .ResultID & SEP_CHAR & _
-                                .GroupID & SEP_CHAR & _
-                                .Scan & SEP_CHAR & _
-                                .Charge & SEP_CHAR & _
-                                .PeptideMH & SEP_CHAR & _
-                                .PeptideHyperscore & SEP_CHAR & _
-                                .PeptideExpectationValue & SEP_CHAR & _
-                                .MultipleProteinCount & SEP_CHAR & _
-                                .SequenceWithPrefixAndSuffix(True) & SEP_CHAR & _
-                                Math.Round(.PeptideDeltaCn2, 4).ToString & SEP_CHAR & _
-                                .PeptideYScore & SEP_CHAR & _
-                                .PeptideYIons & SEP_CHAR & _
-                                .PeptideBScore & SEP_CHAR & _
-                                .PeptideBIons & SEP_CHAR & _
-                                .PeptideDeltaMass & SEP_CHAR & _
-                                .PeptideIntensity & SEP_CHAR & _
-                                MyBase.NumToString(.PeptideDeltaMassCorrectedPpm, 4, True))
+			swPeptideResultsFile.WriteLine( _
+				 .ResultID & SEP_CHAR & _
+				 .GroupID & SEP_CHAR & _
+				 .Scan & SEP_CHAR & _
+				 .Charge & SEP_CHAR & _
+				 .PeptideMH & SEP_CHAR & _
+				 .PeptideHyperscore & SEP_CHAR & _
+				 .PeptideExpectationValue & SEP_CHAR & _
+				 .MultipleProteinCount & SEP_CHAR & _
+				 .SequenceWithPrefixAndSuffix(True) & SEP_CHAR & _
+				 Math.Round(.PeptideDeltaCn2, 4).ToString & SEP_CHAR & _
+				 .PeptideYScore & SEP_CHAR & _
+				 .PeptideYIons & SEP_CHAR & _
+				 .PeptideBScore & SEP_CHAR & _
+				 .PeptideBIons & SEP_CHAR & _
+				 .PeptideDeltaMass & SEP_CHAR & _
+				 .PeptideIntensity & SEP_CHAR & _
+				 MyBase.NumToString(.PeptideDeltaMassCorrectedPpm, 4, True))
         End With
 
     End Sub

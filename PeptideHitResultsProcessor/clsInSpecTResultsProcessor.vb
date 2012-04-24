@@ -1279,7 +1279,7 @@ Public Class clsInSpecTResultsProcessor
                             dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, _
                                                                                       dblPeptideMonoisotopicMass, True)
 
-                            .DelMPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 4, True)
+							.DelMPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 4, True)
 
                         End If
 
@@ -1943,34 +1943,34 @@ Public Class clsInSpecTResultsProcessor
 
         ' Writes an entry to a synopsis or first hits file
         Try
-            swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
-                                   udtSearchResult.Scan & ControlChars.Tab & _
-                                   udtSearchResult.PeptideAnnotation & ControlChars.Tab & _
-                                   udtSearchResult.Protein & ControlChars.Tab & _
-                                   udtSearchResult.Charge & ControlChars.Tab & _
-                                   udtSearchResult.MQScore & ControlChars.Tab & _
-                                   udtSearchResult.Length & ControlChars.Tab & _
-                                   udtSearchResult.TotalPRMScore & ControlChars.Tab & _
-                                   udtSearchResult.MedianPRMScore & ControlChars.Tab & _
-                                   udtSearchResult.FractionY & ControlChars.Tab & _
-                                   udtSearchResult.FractionB & ControlChars.Tab & _
-                                   udtSearchResult.Intensity & ControlChars.Tab & _
-                                   udtSearchResult.NTT & ControlChars.Tab & _
-                                   udtSearchResult.pValue & ControlChars.Tab & _
-                                   udtSearchResult.FScore & ControlChars.Tab & _
-                                   udtSearchResult.DeltaScore & ControlChars.Tab & _
-                                   udtSearchResult.DeltaScoreOther & ControlChars.Tab & _
-                                   NumToString(udtSearchResult.DeltaNormMQScore, 4, True) & ControlChars.Tab & _
-                                   NumToString(udtSearchResult.DeltaNormTotalPRMScore, 4, True) & ControlChars.Tab & _
-                                   udtSearchResult.RankTotalPRMScore & ControlChars.Tab & _
-                                   udtSearchResult.RankFScore & ControlChars.Tab & _
-                                   NumToString(udtSearchResult.MH, 5, True) & ControlChars.Tab & _
-                                   udtSearchResult.RecordNumber & ControlChars.Tab & _
-                                   udtSearchResult.DBFilePos & ControlChars.Tab & _
-                                   udtSearchResult.SpecFilePos & ControlChars.Tab & _
-                                   udtSearchResult.PrecursorMZ & ControlChars.Tab & _
-                                   udtSearchResult.PrecursorError & ControlChars.Tab & _
-                                   udtSearchResult.DelMPPM)
+			swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
+			  udtSearchResult.Scan & ControlChars.Tab & _
+			  udtSearchResult.PeptideAnnotation & ControlChars.Tab & _
+			  udtSearchResult.Protein & ControlChars.Tab & _
+			  udtSearchResult.Charge & ControlChars.Tab & _
+			  udtSearchResult.MQScore & ControlChars.Tab & _
+			  udtSearchResult.Length & ControlChars.Tab & _
+			  udtSearchResult.TotalPRMScore & ControlChars.Tab & _
+			  udtSearchResult.MedianPRMScore & ControlChars.Tab & _
+			  udtSearchResult.FractionY & ControlChars.Tab & _
+			  udtSearchResult.FractionB & ControlChars.Tab & _
+			  udtSearchResult.Intensity & ControlChars.Tab & _
+			  udtSearchResult.NTT & ControlChars.Tab & _
+			  udtSearchResult.pValue & ControlChars.Tab & _
+			  udtSearchResult.FScore & ControlChars.Tab & _
+			  udtSearchResult.DeltaScore & ControlChars.Tab & _
+			  udtSearchResult.DeltaScoreOther & ControlChars.Tab & _
+			  NumToString(udtSearchResult.DeltaNormMQScore, 5, True) & ControlChars.Tab & _
+			  NumToString(udtSearchResult.DeltaNormTotalPRMScore, 5, True) & ControlChars.Tab & _
+			  udtSearchResult.RankTotalPRMScore & ControlChars.Tab & _
+			  udtSearchResult.RankFScore & ControlChars.Tab & _
+			  NumToString(udtSearchResult.MH, 6, True) & ControlChars.Tab & _
+			  udtSearchResult.RecordNumber & ControlChars.Tab & _
+			  udtSearchResult.DBFilePos & ControlChars.Tab & _
+			  udtSearchResult.SpecFilePos & ControlChars.Tab & _
+			  udtSearchResult.PrecursorMZ & ControlChars.Tab & _
+			  udtSearchResult.PrecursorError & ControlChars.Tab & _
+			  udtSearchResult.DelMPPM)
 
         Catch ex As Exception
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then

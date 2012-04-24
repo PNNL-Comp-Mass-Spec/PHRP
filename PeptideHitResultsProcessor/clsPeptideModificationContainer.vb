@@ -54,14 +54,6 @@ Public Class clsPeptideModificationContainer
         ProteinNandCCTerminus = 5       ' The protein only has one residue 
     End Enum
 
-    ''Public Enum clsModificationDefinition.eModificationTypeConstants As Integer
-    ''    UnknownType = 0                         ' Unknown mod type on a residue; essentially treated as a dynamic mod
-    ''    DynamicMod = 1                          ' Dynamic mod on a residue or peptide terminus; this mod is explicitly notated by XTandem; if a terminus mod, then the mod symbol is associated with the first or last residue in the peptide
-    ''    StaticMod = 2                           ' Static mod on a residue or peptide terminus;  this mod is explicitly notated by XTandem; if a terminus mod, then the mod symbol is associated with the first or last residue in the peptide
-    ''    TerminalPeptideStaticMod = 3            ' Peptide terminus static mod (DMS Symbol is T); only used by Sequest since terminus mods are always dynamic in XTandem
-    ''    IsotopicMod = 4                         ' e.g. N15, or C13; most likely not supported by XTandem
-    ''    ProteinTerminusStaticMod = 5            ' Protein terminus static mod; this mod is supported by XTandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
-    ''End Enum
 #End Region
 
 #Region "Structures"
@@ -858,26 +850,34 @@ Public Class clsPeptideModificationContainer
 			' Note: If the mass correction tag names in this list contain spaces at the 
 			'       beginning or end, then function StoreMassCorrectionTag will remove them
 
+			StoreMassCorrectionTag("4xDeut  ", 4.0251)
 			StoreMassCorrectionTag("6C132N15", 8.0143)
 			StoreMassCorrectionTag("6C134N15", 10.0085)
 			StoreMassCorrectionTag("6xC13N15", 7.0172)
 			StoreMassCorrectionTag("9xC13N15", 10.0273)
+			StoreMassCorrectionTag("AcetAmid", 41.0266)
 			StoreMassCorrectionTag("Acetyl  ", 42.0106)
+			StoreMassCorrectionTag("AlkSulf ", -25.0316)
+			StoreMassCorrectionTag("AlkSulf2", -9.0367)
 			StoreMassCorrectionTag("AmAdipic", -1.031634)
 			StoreMassCorrectionTag("Aminaton", 15.0109)
 			StoreMassCorrectionTag("AmOxButa", -2.01565)
 			StoreMassCorrectionTag("BioPeoAm", 356.1882)
 			StoreMassCorrectionTag("Biotinyl", 89.0061)
+			StoreMassCorrectionTag("Bromo   ", 77.9105)
 			StoreMassCorrectionTag("C12_PIC ", 119.038)
 			StoreMassCorrectionTag("C13_PIC ", 125.0581)
 			StoreMassCorrectionTag("Carbamyl", 43.0059)
+			StoreMassCorrectionTag("Chloro  ", 33.96103)
 			StoreMassCorrectionTag("Cys_EDTI", 117.0248)
+			StoreMassCorrectionTag("Cystnyl ", 119.0041)
 			StoreMassCorrectionTag("DCAT_D0 ", 42.0375)
 			StoreMassCorrectionTag("DCAT_D3 ", 44.9957)
 			StoreMassCorrectionTag("Deamide ", 0.984)
 			StoreMassCorrectionTag("DeutMeth", 17.0345)
 			StoreMassCorrectionTag("DiAcet_K", 84.0212)
 			StoreMassCorrectionTag("DiffDeut", 1.0063)
+			StoreMassCorrectionTag("Dimethyl", 28.0314)
 			StoreMassCorrectionTag("DuMtO18 ", 19.0387)
 			StoreMassCorrectionTag("EDPHeavy", 253.1032)
 			StoreMassCorrectionTag("EDPLight", 246.0819)
@@ -887,9 +887,12 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("EDT_D4C7", 257.0819)
 			StoreMassCorrectionTag("EDT+Iodo", 133.002)
 			StoreMassCorrectionTag("EtShD0  ", 44.0085)
+			StoreMassCorrectionTag("FarnesC ", 204.3511)
 			StoreMassCorrectionTag("Formyl  ", 27.9949)
+			StoreMassCorrectionTag("Furylium", 78.01057)
 			StoreMassCorrectionTag("GamGluAl", -43.053433)
 			StoreMassCorrectionTag("GluCPD4 ", 550.1953)
+			StoreMassCorrectionTag("Gluthone", 305.0682)
 			StoreMassCorrectionTag("Guanid  ", 42.0218)
 			StoreMassCorrectionTag("Heme_615", 615.1694)
 			StoreMassCorrectionTag("Heme_617", 617)
@@ -908,12 +911,19 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("Iso_C13 ", 1.00335)
 			StoreMassCorrectionTag("Iso_N15 ", 0.9971)
 			StoreMassCorrectionTag("Iso_O18 ", 2.0042)
+			StoreMassCorrectionTag("itrac   ", 144.102063)
+			StoreMassCorrectionTag("iTRAQ8  ", 304.2022)
+			StoreMassCorrectionTag("LeuToMet", 17.9564)
+			StoreMassCorrectionTag("Lipid2  ", 576.51)
 			StoreMassCorrectionTag("Lipoyl  ", 188.033)
+			StoreMassCorrectionTag("Mercury ", 199.9549)
 			StoreMassCorrectionTag("Met_2O18", 18.0243)
 			StoreMassCorrectionTag("Met_O18 ", 16.02)
 			StoreMassCorrectionTag("Methyl  ", 14.0157)
 			StoreMassCorrectionTag("MinusH2O", -18.0106)
 			StoreMassCorrectionTag("MTSLAddn", 184.076)
+			StoreMassCorrectionTag("NEM     ", 125.047679)
+			StoreMassCorrectionTag("NH+10Da ", 25.0109)
 			StoreMassCorrectionTag("NH3_Loss", -17.026549)
 			StoreMassCorrectionTag("NHS_SS  ", 87.9983)
 			StoreMassCorrectionTag("NHSLCBio", 339.1617)
@@ -921,9 +931,12 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("Nitrosyl", 28.9902)
 			StoreMassCorrectionTag("NO2_Addn", 44.9851)
 			StoreMassCorrectionTag("NO2_Alt ", 44.9975)
+			StoreMassCorrectionTag("NO2+10Da", 54.9851)
 			StoreMassCorrectionTag("None    ", 0)
+			StoreMassCorrectionTag("OMinus2H", 13.9793)
 			StoreMassCorrectionTag("One_O18 ", 2.0042)
 			StoreMassCorrectionTag("Oxid_PEO", 430.1886)
+			StoreMassCorrectionTag("PCGalNAz", 502.2023)
 			StoreMassCorrectionTag("PEO     ", 414.1937)
 			StoreMassCorrectionTag("PEO4Addn", 442.2553)
 			StoreMassCorrectionTag("PhIATD0 ", 490.1742)
@@ -934,6 +947,9 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("Plus1Oxy", 15.9949)
 			StoreMassCorrectionTag("Plus2Oxy", 31.9898)
 			StoreMassCorrectionTag("Plus3Oxy", 47.9847)
+			StoreMassCorrectionTag("PMA     ", 278.0019)
+			StoreMassCorrectionTag("Pro2Azet", -14.01565)
+			StoreMassCorrectionTag("Propnyl ", 56.02621)
 			StoreMassCorrectionTag("ROBLOSS ", -11.876)
 			StoreMassCorrectionTag("SATA_Alk", 131.0041)
 			StoreMassCorrectionTag("SATA_Hvy", 129.9963)
@@ -941,10 +957,18 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("SATAIodo", 146.015)
 			StoreMassCorrectionTag("SBEDBait", 88.01)
 			StoreMassCorrectionTag("SBEDCapt", 547.22)
+			StoreMassCorrectionTag("SelCandM", 47.9444)
 			StoreMassCorrectionTag("SP_Heavy", 177.1583)
 			StoreMassCorrectionTag("SP_Light", 170.1055)
+			StoreMassCorrectionTag("Sucinate", 116.011)
+			StoreMassCorrectionTag("Sulf-10 ", -35.0316)
+			StoreMassCorrectionTag("Sulf2-10", -19.0367)
 			StoreMassCorrectionTag("SulfoNHS", 226.0776)
+			StoreMassCorrectionTag("SumoEstr", 498.2417)
+			StoreMassCorrectionTag("Sumoylat", 484.226)
 			StoreMassCorrectionTag("TriAcetK", 126.0318)
+			StoreMassCorrectionTag("TriMeth ", 42.0471)
+			StoreMassCorrectionTag("TrypOxy ", 3.9949)
 			StoreMassCorrectionTag("TrypPD4 ", 494.74)
 			StoreMassCorrectionTag("Two_O18 ", 4.0085)
 			StoreMassCorrectionTag("Ubiq_02 ", 114.1)
@@ -954,6 +978,8 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("Ubiq_L  ", 100.016)
 			StoreMassCorrectionTag("Ubiq_L02", 229.127)
 			StoreMassCorrectionTag("Ubiq_L03", 172.0942)
+			StoreMassCorrectionTag("UbiqLRGG", 383.228103)
+			StoreMassCorrectionTag("ValToMet", 31.9721)
 
 		Catch ex As Exception
 			' Ignore errors here
