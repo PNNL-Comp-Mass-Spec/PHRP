@@ -74,7 +74,11 @@
     <Compile Include="clsPHRPParserSequest.vb" />
     <Compile Include="clsPHRPParserXTandem.vb" />
     <Compile Include="clsPHRPSeqMapReader.vb" />
+    <Compile Include="clsProteinInfo.vb" />
     <Compile Include="clsPSM.vb" />
+    <Compile Include="clsScanStatsInfo.vb" />
+    <Compile Include="clsScanStatsReader.vb" />
+    <Compile Include="clsSeqInfo.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

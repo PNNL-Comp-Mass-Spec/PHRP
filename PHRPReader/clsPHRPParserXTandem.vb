@@ -33,9 +33,6 @@ Public Class clsPHRPParserXTandem
 	Public Const DATA_COLUMN_Peptide_Intensity_LogI As String = "Peptide_Intensity_Log(I)"
 	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
-	' This List tracks the Protein Names for each ResultID
-	Protected mResultIDToProteins As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
-
 	''' <summary>
 	''' Constructor
 	''' </summary>
@@ -43,11 +40,7 @@ Public Class clsPHRPParserXTandem
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
-		MyBase.New(strDatasetName, strInputFilePath)
-
-		mResultIDToProteins = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
-		LoadXTandemResultProteins()
-
+		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.XTandem)
 		mInitialized = True
 	End Sub
 
@@ -89,72 +82,12 @@ Public Class clsPHRPParserXTandem
 		Return strDatasetName & "_xt_ResultToSeqMap.txt"
 	End Function
 
-	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_xt_SeqToProteinMap.txt"
+	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_xt_SeqInfo.txt"
 	End Function
 
-	Protected Function LoadXTandemResultProteins() As Boolean
-
-		Dim objResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of Integer))
-		Dim objSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
-
-		Dim blnSuccess As Boolean
-		Dim objReader As clsPHRPSeqMapReader
-
-		Try
-
-			mResultIDToProteins.Clear()
-
-			' Initialize the tracking lists
-			objResultToSeqMap = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of Integer))
-			objSeqToProteinMap = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
-
-			' Instantiate the reader
-			objReader = New clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, ePeptideHitResultType.XTandem)
-
-			' Read the files
-			blnSuccess = objReader.GetProteinMapping(objResultToSeqMap, objSeqToProteinMap)
-
-			If blnSuccess Then
-				' Populate mResultIDToProteins
-
-				Dim intResultID As Integer
-				Dim intSeqID As Integer
-
-				Dim lstProteinsForSeqID As System.Collections.Generic.List(Of String) = Nothing
-				Dim lstProteinsForResultID As System.Collections.Generic.List(Of String) = Nothing
-
-				For Each objItem As System.Collections.Generic.KeyValuePair(Of Integer, System.Collections.Generic.List(Of Integer)) In objResultToSeqMap
-
-					intResultID = objItem.Key
-					lstProteinsForResultID = New System.Collections.Generic.List(Of String)
-
-					For Each intSeqID In objItem.Value()
-						If objSeqToProteinMap.TryGetValue(intSeqID, lstProteinsForSeqID) Then
-
-							For Each strProtein As String In lstProteinsForSeqID
-								If Not lstProteinsForResultID.Contains(strProtein) Then
-									lstProteinsForResultID.Add(strProtein)
-								End If
-							Next
-
-						End If
-					Next
-
-					mResultIDToProteins.Add(intResultID, lstProteinsForResultID)
-
-				Next
-
-			End If
-
-		Catch ex As Exception
-			HandleException("Error loading X!Tandem protein results", ex)
-			blnSuccess = False
-			If Not mInitialized Then Throw New Exception(mErrorMessage, ex)
-		End Try
-
-		Return blnSuccess
-
+	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_xt_SeqToProteinMap.txt"
 	End Function
 
 	''' <summary>
@@ -211,6 +144,9 @@ Public Class clsPHRPParserXTandem
 			End With
 
 			If blnSuccess Then
+				' Update objPSM.PeptideMonoisotopicMass and determine the modifications present on this peptide
+				UpdatePSMUsingSeqInfo(objPSM)
+
 				' Store the remaining scores
 				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Hyperscore)
 				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Expectation_Value_LogE)

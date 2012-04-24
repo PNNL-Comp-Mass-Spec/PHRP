@@ -15,6 +15,8 @@ Public Class clsPSM
 	' Note: Be sure to update the Clone() function if you add new class-wide variables
 	Protected mResultID As Integer
 	Protected mScanNumber As Integer
+	Protected mElutionTimeMinutes As Single
+
 	Protected mPeptide As String					' Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
 	Protected mPeptideWithNumericMods As String		' Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
 	Protected mPeptideCleanSequence As String
@@ -31,6 +33,8 @@ Public Class clsPSM
 	Protected mPrecursorNeutralMass As Double		' Uncharged monoisotopic mass of the precursor
 	Protected mMassErrorDa As String
 	Protected mMassErrorPPM As String
+
+	Protected mPeptideMonoisotopicMass As Double
 
 	' Note that protein names are case-sensitive
 	Protected mProteins As System.Collections.Generic.List(Of String)
@@ -70,6 +74,15 @@ Public Class clsPSM
 		End Get
 		Set(value As String)
 			mCollisionMode = value
+		End Set
+	End Property
+
+	Public Property ElutionTimeMinutes As Single
+		Get
+			Return mElutionTimeMinutes
+		End Get
+		Set(value As Single)
+			mElutionTimeMinutes = value
 		End Set
 	End Property
 
@@ -121,7 +134,7 @@ Public Class clsPSM
 	Public ReadOnly Property Peptide() As String
 		Get
 			Return mPeptide
-		End Get		
+		End Get
 	End Property
 
 	Public ReadOnly Property PeptideCleanSequence() As String
@@ -129,6 +142,22 @@ Public Class clsPSM
 			Return mPeptideCleanSequence
 		End Get
 	End Property
+
+	''' <summary>
+	''' Computed monoisotopic mass (uncharged, theoretical mass, including mods)
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Property PeptideMonoisotopicMass As Double
+		Get
+			Return mPeptideMonoisotopicMass
+		End Get
+		Set(value As Double)
+			mPeptideMonoisotopicMass = value
+		End Set
+	End Property
+
 
 	Public Property PeptideWithNumericMods() As String
 		Get
@@ -153,6 +182,9 @@ Public Class clsPSM
 		End Get
 	End Property
 
+	''' <summary>
+	''' Uncharged monoisotopic mass of the precursor (observed mass based on m/z and charge)
+	''' </summary>
 	Public Property PrecursorNeutralMass As Double
 		Get
 			Return mPrecursorNeutralMass
@@ -215,10 +247,11 @@ Public Class clsPSM
 	''' <remarks></remarks>
 	Public Sub Clear()
 		mScanNumber = 0
+		mElutionTimeMinutes = 0
+
 		mPeptide = String.Empty
 		mPeptideWithNumericMods = String.Empty
 		mPeptideCleanSequence = String.Empty
-
 		mCharge = 0
 		mResultID = 0
 		mCollisionMode = "n/a"
@@ -231,6 +264,8 @@ Public Class clsPSM
 		mPrecursorNeutralMass = 0
 		mMassErrorDa = String.Empty
 		mMassErrorPPM = String.Empty
+
+		mPeptideMonoisotopicMass = 0
 
 		mProteins.Clear()
 		mAdditionalScores.Clear()
@@ -249,6 +284,8 @@ Public Class clsPSM
 		With objNew
 			.ResultID = mResultID
 			.ScanNumber = mScanNumber
+			.ElutionTimeMinutes = mElutionTimeMinutes
+
 			.SetPeptide(mPeptide)				' Note: this will auto-update mPeptideCleanSequence in objNew
 			.PeptideWithNumericMods = mPeptideWithNumericMods
 			.Charge = mCharge

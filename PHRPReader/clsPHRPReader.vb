@@ -8,6 +8,7 @@
 ' and returns the data for each peptide hit search result
 '
 ' It also integrates MSGF results with the peptide hit search results
+' And, it integrates scan stats values (to determine elution time)
 ' 
 '*********************************************************************************************************
 
@@ -35,6 +36,7 @@ Public Class clsPHRPReader
 	Public Const DOT_MZXML_EXTENSION As String = ".mzXML"
 
 	Public Const MSGF_RESULT_FILENAME_SUFFIX As String = "_MSGF.txt"
+	Public Const SCAN_STATS_FILENAME_SUFFIX As String = "_ScanStats.txt"
 
 	Protected Const MOD_SUMMARY_COLUMN_Modification_Symbol As String = "Modification_Symbol"
 	Protected Const MOD_SUMMARY_COLUMN_Modification_Mass As String = "Modification_Mass"
@@ -70,8 +72,11 @@ Public Class clsPHRPReader
 	Protected mInputFolderPath As String
 
 	Protected mSkipDuplicatePSMs As Boolean
-	Protected mLoadMSGFResults As Boolean
+
 	Protected mLoadModDefs As Boolean
+	Protected mLoadMSGFResults As Boolean
+	Protected mLoadScanStatsData As Boolean
+
 	Protected mEchoMessagesToConsole As Boolean
 
 	Protected mCanRead As Boolean
@@ -91,8 +96,12 @@ Public Class clsPHRPReader
 	Protected mStaticMods As System.Collections.Generic.SortedDictionary(Of String, String)
 
 	' This dictionary tracks the MSGFSpecProb values for each entry in the source file
-	' The key is Result_ID and the string is MSGFSpecProb (stored as string to preserve formatting)
+	' The keys are Result_ID and the string is MSGFSpecProb (stored as string to preserve formatting)
 	Protected mMSGFCachedResults As System.Collections.Generic.Dictionary(Of Integer, String)
+
+	' This dictionary tracks scan stats values, in particular elution time
+	'The keys are ScanNumber and values are clsScanStatsInfo objects
+	Protected mScanStats As System.Collections.Generic.Dictionary(Of Integer, clsScanStatsInfo)
 
 	Protected mPSMCurrent As clsPSM
 
@@ -132,6 +141,12 @@ Public Class clsPHRPReader
 		End Get
 	End Property
 
+	Public ReadOnly Property DatasetName As String
+		Get
+			Return mDatasetName
+		End Get
+	End Property
+
 	Public Property EchoMessagesToConsole As Boolean
 		Get
 			Return mEchoMessagesToConsole
@@ -165,6 +180,15 @@ Public Class clsPHRPReader
 		End Set
 	End Property
 
+	Public Property LoadScanStatsData() As Boolean
+		Get
+			Return mLoadScanStatsData
+		End Get
+		Set(value As Boolean)
+			mLoadScanStatsData = value
+		End Set
+	End Property
+
 	Public ReadOnly Property PHRPParser() As clsPHRPParser
 		Get
 			Return mPHRPParser
@@ -187,7 +211,7 @@ Public Class clsPHRPReader
 	''' <param name="strInputFilePath">Input file to read</param>
 	''' <remarks>Sets LoadModDefs to True and LoadMSGFResults to true</remarks>
 	Public Sub New(ByVal strInputFilePath As String)
-		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModDefs:=True, blnLoadMSGFResults:=True)
+		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModDefs:=True, blnLoadMSGFResults:=True, blnLoadScanStats:=False)
 	End Sub
 
 	''' <summary>
@@ -197,7 +221,7 @@ Public Class clsPHRPReader
 	''' <param name="eResultType">Source file PeptideHit result type</param>
 	''' <remarks>Sets LoadModDefs to True and LoadMSGFResults to true</remarks>
 	Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType)
-		Me.New(strInputFilePath, eResultType, blnLoadModDefs:=True, blnLoadMSGFResults:=True)
+		Me.New(strInputFilePath, eResultType, blnLoadModDefs:=True, blnLoadMSGFResults:=True, blnLoadScanStats:=False)
 	End Sub
 
 	''' <summary>
@@ -207,8 +231,8 @@ Public Class clsPHRPReader
 	''' <param name="blnLoadModDefs">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
 	''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strInputFilePath As String, ByVal blnLoadModDefs As Boolean, ByVal blnLoadMSGFResults As Boolean)
-		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModDefs, blnLoadMSGFResults)
+	Public Sub New(ByVal strInputFilePath As String, ByVal blnLoadModDefs As Boolean, ByVal blnLoadMSGFResults As Boolean, ByVal blnLoadScanStats As Boolean)
+		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModDefs, blnLoadMSGFResults, blnLoadScanStats)
 	End Sub
 
 	''' <summary>
@@ -219,11 +243,13 @@ Public Class clsPHRPReader
 	''' <param name="blnLoadModDefs">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
 	''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal blnLoadModDefs As Boolean, ByVal blnLoadMSGFResults As Boolean)
+	Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal blnLoadModDefs As Boolean, ByVal blnLoadMSGFResults As Boolean, ByVal blnLoadScanStats As Boolean)
 
 		Reset()
+
 		mLoadModDefs = blnLoadModDefs
 		mLoadMSGFResults = blnLoadMSGFResults
+		mLoadScanStatsData = blnLoadScanStats
 
 		InitializeReader(strInputFilePath, eResultType)
 
@@ -237,8 +263,10 @@ Public Class clsPHRPReader
 		mCanRead = False
 
 		mSkipDuplicatePSMs = True
-		mLoadMSGFResults = True
+
 		mLoadModDefs = True
+		mLoadMSGFResults = True
+		mLoadScanStatsData = False
 
 		mErrorMessage = String.Empty
 		mLocalErrorCode = ePHRPReaderErrorCodes.NoError
@@ -296,6 +324,7 @@ Public Class clsPHRPReader
 					End If
 
 					' Open the input file for reading
+					' Note that this will also load the MSGFSpecProb info and ScanStats info
 					blnSuccess = InitializeParser(eResultType)
 
 				End If
@@ -736,6 +765,11 @@ Public Class clsPHRPReader
 					blnSuccess = ReadAndCacheMSGFData()
 				End If
 
+				If mLoadScanStatsData Then
+					' Cache the Scan Stats values (if present)
+					blnSuccess = ReadScanStatsData()
+				End If
+
 				' Open the data file for reading
 				mSourceFile = New System.IO.StreamReader(New System.IO.FileStream(mInputFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
 				mCanRead = True
@@ -832,30 +866,57 @@ Public Class clsPHRPReader
 
 	End Function
 
-	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPSeqInfoFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
-		Dim strPHRPResultsFileName As String = String.Empty
+		Dim strSeqInfoFilename As String = String.Empty
 
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest
 				' Sequest: _syn.txt
-				strPHRPResultsFileName = clsPHRPParserSequest.GetPHRPSeqToProteinMapFileName(strDatasetName)
+				strSeqInfoFilename = clsPHRPParserSequest.GetPHRPSeqInfoFileName(strDatasetName)
 
 			Case ePeptideHitResultType.XTandem
 				' X!Tandem: _xt.txt
-				strPHRPResultsFileName = clsPHRPParserXTandem.GetPHRPSeqToProteinMapFileName(strDatasetName)
+				strSeqInfoFilename = clsPHRPParserXTandem.GetPHRPSeqInfoFileName(strDatasetName)
 
 			Case ePeptideHitResultType.Inspect
 				' Inspect: _inspect_syn.txt
-				strPHRPResultsFileName = clsPHRPParserInspect.GetPHRPSeqToProteinMapFileName(strDatasetName)
+				strSeqInfoFilename = clsPHRPParserInspect.GetPHRPSeqInfoFileName(strDatasetName)
 
 			Case ePeptideHitResultType.MSGFDB
 				' MSGFDB: _msgfdb_syn.txt
-				strPHRPResultsFileName = clsPHRPParserMSGFDB.GetPHRPSeqToProteinMapFileName(strDatasetName)
+				strSeqInfoFilename = clsPHRPParserMSGFDB.GetPHRPSeqInfoFileName(strDatasetName)
 
 		End Select
 
-		Return strPHRPResultsFileName
+		Return strSeqInfoFilename
+
+	End Function
+
+	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+
+		Dim strSeqToProteinMapFileName As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				' Sequest: _syn.txt
+				strSeqToProteinMapFileName = clsPHRPParserSequest.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.XTandem
+				' X!Tandem: _xt.txt
+				strSeqToProteinMapFileName = clsPHRPParserXTandem.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.Inspect
+				' Inspect: _inspect_syn.txt
+				strSeqToProteinMapFileName = clsPHRPParserInspect.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSGFDB
+				' MSGFDB: _msgfdb_syn.txt
+				strSeqToProteinMapFileName = clsPHRPParserMSGFDB.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+		End Select
+
+		Return strSeqToProteinMapFileName
 
 	End Function
 
@@ -1006,6 +1067,8 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean = False
 		Dim blnMatchFound As Boolean = False
 
+		Dim objScanStatsInfo As clsScanStatsInfo = Nothing
+
 		If mCachedLineAvailable Then
 			strLineIn = mCachedLine
 			mCachedLineAvailable = False
@@ -1054,6 +1117,11 @@ Public Class clsPHRPReader
 							End If
 						End If
 
+						If Not mScanStats Is Nothing Then
+							If mScanStats.TryGetValue(mPSMCurrent.ScanNumber, objScanStatsInfo) Then
+								mPSMCurrent.ElutionTimeMinutes = objScanStatsInfo.ScanTimeMinutes
+							End If
+						End If
 
 						Dim strMSGFSpecProb As String = String.Empty
 						If mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, strMSGFSpecProb) Then
@@ -1292,6 +1360,52 @@ Public Class clsPHRPReader
 		End Try
 
 		Return True
+
+	End Function
+
+	Protected Function ReadScanStatsData() As Boolean
+
+		Dim strScanStatsFilePath As String
+		Dim blnSuccess As Boolean = False
+
+		Try
+			strScanStatsFilePath = mDatasetName & SCAN_STATS_FILENAME_SUFFIX
+			strScanStatsFilePath = System.IO.Path.Combine(mInputFolderPath, strScanStatsFilePath)
+
+			blnSuccess = ReadScanStatsData(strScanStatsFilePath)
+
+		Catch ex As Exception
+			HandleException("Exception determining Scan Stats file path", ex)
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Function ReadScanStatsData(ByVal strScanStatsFilePath As String) As Boolean
+
+		Dim blnSuccess As Boolean = False
+
+		Try
+			If System.IO.File.Exists(strScanStatsFilePath) Then
+
+				Dim oScanStatsReader As New clsScanStatsReader()
+				mScanStats = oScanStatsReader.ReadScanStatsData(strScanStatsFilePath)
+
+				If oScanStatsReader.ErrorMessage.Length > 0 Then
+					ReportError("Error reading ScanStats data: " & oScanStatsReader.ErrorMessage)
+				Else
+					blnSuccess = True
+				End If
+			Else
+				ReportWarning("ScanStats file not found: " & strScanStatsFilePath)
+			End If
+
+		Catch ex As Exception
+			HandleException("Exception reading Scan Stats file", ex)
+		End Try
+
+		Return blnSuccess
 
 	End Function
 

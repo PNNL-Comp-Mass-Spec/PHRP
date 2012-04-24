@@ -45,7 +45,7 @@ Public Class clsPHRPParserSequest
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
-		MyBase.New(strDatasetName, strInputFilePath)
+		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.Sequest)
 		mInitialized = True
 	End Sub
 
@@ -92,6 +92,10 @@ Public Class clsPHRPParserSequest
 
 	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_syn_ResultToSeqMap.txt"
+	End Function
+
+	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_syn_SeqInfo.txt"
 	End Function
 
 	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
@@ -158,8 +162,10 @@ Public Class clsPHRPParserSequest
 			End With
 
 			If blnSuccess Then
-				' Store the remaining scores
+				' Update objPSM.PeptideMonoisotopicMass and determine the modifications present on this peptide
+				UpdatePSMUsingSeqInfo(objPSM)
 
+				' Store the remaining scores
 				AddScore(objPSM, strColumns, DATA_COLUMN_XCorr)
 				AddScore(objPSM, strColumns, DATA_COLUMN_DelCn)
 				AddScore(objPSM, strColumns, DATA_COLUMN_Sp)

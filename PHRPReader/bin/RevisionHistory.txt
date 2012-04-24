@@ -1,0 +1,14 @@
+PHRPReader.dll Revision History
+
+Version 1.1.4496; April 23, 2012
+	- Now loading PHRP SeqInfo and SeqToProteinMap files if present in the same folder as the primary PHRP results file
+	- Updated GetProteinMapping() to return classes with additional information instead of simply protein name
+	- Now loading the MASIC ScanStats file if present to read the ElutionTime values for each scan number
+	- Now using the SeqInfo file to update the computed monoisotopic mass for each peptide (clsPSM)
+
+Version 1.0.4478; April 5, 2012
+	- Added clsPHRPSeqMapReader
+	- Added/expanded several shared functions in clsPHRPReader
+
+Version 1.0.4477; April 4, 2012
+	- Initial commit

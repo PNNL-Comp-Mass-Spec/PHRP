@@ -1,5 +1,7 @@
 ﻿Option Strict On
 
+Imports PHRPReader.clsPeptideCleavageStateCalculator
+
 Public Class clsPHRPSeqMapReader
 
 #Region "Constants"
@@ -10,6 +12,12 @@ Public Class clsPHRPSeqMapReader
 
 	Public Const SEQ_PROT_MAP_COLUMN_Protein_EValue As String = "Protein_Expectation_Value_Log(e)"		' Only used by X!Tandem
 	Public Const SEQ_PROT_MAP_COLUMN_Protein_Intensity As String = "Protein_Intensity_Log(I)"			' Only used by X!Tandem
+
+	Public Const SEQ_INFO_COLUMN_Unique_Seq_ID As String = "Unique_Seq_ID"
+	Public Const SEQ_INFO_COLUMN_Mod_Count As String = "Mod_Count"
+	Public Const SEQ_INFO_COLUMN_Mod_Description As String = "Mod_Description"
+	Public Const SEQ_INFO_COLUMN_Monoisotopic_Mass As String = "Monoisotopic_Mass"
+
 #End Region
 
 #Region "Module-wide variables"
@@ -18,6 +26,7 @@ Public Class clsPHRPSeqMapReader
 
 	Protected mResultToSeqMapFilename As String
 	Protected mSeqToProteinMapFilename As String
+	Protected mSeqInfoFilename As String
 
 	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 #End Region
@@ -86,6 +95,11 @@ Public Class clsPHRPSeqMapReader
 			Throw New Exception("Unable to determine SeqToProteinMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString())
 		End If
 
+		mSeqInfoFilename = clsPHRPReader.GetPHRPSeqInfoFileName(mPeptideHitResultType, mDatasetName)
+		If String.IsNullOrEmpty(mSeqInfoFilename) Then
+			Throw New Exception("Unable to determine SeqInfo filename for PeptideHitResultType: " & mPeptideHitResultType.ToString())
+		End If
+
 	End Sub
 
 	''' <summary>
@@ -93,9 +107,9 @@ Public Class clsPHRPSeqMapReader
 	''' </summary>
 	''' <param name="strInputFolderPath">Input folder path</param>
 	''' <param name="strResultToSeqMapFilename">ResultToSeqMap filename</param>
-	''' <param name="strSeqToProteinMapFilename">SeqToProteinMap filename</param>
+	''' <param name="strSeqInfoFilename">SeqInfo filename</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strInputFolderPath As String, ByVal strResultToSeqMapFilename As String, ByVal strSeqToProteinMapFilename As String)
+	Public Sub New(ByVal strInputFolderPath As String, ByVal strResultToSeqMapFilename As String, ByVal strSeqToProteinMapFilename As String, ByVal strSeqInfoFilename As String)
 		mInputFolderPath = strInputFolderPath
 		If String.IsNullOrEmpty(mInputFolderPath) Then
 			mInputFolderPath = String.Empty
@@ -113,45 +127,63 @@ Public Class clsPHRPSeqMapReader
 
 		mResultToSeqMapFilename = strResultToSeqMapFilename
 		mSeqToProteinMapFilename = strSeqToProteinMapFilename
+		mSeqInfoFilename = strSeqInfoFilename
 
 	End Sub
 
 	''' <summary>
 	''' Load the mapping between ResultID and Protein Name
 	''' </summary>
-	''' <param name="objResultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
-	''' ''' <param name="objSeqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are Protein Name</param>
+	''' <param name="lstResultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
+	''' <param name="lstSeqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
+	''' <param name="lstSeqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
 	''' <returns>True if success, false if an error</returns>
 	''' <remarks></remarks>
 	Public Function GetProteinMapping( _
-	 ByRef objResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of Integer)), _
-	 ByRef objSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))) As Boolean
+	  ByRef lstResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, Integer), _
+	  ByRef lstSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo)), _
+	  ByRef lstSeqInfo As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)) As Boolean
 
 		Dim blnSuccess As Boolean
 
 		' Note: do not put a Try/Catch handler in this function
 		'       Instead, allow LoadResultToSeqMapping or LoadSeqToProteinMapping to raise exceptions
 
-		If objResultToSeqMap Is Nothing Then
-			objResultToSeqMap = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of Integer))
+		If lstResultToSeqMap Is Nothing Then
+			lstResultToSeqMap = New System.Collections.Generic.SortedList(Of Integer, Integer)
 		Else
-			objResultToSeqMap.Clear()
+			lstResultToSeqMap.Clear()
 		End If
 
-		If objSeqToProteinMap Is Nothing Then
-			objSeqToProteinMap = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
+		If lstSeqToProteinMap Is Nothing Then
+			lstSeqToProteinMap = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))
 		Else
-			objSeqToProteinMap.Clear()
+			lstSeqToProteinMap.Clear()
+		End If
+
+		If lstSeqInfo Is Nothing Then
+			lstSeqInfo = New System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)
+		Else
+			lstSeqInfo.Clear()
 		End If
 
 		If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
 			blnSuccess = False
 		Else
-			blnSuccess = LoadResultToSeqMapping(System.IO.Path.Combine(mInputFolderPath, mResultToSeqMapFilename), objResultToSeqMap)
+			blnSuccess = LoadResultToSeqMapping(System.IO.Path.Combine(mInputFolderPath, mResultToSeqMapFilename), lstResultToSeqMap)			
 		End If
 
-		If blnSuccess AndAlso Not String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
-			blnSuccess = LoadSeqToProteinMapping(System.IO.Path.Combine(mInputFolderPath, mSeqToProteinMapFilename), objSeqToProteinMap)
+		If blnSuccess Then
+			If Not String.IsNullOrEmpty(mSeqInfoFilename) Then
+				blnSuccess = LoadSeqInfo(System.IO.Path.Combine(mInputFolderPath, mSeqInfoFilename), lstSeqInfo)
+			End If
+
+			If Not String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
+				blnSuccess = LoadSeqToProteinMapping(System.IO.Path.Combine(mInputFolderPath, mSeqToProteinMapFilename), lstSeqToProteinMap)
+			Else
+				blnSuccess = False
+			End If
+
 		End If
 
 		Return blnSuccess
@@ -162,18 +194,16 @@ Public Class clsPHRPSeqMapReader
 	''' Load the Result to Seq mapping using the specified PHRP result file
 	''' </summary>
 	''' <param name="strFilePath"></param>
-	''' <param name="objResultToSeqMap"></param>
+	''' <param name="lstResultToSeqMap"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadResultToSeqMapping(ByVal strFilePath As String, ByRef objResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of Integer))) As Boolean
+	Protected Function LoadResultToSeqMapping(ByVal strFilePath As String, ByRef lstResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, Integer)) As Boolean
 
 		Dim strLineIn As String
 		Dim strSplitLine() As String
 
 		Dim intResultID As Integer
 		Dim intSeqID As Integer
-
-		Dim lstSeqIDs As System.Collections.Generic.List(Of Integer) = Nothing
 
 		Try
 
@@ -193,17 +223,9 @@ Public Class clsPHRPSeqMapReader
 							If Integer.TryParse(strSplitLine(0), intResultID) Then
 								If Integer.TryParse(strSplitLine(1), intSeqID) Then
 
-									If objResultToSeqMap.TryGetValue(intResultID, lstSeqIDs) Then
-										If Not lstSeqIDs.Contains(intSeqID) Then
-											lstSeqIDs.Add(intSeqID)
-											objResultToSeqMap(intResultID) = lstSeqIDs
-										End If
-									Else
-										lstSeqIDs = New System.Collections.Generic.List(Of Integer)
-										lstSeqIDs.Add(intSeqID)
-										objResultToSeqMap.Add(intResultID, lstSeqIDs)
+									If Not lstResultToSeqMap.ContainsKey(intResultID) Then
+										lstResultToSeqMap.Add(intResultID, intSeqID)
 									End If
-
 								End If
 							End If
 
@@ -222,26 +244,106 @@ Public Class clsPHRPSeqMapReader
 
 	End Function
 
-	''' <summary>
-	''' Load the Sequence to Protein mapping using the specified PHRP result file
-	''' </summary>
-	''' <param name="strFilePath"></param>
-	''' <param name="objSeqToProteinMap"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Function LoadSeqToProteinMapping(ByVal strFilePath As String, _
-	  ByRef objSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))) As Boolean
-
-		Dim lstProteins As System.Collections.Generic.List(Of String) = Nothing
+	Protected Function LoadSeqInfo(ByVal strFilePath As String, ByRef lstSeqInfo As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)) As Boolean
 
 		Dim objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
 
 		Dim strLineIn As String
 		Dim strSplitLine() As String
 
-		Dim strProtein As String
-
 		Dim intSeqID As Integer
+		Dim intModCount As Integer
+		Dim strModDescription As String
+		Dim dblMonoisotopicMass As Double
+
+		Dim blnHeaderLineParsed As Boolean
+		Dim blnSkipLine As Boolean
+
+		Try
+
+			' Initialize the column mapping
+			' Using a case-insensitive comparer
+			objColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+
+			' Define the default column mapping
+			objColumnHeaders.Add(SEQ_INFO_COLUMN_Unique_Seq_ID, 0)
+			objColumnHeaders.Add(SEQ_INFO_COLUMN_Mod_Count, 1)
+			objColumnHeaders.Add(SEQ_INFO_COLUMN_Mod_Description, 2)
+			objColumnHeaders.Add(SEQ_INFO_COLUMN_Monoisotopic_Mass, 3)
+
+			' Read the data from the sequence info file
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+
+				Do While srInFile.Peek >= 0
+					strLineIn = srInFile.ReadLine
+					blnSkipLine = False
+
+					If Not String.IsNullOrEmpty(strLineIn) Then
+						strSplitLine = strLineIn.Split(ControlChars.Tab)
+
+						If Not blnHeaderLineParsed Then
+							If strSplitLine(0).ToLower() = SEQ_INFO_COLUMN_Unique_Seq_ID.ToLower() Then
+								' Parse the header line to confirm the column ordering
+								clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
+								blnSkipLine = True
+							End If
+
+							blnHeaderLineParsed = True
+						End If
+
+						If Not blnSkipLine AndAlso strSplitLine.Length >= 3 Then
+
+							If Integer.TryParse(strSplitLine(0), intSeqID) Then
+
+								intModCount = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Mod_Count, objColumnHeaders, 0)
+								strModDescription = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Mod_Description, objColumnHeaders, String.Empty)
+								dblMonoisotopicMass = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Monoisotopic_Mass, objColumnHeaders, 0.0#)
+
+								If Not lstSeqInfo.ContainsKey(intSeqID) Then
+									lstSeqInfo.Add(intSeqID, New clsSeqInfo(intSeqID, dblMonoisotopicMass, intModCount, strModDescription))
+								End If
+
+							End If
+
+						End If
+
+					End If
+				Loop
+
+			End Using
+
+		Catch ex As Exception
+			Throw New Exception("Exception loading Seq Info from " & System.IO.Path.GetFileName(strFilePath) & ": " & ex.Message)
+		End Try
+
+		Return True
+
+
+	End Function
+
+	''' <summary>
+	''' Load the Sequence to Protein mapping using the specified PHRP result file
+	''' </summary>
+	''' <param name="strFilePath"></param>
+	''' <param name="lstSeqToProteinMap"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function LoadSeqToProteinMapping(ByVal strFilePath As String, _
+	  ByRef lstSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))) As Boolean
+
+		Dim lstProteins As System.Collections.Generic.List(Of clsProteinInfo) = Nothing
+
+		Dim objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
+
+		Dim strLineIn As String
+		Dim strSplitLine() As String
+
+		Dim objProteinInfo As clsProteinInfo
+
+		Dim strProteinName As String
+		Dim intSeqID As Integer
+		Dim eCleavageState As ePeptideCleavageStateConstants
+		Dim eTerminusState As ePeptideTerminusStateConstants
 
 		Dim blnHeaderLineParsed As Boolean
 		Dim blnSkipLine As Boolean
@@ -284,19 +386,23 @@ Public Class clsPHRPSeqMapReader
 
 							If Integer.TryParse(strSplitLine(0), intSeqID) Then
 
-								strProtein = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, objColumnHeaders, String.Empty)
+								strProteinName = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, objColumnHeaders, String.Empty)
 
-								If Not String.IsNullOrEmpty(strProtein) Then
+								If Not String.IsNullOrEmpty(strProteinName) Then
 
-									If objSeqToProteinMap.TryGetValue(intSeqID, lstProteins) Then
-										If Not lstProteins.Contains(strProtein) Then
-											lstProteins.Add(strProtein)
-											objSeqToProteinMap(intSeqID) = lstProteins
-										End If
+									eCleavageState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, objColumnHeaders, 0), ePeptideCleavageStateConstants)
+									eTerminusState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, objColumnHeaders, 0), ePeptideTerminusStateConstants)
+
+									objProteinInfo = New clsProteinInfo(strProteinName, intSeqID, eCleavageState, eTerminusState)
+
+									If lstSeqToProteinMap.TryGetValue(intSeqID, lstProteins) Then
+										' Sequence already exists in lstSeqToProteinMap; add the new protein info
+										lstProteins.Add(objProteinInfo)
 									Else
-										lstProteins = New System.Collections.Generic.List(Of String)
-										lstProteins.Add(strProtein)
-										objSeqToProteinMap.Add(intSeqID, lstProteins)
+										' New Sequence ID
+										lstProteins = New System.Collections.Generic.List(Of clsProteinInfo)
+										lstProteins.Add(objProteinInfo)
+										lstSeqToProteinMap.Add(intSeqID, lstProteins)
 									End If
 
 								End If
@@ -317,7 +423,5 @@ Public Class clsPHRPSeqMapReader
 		Return True
 
 	End Function
-
-
 
 End Class
