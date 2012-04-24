@@ -92,6 +92,23 @@ PeptideHitResultsProcessor
  </summary>
 	<returns></returns>
 	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsModificationDefinition.CanAffectPeptideOrProteinTerminus">
+	<summary>
+ Returns True if this modification can affect the peptide or protein terminus
+ Note that some modifications can affect either peptide teriminii or internal residues
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PeptideHitResultsProcessor.clsPeptideModificationContainer.AddModification(PeptideHitResultsProcessor.clsModificationDefinition,System.Boolean)">
+	<summary>
+ Add objModificationDefinition to mModifications
+ However, do not add if a duplicate modification
+ Furthermore, if everything matches except for .TargetResidues, then add the new target residues to the existing, matching mod
+ </summary>
+	<param name="objModificationDefinition"></param>
+	<param name="blnUseNextAvailableModificationSymbol"></param>
+	<returns>The index of the newly added modification, or the the index of the modification that objModificationDefinition matches </returns>
+	<remarks></remarks>
 </member><member name="M:PeptideHitResultsProcessor.clsPHRPBaseClass.GetColumnValue(System.String[]@,System.Int32,System.String@)">
 	<summary>
  If intColumnIndex is &gt;= 0 then updates strValue with the value at strSplitLine(intColumnIndex)
@@ -576,6 +593,7 @@ PeptideHitResultsProcessor
 	<param name="strLine">The name of the string to be parse.</param>
 	<param name="doc">The name of the System.Xml.XmlDocument.</param>
 	<returns>True if success, false if not a recognized line format</returns>
+	<remarks>Returns True for blank lines</remarks>
 </member><member name="P:PeptideHitResultsProcessor.XmlSettingsFileAccessor.XMLFileReader.OutputFilename">
 	<summary>It Sets or Gets the output file name.</summary>
 </member><member name="M:PeptideHitResultsProcessor.XmlSettingsFileAccessor.XMLFileReader.Save">

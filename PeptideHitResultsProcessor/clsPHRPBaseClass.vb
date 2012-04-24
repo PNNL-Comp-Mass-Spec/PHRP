@@ -24,6 +24,8 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
+Imports PeptideHitResultsProcessor.clsPeptideCleavageStateCalculator
+
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
@@ -118,7 +120,7 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected mMSGFDBSynopsisFilePValueThreshold As Single		' Only used by clsMSGFDBResultsProcessor; note that lower p-values are higher confidence results
 	Protected mMSGFDBSynopsisFileSpecProbThreshold As Single	' Only used by clsMSGFDBResultsProcessor; note that lower SpecProb values are higher confidence results
 
-	Protected mEnzymeMatchSpec As clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType
+	Protected mEnzymeMatchSpec As udtEnzymeMatchSpecType
 	Protected mPeptideNTerminusMassChange As Double				' This is ignored if equal to 0; typical non-zero value is 1.0078246
 	Protected mPeptideCTerminusMassChange As Double				' This is ignored if equal to 0; typical non-zero value is 17.0027387
 
@@ -199,11 +201,11 @@ Public MustInherit Class clsPHRPBaseClass
 		End Set
 	End Property
 
-	Public Property EnzymeMatchSpec() As clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType
+	Public Property EnzymeMatchSpec() As udtEnzymeMatchSpecType
 		Get
 			Return mEnzymeMatchSpec
 		End Get
-		Set(ByVal Value As clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType)
+		Set(ByVal Value As udtEnzymeMatchSpecType)
 			mEnzymeMatchSpec = Value
 		End Set
 	End Property
@@ -536,12 +538,12 @@ Public MustInherit Class clsPHRPBaseClass
 			.ProteinSeqResidueNumberStart = 1
 			.ProteinSeqResidueNumberEnd = 10000
 
-			If .PeptidePreResidues.Trim.EndsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST) Then
+			If .PeptidePreResidues.Trim.EndsWith(TERMINUS_SYMBOL_SEQUEST) Then
 				' The peptide is at the N-Terminus of the protein
 				.PeptideLocInProteinStart = .ProteinSeqResidueNumberStart
 				.PeptideLocInProteinEnd = .PeptideLocInProteinStart + .PeptideCleanSequence.Length - 1
 
-				If .PeptidePostResidues.Trim.Chars(0) = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST Then
+				If .PeptidePostResidues.Trim.Chars(0) = TERMINUS_SYMBOL_SEQUEST Then
 					' The peptide spans the entire length of the protein
 					.ProteinSeqResidueNumberEnd = .PeptideLocInProteinEnd
 				Else
@@ -550,7 +552,7 @@ Public MustInherit Class clsPHRPBaseClass
 						.ProteinSeqResidueNumberEnd = .PeptideLocInProteinEnd + 1
 					End If
 				End If
-			ElseIf .PeptidePostResidues.Trim.StartsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST) Then
+			ElseIf .PeptidePostResidues.Trim.StartsWith(TERMINUS_SYMBOL_SEQUEST) Then
 				' The peptide is at the C-Terminus of the protein
 				.PeptideLocInProteinEnd = .ProteinSeqResidueNumberEnd
 				.PeptideLocInProteinStart = .PeptideLocInProteinEnd - .PeptideCleanSequence.Length + 1
@@ -717,7 +719,7 @@ Public MustInherit Class clsPHRPBaseClass
 		mMSGFDBSynopsisFilePValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 		mMSGFDBSynopsisFileSpecProbThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD
 
-		mEnzymeMatchSpec = clsPeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec()
+		mEnzymeMatchSpec = GetDefaultEnzymeMatchSpec()
 
 		mPeptideNTerminusMassChange = clsPeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE
 		mPeptideCTerminusMassChange = clsPeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE
@@ -788,10 +790,10 @@ Public MustInherit Class clsPHRPBaseClass
 
 	End Function
 
-	Public Shared Function IsNumber(ByVal strValue As String) As Boolean
-		Dim objFormatProvider As System.Globalization.NumberFormatInfo
+	Public Shared Function IsNumber(ByVal strValue As String) As Boolean		
+		Dim dblValue As Double
 		Try
-			Return Double.TryParse(strValue, Globalization.NumberStyles.Any, objFormatProvider, 0)
+			Return Double.TryParse(strValue, dblValue)
 		Catch ex As Exception
 			Return False
 		End Try
@@ -1000,38 +1002,34 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Protected Sub SaveModificationSummaryFile(ByVal strModificationSummaryFilePath As String)
 		Dim intIndex As Integer
-		Dim swOutFile As System.IO.StreamWriter
 
 		Try
-			swOutFile = New System.IO.StreamWriter(strModificationSummaryFilePath, False)
+			Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(strModificationSummaryFilePath, False)
 
-			' Write the header line
-			swOutFile.WriteLine("Modification_Symbol" & SEP_CHAR & _
-								"Modification_Mass" & SEP_CHAR & _
-								"Target_Residues" & SEP_CHAR & _
-								"Modification_Type" & SEP_CHAR & _
-								"Mass_Correction_Tag" & SEP_CHAR & _
-								"Occurence_Count")
+				' Write the header line
+				swOutFile.WriteLine("Modification_Symbol" & SEP_CHAR & _
+					 "Modification_Mass" & SEP_CHAR & _
+					 "Target_Residues" & SEP_CHAR & _
+					 "Modification_Type" & SEP_CHAR & _
+					 "Mass_Correction_Tag" & SEP_CHAR & _
+					 "Occurence_Count")
 
-			For intIndex = 0 To mPeptideMods.ModificationCount - 1
-				With mPeptideMods.GetModificationByIndex(intIndex)
-					If .OccurrenceCount > 0 OrElse Not .UnknownModAutoDefined Then
-						swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR & _
-											.ModificationMass.ToString & SEP_CHAR & _
-											.TargetResidues & SEP_CHAR & _
-											mPeptideMods.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
-											.MassCorrectionTag & SEP_CHAR & _
-											.OccurrenceCount.ToString)
-					End If
-				End With
-			Next intIndex
+				For intIndex = 0 To mPeptideMods.ModificationCount - 1
+					With mPeptideMods.GetModificationByIndex(intIndex)
+						If .OccurrenceCount > 0 OrElse Not .UnknownModAutoDefined Then
+							swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR & _
+								 .ModificationMass.ToString & SEP_CHAR & _
+								 .TargetResidues & SEP_CHAR & _
+								 mPeptideMods.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
+								 .MassCorrectionTag & SEP_CHAR & _
+								 .OccurrenceCount.ToString)
+						End If
+					End With
+				Next intIndex
+			End Using
 
 		Catch ex As Exception
-			Throw ex
-		Finally
-			If Not swOutFile Is Nothing Then
-				swOutFile.Close()
-			End If
+			Throw ex	
 		End Try
 
 	End Sub

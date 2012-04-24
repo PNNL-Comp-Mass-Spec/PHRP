@@ -203,8 +203,6 @@ Public Class clsSequestResultsProcessor
     Protected Function ParseSynopsisOrFirstHitsFile(ByVal strInputFilePath As String, Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-        Dim srDataFile As System.IO.StreamReader
-
         Dim strPreviousXCorr As String
 
         ' Note that synopsis files are normally sorted on XCorr descending, with lines
@@ -254,114 +252,112 @@ Public Class clsSequestResultsProcessor
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
-                srDataFile = New System.IO.StreamReader(strInputFilePath)
+				Using srDataFile As System.IO.StreamReader = New System.IO.StreamReader(strInputFilePath)
 
-                strErrorLog = String.Empty
-                intResultsProcessed = 0
-                blnHeaderParsed = False
+					strErrorLog = String.Empty
+					intResultsProcessed = 0
+					blnHeaderParsed = False
 
-                ' Create the output files
-                blnSuccess = MyBase.InitializeSequenceOutputFiles(strInputFilePath)
+					' Create the output files
+					blnSuccess = MyBase.InitializeSequenceOutputFiles(strInputFilePath)
 
-                ' Parse the input file
-                Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+					' Parse the input file
+					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
 
-                    strLineIn = srDataFile.ReadLine
-                    If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
+						strLineIn = srDataFile.ReadLine
+						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
-                        blnDataLine = True
+							blnDataLine = True
 
-                        If Not blnHeaderParsed Then
-                            blnSuccess = ParseSequestSynFileHeaderLine(strLineIn, intColumnMapping)
-                            If blnSuccess Then
-                                blnDataLine = False
-                            Else
-                                ' Error parsing header; assume this is a data line
-                                blnDataLine = True
-                            End If
-                            blnHeaderParsed = True
-                        End If
+							If Not blnHeaderParsed Then
+								blnSuccess = ParseSequestSynFileHeaderLine(strLineIn, intColumnMapping)
+								If blnSuccess Then
+									blnDataLine = False
+								Else
+									' Error parsing header; assume this is a data line
+									blnDataLine = True
+								End If
+								blnHeaderParsed = True
+							End If
 
-                        If blnDataLine Then
-                            blnValidSearchResult = ParseSequestResultsFileEntry(strLineIn, intColumnMapping, objSearchResult, strErrorLog)
-                        Else
-                            blnValidSearchResult = False
-                        End If
+							If blnDataLine Then
+								blnValidSearchResult = ParseSequestResultsFileEntry(strLineIn, intColumnMapping, objSearchResult, strErrorLog)
+							Else
+								blnValidSearchResult = False
+							End If
 
-                        If blnValidSearchResult Then
-                            strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.NumScans & "_" & objSearchResult.Charge & "_" & objSearchResult.PeptideMH
+							If blnValidSearchResult Then
+								strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.NumScans & "_" & objSearchResult.Charge & "_" & objSearchResult.PeptideMH
 
-                            If objSearchResult.PeptideXCorr = strPreviousXCorr Then
-                                ' New result has the same XCorr as the previous results
-                                ' See if htPeptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
+								If objSearchResult.PeptideXCorr = strPreviousXCorr Then
+									' New result has the same XCorr as the previous results
+									' See if htPeptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
 
-                                If htPeptidesFoundForXCorrLevel.ContainsKey(strKey) Then
-                                    blnFirstMatchForGroup = False
-                                Else
-                                    htPeptidesFoundForXCorrLevel.Add(strKey, 1)
-                                    blnFirstMatchForGroup = True
-                                End If
+									If htPeptidesFoundForXCorrLevel.ContainsKey(strKey) Then
+										blnFirstMatchForGroup = False
+									Else
+										htPeptidesFoundForXCorrLevel.Add(strKey, 1)
+										blnFirstMatchForGroup = True
+									End If
 
-                            Else
-                                ' New XCorr
-                                ' Reset htPeptidesFoundForScan
-                                htPeptidesFoundForXCorrLevel.Clear()
+								Else
+									' New XCorr
+									' Reset htPeptidesFoundForScan
+									htPeptidesFoundForXCorrLevel.Clear()
 
-                                ' Update strPreviousXCorr
-                                strPreviousXCorr = objSearchResult.PeptideXCorr
+									' Update strPreviousXCorr
+									strPreviousXCorr = objSearchResult.PeptideXCorr
 
-                                ' Append a new entry to htPeptidesFoundForScan
-                                htPeptidesFoundForXCorrLevel.Add(strKey, 1)
-                                blnFirstMatchForGroup = True
-                            End If
+									' Append a new entry to htPeptidesFoundForScan
+									htPeptidesFoundForXCorrLevel.Add(strKey, 1)
+									blnFirstMatchForGroup = True
+								End If
 
 
-                            blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
-                            If Not blnSuccess Then
-                                If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                                    strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'"
-                                    If Not mErrorMessage Is Nothing AndAlso mErrorMessage.Length > 0 Then
-                                        strErrorLog &= ": " & mErrorMessage
-                                        mErrorMessage = String.Empty
-                                    End If
-                                    strErrorLog &= ControlChars.NewLine
-                                End If
-                            End If
-                            MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
-                        End If
+								blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
+								If Not blnSuccess Then
+									If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+										strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'"
+										If Not mErrorMessage Is Nothing AndAlso mErrorMessage.Length > 0 Then
+											strErrorLog &= ": " & mErrorMessage
+											mErrorMessage = String.Empty
+										End If
+										strErrorLog &= ControlChars.NewLine
+									End If
+								End If
+								MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
+							End If
 
-                        ' Update the progress
-                        UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+							' Update the progress
+							UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
 
-                        intResultsProcessed += 1
-                    End If
-                Loop
+							intResultsProcessed += 1
+						End If
+					Loop
 
-                If mCreateModificationSummaryFile Then
-                    ' Create the modification summary file
-                    strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(strInputFilePath, "", FILENAME_SUFFIX_MOD_SUMMARY)
-                    SaveModificationSummaryFile(strModificationSummaryFilePath)
-                End If
+				End Using
 
-                ' Inform the user if any errors occurred
-                If strErrorLog.Length > 0 Then
-                    SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
-                    blnSuccess = False
-                Else
-                    blnSuccess = True
-                End If
+				If mCreateModificationSummaryFile Then
+					' Create the modification summary file
+					strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(strInputFilePath, "", FILENAME_SUFFIX_MOD_SUMMARY)
+					SaveModificationSummaryFile(strModificationSummaryFilePath)
+				End If
 
-            Catch ex As Exception
-                SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-                blnSuccess = False
-            Finally
-                If Not srDataFile Is Nothing Then
-                    srDataFile.Close()
-                    srDataFile = Nothing
-                End If
-                MyBase.CloseSequenceOutputFiles()
-            End Try
+				' Inform the user if any errors occurred
+				If strErrorLog.Length > 0 Then
+					SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+					blnSuccess = False
+				Else
+					blnSuccess = True
+				End If
+
+			Catch ex As Exception
+				SetErrorMessage(ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+				blnSuccess = False
+			Finally			
+				MyBase.CloseSequenceOutputFiles()
+			End Try
         Catch ex As Exception
             SetErrorMessage(ex.Message)
             SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)

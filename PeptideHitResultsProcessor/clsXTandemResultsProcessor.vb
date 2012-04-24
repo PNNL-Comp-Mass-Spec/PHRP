@@ -353,12 +353,7 @@ Public Class clsXTandemResultsProcessor
     Protected Function ParseXTandemResultsFile(ByVal strInputFilePath As String, ByVal strOutputFilePath As String, Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile
 
-        Dim srDataFile As System.IO.StreamReader = Nothing
-        Dim objXMLReader As System.Xml.XmlTextReader = Nothing
-
-        Dim swPeptideResultsFile As System.IO.StreamWriter = Nothing
-
-        Dim strModificationSummaryFilePath As String
+		Dim strModificationSummaryFilePath As String
 
         ' Note: The number of valid entries in objSearchResults() is given by intSearchResultCount; objSearchResults() is expanded but never shrunk
         ' There is a separate entry in objSearchResults() for each protein encountered
@@ -411,113 +406,105 @@ Public Class clsXTandemResultsProcessor
                 ' Open the input file and parse it
 
                 ' Initialize the stream reader and the XML Text Reader
-                srDataFile = New System.IO.StreamReader(strInputFilePath)
-                objXMLReader = New System.Xml.XmlTextReader(srDataFile)
-                strErrorLog = String.Empty
-                intResultsProcessed = 0
+				Using srDataFile As System.IO.StreamReader = New System.IO.StreamReader(strInputFilePath)
+					Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(srDataFile)
+						strErrorLog = String.Empty
+						intResultsProcessed = 0
 
-                ' Create the output file
-                swPeptideResultsFile = New System.IO.StreamWriter(strOutputFilePath, False)
+						' Create the output file
+						Using swPeptideResultsFile As System.IO.StreamWriter = New System.IO.StreamWriter(strOutputFilePath, False)
 
-                ' Write the header line to swPeptideResultsFile
-                swPeptideResultsFile.WriteLine( _
-                                    "Result_ID" & SEP_CHAR & _
-                                    "Group_ID" & SEP_CHAR & _
-                                    "Scan" & SEP_CHAR & _
-                                    "Charge" & SEP_CHAR & _
-                                    "Peptide_MH" & SEP_CHAR & _
-                                    "Peptide_Hyperscore" & SEP_CHAR & _
-                                    "Peptide_Expectation_Value_Log(e)" & SEP_CHAR & _
-                                    "Multiple_Protein_Count" & SEP_CHAR & _
-                                    "Peptide_Sequence" & SEP_CHAR & _
-                                    "DeltaCn2" & SEP_CHAR & _
-                                    "y_score" & SEP_CHAR & _
-                                    "y_ions" & SEP_CHAR & _
-                                    "b_score" & SEP_CHAR & _
-                                    "b_ions" & SEP_CHAR & _
-                                    "Delta_Mass" & SEP_CHAR & _
-                                    "Peptide_Intensity_Log(I)" & SEP_CHAR & _
-                                    "DelM_PPM")
+							' Write the header line to swPeptideResultsFile
+							swPeptideResultsFile.WriteLine( _
+							  "Result_ID" & SEP_CHAR & _
+							  "Group_ID" & SEP_CHAR & _
+							  "Scan" & SEP_CHAR & _
+							  "Charge" & SEP_CHAR & _
+							  "Peptide_MH" & SEP_CHAR & _
+							  "Peptide_Hyperscore" & SEP_CHAR & _
+							  "Peptide_Expectation_Value_Log(e)" & SEP_CHAR & _
+							  "Multiple_Protein_Count" & SEP_CHAR & _
+							  "Peptide_Sequence" & SEP_CHAR & _
+							  "DeltaCn2" & SEP_CHAR & _
+							  "y_score" & SEP_CHAR & _
+							  "y_ions" & SEP_CHAR & _
+							  "b_score" & SEP_CHAR & _
+							  "b_ions" & SEP_CHAR & _
+							  "Delta_Mass" & SEP_CHAR & _
+							  "Peptide_Intensity_Log(I)" & SEP_CHAR & _
+							  "DelM_PPM")
 
-                ' Create the additional output files
-                blnSuccess = MyBase.InitializeSequenceOutputFiles(strOutputFilePath)
+							' Create the additional output files
+							blnSuccess = MyBase.InitializeSequenceOutputFiles(strOutputFilePath)
 
-                ' Parse the input file
-                eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile
+							' Parse the input file
+							eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile
 
-                Do While objXMLReader.Read() And Not MyBase.AbortProcessing
+							Do While objXMLReader.Read() And Not MyBase.AbortProcessing
 
-                    XMLTextReaderSkipWhitespace(objXMLReader)
-                    If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
+								XMLTextReaderSkipWhitespace(objXMLReader)
+								If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
 
-                    If objXMLReader.Depth < 2 Then
-                        If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
-                            Select Case objXMLReader.Name.ToLower
-                                Case XTANDEM_XML_ELEMENT_NAME_GROUP
-                                    If objXMLReader.HasAttributes Then
-                                        ' Cache the XML reader depth before reading any of the element's attributes
-                                        intGroupElementReaderDepth = objXMLReader.Depth
+								If objXMLReader.Depth < 2 Then
+									If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
+										Select Case objXMLReader.Name.ToLower
+											Case XTANDEM_XML_ELEMENT_NAME_GROUP
+												If objXMLReader.HasAttributes Then
+													' Cache the XML reader depth before reading any of the element's attributes
+													intGroupElementReaderDepth = objXMLReader.Depth
 
-                                        ' See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
-                                        strCurrentGroupType = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty)
-                                        If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL Then
-                                            eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults
+													' See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
+													strCurrentGroupType = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty)
+													If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL Then
+														eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults
 
-                                            blnSuccess = ParseXTandemResultsFileEntry(objXMLReader, swPeptideResultsFile, intSearchResultCount, objSearchResults, strErrorLog, intGroupElementReaderDepth)
-                                            intResultsProcessed += 1
+														blnSuccess = ParseXTandemResultsFileEntry(objXMLReader, swPeptideResultsFile, intSearchResultCount, objSearchResults, strErrorLog, intGroupElementReaderDepth)
+														intResultsProcessed += 1
 
-                                            ' Update the progress
-                                            UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
-                                        End If
-                                    Else
-                                        ' Group doesn't have any attributes; ignore it
-                                        objXMLReader.Skip()
-                                    End If
+														' Update the progress
+														UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+													End If
+												Else
+													' Group doesn't have any attributes; ignore it
+													objXMLReader.Skip()
+												End If
 
-                                Case XTANDEM_XML_ROOT_ELEMENT
-                                    eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.Start
-                            End Select
-                        End If
-                    End If
-                Loop
+											Case XTANDEM_XML_ROOT_ELEMENT
+												eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.Start
+										End Select
+									End If
+								End If
+							Loop
 
-                If eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile Then
-                    mErrorMessage = "Root element '" & XTANDEM_XML_ROOT_ELEMENT & "' not found in the input file: " & ControlChars.NewLine & strInputFilePath
-                Else
-                    If mCreateModificationSummaryFile Then
-                        ' Create the modification summary file
-                        strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(strOutputFilePath, "", FILENAME_SUFFIX_MOD_SUMMARY)
-                        SaveModificationSummaryFile(strModificationSummaryFilePath)
-                    End If
+						End Using
+					End Using
+				End Using
 
-                    ' Inform the user if any errors occurred
-                    If strErrorLog.Length > 0 Then
-                        SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
-                    End If
+				If eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile Then
+					mErrorMessage = "Root element '" & XTANDEM_XML_ROOT_ELEMENT & "' not found in the input file: " & ControlChars.NewLine & strInputFilePath
+				Else
+					If mCreateModificationSummaryFile Then
+						' Create the modification summary file
+						strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(strOutputFilePath, "", FILENAME_SUFFIX_MOD_SUMMARY)
+						SaveModificationSummaryFile(strModificationSummaryFilePath)
+					End If
 
-                End If
+					' Inform the user if any errors occurred
+					If strErrorLog.Length > 0 Then
+						SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+					End If
 
-                blnSuccess = True
+				End If
 
-            Catch ex As Exception
-                SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-                blnSuccess = False
-            Finally
-                If Not objXMLReader Is Nothing Then
-                    objXMLReader.Close()
-                    objXMLReader = Nothing
-                End If
-                If Not srDataFile Is Nothing Then
-                    srDataFile.Close()
-                    srDataFile = Nothing
-                End If
-                If Not swPeptideResultsFile Is Nothing Then
-                    swPeptideResultsFile.Close()
-                    swPeptideResultsFile = Nothing
-                End If
-                MyBase.CloseSequenceOutputFiles()
-            End Try
+				blnSuccess = True
+
+			Catch ex As Exception
+				SetErrorMessage(ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+				blnSuccess = False
+			Finally
+				MyBase.CloseSequenceOutputFiles()
+			End Try
         Catch ex As Exception
             SetErrorMessage(ex.Message)
             SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
@@ -563,7 +550,7 @@ Public Class clsXTandemResultsProcessor
 
         ' Scan: <xsl:value-of select="substring-before(concat(substring-after(./group/note,'scan='),' '), ' ')" />
 
-        Dim strGroupIDInXMLFile As String
+		Dim strGroupIDInXMLFile As String = String.Empty
         Dim strCurrentGroupType As String = String.Empty
         Dim strCurrentGroupLabel As String = String.Empty
 
@@ -989,9 +976,6 @@ Public Class clsXTandemResultsProcessor
 
         Const GROUP_LABEL_INPUT_PARAMETERS As String = "input parameters"
 
-        Dim srDataFile As System.IO.StreamReader
-        Dim objXMLReader As System.Xml.XmlTextReader
-
         Dim eCurrentXMLDataFileSection As eCurrentXMLDataFileSectionConstants
 
         Dim strCurrentGroupType As String
@@ -1004,70 +988,67 @@ Public Class clsXTandemResultsProcessor
         Try
             ' Open the input file and parse it
             ' Initialize the stream reader and the XML Text Reader
-            srDataFile = New System.IO.StreamReader(strInputFilePath)
-            objXMLReader = New System.Xml.XmlTextReader(strInputFilePath)
+			Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(strInputFilePath)
 
-            ' Parse the file
-            eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile
+				' Parse the file
+				eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile
 
-            Do While objXMLReader.Read() And Not MyBase.AbortProcessing
+				Do While objXMLReader.Read() And Not MyBase.AbortProcessing
 
-                XMLTextReaderSkipWhitespace(objXMLReader)
-                If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
+					XMLTextReaderSkipWhitespace(objXMLReader)
+					If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
 
-                If objXMLReader.Depth < 2 Then
-                    If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
-                        Select Case objXMLReader.Name.ToLower
-                            Case XTANDEM_XML_ELEMENT_NAME_GROUP
-                                If objXMLReader.HasAttributes Then
-                                    intParametersGroupDepth = objXMLReader.Depth
+					If objXMLReader.Depth < 2 Then
+						If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
+							Select Case objXMLReader.Name.ToLower
+								Case XTANDEM_XML_ELEMENT_NAME_GROUP
+									If objXMLReader.HasAttributes Then
+										intParametersGroupDepth = objXMLReader.Depth
 
-                                    ' See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_PARAMETERS
-                                    strCurrentGroupType = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty)
-                                    If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_PARAMETERS Then
-                                        eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.InputParameters
+										' See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_PARAMETERS
+										strCurrentGroupType = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty)
+										If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_PARAMETERS Then
+											eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.InputParameters
 
-                                        ' Read the Label for this group
-                                        strCurrentGroupLabel = XMLTextReaderGetAttributeValue(objXMLReader, "label", String.Empty)
-                                        If strCurrentGroupLabel = GROUP_LABEL_INPUT_PARAMETERS Then
-                                            ' Read the input parameters
-                                            ParseXTandemResultsFileInputParametersWork(objXMLReader, intParametersGroupDepth)
-                                        End If
-                                    Else
-                                        ' Skip this group
-                                        objXMLReader.Skip()
-                                    End If
-                                Else
-                                    ' Group doesn't have any attributes; ignore it
-                                    objXMLReader.Skip()
-                                End If
+											' Read the Label for this group
+											strCurrentGroupLabel = XMLTextReaderGetAttributeValue(objXMLReader, "label", String.Empty)
+											If strCurrentGroupLabel = GROUP_LABEL_INPUT_PARAMETERS Then
+												' Read the input parameters
+												ParseXTandemResultsFileInputParametersWork(objXMLReader, intParametersGroupDepth)
+											End If
+										Else
+											' Skip this group
+											objXMLReader.Skip()
+										End If
+									Else
+										' Group doesn't have any attributes; ignore it
+										objXMLReader.Skip()
+									End If
 
-                            Case XTANDEM_XML_ROOT_ELEMENT
-                                eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.Start
-                            Case Else
-                                ' Skip this element
-                                objXMLReader.Skip()
-                        End Select
-                    End If
-                End If
-            Loop
+								Case XTANDEM_XML_ROOT_ELEMENT
+									eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.Start
+								Case Else
+									' Skip this element
+									objXMLReader.Skip()
+							End Select
+						End If
+					End If
+				Loop
 
-            If eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile Then
-                SetErrorMessage("Root element '" & XTANDEM_XML_ROOT_ELEMENT & "' not found in the input file: " & strInputFilePath)
-                blnSuccess = False
-            Else
-                blnSuccess = True
-            End If
+			End Using
 
-        Catch ex As Exception
-            SetErrorMessage(ex.Message)
-            SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
-            blnSuccess = False
-        Finally
-            If Not objXMLReader Is Nothing Then
-                objXMLReader.Close()
-            End If
-        End Try
+			If eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile Then
+				SetErrorMessage("Root element '" & XTANDEM_XML_ROOT_ELEMENT & "' not found in the input file: " & strInputFilePath)
+				blnSuccess = False
+			Else
+				blnSuccess = True
+			End If
+
+		Catch ex As Exception
+			SetErrorMessage(ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
+			blnSuccess = False
+		End Try
 
         Return blnSuccess
     End Function

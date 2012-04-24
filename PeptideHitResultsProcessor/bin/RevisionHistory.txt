@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.4496; April 23, 2012
+	- Now tracking search result modifications using a generic list of clsAminoAcidModInfo objects instead of an array of structs
+	- Updated file readers to use Using / End Using
+
 Version 1.4.4349; November 28, 2011
 	- Now writing out a separate entry to the synopsis or first-hits file for each scan involved in a merged result reported by MSGFDB
 		- Removed column ScanCount from the _msgfdb_syn.txt and _msgfdb_fht.txt files

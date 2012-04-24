@@ -116,6 +116,7 @@
     <Compile Include="clsPHRPBaseClass.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="clsSearchResultModInfo.vb" />
     <Compile Include="clsSearchResultsBaseClass.vb">
       <SubType>Code</SubType>
     </Compile>

@@ -25,6 +25,8 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
+Imports PeptideHitResultsProcessor.clsPeptideModificationContainer
+
 Public Class clsModificationDefinition
 
 #Region "Constants and Enums"
@@ -288,13 +290,62 @@ Public Class clsModificationDefinition
 
     End Function
 
+	''' <summary>
+	''' Returns True if this modification can affect the peptide or protein terminus
+	''' Note that some modifications can affect either peptide teriminii or internal residues
+	''' </summary>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Function CanAffectPeptideOrProteinTerminus() As Boolean
+		Static chTerminalSymbols As Char() = New Char() {N_TERMINAL_PROTEIN_SYMBOL_DMS, N_TERMINAL_PEPTIDE_SYMBOL_DMS, C_TERMINAL_PROTEIN_SYMBOL_DMS, C_TERMINAL_PEPTIDE_SYMBOL_DMS}
+
+		If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
+			Return True
+		Else
+			If mTargetResidues.IndexOfAny(chTerminalSymbols) >= 0 Then
+				Return True
+			Else
+				Return False
+			End If
+		End If
+	End Function
+
+	Public Function CanAffectPeptideResidues() As Boolean
+		Static chTerminalSymbols As Char() = New Char() {N_TERMINAL_PROTEIN_SYMBOL_DMS, N_TERMINAL_PEPTIDE_SYMBOL_DMS, C_TERMINAL_PROTEIN_SYMBOL_DMS, C_TERMINAL_PEPTIDE_SYMBOL_DMS}
+		Dim blnTerminalCharFound As Boolean
+
+		If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
+			Return False
+		Else
+			If String.IsNullOrEmpty(mTargetResidues) Then
+				Return True
+			Else
+				For Each chChar As Char In mTargetResidues
+					blnTerminalCharFound = False
+					For Each chTerminalChar As Char In chTerminalSymbols
+						If chChar = chTerminalChar Then
+							blnTerminalCharFound = True
+						End If
+					Next
+
+					If Not blnTerminalCharFound Then
+						Return True
+					End If
+				Next
+			End If
+
+			Return False
+		End If
+
+	End Function
+
     Public Function TargetResiduesContain(ByVal chComparisonResidue As Char) As Boolean
-        If chComparisonResidue = Nothing Then
-            Return False
-        ElseIf Me.TargetResidues.IndexOf(chComparisonResidue) >= 0 Then
-            Return True
-        Else
-            Return False
-        End If
+		If chComparisonResidue = Nothing Then
+			Return False
+		ElseIf Me.TargetResidues.IndexOf(chComparisonResidue) >= 0 Then
+			Return True
+		Else
+			Return False
+		End If
     End Function
 End Class
