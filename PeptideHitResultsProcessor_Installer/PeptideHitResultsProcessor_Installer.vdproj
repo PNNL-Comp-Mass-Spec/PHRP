@@ -51,6 +51,18 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_97D88C1C66E31EDEFE5922634F3ED8F3"
+        "OwnerKey" = "8:_B98DE38250D536BD6E51037EF3C554AC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_97D88C1C66E31EDEFE5922634F3ED8F3"
+        "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_ADA297E1FC1D43E1ADE28011C2437192"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -71,6 +83,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_B98DE38250D536BD6E51037EF3C554AC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_97D88C1C66E31EDEFE5922634F3ED8F3"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -100,6 +118,11 @@
             "ComponentsUrl" = "8:"
                 "Items"
                 {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.0"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.0"
+                    }
                     "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
                     {
                     "Name" = "8:Windows Installer 3.1"
@@ -165,7 +188,7 @@
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
-                "FrameworkVersion" = "8:3.5.21022 "
+                "FrameworkVersion" = "8:.NETFramework,Version=v4.0"
                 "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=9832"
                 "SupportedRuntimes" = "8:1.1.4322"
@@ -274,6 +297,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_97D88C1C66E31EDEFE5922634F3ED8F3"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:PHRPReader, Version=1.1.4497.25011, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_97D88C1C66E31EDEFE5922634F3ED8F3"
+                    {
+                    "Name" = "8:PHRPReader.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:PHRPReader.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_5AB1A6DB5284425792AD22627243D745"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_ADA297E1FC1D43E1ADE28011C2437192"
             {
             "SourcePath" = "8:..\\bin\\RevisionHistory.txt"
@@ -298,7 +352,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PeptideHitResultsProcessor, Version=1.4.4286.33833, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:PeptideHitResultsProcessor, Version=1.5.4497.25241, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_B98DE38250D536BD6E51037EF3C554AC"
@@ -393,7 +447,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PeptideHitResultsProcessor"
         "ProductCode" = "8:{4B0107BF-02E1-4461-B463-88ECC2BFB3B5}"
-        "PackageCode" = "8:{706E395E-5CB4-4086-9A4E-E494417EF87D}"
+        "PackageCode" = "8:{F492BA20-F30E-4EC5-AF3F-4381D0E1D258}"
         "UpgradeCode" = "8:{36FC1927-8EED-476F-8562-582B0F670156}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -928,7 +982,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_143896B4B2674148A9CA18F46E344A91"
             {
-            "SourcePath" = "8:..\\obj\\Debug\\PeptideHitResultsProcRunner.exe"
+            "SourcePath" = "8:..\\obj\\x86\\Debug\\PeptideHitResultsProcRunner.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_5AB1A6DB5284425792AD22627243D745"

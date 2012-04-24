@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.4497; April 24, 2012
+	- Updated use PHRPReader for classes clsAminoAcidModInfo and clsModificationDefinition
+
 Version 1.5.4496; April 23, 2012
 	- Now tracking search result modifications using a generic list of clsAminoAcidModInfo objects instead of an array of structs
 	- Updated file readers to use Using / End Using
