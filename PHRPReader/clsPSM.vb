@@ -10,6 +10,8 @@
 
 Option Strict On
 
+Imports PeptideHitResultsProcessor.clsPeptideModificationContainer
+
 Public Class clsPSM
 
 	' Note: Be sure to update the Clone() function if you add new class-wide variables
@@ -20,6 +22,8 @@ Public Class clsPSM
 	Protected mPeptide As String					' Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
 	Protected mPeptideWithNumericMods As String		' Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
 	Protected mPeptideCleanSequence As String
+
+	Protected mModifiedPeptideResidues As System.Collections.Generic.List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)
 
 	Protected mCharge As Short
 	Protected mCollisionMode As String		' CID, ETD, HCD, or n/a
@@ -102,6 +106,12 @@ Public Class clsPSM
 		Set(value As String)
 			mMassErrorPPM = value
 		End Set
+	End Property
+
+	Public ReadOnly Property ModifiedResidues As System.Collections.Generic.List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)
+		Get
+			Return mModifiedPeptideResidues
+		End Get
 	End Property
 
 	Public Property MSGFSpecProb As String
@@ -226,8 +236,17 @@ Public Class clsPSM
 	''' <remarks></remarks>
 	Public Sub New()
 		mProteins = New System.Collections.Generic.List(Of String)
+		mModifiedPeptideResidues = New System.Collections.Generic.List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)
 		mAdditionalScores = New System.Collections.Generic.Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
 		Me.Clear()
+	End Sub
+
+	Public Sub AddModifiedResidue(objModInfo As PeptideHitResultsProcessor.clsAminoAcidModInfo)
+		mModifiedPeptideResidues.Add(objModInfo)
+	End Sub
+
+	Public Sub AddModifiedResidue(Residue As Char, ResidueLocInPeptide As Integer, ResidueTerminusState As eResidueTerminusStateConstants, ModDefinition As PeptideHitResultsProcessor.clsModificationDefinition)
+		mModifiedPeptideResidues.Add(New PeptideHitResultsProcessor.clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition))
 	End Sub
 
 	''' <summary>
@@ -268,7 +287,12 @@ Public Class clsPSM
 		mPeptideMonoisotopicMass = 0
 
 		mProteins.Clear()
+		mModifiedPeptideResidues.Clear()
 		mAdditionalScores.Clear()
+	End Sub
+
+	Public Sub ClearModifiedResidues()
+		mModifiedPeptideResidues.Clear()
 	End Sub
 
 	''' <summary>
@@ -302,6 +326,10 @@ Public Class clsPSM
 
 			For Each strProtein In mProteins
 				.AddProtein(strProtein)
+			Next
+
+			For Each objItem In mModifiedPeptideResidues
+				.AddModifiedResidue(objItem.Residue, objItem.ResidueLocInPeptide, objItem.ResidueTerminusState, objItem.ModDefinition)
 			Next
 
 			For Each objScore As System.Collections.Generic.KeyValuePair(Of String, String) In mAdditionalScores

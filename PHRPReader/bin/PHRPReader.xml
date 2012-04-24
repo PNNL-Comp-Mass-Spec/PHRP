@@ -254,24 +254,19 @@ PHRPReader
 	<param name="strFilePath"></param>
 	<returns></returns>
 	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.ConvertModsToNumericMods(System.String,System.String@,System.Collections.Generic.List{PeptideHitResultsProcessor.clsAminoAcidModInfo}@)">
+	<summary>
+ Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
+ Note that if the _SeqInfo.txt file is available, then this function will not be used
+ </summary>
+	<returns>True if success, false if an error</returns>
+	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPHRPReader.GetModSummaryFileName(PHRPReader.clsPHRPReader.ePeptideHitResultType,System.String)">
 	<summary>
  Returns the default ModSummary file name for the given PeptideHit result type
  </summary>
 	<param name="eResultType"></param>
 	<param name="strDatasetName"></param>
-	<returns></returns>
-	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.AddDynamicAndStaticMods(System.String,System.String@)">
-	<summary>
- Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
- </summary>
-	<returns>True if success, false if an error</returns>
-	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.OpenDataFile">
-	<summary>
- Opens the data file for reading
- </summary>
 	<returns></returns>
 	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPHRPReader.IsNumber(System.String)">
@@ -317,7 +312,7 @@ PHRPReader
  </summary>
 	<returns>True if a line was read, false if not more data is available</returns>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.ReadModSummaryFile(System.String,System.Collections.Generic.SortedDictionary{System.String,System.String}@,System.Collections.Generic.SortedDictionary{System.String,System.String}@)">
+</member><member name="M:PHRPReader.clsPHRPReader.ReadModSummaryFile(System.String,System.Collections.Generic.SortedDictionary{System.Char,System.String}@,System.Collections.Generic.SortedDictionary{System.String,System.Collections.Generic.List{System.String}}@)">
 	<summary>
  Reads the data in strModSummaryFilePath.  Populates objDynamicMods and objStaticMods with the modification definitions
  </summary>
@@ -373,6 +368,14 @@ PHRPReader
 	<param name="strDatasetName">Dataset name</param>
 	<param name="strInputFilePath">Input file path</param>
 	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPParserXTandem.LoadSearchEngineParameters(System.String,PHRPReader.clsSearchEngineParameters@)">
+	<summary>
+ Parses the specified X!Tandem parameter file
+ </summary>
+	<param name="strSearchEngineParamFileName"></param>
+	<param name="objSearchEngineParams"></param>
+	<returns></returns>
+	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPHRPParserXTandem.ParsePHRPDataLine(System.String,System.Int32,PHRPReader.clsPSM@)">
 	<summary>
  Parse the data line read from a PHRP results file
@@ -387,6 +390,14 @@ PHRPReader
  </summary>
 	<param name="strDatasetName">Dataset name</param>
 	<param name="strInputFilePath">Input file path</param>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPParserSequest.LoadSearchEngineParameters(System.String,PHRPReader.clsSearchEngineParameters@)">
+	<summary>
+ Parses the specified Sequest parameter file
+ </summary>
+	<param name="strSearchEngineParamFileName"></param>
+	<param name="objSearchEngineParams"></param>
+	<returns></returns>
 	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPHRPParserSequest.ParsePHRPDataLine(System.String,System.Int32,PHRPReader.clsPSM@)">
 	<summary>
@@ -433,6 +444,11 @@ PHRPReader
 	<param name="strDatasetName">Dataset Name</param>
 	<param name="strInputFilePath">Input file path</param>
 	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPParser.LoadModSummary">
+	<summary>
+ Reads the data in strModSummaryFilePath.  Populates mModInfo with the modification names, masses, and affected residues
+ </summary>
+	<returns>True if success; false if an error</returns>
 </member><member name="M:PHRPReader.clsPHRPParser.ParseColumnHeaders(System.String[]@)">
 	<summary>
  Parse the column names in strSplitLine and update the local column header mapping
@@ -442,6 +458,7 @@ PHRPReader
 </member><member name="M:PHRPReader.clsPHRPParser.UpdatePSMUsingSeqInfo(PHRPReader.clsPSM@)">
 	<summary>
  Updates the theoretical (computed) monoisotopic mass of objPSM using mResultToSeqMap and mSeqInfo
+ Also updates the modification info
  </summary>
 	<param name="objPSM"></param>
 	<returns>True if success, False if objPSM.ResultID is not found in mResultToSeqMap</returns>
@@ -452,6 +469,14 @@ PHRPReader
  </summary>
 	<param name="strDatasetName">Dataset name</param>
 	<param name="strInputFilePath">Input file path</param>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPParserInspect.LoadSearchEngineParameters(System.String,PHRPReader.clsSearchEngineParameters@)">
+	<summary>
+ Parses the specified Inspect parameter file
+ </summary>
+	<param name="strSearchEngineParamFileName"></param>
+	<param name="objSearchEngineParams"></param>
+	<returns></returns>
 	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPHRPParserInspect.ParsePHRPDataLine(System.String,System.Int32,PHRPReader.clsPSM@)">
 	<summary>
@@ -467,6 +492,14 @@ PHRPReader
  </summary>
 	<param name="strDatasetName">Dataset name</param>
 	<param name="strInputFilePath">Input file path</param>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPParserMSGFDB.LoadSearchEngineParameters(System.String,PHRPReader.clsSearchEngineParameters@)">
+	<summary>
+ Parses the specified MSGFDB (aka MS-GF+) parameter file
+ </summary>
+	<param name="strSearchEngineParamFileName"></param>
+	<param name="objSearchEngineParams"></param>
+	<returns></returns>
 	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPHRPParserMSGFDB.ParsePHRPDataLine(System.String,System.Int32,PHRPReader.clsPSM@)">
 	<summary>
@@ -582,6 +615,13 @@ PHRPReader
 	<param name="chLeftChar"></param>
 	<param name="chRightChar"></param>
 	<returns>True if the characters match the currently defined cleavage rule</returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPHRPModSummaryReader.GetModificationMassAsText(System.String)">
+	<summary>
+ Returns the mass value associated with the given mass correction tag
+ </summary>
+	<param name="strMassCorrectionTag"></param>
+	<returns></returns>
 	<remarks></remarks>
 </member>
 </members>

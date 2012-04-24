@@ -48,7 +48,7 @@ Public Class clsPeptideModificationContainer
     Public Enum eResidueTerminusStateConstants As Integer
         None = 0                        ' The residue is in the middle of the peptide
         PeptideNTerminus = 1            ' The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
-        PeptideCTerminus = 2            ' The residue is located at the peptide's C-terminus; superseded by ProteinNTerminus if applicable
+		PeptideCTerminus = 2			' The residue is located at the peptide's C-terminus; superseded by ProteinCTerminus if applicable
         ProteinNTerminus = 3            ' The residue is located at the protein's N-terminus
         ProteinCTerminus = 4            ' The residue is located at the protein's C-terminus
         ProteinNandCCTerminus = 5       ' The protein only has one residue 
@@ -560,7 +560,7 @@ Public Class clsPeptideModificationContainer
 
 	End Function
 
-	Public Function ModificationSymbolToModificationType(ByVal chModificationTypeSymbol As Char) As clsModificationDefinition.eModificationTypeConstants
+	Public Shared Function ModificationSymbolToModificationType(ByVal chModificationTypeSymbol As Char) As clsModificationDefinition.eModificationTypeConstants
 		If chModificationTypeSymbol = Nothing Then
 			Return clsModificationDefinition.eModificationTypeConstants.UnknownType
 		Else
@@ -581,7 +581,7 @@ Public Class clsPeptideModificationContainer
 		End If
 	End Function
 
-	Public Function ModificationTypeToModificationSymbol(ByVal eModificationType As clsModificationDefinition.eModificationTypeConstants) As Char
+	Public Shared Function ModificationTypeToModificationSymbol(ByVal eModificationType As clsModificationDefinition.eModificationTypeConstants) As Char
 		Select Case eModificationType
 			Case clsModificationDefinition.eModificationTypeConstants.DynamicMod
 				Return "D"c
@@ -747,7 +747,7 @@ Public Class clsPeptideModificationContainer
 											If strSplitLine.Length >= 4 Then
 												' Store the modification type
 												If strSplitLine(3).Trim.Length = 1 Then
-													.ModificationType = ModificationSymbolToModificationType(strSplitLine(3).ToUpper.Trim.Chars(0))
+													.ModificationType = clsPeptideModificationContainer.ModificationSymbolToModificationType(strSplitLine(3).ToUpper.Trim.Chars(0))
 												End If
 
 												' If the .ModificationType is unknown, then change it to Dynamic

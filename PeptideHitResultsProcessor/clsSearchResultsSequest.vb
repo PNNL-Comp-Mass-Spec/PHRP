@@ -101,30 +101,4 @@ Public Class clsSearchResultsSequest
         End Try
     End Sub
 
-    '' Unused
-    ''Protected Overrides Sub ComputeDelMCorrected()
-
-    ''    Dim dblDelM As Double
-    ''    Dim intCorrectionCount As Integer = 0
-
-    ''    Dim dblPrecursorMonoMass As Double
-
-    ''    ' Note that mPeptideDeltaMass is the DeltaMass value reported by Sequest
-    ''    ' (it currently represents "theoretical - observed")
-    ''    If Double.TryParse(mPeptideDeltaMass, dblDelM) Then
-
-    ''        ' Negate dblDelM so that it represents observed - theoretical
-    ''        dblDelM = -dblDelM
-
-    ''        ' Compute the original value for the precursor monoisotopic mass
-    ''        dblPrecursorMonoMass = mPeptideMonoisotopicMass + dblDelM
-
-    ''        MyBase.ComputeDelMCorrectedWork(dblDelM, dblPrecursorMonoMass, True)
-
-    ''    Else
-    ''        mPeptideDeltaMassCorrectedPpm = 0
-    ''    End If
-
-    ''End Sub
-
 End Class

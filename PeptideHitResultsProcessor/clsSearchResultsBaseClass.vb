@@ -319,8 +319,8 @@ Public MustInherit Class clsSearchResultsBaseClass
 
 		If mSearchResultModifications.Count > 0 Then
 			' Insert the modification symbols into strSequenceWithMods
-			' First, sort mSearchResultModifications on .ResidueLocInPeptide
-			' Limit the sort to the first mSearchResultModifications.Count items
+			' First, sort mSearchResultModifications on .ResidueLocInPeptide and .MassCorrectionTag
+
 			If mSearchResultModifications.Count > 1 Then
 				mSearchResultModifications.Sort(New IGenericResidueModificationInfoComparer)
 			End If
@@ -395,34 +395,13 @@ Public MustInherit Class clsSearchResultsBaseClass
 
 		mSearchResultModifications.Clear()
 
-		' Old
-		'For intIndex = 0 To mSearchResultModifications.Length - 1
-		'	With mSearchResultModifications(intIndex)
-		'		.ModDefinition = Nothing
-		'		.Residue = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL
-		'		.ResidueLocInPeptide = 0
-		'		.ResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.None
-		'	End With
-		'Next intIndex
-
 	End Sub
 
-	'' Unused
-	''Protected MustOverride Sub ComputeDelMCorrected()
-
-	'' Unused
-	''Protected Sub ComputeDelMCorrectedWork(ByVal dblDelM As Double, _
-	''                                       ByVal dblPrecursorMonoMass As Double, _
-	''                                       ByVal blnAdjustPrecursorMassForC13 As Boolean)
-
-	''    mPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPublic(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, mPeptideMonoisotopicMass)
-
-	''End Sub
-
-	Public Shared Function ComputeDelMCorrectedPublic(ByVal dblDelM As Double, _
-													  ByVal dblPrecursorMonoMass As Double, _
-													  ByVal blnAdjustPrecursorMassForC13 As Boolean, _
-													  ByVal dblPeptideMonoisotopicMass As Double) As Double
+	Public Shared Function ComputeDelMCorrectedPPM( _
+	  ByVal dblDelM As Double, _
+	  ByVal dblPrecursorMonoMass As Double, _
+	  ByVal blnAdjustPrecursorMassForC13 As Boolean, _
+	  ByVal dblPeptideMonoisotopicMass As Double) As Double
 
 		Dim intCorrectionCount As Integer = 0
 
@@ -984,31 +963,6 @@ Public MustInherit Class clsSearchResultsBaseClass
 		End If
 
 	End Sub
-
-	' Unused class; deprecated in April 2012
-	'   Protected Class IResidueModificationInfoComparer
-	'       Implements System.Collections.IComparer
-
-	'       Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-	'           Dim xData As udtSearchResultModificationsType = DirectCast(x, udtSearchResultModificationsType)
-	'           Dim yData As udtSearchResultModificationsType = DirectCast(y, udtSearchResultModificationsType)
-
-	'           If xData.ResidueLocInPeptide > yData.ResidueLocInPeptide Then
-	'               Return 1
-	'           ElseIf xData.ResidueLocInPeptide < yData.ResidueLocInPeptide Then
-	'               Return -1
-	'           Else
-	'               If xData.ModDefinition.MassCorrectionTag > yData.ModDefinition.MassCorrectionTag Then
-	'                   Return 1
-	'               ElseIf xData.ModDefinition.MassCorrectionTag < yData.ModDefinition.MassCorrectionTag Then
-	'                   Return -1
-	'               Else
-	'                   Return 0
-	'               End If
-
-	'           End If
-	'       End Function
-	'End Class
 
 	Protected Class IGenericResidueModificationInfoComparer
 		Implements System.Collections.Generic.IComparer(Of clsAminoAcidModInfo)

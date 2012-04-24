@@ -10,6 +10,7 @@
 '*********************************************************************************************************
 
 Option Strict On
+Imports PeptideHitResultsProcessor.clsPeptideModificationContainer
 
 Public MustInherit Class clsPHRPParser
 
@@ -30,6 +31,9 @@ Public MustInherit Class clsPHRPParser
 
 	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 
+	Protected mModInfo As System.Collections.Generic.List(Of PeptideHitResultsProcessor.clsModificationDefinition)
+	Protected mModInfoLoaded As Boolean
+
 	Protected mResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, Integer)
 	Protected mSeqInfo As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)
 	Protected mSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))
@@ -43,6 +47,14 @@ Public MustInherit Class clsPHRPParser
 	Public Event MessageEvent(ByVal strMessage As String)
 	Public Event ErrorEvent(ByVal strErrorMessage As String)
 	Public Event WarningEvent(ByVal strWarningMessage As String)
+#End Region
+
+#Region "Properties"
+	Public ReadOnly Property PeptideHitResultType As clsPHRPReader.ePeptideHitResultType
+		Get
+			Return mPeptideHitResultType
+		End Get
+	End Property
 #End Region
 
 	''' <summary>
@@ -76,6 +88,9 @@ Public MustInherit Class clsPHRPParser
 
 		mResultIDToProteins = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
 
+		' Read the ModSummary file (if it exists)
+		mModInfoLoaded = LoadModSummary()
+
 		' Read the ResultToSeqMapInfo (if the files exist)
 		LoadSeqInfo()
 
@@ -87,6 +102,7 @@ Public MustInherit Class clsPHRPParser
 #Region "Functions overridden by derived classes"
 	Protected MustOverride Sub DefineColumnHeaders()
 	Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
+	Public MustOverride Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 #End Region
 
 	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
@@ -105,6 +121,25 @@ Public MustInherit Class clsPHRPParser
 
 	End Sub
 
+	Protected Function ConvertModsToNumericMods(ByVal strCleanSequence As String, ByRef lstModifiedResidues As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)) As String
+		Static sbNewPeptide As New System.Text.StringBuilder
+
+		sbNewPeptide.Length = 0
+
+		For intIndex = 0 To strCleanSequence.Length - 1
+			sbNewPeptide.Append(strCleanSequence.Chars(0))
+
+			For Each objModInfo In lstModifiedResidues
+				If objModInfo.ResidueLocInPeptide = intIndex + 1 Then
+					sbNewPeptide.Append(objModInfo.ModDefinition.ModificationMass.ToString("+0.00000;-0.00000"))
+				End If
+			Next
+		Next
+
+		Return sbNewPeptide.ToString()
+
+	End Function
+
 	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
 		If String.IsNullOrEmpty(strBaseMessage) Then
 			strBaseMessage = "Error"
@@ -113,12 +148,56 @@ Public MustInherit Class clsPHRPParser
 		ReportError(strBaseMessage & ": " & ex.Message)
 	End Sub
 
+	''' <summary>
+	''' Reads the data in strModSummaryFilePath.  Populates mModInfo with the modification names, masses, and affected residues
+	''' </summary>
+	''' <returns>True if success; false if an error</returns>
+	Protected Function LoadModSummary() As Boolean
+
+		Dim objModSummaryReader As clsPHRPModSummaryReader
+
+		Dim strModSummaryFilePath As String
+
+		Dim blnSuccess As Boolean
+
+		Try
+			strModSummaryFilePath = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName)
+			If String.IsNullOrEmpty(strModSummaryFilePath) Then
+				ReportError("ModSummaryFile path is empty; unable to continue")
+				Return False
+			End If
+
+			If Not System.IO.File.Exists(strModSummaryFilePath) Then
+				ReportError("ModSummaryFile not found: " & strModSummaryFilePath)
+				Return False
+			End If
+
+			ShowMessage("Reading the PHRP ModSummary file")
+
+			objModSummaryReader = New clsPHRPModSummaryReader(strModSummaryFilePath)
+			blnSuccess = objModSummaryReader.Success
+
+			If blnSuccess Then
+				mModInfo = objModSummaryReader.ModificationDefs			
+			End If
+
+		Catch ex As Exception
+			HandleException("Exception reading PHRP Mod Summary file", ex)
+			Return False
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
 	Protected Function LoadSeqInfo() As Boolean
 
 		Dim blnSuccess As Boolean
 		Dim objReader As clsPHRPSeqMapReader
 
 		Try
+
+			ShowMessage("Reading the PHRP SeqInfo file")
 
 			' Instantiate the reader
 			objReader = New clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType)
@@ -193,6 +272,7 @@ Public MustInherit Class clsPHRPParser
 
 	''' <summary>
 	''' Updates the theoretical (computed) monoisotopic mass of objPSM using mResultToSeqMap and mSeqInfo
+	''' Also updates the modification info
 	''' </summary>
 	''' <param name="objPSM"></param>
 	''' <returns>True if success, False if objPSM.ResultID is not found in mResultToSeqMap</returns>
@@ -201,16 +281,130 @@ Public MustInherit Class clsPHRPParser
 		Dim intSeqID As Integer
 		Dim objSeqInfo As clsSeqInfo = Nothing
 
+		Dim strMods() As String
+		Dim strModDetails() As String
+
+		Dim strMassCorrectionTag As String
+		Dim intResidueLoc As Integer
+		Dim intPeptideResidueCount As Integer
+
+		Dim eResidueTerminusState As eResidueTerminusStateConstants
+
+		Dim objMatchedModDef As PeptideHitResultsProcessor.clsModificationDefinition = Nothing
+		Dim blnMatchFound As Boolean
+
+		Dim blnFavorTerminalMods As Boolean
+		Dim blnSuccess As Boolean
+
+		intPeptideResidueCount = objPSM.PeptideCleanSequence.Length
+		blnSuccess = False
+
+		' First determine the modified residues present in this peptide
 		If mResultToSeqMap.TryGetValue(objPSM.ResultID, intSeqID) Then
 			If mSeqInfo.TryGetValue(intSeqID, objSeqInfo) Then
 				objPSM.PeptideMonoisotopicMass = objSeqInfo.MonoisotopicMass
 
-				' ToDo: parse objSeqInfo.ModDescription and store the specific mods in objPSM
-				Return True
+				objPSM.ClearModifiedResidues()
+
+				If objSeqInfo.ModCount > 0 Then
+					' Split objSeqInfo.ModDescription on the comma character
+					strMods = objSeqInfo.ModDescription.Split(","c)
+
+					If Not strMods Is Nothing AndAlso strMods.Count > 0 Then
+						For intModIndex As Integer = 0 To strMods.Count - 1
+
+							' Split strMods on the colon characters
+							strModDetails = strMods(intModIndex).Split(":"c)
+
+							If Not strModDetails Is Nothing AndAlso strModDetails.Count = 2 Then
+								strMassCorrectionTag = strModDetails(0)
+								If Integer.TryParse(strModDetails(1), intResidueLoc) Then
+									' Find the modification definition in mModInfo
+									' Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
+									' Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
+
+									If intResidueLoc = 1 Then
+										eResidueTerminusState = eResidueTerminusStateConstants.PeptideNTerminus
+										blnFavorTerminalMods = True
+									ElseIf intResidueLoc = intPeptideResidueCount Then
+										eResidueTerminusState = eResidueTerminusStateConstants.PeptideCTerminus
+										blnFavorTerminalMods = True
+									Else
+										eResidueTerminusState = eResidueTerminusStateConstants.None
+										blnFavorTerminalMods = False
+									End If
+
+									blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState, objMatchedModDef)
+
+									If blnMatchFound Then
+										objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
+									Else
+										' Could not find a valid entry in mModInfo
+										ReportError("Unrecognized mass correction tag found in the SeqInfo file: " & strMassCorrectionTag)
+									End If
+
+								End If
+							End If
+						Next intModIndex
+					End If
+					
+				End If
+
+				blnSuccess = True
 			End If
 		End If
 
-		Return False
+		If blnSuccess Then
+			objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
+		End If
+
+		Return blnSuccess
 	End Function
 
+	Protected Function UpdatePSMFindMatchingModInfo(ByVal strMassCorrectionTag As String, ByVal blnFavorTerminalMods As Boolean, ByVal eResidueTerminusState As eResidueTerminusStateConstants, ByRef objMatchedModDef As PeptideHitResultsProcessor.clsModificationDefinition) As Boolean
+
+		Dim blnMatchFound As Boolean
+
+		blnMatchFound = False
+		Do
+			For Each objMod In mModInfo
+				If strMassCorrectionTag = objMod.MassCorrectionTag Then
+					If blnFavorTerminalMods Then
+						If objMod.ModificationType = PeptideHitResultsProcessor.clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
+						   objMod.ModificationType = PeptideHitResultsProcessor.clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
+
+							If eResidueTerminusState = eResidueTerminusStateConstants.PeptideNTerminus AndAlso _
+							  (objMod.TargetResiduesContain(N_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(N_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
+								blnMatchFound = True
+							End If
+
+							If eResidueTerminusState = eResidueTerminusStateConstants.PeptideCTerminus AndAlso _
+							  (objMod.TargetResiduesContain(C_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(C_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
+								blnMatchFound = True
+							End If
+
+						End If
+					Else
+						blnMatchFound = True
+					End If
+
+					If blnFavorTerminalMods Then
+						' Match found
+						objMatchedModDef = objMod
+						blnMatchFound = True
+					End If
+				End If
+			Next
+
+			If Not blnMatchFound AndAlso blnFavorTerminalMods Then
+				' Change FavorTerminalMods to false and try again
+				blnFavorTerminalMods = False
+			Else
+				Exit Do
+			End If
+		Loop While Not blnMatchFound
+
+		Return blnMatchFound
+
+	End Function
 End Class

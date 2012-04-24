@@ -38,6 +38,8 @@ Public Class clsPHRPParserSequest
 	Public Const DATA_COLUMN_NumTrypticEnds As String = "NumTrypticEnds"
 	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
+	Protected Const SEQ_SEARCH_ENGINE_NAME As String = "SEQUEST"
+
 	''' <summary>
 	''' Constructor
 	''' </summary>
@@ -86,6 +88,10 @@ Public Class clsPHRPParserSequest
 		Return strDatasetName & "_fht.txt"
 	End Function
 
+	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_syn_ModSummary.txt"
+	End Function
+
 	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_syn.txt"
 	End Function
@@ -100,6 +106,43 @@ Public Class clsPHRPParserSequest
 
 	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_syn_SeqToProteinMap.txt"
+	End Function
+
+	''' <summary>
+	''' Parses the specified Sequest parameter file
+	''' </summary>
+	''' <param name="strSearchEngineParamFileName"></param>
+	''' <param name="objSearchEngineParams"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+		Dim strParamFilePath As String
+		Dim blnSuccess As Boolean
+		Dim strLineIn As String
+
+		Try
+			objSearchEngineParams = New clsSearchEngineParameters(SEQ_SEARCH_ENGINE_NAME, mModInfo)
+
+			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+
+			If Not System.IO.File.Exists(strParamFilePath) Then
+				ReportError("File not found: " & strParamFilePath)
+			Else
+				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+
+					While srInFile.Peek > -1
+						strLineIn = srInFile.ReadLine()
+
+						objSearchEngineParams.AddUpdateParameter("ParamName", "ParamValue")
+
+					End While
+				End Using
+			End If
+		Catch ex As Exception
+			ReportError("Error in LoadSearchEngineParameters: " & ex.Message)
+		End Try
+
+		Return blnSuccess
 	End Function
 
 	''' <summary>
@@ -162,7 +205,6 @@ Public Class clsPHRPParserSequest
 			End With
 
 			If blnSuccess Then
-				' Update objPSM.PeptideMonoisotopicMass and determine the modifications present on this peptide
 				UpdatePSMUsingSeqInfo(objPSM)
 
 				' Store the remaining scores
@@ -176,7 +218,6 @@ Public Class clsPHRPParserSequest
 				AddScore(objPSM, strColumns, DATA_COLUMN_Ions_Observed)
 				AddScore(objPSM, strColumns, DATA_COLUMN_Ions_Expected)
 				AddScore(objPSM, strColumns, DATA_COLUMN_NumTrypticEnds)
-
 			End If
 
 

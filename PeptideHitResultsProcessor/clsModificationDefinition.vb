@@ -1,6 +1,6 @@
 Option Strict On
 
-' This class can be used as a base class for peptide hit results processor classes
+' This class describes an amino acid modification
 '
 ' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)

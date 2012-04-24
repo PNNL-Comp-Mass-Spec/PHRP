@@ -129,7 +129,7 @@ Public Class clsXTandemResultsProcessor
             objSearchResult.ComputeMonoisotopicMass()
 
             ' Update PeptideDeltaMassCorrectedPpm
-            objSearchResult.ComputeDelMCorrected()
+			objSearchResult.ComputeDelMCorrectedXT()
 
             ' Populate .PeptideSequenceWithMods and .PeptideModDescription
             ' Note that this function will call .AddSearchResultModificationsToCleanSequence() then .UpdateModDescription()

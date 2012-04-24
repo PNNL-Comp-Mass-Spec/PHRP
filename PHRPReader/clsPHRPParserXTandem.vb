@@ -33,6 +33,8 @@ Public Class clsPHRPParserXTandem
 	Public Const DATA_COLUMN_Peptide_Intensity_LogI As String = "Peptide_Intensity_Log(I)"
 	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
+	Protected Const XT_SEARCH_ENGINE_NAME As String = "X! Tandem"
+
 	''' <summary>
 	''' Constructor
 	''' </summary>
@@ -74,6 +76,10 @@ Public Class clsPHRPParserXTandem
 		Return String.Empty
 	End Function
 
+	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_xt_ModSummary.txt"
+	End Function
+
 	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_xt.txt"
 	End Function
@@ -88,6 +94,43 @@ Public Class clsPHRPParserXTandem
 
 	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_xt_SeqToProteinMap.txt"
+	End Function
+
+	''' <summary>
+	''' Parses the specified X!Tandem parameter file
+	''' </summary>
+	''' <param name="strSearchEngineParamFileName"></param>
+	''' <param name="objSearchEngineParams"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+		Dim strParamFilePath As String
+		Dim blnSuccess As Boolean
+		Dim strLineIn As String
+
+		Try
+			objSearchEngineParams = New clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME, mModInfo)
+
+			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+
+			If Not System.IO.File.Exists(strParamFilePath) Then
+				ReportError("File not found: " & strParamFilePath)
+			Else
+				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+
+					While srInFile.Peek > -1
+						strLineIn = srInFile.ReadLine()
+
+						objSearchEngineParams.AddUpdateParameter("ParamName", "ParamValue")
+
+					End While
+				End Using
+			End If
+		Catch ex As Exception
+			ReportError("Error in LoadSearchEngineParameters: " & ex.Message)
+		End Try
+
+		Return blnSuccess
 	End Function
 
 	''' <summary>
@@ -144,7 +187,6 @@ Public Class clsPHRPParserXTandem
 			End With
 
 			If blnSuccess Then
-				' Update objPSM.PeptideMonoisotopicMass and determine the modifications present on this peptide
 				UpdatePSMUsingSeqInfo(objPSM)
 
 				' Store the remaining scores

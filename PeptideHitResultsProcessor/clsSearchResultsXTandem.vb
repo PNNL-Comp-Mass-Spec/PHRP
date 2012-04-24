@@ -171,42 +171,42 @@ Public Class clsSearchResultsXTandem
         mPeptideDeltaMassCorrectedPpm = 0
     End Sub
 
-    Public Sub ComputeDelMCorrected()
+	Public Sub ComputeDelMCorrectedXT()
 
-        Dim dblDelM As Double
-        Dim intCorrectionCount As Integer = 0
+		Dim dblDelM As Double
+		Dim intCorrectionCount As Integer = 0
 
-        Dim dblPrecursorMonoMass As Double
+		Dim dblPrecursorMonoMass As Double
 
-        Dim blnParseError As Boolean = False
+		Dim blnParseError As Boolean = False
 
-        ' Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
-        ' (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
-        If Double.TryParse(mPeptideDeltaMass, dblDelM) Then
+		' Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
+		' (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
+		If Double.TryParse(mPeptideDeltaMass, dblDelM) Then
 
-            ' Negate dblDelM so that it represents observed - theoretical
-            dblDelM = -dblDelM
+			' Negate dblDelM so that it represents observed - theoretical
+			dblDelM = -dblDelM
 
-            ' Compute the original value for the precursor monoisotopic mass
-            Dim dblParentIonMH As Double
-            If Double.TryParse(MyBase.ParentIonMH, dblParentIonMH) Then
-                dblPrecursorMonoMass = dblParentIonMH - clsPeptideMassCalculator.MASS_PROTON
-            Else
-                blnParseError = True
-            End If
+			' Compute the original value for the precursor monoisotopic mass
+			Dim dblParentIonMH As Double
+			If Double.TryParse(MyBase.ParentIonMH, dblParentIonMH) Then
+				dblPrecursorMonoMass = dblParentIonMH - clsPeptideMassCalculator.MASS_PROTON
+			Else
+				blnParseError = True
+			End If
 
-            If blnParseError Then
-                dblPrecursorMonoMass = mPeptideMonoisotopicMass + dblDelM
-            End If
+			If blnParseError Then
+				dblPrecursorMonoMass = mPeptideMonoisotopicMass + dblDelM
+			End If
 
-            Dim blnAdjustPrecursorMassForC13 As Boolean = True
-            mPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPublic(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, mPeptideMonoisotopicMass)
+			Dim blnAdjustPrecursorMassForC13 As Boolean = True
+			mPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, mPeptideMonoisotopicMass)
 
-        Else
-            mPeptideDeltaMassCorrectedPpm = 0
-        End If
+		Else
+			mPeptideDeltaMassCorrectedPpm = 0
+		End If
 
-    End Sub
+	End Sub
 
     Protected Sub ComputePeptideDeltaCn2()
         Try

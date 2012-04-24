@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.4.4496; April 23, 2012
+	- New version of PeptideHitResultsProcessor
+
 Version 1.4.4349; November 28, 2011
 	- Now writing out a separate entry to the synopsis or first-hits file for each scan involved in a merged result reported by MSGFDB
 	- Now creating a ScanGroupInfo.txt file when MSGFDB merged spectra are processed

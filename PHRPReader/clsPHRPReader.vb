@@ -14,6 +14,10 @@
 
 Option Strict On
 
+Imports System.Collections.Generic
+Imports PeptideHitResultsProcessor.clsPeptideModificationContainer
+Imports PeptideHitResultsProcessor.clsModificationDefinition
+
 Public Class clsPHRPReader
 	Implements IDisposable
 
@@ -38,13 +42,6 @@ Public Class clsPHRPReader
 	Public Const MSGF_RESULT_FILENAME_SUFFIX As String = "_MSGF.txt"
 	Public Const SCAN_STATS_FILENAME_SUFFIX As String = "_ScanStats.txt"
 
-	Protected Const MOD_SUMMARY_COLUMN_Modification_Symbol As String = "Modification_Symbol"
-	Protected Const MOD_SUMMARY_COLUMN_Modification_Mass As String = "Modification_Mass"
-	Protected Const MOD_SUMMARY_COLUMN_Target_Residues As String = "Target_Residues"
-	Protected Const MOD_SUMMARY_COLUMN_Modification_Type As String = "Modification_Type"
-	Protected Const MOD_SUMMARY_COLUMN_Mass_Correction_Tag As String = "Mass_Correction_Tag"
-	Protected Const MOD_SUMMARY_COLUMN_Occurence_Count As String = "Occurence_Count"
-
 	Public Enum ePeptideHitResultType
 		Unknown = 0
 		Sequest = 1
@@ -65,7 +62,6 @@ Public Class clsPHRPReader
 
 #End Region
 
-
 #Region "Module variables"
 	Protected mDatasetName As String
 	Protected mInputFilePath As String
@@ -85,23 +81,23 @@ Public Class clsPHRPReader
 	Protected mSourceFile As System.IO.StreamReader
 	Protected WithEvents mPHRPParser As clsPHRPParser
 
-	' This list contains mod symbols as the key and the corresponding mod mass (stored as a string 
-	'  to retain the same number of Sig Figs as the _ModSummary.txt file)
+	' This list contains mod symbols as the key and the corresponding mod mass 
+	' (masses are stored as strings to retain the same number of Sig Figs as the _ModSummary.txt file)
 	' This dictionary object will use case-sensitive searching
-	Protected mDynamicMods As System.Collections.Generic.SortedDictionary(Of String, String)
+	Protected mDynamicMods As SortedDictionary(Of Char, String)
 
-	' This dictionary contains amino acid names as the key and the corresponding mod mass (stored as a string 
-	'  to retain the same number of Sig Figs as the _ModSummary.txt file)
+	' This dictionary contains amino acid names as the key and the corresponding mod mass (or mod masses) 
+	' (masses are stored as strings to retain the same number of Sig Figs as the _ModSummary.txt file)
 	' This dictionary object will use case-sensitive searching
-	Protected mStaticMods As System.Collections.Generic.SortedDictionary(Of String, String)
+	Protected mStaticMods As SortedDictionary(Of String, List(Of String))
 
 	' This dictionary tracks the MSGFSpecProb values for each entry in the source file
 	' The keys are Result_ID and the string is MSGFSpecProb (stored as string to preserve formatting)
-	Protected mMSGFCachedResults As System.Collections.Generic.Dictionary(Of Integer, String)
+	Protected mMSGFCachedResults As Dictionary(Of Integer, String)
 
 	' This dictionary tracks scan stats values, in particular elution time
 	'The keys are ScanNumber and values are clsScanStatsInfo objects
-	Protected mScanStats As System.Collections.Generic.Dictionary(Of Integer, clsScanStatsInfo)
+	Protected mScanStats As Dictionary(Of Integer, clsScanStatsInfo)
 
 	Protected mPSMCurrent As clsPSM
 
@@ -189,6 +185,16 @@ Public Class clsPHRPReader
 		End Set
 	End Property
 
+	Public ReadOnly Property PeptideHitResultType As ePeptideHitResultType
+		Get
+			If mPHRPParser Is Nothing Then
+				Return ePeptideHitResultType.Unknown
+			Else
+				Return mPHRPParser.PeptideHitResultType
+			End If
+		End Get
+	End Property
+
 	Public ReadOnly Property PHRPParser() As clsPHRPParser
 		Get
 			Return mPHRPParser
@@ -271,16 +277,15 @@ Public Class clsPHRPReader
 		mErrorMessage = String.Empty
 		mLocalErrorCode = ePHRPReaderErrorCodes.NoError
 
-		mMSGFCachedResults = New System.Collections.Generic.Dictionary(Of Integer, String)
+		mMSGFCachedResults = New Dictionary(Of Integer, String)
 
-		mDynamicMods = New System.Collections.Generic.SortedDictionary(Of String, String)
-		mStaticMods = New System.Collections.Generic.SortedDictionary(Of String, String)
+		mDynamicMods = New SortedDictionary(Of Char, String)
+		mStaticMods = New SortedDictionary(Of String, List(Of String))
 
 	End Sub
 
 	Protected Function InitializeReader(ByVal strInputFilePath As String, ByVal eResultType As ePeptideHitResultType) As Boolean
 
-		Dim strSearchToolParamFilePath As String = String.Empty
 		Dim strModSummaryFilePath As String = String.Empty
 
 		Dim blnSuccess As Boolean
@@ -306,15 +311,20 @@ Public Class clsPHRPReader
 				Else
 
 					' Note that the following populates mDatasetName
-					blnSuccess = ValidateInputFiles(strInputFilePath, eResultType, strSearchToolParamFilePath, strModSummaryFilePath)
+					blnSuccess = ValidateInputFiles(strInputFilePath, eResultType, strModSummaryFilePath)
 					If Not blnSuccess Then
 						SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, True)
 						If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
 						Return False
 					End If
 
-					If mLoadModDefs Then
-						' Read the PHRP Mod Summary File		
+					' Open the input file for reading
+					' Note that this will also load the MSGFSpecProb info and ScanStats info
+					blnSuccess = InitializeParser(eResultType)
+
+					If blnSuccess AndAlso mLoadModDefs Then
+						' Read the PHRP Mod Summary File to populate mDynamicMods and mStaticMods
+						' Note that the PHRPParser also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo file is not found
 						blnSuccess = ReadModSummaryFile(strModSummaryFilePath, mDynamicMods, mStaticMods)
 						If Not blnSuccess Then
 							SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, True)
@@ -323,11 +333,17 @@ Public Class clsPHRPReader
 						End If
 					End If
 
-					' Open the input file for reading
-					' Note that this will also load the MSGFSpecProb info and ScanStats info
-					blnSuccess = InitializeParser(eResultType)
+					If blnSuccess AndAlso mLoadMSGFResults Then
+						' Cache the MSGF values (if present)
+						ReadAndCacheMSGFData()
+					End If
 
+					If blnSuccess AndAlso mLoadScanStatsData Then
+						' Cache the Scan Stats values (if present)
+						ReadScanStatsData()
+					End If
 				End If
+
 			End If
 
 		Catch ex As Exception
@@ -344,8 +360,23 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean = True
 
 		Try
+			If String.IsNullOrEmpty(mDatasetName) Then
+				ReportError("Dataset name is undefined; unable to continue")
+				Return False
+			End If
+
+			' Initialize some tracking variables
+			mMSGFCachedResults.Clear()
+
+			mPSMCurrent = New clsPSM()
+
+			mLinesRead = 0
+			mHeaderLineParsed = False
+			mCachedLineAvailable = False
+			mCachedLine = String.Empty
 
 			' Open the peptide-hit result file (from PHRP) for reading
+			' Instantiate the appropriare PHRP Parser
 			Select Case eResultType
 				Case ePeptideHitResultType.Sequest
 
@@ -354,23 +385,9 @@ Public Class clsPHRPReader
 
 				Case ePeptideHitResultType.XTandem
 
-					' Make sure a few more files are present for X!Tandem so that we can extract the protein names and include these in the MSGF files
-					Dim strFileToCheck As String
-					strFileToCheck = System.IO.Path.Combine(mInputFolderPath, mDatasetName & clsPHRPReader.XT_RESULT_TO_SEQ_MAP_SUFFIX)
-					If Not ValidateRequiredFileExists("X!Tandem Result to Seq Map file", strFileToCheck, False) Then
-						ShowMessage("Warning: X!Tandem Result to Seq Map file not found (" & System.IO.Path.GetFileName(strFileToCheck) & "); protein names will be blank")
-					Else
-						strFileToCheck = System.IO.Path.Combine(mInputFolderPath, mDatasetName & clsPHRPReader.XT_SEQ_TO_PROTEIN_MAP_SUFFIX)
-						If Not ValidateRequiredFileExists("X!Tandem Seq to Protein Map file", strFileToCheck, False) Then
-							ShowMessage("Warning: X!Tandem Seq to Protein Map file not found (" & System.IO.Path.GetFileName(strFileToCheck) & "); protein names will be blank")
-						End If
-					End If
-
-
 					' Convert X!Tandem results to input format required for MSGF
 					' Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
 					mPHRPParser = New clsPHRPParserXTandem(mDatasetName, mInputFilePath)
-
 
 				Case ePeptideHitResultType.Inspect
 
@@ -389,7 +406,11 @@ Public Class clsPHRPReader
 			End Select
 
 			If blnSuccess Then
-				blnSuccess = OpenDataFile()
+
+				' Open the data file for reading
+				mSourceFile = New System.IO.StreamReader(New System.IO.FileStream(mInputFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+				mCanRead = True
+
 			End If
 
 		Catch ex As Exception
@@ -554,8 +575,8 @@ Public Class clsPHRPReader
 	Protected Shared Function AutoTrimExtraSuffix(ByVal strFilePath As String, ByRef strFilePathTrimmed As String) As Boolean
 
 		' Check whether strfilePathLCase ends in other known PHRP extensions
-		Dim lstExtraSuffixes As System.Collections.Generic.List(Of String)
-		lstExtraSuffixes = New System.Collections.Generic.List(Of String)
+		Dim lstExtraSuffixes As List(Of String)
+		lstExtraSuffixes = New List(Of String)
 
 		lstExtraSuffixes.Add("_ResultToSeqMap.txt")
 		lstExtraSuffixes.Add("_SeqToProteinMap.txt")
@@ -575,6 +596,187 @@ Public Class clsPHRPReader
 		Return False
 
 	End Function
+
+	''' <summary>
+	''' Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
+	''' Note that if the _SeqInfo.txt file is available, then this function will not be used
+	''' </summary>
+	''' <returns>True if success, false if an error</returns>
+	''' <remarks></remarks>
+	Protected Function ConvertModsToNumericMods(ByVal strPeptide As String, ByRef strPeptideWithNumericMods As String, ByRef lstPeptideMods As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)) As Boolean
+
+		Static sbNewPeptide As New System.Text.StringBuilder
+
+		Dim intPeptideLength As Integer
+		Dim chMostRecentResidue As Char
+		Dim intResidueLocInPeptide As Integer = 0
+		Dim eResidueTerminusState As eResidueTerminusStateConstants
+
+		Dim intIndex As Integer
+		Dim intIndexStart As Integer
+		Dim intIndexEnd As Integer
+
+		Try
+			lstPeptideMods.Clear()
+
+			If mDynamicMods.Count = 0 AndAlso mStaticMods.Count = 0 Then
+				' No mods are defined; simply update strPeptideWithNumericMods to be strPeptide
+				strPeptideWithNumericMods = strPeptide
+				Return True
+			End If
+
+			strPeptideWithNumericMods = String.Empty
+			sbNewPeptide.Length = 0
+			intPeptideLength = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, True).Length
+
+			intIndexStart = 0
+			intIndexEnd = strPeptide.Length - 1
+
+			If strPeptide.Length >= 4 Then
+				If strPeptide.Chars(1) = "." Then
+					' Peptide is of the form R.HRDTGILDSIGR.F
+					' Skip the first two characters
+					intIndexStart = 2
+				End If
+
+				If strPeptide.Chars(strPeptide.Length - 2) = "." Then
+					' Peptide is of the form R.HRDTGILDSIGR.F
+					' Skip the last two characters
+					intIndexEnd = strPeptide.Length - 3
+				End If
+
+			End If
+
+			intIndex = 0
+			chMostRecentResidue = "."c
+			Do While intIndex < strPeptide.Length
+				If intIndex < intIndexStart OrElse intIndex > intIndexEnd Then
+					' We're before or after the primary peptide sequence; simply append the character
+					sbNewPeptide.Append(strPeptide.Chars(intIndex))
+				Else
+					If Char.IsLetter(strPeptide.Chars(intIndex)) Then
+						chMostRecentResidue = strPeptide.Chars(intIndex)
+						intResidueLocInPeptide += 1
+						If intResidueLocInPeptide = 1 Then
+							eResidueTerminusState = eResidueTerminusStateConstants.PeptideNTerminus
+						ElseIf intResidueLocInPeptide = intPeptideLength Then
+							eResidueTerminusState = eResidueTerminusStateConstants.PeptideCTerminus
+						Else
+							eResidueTerminusState = eResidueTerminusStateConstants.None
+						End If
+
+						' Character is a letter; append it
+						sbNewPeptide.Append(chMostRecentResidue)
+
+						' See if it is present in mStaticMods (this is a case-sensitive search)
+						AddStaticModIfPresent(mStaticMods, chMostRecentResidue, intResidueLocInPeptide, eResidueTerminusState, sbNewPeptide, lstPeptideMods)
+
+						If intIndex = intIndexStart AndAlso mStaticMods.Count > 0 Then
+							' We're at the N-terminus of the peptide
+							' Possibly add a static N-terminal peptide mod (for example, iTRAQ8, which is 304.2022 Da)
+							AddStaticModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, eResidueTerminusStateConstants.PeptideNTerminus, sbNewPeptide, lstPeptideMods)
+
+							If strPeptide.StartsWith(clsPHRPReader.PROTEIN_TERMINUS_SYMBOL_PHRP) Then
+								' We're at the N-terminus of the protein
+								' Possibly add a static N-terminal protein mod
+								AddStaticModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, eResidueTerminusStateConstants.ProteinNTerminus, sbNewPeptide, lstPeptideMods)
+							End If
+						End If
+					Else
+						' Not a letter; see if it is present in mDynamicMods
+						AddDynamicModIfPresent(mDynamicMods, chMostRecentResidue, strPeptide.Chars(intIndex), intResidueLocInPeptide, eResidueTerminusState, sbNewPeptide, lstPeptideMods)
+					End If
+
+					If intIndex = intIndexEnd AndAlso mStaticMods.Count > 0 Then
+						' Possibly add a static C-terminal peptide mod
+						AddStaticModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, eResidueTerminusStateConstants.PeptideCTerminus, sbNewPeptide, lstPeptideMods)
+
+						If strPeptide.EndsWith(clsPHRPReader.PROTEIN_TERMINUS_SYMBOL_PHRP) Then
+							' We're at the C-terminus of the protein
+							' Possibly add a static C-terminal protein mod
+							AddStaticModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, eResidueTerminusStateConstants.ProteinCTerminus, sbNewPeptide, lstPeptideMods)
+						End If
+
+					End If
+
+				End If
+				intIndex += 1
+			Loop
+
+			strPeptideWithNumericMods = sbNewPeptide.ToString
+
+		Catch ex As Exception
+			HandleException("Error adding dynamic and static mod masses to peptide " & strPeptide, ex)
+			Return False
+		End Try
+
+		Return True
+
+	End Function
+
+	Protected Sub AddDynamicModIfPresent(ByRef objMods As SortedDictionary(Of Char, String), _
+	  ByVal chResidue As Char, _
+	  ByVal chModSymbol As Char, _
+	  ByVal ResidueLocInPeptide As Integer, _
+	  ByVal ResidueTerminusState As eResidueTerminusStateConstants, _
+	  ByRef sbNewPeptide As System.Text.StringBuilder, _
+	  ByRef lstPeptideMods As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo))
+
+		Dim strModMass As String = String.Empty
+
+		If objMods.TryGetValue(chModSymbol, strModMass) Then
+			' Mod mass found for chModSymbol; append the mod (add a plus sign if it doesn't start with a minus sign)
+			If strModMass.StartsWith("-") Then
+				sbNewPeptide.Append(strModMass)
+			Else
+				sbNewPeptide.Append("+" & strModMass)
+			End If
+
+			Dim objModDef As PeptideHitResultsProcessor.clsModificationDefinition
+			Dim dblModMass As Double
+
+			If Double.TryParse(strModMass, dblModMass) Then
+				objModDef = New PeptideHitResultsProcessor.clsModificationDefinition(chModSymbol, dblModMass, chResidue, eModificationTypeConstants.DynamicMod, "Unknown_" & strModMass)
+
+				lstPeptideMods.Add(New PeptideHitResultsProcessor.clsAminoAcidModInfo(chResidue, ResidueLocInPeptide, ResidueTerminusState, objModDef))
+
+			End If
+		End If
+
+	End Sub
+
+	Protected Sub AddStaticModIfPresent(ByRef objMods As SortedDictionary(Of String, List(Of String)), _
+	  ByVal chResidue As Char, _
+	  ByVal ResidueLocInPeptide As Integer, _
+	  ByVal ResidueTerminusState As eResidueTerminusStateConstants, _
+	  ByRef sbNewPeptide As System.Text.StringBuilder, _
+	  ByRef lstPeptideMods As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo))
+
+		Dim lstModMasses As List(Of String) = Nothing
+
+		If objMods.TryGetValue(chResidue, lstModMasses) Then
+			' Static mod applies to this residue; append the mod (add a plus sign if it doesn't start with a minus sign)
+
+			For Each strModMass In lstModMasses
+				If strModMass.StartsWith("-") Then
+					sbNewPeptide.Append(strModMass)
+				Else
+					sbNewPeptide.Append("+" & strModMass)
+				End If
+
+				Dim objModDef As PeptideHitResultsProcessor.clsModificationDefinition
+				Dim dblModMass As Double
+
+				If Double.TryParse(strModMass, dblModMass) Then
+					objModDef = New PeptideHitResultsProcessor.clsModificationDefinition("-"c, dblModMass, chResidue, eModificationTypeConstants.StaticMod, "Unknown_" & strModMass)
+
+					lstPeptideMods.Add(New PeptideHitResultsProcessor.clsAminoAcidModInfo(chResidue, ResidueLocInPeptide, ResidueTerminusState, objModDef))
+				End If
+			Next
+
+		End If
+
+	End Sub
 
 	''' <summary>
 	''' Returns the default ModSummary file name for the given PeptideHit result type
@@ -610,181 +812,6 @@ Public Class clsPHRPReader
 
 	End Function
 
-	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
-		If String.IsNullOrEmpty(strBaseMessage) Then
-			strBaseMessage = "Error"
-		End If
-
-		ReportError(strBaseMessage & ": " & ex.Message)
-
-	End Sub
-
-	''' <summary>
-	''' Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
-	''' </summary>
-	''' <returns>True if success, false if an error</returns>
-	''' <remarks></remarks>
-	Protected Function AddDynamicAndStaticMods(ByVal strPeptide As String, ByRef strPeptideWithMods As String) As Boolean
-
-		Static sbNewPeptide As New System.Text.StringBuilder
-
-		Dim intIndex As Integer
-		Dim intIndexStart As Integer
-		Dim intIndexEnd As Integer
-
-		Try
-			If mDynamicMods.Count = 0 AndAlso mStaticMods.Count = 0 Then
-				' No mods are defined; simply update strPeptideWithMods to be strPeptide
-				strPeptideWithMods = strPeptide
-				Return True
-			End If
-
-			strPeptideWithMods = String.Empty
-			sbNewPeptide.Length = 0
-
-			intIndexStart = 0
-			intIndexEnd = strPeptide.Length - 1
-
-			If strPeptide.Length >= 4 Then
-				If strPeptide.Chars(1) = "." Then
-					' Peptide is of the form R.HRDTGILDSIGR.F
-					' Skip the first two characters
-					intIndexStart = 2
-				End If
-
-				If strPeptide.Chars(strPeptide.Length - 2) = "." Then
-					' Peptide is of the form R.HRDTGILDSIGR.F
-					' Skip the last two characters
-					intIndexEnd = strPeptide.Length - 3
-				End If
-
-			End If
-
-			intIndex = 0
-			Do While intIndex < strPeptide.Length
-				If intIndex < intIndexStart OrElse intIndex > intIndexEnd Then
-					' We're before or after the primary peptide sequence; simply append the character
-					sbNewPeptide.Append(strPeptide.Chars(intIndex))
-				Else
-					If Char.IsLetter(strPeptide.Chars(intIndex)) Then
-						' Character is a letter; append it
-						sbNewPeptide.Append(strPeptide.Chars(intIndex))
-
-						' See if it is present in mStaticMods (this is a case-sensitive search)
-						AddModIfPresent(mStaticMods, strPeptide.Chars(intIndex), sbNewPeptide)
-
-						If intIndex = intIndexStart AndAlso mStaticMods.Count > 0 Then
-							' We're at the N-terminus of the peptide
-							' Possibly add a static N-terminal peptide mod (for example, iTRAQ8, which is 304.2022 DA)
-							AddModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PEPTIDE_SYMBOL_DMS, sbNewPeptide)
-
-							If strPeptide.StartsWith(clsPHRPReader.PROTEIN_TERMINUS_SYMBOL_PHRP) Then
-								' We're at the N-terminus of the protein
-								' Possibly add a static N-terminal protein mod
-								AddModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PROTEIN_SYMBOL_DMS, sbNewPeptide)
-							End If
-						End If
-					Else
-						' Not a letter; see if it is present in mDynamicMods
-						AddModIfPresent(mDynamicMods, strPeptide.Chars(intIndex), sbNewPeptide)
-					End If
-
-					If intIndex = intIndexEnd AndAlso mStaticMods.Count > 0 Then
-						' Possibly add a static C-terminal peptide mod
-						AddModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PEPTIDE_SYMBOL_DMS, sbNewPeptide)
-
-						If strPeptide.EndsWith(clsPHRPReader.PROTEIN_TERMINUS_SYMBOL_PHRP) Then
-							' We're at the C-terminus of the protein
-							' Possibly add a static C-terminal protein mod
-							AddModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PROTEIN_SYMBOL_DMS, sbNewPeptide)
-						End If
-
-					End If
-
-				End If
-				intIndex += 1
-			Loop
-
-			strPeptideWithMods = sbNewPeptide.ToString
-
-		Catch ex As Exception
-			HandleException("Error adding dynamic and static mods to peptide " & strPeptide, ex)
-			Return False
-		End Try
-
-		Return True
-
-	End Function
-
-	Protected Sub AddModIfPresent(ByRef objMods As System.Collections.Generic.SortedDictionary(Of String, String), _
-	   ByVal chResidue As Char, _
-	   ByRef sbNewPeptide As System.Text.StringBuilder)
-
-		Dim strModMass As String = String.Empty
-
-		If objMods.TryGetValue(chResidue, strModMass) Then
-			' Static mod applies to this residue; append the mod (add a plus sign if it doesn't start with a minus sign)
-			If strModMass.StartsWith("-") Then
-				sbNewPeptide.Append(strModMass)
-			Else
-				sbNewPeptide.Append("+" & strModMass)
-			End If
-		End If
-
-	End Sub
-
-	''' <summary>
-	''' Opens the data file for reading
-	''' </summary>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Overridable Function OpenDataFile() As Boolean
-
-		Dim blnSuccess As Boolean = False
-
-		Try
-			If String.IsNullOrEmpty(mDatasetName) Then
-				ReportError("Dataset name is undefined; unable to continue")
-				Return False
-			End If
-
-			' Initialize some tracking variables
-			mMSGFCachedResults.Clear()
-
-			mPSMCurrent = New clsPSM()
-
-			mLinesRead = 0
-			mHeaderLineParsed = False
-			mCachedLineAvailable = False
-			mCachedLine = String.Empty
-
-			If Not String.IsNullOrEmpty(mInputFilePath) AndAlso System.IO.File.Exists(mInputFilePath) Then
-
-				If mLoadMSGFResults Then
-					' Cache the MSGF values (if present)
-					blnSuccess = ReadAndCacheMSGFData()
-				End If
-
-				If mLoadScanStatsData Then
-					' Cache the Scan Stats values (if present)
-					blnSuccess = ReadScanStatsData()
-				End If
-
-				' Open the data file for reading
-				mSourceFile = New System.IO.StreamReader(New System.IO.FileStream(mInputFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
-				mCanRead = True
-
-				blnSuccess = True
-			End If
-
-		Catch ex As Exception
-			HandleException("Error opening the PHRP data file", ex)
-		End Try
-
-		Return blnSuccess
-
-	End Function
-
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim strPHRPResultsFileName As String = String.Empty
@@ -809,6 +836,33 @@ Public Class clsPHRPReader
 		End Select
 
 		Return strPHRPResultsFileName
+
+	End Function
+
+	Public Shared Function GetPHRPModSummaryFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+
+		Dim strPHRPModSummaryFileName As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				' Sequest: _syn.txt
+				strPHRPModSummaryFileName = clsPHRPParserSequest.GetPHRPModSummaryFileName(strDatasetName)
+
+			Case ePeptideHitResultType.XTandem
+				' X!Tandem: _xt.txt
+				strPHRPModSummaryFileName = clsPHRPParserXTandem.GetPHRPModSummaryFileName(strDatasetName)
+
+			Case ePeptideHitResultType.Inspect
+				' Inspect: _inspect_syn.txt
+				strPHRPModSummaryFileName = clsPHRPParserInspect.GetPHRPModSummaryFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSGFDB
+				' MSGFDB: _msgfdb_syn.txt
+				strPHRPModSummaryFileName = clsPHRPParserMSGFDB.GetPHRPModSummaryFileName(strDatasetName)
+
+		End Select
+
+		Return strPHRPModSummaryFileName
 
 	End Function
 
@@ -920,6 +974,15 @@ Public Class clsPHRPReader
 
 	End Function
 
+	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
+		If String.IsNullOrEmpty(strBaseMessage) Then
+			strBaseMessage = "Error"
+		End If
+
+		ReportError(strBaseMessage & ": " & ex.Message)
+
+	End Sub
+
 	''' <summary>
 	''' Examines the string to determine if it is numeric
 	''' </summary>
@@ -944,7 +1007,7 @@ Public Class clsPHRPReader
 	''' <remarks></remarks>
 	Public Shared Function LookupColumnValue(ByRef strColumns() As String, _
 	  ByVal strColumnName As String, _
-	  ByRef objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)) As String
+	  ByRef objColumnHeaders As SortedDictionary(Of String, Integer)) As String
 
 		Return LookupColumnValue(strColumns, strColumnName, objColumnHeaders, String.Empty)
 	End Function
@@ -956,7 +1019,7 @@ Public Class clsPHRPReader
 	''' <remarks></remarks>
 	Public Shared Function LookupColumnValue(ByRef strColumns() As String, _
 	  ByVal strColumnName As String, _
-	  ByRef objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer), _
+	  ByRef objColumnHeaders As SortedDictionary(Of String, Integer), _
 	  ByVal strValueIfMissing As String) As String
 
 		Dim intColIndex As Integer
@@ -985,7 +1048,7 @@ Public Class clsPHRPReader
 	''' <remarks></remarks>
 	Public Shared Function LookupColumnValue(ByRef strColumns() As String, _
 	  ByVal strColumnName As String, _
-	  ByRef objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer), _
+	  ByRef objColumnHeaders As SortedDictionary(Of String, Integer), _
 	  ByVal ValueIfMissing As Integer) As Integer
 
 		Dim strValue As String
@@ -1006,7 +1069,7 @@ Public Class clsPHRPReader
 	''' <remarks></remarks>
 	Public Shared Function LookupColumnValue(ByRef strColumns() As String, _
 	  ByVal strColumnName As String, _
-	  ByRef objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer), _
+	  ByRef objColumnHeaders As SortedDictionary(Of String, Integer), _
 	  ByVal ValueIfMissing As Double) As Double
 
 		Dim strValue As String
@@ -1027,7 +1090,7 @@ Public Class clsPHRPReader
 	''' <param name="objColumnHeaders">Column mapping dictionary object to update</param>
 	''' <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.CurrentCultureIgnoreCase)</remarks>
 	Public Shared Sub ParseColumnHeaders(ByVal strColumns() As String, _
-	 ByRef objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer))
+	 ByRef objColumnHeaders As SortedDictionary(Of String, Integer))
 
 		Dim intIndex As Integer
 
@@ -1106,14 +1169,22 @@ Public Class clsPHRPReader
 					If blnSuccess Then
 						blnMatchFound = True
 
-						If mLoadModDefs Then
+						If mLoadModDefs AndAlso String.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods) Then
+							' The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
+							' If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods
 
 							' Markup the peptide with the dynamic and static mods
 							Dim strPeptideWithMods As String = String.Empty
+							Dim lstPeptideMods As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)
+							lstPeptideMods = New List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)
 
-							blnSuccess = AddDynamicAndStaticMods(mPSMCurrent.Peptide.Trim, strPeptideWithMods)
+							blnSuccess = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim, strPeptideWithMods, lstPeptideMods)
 							If blnSuccess Then
 								mPSMCurrent.PeptideWithNumericMods = strPeptideWithMods
+								mPSMCurrent.ClearModifiedResidues()
+								For Each objModEntry In lstPeptideMods
+									mPSMCurrent.AddModifiedResidue(objModEntry)
+								Next
 							End If
 						End If
 
@@ -1230,24 +1301,15 @@ Public Class clsPHRPReader
 	''' <param name="objStaticMods">List with amino acid names as the key and the corresponding mod mass</param>
 	''' <returns>True if success; false if an error</returns>
 	Protected Function ReadModSummaryFile(ByVal strModSummaryFilePath As String, _
-	  ByRef objDynamicMods As System.Collections.Generic.SortedDictionary(Of String, String), _
-	  ByRef objStaticMods As System.Collections.Generic.SortedDictionary(Of String, String)) As Boolean
+	  ByRef objDynamicMods As SortedDictionary(Of Char, String), _
+	  ByRef objStaticMods As SortedDictionary(Of String, List(Of String))) As Boolean
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
+		Dim objModSummaryReader As clsPHRPModSummaryReader
 
-		Dim objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
+		Dim lstModMasses As List(Of String) = Nothing
 
-		Dim intLinesRead As Integer
-		Dim intIndex As Integer
-
-		Dim strModSymbol As String
 		Dim strModMass As String
-		Dim strTargetResidues As String
-		Dim strModType As String
-
-		Dim blnSkipLine As Boolean
-		Dim blnHeaderLineParsed As Boolean
+		Dim blnSuccess As Boolean
 
 		Try
 			If String.IsNullOrEmpty(strModSummaryFilePath) Then
@@ -1257,102 +1319,78 @@ Public Class clsPHRPReader
 
 			ShowMessage("Reading the PHRP ModSummary file")
 
-			' Initialize the column mapping
-			' Using a case-insensitive comparer
-			objColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
-
-			' Define the default column mapping
-			objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Symbol, 0)
-			objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Mass, 1)
-			objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Target_Residues, 2)
-			objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Type, 3)
-			objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Mass_Correction_Tag, 4)
-			objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Occurence_Count, 5)
-
 			' Clear objDynamicMods and objStaticMods (should have been instantiated by the calling function)
 			objDynamicMods.Clear()
 			objStaticMods.Clear()
 
+			objModSummaryReader = New clsPHRPModSummaryReader(strModSummaryFilePath)
+			blnSuccess = objModSummaryReader.Success
 
-			' Read the data from the ModSummary.txt file
-			' The first line is typically a header line:
-			' Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	Occurence_Count
+			If blnSuccess Then
+				For Each objItem In objModSummaryReader.ModificationDefs
 
-			Using srModSummaryFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strModSummaryFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+					strModMass = objModSummaryReader.GetModificationMassAsText(objItem.MassCorrectionTag)
 
-				blnHeaderLineParsed = False
-				intLinesRead = 0
+					Select Case objItem.ModificationType
+						Case eModificationTypeConstants.StaticMod, eModificationTypeConstants.TerminalPeptideStaticMod, eModificationTypeConstants.ProteinTerminusStaticMod
 
-				Do While srModSummaryFile.Peek >= 0
-					strLineIn = srModSummaryFile.ReadLine
-					intLinesRead += 1
-					blnSkipLine = False
+							' "S", "T", or "P"
+							' Static residue mod, peptide terminus static mod, or protein terminus static mod
+							' Note that < and > mean peptide N and C terminus (N_TERMINAL_PEPTIDE_SYMBOL_DMS and C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+							' Note that [ and ] mean protein N and C terminus (N_TERMINAL_PROTEIN_SYMBOL_DMS and C_TERMINAL_PROTEIN_SYMBOL_DMS)
 
-					If Not String.IsNullOrEmpty(strLineIn) Then
-						strSplitLine = strLineIn.Split(ControlChars.Tab)
+							' This mod could apply to multiple residues, so need to process each character in strTargetResidues
+							For Each chChar In objItem.TargetResidues
+								Try
 
-						If Not blnHeaderLineParsed Then
-							If strSplitLine(0).ToLower() = MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower() Then
-								' Parse the header line to confirm the column ordering
-								clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
-								blnSkipLine = True
-							End If
-
-							blnHeaderLineParsed = True
-						End If
-
-						If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
-							strModSymbol = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, objColumnHeaders)
-							strModMass = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Mass, objColumnHeaders)
-							strTargetResidues = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Target_Residues, objColumnHeaders)
-							strModType = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Type, objColumnHeaders)
-
-							Select Case strModType.ToUpper()
-								Case "S", "T", "P"
-									' Static residue mod, peptide terminus static mod, or protein terminus static mod
-									' Note that < and > mean peptide N and C terminus (N_TERMINAL_PEPTIDE_SYMBOL_DMS and C_TERMINAL_PEPTIDE_SYMBOL_DMS)
-									' Note that [ and ] mean protein N and C terminus (N_TERMINAL_PROTEIN_SYMBOL_DMS and C_TERMINAL_PROTEIN_SYMBOL_DMS)
-
-									' This mod could apply to multiple residues, so need to process each character in strTargetResidues
-									For intIndex = 0 To strTargetResidues.Length - 1
-										Try
-											If objStaticMods.ContainsKey(strTargetResidues.Chars(intIndex)) Then
-												' Residue is already present in objStaticMods; this is unexpected
-												' We'll log a warning, but continue
-												ShowMessage("Warning: Residue '" & strTargetResidues.Chars(intIndex) & "' has more than one static mod defined; this is not allowed (duplicate has ModMass=" & strModMass & ")")
-											Else
-												objStaticMods.Add(strTargetResidues.Chars(intIndex), strModMass)
-											End If
-
-										Catch ex As Exception
-											HandleException("Exception adding static mod for " & strTargetResidues.Chars(intIndex) & " with ModMass=" & strModMass, ex)
-										End Try
-									Next intIndex
-
-								Case Else
-									' Dynamic residue mod (Includes mod type "D")
-									' Note that < and > mean peptide N and C terminus (N_TERMINAL_PEPTIDE_SYMBOL_DMS and C_TERMINAL_PEPTIDE_SYMBOL_DMS)
-
-									Try
-										If objDynamicMods.ContainsKey(strModSymbol) Then
-											' Mod symbol already present in objDynamicMods; this is unexpected
+									If objStaticMods.TryGetValue(chChar, lstModMasses) Then
+										If Not lstModMasses.Contains(strModMass) Then
+											' Residue is already present in objStaticMods; this is unusual, but we'll allow it
 											' We'll log a warning, but continue
-											ShowMessage("Warning: Dynamic mod symbol '" & strModSymbol & "' is already defined; it cannot have more than one associated mod mass (duplicate has ModMass=" & strModMass & ")")
-										Else
-											objDynamicMods.Add(strModSymbol, strModMass)
+											ShowMessage("Warning: Residue '" & chChar & "' has more than one static mod defined; this is not typically used, but will be allowed")
+											lstModMasses.Add(strModMass)
 										End If
+									Else
+										lstModMasses = New List(Of String)
+										lstModMasses.Add(strModMass)
+										objStaticMods.Add(chChar, lstModMasses)
+									End If
 
-									Catch ex As Exception
-										HandleException("Exception adding dynamic mod for " & strModSymbol & " with ModMass=" & strModMass, ex)
-									End Try
+								Catch ex As Exception
+									HandleException("Exception adding static mod for " & chChar & " with ModMass=" & strModMass, ex)
+								End Try
+							Next
+						Case eModificationTypeConstants.DynamicMod
+							' Dynamic residue mod (Includes mod type "D")
+							' Note that < and > mean peptide N and C terminus (N_TERMINAL_PEPTIDE_SYMBOL_DMS and C_TERMINAL_PEPTIDE_SYMBOL_DMS)
 
-							End Select
-						End If
-					End If
+							Try
+								If objDynamicMods.ContainsKey(objItem.ModificationSymbol) Then
+									' Mod symbol already present in objDynamicMods; this is unexpected
+									' We'll log a warning, but continue
+									ShowMessage("Warning: Dynamic mod symbol '" & objItem.ModificationSymbol & "' is already defined; it cannot have more than one associated mod mass (duplicate has ModMass=" & strModMass & ")")
+								Else
+									objDynamicMods.Add(objItem.ModificationSymbol, strModMass)
+								End If
 
-				Loop
+							Catch ex As Exception
+								HandleException("Exception adding dynamic mod for " & objItem.ModificationSymbol & " with ModMass=" & strModMass, ex)
+							End Try
 
-			End Using
+
+						Case eModificationTypeConstants.IsotopicMod
+							' Isotopic mods are not supported by this class
+							' However, do not log a warning since these are rarely used
+
+						Case eModificationTypeConstants.UnknownType
+							' Unknown type; just ignore it
+
+						Case Else
+							' Unknown type; just ignore it
+
+					End Select
+				Next
+			End If
 
 		Catch ex As Exception
 			HandleException("Exception reading PHRP Mod Summary file", ex)
@@ -1442,7 +1480,6 @@ Public Class clsPHRPReader
 
 	Private Function ValidateInputFiles(ByVal strInputFilePath As String, _
 	  ByRef eResultType As ePeptideHitResultType, _
-	  ByRef strSearchToolParamFilePath As String, _
 	  ByRef strModSummaryFilePath As String) As Boolean
 
 		Dim fiFileInfo As System.IO.FileInfo

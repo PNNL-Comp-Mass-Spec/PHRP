@@ -1018,11 +1018,11 @@ Public MustInherit Class clsPHRPBaseClass
 					With mPeptideMods.GetModificationByIndex(intIndex)
 						If .OccurrenceCount > 0 OrElse Not .UnknownModAutoDefined Then
 							swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR & _
-								 .ModificationMass.ToString & SEP_CHAR & _
-								 .TargetResidues & SEP_CHAR & _
-								 mPeptideMods.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
-								 .MassCorrectionTag & SEP_CHAR & _
-								 .OccurrenceCount.ToString)
+							  .ModificationMass.ToString & SEP_CHAR & _
+							  .TargetResidues & SEP_CHAR & _
+							  clsPeptideModificationContainer.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
+							  .MassCorrectionTag & SEP_CHAR & _
+							  .OccurrenceCount.ToString)
 						End If
 					End With
 				Next intIndex

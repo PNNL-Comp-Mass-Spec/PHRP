@@ -46,6 +46,10 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PeptideHitResultsProcessor, Version=1.5.4496.29907, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\PeptideHitResultsProcessor\bin\PeptideHitResultsProcessor.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -67,6 +71,7 @@
     <Compile Include="clsMSGFResultsReader.vb" />
     <Compile Include="clsPeptideCleavageStateCalculator.vb" />
     <Compile Include="clsPeptideMassCalculator.vb" />
+    <Compile Include="clsPHRPModSummaryReader.vb" />
     <Compile Include="clsPHRPParser.vb" />
     <Compile Include="clsPHRPReader.vb" />
     <Compile Include="clsPHRPParserInspect.vb" />
@@ -78,6 +83,7 @@
     <Compile Include="clsPSM.vb" />
     <Compile Include="clsScanStatsInfo.vb" />
     <Compile Include="clsScanStatsReader.vb" />
+    <Compile Include="clsSearchEngineParameters.vb" />
     <Compile Include="clsSeqInfo.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
   </ItemGroup>

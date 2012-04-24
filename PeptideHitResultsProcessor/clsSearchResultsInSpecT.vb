@@ -269,44 +269,4 @@ Public Class clsSearchResultsInSpecT
         mPrecursorError = String.Empty
     End Sub
 
-    '' Unused
-    ''Protected Overrides Sub ComputeDelMCorrected()
-
-    ''    Dim dblDelM As Double
-    ''    Dim intCorrectionCount As Integer = 0
-
-    ''    Dim dblPrecursorMZ As Double
-    ''    Dim intCharge As Integer
-    ''    Dim dblPrecursorMonoMass As Double
-
-    ''    Dim blnParseError As Boolean = False
-
-    ''    ' Note that mPeptideDeltaMass is the DeltaMass value reported by Inspect 
-    ''    ' (though clsInSpecTResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
-    ''    If Double.TryParse(mPeptideDeltaMass, dblDelM) Then
-
-    ''        ' Negate dblDelM so that it represents observed - theoretical
-    ''        dblDelM = -dblDelM
-
-    ''        ' Compute the original value for the precursor monoisotopic mass
-    ''        If Double.TryParse(mPrecursorMZ, dblPrecursorMZ) Then
-    ''            If Integer.TryParse(mCharge, intCharge) Then
-    ''                dblPrecursorMonoMass = dblPrecursorMZ * intCharge - intCharge * clsPeptideMassCalculator.MASS_PROTON
-    ''            Else
-    ''                blnParseError = True
-    ''            End If
-    ''        End If
-
-    ''        If blnParseError Then
-    ''            dblPrecursorMonoMass = mPeptideMonoisotopicMass + dblDelM
-    ''        End If
-
-    ''        MyBase.ComputeDelMCorrectedWork(dblDelM, dblPrecursorMonoMass, True)
-
-    ''    Else
-    ''        mPeptideDeltaMassCorrectedPpm = 0
-    ''    End If
-
-    ''End Sub
-
 End Class

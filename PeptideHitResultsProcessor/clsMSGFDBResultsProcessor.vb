@@ -405,7 +405,7 @@ Public Class clsMSGFDBResultsProcessor
         ' Compute the original value for the precursor monoisotopic mass
         dblPrecursorMonoMass = dblPrecursorMZ * intCharge - intCharge * clsPeptideMassCalculator.MASS_PROTON
 
-        dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPublic(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
+		dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
 
         Return dblPeptideDeltaMassCorrectedPpm
 

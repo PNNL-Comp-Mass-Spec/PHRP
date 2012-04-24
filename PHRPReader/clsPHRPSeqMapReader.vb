@@ -145,6 +145,7 @@ Public Class clsPHRPSeqMapReader
 	  ByRef lstSeqInfo As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)) As Boolean
 
 		Dim blnSuccess As Boolean
+		Dim strFilePath As String
 
 		' Note: do not put a Try/Catch handler in this function
 		'       Instead, allow LoadResultToSeqMapping or LoadSeqToProteinMapping to raise exceptions
@@ -170,16 +171,30 @@ Public Class clsPHRPSeqMapReader
 		If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
 			blnSuccess = False
 		Else
-			blnSuccess = LoadResultToSeqMapping(System.IO.Path.Combine(mInputFolderPath, mResultToSeqMapFilename), lstResultToSeqMap)			
+			strFilePath = System.IO.Path.Combine(mInputFolderPath, mResultToSeqMapFilename)
+			If Not System.IO.File.Exists(strFilePath) Then
+				blnSuccess = False
+			Else
+				blnSuccess = LoadResultToSeqMapping(strFilePath, lstResultToSeqMap)
+			End If
 		End If
 
 		If blnSuccess Then
+
 			If Not String.IsNullOrEmpty(mSeqInfoFilename) Then
-				blnSuccess = LoadSeqInfo(System.IO.Path.Combine(mInputFolderPath, mSeqInfoFilename), lstSeqInfo)
+				strFilePath = System.IO.Path.Combine(mInputFolderPath, mSeqInfoFilename)
+				If System.IO.File.Exists(strFilePath) Then
+					LoadSeqInfo(strFilePath, lstSeqInfo)
+				End If
 			End If
 
 			If Not String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
-				blnSuccess = LoadSeqToProteinMapping(System.IO.Path.Combine(mInputFolderPath, mSeqToProteinMapFilename), lstSeqToProteinMap)
+				strFilePath = System.IO.Path.Combine(mInputFolderPath, mSeqToProteinMapFilename)
+				If Not System.IO.File.Exists(strFilePath) Then
+					blnSuccess = False
+				Else
+					blnSuccess = LoadSeqToProteinMapping(strFilePath, lstSeqToProteinMap)
+				End If
 			Else
 				blnSuccess = False
 			End If

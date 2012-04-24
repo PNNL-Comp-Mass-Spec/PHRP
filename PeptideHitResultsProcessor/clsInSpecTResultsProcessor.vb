@@ -580,7 +580,7 @@ Public Class clsInSpecTResultsProcessor
 
         Dim dblPeptideDeltaMassCorrectedPpm As Double
 
-        dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPublic(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
+		dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
 
         Return dblPeptideDeltaMassCorrectedPpm
 
