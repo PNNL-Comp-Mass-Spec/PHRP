@@ -10,7 +10,6 @@
 '*********************************************************************************************************
 
 Option Strict On
-Imports PeptideHitResultsProcessor.clsPeptideModificationContainer
 
 Public MustInherit Class clsPHRPParser
 
@@ -31,7 +30,7 @@ Public MustInherit Class clsPHRPParser
 
 	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 
-	Protected mModInfo As System.Collections.Generic.List(Of PeptideHitResultsProcessor.clsModificationDefinition)
+	Protected mModInfo As System.Collections.Generic.List(Of clsModificationDefinition)
 	Protected mModInfoLoaded As Boolean
 
 	Protected mResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, Integer)
@@ -121,7 +120,7 @@ Public MustInherit Class clsPHRPParser
 
 	End Sub
 
-	Protected Function ConvertModsToNumericMods(ByVal strCleanSequence As String, ByRef lstModifiedResidues As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)) As String
+	Protected Function ConvertModsToNumericMods(ByVal strCleanSequence As String, ByRef lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
 		Static sbNewPeptide As New System.Text.StringBuilder
 
 		sbNewPeptide.Length = 0
@@ -178,7 +177,7 @@ Public MustInherit Class clsPHRPParser
 			blnSuccess = objModSummaryReader.Success
 
 			If blnSuccess Then
-				mModInfo = objModSummaryReader.ModificationDefs			
+				mModInfo = objModSummaryReader.ModificationDefs
 			End If
 
 		Catch ex As Exception
@@ -288,9 +287,9 @@ Public MustInherit Class clsPHRPParser
 		Dim intResidueLoc As Integer
 		Dim intPeptideResidueCount As Integer
 
-		Dim eResidueTerminusState As eResidueTerminusStateConstants
+		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
 
-		Dim objMatchedModDef As PeptideHitResultsProcessor.clsModificationDefinition = Nothing
+		Dim objMatchedModDef As clsModificationDefinition = Nothing
 		Dim blnMatchFound As Boolean
 
 		Dim blnFavorTerminalMods As Boolean
@@ -324,13 +323,13 @@ Public MustInherit Class clsPHRPParser
 									' Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
 
 									If intResidueLoc = 1 Then
-										eResidueTerminusState = eResidueTerminusStateConstants.PeptideNTerminus
+										eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
 										blnFavorTerminalMods = True
 									ElseIf intResidueLoc = intPeptideResidueCount Then
-										eResidueTerminusState = eResidueTerminusStateConstants.PeptideCTerminus
+										eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
 										blnFavorTerminalMods = True
 									Else
-										eResidueTerminusState = eResidueTerminusStateConstants.None
+										eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
 										blnFavorTerminalMods = False
 									End If
 
@@ -347,7 +346,7 @@ Public MustInherit Class clsPHRPParser
 							End If
 						Next intModIndex
 					End If
-					
+
 				End If
 
 				blnSuccess = True
@@ -361,7 +360,7 @@ Public MustInherit Class clsPHRPParser
 		Return blnSuccess
 	End Function
 
-	Protected Function UpdatePSMFindMatchingModInfo(ByVal strMassCorrectionTag As String, ByVal blnFavorTerminalMods As Boolean, ByVal eResidueTerminusState As eResidueTerminusStateConstants, ByRef objMatchedModDef As PeptideHitResultsProcessor.clsModificationDefinition) As Boolean
+	Protected Function UpdatePSMFindMatchingModInfo(ByVal strMassCorrectionTag As String, ByVal blnFavorTerminalMods As Boolean, ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ByRef objMatchedModDef As clsModificationDefinition) As Boolean
 
 		Dim blnMatchFound As Boolean
 
@@ -370,16 +369,16 @@ Public MustInherit Class clsPHRPParser
 			For Each objMod In mModInfo
 				If strMassCorrectionTag = objMod.MassCorrectionTag Then
 					If blnFavorTerminalMods Then
-						If objMod.ModificationType = PeptideHitResultsProcessor.clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
-						   objMod.ModificationType = PeptideHitResultsProcessor.clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
+						If objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
+						   objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
 
-							If eResidueTerminusState = eResidueTerminusStateConstants.PeptideNTerminus AndAlso _
-							  (objMod.TargetResiduesContain(N_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(N_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
+							If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus AndAlso _
+							  (objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
 								blnMatchFound = True
 							End If
 
-							If eResidueTerminusState = eResidueTerminusStateConstants.PeptideCTerminus AndAlso _
-							  (objMod.TargetResiduesContain(C_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(C_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
+							If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus AndAlso _
+							  (objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
 								blnMatchFound = True
 							End If
 

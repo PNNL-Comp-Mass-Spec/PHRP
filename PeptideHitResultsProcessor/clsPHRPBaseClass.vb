@@ -25,6 +25,7 @@ Option Strict On
 ' this computer software.
 
 Imports PeptideHitResultsProcessor.clsPeptideCleavageStateCalculator
+Imports PHRPReader
 
 Public MustInherit Class clsPHRPBaseClass
 
@@ -1017,7 +1018,7 @@ Public MustInherit Class clsPHRPBaseClass
 							swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR & _
 							  .ModificationMass.ToString & SEP_CHAR & _
 							  .TargetResidues & SEP_CHAR & _
-							  clsPeptideModificationContainer.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
+							  clsModificationDefinition.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
 							  .MassCorrectionTag & SEP_CHAR & _
 							  .OccurrenceCount.ToString)
 						End If

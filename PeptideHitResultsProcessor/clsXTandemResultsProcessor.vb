@@ -29,6 +29,8 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
+Imports PHRPReader
+
 Public Class clsXTandemResultsProcessor
     Inherits clsPHRPBaseClass
 
@@ -266,8 +268,8 @@ Public Class clsXTandemResultsProcessor
 
                             If strTargetResidues.Length > 0 Then
                                 ' Convert from X!Tandem-style N-Terminus notation to DMS-style notation
-                                strTargetResidues = strTargetResidues.Replace(clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_SYMBOL_DMS)
-                                strTargetResidues = strTargetResidues.Replace(clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+								strTargetResidues = strTargetResidues.Replace(clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS)
+								strTargetResidues = strTargetResidues.Replace(clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
                             End If
 
                             ' Append the new mod information to udtModInfo
@@ -327,9 +329,9 @@ Public Class clsXTandemResultsProcessor
                     With udtModInfo(intModInfoCount)
                         .SortOrder = intSortOrder
                         If blnNTerminus Then
-                            strTargetResidues = clsPeptideModificationContainer.N_TERMINAL_PROTEIN_SYMBOL_DMS
+							strTargetResidues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
                         Else
-                            strTargetResidues = clsPeptideModificationContainer.C_TERMINAL_PROTEIN_SYMBOL_DMS
+							strTargetResidues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
                         End If
 
                         .ModificationMass = dblModificationMass
@@ -1285,7 +1287,7 @@ Public Class clsXTandemResultsProcessor
 
     Private Sub ParseXTandemResultsFileReadDomainMods(ByRef objXMLReader As System.Xml.XmlTextReader, ByRef objSearchResult As clsSearchResultsXTandem, ByVal intDomainElementReaderDepth As Integer, ByVal blnUpdateModOccurrenceCounts As Boolean)
 
-        Dim eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants
+		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
         Dim chTargetResidue As Char
         Dim strValue As String
 

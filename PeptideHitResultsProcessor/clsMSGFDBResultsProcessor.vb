@@ -13,6 +13,8 @@ Option Strict On
 ' E-mail: matthew.monroe@pnnl.gov
 ' -------------------------------------------------------------------------------
 
+Imports PHRPReader
+
 Public Class clsMSGFDBResultsProcessor
     Inherits clsPHRPBaseClass
 
@@ -2085,63 +2087,63 @@ Public Class clsMSGFDBResultsProcessor
         Dim intResIndexEnd As Integer
 
         Dim chTargetResidue As Char
-        Dim eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants
-        Dim blnExistingModFound As Boolean
+		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
+		Dim blnExistingModFound As Boolean
 
-        Dim objModificationDefinition As clsModificationDefinition
+		Dim objModificationDefinition As clsModificationDefinition
 
-        If Not udtMSGFDBModInfo Is Nothing Then
-            For intIndex = 0 To udtMSGFDBModInfo.Length - 1
-                ' Call .LookupModificationDefinitionByMass for each entry in udtMSGFDBModInfo
+		If Not udtMSGFDBModInfo Is Nothing Then
+			For intIndex = 0 To udtMSGFDBModInfo.Length - 1
+				' Call .LookupModificationDefinitionByMass for each entry in udtMSGFDBModInfo
 
-                With udtMSGFDBModInfo(intIndex)
+				With udtMSGFDBModInfo(intIndex)
 
-                    If .Residues.Length > 0 Then
-                        intResIndexStart = 0
-                        intResIndexEnd = .Residues.Length - 1
-                    Else
-                        intResIndexStart = -1
-                        intResIndexEnd = -1
-                    End If
+					If .Residues.Length > 0 Then
+						intResIndexStart = 0
+						intResIndexEnd = .Residues.Length - 1
+					Else
+						intResIndexStart = -1
+						intResIndexEnd = -1
+					End If
 
-                    For intResidueIndex = intResIndexStart To intResIndexEnd
-                        If intResidueIndex >= 0 Then
-                            chTargetResidue = .Residues.Chars(intResidueIndex)
-                            If chTargetResidue = "*"c Then
-                                ' This is a terminal mod, and MSGFDB lists the target residue as * for terminal mods
-                                ' This program requires that chTargetResidue be Nothing
-                                chTargetResidue = Nothing
-                            End If
-                        Else
-                            chTargetResidue = Nothing
-                        End If
+					For intResidueIndex = intResIndexStart To intResIndexEnd
+						If intResidueIndex >= 0 Then
+							chTargetResidue = .Residues.Chars(intResidueIndex)
+							If chTargetResidue = "*"c Then
+								' This is a terminal mod, and MSGFDB lists the target residue as * for terminal mods
+								' This program requires that chTargetResidue be Nothing
+								chTargetResidue = Nothing
+							End If
+						Else
+							chTargetResidue = Nothing
+						End If
 
-                        If .ModType = eMSGFDBModType.DynNTermPeptide Then
-                            eResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.PeptideNTerminus
-                        ElseIf .ModType = eMSGFDBModType.DynCTermPeptide Then
-                            eResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.PeptideCTerminus
-                        ElseIf .ModType = eMSGFDBModType.DynNTermProtein Then
-                            eResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.ProteinNTerminus
-                        ElseIf .ModType = eMSGFDBModType.DynCTermProtein Then
-                            eResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.ProteinCTerminus
-                        Else
-                            eResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.None
-                        End If
-                        blnExistingModFound = False
+						If .ModType = eMSGFDBModType.DynNTermPeptide Then
+							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
+						ElseIf .ModType = eMSGFDBModType.DynCTermPeptide Then
+							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
+						ElseIf .ModType = eMSGFDBModType.DynNTermProtein Then
+							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus
+						ElseIf .ModType = eMSGFDBModType.DynCTermProtein Then
+							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
+						Else
+							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
+						End If
+						blnExistingModFound = False
 
-                        objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(.ModMassVal, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
+						objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(.ModMassVal, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
 
-                        If intResidueIndex = intResIndexStart Then
-                            .ModSymbol = objModificationDefinition.ModificationSymbol
-                        End If
+						If intResidueIndex = intResIndexStart Then
+							.ModSymbol = objModificationDefinition.ModificationSymbol
+						End If
 
-                    Next intResidueIndex
+					Next intResidueIndex
 
 
-                End With
+				End With
 
-            Next intIndex
-        End If
+			Next intIndex
+		End If
     End Sub
 
 	Protected Sub StoreSearchResult(ByRef udtSearchResult As udtMSGFDBSearchResultType, _

@@ -92,14 +92,7 @@ PeptideHitResultsProcessor
  </summary>
 	<returns></returns>
 	<remarks></remarks>
-</member><member name="M:PeptideHitResultsProcessor.clsModificationDefinition.CanAffectPeptideOrProteinTerminus">
-	<summary>
- Returns True if this modification can affect the peptide or protein terminus
- Note that some modifications can affect either peptide teriminii or internal residues
- </summary>
-	<returns></returns>
-	<remarks></remarks>
-</member><member name="M:PeptideHitResultsProcessor.clsPeptideModificationContainer.AddModification(PeptideHitResultsProcessor.clsModificationDefinition,System.Boolean)">
+</member><member name="M:PeptideHitResultsProcessor.clsPeptideModificationContainer.AddModification(PHRPReader.clsModificationDefinition,System.Boolean)">
 	<summary>
  Add objModificationDefinition to mModifications
  However, do not add if a duplicate modification
@@ -143,7 +136,7 @@ PeptideHitResultsProcessor
  Also updates mPeptideDeltaMassCorrectedPpm
  </summary>
 	<remarks></remarks>
-</member><member name="M:PeptideHitResultsProcessor.clsSearchResultsBaseClass.SearchResultAddDynamicModification(System.Char,System.Char,System.Int32,PeptideHitResultsProcessor.clsPeptideModificationContainer.eResidueTerminusStateConstants,System.Boolean)">
+</member><member name="M:PeptideHitResultsProcessor.clsSearchResultsBaseClass.SearchResultAddDynamicModification(System.Char,System.Char,System.Int32,PHRPReader.clsAminoAcidModInfo.eResidueTerminusStateConstants,System.Boolean)">
 	<summary>
  Associates the given modification symbol with the given residue
  If the modification symbol is unknown, then will return False
@@ -155,7 +148,7 @@ PeptideHitResultsProcessor
 	<param name="blnUpdateModOccurrenceCounts"></param>
 	<returns></returns>
 	<remarks></remarks>
-</member><member name="M:PeptideHitResultsProcessor.clsSearchResultsBaseClass.SearchResultAddModification(System.Double,System.Char,System.Int32,PeptideHitResultsProcessor.clsPeptideModificationContainer.eResidueTerminusStateConstants,System.Boolean)">
+</member><member name="M:PeptideHitResultsProcessor.clsSearchResultsBaseClass.SearchResultAddModification(System.Double,System.Char,System.Int32,PHRPReader.clsAminoAcidModInfo.eResidueTerminusStateConstants,System.Boolean)">
 	<summary>
  Associates the given modification mass with the given residue
  If the modification mass is unknown, then will auto-add it to the list of known modifications
@@ -167,7 +160,7 @@ PeptideHitResultsProcessor
 	<param name="blnUpdateModOccurrenceCounts"></param>
 	<returns></returns>
 	<remarks></remarks>
-</member><member name="M:PeptideHitResultsProcessor.clsSearchResultsBaseClass.SearchResultAddModification(PeptideHitResultsProcessor.clsModificationDefinition@,System.Char,System.Int32,PeptideHitResultsProcessor.clsPeptideModificationContainer.eResidueTerminusStateConstants,System.Boolean)">
+</member><member name="M:PeptideHitResultsProcessor.clsSearchResultsBaseClass.SearchResultAddModification(PHRPReader.clsModificationDefinition@,System.Char,System.Int32,PHRPReader.clsAminoAcidModInfo.eResidueTerminusStateConstants,System.Boolean)">
 	<summary>
  Associates the given modification with the given residue
  </summary>

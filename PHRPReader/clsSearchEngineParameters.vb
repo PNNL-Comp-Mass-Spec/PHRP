@@ -1,7 +1,5 @@
 ﻿Option Strict On
 
-Imports PeptideHitResultsProcessor
-
 Public Class clsSearchEngineParameters
 
 	Public Const MASS_TYPE_MONOISOTOPIC As String = "monoisotopic"

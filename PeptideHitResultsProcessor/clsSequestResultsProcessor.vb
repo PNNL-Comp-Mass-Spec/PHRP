@@ -29,6 +29,8 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
+Imports PHRPReader
+
 Public Class clsSequestResultsProcessor
     Inherits clsPHRPBaseClass
 

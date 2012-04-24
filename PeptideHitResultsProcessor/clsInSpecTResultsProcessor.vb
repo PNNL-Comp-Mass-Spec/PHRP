@@ -26,6 +26,8 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
+Imports PHRPReader
+
 Public Class clsInSpecTResultsProcessor
     Inherits clsPHRPBaseClass
 
@@ -1719,54 +1721,54 @@ Public Class clsInSpecTResultsProcessor
 
         Dim dblModMass As Double
         Dim chTargetResidue As Char
-        Dim eResidueTerminusState As clsPeptideModificationContainer.eResidueTerminusStateConstants
-        Dim blnExistingModFound As Boolean
+		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
+		Dim blnExistingModFound As Boolean
 
-        Dim objModificationDefinition As clsModificationDefinition
+		Dim objModificationDefinition As clsModificationDefinition
 
-        If Not udtInspectModInfo Is Nothing Then
-            For intIndex = 0 To udtInspectModInfo.Length - 1
-                ' Call .LookupModificationDefinitionByMass for each entry in udtInspectModInfo
+		If Not udtInspectModInfo Is Nothing Then
+			For intIndex = 0 To udtInspectModInfo.Length - 1
+				' Call .LookupModificationDefinitionByMass for each entry in udtInspectModInfo
 
-                With udtInspectModInfo(intIndex)
-                    If Double.TryParse(.ModMass, dblModMass) Then
-                        If .Residues.Length > 0 Then
-                            intResIndexStart = 0
-                            intResIndexEnd = .Residues.Length - 1
-                        Else
-                            intResIndexStart = -1
-                            intResIndexEnd = -1
-                        End If
+				With udtInspectModInfo(intIndex)
+					If Double.TryParse(.ModMass, dblModMass) Then
+						If .Residues.Length > 0 Then
+							intResIndexStart = 0
+							intResIndexEnd = .Residues.Length - 1
+						Else
+							intResIndexStart = -1
+							intResIndexEnd = -1
+						End If
 
-                        For intResidueIndex = intResIndexStart To intResIndexEnd
-                            If intResidueIndex >= 0 Then
-                                chTargetResidue = .Residues.Chars(intResidueIndex)
-                            Else
-                                chTargetResidue = Nothing
-                            End If
+						For intResidueIndex = intResIndexStart To intResIndexEnd
+							If intResidueIndex >= 0 Then
+								chTargetResidue = .Residues.Chars(intResidueIndex)
+							Else
+								chTargetResidue = Nothing
+							End If
 
-                            If .ModType = eInspectModType.DynNTermPeptide Then
-                                eResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.PeptideNTerminus
-                            ElseIf .ModType = eInspectModType.DynCTermPeptide Then
-                                eResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.PeptideCTerminus
-                            Else
-                                eResidueTerminusState = clsPeptideModificationContainer.eResidueTerminusStateConstants.None
-                            End If
-                            blnExistingModFound = False
+							If .ModType = eInspectModType.DynNTermPeptide Then
+								eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
+							ElseIf .ModType = eInspectModType.DynCTermPeptide Then
+								eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
+							Else
+								eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
+							End If
+							blnExistingModFound = False
 
-                            objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(dblModMass, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
+							objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(dblModMass, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
 
-                            If intResidueIndex = intResIndexStart Then
-                                .ModSymbol = objModificationDefinition.ModificationSymbol
-                            End If
+							If intResidueIndex = intResIndexStart Then
+								.ModSymbol = objModificationDefinition.ModificationSymbol
+							End If
 
-                        Next intResidueIndex
+						Next intResidueIndex
 
-                    End If
-                End With
+					End If
+				End With
 
-            Next intIndex
-        End If
+			Next intIndex
+		End If
     End Sub
 
     Protected Sub StoreOrWriteSearchResult(ByRef swResultFile As System.IO.StreamWriter, _

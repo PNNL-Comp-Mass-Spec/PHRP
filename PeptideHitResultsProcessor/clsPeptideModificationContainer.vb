@@ -27,6 +27,9 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
+Imports PHRPReader
+Imports PHRPReader.clsAminoAcidModInfo
+
 Public Class clsPeptideModificationContainer
 
 #Region "Constants and Enums"
@@ -34,25 +37,11 @@ Public Class clsPeptideModificationContainer
 
     Public Const MASS_DIGITS_OF_PRECISION As Byte = 3
 
-    Public Const N_TERMINAL_PEPTIDE_SYMBOL_DMS As Char = "<"c
-    Public Const C_TERMINAL_PEPTIDE_SYMBOL_DMS As Char = ">"c
-    Public Const N_TERMINAL_PROTEIN_SYMBOL_DMS As Char = "["c
-    Public Const C_TERMINAL_PROTEIN_SYMBOL_DMS As Char = "]"c
-
     Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "["c
     Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "]"c
 
     Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "["c
     Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "]"c
-
-    Public Enum eResidueTerminusStateConstants As Integer
-        None = 0                        ' The residue is in the middle of the peptide
-        PeptideNTerminus = 1            ' The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
-		PeptideCTerminus = 2			' The residue is located at the peptide's C-terminus; superseded by ProteinCTerminus if applicable
-        ProteinNTerminus = 3            ' The residue is located at the protein's N-terminus
-        ProteinCTerminus = 4            ' The residue is located at the protein's C-terminus
-        ProteinNandCCTerminus = 5       ' The protein only has one residue 
-    End Enum
 
 #End Region
 
@@ -352,8 +341,8 @@ Public Class clsPeptideModificationContainer
 							End If
 
 							If Not blnExistingModFound AndAlso _
-								(eResidueTerminusState = eResidueTerminusStateConstants.ProteinNTerminus OrElse _
-								 eResidueTerminusState = eResidueTerminusStateConstants.ProteinNandCCTerminus) Then
+							 (eResidueTerminusState = eResidueTerminusStateConstants.ProteinNTerminus OrElse _
+							  eResidueTerminusState = eResidueTerminusStateConstants.ProteinNandCCTerminus) Then
 
 								' Protein N-Terminus residue could also match a Peptide N-terminal mod; check for this
 								If mModifications(intIndex).TargetResiduesContain(N_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
@@ -362,8 +351,8 @@ Public Class clsPeptideModificationContainer
 							End If
 
 							If Not blnExistingModFound AndAlso _
-								(eResidueTerminusState = eResidueTerminusStateConstants.ProteinCTerminus OrElse _
-								 eResidueTerminusState = eResidueTerminusStateConstants.ProteinNandCCTerminus) Then
+							 (eResidueTerminusState = eResidueTerminusStateConstants.ProteinCTerminus OrElse _
+							  eResidueTerminusState = eResidueTerminusStateConstants.ProteinNandCCTerminus) Then
 
 								' Protein C-Terminus residue could also match a Peptide C-terminal mod; check for this
 								If mModifications(intIndex).TargetResiduesContain(C_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
@@ -552,44 +541,6 @@ Public Class clsPeptideModificationContainer
 
 	End Function
 
-	Public Shared Function ModificationSymbolToModificationType(ByVal chModificationTypeSymbol As Char) As clsModificationDefinition.eModificationTypeConstants
-		If chModificationTypeSymbol = Nothing Then
-			Return clsModificationDefinition.eModificationTypeConstants.UnknownType
-		Else
-			Select Case chModificationTypeSymbol
-				Case "D"c
-					Return clsModificationDefinition.eModificationTypeConstants.DynamicMod
-				Case "S"c
-					Return clsModificationDefinition.eModificationTypeConstants.StaticMod
-				Case "T"c
-					Return clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-				Case "I"c
-					Return clsModificationDefinition.eModificationTypeConstants.IsotopicMod
-				Case "P"c
-					Return clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
-				Case Else
-					Return clsModificationDefinition.eModificationTypeConstants.UnknownType
-			End Select
-		End If
-	End Function
-
-	Public Shared Function ModificationTypeToModificationSymbol(ByVal eModificationType As clsModificationDefinition.eModificationTypeConstants) As Char
-		Select Case eModificationType
-			Case clsModificationDefinition.eModificationTypeConstants.DynamicMod
-				Return "D"c
-			Case clsModificationDefinition.eModificationTypeConstants.StaticMod
-				Return "S"c
-			Case clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-				Return "T"c
-			Case clsModificationDefinition.eModificationTypeConstants.IsotopicMod
-				Return "I"c
-			Case clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
-				Return "P"c
-			Case Else
-				Return "?"c
-		End Select
-	End Function
-
 	Private Sub InitializeLocalVariables()
 		mErrorMessage = String.Empty
 		SetDefaultMassCorrectionTags()
@@ -739,7 +690,7 @@ Public Class clsPeptideModificationContainer
 											If strSplitLine.Length >= 4 Then
 												' Store the modification type
 												If strSplitLine(3).Trim.Length = 1 Then
-													.ModificationType = clsPeptideModificationContainer.ModificationSymbolToModificationType(strSplitLine(3).ToUpper.Trim.Chars(0))
+													.ModificationType = clsModificationDefinition.ModificationSymbolToModificationType(strSplitLine(3).ToUpper.Trim.Chars(0))
 												End If
 
 												' If the .ModificationType is unknown, then change it to Dynamic

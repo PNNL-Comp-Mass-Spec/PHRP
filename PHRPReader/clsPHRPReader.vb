@@ -15,8 +15,7 @@
 Option Strict On
 
 Imports System.Collections.Generic
-Imports PeptideHitResultsProcessor.clsPeptideModificationContainer
-Imports PeptideHitResultsProcessor.clsModificationDefinition
+Imports PHRPReader.clsModificationDefinition
 
 Public Class clsPHRPReader
 	Implements IDisposable
@@ -603,14 +602,14 @@ Public Class clsPHRPReader
 	''' </summary>
 	''' <returns>True if success, false if an error</returns>
 	''' <remarks></remarks>
-	Protected Function ConvertModsToNumericMods(ByVal strPeptide As String, ByRef strPeptideWithNumericMods As String, ByRef lstPeptideMods As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)) As Boolean
+	Protected Function ConvertModsToNumericMods(ByVal strPeptide As String, ByRef strPeptideWithNumericMods As String, ByRef lstPeptideMods As List(Of clsAminoAcidModInfo)) As Boolean
 
 		Static sbNewPeptide As New System.Text.StringBuilder
 
 		Dim intPeptideLength As Integer
 		Dim chMostRecentResidue As Char
 		Dim intResidueLocInPeptide As Integer = 0
-		Dim eResidueTerminusState As eResidueTerminusStateConstants
+		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
 
 		Dim intIndex As Integer
 		Dim intIndexStart As Integer
@@ -658,11 +657,11 @@ Public Class clsPHRPReader
 						chMostRecentResidue = strPeptide.Chars(intIndex)
 						intResidueLocInPeptide += 1
 						If intResidueLocInPeptide = 1 Then
-							eResidueTerminusState = eResidueTerminusStateConstants.PeptideNTerminus
+							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
 						ElseIf intResidueLocInPeptide = intPeptideLength Then
-							eResidueTerminusState = eResidueTerminusStateConstants.PeptideCTerminus
+							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
 						Else
-							eResidueTerminusState = eResidueTerminusStateConstants.None
+							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
 						End If
 
 						' Character is a letter; append it
@@ -674,12 +673,12 @@ Public Class clsPHRPReader
 						If intIndex = intIndexStart AndAlso mStaticMods.Count > 0 Then
 							' We're at the N-terminus of the peptide
 							' Possibly add a static N-terminal peptide mod (for example, iTRAQ8, which is 304.2022 Da)
-							AddStaticModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, eResidueTerminusStateConstants.PeptideNTerminus, sbNewPeptide, lstPeptideMods)
+							AddStaticModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus, sbNewPeptide, lstPeptideMods)
 
 							If strPeptide.StartsWith(clsPHRPReader.PROTEIN_TERMINUS_SYMBOL_PHRP) Then
 								' We're at the N-terminus of the protein
 								' Possibly add a static N-terminal protein mod
-								AddStaticModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, eResidueTerminusStateConstants.ProteinNTerminus, sbNewPeptide, lstPeptideMods)
+								AddStaticModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus, sbNewPeptide, lstPeptideMods)
 							End If
 						End If
 					Else
@@ -689,12 +688,12 @@ Public Class clsPHRPReader
 
 					If intIndex = intIndexEnd AndAlso mStaticMods.Count > 0 Then
 						' Possibly add a static C-terminal peptide mod
-						AddStaticModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, eResidueTerminusStateConstants.PeptideCTerminus, sbNewPeptide, lstPeptideMods)
+						AddStaticModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus, sbNewPeptide, lstPeptideMods)
 
 						If strPeptide.EndsWith(clsPHRPReader.PROTEIN_TERMINUS_SYMBOL_PHRP) Then
 							' We're at the C-terminus of the protein
 							' Possibly add a static C-terminal protein mod
-							AddStaticModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, eResidueTerminusStateConstants.ProteinCTerminus, sbNewPeptide, lstPeptideMods)
+							AddStaticModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus, sbNewPeptide, lstPeptideMods)
 						End If
 
 					End If
@@ -718,9 +717,9 @@ Public Class clsPHRPReader
 	  ByVal chResidue As Char, _
 	  ByVal chModSymbol As Char, _
 	  ByVal ResidueLocInPeptide As Integer, _
-	  ByVal ResidueTerminusState As eResidueTerminusStateConstants, _
+	  ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
 	  ByRef sbNewPeptide As System.Text.StringBuilder, _
-	  ByRef lstPeptideMods As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo))
+	  ByRef lstPeptideMods As List(Of clsAminoAcidModInfo))
 
 		Dim strModMass As String = String.Empty
 
@@ -732,13 +731,13 @@ Public Class clsPHRPReader
 				sbNewPeptide.Append("+" & strModMass)
 			End If
 
-			Dim objModDef As PeptideHitResultsProcessor.clsModificationDefinition
+			Dim objModDef As clsModificationDefinition
 			Dim dblModMass As Double
 
 			If Double.TryParse(strModMass, dblModMass) Then
-				objModDef = New PeptideHitResultsProcessor.clsModificationDefinition(chModSymbol, dblModMass, chResidue, eModificationTypeConstants.DynamicMod, "Unknown_" & strModMass)
+				objModDef = New clsModificationDefinition(chModSymbol, dblModMass, chResidue, eModificationTypeConstants.DynamicMod, "Unknown_" & strModMass)
 
-				lstPeptideMods.Add(New PeptideHitResultsProcessor.clsAminoAcidModInfo(chResidue, ResidueLocInPeptide, ResidueTerminusState, objModDef))
+				lstPeptideMods.Add(New clsAminoAcidModInfo(chResidue, ResidueLocInPeptide, ResidueTerminusState, objModDef))
 
 			End If
 		End If
@@ -748,9 +747,9 @@ Public Class clsPHRPReader
 	Protected Sub AddStaticModIfPresent(ByRef objMods As SortedDictionary(Of String, List(Of String)), _
 	  ByVal chResidue As Char, _
 	  ByVal ResidueLocInPeptide As Integer, _
-	  ByVal ResidueTerminusState As eResidueTerminusStateConstants, _
+	  ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
 	  ByRef sbNewPeptide As System.Text.StringBuilder, _
-	  ByRef lstPeptideMods As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo))
+	  ByRef lstPeptideMods As List(Of clsAminoAcidModInfo))
 
 		Dim lstModMasses As List(Of String) = Nothing
 
@@ -764,13 +763,13 @@ Public Class clsPHRPReader
 					sbNewPeptide.Append("+" & strModMass)
 				End If
 
-				Dim objModDef As PeptideHitResultsProcessor.clsModificationDefinition
+				Dim objModDef As clsModificationDefinition
 				Dim dblModMass As Double
 
 				If Double.TryParse(strModMass, dblModMass) Then
-					objModDef = New PeptideHitResultsProcessor.clsModificationDefinition("-"c, dblModMass, chResidue, eModificationTypeConstants.StaticMod, "Unknown_" & strModMass)
+					objModDef = New clsModificationDefinition("-"c, dblModMass, chResidue, eModificationTypeConstants.StaticMod, "Unknown_" & strModMass)
 
-					lstPeptideMods.Add(New PeptideHitResultsProcessor.clsAminoAcidModInfo(chResidue, ResidueLocInPeptide, ResidueTerminusState, objModDef))
+					lstPeptideMods.Add(New clsAminoAcidModInfo(chResidue, ResidueLocInPeptide, ResidueTerminusState, objModDef))
 				End If
 			Next
 
@@ -1175,8 +1174,8 @@ Public Class clsPHRPReader
 
 							' Markup the peptide with the dynamic and static mods
 							Dim strPeptideWithMods As String = String.Empty
-							Dim lstPeptideMods As List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)
-							lstPeptideMods = New List(Of PeptideHitResultsProcessor.clsAminoAcidModInfo)
+							Dim lstPeptideMods As List(Of clsAminoAcidModInfo)
+							lstPeptideMods = New List(Of clsAminoAcidModInfo)
 
 							blnSuccess = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim, strPeptideWithMods, lstPeptideMods)
 							If blnSuccess Then

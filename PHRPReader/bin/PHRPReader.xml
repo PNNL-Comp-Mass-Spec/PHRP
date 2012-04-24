@@ -254,7 +254,7 @@ PHRPReader
 	<param name="strFilePath"></param>
 	<returns></returns>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.ConvertModsToNumericMods(System.String,System.String@,System.Collections.Generic.List{PeptideHitResultsProcessor.clsAminoAcidModInfo}@)">
+</member><member name="M:PHRPReader.clsPHRPReader.ConvertModsToNumericMods(System.String,System.String@,System.Collections.Generic.List{PHRPReader.clsAminoAcidModInfo}@)">
 	<summary>
  Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
  Note that if the _SeqInfo.txt file is available, then this function will not be used
@@ -621,6 +621,13 @@ PHRPReader
  Returns the mass value associated with the given mass correction tag
  </summary>
 	<param name="strMassCorrectionTag"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsModificationDefinition.CanAffectPeptideOrProteinTerminus">
+	<summary>
+ Returns True if this modification can affect the peptide or protein terminus
+ Note that some modifications can affect either peptide teriminii or internal residues
+ </summary>
 	<returns></returns>
 	<remarks></remarks>
 </member>

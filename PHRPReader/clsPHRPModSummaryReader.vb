@@ -1,7 +1,5 @@
 ﻿Option Strict On
 
-Imports PeptideHitResultsProcessor
-
 Public Class clsPHRPModSummaryReader
 
 	Protected Const MOD_SUMMARY_COLUMN_Modification_Symbol As String = "Modification_Symbol"
@@ -152,7 +150,7 @@ Public Class clsPHRPModSummaryReader
 						If String.IsNullOrWhiteSpace(strModType) Then
 							eModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType
 						Else
-							eModificationType = clsPeptideModificationContainer.ModificationSymbolToModificationType(strModType.Chars(0))
+							eModificationType = clsModificationDefinition.ModificationSymbolToModificationType(strModType.Chars(0))
 						End If
 
 						Dim objModDef As clsModificationDefinition
