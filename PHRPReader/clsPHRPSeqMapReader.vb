@@ -29,6 +29,8 @@ Public Class clsPHRPSeqMapReader
 	Protected mSeqInfoFilename As String
 
 	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
+
+	Protected mErrorMessage As String = String.Empty
 #End Region
 
 #Region "Properties"
@@ -39,6 +41,11 @@ Public Class clsPHRPSeqMapReader
 		End Get
 	End Property
 
+	Public ReadOnly Property ErrorMessage As String
+		Get
+			Return mErrorMessage
+		End Get
+	End Property
 	Public ReadOnly Property InputFolderPath As String
 		Get
 			Return mInputFolderPath
@@ -74,8 +81,10 @@ Public Class clsPHRPSeqMapReader
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFolderPath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType)
 		mDatasetName = strDatasetName
+
 		If String.IsNullOrEmpty(mDatasetName) Then
-			Throw New Exception("Dataset name cannot be empty")
+			mErrorMessage = "Dataset name cannot be empty"
+			Throw New Exception(mErrorMessage)
 		End If
 
 		mInputFolderPath = strInputFolderPath
@@ -87,17 +96,20 @@ Public Class clsPHRPSeqMapReader
 
 		mResultToSeqMapFilename = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName)
 		If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
-			Throw New Exception("Unable to determine ResultToSeqMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString())
+			mErrorMessage = "Unable to determine ResultToSeqMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
+			Throw New Exception(mErrorMessage)
 		End If
 
 		mSeqToProteinMapFilename = clsPHRPReader.GetPHRPSeqToProteinMapFileName(mPeptideHitResultType, mDatasetName)
 		If String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
-			Throw New Exception("Unable to determine SeqToProteinMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString())
+			mErrorMessage = "Unable to determine SeqToProteinMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
+			Throw New Exception(mErrorMessage)
 		End If
 
 		mSeqInfoFilename = clsPHRPReader.GetPHRPSeqInfoFileName(mPeptideHitResultType, mDatasetName)
 		If String.IsNullOrEmpty(mSeqInfoFilename) Then
-			Throw New Exception("Unable to determine SeqInfo filename for PeptideHitResultType: " & mPeptideHitResultType.ToString())
+			mErrorMessage = "Unable to determine SeqInfo filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
+			Throw New Exception(mErrorMessage)
 		End If
 
 	End Sub
@@ -111,18 +123,21 @@ Public Class clsPHRPSeqMapReader
 	''' <remarks></remarks>
 	Public Sub New(ByVal strInputFolderPath As String, ByVal strResultToSeqMapFilename As String, ByVal strSeqToProteinMapFilename As String, ByVal strSeqInfoFilename As String)
 		mInputFolderPath = strInputFolderPath
+
 		If String.IsNullOrEmpty(mInputFolderPath) Then
 			mInputFolderPath = String.Empty
 		End If
 
 		mPeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strResultToSeqMapFilename)
 		If mPeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
-			Throw New Exception("Unable to auto-determine the PepthideHit result type based on filename " & strResultToSeqMapFilename)
+			mErrorMessage = "Unable to auto-determine the PepthideHit result type based on filename " & strResultToSeqMapFilename
+			Throw New Exception(mErrorMessage)
 		End If
 
 		mDatasetName = clsPHRPReader.AutoDetermineDatasetName(strResultToSeqMapFilename)
 		If String.IsNullOrEmpty(mDatasetName) Then
-			Throw New Exception("Dataset name cannot be empty")
+			mErrorMessage = "Unable to auto-determine the dataset name using filename '" & strResultToSeqMapFilename & "'"
+			Throw New Exception(mErrorMessage)
 		End If
 
 		mResultToSeqMapFilename = strResultToSeqMapFilename
@@ -173,6 +188,7 @@ Public Class clsPHRPSeqMapReader
 		Else
 			strFilePath = System.IO.Path.Combine(mInputFolderPath, mResultToSeqMapFilename)
 			If Not System.IO.File.Exists(strFilePath) Then
+				mErrorMessage = "File not found: " & strFilePath
 				blnSuccess = False
 			Else
 				blnSuccess = LoadResultToSeqMapping(strFilePath, lstResultToSeqMap)
@@ -191,6 +207,7 @@ Public Class clsPHRPSeqMapReader
 			If Not String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
 				strFilePath = System.IO.Path.Combine(mInputFolderPath, mSeqToProteinMapFilename)
 				If Not System.IO.File.Exists(strFilePath) Then
+					mErrorMessage = "File not found: " & strFilePath
 					blnSuccess = False
 				Else
 					blnSuccess = LoadSeqToProteinMapping(strFilePath, lstSeqToProteinMap)

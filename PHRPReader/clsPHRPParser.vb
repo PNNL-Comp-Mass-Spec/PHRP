@@ -40,6 +40,9 @@ Public MustInherit Class clsPHRPParser
 	' This List tracks the Protein Names for each ResultID
 	Protected mResultIDToProteins As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
 
+	Protected mErrorMessages As System.Collections.Generic.List(Of String)
+	Protected mWarningMessages As System.Collections.Generic.List(Of String)
+
 #End Region
 
 #Region "Events"
@@ -49,6 +52,18 @@ Public MustInherit Class clsPHRPParser
 #End Region
 
 #Region "Properties"
+
+	''' <summary>
+	''' Cached error messages
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property ErrorMessages() As System.Collections.Generic.List(Of String)
+		Get
+			Return mErrorMessages
+		End Get
+	End Property
 
 	''' <summary>
 	''' Input file path
@@ -122,6 +137,18 @@ Public MustInherit Class clsPHRPParser
 		End Get
 	End Property
 
+	''' <summary>
+	''' Cached warning messages
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property WarningMessages() As System.Collections.Generic.List(Of String)
+		Get
+			Return mWarningMessages
+		End Get
+	End Property
+
 #End Region
 
 	''' <summary>
@@ -130,7 +157,10 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="strDatasetName">Dataset Name</param>
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType)
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean)
+
+		mErrorMessages = New System.Collections.Generic.List(Of String)
+		mWarningMessages = New System.Collections.Generic.List(Of String)
 
 		mDatasetName = strDatasetName
 		mPeptideHitResultType = ePeptideHitResultType
@@ -155,11 +185,17 @@ Public MustInherit Class clsPHRPParser
 
 		mResultIDToProteins = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
 
-		' Read the ModSummary file (if it exists)
-		mModInfoLoaded = LoadModSummary()
+		If blnLoadModsAndSeqInfo Then
+			' Read the ModSummary file (if it exists)
+			mModInfoLoaded = LoadModSummary()
+		Else
+			mModInfoLoaded = False
+		End If
 
-		' Read the ResultToSeqMapInfo (if the files exist)
-		LoadSeqInfo()
+		If mModInfoLoaded AndAlso blnLoadModsAndSeqInfo Then
+			' Read the ResultToSeqMapInfo (if the files exist)
+			LoadSeqInfo()
+		End If
 
 		' The following will be overridden by a derived form of this class
 		DefineColumnHeaders()
@@ -204,6 +240,22 @@ Public MustInherit Class clsPHRPParser
 
 	End Sub
 
+	''' <summary>
+	''' Clear any cached error messages
+	''' </summary>
+	''' <remarks></remarks>
+	Public Sub ClearErrors()
+		mErrorMessages.Clear()
+	End Sub
+
+	''' <summary>
+	''' Clear any cached warning messages
+	''' </summary>
+	''' <remarks></remarks>
+	Public Sub ClearWarnings()
+		mWarningMessages.Clear()
+	End Sub
+
 	Protected Function ConvertModsToNumericMods(ByVal strCleanSequence As String, ByRef lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
 		Static sbNewPeptide As New System.Text.StringBuilder
 
@@ -246,12 +298,12 @@ Public MustInherit Class clsPHRPParser
 		Try
 			strModSummaryFilePath = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName)
 			If String.IsNullOrEmpty(strModSummaryFilePath) Then
-				ReportError("ModSummaryFile path is empty; unable to continue")
+				ReportWarning("ModSummaryFile path is empty; unable to continue")
 				Return False
 			End If
 
 			If Not System.IO.File.Exists(strModSummaryFilePath) Then
-				ReportError("ModSummaryFile not found: " & strModSummaryFilePath)
+				ReportWarning("ModSummaryFile not found: " & strModSummaryFilePath)
 				Return False
 			End If
 
@@ -287,6 +339,10 @@ Public MustInherit Class clsPHRPParser
 
 			' Read the files
 			blnSuccess = objReader.GetProteinMapping(mResultToSeqMap, mSeqToProteinMap, mSeqInfo)
+
+			If Not blnSuccess Then
+				ReportWarning(objReader.ErrorMessage)
+			End If
 
 			mResultIDToProteins.Clear()
 
@@ -370,10 +426,12 @@ Public MustInherit Class clsPHRPParser
 
 	Protected Sub ReportError(ByVal strErrorMessage As String)
 		mErrorMessage = strErrorMessage
+		mErrorMessages.Add(strErrorMessage)
 		RaiseEvent ErrorEvent(strErrorMessage)
 	End Sub
 
 	Protected Sub ReportWarning(ByVal strWarningMessage As String)
+		mWarningMessages.Add(strWarningMessage)
 		RaiseEvent WarningEvent(strWarningMessage)
 	End Sub
 

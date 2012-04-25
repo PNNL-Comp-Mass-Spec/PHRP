@@ -3,6 +3,9 @@ PHRPReader.dll Revision History
 Version 1.1.4498; April 25, 2012
 	- Added support for parsing search engine parameter files
 	- Updated clsPSM to track SeqID and ScoreRank
+	- Renamed LoadModSummaryFile to LoadModsAndSeqInfo
+	- Added LoadModsAndSeqInfo to PHRPParser constructor
+	- Now caching error and warning messages that occur while instantiating PHRPReader and PHRPParser
 
 Version 1.1.4496; April 23, 2012
 	- Now loading PHRP SeqInfo and SeqToProteinMap files if present in the same folder as the primary PHRP results file

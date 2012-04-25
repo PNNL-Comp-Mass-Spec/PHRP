@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.4.4497; April 24, 2012
+	- Updated NumToString to correctly handle intDigitsOfPrecision
+	- PeptideHitResultsProcessor now depends on PHRPReader 
+
 Version 1.4.4496; April 23, 2012
 	- New version of PeptideHitResultsProcessor
 

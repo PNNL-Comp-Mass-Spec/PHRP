@@ -15,6 +15,7 @@ Imports PHRPReader.clsPHRPReader
 Public Class clsPHRPParserSequest
 	Inherits clsPHRPParser
 
+#Region "Constants"
 	Public Const DATA_COLUMN_HitNum As String = "HitNum"
 	Public Const DATA_COLUMN_ScanNum As String = "ScanNum"
 	Public Const DATA_COLUMN_ScanCount As String = "ScanCount"
@@ -39,15 +40,27 @@ Public Class clsPHRPParserSequest
 	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
 	Protected Const SEQ_SEARCH_ENGINE_NAME As String = "SEQUEST"
+#End Region
+
+	''' <summary>
+	''' Constructor; assumes blnLoadModsAndSeqInfo=True
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <remarks></remarks>
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
+		Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
+	End Sub
 
 	''' <summary>
 	''' Constructor
 	''' </summary>
 	''' <param name="strDatasetName">Dataset name</param>
 	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
-		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.Sequest)
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
+		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.Sequest, blnLoadModsAndSeqInfo)
 		mInitialized = True
 	End Sub
 

@@ -15,6 +15,7 @@ Imports PHRPReader.clsPHRPReader
 Public Class clsPHRPParserMSGFDB
 	Inherits clsPHRPParser
 
+#Region "Constants"
 	Public Const DATA_COLUMN_ResultID As String = "ResultID"
 	Public Const DATA_COLUMN_Scan As String = "Scan"
 	Public Const DATA_COLUMN_FragMethod As String = "FragMethod"
@@ -36,15 +37,27 @@ Public Class clsPHRPParserMSGFDB
 	Public Const DATA_COLUMN_PepFDR As String = "PepFDR"
 
 	Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GF+"
+#End Region
+
+	''' <summary>
+	''' Constructor; assumes blnLoadModsAndSeqInfo=True
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <remarks></remarks>
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
+		Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
+	End Sub
 
 	''' <summary>
 	''' Constructor
 	''' </summary>
 	''' <param name="strDatasetName">Dataset name</param>
 	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
-		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSGFDB)
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
+		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSGFDB, blnLoadModsAndSeqInfo)
 		mInitialized = True
 	End Sub
 
