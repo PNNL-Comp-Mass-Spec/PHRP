@@ -49,11 +49,79 @@ Public MustInherit Class clsPHRPParser
 #End Region
 
 #Region "Properties"
+
+	''' <summary>
+	''' Input file path
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property InputFilePath As String
+		Get
+			Return mInputFilePath
+		End Get
+	End Property
+
+	''' <summary>
+	''' Input folder path
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property InputFolderPath As String
+		Get
+			Return mInputFolderPath
+		End Get
+	End Property
+
+	''' <summary>
+	''' Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property PeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 		Get
 			Return mPeptideHitResultType
 		End Get
 	End Property
+
+	''' <summary>
+	''' Returns the cached mapping between ResultID and SeqID
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property ResultToSeqMap() As System.Collections.Generic.SortedList(Of Integer, Integer)
+		Get
+			Return mResultToSeqMap
+		End Get
+	End Property
+
+	''' <summary>
+	''' Returns the cached sequence info, where key is SeqID
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property SeqInfo() As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)
+		Get
+			Return mSeqInfo
+		End Get
+	End Property
+
+	''' <summary>
+	''' Returns the cached sequence to protein map information
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property SeqToProteinMap() As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))
+		Get
+			Return mSeqToProteinMap
+		End Get
+	End Property
+
 #End Region
 
 	''' <summary>
@@ -65,10 +133,10 @@ Public MustInherit Class clsPHRPParser
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType)
 
 		mDatasetName = strDatasetName
-		mInputFilePath = strInputFilePath
 		mPeptideHitResultType = ePeptideHitResultType
 
 		Dim fiFileInfo As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
+		mInputFilePath = fiFileInfo.FullName
 		mInputFolderPath = fiFileInfo.DirectoryName
 
 		mErrorMessage = String.Empty
@@ -100,7 +168,23 @@ Public MustInherit Class clsPHRPParser
 
 #Region "Functions overridden by derived classes"
 	Protected MustOverride Sub DefineColumnHeaders()
+
+	''' <summary>
+	''' Parse the data line read from a PHRP results file
+	''' </summary>
+	''' <param name="strLine">Data line</param>
+	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
+	''' <param name="objPSM">clsPSM object (output)</param>
+	''' <returns>True if success, false if an error</returns>
 	Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
+
+	''' <summary>
+	''' Parses the specified parameter file
+	''' </summary>
+	''' <param name="strSearchEngineParamFileName">Name of the parameter file to parse (must reside in InputFolderPath)</param>
+	''' <param name="objSearchEngineParams">Search engine parameters class (output)</param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public MustOverride Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 #End Region
 
@@ -256,6 +340,34 @@ Public MustInherit Class clsPHRPParser
 		clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
 	End Sub
 
+	''' <summary>
+	''' Splits strText on strText, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
+	''' </summary>
+	''' <param name="strText"></param>
+	''' <param name="chDelimiter"></param>
+	''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
+	''' <remarks>Automatically trims whitespace</remarks>
+	Protected Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char) As System.Collections.Generic.KeyValuePair(Of String, String)
+		Dim strSplitLine() As String
+		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
+
+		If Not String.IsNullOrEmpty(strText) Then
+			strSplitLine = strText.Split(chDelimiter)
+
+			If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+				If strSplitLine.Length = 1 Then
+					kvSetting = New System.Collections.Generic.KeyValuePair(Of String, String)(strSplitLine(0).Trim(), String.Empty)
+				Else
+					kvSetting = New System.Collections.Generic.KeyValuePair(Of String, String)(strSplitLine(0).Trim(), strSplitLine(1).Trim())
+				End If
+				Return kvSetting
+			End If
+		End If
+
+		Return New System.Collections.Generic.KeyValuePair(Of String, String)(String.Empty, String.Empty)
+
+	End Function
+
 	Protected Sub ReportError(ByVal strErrorMessage As String)
 		mErrorMessage = strErrorMessage
 		RaiseEvent ErrorEvent(strErrorMessage)
@@ -272,6 +384,7 @@ Public MustInherit Class clsPHRPParser
 	''' <summary>
 	''' Updates the theoretical (computed) monoisotopic mass of objPSM using mResultToSeqMap and mSeqInfo
 	''' Also updates the modification info
+	''' Also updates SeqID
 	''' </summary>
 	''' <param name="objPSM"></param>
 	''' <returns>True if success, False if objPSM.ResultID is not found in mResultToSeqMap</returns>
@@ -281,7 +394,7 @@ Public MustInherit Class clsPHRPParser
 		Dim objSeqInfo As clsSeqInfo = Nothing
 
 		Dim strMods() As String
-		Dim strModDetails() As String
+		Dim kvModDetails As System.Collections.Generic.KeyValuePair(Of String, String)
 
 		Dim strMassCorrectionTag As String
 		Dim intResidueLoc As Integer
@@ -300,6 +413,9 @@ Public MustInherit Class clsPHRPParser
 
 		' First determine the modified residues present in this peptide
 		If mResultToSeqMap.TryGetValue(objPSM.ResultID, intSeqID) Then
+
+			objPSM.SeqID = intSeqID
+
 			If mSeqInfo.TryGetValue(intSeqID, objSeqInfo) Then
 				objPSM.PeptideMonoisotopicMass = objSeqInfo.MonoisotopicMass
 
@@ -313,11 +429,11 @@ Public MustInherit Class clsPHRPParser
 						For intModIndex As Integer = 0 To strMods.Count - 1
 
 							' Split strMods on the colon characters
-							strModDetails = strMods(intModIndex).Split(":"c)
+							kvModDetails = ParseKeyValueSetting(strMods(intModIndex), ":"c)
 
-							If Not strModDetails Is Nothing AndAlso strModDetails.Count = 2 Then
-								strMassCorrectionTag = strModDetails(0)
-								If Integer.TryParse(strModDetails(1), intResidueLoc) Then
+							If Not String.IsNullOrEmpty(kvModDetails.Key) AndAlso Not String.IsNullOrEmpty(kvModDetails.Value) Then
+								strMassCorrectionTag = kvModDetails.Key
+								If Integer.TryParse(kvModDetails.Value, intResidueLoc) Then
 									' Find the modification definition in mModInfo
 									' Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
 									' Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
@@ -360,7 +476,11 @@ Public MustInherit Class clsPHRPParser
 		Return blnSuccess
 	End Function
 
-	Protected Function UpdatePSMFindMatchingModInfo(ByVal strMassCorrectionTag As String, ByVal blnFavorTerminalMods As Boolean, ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ByRef objMatchedModDef As clsModificationDefinition) As Boolean
+	Protected Function UpdatePSMFindMatchingModInfo( _
+	  ByVal strMassCorrectionTag As String, _
+	  ByVal blnFavorTerminalMods As Boolean, _
+	  ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
+	  ByRef objMatchedModDef As clsModificationDefinition) As Boolean
 
 		Dim blnMatchFound As Boolean
 

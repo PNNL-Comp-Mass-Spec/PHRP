@@ -14,12 +14,15 @@ Public Class clsPSM
 
 	' Note: Be sure to update the Clone() function if you add new class-wide variables
 	Protected mResultID As Integer
+	Protected mScoreRank As Integer					' Top scoring peptide is rank 1, next lowest score is rank 2, etc.
+
 	Protected mScanNumber As Integer
 	Protected mElutionTimeMinutes As Single
 
 	Protected mPeptide As String					' Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
 	Protected mPeptideWithNumericMods As String		' Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
 	Protected mPeptideCleanSequence As String
+	Protected mSeqID As Integer
 
 	Protected mModifiedPeptideResidues As System.Collections.Generic.List(Of clsAminoAcidModInfo)
 
@@ -46,12 +49,24 @@ Public Class clsPSM
 
 #Region "Properties"
 
+	''' <summary>
+	''' Returns a dictionary with additional search engine scores stored as key/value pairs
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks>Update scores using SetScore</remarks>
 	Public ReadOnly Property AdditionalScores() As System.Collections.Generic.Dictionary(Of String, String)
 		Get
 			Return mAdditionalScores
 		End Get
 	End Property
 
+	''' <summary>
+	''' Assumed charge of the spectrum in which this peptide was identified
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property Charge As Short
 		Get
 			Return mCharge
@@ -61,6 +76,12 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Peptide cleavage state (with regards to ProteinFirst)
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property CleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
 		Get
 			Return mCleavageState
@@ -70,6 +91,12 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Collision mode (CID, ETD, HCD)
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property CollisionMode As String
 		Get
 			Return mCollisionMode
@@ -79,6 +106,12 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Elution time (in minutes) of the spectrum
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property ElutionTimeMinutes As Single
 		Get
 			Return mElutionTimeMinutes
@@ -88,6 +121,12 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Mass difference, in daltons, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property MassErrorDa As String
 		Get
 			Return mMassErrorDa
@@ -97,6 +136,12 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Mass difference, in ppm, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property MassErrorPPM As String
 		Get
 			Return mMassErrorPPM
@@ -106,12 +151,24 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' List of modified residues
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks>A given residue is allowed to have more than one modification</remarks>
 	Public ReadOnly Property ModifiedResidues As System.Collections.Generic.List(Of clsAminoAcidModInfo)
 		Get
 			Return mModifiedPeptideResidues
 		End Get
 	End Property
 
+	''' <summary>
+	''' MSGF Spectral Probability associated with this peptide
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks>Ranges from 0 to 1, where 0 is the best score and 1 is the worse score</remarks>
 	Public Property MSGFSpecProb As String
 		Get
 			Return mMSGFSpecProb
@@ -121,6 +178,12 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Number of missed cleavages (internal K or R)
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property NumMissedCleavages As Short
 		Get
 			Return mNumMissedCleavages
@@ -130,6 +193,12 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Number of tryptic terminii (or similar if not using trypsin)
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks>2 means fully tryptic, 1 means partially tryptic, 0 means non-tryptic</remarks>
 	Public Property NumTrypticTerminii As Short
 		Get
 			Return mNumTrypticTerminii
@@ -139,12 +208,26 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Peptide sequence, including any modification symbols that were assigned by the search engine
+	''' For example, R.AAS*PQDLAGGYTSSLACHR.A
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property Peptide() As String
 		Get
 			Return mPeptide
 		End Get
 	End Property
 
+	''' <summary>
+	''' Peptide residues without any modification symbols or flanking residues
+	''' For example, AASPQDLAGGYTSSLACHR
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property PeptideCleanSequence() As String
 		Get
 			Return mPeptideCleanSequence
@@ -166,7 +249,13 @@ Public Class clsPSM
 		End Set
 	End Property
 
-
+	''' <summary>
+	''' Peptide sequence where all modified residues have the modification masses displayed as numeric values
+	''' For example, R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property PeptideWithNumericMods() As String
 		Get
 			Return mPeptideWithNumericMods
@@ -180,6 +269,12 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' First protein associated with this peptide
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks>Retrieve full list of proteins using the Proteins property</remarks>
 	Public ReadOnly Property ProteinFirst() As String
 		Get
 			If mProteins.Count = 0 Then
@@ -193,6 +288,9 @@ Public Class clsPSM
 	''' <summary>
 	''' Uncharged monoisotopic mass of the precursor (observed mass based on m/z and charge)
 	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property PrecursorNeutralMass As Double
 		Get
 			Return mPrecursorNeutralMass
@@ -202,12 +300,24 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' List of proteins associated with this peptide
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property Proteins() As System.Collections.Generic.List(Of String)
 		Get
 			Return mProteins
 		End Get
 	End Property
 
+	''' <summary>
+	''' ResultID of this peptide (typically assigned by the search engine)
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property ResultID As Integer
 		Get
 			Return mResultID
@@ -217,6 +327,43 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	''' <summary>
+	''' Rank of this peptide in the given spectrum
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks>Top scoring peptide is rank 1, next lowest score is rank 2, etc.</remarks>
+	Public Property ScoreRank As Integer
+		Get
+			Return mScoreRank
+		End Get
+		Set(value As Integer)
+			mScoreRank = value
+		End Set
+	End Property
+
+	''' <summary>
+	''' Sequence ID value assigned by PHRP
+	''' Required for looking up information from the SeqInfo files
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Property SeqID As Integer
+		Get
+			Return mSeqID
+		End Get
+		Set(value As Integer)
+			mSeqID = value
+		End Set
+	End Property
+
+	''' <summary>
+	''' Scan number of the mass spectrum in which this peptide was identified
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property ScanNumber As Integer
 		Get
 			Return mScanNumber
@@ -239,10 +386,23 @@ Public Class clsPSM
 		Me.Clear()
 	End Sub
 
+	''' <summary>
+	''' Add the details for a modified residue
+	''' </summary>
+	''' <param name="objModInfo">Modification info class</param>
+	''' <remarks></remarks>
 	Public Sub AddModifiedResidue(objModInfo As clsAminoAcidModInfo)
 		mModifiedPeptideResidues.Add(objModInfo)
 	End Sub
 
+	''' <summary>
+	''' Add the details for a modified residue
+	''' </summary>
+	''' <param name="Residue">Amino acid letter; use angle brackets or square brackes for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+	''' <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
+	''' <param name="ResidueTerminusState">Terminus state of residue</param>
+	''' <param name="ModDefinition">Modification details</param>
+	''' <remarks></remarks>
 	Public Sub AddModifiedResidue(Residue As Char, ResidueLocInPeptide As Integer, ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ModDefinition As clsModificationDefinition)
 		mModifiedPeptideResidues.Add(New clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition))
 	End Sub
@@ -271,6 +431,8 @@ Public Class clsPSM
 		mPeptideCleanSequence = String.Empty
 		mCharge = 0
 		mResultID = 0
+		mScoreRank = 0
+
 		mCollisionMode = "n/a"
 		mMSGFSpecProb = String.Empty
 
@@ -305,6 +467,7 @@ Public Class clsPSM
 
 		With objNew
 			.ResultID = mResultID
+			.ScoreRank = mScoreRank
 			.ScanNumber = mScanNumber
 			.ElutionTimeMinutes = mElutionTimeMinutes
 

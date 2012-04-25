@@ -298,22 +298,23 @@ Public Class clsModificationDefinition
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Public Function CanAffectPeptideOrProteinTerminus() As Boolean
-		Static chTerminalSymbols As Char() = New Char() {clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS, clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS}
+		Dim lstTerminalSymbols As System.Collections.Generic.SortedSet(Of Char) = GetTerminalSymbols()
 
 		If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
 			Return True
 		Else
-			If mTargetResidues.IndexOfAny(chTerminalSymbols) >= 0 Then
-				Return True
-			Else
-				Return False
-			End If
+			For Each chChar As Char In mTargetResidues
+				If lstTerminalSymbols.Contains(chChar) Then
+					Return True
+				End If
+			Next
+			Return False
 		End If
+
 	End Function
 
-	Public Function CanAffectPeptideResidues() As Boolean
-		Static chTerminalSymbols As Char() = New Char() {clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS, clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS}
-		Dim blnTerminalCharFound As Boolean
+	Public Function CanAffectPeptideResidues() As Boolean		
+		Dim lstTerminalSymbols As System.Collections.Generic.SortedSet(Of Char) = GetTerminalSymbols()
 
 		If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
 			Return False
@@ -322,14 +323,7 @@ Public Class clsModificationDefinition
 				Return True
 			Else
 				For Each chChar As Char In mTargetResidues
-					blnTerminalCharFound = False
-					For Each chTerminalChar As Char In chTerminalSymbols
-						If chChar = chTerminalChar Then
-							blnTerminalCharFound = True
-						End If
-					Next
-
-					If Not blnTerminalCharFound Then
+					If Not lstTerminalSymbols.Contains(chChar) Then
 						Return True
 					End If
 				Next
@@ -337,6 +331,20 @@ Public Class clsModificationDefinition
 
 			Return False
 		End If
+
+	End Function
+
+	Public Shared Function GetTerminalSymbols() As System.Collections.Generic.SortedSet(Of Char)
+		Dim lstTerminalSymbols As System.Collections.Generic.SortedSet(Of Char)
+
+		lstTerminalSymbols = New System.Collections.Generic.SortedSet(Of Char)
+
+		lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)
+		lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS)
+		lstTerminalSymbols.Add(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
+		lstTerminalSymbols.Add(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+
+		Return lstTerminalSymbols
 
 	End Function
 

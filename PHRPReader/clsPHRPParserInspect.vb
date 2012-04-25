@@ -127,7 +127,13 @@ Public Class clsPHRPParserInspect
 	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 		Dim strParamFilePath As String
 		Dim blnSuccess As Boolean
+
 		Dim strLineIn As String
+		Dim strSettingValue As String
+
+		Dim intCharIndex As Integer
+
+		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
 
 		Try
 			objSearchEngineParams = New clsSearchEngineParameters(INS_SEARCH_ENGINE_NAME, mModInfo)
@@ -135,23 +141,62 @@ Public Class clsPHRPParserInspect
 			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
 			If Not System.IO.File.Exists(strParamFilePath) Then
-				ReportError("File not found: " & strParamFilePath)
+				ReportError("Inspect param file not found: " & strParamFilePath)
 			Else
 				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
 					While srInFile.Peek > -1
-						strLineIn = srInFile.ReadLine()
+						strLineIn = srInFile.ReadLine().TrimStart()
 
-						objSearchEngineParams.AddUpdateParameter("ParamName", "ParamValue")
+						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso Not strLineIn.StartsWith("[") AndAlso strLineIn.Contains("="c) Then
+
+							' Split the line on the comma
+							kvSetting = ParseKeyValueSetting(strLineIn, ","c)
+
+							If Not String.IsNullOrEmpty(kvSetting.Key) Then
+
+								' Trim off any text that occurs after a # in kvSetting.Value
+								strSettingValue = kvSetting.Value
+								intCharIndex = strSettingValue.IndexOf("#"c)
+								If intCharIndex > 0 Then
+									strSettingValue = strSettingValue.Substring(intCharIndex).Trim()
+								End If
+
+								objSearchEngineParams.AddUpdateParameter(kvSetting.Key, strSettingValue)
+
+								Select Case kvSetting.Key.ToLower()
+									Case "protease"
+
+										Select Case strSettingValue.ToLower()
+											Case "trypsin"
+												objSearchEngineParams.Enzyme = "trypsin"
+											Case "none"
+												objSearchEngineParams.Enzyme = "no_enzyme"
+											Case "chymotrypsin"
+												objSearchEngineParams.Enzyme = "chymotrypsin"
+											Case Else
+												If Not String.IsNullOrEmpty(strSettingValue) Then
+													objSearchEngineParams.Enzyme = strSettingValue
+												End If
+
+										End Select
+								
+								End Select
+							End If
+						End If
 
 					End While
 				End Using
+
+				blnSuccess = True
+
 			End If
 		Catch ex As Exception
 			ReportError("Error in LoadSearchEngineParameters: " & ex.Message)
 		End Try
 
 		Return blnSuccess
+
 	End Function
 
 	''' <summary>
@@ -183,6 +228,8 @@ Public Class clsPHRPParserInspect
 					' Data line is not valid
 				Else
 					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
+					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_RankTotalPRMScore, mColumnHeaders, 0)
+
 					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 					.SetPeptide(strPeptide, mCleavageStateCalculator)
 

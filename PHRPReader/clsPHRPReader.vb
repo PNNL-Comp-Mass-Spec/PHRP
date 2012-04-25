@@ -66,9 +66,7 @@ Public Class clsPHRPReader
 	Protected mInputFilePath As String
 	Protected mInputFolderPath As String
 
-	Protected mSkipDuplicatePSMs As Boolean
-
-	Protected mLoadModDefs As Boolean
+	Protected mLoadModSummaryFile As Boolean
 	Protected mLoadMSGFResults As Boolean
 	Protected mLoadScanStatsData As Boolean
 
@@ -130,18 +128,36 @@ Public Class clsPHRPReader
 		End Get
 	End Property
 
+	''' <summary>
+	''' Returns the most recently loaded PSM
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property CurrentPSM As clsPSM
 		Get
 			Return mPSMCurrent
 		End Get
 	End Property
 
+	''' <summary>
+	''' Dataset name (auto-determined based on the input filename)
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property DatasetName As String
 		Get
 			Return mDatasetName
 		End Get
 	End Property
 
+	''' <summary>
+	''' If True, then will display messages at the console
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property EchoMessagesToConsole As Boolean
 		Get
 			Return mEchoMessagesToConsole
@@ -151,21 +167,39 @@ Public Class clsPHRPReader
 		End Set
 	End Property
 
+	''' <summary>
+	''' Current error message
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property ErrorMessage() As String
 		Get
 			Return mErrorMessage
 		End Get
 	End Property
 
-	Public Property LoadModDefs() As Boolean
+	''' <summary>
+	''' If True, then looks for and loads the modification definitions from the _ModSummary.txt file associated with the input file
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Property LoadModSummaryFile() As Boolean
 		Get
-			Return mLoadModDefs
+			Return mLoadModSummaryFile
 		End Get
 		Set(value As Boolean)
-			mLoadModDefs = value
+			mLoadModSummaryFile = value
 		End Set
 	End Property
 
+	''' <summary>
+	''' If true, then loads the MSGF SpecProb values from the _MSGF.txt file associated with the input file
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property LoadMSGFResults() As Boolean
 		Get
 			Return mLoadMSGFResults
@@ -175,6 +209,12 @@ Public Class clsPHRPReader
 		End Set
 	End Property
 
+	''' <summary>
+	''' If True, then loads the MASIC _ScanStats.txt file
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Property LoadScanStatsData() As Boolean
 		Get
 			Return mLoadScanStatsData
@@ -184,6 +224,12 @@ Public Class clsPHRPReader
 		End Set
 	End Property
 
+	''' <summary>
+	''' Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property PeptideHitResultType As ePeptideHitResultType
 		Get
 			If mPHRPParser Is Nothing Then
@@ -194,29 +240,27 @@ Public Class clsPHRPReader
 		End Get
 	End Property
 
+	''' <summary>
+	''' Returns the PHRP Parser object
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public ReadOnly Property PHRPParser() As clsPHRPParser
 		Get
 			Return mPHRPParser
 		End Get
 	End Property
 
-	Public Property SkipDuplicatePSMs() As Boolean
-		Get
-			Return mSkipDuplicatePSMs
-		End Get
-		Set(value As Boolean)
-			mSkipDuplicatePSMs = value
-		End Set
-	End Property
 #End Region
 
 	''' <summary>
 	''' Constructor that auto-determines the PeptideHit result type based on the filename
 	''' </summary>
 	''' <param name="strInputFilePath">Input file to read</param>
-	''' <remarks>Sets LoadModDefs to True and LoadMSGFResults to true</remarks>
+	''' <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
 	Public Sub New(ByVal strInputFilePath As String)
-		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModDefs:=True, blnLoadMSGFResults:=True, blnLoadScanStats:=False)
+		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModSummaryFile:=True, blnLoadMSGFResults:=True, blnLoadScanStats:=False)
 	End Sub
 
 	''' <summary>
@@ -224,20 +268,20 @@ Public Class clsPHRPReader
 	''' </summary>
 	''' <param name="strInputFilePath">Input file to read</param>
 	''' <param name="eResultType">Source file PeptideHit result type</param>
-	''' <remarks>Sets LoadModDefs to True and LoadMSGFResults to true</remarks>
+	''' <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
 	Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType)
-		Me.New(strInputFilePath, eResultType, blnLoadModDefs:=True, blnLoadMSGFResults:=True, blnLoadScanStats:=False)
+		Me.New(strInputFilePath, eResultType, blnLoadModSummaryFile:=True, blnLoadMSGFResults:=True, blnLoadScanStats:=False)
 	End Sub
 
 	''' <summary>
 	''' Constructor that auto-determines the PeptideHit result type based on the filename
 	''' </summary>
 	''' <param name="strInputFilePath">Input file to read</param>
-	''' <param name="blnLoadModDefs">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
+	''' <param name="blnLoadModSummaryFile">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
 	''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strInputFilePath As String, ByVal blnLoadModDefs As Boolean, ByVal blnLoadMSGFResults As Boolean, ByVal blnLoadScanStats As Boolean)
-		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModDefs, blnLoadMSGFResults, blnLoadScanStats)
+	Public Sub New(ByVal strInputFilePath As String, ByVal blnLoadModSummaryFile As Boolean, ByVal blnLoadMSGFResults As Boolean, ByVal blnLoadScanStats As Boolean)
+		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModSummaryFile, blnLoadMSGFResults, blnLoadScanStats)
 	End Sub
 
 	''' <summary>
@@ -245,14 +289,14 @@ Public Class clsPHRPReader
 	''' </summary>
 	''' <param name="strInputFilePath">Input file to read</param>
 	''' ''' <param name="eResultType">Source file PeptideHit result type</param>
-	''' <param name="blnLoadModDefs">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
+	''' <param name="blnLoadModSummaryFile">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
 	''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal blnLoadModDefs As Boolean, ByVal blnLoadMSGFResults As Boolean, ByVal blnLoadScanStats As Boolean)
+	Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal blnLoadModSummaryFile As Boolean, ByVal blnLoadMSGFResults As Boolean, ByVal blnLoadScanStats As Boolean)
 
 		Reset()
 
-		mLoadModDefs = blnLoadModDefs
+		mLoadModSummaryFile = blnLoadModSummaryFile
 		mLoadMSGFResults = blnLoadMSGFResults
 		mLoadScanStatsData = blnLoadScanStats
 
@@ -267,9 +311,7 @@ Public Class clsPHRPReader
 		mInputFolderPath = String.Empty
 		mCanRead = False
 
-		mSkipDuplicatePSMs = True
-
-		mLoadModDefs = True
+		mLoadModSummaryFile = True
 		mLoadMSGFResults = True
 		mLoadScanStatsData = False
 
@@ -301,7 +343,7 @@ Public Class clsPHRPReader
 				fiFileInfo = New System.IO.FileInfo(strInputFilePath)
 
 				mInputFolderPath = fiFileInfo.DirectoryName
-				mInputFilePath = strInputFilePath
+				mInputFilePath = fiFileInfo.FullName
 
 				If Not fiFileInfo.Exists Then
 					ReportError("Input file not found: " & strInputFilePath)
@@ -321,7 +363,7 @@ Public Class clsPHRPReader
 					' Note that this will also load the MSGFSpecProb info and ScanStats info
 					blnSuccess = InitializeParser(eResultType)
 
-					If blnSuccess AndAlso mLoadModDefs Then
+					If blnSuccess AndAlso mLoadModSummaryFile Then
 						' Read the PHRP Mod Summary File to populate mDynamicMods and mStaticMods
 						' Note that the PHRPParser also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo file is not found
 						blnSuccess = ReadModSummaryFile(strModSummaryFilePath, mDynamicMods, mStaticMods)
@@ -778,39 +820,12 @@ Public Class clsPHRPReader
 	End Sub
 
 	''' <summary>
-	''' Returns the default ModSummary file name for the given PeptideHit result type
+	''' Returns the default first-hits file name for the given PeptideHit result type
 	''' </summary>
 	''' <param name="eResultType"></param>
 	''' <param name="strDatasetName"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public Shared Function GetModSummaryFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
-
-		Dim strModSummaryName As String = String.Empty
-
-		Select Case eResultType
-			Case ePeptideHitResultType.Sequest
-				' Sequest
-				strModSummaryName = strDatasetName & "_syn_ModSummary.txt"
-
-			Case ePeptideHitResultType.XTandem
-				' X!Tandem
-				strModSummaryName = strDatasetName & "_xt_ModSummary.txt"
-
-			Case ePeptideHitResultType.Inspect
-				' Inspect
-				strModSummaryName = strDatasetName & "_inspect_syn_ModSummary.txt"
-
-			Case ePeptideHitResultType.MSGFDB
-				' MSGFDB
-				strModSummaryName = strDatasetName & "_msgfdb_syn_ModSummary.txt"
-
-		End Select
-
-		Return strModSummaryName
-
-	End Function
-
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim strPHRPResultsFileName As String = String.Empty
@@ -838,6 +853,13 @@ Public Class clsPHRPReader
 
 	End Function
 
+	''' <summary>
+	''' Returns the default ModSummary file name for the given PeptideHit result type
+	''' </summary>
+	''' <param name="eResultType"></param>
+	''' <param name="strDatasetName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Shared Function GetPHRPModSummaryFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim strPHRPModSummaryFileName As String = String.Empty
@@ -865,6 +887,13 @@ Public Class clsPHRPReader
 
 	End Function
 
+	''' <summary>
+	''' Returns the default Synopsis file name for the given PeptideHit result type
+	''' </summary>
+	''' <param name="eResultType"></param>
+	''' <param name="strDatasetName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Shared Function GetPHRPSynopsisFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim strPHRPResultsFileName As String = String.Empty
@@ -892,6 +921,13 @@ Public Class clsPHRPReader
 
 	End Function
 
+	''' <summary>
+	''' Returns the default ResultToSeq Map file name for the given PeptideHit result type
+	''' </summary>
+	''' <param name="eResultType"></param>
+	''' <param name="strDatasetName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim strPHRPResultsFileName As String = String.Empty
@@ -919,6 +955,13 @@ Public Class clsPHRPReader
 
 	End Function
 
+	''' <summary>
+	''' Returns the default SeqInfo file name for the given PeptideHit result type
+	''' </summary>
+	''' <param name="eResultType"></param>
+	''' <param name="strDatasetName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Shared Function GetPHRPSeqInfoFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim strSeqInfoFilename As String = String.Empty
@@ -946,6 +989,13 @@ Public Class clsPHRPReader
 
 	End Function
 
+	''' <summary>
+	''' Returns the default SeqToProtein Map file name for the given PeptideHit result type
+	''' </summary>
+	''' <param name="eResultType"></param>
+	''' <param name="strDatasetName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
 	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim strSeqToProteinMapFileName As String = String.Empty
@@ -1088,8 +1138,7 @@ Public Class clsPHRPReader
 	''' <param name="strColumns">Column names read from the input file</param>
 	''' <param name="objColumnHeaders">Column mapping dictionary object to update</param>
 	''' <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.CurrentCultureIgnoreCase)</remarks>
-	Public Shared Sub ParseColumnHeaders(ByVal strColumns() As String, _
-	 ByRef objColumnHeaders As SortedDictionary(Of String, Integer))
+	Public Shared Sub ParseColumnHeaders(ByVal strColumns() As String, ByRef objColumnHeaders As SortedDictionary(Of String, Integer))
 
 		Dim intIndex As Integer
 
@@ -1168,7 +1217,7 @@ Public Class clsPHRPReader
 					If blnSuccess Then
 						blnMatchFound = True
 
-						If mLoadModDefs AndAlso String.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods) Then
+						If mLoadModSummaryFile AndAlso String.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods) Then
 							' The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
 							' If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods
 
@@ -1198,42 +1247,38 @@ Public Class clsPHRPReader
 							mPSMCurrent.MSGFSpecProb = strMSGFSpecProb
 						End If
 
-						If mSkipDuplicatePSMs Then
+						' Read the next line and check whether it's the same hit, but a different protein
+						Dim blnReadNext As Boolean = True
+						Do While blnReadNext AndAlso mSourceFile.Peek > -1
+							strLineIn = mSourceFile.ReadLine()
+							mLinesRead += 1
 
-							' Read the next line and check whether it's the same hit, but a different protein
-							Dim blnReadNext As Boolean = True
-							Do While blnReadNext AndAlso mSourceFile.Peek > -1
-								strLineIn = mSourceFile.ReadLine()
-								mLinesRead += 1
+							If Not String.IsNullOrEmpty(strLineIn) Then
 
-								If Not String.IsNullOrEmpty(strLineIn) Then
+								Dim objNewPSM As New clsPSM
+								blnSuccess = mPHRPParser.ParsePHRPDataLine(strLineIn, mLinesRead, objNewPSM)
 
-									Dim objNewPSM As New clsPSM
-									blnSuccess = mPHRPParser.ParsePHRPDataLine(strLineIn, mLinesRead, objNewPSM)
+								' Check for duplicate lines
+								' If this line is a duplicate of the previous line, then skip it
+								' This happens in Sequest _syn.txt files where the line is repeated for all protein matches
+								With mPSMCurrent
+									If .ScanNumber = objNewPSM.ScanNumber AndAlso _
+									   .Charge = objNewPSM.Charge AndAlso _
+									   .Peptide = objNewPSM.Peptide Then
 
-									' Check for duplicate lines
-									' If this line is a duplicate of the previous line, then skip it
-									' This happens in Sequest _syn.txt files where the line is repeated for all protein matches
-									With mPSMCurrent
-										If .ScanNumber = objNewPSM.ScanNumber AndAlso _
-										   .Charge = objNewPSM.Charge AndAlso _
-										   .Peptide = objNewPSM.Peptide Then
-
-											' Yes, this is a duplicate
-											' Update the protein list
-											For Each strProtein As String In objNewPSM.Proteins
-												.AddProtein(strProtein)
-											Next
-										Else
-											blnReadNext = False
-											mCachedLine = String.Copy(strLineIn)
-											mCachedLineAvailable = True
-										End If
-									End With
-								End If
-							Loop
-
-						End If
+										' Yes, this is a duplicate
+										' Update the protein list
+										For Each strProtein As String In objNewPSM.Proteins
+											.AddProtein(strProtein)
+										Next
+									Else
+										blnReadNext = False
+										mCachedLine = String.Copy(strLineIn)
+										mCachedLineAvailable = True
+									End If
+								End With
+							End If
+						Loop
 
 						blnSuccess = True
 
@@ -1509,8 +1554,8 @@ Public Class clsPHRPReader
 			Return False
 		End If
 
-		If mLoadModDefs Then
-			strModSummaryFilePath = GetModSummaryFileName(eResultType, mDatasetName)
+		If mLoadModSummaryFile Then
+			strModSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName)
 			strModSummaryFilePath = System.IO.Path.Combine(fiFileInfo.DirectoryName, strModSummaryFilePath)
 			If Not ValidateRequiredFileExists("ModSummary file", strModSummaryFilePath) Then
 				SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound)

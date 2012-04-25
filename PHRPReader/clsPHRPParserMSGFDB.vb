@@ -109,7 +109,14 @@ Public Class clsPHRPParserMSGFDB
 	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 		Dim strParamFilePath As String
 		Dim blnSuccess As Boolean
+
 		Dim strLineIn As String
+		Dim strSettingValue As String
+
+		Dim intCharIndex As Integer
+		Dim intValue As Integer
+
+		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
 
 		Try
 			objSearchEngineParams = New clsSearchEngineParameters(MSGFDB_SEARCH_ENGINE_NAME, mModInfo)
@@ -117,23 +124,77 @@ Public Class clsPHRPParserMSGFDB
 			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
 			If Not System.IO.File.Exists(strParamFilePath) Then
-				ReportError("File not found: " & strParamFilePath)
+				ReportError("MSGF DB param file not found: " & strParamFilePath)
 			Else
 				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
 					While srInFile.Peek > -1
-						strLineIn = srInFile.ReadLine()
+						strLineIn = srInFile.ReadLine().TrimStart()
 
-						objSearchEngineParams.AddUpdateParameter("ParamName", "ParamValue")
+						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso Not strLineIn.StartsWith("[") AndAlso strLineIn.Contains("="c) Then
+
+							' Split the line on the equals sign
+							kvSetting = ParseKeyValueSetting(strLineIn, "="c)
+
+							If Not String.IsNullOrEmpty(kvSetting.Key) Then
+
+								' Trim off any text that occurs after a # in kvSetting.Value
+								strSettingValue = kvSetting.Value
+								intCharIndex = strSettingValue.IndexOf("#"c)
+								If intCharIndex > 0 Then
+									strSettingValue = strSettingValue.Substring(intCharIndex).Trim()
+								End If
+
+								objSearchEngineParams.AddUpdateParameter(kvSetting.Key, strSettingValue)
+
+								Select Case kvSetting.Key.ToLower()
+									Case "enzymeid"
+
+										If Integer.TryParse(strSettingValue, intValue) Then
+											Select Case intValue
+												Case 0 : objSearchEngineParams.Enzyme = "no_enzyme"
+												Case 1 : objSearchEngineParams.Enzyme = "trypsin"
+												Case 2 : objSearchEngineParams.Enzyme = "Chymotrypsin"
+												Case 3 : objSearchEngineParams.Enzyme = "Lys-C "
+												Case 4 : objSearchEngineParams.Enzyme = "Lys-N  "
+												Case 5 : objSearchEngineParams.Enzyme = "Glu-C  "
+												Case 6 : objSearchEngineParams.Enzyme = "Arg-C "
+												Case 7 : objSearchEngineParams.Enzyme = "Asp-N"
+											End Select
+										End If
+
+									Case "nnet"
+
+										If Integer.TryParse(strSettingValue, intValue) Then
+											Select Case intValue
+												Case 0
+													' Fully-tryptic
+													objSearchEngineParams.MinNumberTermini = 2
+												Case 1
+													' Partially-tryptic
+													objSearchEngineParams.MinNumberTermini = 1
+												Case Else
+													' No-enzyme search
+													objSearchEngineParams.MinNumberTermini = 0
+											End Select
+
+										End If
+								End Select
+							End If
+						End If
 
 					End While
 				End Using
+
+				blnSuccess = True
+
 			End If
 		Catch ex As Exception
 			ReportError("Error in LoadSearchEngineParameters: " & ex.Message)
 		End Try
 
 		Return blnSuccess
+
 	End Function
 
 	''' <summary>
@@ -167,6 +228,8 @@ Public Class clsPHRPParserMSGFDB
 					' Data line is not valid
 				Else
 					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
+					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb, mColumnHeaders, 1)
+
 					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 					.SetPeptide(strPeptide, mCleavageStateCalculator)
 

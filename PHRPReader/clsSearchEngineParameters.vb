@@ -6,7 +6,9 @@ Public Class clsSearchEngineParameters
 	Public Const MASS_TYPE_AVERAGE As String = "average"
 
 	Protected mSearchEngineName As String
-	Protected mPrecursorMassType As String
+	Protected mFastaFilePath As String
+
+	Protected mPrecursorMassType As String			' Typically "monoisotopic" or "average"
 	Protected mFragmentMassType As String
 
 	Protected mEnzyme As String
@@ -28,6 +30,14 @@ Public Class clsSearchEngineParameters
 		End Set
 	End Property
 
+	Public Property FastaFilePath As String
+		Get
+			Return mFastaFilePath
+		End Get
+		Set(value As String)
+			mFastaFilePath = value
+		End Set
+	End Property
 
 	Public Property FragmentMassType As String
 		Get
@@ -100,7 +110,6 @@ Public Class clsSearchEngineParameters
 		mSearchEngineName = SearchEngineName
 		mModInfo = objModInfo
 
-
 		If objModInfo Is Nothing Then
 			mModInfo = New System.Collections.Generic.List(Of clsModificationDefinition)
 		Else
@@ -129,12 +138,14 @@ Public Class clsSearchEngineParameters
 
 	Protected Sub InitializeDefaults()
 		mSearchEngineName = "Unknown"
+		mFastaFilePath = String.Empty
+
 		mPrecursorMassType = MASS_TYPE_MONOISOTOPIC
 		mFragmentMassType = MASS_TYPE_MONOISOTOPIC
 
 		mEnzyme = "trypsin"
-		mMaxNumberInternalCleavages = 3
-		mMinNumberTermini = 1
+		mMaxNumberInternalCleavages = 4
+		mMinNumberTermini = 0
 
 	End Sub
 
