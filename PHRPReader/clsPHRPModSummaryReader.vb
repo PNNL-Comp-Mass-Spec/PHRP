@@ -38,7 +38,7 @@ Public Class clsPHRPModSummaryReader
 		If String.IsNullOrEmpty(strModSummaryFilePath) Then
 			Throw New Exception("ModSummaryFilePath is empty; unable to continue")
 		ElseIf Not System.IO.File.Exists(strModSummaryFilePath) Then
-			Throw New System.IO.FileNotFoundException("File not found: " & strModSummaryFilePath)
+			Throw New System.IO.FileNotFoundException("ModSummary file not found: " & strModSummaryFilePath)
 		End If
 
 		mSuccess = ReadModSummaryFile(strModSummaryFilePath, mModificationDefs)

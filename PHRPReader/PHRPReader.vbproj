@@ -79,6 +79,8 @@
     <Compile Include="clsPHRPSeqMapReader.vb" />
     <Compile Include="clsProteinInfo.vb" />
     <Compile Include="clsPSM.vb" />
+    <Compile Include="clsScanStatsExInfo.vb" />
+    <Compile Include="clsScanStatsExReader.vb" />
     <Compile Include="clsScanStatsInfo.vb" />
     <Compile Include="clsScanStatsReader.vb" />
     <Compile Include="clsSearchEngineParameters.vb" />

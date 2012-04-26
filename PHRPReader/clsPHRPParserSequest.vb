@@ -323,8 +323,9 @@ Public Class clsPHRPParserSequest
 					.AddProtein(strProtein)
 
 					' Note that the MH value listed in Sequest files is not the precursor MH but is instead the theoretical MH of the peptide
+					' We'll update this value later using the ScanStatsEx data
 					dblPrecursorMH = LookupColumnValue(strColumns, DATA_COLUMN_MH, mColumnHeaders, 0.0#)
-					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH, .Charge, 0)
+					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH, 1, 0)
 
 					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
 					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)

@@ -188,7 +188,7 @@ Public Class clsPHRPSeqMapReader
 		Else
 			strFilePath = System.IO.Path.Combine(mInputFolderPath, mResultToSeqMapFilename)
 			If Not System.IO.File.Exists(strFilePath) Then
-				mErrorMessage = "File not found: " & strFilePath
+				mErrorMessage = "SeqInfo file not found: " & strFilePath
 				blnSuccess = False
 			Else
 				blnSuccess = LoadResultToSeqMapping(strFilePath, lstResultToSeqMap)
@@ -207,7 +207,7 @@ Public Class clsPHRPSeqMapReader
 			If Not String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
 				strFilePath = System.IO.Path.Combine(mInputFolderPath, mSeqToProteinMapFilename)
 				If Not System.IO.File.Exists(strFilePath) Then
-					mErrorMessage = "File not found: " & strFilePath
+					mErrorMessage = "SeqInfo file not found: " & strFilePath
 					blnSuccess = False
 				Else
 					blnSuccess = LoadSeqToProteinMapping(strFilePath, lstSeqToProteinMap)

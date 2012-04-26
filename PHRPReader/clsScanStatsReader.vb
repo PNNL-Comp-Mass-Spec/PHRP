@@ -78,7 +78,7 @@ Public Class clsScanStatsReader
 	End Sub
 
 	''' <summary>
-	''' Open a tab-delimited Scan_Stats file and read the data
+	''' Open a tab-delimited _ScanStats.txt file and read the data
 	''' </summary>
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>

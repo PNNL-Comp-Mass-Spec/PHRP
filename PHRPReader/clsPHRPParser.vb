@@ -302,8 +302,9 @@ Public MustInherit Class clsPHRPParser
 				Return False
 			End If
 
+			strModSummaryFilePath = System.IO.Path.Combine(mInputFolderPath, strModSummaryFilePath)
 			If Not System.IO.File.Exists(strModSummaryFilePath) Then
-				ReportWarning("ModSummaryFile not found: " & strModSummaryFilePath)
+				ReportWarning("ModSummary file not found: " & strModSummaryFilePath)
 				Return False
 			End If
 

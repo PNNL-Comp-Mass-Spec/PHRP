@@ -96,6 +96,10 @@ Public Class clsPHRPReader
 	'The keys are ScanNumber and values are clsScanStatsInfo objects
 	Protected mScanStats As Dictionary(Of Integer, clsScanStatsInfo)
 
+	' This dictionary tracks extended scan stats values, in particular parent ion mz (via MonoisotopicMZ)
+	'The keys are ScanNumber and values are clsScanStatsExInfo objects
+	Protected mScanStatsEx As Dictionary(Of Integer, clsScanStatsExInfo)
+
 	Protected mPSMCurrent As clsPSM
 
 	Protected mLinesRead As Integer
@@ -1251,6 +1255,10 @@ Public Class clsPHRPReader
 		Dim blnMatchFound As Boolean = False
 
 		Dim objScanStatsInfo As clsScanStatsInfo = Nothing
+		Dim objExtendedScanStatsInfo As clsScanStatsExInfo = Nothing
+
+		Dim dblMonoisotopicPrecursorMass As Double
+
 
 		If mCachedLineAvailable Then
 			strLineIn = mCachedLine
@@ -1311,6 +1319,17 @@ Public Class clsPHRPReader
 						If Not mScanStats Is Nothing Then
 							If mScanStats.TryGetValue(mPSMCurrent.ScanNumber, objScanStatsInfo) Then
 								mPSMCurrent.ElutionTimeMinutes = objScanStatsInfo.ScanTimeMinutes
+							End If
+						End If
+
+						If Not mScanStatsEx Is Nothing Then
+							If mScanStatsEx.TryGetValue(mPSMCurrent.ScanNumber, objExtendedScanStatsInfo) Then
+								If objExtendedScanStatsInfo.MonoisotopicMZ > 0 AndAlso mPSMCurrent.Charge <> 0 Then
+									dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(objExtendedScanStatsInfo.MonoisotopicMZ, mPSMCurrent.Charge, 0)
+									If dblMonoisotopicPrecursorMass > 0 Then
+										mPSMCurrent.PrecursorNeutralMass = dblMonoisotopicPrecursorMass
+									End If
+								End If
 							End If
 						End If
 
@@ -1442,7 +1461,8 @@ Public Class clsPHRPReader
 			objModSummaryReader = New clsPHRPModSummaryReader(strModSummaryFilePath)
 			blnSuccess = objModSummaryReader.Success
 
-			If blnSuccess Then
+			If blnSuccess AndAlso objModSummaryReader.ModificationDefs.Count > 0 Then
+
 				For Each objItem In objModSummaryReader.ModificationDefs
 
 					strModMass = objModSummaryReader.GetModificationMassAsText(objItem.MassCorrectionTag)
@@ -1506,6 +1526,7 @@ Public Class clsPHRPReader
 
 					End Select
 				Next
+
 			End If
 
 		Catch ex As Exception
@@ -1562,6 +1583,34 @@ Public Class clsPHRPReader
 		Return blnSuccess
 
 	End Function
+
+	Protected Function ReadExtendedScanStatsData(ByVal strScanStatsExFilePath As String) As Boolean
+
+		Dim blnSuccess As Boolean = False
+
+		Try
+			If System.IO.File.Exists(strScanStatsExFilePath) Then
+
+				Dim oExtendedScanStatsReader As New clsExtendedScanStatsReader()
+				mScanStatsEx = oExtendedScanStatsReader.ReadExtendedScanStatsData(strScanStatsExFilePath)
+
+				If oExtendedScanStatsReader.ErrorMessage.Length > 0 Then
+					ReportError("Error reading ScanStatsEx data: " & oExtendedScanStatsReader.ErrorMessage)
+				Else
+					blnSuccess = True
+				End If
+			Else
+				ReportWarning("Extended ScanStats file not found: " & strScanStatsExFilePath)
+			End If
+
+		Catch ex As Exception
+			HandleException("Exception reading Extended Scan Stats file", ex)
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
 
 	Protected Sub ReportError(ByVal strErrorMessage As String)
 		mErrorMessage = strErrorMessage
