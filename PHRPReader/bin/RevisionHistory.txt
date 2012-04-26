@@ -1,12 +1,16 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4499; April 26, 2012
+	- Now using ThermoRawFileReaderDLL to extract the parent ion m/z from the Filter Text field
+
 Version 1.1.4498; April 25, 2012
 	- Added support for parsing search engine parameter files
 	- Updated clsPSM to track SeqID and ScoreRank
-	- Renamed LoadModSummaryFile to LoadModsAndSeqInfo
-	- Added LoadModsAndSeqInfo to PHRPParser constructor
 	- Now caching error and warning messages that occur while instantiating PHRPReader and PHRPParser
 	- Added support for loading the MASIC ScanStatsEx.txt file
+	- Now updating PercentComplete after each call to MoveNext
+	- Extended clsPSM to track additional items
+
 
 Version 1.1.4496; April 23, 2012
 	- Now loading PHRP SeqInfo and SeqToProteinMap files if present in the same folder as the primary PHRP results file

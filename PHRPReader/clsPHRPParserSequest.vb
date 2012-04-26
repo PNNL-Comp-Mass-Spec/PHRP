@@ -291,9 +291,7 @@ Public Class clsPHRPParserSequest
 		Dim strPeptide As String
 		Dim strProtein As String
 
-		Dim dblPrecursorMH As Double
-		Dim dblPrecursorMZ As Double
-		Dim dblMassErrorPPM As Double
+		Dim dblPrecursorMH As Double		
 		Dim dblMassErrorDa As Double
 
 		Dim blnSuccess As Boolean
@@ -322,19 +320,19 @@ Public Class clsPHRPParserSequest
 					strProtein = LookupColumnValue(strColumns, DATA_COLUMN_Reference, mColumnHeaders)
 					.AddProtein(strProtein)
 
-					' Note that the MH value listed in Sequest files is not the precursor MH but is instead the theoretical MH of the peptide
-					' We'll update this value later using the ScanStatsEx data
+					' Note that the MH value listed in Sequest files is not the precursor MH but is instead the theoretical (computed) MH of the peptide
+					' We'll update this value below using dblMassErrorDa
+					' We'll further update this value using the ScanStatsEx data
 					dblPrecursorMH = LookupColumnValue(strColumns, DATA_COLUMN_MH, mColumnHeaders, 0.0#)
 					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH, 1, 0)
 
 					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
-					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
-
-					If Double.TryParse(.MassErrorPPM, dblMassErrorPPM) Then
-						dblPrecursorMZ = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH, 1, .Charge)
-						dblMassErrorDa = clsPeptideMassCalculator.PPMToMass(dblMassErrorPPM, dblPrecursorMZ)
-						' Could store this in .MassErrorDa = dblMassErrorDa.ToString("0.00000")
+					If Double.TryParse(.MassErrorDa, dblMassErrorDa) Then
+						' Adjust the precursor mass
+						.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH - dblMassErrorDa, 1, 0)
 					End If
+
+					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
 					blnSuccess = True
 				End If

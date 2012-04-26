@@ -52,6 +52,7 @@ Public Class clsModificationDefinition
 #Region "Classwide Variables"
 	Protected mModificationSymbol As Char				' One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
 	Protected mModificationMass As Double				' Monoisotopic modification mass
+	Protected mModificationMassAsText As String			' Modification mass, stored as text
 	Protected mTargetResidues As String					' If this string is empty, then the given modification can apply to any residue or terminus; Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to; Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols (< and > for the peptide terminii; [ and ] for the protein terminii)
 	Protected mModificationType As eModificationTypeConstants
 	Protected mMassCorrectionTag As String				' Name associated with the given ModificationMass; maximum length is 8 characters; cannot contain a colon, comma, or space
@@ -79,6 +80,15 @@ Public Class clsModificationDefinition
 		End Get
 		Set(ByVal Value As Double)
 			mModificationMass = Value
+			mModificationMassAsText = mModificationMass.ToString()
+		End Set
+	End Property
+	Public Property ModificationMassAsText() As String
+		Get
+			Return mModificationMassAsText
+		End Get
+		Set(value As String)
+			mModificationMassAsText = value
 		End Set
 	End Property
 	Public Property TargetResidues() As String
@@ -184,6 +194,7 @@ Public Class clsModificationDefinition
 	Public Sub Clear()
 		mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL
 		mModificationMass = 0
+		mModificationMassAsText = "0"
 		mTargetResidues = String.Empty
 		mModificationType = eModificationTypeConstants.UnknownType
 		mMassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME

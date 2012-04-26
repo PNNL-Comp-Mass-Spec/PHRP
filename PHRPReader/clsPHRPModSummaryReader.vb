@@ -155,6 +155,7 @@ Public Class clsPHRPModSummaryReader
 
 						Dim objModDef As clsModificationDefinition
 						objModDef = New clsModificationDefinition(chModSymbol, dblModificationMass, strTargetResidues, eModificationType, strMassCorrectionTag)
+						objModDef.ModificationMassAsText = strModMass
 
 						lstModInfo.Add(objModDef)
 

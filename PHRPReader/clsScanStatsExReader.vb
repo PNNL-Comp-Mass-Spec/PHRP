@@ -71,9 +71,26 @@ Public Class clsExtendedScanStatsReader
 		mColumnHeaders.Clear()
 
 		' Define the default column mapping
-		' Since columns that are present can be variable in this file, we'll only define Dataset and ScanNumber
 		AddHeaderColumn(DATA_COLUMN_Dataset)
 		AddHeaderColumn(DATA_COLUMN_ScanNumber)
+		AddHeaderColumn(DATA_COLUMN_IonInjectionTime)
+		AddHeaderColumn(DATA_COLUMN_ScanEvent)
+		AddHeaderColumn(DATA_COLUMN_MasterIndex)
+		AddHeaderColumn(DATA_COLUMN_ElapsedScanTime)
+		AddHeaderColumn(DATA_COLUMN_ChargeState)
+		AddHeaderColumn(DATA_COLUMN_MonoisotopicMZ)
+		AddHeaderColumn(DATA_COLUMN_MS2IsolationWidth)
+		AddHeaderColumn(DATA_COLUMN_FTAnalyzerSettings)
+		AddHeaderColumn(DATA_COLUMN_FTAnalyzerMessage)
+		AddHeaderColumn(DATA_COLUMN_FTResolution)
+		AddHeaderColumn(DATA_COLUMN_ConversionParameterB)
+		AddHeaderColumn(DATA_COLUMN_ConversionParameterC)
+		AddHeaderColumn(DATA_COLUMN_ConversionParameterD)
+		AddHeaderColumn(DATA_COLUMN_ConversionParameterE)
+		AddHeaderColumn(DATA_COLUMN_CollisionMode)
+		AddHeaderColumn(DATA_COLUMN_ScanFilterText)
+		AddHeaderColumn(DATA_COLUMN_SourceVoltage)
+		AddHeaderColumn(DATA_COLUMN_Source_Current)
 
 	End Sub
 

@@ -12,12 +12,15 @@ Option Strict On
 
 Public Class clsPSM
 
+	Public Const UNKNOWN_COLLISION_MODE As String = "n/a"
+
 	' Note: Be sure to update the Clone() function if you add new class-wide variables
 	Protected mResultID As Integer
 	Protected mScoreRank As Integer					' Top scoring peptide is rank 1, next lowest score is rank 2, etc.
 
 	Protected mScanNumber As Integer
 	Protected mElutionTimeMinutes As Single
+	Protected mScanList As System.Collections.Generic.SortedSet(Of Integer)			' List of scans that were combined prior to identifying this peptide
 
 	Protected mPeptide As String					' Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
 	Protected mPeptideWithNumericMods As String		' Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
@@ -93,6 +96,7 @@ Public Class clsPSM
 
 	''' <summary>
 	''' Collision mode (CID, ETD, HCD)
+	''' PepXML allows this to be CID, ETD, ECD, ETD/CID, or HCD
 	''' </summary>
 	''' <value></value>
 	''' <returns></returns>
@@ -328,6 +332,49 @@ Public Class clsPSM
 	End Property
 
 	''' <summary>
+	''' List of scans that were combined prior to identifying this peptide
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property ScanList() As System.Collections.Generic.SortedSet(Of Integer)
+		Get
+			Return mScanList
+		End Get
+	End Property
+
+	''' <summary>
+	''' Scan number of the mass spectrum in which this peptide was identified
+	''' Will automatically update ScanList if it does not yet contain this scan number
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Property ScanNumber As Integer
+		Get
+			Return mScanNumber
+		End Get
+		Set(value As Integer)
+			mScanNumber = value
+			If Not mScanList.Contains(value) Then
+				mScanList.Add(value)
+			End If
+		End Set
+	End Property
+
+	Public ReadOnly Property ScanNumberStart As Integer
+		Get
+			Return mScanList.Min()
+		End Get
+	End Property
+
+	Public ReadOnly Property ScanNumberEnd As Integer
+		Get
+			Return mScanList.Max()
+		End Get
+	End Property
+
+	''' <summary>
 	''' Rank of this peptide in the given spectrum
 	''' </summary>
 	''' <value></value>
@@ -358,21 +405,6 @@ Public Class clsPSM
 		End Set
 	End Property
 
-	''' <summary>
-	''' Scan number of the mass spectrum in which this peptide was identified
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property ScanNumber As Integer
-		Get
-			Return mScanNumber
-		End Get
-		Set(value As Integer)
-			mScanNumber = value
-		End Set
-	End Property
-
 #End Region
 
 	''' <summary>
@@ -380,12 +412,18 @@ Public Class clsPSM
 	''' </summary>
 	''' <remarks></remarks>
 	Public Sub New()
+		mScanList = New System.Collections.Generic.SortedSet(Of Integer)
 		mProteins = New System.Collections.Generic.List(Of String)
 		mModifiedPeptideResidues = New System.Collections.Generic.List(Of clsAminoAcidModInfo)
 		mAdditionalScores = New System.Collections.Generic.Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
 		Me.Clear()
 	End Sub
 
+	Public Sub AddCombinedScan(intScanNumber As Integer)
+		If Not mScanList.Contains(intScanNumber) Then
+			mScanList.Add(intScanNumber)
+		End If
+	End Sub
 	''' <summary>
 	''' Add the details for a modified residue
 	''' </summary>
@@ -426,6 +464,8 @@ Public Class clsPSM
 		mScanNumber = 0
 		mElutionTimeMinutes = 0
 
+		mScanList.Clear()
+
 		mPeptide = String.Empty
 		mPeptideWithNumericMods = String.Empty
 		mPeptideCleanSequence = String.Empty
@@ -433,7 +473,7 @@ Public Class clsPSM
 		mResultID = 0
 		mScoreRank = 0
 
-		mCollisionMode = "n/a"
+		mCollisionMode = UNKNOWN_COLLISION_MODE
 		mMSGFSpecProb = String.Empty
 
 		mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific
@@ -470,6 +510,10 @@ Public Class clsPSM
 			.ScoreRank = mScoreRank
 			.ScanNumber = mScanNumber
 			.ElutionTimeMinutes = mElutionTimeMinutes
+
+			For Each intScanNumber In mScanList
+				.AddCombinedScan(intScanNumber)
+			Next
 
 			.SetPeptide(mPeptide)				' Note: this will auto-update mPeptideCleanSequence in objNew
 			.PeptideWithNumericMods = mPeptideWithNumericMods

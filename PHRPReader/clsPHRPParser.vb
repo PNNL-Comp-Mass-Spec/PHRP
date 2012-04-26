@@ -261,12 +261,20 @@ Public MustInherit Class clsPHRPParser
 
 		sbNewPeptide.Length = 0
 
+		If lstModifiedResidues Is Nothing OrElse lstModifiedResidues.Count = 0 Then
+			Return strCleanSequence
+		End If
+
 		For intIndex = 0 To strCleanSequence.Length - 1
-			sbNewPeptide.Append(strCleanSequence.Chars(0))
+			sbNewPeptide.Append(strCleanSequence.Chars(intIndex))
 
 			For Each objModInfo In lstModifiedResidues
 				If objModInfo.ResidueLocInPeptide = intIndex + 1 Then
-					sbNewPeptide.Append(objModInfo.ModDefinition.ModificationMass.ToString("+0.00000;-0.00000"))
+					If objModInfo.ModDefinition.ModificationMass < 0 Then
+						sbNewPeptide.Append(objModInfo.ModDefinition.ModificationMassAsText)
+					Else
+						sbNewPeptide.Append("+" & objModInfo.ModDefinition.ModificationMassAsText)
+					End If
 				End If
 			Next
 		Next
@@ -353,13 +361,13 @@ Public MustInherit Class clsPHRPParser
 				Dim intResultID As Integer
 				Dim intSeqID As Integer
 
-				Dim lstProteinsForSeqID As System.Collections.Generic.List(Of clsProteinInfo) = Nothing
-				Dim lstProteinsForResultID As System.Collections.Generic.List(Of String) = Nothing
-
 				For Each objItem As System.Collections.Generic.KeyValuePair(Of Integer, Integer) In mResultToSeqMap
 
 					intResultID = objItem.Key
 					intSeqID = objItem.Value
+
+					Dim lstProteinsForSeqID As System.Collections.Generic.List(Of clsProteinInfo) = Nothing
+					Dim lstProteinsForResultID As System.Collections.Generic.List(Of String) = Nothing
 					lstProteinsForResultID = New System.Collections.Generic.List(Of String)
 
 					If mSeqToProteinMap.TryGetValue(intSeqID, lstProteinsForSeqID) Then
@@ -461,75 +469,86 @@ Public MustInherit Class clsPHRPParser
 
 		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
 
-		Dim objMatchedModDef As clsModificationDefinition = Nothing
 		Dim blnMatchFound As Boolean
 
 		Dim blnFavorTerminalMods As Boolean
 		Dim blnSuccess As Boolean
 
-		intPeptideResidueCount = objPSM.PeptideCleanSequence.Length
 		blnSuccess = False
 
 		' First determine the modified residues present in this peptide
-		If mResultToSeqMap.TryGetValue(objPSM.ResultID, intSeqID) Then
+		If Not mResultToSeqMap Is Nothing AndAlso mResultToSeqMap.Count > 0 Then
+			If mResultToSeqMap.TryGetValue(objPSM.ResultID, intSeqID) Then
 
-			objPSM.SeqID = intSeqID
+				objPSM.SeqID = intSeqID
+				intPeptideResidueCount = objPSM.PeptideCleanSequence.Length
 
-			If mSeqInfo.TryGetValue(intSeqID, objSeqInfo) Then
-				objPSM.PeptideMonoisotopicMass = objSeqInfo.MonoisotopicMass
+				If mSeqInfo.TryGetValue(intSeqID, objSeqInfo) Then
+					objPSM.PeptideMonoisotopicMass = objSeqInfo.MonoisotopicMass
 
-				objPSM.ClearModifiedResidues()
+					objPSM.ClearModifiedResidues()
 
-				If objSeqInfo.ModCount > 0 Then
-					' Split objSeqInfo.ModDescription on the comma character
-					strMods = objSeqInfo.ModDescription.Split(","c)
+					If objSeqInfo.ModCount > 0 Then
+						' Split objSeqInfo.ModDescription on the comma character
+						strMods = objSeqInfo.ModDescription.Split(","c)
 
-					If Not strMods Is Nothing AndAlso strMods.Count > 0 Then
-						For intModIndex As Integer = 0 To strMods.Count - 1
+						If Not strMods Is Nothing AndAlso strMods.Count > 0 Then
+							For intModIndex As Integer = 0 To strMods.Count - 1
 
-							' Split strMods on the colon characters
-							kvModDetails = ParseKeyValueSetting(strMods(intModIndex), ":"c)
+								' Split strMods on the colon characters
+								kvModDetails = ParseKeyValueSetting(strMods(intModIndex), ":"c)
 
-							If Not String.IsNullOrEmpty(kvModDetails.Key) AndAlso Not String.IsNullOrEmpty(kvModDetails.Value) Then
-								strMassCorrectionTag = kvModDetails.Key
-								If Integer.TryParse(kvModDetails.Value, intResidueLoc) Then
-									' Find the modification definition in mModInfo
-									' Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
-									' Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
+								If Not String.IsNullOrEmpty(kvModDetails.Key) AndAlso Not String.IsNullOrEmpty(kvModDetails.Value) Then
+									strMassCorrectionTag = kvModDetails.Key
+									If Integer.TryParse(kvModDetails.Value, intResidueLoc) Then
+										' Find the modification definition in mModInfo
+										' Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
+										' Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
 
-									If intResidueLoc = 1 Then
-										eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
-										blnFavorTerminalMods = True
-									ElseIf intResidueLoc = intPeptideResidueCount Then
-										eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
-										blnFavorTerminalMods = True
-									Else
-										eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
-										blnFavorTerminalMods = False
+										If intResidueLoc = 1 Then
+											eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
+											blnFavorTerminalMods = True
+										ElseIf intResidueLoc = intPeptideResidueCount Then
+											eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
+											blnFavorTerminalMods = True
+										Else
+											eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
+											blnFavorTerminalMods = False
+										End If
+
+										Dim objMatchedModDef As clsModificationDefinition = Nothing
+										blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState, objMatchedModDef)
+
+										If blnMatchFound Then
+											objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
+										Else
+											' Could not find a valid entry in mModInfo
+											ReportError("Unrecognized mass correction tag found in the SeqInfo file: " & strMassCorrectionTag)
+										End If
+
 									End If
-
-									blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState, objMatchedModDef)
-
-									If blnMatchFound Then
-										objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
-									Else
-										' Could not find a valid entry in mModInfo
-										ReportError("Unrecognized mass correction tag found in the SeqInfo file: " & strMassCorrectionTag)
-									End If
-
 								End If
-							End If
-						Next intModIndex
+							Next intModIndex
+						End If
+
 					End If
 
+					blnSuccess = True
 				End If
-
-				blnSuccess = True
 			End If
 		End If
 
 		If blnSuccess Then
-			objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
+			Dim strPrimarySequence As String = String.Empty
+			Dim strPrefix As String = String.Empty
+			Dim strSuffix As String = String.Empty
+
+			If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, strPrimarySequence, strPrefix, strSuffix) Then
+				objPSM.PeptideWithNumericMods = strPrefix & "." & ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues) & "." & strSuffix
+			Else
+				objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
+			End If
+
 		End If
 
 		Return blnSuccess
@@ -566,10 +585,10 @@ Public MustInherit Class clsPHRPParser
 						blnMatchFound = True
 					End If
 
-					If blnFavorTerminalMods Then
+					If blnMatchFound Then
 						' Match found
 						objMatchedModDef = objMod
-						blnMatchFound = True
+						Exit For
 					End If
 				End If
 			Next

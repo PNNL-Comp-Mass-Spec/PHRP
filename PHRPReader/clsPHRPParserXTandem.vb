@@ -323,7 +323,8 @@ Public Class clsPHRPParserXTandem
 		Dim strPeptide As String
 		Dim lstProteinsForResultID As System.Collections.Generic.List(Of String) = Nothing
 
-		Dim dblPrecursorMH As Double
+		Dim dblPeptideMH As Double
+		Dim dblMassErrorDa As Double
 
 		Dim blnSuccess As Boolean
 
@@ -357,10 +358,18 @@ Public Class clsPHRPParserXTandem
 						Next
 					End If
 
-					dblPrecursorMH = LookupColumnValue(strColumns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0#)
-					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH, 1, 0)
+					' The Peptide_MH value listed in X!Tandem files is the theoretical (computed) MH of the peptide
+					' We'll update this value below using dblMassErrorDa
+					' We'll further update this value using the ScanStatsEx data
+					dblPeptideMH = LookupColumnValue(strColumns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0#)
+					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPeptideMH, 1, 0)
 
 					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_Delta_Mass, mColumnHeaders)
+					If Double.TryParse(.MassErrorDa, dblMassErrorDa) Then
+						' Adjust the precursor mass
+						.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPeptideMH - dblMassErrorDa, 1, 0)
+					End If
+
 					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
 					blnSuccess = True
@@ -372,13 +381,21 @@ Public Class clsPHRPParserXTandem
 
 				' Store the remaining scores
 				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Hyperscore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Expectation_Value_LogE)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Expectation_Value_LogE)				
 				AddScore(objPSM, strColumns, DATA_COLUMN_DeltaCn2)
 				AddScore(objPSM, strColumns, DATA_COLUMN_y_score)
 				AddScore(objPSM, strColumns, DATA_COLUMN_y_ions)
 				AddScore(objPSM, strColumns, DATA_COLUMN_b_score)
 				AddScore(objPSM, strColumns, DATA_COLUMN_b_ions)
 				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Intensity_LogI)
+
+				' This is the base-10 log of the expectation value
+				Dim dblLogEValue As Double
+				If Double.TryParse(objPSM.GetScore(DATA_COLUMN_Peptide_Expectation_Value_LogE), dblLogEValue) Then
+					' Record the original E-value
+					objPSM.SetScore("Peptide_Expectation_Value", Math.Pow(10, dblLogEValue).ToString("0.00e+000"))
+				End If
+
 			End If
 
 		Catch ex As Exception

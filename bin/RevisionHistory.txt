@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.4.4499; April 26, 2012
+	- New version of PHRPReader.dll that uses ThermoRawFileReaderDLL.dll
+
 Version 1.4.4497; April 24, 2012
 	- Updated NumToString to correctly handle intDigitsOfPrecision
 	- PeptideHitResultsProcessor now depends on PHRPReader 
