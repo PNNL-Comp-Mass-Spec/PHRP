@@ -77,12 +77,14 @@ Public Class clsPHRPReader
 
 	Protected mCanRead As Boolean
 	Protected mInitialized As Boolean
+	Protected mModSummaryFileLoaded As Boolean
 
 	Protected mSourceFile As System.IO.StreamReader
 	Protected mSourceFileLineCount As Integer
 	Protected mSourceFileLinesRead As Integer
 
 	Protected WithEvents mPHRPParser As clsPHRPParser
+	Protected mPeptideMassCalculator As clsPeptideMassCalculator
 
 	' This dictionary contains mod symbols as the key and modification definition as the values
 	Protected mDynamicMods As SortedDictionary(Of Char, clsModificationDefinition)
@@ -243,6 +245,18 @@ Public Class clsPHRPReader
 		Set(value As Boolean)
 			mLoadScanStatsData = value
 		End Set
+	End Property
+
+	''' <summary>
+	''' Returns True if the ModSummary file was successfully loaded
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property ModSummaryFileLoaded As Boolean
+		Get
+			Return mModSummaryFileLoaded
+		End Get
 	End Property
 
 	''' <summary>
@@ -444,7 +458,9 @@ Public Class clsPHRPReader
 		mDatasetName = String.Empty
 		mInputFilePath = String.Empty
 		mInputFolderPath = String.Empty
+
 		mCanRead = False
+		mModSummaryFileLoaded = False
 
 		mSkipDuplicatePSMs = True
 
@@ -461,6 +477,8 @@ Public Class clsPHRPReader
 
 		mDynamicMods = New SortedDictionary(Of Char, clsModificationDefinition)
 		mStaticMods = New SortedDictionary(Of String, List(Of clsModificationDefinition))
+
+		mPeptideMassCalculator = New clsPeptideMassCalculator()
 
 		mErrorMessages = New System.Collections.Generic.List(Of String)
 		mWarningMessages = New System.Collections.Generic.List(Of String)
@@ -517,6 +535,8 @@ Public Class clsPHRPReader
 							SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, True)
 							If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
 							Return False
+						Else
+							mModSummaryFileLoaded = True
 						End If
 					End If
 
@@ -936,15 +956,9 @@ Public Class clsPHRPReader
 		Dim objModDef As clsModificationDefinition = Nothing
 
 		If objMods.TryGetValue(chModSymbol, objModDef) Then
-			' Mod mass found for chModSymbol; append the mod (add a plus sign if it doesn't start with a minus sign)
-			If objModDef.ModificationMass < 0 Then
-				sbNewPeptide.Append(objModDef.ModificationMassAsText)
-			Else
-				sbNewPeptide.Append("+" & objModDef.ModificationMassAsText)
-			End If
-
+			' Mod mass found for dynamic mod symbol; append the mod
+			sbNewPeptide.Append(clsPHRPParser.NumToStringPlusMinus(objModDef.ModificationMass, 4))
 			lstPeptideMods.Add(New clsAminoAcidModInfo(chResidue, ResidueLocInPeptide, ResidueTerminusState, objModDef))
-
 		End If
 
 	End Sub
@@ -962,12 +976,7 @@ Public Class clsPHRPReader
 			' Static mod applies to this residue; append the mod (add a plus sign if it doesn't start with a minus sign)
 
 			For Each objModDef In lstModDefs
-				If objModDef.ModificationMass < 0 Then
-					sbNewPeptide.Append(objModDef.ModificationMassAsText)
-				Else
-					sbNewPeptide.Append("+" & objModDef.ModificationMassAsText)
-				End If
-
+				sbNewPeptide.Append(clsPHRPParser.NumToStringPlusMinus(objModDef.ModificationMass, 4))
 				lstPeptideMods.Add(New clsAminoAcidModInfo(chResidue, ResidueLocInPeptide, ResidueTerminusState, objModDef))
 			Next
 
@@ -1448,11 +1457,19 @@ Public Class clsPHRPReader
 
 							blnSuccess = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim, strPeptideWithMods, lstPeptideMods)
 							If blnSuccess Then
+								Dim dblTotalModMass As Double = 0
+
 								mPSMCurrent.PeptideWithNumericMods = strPeptideWithMods
 								mPSMCurrent.ClearModifiedResidues()
 								For Each objModEntry In lstPeptideMods
 									mPSMCurrent.AddModifiedResidue(objModEntry)
+									dblTotalModMass += objModEntry.ModDefinition.ModificationMass
 								Next
+
+								If mPSMCurrent.PeptideMonoisotopicMass = 0 Then
+									mPSMCurrent.PeptideMonoisotopicMass = mPeptideMassCalculator.ComputeSequenceMass(mPSMCurrent.PeptideCleanSequence) + dblTotalModMass
+								End If
+
 							End If
 						End If
 
@@ -1486,7 +1503,7 @@ Public Class clsPHRPReader
 						If mPHRPParser.PeptideHitResultType = ePeptideHitResultType.Sequest OrElse mPHRPParser.PeptideHitResultType = ePeptideHitResultType.XTandem Then
 
 							dblMonoisotopicPrecursorMass = 0
-							If blnScanStatsValid Then
+							If blnExtendedScanStatsValid Then
 								' Try to extract out the precursor m/z value from the "Scan Filter Text" field
 								Dim dblParentIonMZ As Double
 								Dim intMSLevel As Integer
@@ -1515,8 +1532,16 @@ Public Class clsPHRPReader
 
 						If Not mMSGFCachedResults Is Nothing AndAlso mMSGFCachedResults.Count > 0 Then
 							Dim strMSGFSpecProb As String = String.Empty
+							Dim dblSpecProb As Double
+
 							If mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, strMSGFSpecProb) Then
 								mPSMCurrent.MSGFSpecProb = strMSGFSpecProb
+								If strMSGFSpecProb.Length > 13 Then
+									' Attempt to shorten the SpecProb value
+									If Double.TryParse(strMSGFSpecProb, dblSpecProb) Then
+										mPSMCurrent.MSGFSpecProb = dblSpecProb.ToString("0.0000000E-00")
+									End If
+								End If
 							End If
 						End If
 
@@ -1805,7 +1830,10 @@ Public Class clsPHRPReader
 					blnSuccess = True
 				End If
 			Else
-				ReportWarning("Extended ScanStats file not found: " & strExtendedScanStatsFilePath)
+				' Note: we do not need to raise a warning for MSGFDB results since the extended scan stats file isn't needed
+				If mPHRPParser.PeptideHitResultType <> ePeptideHitResultType.MSGFDB Then
+					ReportWarning("Extended ScanStats file not found: " & strExtendedScanStatsFilePath)
+				End If
 			End If
 
 		Catch ex As Exception

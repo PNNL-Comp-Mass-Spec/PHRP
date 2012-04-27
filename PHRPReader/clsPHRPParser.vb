@@ -270,11 +270,7 @@ Public MustInherit Class clsPHRPParser
 
 			For Each objModInfo In lstModifiedResidues
 				If objModInfo.ResidueLocInPeptide = intIndex + 1 Then
-					If objModInfo.ModDefinition.ModificationMass < 0 Then
-						sbNewPeptide.Append(objModInfo.ModDefinition.ModificationMassAsText)
-					Else
-						sbNewPeptide.Append("+" & objModInfo.ModDefinition.ModificationMassAsText)
-					End If
+					sbNewPeptide.Append(NumToStringPlusMinus(objModInfo.ModDefinition.ModificationMass, 4))
 				End If
 			Next
 		Next
@@ -397,6 +393,33 @@ Public MustInherit Class clsPHRPParser
 	End Function
 
 	''' <summary>
+	''' Formats a number so that it begins with a + sign if positive or a - sign if negative
+	''' Rounds the number to the specified number of digits, trimming off trailing zeros
+	''' Example output: +79.9663 or -17.016
+	''' </summary>
+	''' <param name="Value"></param>
+	''' <param name="DigitsOfPrecision"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Shared Function NumToStringPlusMinus(ByVal Value As Double, ByVal DigitsOfPrecision As Integer) As String
+
+		Dim strFormatString As String = "+0;-0"
+		If DigitsOfPrecision > 0 Then
+			strFormatString = "+0." & New String("0"c, DigitsOfPrecision) & ";-0." & New String("0"c, DigitsOfPrecision)
+		End If
+
+		Dim strValue As String = Value.ToString(strFormatString).TrimEnd("0"c)
+
+		If strValue.EndsWith("."c) Then
+			' Ends in a decimal point; remove the decimal point
+			strValue = strValue.TrimEnd("."c)
+		End If
+
+		Return strValue
+
+	End Function
+
+	''' <summary>
 	''' Parse the column names in strSplitLine and update the local column header mapping
 	''' </summary>
 	''' <param name="strSplitLine"></param>
@@ -463,6 +486,9 @@ Public MustInherit Class clsPHRPParser
 		Dim strMods() As String
 		Dim kvModDetails As System.Collections.Generic.KeyValuePair(Of String, String)
 
+		Dim lstNTerminalModsAdded As System.Collections.Generic.List(Of String)
+		Dim lstCTerminalModsAdded As System.Collections.Generic.List(Of String)
+
 		Dim strMassCorrectionTag As String
 		Dim intResidueLoc As Integer
 		Dim intPeptideResidueCount As Integer
@@ -482,6 +508,9 @@ Public MustInherit Class clsPHRPParser
 
 				objPSM.SeqID = intSeqID
 				intPeptideResidueCount = objPSM.PeptideCleanSequence.Length
+
+				lstNTerminalModsAdded = New System.Collections.Generic.List(Of String)
+				lstCTerminalModsAdded = New System.Collections.Generic.List(Of String)
 
 				If mSeqInfo.TryGetValue(intSeqID, objSeqInfo) Then
 					objPSM.PeptideMonoisotopicMass = objSeqInfo.MonoisotopicMass
@@ -507,10 +536,24 @@ Public MustInherit Class clsPHRPParser
 
 										If intResidueLoc = 1 Then
 											eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
-											blnFavorTerminalMods = True
+											If lstNTerminalModsAdded.Contains(strMassCorrectionTag) Then
+												' We have likely already added this modification as an N-terminal mod, thus, don't favor terminal mods this time
+												' An example is an iTraq peptide where there is a K at the N-terminus
+												' It gets modified with iTraq twice: once because of the N-terminus and once because of Lysine
+												' For example, R.K+144.102063+144.102063TGSY+79.9663GALAEITASK+144.102063.E
+												blnFavorTerminalMods = False
+											Else
+												blnFavorTerminalMods = True
+											End If
+
 										ElseIf intResidueLoc = intPeptideResidueCount Then
 											eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
-											blnFavorTerminalMods = True
+											If lstCTerminalModsAdded.Contains(strMassCorrectionTag) Then
+												blnFavorTerminalMods = False
+											Else
+												blnFavorTerminalMods = True
+											End If
+
 										Else
 											eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
 											blnFavorTerminalMods = False
@@ -521,6 +564,11 @@ Public MustInherit Class clsPHRPParser
 
 										If blnMatchFound Then
 											objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
+											If intResidueLoc = 1 Then
+												lstNTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag)
+											ElseIf intResidueLoc = intPeptideResidueCount Then
+												lstCTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag)
+											End If
 										Else
 											' Could not find a valid entry in mModInfo
 											ReportError("Unrecognized mass correction tag found in the SeqInfo file: " & strMassCorrectionTag)
@@ -562,46 +610,69 @@ Public MustInherit Class clsPHRPParser
 
 		Dim blnMatchFound As Boolean
 
+		Dim lstMatchedDefs As System.Collections.Generic.List(Of clsModificationDefinition)
+		lstMatchedDefs = New System.Collections.Generic.List(Of clsModificationDefinition)
+
+		For Each objMod In mModInfo
+			If strMassCorrectionTag.ToLower() = objMod.MassCorrectionTag.ToLower() Then
+				lstMatchedDefs.Add(objMod)
+			End If
+		Next
+
 		blnMatchFound = False
-		Do
-			For Each objMod In mModInfo
-				If strMassCorrectionTag = objMod.MassCorrectionTag Then
-					If blnFavorTerminalMods Then
+		If lstMatchedDefs.Count > 0 Then
+
+			Do
+
+				If blnFavorTerminalMods Then
+					' Look for an entry in lstMatchedDefs that is a terminal mod
+					For Each objMod In lstMatchedDefs
 						If objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
 						   objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
 
 							If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus AndAlso _
 							  (objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
 								blnMatchFound = True
+								objMatchedModDef = objMod
+								Exit For
 							End If
 
 							If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus AndAlso _
 							  (objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
 								blnMatchFound = True
+								objMatchedModDef = objMod
+								Exit For
 							End If
-
 						End If
+					Next
+				Else
+					' Look for an entry in lstMatchedDefs that is not a terminal mod
+					For Each objMod In lstMatchedDefs
+						If Not (objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
+						  objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod) Then
+							blnMatchFound = True
+							objMatchedModDef = objMod
+							Exit For
+						End If
+					Next
+				End If
+
+				If Not blnMatchFound Then
+					If blnFavorTerminalMods Then
+						blnFavorTerminalMods = False
 					Else
+						' Still no match found (this shouldn't happen); use the first entry in lstMatchedDefs
+						objMatchedModDef = lstMatchedDefs(0)
 						blnMatchFound = True
 					End If
-
-					If blnMatchFound Then
-						' Match found
-						objMatchedModDef = objMod
-						Exit For
-					End If
 				End If
-			Next
 
-			If Not blnMatchFound AndAlso blnFavorTerminalMods Then
-				' Change FavorTerminalMods to false and try again
-				blnFavorTerminalMods = False
-			Else
-				Exit Do
-			End If
-		Loop While Not blnMatchFound
+			Loop While Not blnMatchFound
+
+		End If
 
 		Return blnMatchFound
 
 	End Function
+
 End Class

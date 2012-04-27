@@ -227,7 +227,7 @@ Public Class clsPHRPParserXTandem
 					If Not String.IsNullOrEmpty(strDefaultParamsFilename) Then
 						' Read the parameters from the default parameters file and store them in objSearchEngineParams
 						' Do this by recursively calling this function
-						ParseXTandemParamFile(strDefaultParamsFilename, objSearchEngineParams, blnLookForDefaultParamsFileName:=False)
+						ParseXTandemParamFile(System.IO.Path.Combine(mInputFolderPath, strDefaultParamsFilename), objSearchEngineParams, blnLookForDefaultParamsFileName:=False)
 					End If
 				End If
 
@@ -278,9 +278,6 @@ Public Class clsPHRPParserXTandem
 		Dim strParamName As String
 		Dim strValue As String
 
-		Dim blnMatchFound As Boolean
-		blnMatchFound = False
-
 		Do While objXMLReader.Read()
 			XMLTextReaderSkipWhitespace(objXMLReader)
 			If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
@@ -299,14 +296,14 @@ Public Class clsPHRPParserXTandem
 							strValue = XMLTextReaderGetInnerText(objXMLReader)
 
 							kvParameter = New System.Collections.Generic.KeyValuePair(Of String, String)(strParamName, strValue)
-
+							Return True						
 						End If
 					End If
 				End If
 			End If
 		Loop
 
-		Return blnMatchFound
+		Return False
 
 	End Function
 

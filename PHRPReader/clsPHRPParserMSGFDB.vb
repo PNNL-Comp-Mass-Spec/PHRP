@@ -144,7 +144,7 @@ Public Class clsPHRPParserMSGFDB
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
 
-						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso Not strLineIn.StartsWith("[") AndAlso strLineIn.Contains("="c) Then
+						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso strLineIn.Contains("="c) Then
 
 							' Split the line on the equals sign
 							kvSetting = ParseKeyValueSetting(strLineIn, "="c)
@@ -177,6 +177,7 @@ Public Class clsPHRPParserMSGFDB
 										End If
 
 									Case "nnet"
+										' NNET means number of non-enzymatic terminii
 
 										If Integer.TryParse(strSettingValue, intValue) Then
 											Select Case intValue
@@ -224,6 +225,7 @@ Public Class clsPHRPParserMSGFDB
 		Dim strProtein As String
 
 		Dim dblPrecursorMZ As Double
+		Dim dblSpecProb As Double
 
 		Dim blnSuccess As Boolean
 
@@ -261,6 +263,13 @@ Public Class clsPHRPParserMSGFDB
 
 					.MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders)
 
+					If .MSGFSpecProb.Length > 13 Then
+						' Attempt to shorten the SpecProb value
+						If Double.TryParse(.MSGFSpecProb, dblSpecProb) Then
+							.MSGFSpecProb = dblSpecProb.ToString("0.0000000E-00")
+						End If
+
+					End If
 					blnSuccess = True
 				End If
 			End With

@@ -161,7 +161,7 @@ Public Class clsPHRPParserInspect
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
 
-						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso Not strLineIn.StartsWith("[") AndAlso strLineIn.Contains("="c) Then
+						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso strLineIn.Contains(","c) Then
 
 							' Split the line on the comma
 							kvSetting = ParseKeyValueSetting(strLineIn, ","c)
