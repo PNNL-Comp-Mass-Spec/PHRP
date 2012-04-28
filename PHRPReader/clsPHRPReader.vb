@@ -1041,6 +1041,16 @@ Public Class clsPHRPReader
 	End Function
 
 	''' <summary>
+	''' Returns the filename of the MSGF file that corresponds to strSynopsisOrFirstHitsFileName
+	''' </summary>
+	''' <param name="strSynopsisOrFirstHitsFileName">Filename (or full path) to the synopsis or first-hits file</param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Shared Function GetMSGFFileName(strSynopsisOrFirstHitsFileName As String) As String
+		Return System.IO.Path.GetFileNameWithoutExtension(strSynopsisOrFirstHitsFileName) & MSGF_RESULT_FILENAME_SUFFIX
+	End Function
+
+	''' <summary>
 	''' Returns the default first-hits file name for the given PeptideHit result type
 	''' </summary>
 	''' <param name="eResultType"></param>
@@ -1242,6 +1252,14 @@ Public Class clsPHRPReader
 
 		Return strSeqToProteinMapFileName
 
+	End Function
+
+	Public Shared Function GetScanStatsFilename(ByVal strDatasetName As String) As String
+		Return strDatasetName & SCAN_STATS_FILENAME_SUFFIX
+	End Function
+
+	Public Shared Function GetExtendedScanStatsFilename(ByVal strDatasetName As String) As String
+		Return strDatasetName & EXTENDED_SCAN_STATS_FILENAME_SUFFIX
 	End Function
 
 	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
@@ -1601,7 +1619,7 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean = False
 
 		Try
-			strMSGFFilePath = System.IO.Path.GetFileNameWithoutExtension(mInputFilePath) & MSGF_RESULT_FILENAME_SUFFIX
+			strMSGFFilePath = GetMSGFFileName(mInputFilePath)
 			strMSGFFilePath = System.IO.Path.Combine(mInputFolderPath, strMSGFFilePath)
 
 			blnSuccess = ReadAndCacheMSGFData(strMSGFFilePath)
@@ -1755,7 +1773,7 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean = False
 
 		Try
-			strScanStatsFilePath = mDatasetName & SCAN_STATS_FILENAME_SUFFIX
+			strScanStatsFilePath = GetScanStatsFilename(mDatasetName)
 			strScanStatsFilePath = System.IO.Path.Combine(mInputFolderPath, strScanStatsFilePath)
 
 			blnSuccess = ReadScanStatsData(strScanStatsFilePath)
@@ -1801,7 +1819,7 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean = False
 
 		Try
-			strExtendedScanStatsFilePath = mDatasetName & EXTENDED_SCAN_STATS_FILENAME_SUFFIX
+			strExtendedScanStatsFilePath = GetExtendedScanStatsFilename(mDatasetName)
 			strExtendedScanStatsFilePath = System.IO.Path.Combine(mInputFolderPath, strExtendedScanStatsFilePath)
 
 			blnSuccess = ReadExtendedScanStatsData(strExtendedScanStatsFilePath)
@@ -1843,7 +1861,6 @@ Public Class clsPHRPReader
 		Return blnSuccess
 
 	End Function
-
 
 	Protected Sub ReportError(ByVal strErrorMessage As String)
 		mErrorMessage = strErrorMessage

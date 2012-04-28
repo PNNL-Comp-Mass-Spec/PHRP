@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Verion 1.4.4500; April 27, 2012
+	- Removed duplicated classes from PeptideHitResultsProcessor
+	- Now skipping synopsis-specific SeqInfo files when parsing a first-hits file with the PHRPReader
+
 Version 1.4.4499; April 26, 2012
 	- New version of PHRPReader.dll that uses ThermoRawFileReaderDLL.dll
 

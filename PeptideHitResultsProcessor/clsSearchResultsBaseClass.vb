@@ -28,8 +28,8 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
-Imports PeptideHitResultsProcessor.clsPeptideCleavageStateCalculator
 Imports PHRPReader
+Imports PHRPReader.clsPeptideCleavageStateCalculator
 
 Public MustInherit Class clsSearchResultsBaseClass
 

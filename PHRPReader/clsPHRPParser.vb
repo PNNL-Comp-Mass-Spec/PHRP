@@ -171,6 +171,13 @@ Public MustInherit Class clsPHRPParser
 
 		mErrorMessage = String.Empty
 
+		Dim blnIsSynopsisFile As Boolean
+		If fiFileInfo.Name.ToLower() = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName).ToLower() Then
+			blnIsSynopsisFile = True
+		Else
+			blnIsSynopsisFile = False
+		End If
+
 		' Initialize the column mapping object
 		' Using a case-insensitive comparer
 		mColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
@@ -194,7 +201,10 @@ Public MustInherit Class clsPHRPParser
 
 		If mModInfoLoaded AndAlso blnLoadModsAndSeqInfo Then
 			' Read the ResultToSeqMapInfo (if the files exist)
-			LoadSeqInfo()
+			' We can only read these files if the source file is a _syn.txt file; cannot read this data if it is a _fht.txt file
+			If blnIsSynopsisFile Then
+				LoadSeqInfo()
+			End If
 		End If
 
 		' The following will be overridden by a derived form of this class

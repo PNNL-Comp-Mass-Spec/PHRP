@@ -190,7 +190,7 @@ Public Class clsSearchResultsXTandem
 			' Compute the original value for the precursor monoisotopic mass
 			Dim dblParentIonMH As Double
 			If Double.TryParse(MyBase.ParentIonMH, dblParentIonMH) Then
-				dblPrecursorMonoMass = dblParentIonMH - clsPeptideMassCalculator.MASS_PROTON
+				dblPrecursorMonoMass = dblParentIonMH - PHRPReader.clsPeptideMassCalculator.MASS_PROTON
 			Else
 				blnParseError = True
 			End If

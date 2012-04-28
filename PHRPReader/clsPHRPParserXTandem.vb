@@ -39,6 +39,8 @@ Public Class clsPHRPParserXTandem
 	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
 	Protected Const XT_SEARCH_ENGINE_NAME As String = "X! Tandem"
+
+	Protected Const TAXONOMY_INFO_KEY_NAME As String = "list path, taxonomy information"
 #End Region
 
 	''' <summary>
@@ -62,6 +64,16 @@ Public Class clsPHRPParserXTandem
 		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.XTandem, blnLoadModsAndSeqInfo)
 		mInitialized = True
 	End Sub
+
+	Protected Shared Function AppendToString(ByVal strText As String, ByVal strAppend As String) As String
+
+		If String.IsNullOrEmpty(strText) Then
+			Return strAppend
+		Else
+			Return strText & "; " & strAppend
+		End If
+
+	End Function
 
 	Protected Overrides Sub DefineColumnHeaders()
 
@@ -113,7 +125,62 @@ Public Class clsPHRPParserXTandem
 		Return strDatasetName & "_xt_SeqToProteinMap.txt"
 	End Function
 
-	Protected Function GetFastaFileFromTaxonomyFile(ByVal strTaxononomyFilename As String) As String
+	Public Shared Function GetAdditionalSearchEngineParamFileNames(ByVal strSearchEngineParamFilePath As String) As System.Collections.Generic.List(Of String)
+		Dim lstFileNames As System.Collections.Generic.List(Of String)
+		lstFileNames = New System.Collections.Generic.List(Of String)
+
+		Dim strDefaultParamsFilename As String
+		Dim strTaxonomyFilename As String = String.Empty
+		Dim strErrorMessage As String = String.Empty
+
+		Dim fiFileInfo As System.IO.FileInfo
+		Dim objSearchEngineParams As clsSearchEngineParameters
+
+		Try
+			If Not System.IO.File.Exists(strSearchEngineParamFilePath) Then
+				lstFileNames.Add("default_input.xml  (Not Confirmed)")
+				lstFileNames.Add("taxonomy.xml  (Not Confirmed)")
+			Else
+				fiFileInfo = New System.IO.FileInfo(strSearchEngineParamFilePath)
+				objSearchEngineParams = New clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME)
+
+				Try
+					strDefaultParamsFilename = GetXTandemDefaultParamsFilename(strSearchEngineParamFilePath)
+					If Not String.IsNullOrEmpty(strDefaultParamsFilename) Then
+						lstFileNames.Add(strDefaultParamsFilename)
+					End If
+				Catch ex As Exception
+					Console.WriteLine("Error in GetXTandemDefaultParamsFilename: " & ex.Message)
+					strDefaultParamsFilename = String.Empty
+				End Try
+
+				Try
+
+					ParseXTandemParamFileWork(fiFileInfo.DirectoryName, fiFileInfo.Name, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile:=False, blnLookForDefaultParamsFileName:=True, strErrorMessage:=strErrorMessage)
+
+					If objSearchEngineParams.Parameters.TryGetValue(TAXONOMY_INFO_KEY_NAME, strTaxonomyFilename) Then
+						lstFileNames.Add(System.IO.Path.GetFileName(strTaxonomyFilename))
+					End If
+
+				Catch ex As Exception
+					Console.WriteLine("Error in ParseXTandemParamFileWork: " & ex.Message)
+				End Try
+
+				If Not String.IsNullOrEmpty(strErrorMessage) Then
+					Console.WriteLine(strErrorMessage)
+				End If
+
+			End If
+
+		Catch ex As Exception
+			Console.WriteLine("Exception in GetAdditionalSearchEngineParamFileNames: " & ex.Message)
+		End Try
+
+		Return lstFileNames
+
+	End Function
+
+	Protected Shared Function GetFastaFileFromTaxonomyFile(ByVal strInputFolderPath As String, ByVal strTaxononomyFilename As String, ByRef strErrorMessage As String) As String
 
 		Dim strTaxonomyFilePath As String
 		Dim strFastaFile As String = String.Empty
@@ -123,9 +190,9 @@ Public Class clsPHRPParserXTandem
 		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String) = Nothing
 
 		Try
-			strTaxonomyFilePath = System.IO.Path.Combine(mInputFolderPath, strTaxononomyFilename)
+			strTaxonomyFilePath = System.IO.Path.Combine(strInputFolderPath, strTaxononomyFilename)
 			If Not System.IO.File.Exists(strTaxonomyFilePath) Then
-				ReportError("Taxonomy file not found: " & strTaxonomyFilePath)
+				strErrorMessage = AppendToString(strErrorMessage, "Taxonomy file not found: " & strTaxonomyFilePath)
 			Else
 
 				' Open the XML file and look for the "file" element with attribute "peptide"
@@ -152,35 +219,29 @@ Public Class clsPHRPParserXTandem
 
 			End If
 		Catch ex As Exception
-			ReportError("Error in GetFastaFileFromTaxonomyFile: " & ex.Message)
+			strErrorMessage = AppendToString(strErrorMessage, "Error in GetFastaFileFromTaxonomyFile: " & ex.Message)
 		End Try
 
 		Return strFastaFile
 
 	End Function
 
-	Protected Function GetXTandemDefaultParamsFilename(ByVal strParamFilePath As String) As String
+	Protected Shared Function GetXTandemDefaultParamsFilename(ByVal strParamFilePath As String) As String
 
 		Dim strDefaultParamsFilename As String = String.Empty
 		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String) = Nothing
 
-		Try
+		' Open the XML file and look for the "list path, default parameters" entry
+		Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(strParamFilePath)
 
-			' Open the XML file and look for the "list path, default parameters" entry
-			Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(strParamFilePath)
+			Do While MoveToNextInputParam(objXMLReader, kvSetting)
+				If kvSetting.Key = "list path, default parameters" Then
+					strDefaultParamsFilename = String.Copy(kvSetting.Value)
+					Exit Do
+				End If
+			Loop
 
-				Do While MoveToNextInputParam(objXMLReader, kvSetting)
-					If kvSetting.Key = "list path, default parameters" Then
-						strDefaultParamsFilename = String.Copy(kvSetting.Value)
-						Exit Do
-					End If
-				Loop
-
-			End Using
-
-		Catch ex As Exception
-			ReportError("Error in GetXTandemDefaultParamsFilename: " & ex.Message)
-		End Try
+		End Using
 
 		Return strDefaultParamsFilename
 
@@ -205,6 +266,44 @@ Public Class clsPHRPParserXTandem
 	Public Function ParseXTandemParamFile(ByVal strParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters, blnLookForDefaultParamsFileName As Boolean) As Boolean
 
 		Dim strParamFilePath As String
+		Dim strErrorMessage As String = String.Empty
+
+		Dim blnDetermineFastaFileNameUsingTaxonomyFile As Boolean
+		Dim blnSuccess As Boolean
+
+		Try
+			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strParamFileName)
+
+			If Not System.IO.File.Exists(strParamFilePath) Then
+				ReportError("X!Tandem param file not found: " & strParamFilePath)
+			Else
+
+				Try
+					blnDetermineFastaFileNameUsingTaxonomyFile = True
+					blnSuccess = ParseXTandemParamFileWork(mInputFolderPath, strParamFileName, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile, blnLookForDefaultParamsFileName, strErrorMessage)
+				Catch ex As Exception
+					ReportError("Error in ParseXTandemParamFileWork: " & ex.Message)
+				End Try
+
+				If Not String.IsNullOrEmpty(strErrorMessage) Then
+					ReportError(strErrorMessage)
+				End If
+
+			End If
+
+		Catch ex As Exception
+			ReportError("Error in ParseXTandemParamFile: " & ex.Message)
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Shared Function ParseXTandemParamFileWork(ByVal strInputFolderPath As String, ByVal strParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters, ByVal blnDetermineFastaFileNameUsingTaxonomyFile As Boolean, ByVal blnLookForDefaultParamsFileName As Boolean, ByRef strErrorMessage As String) As Boolean
+
+		' Note: Do not put a Try/Catch block in this function
+
+		Dim strParamFilePath As String
 		Dim strDefaultParamsFilename As String
 
 		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String) = Nothing
@@ -213,66 +312,64 @@ Public Class clsPHRPParserXTandem
 
 		Dim blnSuccess As Boolean
 
-		Try
+		strParamFilePath = System.IO.Path.Combine(strInputFolderPath, strParamFileName)
 
-			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strParamFileName)
+		If blnLookForDefaultParamsFileName Then
+			Try
+				strDefaultParamsFilename = GetXTandemDefaultParamsFilename(strParamFilePath)
+			Catch ex As Exception
+				strErrorMessage = AppendToString(strErrorMessage, "Error in GetXTandemDefaultParamsFilename: " & ex.Message)
+				strDefaultParamsFilename = String.Empty
+			End Try
 
-			If Not System.IO.File.Exists(strParamFilePath) Then
-				ReportError("X!Tandem param file not found: " & strParamFilePath)
-			Else
-
-				If blnLookForDefaultParamsFileName Then
-					strDefaultParamsFilename = GetXTandemDefaultParamsFilename(strParamFilePath)
-
-					If Not String.IsNullOrEmpty(strDefaultParamsFilename) Then
-						' Read the parameters from the default parameters file and store them in objSearchEngineParams
-						' Do this by recursively calling this function
-						ParseXTandemParamFile(System.IO.Path.Combine(mInputFolderPath, strDefaultParamsFilename), objSearchEngineParams, blnLookForDefaultParamsFileName:=False)
-					End If
-				End If
-
-				' Now read the parameters in strParamFilePath
-				Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(strParamFilePath)
-
-					Do While MoveToNextInputParam(objXMLReader, kvSetting)
-
-						If Not String.IsNullOrEmpty(kvSetting.Key) Then
-							objSearchEngineParams.AddUpdateParameter(kvSetting.Key, kvSetting.Value)
-
-							Select Case kvSetting.Key
-								Case "list path, taxonomy information"
-									' Open the taxonomy file to determine the fasta file used
-									strSetting = GetFastaFileFromTaxonomyFile(kvSetting.Value)
-
-									If Not String.IsNullOrEmpty(strSetting) Then
-										objSearchEngineParams.FastaFilePath = strSetting
-									End If
-
-								Case "spectrum, fragment mass type"
-									objSearchEngineParams.FragmentMassType = kvSetting.Value
-
-								Case "scoring, maximum missed cleavage sites"
-									If Integer.TryParse(kvSetting.Value, intValue) Then
-										objSearchEngineParams.MaxNumberInternalCleavages = intValue
-									End If
-
-							End Select
-						End If
-					Loop
-
-				End Using
-
-				blnSuccess = True
-
+			If Not String.IsNullOrEmpty(strDefaultParamsFilename) Then
+				' Read the parameters from the default parameters file and store them in objSearchEngineParams
+				' Do this by recursively calling this function
+				ParseXTandemParamFileWork(strInputFolderPath, strDefaultParamsFilename, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile, blnLookForDefaultParamsFileName:=False, strErrorMessage:=strErrorMessage)
 			End If
-		Catch ex As Exception
-			ReportError("Error in LoadSearchEngineParameters: " & ex.Message)
-		End Try
+		End If
+
+		' Now read the parameters in strParamFilePath
+		Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(strParamFilePath)
+
+			Do While MoveToNextInputParam(objXMLReader, kvSetting)
+
+				If Not String.IsNullOrEmpty(kvSetting.Key) Then
+					objSearchEngineParams.AddUpdateParameter(kvSetting.Key, kvSetting.Value)
+
+					Select Case kvSetting.Key
+						Case TAXONOMY_INFO_KEY_NAME
+
+							If blnDetermineFastaFileNameUsingTaxonomyFile Then
+								' Open the taxonomy file to determine the fasta file used
+								strSetting = GetFastaFileFromTaxonomyFile(strInputFolderPath, System.IO.Path.GetFileName(kvSetting.Value), strErrorMessage)
+
+								If Not String.IsNullOrEmpty(strSetting) Then
+									objSearchEngineParams.FastaFilePath = strSetting
+								End If
+							End If
+
+						Case "spectrum, fragment mass type"
+							objSearchEngineParams.FragmentMassType = kvSetting.Value
+
+						Case "scoring, maximum missed cleavage sites"
+							If Integer.TryParse(kvSetting.Value, intValue) Then
+								objSearchEngineParams.MaxNumberInternalCleavages = intValue
+							End If
+
+					End Select
+				End If
+			Loop
+
+		End Using
+
+		blnSuccess = True
 
 		Return blnSuccess
+
 	End Function
 
-	Protected Function MoveToNextInputParam(ByRef objXMLReader As System.Xml.XmlTextReader, ByRef kvParameter As System.Collections.Generic.KeyValuePair(Of String, String)) As Boolean
+	Protected Shared Function MoveToNextInputParam(ByRef objXMLReader As System.Xml.XmlTextReader, ByRef kvParameter As System.Collections.Generic.KeyValuePair(Of String, String)) As Boolean
 
 		Dim strNoteType As String
 		Dim strParamName As String
@@ -296,7 +393,7 @@ Public Class clsPHRPParserXTandem
 							strValue = XMLTextReaderGetInnerText(objXMLReader)
 
 							kvParameter = New System.Collections.Generic.KeyValuePair(Of String, String)(strParamName, strValue)
-							Return True						
+							Return True
 						End If
 					End If
 				End If
@@ -378,7 +475,7 @@ Public Class clsPHRPParserXTandem
 
 				' Store the remaining scores
 				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Hyperscore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Expectation_Value_LogE)				
+				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Expectation_Value_LogE)
 				AddScore(objPSM, strColumns, DATA_COLUMN_DeltaCn2)
 				AddScore(objPSM, strColumns, DATA_COLUMN_y_score)
 				AddScore(objPSM, strColumns, DATA_COLUMN_y_ions)
@@ -403,7 +500,7 @@ Public Class clsPHRPParserXTandem
 
 	End Function
 
-	Private Function XMLTextReaderGetAttributeValue(ByRef objXMLReader As System.Xml.XmlTextReader, ByVal strAttributeName As String, ByVal strValueIfMissing As String) As String
+	Private Shared Function XMLTextReaderGetAttributeValue(ByRef objXMLReader As System.Xml.XmlTextReader, ByVal strAttributeName As String, ByVal strValueIfMissing As String) As String
 		objXMLReader.MoveToAttribute(strAttributeName)
 		If objXMLReader.ReadAttributeValue() Then
 			Return objXMLReader.Value
@@ -412,7 +509,7 @@ Public Class clsPHRPParserXTandem
 		End If
 	End Function
 
-	Private Function XMLTextReaderGetInnerText(ByRef objXMLReader As System.Xml.XmlTextReader) As String
+	Private Shared Function XMLTextReaderGetInnerText(ByRef objXMLReader As System.Xml.XmlTextReader) As String
 		Dim strValue As String = String.Empty
 		Dim blnSuccess As Boolean
 
@@ -430,7 +527,7 @@ Public Class clsPHRPParserXTandem
 		Return strValue
 	End Function
 
-	Private Sub XMLTextReaderSkipWhitespace(ByRef objXMLReader As System.Xml.XmlTextReader)
+	Private Shared Sub XMLTextReaderSkipWhitespace(ByRef objXMLReader As System.Xml.XmlTextReader)
 		If objXMLReader.NodeType = Xml.XmlNodeType.Whitespace Then
 			' Whitspace; read the next node
 			objXMLReader.Read()

@@ -91,12 +91,6 @@
     </Compile>
     <Compile Include="clsInSpecTResultsProcessor.vb" />
     <Compile Include="clsMSGFDBResultsProcessor.vb" />
-    <Compile Include="clsPeptideCleavageStateCalculator.vb">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="clsPeptideMassCalculator.vb">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="clsPeptideModificationContainer.vb">
       <SubType>Code</SubType>
     </Compile>
