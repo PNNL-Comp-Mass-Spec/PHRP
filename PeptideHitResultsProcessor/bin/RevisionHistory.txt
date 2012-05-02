@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.4504; May 1, 2012
+	- Added full support for loading static mods from a msgfdb parameter file
+		- Previously treated them as dynamic mods
+
 Version 1.5.4497; April 24, 2012
 	- Updated use PHRPReader for classes clsAminoAcidModInfo and clsModificationDefinition
 

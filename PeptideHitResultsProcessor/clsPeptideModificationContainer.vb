@@ -392,17 +392,23 @@ Public Class clsPeptideModificationContainer
 
 	End Function
 
+	''' <summary>
+	''' Looks for an existing modification with the given modification mass and target residues
+	''' </summary>
+	''' <param name="dblModificationMass"></param>
+	''' <param name="chTargetResidue">If defined, then returns the first modification with the given mass and containing the residue in .TargetResidues; if no match, then looks for the first modification with the given mass and no defined .TargetResidues</param>
+	''' <param name="eResidueTerminusState"></param>
+	''' <param name="blnExistingModFound"></param>
+	''' <param name="blnAddToModificationListIfUnknown"></param>
+	''' <param name="MassDigitsOfPrecision"></param>
+	''' <returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True</returns>
+	''' <remarks>If chTargetResidue is nothing, then follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
 	Public Function LookupModificationDefinitionByMass(ByVal dblModificationMass As Double, _
 													   ByVal chTargetResidue As Char, _
 													   ByVal eResidueTerminusState As eResidueTerminusStateConstants, _
 													   ByRef blnExistingModFound As Boolean, _
 													   ByVal blnAddToModificationListIfUnknown As Boolean, _
 													   Optional ByVal MassDigitsOfPrecision As Byte = MASS_DIGITS_OF_PRECISION) As clsModificationDefinition
-		' If chTargetResidue is defined, then returns the first modification with the given mass and containing the residue in .TargetResidues
-		'  If no match is found, then looks for the first modification with the given mass and no defined .TargetResidues
-		'  If no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True
-		' If chTargetResidue is nothing, then follows similar logic, but skips defined modifications with defined .TargetResidues
-
 		Dim intIndex As Integer
 		Dim intNewModIndex As Integer
 
@@ -541,6 +547,187 @@ Public Class clsPeptideModificationContainer
 
 	End Function
 
+	''' <summary>
+	''' Looks for an existing modification with the given modification mass, modification type, and target residues
+	''' </summary>
+	''' <param name="dblModificationMass"></param>
+	''' <param name="eModType"></param>
+	''' <param name="chTargetResidue">If defined, then returns the first modification with the given mass and containing the residue in .TargetResidues; if no match, then looks for the first modification with the given mass and no defined .TargetResidues</param>
+	''' <param name="eResidueTerminusState"></param>
+	''' <param name="blnExistingModFound"></param>
+	''' <param name="blnAddToModificationListIfUnknown"></param>
+	''' <param name="MassDigitsOfPrecision"></param>
+	''' <returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True</returns>
+	''' <remarks>If chTargetResidue is nothing, then follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+	Public Function LookupModificationDefinitionByMassAndModType( _
+	  ByVal dblModificationMass As Double, _
+	  ByVal eModType As clsModificationDefinition.eModificationTypeConstants, _
+	  ByVal chTargetResidue As Char, _
+	  ByVal eResidueTerminusState As eResidueTerminusStateConstants, _
+	  ByRef blnExistingModFound As Boolean, _
+	  ByVal blnAddToModificationListIfUnknown As Boolean, _
+	  Optional ByVal MassDigitsOfPrecision As Byte = MASS_DIGITS_OF_PRECISION) As clsModificationDefinition
+
+		' If chTargetResidue is defined, then returns the first modification with the given mass and containing the residue in .TargetResidues
+		'  If no match is found, then looks for the first modification with the given mass and no defined .TargetResidues
+		'  If no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True
+		' If chTargetResidue is nothing, then follows similar logic, but skips defined modifications with defined .TargetResidues
+
+		Dim intIndex As Integer
+		Dim intNewModIndex As Integer
+
+		Dim objModificationDefinition As clsModificationDefinition
+		Dim strTargetResidues As String
+
+		Dim chModSymbol As Char
+		Dim blnUseNextAvailableModificationSymbol As Boolean
+
+		If MassDigitsOfPrecision < 0 Then MassDigitsOfPrecision = 0
+
+		Select Case eModType
+			Case clsModificationDefinition.eModificationTypeConstants.StaticMod, clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod, clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+				chModSymbol = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL
+				blnUseNextAvailableModificationSymbol = False
+			Case Else
+				chModSymbol = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL
+				blnUseNextAvailableModificationSymbol = True
+		End Select
+
+		blnExistingModFound = False
+		If Not chTargetResidue = Nothing OrElse eResidueTerminusState <> eResidueTerminusStateConstants.None Then
+			' The residue was provided and/or the residue is located at a peptide or protein terminus
+			' First compare against modifications with 1 or more residues in .TargetResidues
+			For intIndex = 0 To mModifications.Count - 1
+				If mModifications(intIndex).ModificationType = eModType AndAlso _
+				 (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
+				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
+				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
+				  mModifications(intIndex).TargetResidues.Length > 0 Then
+
+					If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+						' Matching mass found
+						' Now see if .TargetResidues contains chTargetResidue
+						If Not chTargetResidue = Nothing AndAlso mModifications(intIndex).TargetResiduesContain(chTargetResidue) Then
+							blnExistingModFound = True
+						End If
+
+						If Not blnExistingModFound AndAlso eResidueTerminusState <> eResidueTerminusStateConstants.None Then
+							Select Case eResidueTerminusState
+								Case eResidueTerminusStateConstants.PeptideNTerminus, eResidueTerminusStateConstants.ProteinNTerminus, eResidueTerminusStateConstants.ProteinNandCCTerminus
+									If mModifications(intIndex).TargetResiduesContain(N_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
+										blnExistingModFound = True
+									End If
+								Case eResidueTerminusStateConstants.PeptideCTerminus, eResidueTerminusStateConstants.ProteinCTerminus
+									If mModifications(intIndex).TargetResiduesContain(C_TERMINAL_PEPTIDE_SYMBOL_DMS) Then
+										blnExistingModFound = True
+									End If
+							End Select
+						End If
+
+						If blnExistingModFound Then
+							' Match found
+							Return mModifications(intIndex)
+						End If
+					End If
+				End If
+			Next intIndex
+		End If
+
+		' No match was found
+		' Compare against modifications with empty .TargetResidues
+		For intIndex = 0 To mModifications.Count - 1
+			If mModifications(intIndex).ModificationType = eModType AndAlso _
+			 (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
+			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
+			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
+			  mModifications(intIndex).TargetResidues.Length = 0 Then
+
+				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+					' Matching mass found
+					Return mModifications(intIndex)
+				End If
+
+			End If
+		Next intIndex
+
+		' Still no match; look for the modification mass and residue in mStandardRefinementModifications
+		' Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing
+		If Not chTargetResidue = Nothing Then
+			For intIndex = 0 To mStandardRefinementModifications.Length - 1
+				If Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+					' Matching mass found
+					' Now see if .TargetResidues contains chTargetResidue
+					If mStandardRefinementModifications(intIndex).TargetResiduesContain(chTargetResidue) Then
+						blnExistingModFound = True
+
+						objModificationDefinition = mStandardRefinementModifications(intIndex)
+						objModificationDefinition.ModificationSymbol = chModSymbol
+						objModificationDefinition.ModificationType = eModType
+
+						If blnAddToModificationListIfUnknown AndAlso mDefaultModificationSymbols.Count > 0 Then
+							' Append objModificationDefinition to mModifications()
+							intNewModIndex = AddModification(objModificationDefinition, True)
+							If intNewModIndex >= 0 Then
+								Return mModifications(intNewModIndex)
+							Else
+								Return objModificationDefinition
+							End If
+						End If
+
+						' Either blnAddToModificationListIfUnknown = False or no more default modification symbols
+						' Return objModificationDefinition, which has .ModificationSymbol = LAST_RESORT_MODIFICATION_SYMBOL
+						Return objModificationDefinition
+					End If
+				End If
+			Next intIndex
+		End If
+
+		' Still no match; define a new custom modification
+		' First, need to populate strTargetResidues
+		If chTargetResidue = Nothing Then
+			strTargetResidues = String.Empty
+		Else
+			strTargetResidues = chTargetResidue
+		End If
+
+		If eResidueTerminusState <> eResidueTerminusStateConstants.None Then
+			' Assume this is a terminus mod
+			Select Case eResidueTerminusState
+				Case eResidueTerminusStateConstants.PeptideNTerminus, eResidueTerminusStateConstants.ProteinNTerminus, eResidueTerminusStateConstants.ProteinNandCCTerminus
+					strTargetResidues = N_TERMINAL_PEPTIDE_SYMBOL_DMS
+				Case eResidueTerminusStateConstants.PeptideNTerminus, eResidueTerminusStateConstants.PeptideCTerminus
+					strTargetResidues = C_TERMINAL_PEPTIDE_SYMBOL_DMS
+				Case Else
+					' This shouldn't occur
+			End Select
+		End If
+
+		objModificationDefinition = New clsModificationDefinition( _
+		   chModSymbol, _
+		   dblModificationMass, _
+		   strTargetResidues, _
+		   eModType, _
+		   LookupMassCorrectionTagByMass(dblModificationMass), _
+		   clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, _
+		   True)
+
+		If blnAddToModificationListIfUnknown AndAlso mDefaultModificationSymbols.Count > 0 Then
+			' Append objModificationDefinition to mModifications()
+
+			intNewModIndex = AddModification(objModificationDefinition, blnUseNextAvailableModificationSymbol)
+			If intNewModIndex >= 0 Then
+				Return mModifications(intNewModIndex)
+			Else
+				Return objModificationDefinition
+			End If
+		End If
+
+		' Either blnAddToModificationListIfUnknown = False or no more default modification symbols
+		' Return objModificationDefinition, which has .ModificationSymbol = LAST_RESORT_MODIFICATION_SYMBOL
+		Return objModificationDefinition
+
+	End Function
+
 	Private Sub InitializeLocalVariables()
 		mErrorMessage = String.Empty
 		SetDefaultMassCorrectionTags()
@@ -607,7 +794,7 @@ Public Class clsPeptideModificationContainer
 			End If
 		Catch ex As Exception
 			mErrorMessage = "Error reading Mass Correction Tags file (" & strFilePath & "): " & ex.Message
-			blnSuccess = False	
+			blnSuccess = False
 		End Try
 
 		Return blnSuccess
@@ -773,7 +960,7 @@ Public Class clsPeptideModificationContainer
 			End If
 		Catch ex As Exception
 			mErrorMessage = "Error reading Modification Definition file (" & strFilePath & "): " & ex.Message
-			blnSuccess = False	
+			blnSuccess = False
 		End Try
 
 		Return blnSuccess
@@ -985,19 +1172,19 @@ Public Class clsPeptideModificationContainer
 
 		dblModificationMass = -17.026549
 		mStandardRefinementModifications(0) = New clsModificationDefinition( _
-							clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL, _
-							dblModificationMass, _
-							"Q", _
-							clsModificationDefinition.eModificationTypeConstants.DynamicMod, _
-							LookupMassCorrectionTagByMass(dblModificationMass))
+		  clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL, _
+		  dblModificationMass, _
+		  "Q", _
+		  clsModificationDefinition.eModificationTypeConstants.DynamicMod, _
+		  LookupMassCorrectionTagByMass(dblModificationMass))
 
 		dblModificationMass = -18.0106
 		mStandardRefinementModifications(1) = New clsModificationDefinition( _
-							clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL, _
-							dblModificationMass, _
-							"E", _
-							clsModificationDefinition.eModificationTypeConstants.DynamicMod, _
-							LookupMassCorrectionTagByMass(dblModificationMass))
+		  clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL, _
+		  dblModificationMass, _
+		  "E", _
+		  clsModificationDefinition.eModificationTypeConstants.DynamicMod, _
+		  LookupMassCorrectionTagByMass(dblModificationMass))
 
 	End Sub
 

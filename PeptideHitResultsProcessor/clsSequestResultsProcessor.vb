@@ -341,7 +341,8 @@ Public Class clsSequestResultsProcessor
 
 				If mCreateModificationSummaryFile Then
 					' Create the modification summary file
-					strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(strInputFilePath, "", FILENAME_SUFFIX_MOD_SUMMARY)
+					Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
+					strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY)
 					SaveModificationSummaryFile(strModificationSummaryFilePath)
 				End If
 

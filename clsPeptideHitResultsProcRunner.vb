@@ -373,11 +373,15 @@ Public Class clsPeptideHitResultsProcRunner
                             If Not mPeptideHitResultsProcessor Is Nothing Then
                                 If mObtainModificationDefinitionsFromDMS Then
                                     LoadModificationInfoFromDMS()
-                                End If
-                                With mPeptideHitResultsProcessor
-                                    .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath
-                                    .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
-                                    .SearchToolParameterFilePath = mSearchToolParameterFilePath
+								End If
+
+								Dim fiSourceFile As System.IO.FileInfo
+								fiSourceFile = New System.IO.FileInfo(strInputFilePath)
+
+								With mPeptideHitResultsProcessor
+									.MassCorrectionTagsFilePath = ResolveFilePath(fiSourceFile.DirectoryName, mMassCorrectionTagsFilePath)
+									.ModificationDefinitionsFilePath = ResolveFilePath(fiSourceFile.DirectoryName, mModificationDefinitionsFilePath)
+									.SearchToolParameterFilePath = ResolveFilePath(fiSourceFile.DirectoryName, mSearchToolParameterFilePath)
 
                                     .CreateInspectFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
                                     .CreateInspectSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
@@ -387,7 +391,8 @@ Public Class clsPeptideHitResultsProcRunner
                                     .CreateMSGFDBSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
 
                                     .WarnMissingParameterFileSection = mWarnMissingParameterFileSection
-                                End With
+								End With
+
                                 blnSuccess = mPeptideHitResultsProcessor.ProcessFile(strInputFilePath, strOutputFolderPath, strParameterFilePath)
                                 If Not blnSuccess Then
                                     ShowErrorMessage(mPeptideHitResultsProcessor.ErrorMessage)
@@ -412,9 +417,32 @@ Public Class clsPeptideHitResultsProcRunner
 
     End Function
 
-    Private Sub SetLocalErrorCode(ByVal eNewErrorCode As eResultsProcessorErrorCodes)
-        SetLocalErrorCode(eNewErrorCode, False)
-    End Sub
+	''' <summary>
+	''' Looks for file strFileNameOrPath in the current working directory
+	''' If not found, then looks in strSourceFolderPath
+	''' </summary>
+	''' <param name="strSourceFolderPath">Path to the folder containing the input file</param>
+	''' <param name="strFileNameOrPath">File to find (either filename or full file path)</param>
+	''' <returns>The path to the file if found, or strFileNameOrPath if not found</returns>
+	''' <remarks></remarks>
+	Protected Function ResolveFilePath(ByVal strSourceFolderPath As String, ByVal strFileNameOrPath As String) As String
+
+		If System.IO.File.Exists(strFileNameOrPath) Then
+			Return strFileNameOrPath
+		Else
+			Dim strNewPath As String
+			strNewPath = System.IO.Path.Combine(strSourceFolderPath, System.IO.Path.GetFileName(strFileNameOrPath))
+			If System.IO.File.Exists(strNewPath) Then
+				Return strNewPath
+			End If
+		End If
+
+		Return strFileNameOrPath
+	End Function
+
+	Private Sub SetLocalErrorCode(ByVal eNewErrorCode As eResultsProcessorErrorCodes)
+		SetLocalErrorCode(eNewErrorCode, False)
+	End Sub
 
     Private Sub SetLocalErrorCode(ByVal eNewErrorCode As eResultsProcessorErrorCodes, ByVal blnLeaveExistingErrorCodeUnchanged As Boolean)
 

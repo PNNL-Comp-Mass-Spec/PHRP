@@ -1,6 +1,10 @@
 Peptide Hit Results Proc Runner Revision History
 
-Verion 1.4.4500; April 27, 2012
+Version 1.4.4504; May 1, 2012
+	- Now looking for the search engine parameter file and ModDefs file in the same folder as the input folder if not found in the working directory
+	- New version of PeptideHitResultsProcessor
+
+Version 1.4.4500; April 27, 2012
 	- Removed duplicated classes from PeptideHitResultsProcessor
 	- Now skipping synopsis-specific SeqInfo files when parsing a first-hits file with the PHRPReader
 

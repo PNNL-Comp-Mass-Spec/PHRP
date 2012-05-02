@@ -173,7 +173,7 @@ Public Class clsMSGFDBResultsProcessor
         Public ModMassVal As Double
         Public Residues As String
         Public ModType As eMSGFDBModType
-        Public ModSymbol As String
+		Public ModSymbol As Char
     End Structure
 
     Protected Structure udtPepToProteinMappingType
@@ -456,6 +456,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim dblBestMassDiff As Double
         Dim dblCandidateMassDiff As Double
         Dim intModSymbolsFound As Integer = 0
+		Dim chSymbolBestMatch As Char = PHRPReader.clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL
 
         strModSymbols = String.Empty
         dblModMassFound = 0
@@ -505,11 +506,12 @@ Public Class clsMSGFDBResultsProcessor
                         dblCandidateMassDiff = Math.Abs(udtMSGFDBModInfo(intIndex).ModMassVal - dblModMass)
                         If dblCandidateMassDiff < 0.25 Then
                             ' Possible match found
-                            If intBestMatchIndex < 0 OrElse dblCandidateMassDiff < dblBestMassDiff Then
-                                intBestMatchIndex = intIndex
-                                dblBestMassDiff = dblCandidateMassDiff
-                                blnMatchFound = True
-                            End If
+							If intBestMatchIndex < 0 OrElse dblCandidateMassDiff < dblBestMassDiff OrElse (dblCandidateMassDiff = dblBestMassDiff And chSymbolBestMatch = "-"c) Then
+								intBestMatchIndex = intIndex
+								dblBestMassDiff = dblCandidateMassDiff
+								chSymbolBestMatch = udtMSGFDBModInfo(intIndex).ModSymbol
+								blnMatchFound = True
+							End If
                         End If
 
                     End If
@@ -821,7 +823,7 @@ Public Class clsMSGFDBResultsProcessor
             intUnnamedModID = 0
 
             If String.IsNullOrEmpty(strMSGFDBParamFilePath) Then
-                SetErrorMessage("MSGFDB  Parameter File name not defined; unable to extract mod info")
+				SetErrorMessage("MSGFDB Parameter File name not defined; unable to extract mod info")
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
                 Return False
             End If
@@ -902,15 +904,19 @@ Public Class clsMSGFDBResultsProcessor
 										Case "any"
 											' Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
 										Case "nterm"
-											.ModType = eMSGFDBModType.DynNTermPeptide
+											.Residues = PHRPReader.clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
+											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermPeptide
 										Case "cterm"
-											.ModType = eMSGFDBModType.DynCTermPeptide
+											.Residues = PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermPeptide
 										Case "protnterm"
 											' Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
-											.ModType = eMSGFDBModType.DynNTermProtein
+											.Residues = PHRPReader.clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
+											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermProtein
 										Case "protcterm"
 											' Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
-											.ModType = eMSGFDBModType.DynCTermProtein
+											.Residues = PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
+											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
 										Case Else
 											SetErrorMessage("Warning: Unrecognized Mod Type in the MSGFDB parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
 									End Select
@@ -1276,7 +1282,8 @@ Public Class clsMSGFDBResultsProcessor
 
 				If mCreateModificationSummaryFile Then
 					' Create the modification summary file
-					strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(strInputFilePath, "", FILENAME_SUFFIX_MOD_SUMMARY)
+					Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
+					strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY)
 					SaveModificationSummaryFile(strModificationSummaryFilePath)
 				End If
 
@@ -1809,7 +1816,7 @@ Public Class clsMSGFDBResultsProcessor
                         ReDim udtPepToProteinMapping(-1)
 
                         ' Load the MSGF-DB Parameter File so that we can determine the modification names and masses
-                        ' The user is allowed to specify either the MSGF-DB parameter file or the MSGFDB_Mods.txt file
+						' If the MSGFDB_Mods.txt file was defined, then the mod symbols in that file will be used to define the mod symbols in udtMSGFDBModInfo 
                         If Not ExtractModInfoFromMSGFDBModsFile(mSearchToolParameterFilePath, udtMSGFDBModInfo) Then
                             If udtMSGFDBModInfo Is Nothing OrElse udtMSGFDBModInfo.Length = 0 Then
                                 ReDim udtMSGFDBModInfo(-1)
@@ -1895,7 +1902,7 @@ Public Class clsMSGFDBResultsProcessor
     End Function
 
     ''' <summary>
-    ''' Replaces modification name text in peptide sequences with modification symbols (uses case-sensitive comparisons)
+	''' Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
     ''' </summary>
     ''' <param name="strPeptide"></param>
     ''' <param name="udtMSGFDBModInfo">This function assumes that each entry in udtMSGFDBModInfo() has both .ModName and .ModSymbol defined</param>
@@ -1905,7 +1912,10 @@ Public Class clsMSGFDBResultsProcessor
                                                     ByRef udtMSGFDBModInfo() As udtModInfoType, _
                                                     ByRef dblTotalModMass As Double) As String
 
-        Dim intIndex As Integer
+		Dim intIndex As Integer
+		Dim intIndexFirstResidue As Integer
+		Dim intIndexLastResidue As Integer
+
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
 
@@ -1913,7 +1923,7 @@ Public Class clsMSGFDBResultsProcessor
 
         Dim blnNterminalMod As Boolean
         Dim blnPossibleCTerminalMod As Boolean
-
+		
         Static reNTerminalModMassRegEx As New System.Text.RegularExpressions.Regex(MSGFDB_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
         Static reCTerminalModMassRegEx As New System.Text.RegularExpressions.Regex(MSGFDB_CTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
         Static reModMassRegEx As New System.Text.RegularExpressions.Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
@@ -1925,6 +1935,7 @@ Public Class clsMSGFDBResultsProcessor
         ' Reset the total mod mass
         dblTotalModMass = 0
 
+		' Remove the prefix and suffix residues
         If strPeptide.Length >= 4 Then
             If strPeptide.Chars(1) = "."c AndAlso _
                strPeptide.Chars(strPeptide.Length - 2) = "."c Then
@@ -1935,9 +1946,9 @@ Public Class clsMSGFDBResultsProcessor
             End If
         End If
 
-        ' strPeptide should now be the clean peptide, without the prefix or suffix residues
+		' strPeptide should now be the primary peptide sequence, without the prefix or suffix residues
 
-        ' First look for N-terminal mods (NTermPeptide or NTermProtein)
+		' First look for dynamic N-terminal mods (NTermPeptide or NTermProtein)
         ' This RegEx will match one or more mods, all at the N-terminus
         reMatch = reNTerminalModMassRegEx.Match(strPeptide)
         If reMatch IsNot Nothing AndAlso reMatch.Success Then
@@ -1961,15 +1972,24 @@ Public Class clsMSGFDBResultsProcessor
         ' Any mod mass at the end must be considered a C-terminal mod 
 
         ' Need to start at the first letter
-        ' If we had N-terminal mods, they're currently notated like this: _.+42.011MDHTPQSQLK.L or _.+42.011+57.021MNDR.Q)
+		' If we had N-terminal mods, they're currently notated like this: _.+42.011MDHTPQSQLK.L or _.+42.011+57.021MNDR.Q
         ' We want things to look like this: -.#MDHTPQSQLK.L or -.#*MNDRQLNHR.S
 
         ' Static mods will not have a mod mass listed; we do not add mod symbols for static mods, but we do increment dblTotalModMass
 
+		' Find the index of the last residue
+		intIndex = strPeptide.Length - 1
+		Do While intIndex > 0 AndAlso Not Char.IsLetter(strPeptide.Chars(intIndex))
+			intIndex -= 1
+		Loop
+		intIndexLastResidue = intIndex
+
+		' Find the index of the first residue
         intIndex = 0
         Do While intIndex < strPeptide.Length AndAlso Not Char.IsLetter(strPeptide.Chars(intIndex))
             intIndex += 1
-        Loop
+		Loop
+		intIndexFirstResidue = intIndex
 
         Do While intIndex < strPeptide.Length
 
@@ -1977,30 +1997,43 @@ Public Class clsMSGFDBResultsProcessor
 
                 Dim objModificationDefinition As clsModificationDefinition
 
-                For intModIndex As Integer = 0 To mPeptideMods.ModificationCount - 1
-                    If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
-                        objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+				' Look for static mods
+				For intModIndex As Integer = 0 To mPeptideMods.ModificationCount - 1
+					Dim eModificationType As clsModificationDefinition.eModificationTypeConstants
+					eModificationType = mPeptideMods.GetModificationTypeByIndex(intModIndex)
 
-                        If objModificationDefinition.TargetResiduesContain(strPeptide.Chars(intIndex)) Then
-                            ' Match found; update dblTotalModMass but do not add a static mod symbol
-                            dblTotalModMass += objModificationDefinition.ModificationMass
-                            Exit For
-                        End If
-                    End If
-                Next intModIndex
+					If eModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+						objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+
+						If objModificationDefinition.TargetResiduesContain(strPeptide.Chars(intIndex)) Then
+							' Match found; update dblTotalModMass but do not add a static mod symbol
+							dblTotalModMass += objModificationDefinition.ModificationMass							
+						End If
+
+					ElseIf intIndex = intIndexFirstResidue Then
+						If eModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod AndAlso strPrefix = "_" Then
+							' N-terminal protein static mod
+							objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+							dblTotalModMass += objModificationDefinition.ModificationMass
+						ElseIf eModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod Then
+							' N-terminal peptide static mod
+							objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+							dblTotalModMass += objModificationDefinition.ModificationMass
+						End If
+					End If
+				Next intModIndex
 
                 intIndex += 1
+
+				If intIndex = intIndexLastResidue Then blnPossibleCTerminalMod = True
 
             Else
                 ' Found a mod; find the extent of the mod digits
                 reMatch = reModMassRegEx.Match(strPeptide, intIndex)
 
-                blnNterminalMod = False
-                If intIndex + reMatch.Groups(1).Value.Length >= strPeptide.Length Then
-                    blnPossibleCTerminalMod = True
-                Else
-                    blnPossibleCTerminalMod = False
-                End If
+				' Note that blnPossibleCTerminalMod will be set to True once we hit the last residue
+				' Assure blnNterminalMod is false
+                blnNterminalMod = False				
 
                 ' Convert the mod mass (or masses) to one or more mod symbols
                 If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, udtMSGFDBModInfo, _
@@ -2025,19 +2058,20 @@ Public Class clsMSGFDBResultsProcessor
         ' in other words, switch from #MDHTPQSQLK to M#DHTPQSQLK
         '                          or #*MNDRQLNHR to M#*NDRQLNHR
 
-        Dim intIndexFirstLetter As Integer = 0
-        Do While intIndexFirstLetter <= strPeptide.Length AndAlso Not Char.IsLetter(strPeptide.Chars(intIndexFirstLetter))
-            intIndexFirstLetter += 1
-        Loop
+		' Update intIndexFirstResidue
+		intIndexFirstResidue = 0
+		Do While intIndexFirstResidue < strPeptide.Length AndAlso Not Char.IsLetter(strPeptide.Chars(intIndexFirstResidue))
+			intIndexFirstResidue += 1
+		Loop
 
-        If intIndexFirstLetter > 0 AndAlso intIndexFirstLetter < strPeptide.Length Then
-            Dim strPeptideNew As String
-            strPeptideNew = strPeptide.Chars(intIndexFirstLetter) & strPeptide.Substring(0, intIndexFirstLetter)
-            If intIndexFirstLetter < strPeptide.Length - 1 Then
-                strPeptideNew &= strPeptide.Substring(intIndexFirstLetter + 1)
-            End If
-            strPeptide = String.Copy(strPeptideNew)
-        End If
+		If intIndexFirstResidue > 0 AndAlso intIndexFirstResidue < strPeptide.Length Then
+			Dim strPeptideNew As String
+			strPeptideNew = strPeptide.Chars(intIndexFirstResidue) & strPeptide.Substring(0, intIndexFirstResidue)
+			If intIndexFirstResidue < strPeptide.Length - 1 Then
+				strPeptideNew &= strPeptide.Substring(intIndexFirstResidue + 1)
+			End If
+			strPeptide = String.Copy(strPeptideNew)
+		End If
 
         Return strPrefix & strPeptide & strSuffix
 
@@ -2088,6 +2122,7 @@ Public Class clsMSGFDBResultsProcessor
 
         Dim chTargetResidue As Char
 		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
+		Dim eModType As PHRPReader.clsModificationDefinition.eModificationTypeConstants
 		Dim blnExistingModFound As Boolean
 
 		Dim objModificationDefinition As clsModificationDefinition
@@ -2118,6 +2153,8 @@ Public Class clsMSGFDBResultsProcessor
 							chTargetResidue = Nothing
 						End If
 
+						eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod
+
 						If .ModType = eMSGFDBModType.DynNTermPeptide Then
 							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
 						ElseIf .ModType = eMSGFDBModType.DynCTermPeptide Then
@@ -2127,11 +2164,29 @@ Public Class clsMSGFDBResultsProcessor
 						ElseIf .ModType = eMSGFDBModType.DynCTermProtein Then
 							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
 						Else
-							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
+							Select Case chTargetResidue
+								Case PHRPReader.clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
+									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
+									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+								Case PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
+									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+								Case PHRPReader.clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
+									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus
+									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+								Case PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
+									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
+									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+								Case Else
+									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
+									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod
+							End Select
+
 						End If
+
 						blnExistingModFound = False
 
-						objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(.ModMassVal, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
+						objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMassAndModType(.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
 
 						If intResidueIndex = intResIndexStart Then
 							.ModSymbol = objModificationDefinition.ModificationSymbol
@@ -2144,6 +2199,7 @@ Public Class clsMSGFDBResultsProcessor
 
 			Next intIndex
 		End If
+
     End Sub
 
 	Protected Sub StoreSearchResult(ByRef udtSearchResult As udtMSGFDBSearchResultType, _

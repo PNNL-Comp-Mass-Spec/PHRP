@@ -740,18 +740,19 @@ Public MustInherit Class clsPHRPBaseClass
 
 		' Initializes the StreamWriter objects using strBaseOutputFilePath as a base name and replacing the suffix with the default suffix names
 		' Returns True if success; does not catch errors; they will be thrown to the calling function if they occur
-
+		Dim fiOutputFileInfo As System.IO.FileInfo
 		Dim strResultToSeqMapFilePath As String
 		Dim strSeqInfoFilePath As String
 		Dim strModDetailsFilePath As String
 		Dim strSeqToProteinMapFilePath As String
 
-		' Initialize the file paths based on strBaseOutputFilePath
-		strResultToSeqMapFilePath = ReplaceFilenameSuffix(strBaseOutputFilePath, "", FILENAME_SUFFIX_RESULT_TO_SEQ_MAP)
-		strSeqInfoFilePath = ReplaceFilenameSuffix(strBaseOutputFilePath, "", FILENAME_SUFFIX_SEQ_INFO)
-		strModDetailsFilePath = ReplaceFilenameSuffix(strBaseOutputFilePath, "", FILENAME_SUFFIX_MOD_DETAILS)
-		strSeqToProteinMapFilePath = ReplaceFilenameSuffix(strBaseOutputFilePath, "", FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP)
+		fiOutputFileInfo = New System.IO.FileInfo(strBaseOutputFilePath)
 
+		' Initialize the file paths based on strBaseOutputFilePath
+		strResultToSeqMapFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_RESULT_TO_SEQ_MAP)
+		strSeqInfoFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_SEQ_INFO)
+		strModDetailsFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_MOD_DETAILS)
+		strSeqToProteinMapFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP)
 
 		' Clear the unique sequences container
 		mUniqueSequences.Clear()
@@ -915,36 +916,22 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Public MustOverride Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
 
-	Protected Function ReplaceFilenameSuffix(ByVal strOriginalFilePath As String, ByVal strCurrentSuffixExpected As String, ByVal strNewSuffix As String) As String
-		' Examines strOriginalFilePath to see if it ends with strCurrentSuffixExpected (it normally should if you call this function)
-		' If found, it removes strCurrentSuffixExpected
-		' It then appends strNewSuffix and returns a full path to the file using the folder associated with strOriginalFilePath
-		' Note that strCurrentSuffixExpected and strNewSuffix may each contain a file extension though they do not have to
+	Protected Function ReplaceFilenameSuffix(ByVal fiOriginalFile As System.IO.FileInfo, ByVal strNewSuffix As String) As String
+		' Appends strNewSuffix to the base name of the original file, then returns a full path to the file using the folder associated with strOriginalFilePath
+		' Note that strNewSuffix may contain a file extension though it does not have to
 		'  If strNewSuffix does not contain an extension, then the path returned will end in the same extension as strOriginalFilePath
 
 		Dim strNewFileName As String
 		Dim strOriginalExtension As String
 
 		' Keep track of the original extension on strOriginalFilePath
-		strOriginalExtension = System.IO.Path.GetExtension(strOriginalFilePath)
+		strOriginalExtension = fiOriginalFile.Extension
 
-		' Make sure strCurrentSuffixExpected and strNewSuffix are not nothing
-		If strCurrentSuffixExpected Is Nothing Then strCurrentSuffixExpected = String.Empty
+		' Make sure strNewSuffix is not nothing
 		If strNewSuffix Is Nothing Then strNewSuffix = String.Empty
 
-		' See if strCurrentSuffixExpected contains an extension
-		If strCurrentSuffixExpected.Length > 0 AndAlso System.IO.Path.HasExtension(strCurrentSuffixExpected) Then
-			strNewFileName = System.IO.Path.GetFileName(strOriginalFilePath)
-		Else
-			strNewFileName = System.IO.Path.GetFileNameWithoutExtension(strOriginalFilePath)
-		End If
-
-		' If strNewFileName ends in strCurrentSuffixExpected, then remove strCurrentSuffixExpected from strNewFileName
-		If strCurrentSuffixExpected.Length > 0 AndAlso strNewFileName.ToLower.EndsWith(strCurrentSuffixExpected.ToLower) Then
-			strNewFileName = strNewFileName.Substring(0, strNewFileName.Length - strCurrentSuffixExpected.Length)
-		Else
-			strNewFileName = System.IO.Path.GetFileNameWithoutExtension(strOriginalFilePath)
-		End If
+		' Obtain the filename, without its extension
+		strNewFileName = System.IO.Path.GetFileNameWithoutExtension(fiOriginalFile.Name)
 
 		' Append strNewSuffix to strNewFileName
 		If System.IO.Path.HasExtension(strNewSuffix) Then
@@ -953,11 +940,10 @@ Public MustInherit Class clsPHRPBaseClass
 			strNewFileName &= strNewSuffix & strOriginalExtension
 		End If
 
-		If System.IO.Path.IsPathRooted(strOriginalFilePath) Then
-			strNewFileName = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(strOriginalFilePath), strNewFileName)
-		End If
+		strNewFileName = System.IO.Path.Combine(fiOriginalFile.DirectoryName, strNewFileName)
 
 		Return strNewFileName
+
 	End Function
 
 	Public Function ResetMassCorrectionTagsAndModificationDefinitions() As Boolean

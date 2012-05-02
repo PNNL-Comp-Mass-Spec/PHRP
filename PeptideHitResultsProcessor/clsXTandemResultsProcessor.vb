@@ -487,7 +487,8 @@ Public Class clsXTandemResultsProcessor
 				Else
 					If mCreateModificationSummaryFile Then
 						' Create the modification summary file
-						strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(strOutputFilePath, "", FILENAME_SUFFIX_MOD_SUMMARY)
+						Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
+						strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY)
 						SaveModificationSummaryFile(strModificationSummaryFilePath)
 					End If
 
@@ -1377,7 +1378,7 @@ Public Class clsXTandemResultsProcessor
                         strInputFilePathFull = ioFile.FullName
 
                         ' Define the output file name based on strInputFilePath
-                        strOutputFilePath = MyBase.ReplaceFilenameSuffix(strInputFilePathFull, "", ".txt")
+						strOutputFilePath = MyBase.ReplaceFilenameSuffix(ioFile, ".txt")
                         blnSuccess = ParseXTandemResultsFile(strInputFilePathFull, strOutputFilePath, False)
 
                     Catch ex As Exception
