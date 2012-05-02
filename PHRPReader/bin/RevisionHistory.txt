@@ -1,5 +1,9 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4503; April 30, 2012
+	- Now skipping synopsis-specific SeqInfo files when parsing a first-hits file
+	- Now determining Precursor Mass Tolerance when parsing the search engine parameter file
+
 Version 1.1.4499; April 26, 2012
 	- Now using ThermoRawFileReaderDLL to extract the parent ion m/z from the Filter Text field
 

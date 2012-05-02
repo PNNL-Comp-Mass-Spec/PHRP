@@ -100,6 +100,37 @@ Public Class clsPHRPParserXTandem
 
 	End Sub
 
+	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters) As Double
+		Dim strTolerance As String = String.Empty
+		Dim strUnits As String = String.Empty
+		Dim blnPPM As Boolean = False
+
+		Dim dblTolerancePlus As Double = 0
+		Dim dblToleranceMinus As Double = 0
+		Dim dblTolerance As Double
+
+		If objSearchEngineParams.Parameters.TryGetValue("spectrum, parent monoisotopic mass error units", strUnits) Then
+			If strUnits.ToLower().Trim() = "ppm" Then blnPPM = True
+		End If
+
+		If objSearchEngineParams.Parameters.TryGetValue("spectrum, parent monoisotopic mass error minus", strTolerance) Then
+			Double.TryParse(strTolerance, dblToleranceMinus)
+		End If
+
+		If objSearchEngineParams.Parameters.TryGetValue("spectrum, parent monoisotopic mass error plus", strTolerance) Then
+			Double.TryParse(strTolerance, dblTolerancePlus)
+		End If
+
+		dblTolerance = Math.Max(dblToleranceMinus, dblTolerancePlus)
+		If blnPPM Then
+			' Convert from PPM to dalton (assuming a mass of 2000 m/z)
+			dblTolerance = clsPeptideMassCalculator.PPMToMass(dblTolerance, 2000)
+		End If
+
+		Return dblTolerance
+
+	End Function
+
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		' X!Tandem does not have a first-hits file; just the _xt.txt file
 		Return String.Empty
@@ -192,7 +223,7 @@ Public Class clsPHRPParserXTandem
 		Try
 			strTaxonomyFilePath = System.IO.Path.Combine(strInputFolderPath, strTaxononomyFilename)
 			If Not System.IO.File.Exists(strTaxonomyFilePath) Then
-				strErrorMessage = AppendToString(strErrorMessage, "Taxonomy file not found: " & strTaxonomyFilePath)
+				strErrorMessage = AppendToString(strErrorMessage, "Warning, taxonomy file not found: " & strTaxonomyFilePath)
 			Else
 
 				' Open the XML file and look for the "file" element with attribute "peptide"
@@ -289,6 +320,9 @@ Public Class clsPHRPParserXTandem
 					ReportError(strErrorMessage)
 				End If
 
+				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
+
 			End If
 
 		Catch ex As Exception
@@ -325,7 +359,13 @@ Public Class clsPHRPParserXTandem
 			If Not String.IsNullOrEmpty(strDefaultParamsFilename) Then
 				' Read the parameters from the default parameters file and store them in objSearchEngineParams
 				' Do this by recursively calling this function
-				ParseXTandemParamFileWork(strInputFolderPath, strDefaultParamsFilename, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile, blnLookForDefaultParamsFileName:=False, strErrorMessage:=strErrorMessage)
+
+				' First confirm that the file exists
+				If System.IO.File.Exists(System.IO.Path.Combine(strInputFolderPath, strDefaultParamsFilename)) Then
+					ParseXTandemParamFileWork(strInputFolderPath, strDefaultParamsFilename, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile, blnLookForDefaultParamsFileName:=False, strErrorMessage:=strErrorMessage)
+				Else
+					strErrorMessage = AppendToString(strErrorMessage, "Warning, file not found: " & strDefaultParamsFilename)
+				End If
 			End If
 		End If
 

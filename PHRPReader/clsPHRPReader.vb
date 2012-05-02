@@ -1554,10 +1554,10 @@ Public Class clsPHRPReader
 
 							If mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, strMSGFSpecProb) Then
 								mPSMCurrent.MSGFSpecProb = strMSGFSpecProb
-								If strMSGFSpecProb.Length > 13 Then
+								If strMSGFSpecProb.Length > 11 Then
 									' Attempt to shorten the SpecProb value
 									If Double.TryParse(strMSGFSpecProb, dblSpecProb) Then
-										mPSMCurrent.MSGFSpecProb = dblSpecProb.ToString("0.0000000E-00")
+										mPSMCurrent.MSGFSpecProb = dblSpecProb.ToString("0.00000E-00")
 									End If
 								End If
 							End If

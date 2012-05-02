@@ -88,6 +88,49 @@ Public Class clsPHRPParserMSGFDB
 
 	End Sub
 
+	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters) As Double
+		Dim strTolerance As String = String.Empty
+		Dim strToleranceSplit As String()
+
+		Dim reExtraTolerance As System.Text.RegularExpressions.Regex
+		Dim reMatch As System.Text.RegularExpressions.Match
+		reExtraTolerance = New System.Text.RegularExpressions.Regex("([0-9.]+)([A-Za-z]+)", Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
+
+		Dim dblToleranceDa As Double
+		Dim dblToleranceCurrent As Double
+
+		If objSearchEngineParams.Parameters.TryGetValue("PMTolerance", strTolerance) Then
+			' Parent mass tolerance
+			' Might contain two values, separated by a comma
+			strToleranceSplit = strTolerance.Split(","c)
+
+			If Not strToleranceSplit Is Nothing Then
+				For Each strItem As String In strToleranceSplit
+					If Not strItem.Trim.StartsWith("#") Then
+						reMatch = reExtraTolerance.Match(strItem)
+
+						If reMatch.Success Then
+							If Double.TryParse(reMatch.Groups(1).Value, dblToleranceCurrent) Then
+								If reMatch.Groups(2).Value.ToLower().Contains("ppm") Then
+									' Ppm
+									' Convert from PPM to dalton (assuming a mass of 2000 m/z)
+									dblToleranceCurrent = clsPeptideMassCalculator.PPMToMass(dblToleranceCurrent, 2000)
+								End If
+
+								dblToleranceDa = Math.Max(dblToleranceDa, dblToleranceCurrent)
+							End If
+						End If
+					End If
+				Next
+			End If
+
+		End If
+
+	
+		Return dblToleranceDa
+
+	End Function
+
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_msgfdb_fht.txt"
 	End Function
@@ -199,6 +242,9 @@ Public Class clsPHRPParserMSGFDB
 
 					End While
 				End Using
+
+				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
 
 				blnSuccess = True
 

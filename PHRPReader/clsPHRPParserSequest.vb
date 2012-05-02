@@ -97,6 +97,46 @@ Public Class clsPHRPParserSequest
 
 	End Sub
 
+	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters) As Double
+		Dim strPeptideMassTolerance As String = String.Empty
+		Dim strPeptideMassUnits As String = String.Empty
+
+		Dim dblValue As Double
+
+		If objSearchEngineParams.Parameters.TryGetValue("peptide_mass_tolerance", strPeptideMassTolerance) Then
+			If Double.TryParse(strPeptideMassTolerance, dblValue) Then
+
+				' Determine the mass units
+				' 0 means Da, 1 means mmu, 2 means ppm
+				Dim intUnits As Integer = 0
+
+				If objSearchEngineParams.Parameters.TryGetValue("peptide_mass_units", strPeptideMassUnits) Then
+					If Not String.IsNullOrEmpty(strPeptideMassUnits) Then
+						Integer.TryParse(strPeptideMassUnits, intUnits)
+					End If
+				End If
+
+				If intUnits = 2 Then
+					' Tolerance is in ppm; convert to Da at 2000 m/z
+					Return clsPeptideMassCalculator.PPMToMass(dblValue, 2000)
+
+				ElseIf intUnits = 1 Then
+					' Tolerance is in milli mass units
+					Return dblValue / 1000.0
+
+				Else
+					' Tolerance is in daltons
+					Return dblValue
+
+				End If
+
+			End If
+		End If
+
+		Return 0
+
+	End Function
+
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_fht.txt"
 	End Function
@@ -267,9 +307,13 @@ Public Class clsPHRPParserSequest
 					End While
 				End Using
 
+				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
+
 				blnSuccess = True
 
 			End If
+
 		Catch ex As Exception
 			ReportError("Error in LoadSearchEngineParameters: " & ex.Message)
 		End Try
@@ -291,7 +335,7 @@ Public Class clsPHRPParserSequest
 		Dim strPeptide As String
 		Dim strProtein As String
 
-		Dim dblPrecursorMH As Double		
+		Dim dblPrecursorMH As Double
 		Dim dblMassErrorDa As Double
 
 		Dim blnSuccess As Boolean

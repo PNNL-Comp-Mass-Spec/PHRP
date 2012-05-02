@@ -8,6 +8,8 @@ Public Class clsSearchEngineParameters
 	Protected mSearchEngineName As String
 	Protected mFastaFilePath As String
 
+	Protected mPrecursorMassToleranceDa As Double	' Precursor mass tolerance, in Da; 0 if unknown
+
 	Protected mPrecursorMassType As String			' Typically "monoisotopic" or "average"
 	Protected mFragmentMassType As String
 
@@ -79,6 +81,15 @@ Public Class clsSearchEngineParameters
 		End Get
 	End Property
 
+	Public Property PrecursorMassToleranceDa As Double
+		Get
+			Return mPrecursorMassToleranceDa
+		End Get
+		Set(value As Double)
+			mPrecursorMassToleranceDa = value
+		End Set
+	End Property
+
 	Public Property PrecursorMassType As String
 		Get
 			Return mPrecursorMassType
@@ -97,11 +108,11 @@ Public Class clsSearchEngineParameters
 #End Region
 
 	Public Sub New(ByVal SearchEngineName As String)
-		Me.New(SearchEngineName, New System.Collections.Generic.List(Of clsModificationDefinition), New System.Collections.Generic.Dictionary(Of String, String))
+		Me.New(SearchEngineName, New System.Collections.Generic.List(Of clsModificationDefinition), Nothing)
 	End Sub
 
 	Public Sub New(ByVal SearchEngineName As String, ByVal objModInfo As System.Collections.Generic.List(Of clsModificationDefinition))
-		Me.New(SearchEngineName, objModInfo, New System.Collections.Generic.Dictionary(Of String, String))
+		Me.New(SearchEngineName, objModInfo, Nothing)
 	End Sub
 
 	Public Sub New(ByVal SearchEngineName As String, ByVal objModInfo As System.Collections.Generic.List(Of clsModificationDefinition), ByVal Parameters As System.Collections.Generic.Dictionary(Of String, String))
@@ -117,7 +128,7 @@ Public Class clsSearchEngineParameters
 		End If
 
 		If mParameters Is Nothing Then
-			mParameters = New System.Collections.Generic.Dictionary(Of String, String)
+			mParameters = New System.Collections.Generic.Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
 		Else
 			mParameters = Parameters
 		End If
@@ -140,6 +151,7 @@ Public Class clsSearchEngineParameters
 		mSearchEngineName = "Unknown"
 		mFastaFilePath = String.Empty
 
+		mPrecursorMassToleranceDa = 0
 		mPrecursorMassType = MASS_TYPE_MONOISOTOPIC
 		mFragmentMassType = MASS_TYPE_MONOISOTOPIC
 

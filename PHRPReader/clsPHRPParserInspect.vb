@@ -106,6 +106,32 @@ Public Class clsPHRPParserInspect
 
 	End Sub
 
+	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters) As Double
+		Dim strTolerance As String = String.Empty
+		Dim strUnits As String = String.Empty
+
+		Dim dblTolerancePPM As Double = 0
+		Dim dblToleranceDa As Double = 0
+		Dim dblTolerance As Double = 0
+
+		If objSearchEngineParams.Parameters.TryGetValue("ParentPPM", strTolerance) Then
+			' Parent mass tolerance, in ppm
+			Double.TryParse(strTolerance, dblTolerancePPM)
+			' Convert from PPM to dalton (assuming a mass of 2000 m/z)
+			dblTolerance = clsPeptideMassCalculator.PPMToMass(dblTolerancePPM, 2000)
+		End If
+
+		If objSearchEngineParams.Parameters.TryGetValue("PMTolerance", strTolerance) Then
+			' Parent mass tolerance, in Da
+			Double.TryParse(strTolerance, dblToleranceDa)
+		End If
+
+		dblTolerance = Math.Max(dblTolerance, dblToleranceDa)
+
+		Return dblTolerance
+
+	End Function
+
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_inspect_fht.txt"
 	End Function
@@ -200,6 +226,9 @@ Public Class clsPHRPParserInspect
 
 					End While
 				End Using
+
+				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
 
 				blnSuccess = True
 
