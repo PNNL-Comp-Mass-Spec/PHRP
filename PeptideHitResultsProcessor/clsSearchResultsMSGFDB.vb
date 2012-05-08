@@ -30,7 +30,7 @@ Public Class clsSearchResultsMSGFDB
     Public Property RankSpecProb As String
     Public Property PValue As String
 
-    Public Property FDR As String           ' Only present if searched using -tda 1
+	Public Property FDR As String			' Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used
     Public Property PepFDR As String        ' Only present if searched using -tda 1
 
     Public Property PrecursorMZ As String

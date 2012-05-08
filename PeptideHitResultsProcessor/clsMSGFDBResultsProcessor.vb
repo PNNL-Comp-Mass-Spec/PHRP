@@ -20,7 +20,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-		MyBase.mFileDate = "November 28, 2011"
+		MyBase.mFileDate = "May 8, 2012"
         InitializeLocalVariables()
     End Sub
 
@@ -54,7 +54,7 @@ Public Class clsMSGFDBResultsProcessor
     Private Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
 
     ' These columns correspond to the tab-delimited file created directly by MSGF-DB
-    Protected Const MSGFDBResultsFileColCount As Integer = 16
+	Protected Const MSGFDBResultsFileColCount As Integer = 17
     Public Enum eMSGFDBResultsFileColumns As Integer
         SpectrumFile = 0
         SpecIndex = 1
@@ -71,11 +71,12 @@ Public Class clsMSGFDBResultsProcessor
         SpecProb = 12
         PValue = 13
         FDR = 14                    ' Only present if searched using -tda 1
-        PepFDR = 15                 ' Only present if searched using -tda 1
+		PepFDR = 15					' Only present if searched using -tda 1
+		EFDR = 16					' Only present if did not search using -tda 1
     End Enum
 
     ' These columns correspond to the Synopsis and First-Hits files created by this class
-    Protected Const MSGFDBSynFileColCount As Integer = 19
+	Protected Const MSGFDBSynFileColCount As Integer = 20
     Public Enum eMSFDBSynFileColumns As Integer
         ResultID = 0
         Scan = 1
@@ -95,7 +96,8 @@ Public Class clsMSGFDBResultsProcessor
         RankSpecProb = 15                   ' Rank 1 means lowest SpecProb, 2 means next higher score, etc. (ties get the same rank)
         PValue = 16
         FDR = 17                            ' Only present if searched using -tda 1
-        PepFDR = 18                         ' Only present if searched using -tda 1
+		PepFDR = 18							' Only present if searched using -tda 1
+		EFDR = 19							' Only present if did not search using -tda 1
     End Enum
 
     Protected Enum eMSGFDBModType As Integer
@@ -137,8 +139,8 @@ Public Class clsMSGFDBResultsProcessor
         Public SpecProbNum As Double
         Public PValue As String                     ' Smaller values are better scores (e.g. 1E-7 is better than 1E-3)
         Public PValueNum As Double
-        Public FDR As String
-        Public PepFDR As String
+		Public FDR As String					' Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used
+		Public PepFDR As String					' Only used when target/decoy search was used
         Public RankSpecProb As Integer
 
         Public Sub Clear()
@@ -580,6 +582,7 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim blnHeaderParsed As Boolean
 		Dim blnIncludeFDRandPepFDR As Boolean = False
+		Dim blnIncludeEFDR As Boolean = False
 
 		Dim intColumnMapping() As Integer = Nothing
 
@@ -636,14 +639,17 @@ Public Class clsMSGFDBResultsProcessor
 									End If
 									blnHeaderParsed = True
 
-									If intColumnMapping(eMSGFDBResultsFileColumns.FDR) >= 0 Or intColumnMapping(eMSGFDBResultsFileColumns.PepFDR) >= 0 Then
+									blnIncludeFDRandPepFDR = False
+									blnIncludeEFDR = False
+
+									If intColumnMapping(eMSGFDBResultsFileColumns.FDR) >= 0 OrElse intColumnMapping(eMSGFDBResultsFileColumns.PepFDR) >= 0 Then
 										blnIncludeFDRandPepFDR = True
-									Else
-										blnIncludeFDRandPepFDR = False
+									ElseIf intColumnMapping(eMSGFDBResultsFileColumns.EFDR) >= 0 Then
+										blnIncludeEFDR = True
 									End If
 
 									' Write the header line
-									WriteSynFHTFileHeader(swResultFile, strErrorLog, blnIncludeFDRandPepFDR)
+									WriteSynFHTFileHeader(swResultFile, strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR)
 								Else
 
 									blnValidSearchResult = ParseMSGFDBResultsFileEntry(strLineIn, udtMSGFDBModInfo, lstSearchResults, _
@@ -689,7 +695,7 @@ Public Class clsMSGFDBResultsProcessor
 						Loop
 
 						' Sort the data in udtFilteredSearchResults then write out to disk
-						SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, blnIncludeFDRandPepFDR)
+						SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR)
 					End Using
 				End Using
 
@@ -1334,6 +1340,7 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim blnValidSearchResult As Boolean
 		Dim intSlashIndex As Integer
+		Dim blnTargetDecoyFDRValid As Boolean
 
 		Try
 			' Set this to False for now
@@ -1487,8 +1494,12 @@ Public Class clsMSGFDBResultsProcessor
 					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue), .PValue)
 					If Not Double.TryParse(.PValue, .PValueNum) Then .PValueNum = 0
 
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR), .FDR)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR), .PepFDR)
+					blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR), .FDR)
+					If blnTargetDecoyFDRValid Then
+						GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR), .PepFDR)
+					Else
+						GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.EFDR), .FDR)
+					End If
 
 					.NTT = ComputeCleaveageState(.Peptide).ToString()
 				End With
@@ -1575,7 +1586,8 @@ Public Class clsMSGFDBResultsProcessor
         lstColumnNames.Add("SpecProb", eMSGFDBResultsFileColumns.SpecProb)
         lstColumnNames.Add("P-value", eMSGFDBResultsFileColumns.PValue)
         lstColumnNames.Add("FDR", eMSGFDBResultsFileColumns.FDR)
-        lstColumnNames.Add("PepFDR", eMSGFDBResultsFileColumns.PepFDR)
+		lstColumnNames.Add("PepFDR", eMSGFDBResultsFileColumns.PepFDR)
+		lstColumnNames.Add("EFDR", eMSGFDBResultsFileColumns.EFDR)
 
         Try
             ' Initialize each entry in intColumnMapping to -1
@@ -1630,7 +1642,8 @@ Public Class clsMSGFDBResultsProcessor
         lstColumnNames.Add("Rank_MSGFDB_SpecProb", eMSFDBSynFileColumns.RankSpecProb)
         lstColumnNames.Add("PValue", eMSFDBSynFileColumns.PValue)
         lstColumnNames.Add("FDR", eMSFDBSynFileColumns.FDR)
-        lstColumnNames.Add("PepFDR", eMSFDBSynFileColumns.PepFDR)
+		lstColumnNames.Add("PepFDR", eMSFDBSynFileColumns.PepFDR)
+		lstColumnNames.Add("EFDR", eMSFDBSynFileColumns.EFDR)
 
         Try
             ' Initialize each entry in intColumnMapping to -1
@@ -1669,6 +1682,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim strValue As String = String.Empty
 
         Dim blnValidSearchResult As Boolean
+		Dim blnTargetDecoyFDRValid As Boolean
 
         Try
             ' Set this to False for now
@@ -1747,8 +1761,14 @@ Public Class clsMSGFDBResultsProcessor
                     GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.SpecProb), .SpecProb)
                     GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.RankSpecProb), .RankSpecProb)
                     GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.PValue), .PValue)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.FDR), .FDR)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.PepFDR), .PepFDR)
+
+					blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.FDR), .FDR)
+					If blnTargetDecoyFDRValid Then
+						GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.PepFDR), .PepFDR)
+					Else
+						GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.EFDR), .FDR)
+					End If
+
 
                 End With
 
@@ -2216,22 +2236,23 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Sub
 
-    Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As System.IO.StreamWriter, _
-                                                  ByVal intFilteredSearchResultCount As Integer, _
-                                                  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
-                                                  ByRef strErrorLog As String, _
-                                                  ByVal blnIncludeFDRandPepFDR As Boolean)
+	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As System.IO.StreamWriter, _
+												  ByVal intFilteredSearchResultCount As Integer, _
+												  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
+												  ByRef strErrorLog As String, _
+												  ByVal blnIncludeFDRandPepFDR As Boolean, _
+												  ByVal blnIncludeEFDR As Boolean)
 
-        Dim intIndex As Integer
+		Dim intIndex As Integer
 
-        ' Sort udtFilteredSearchResults by ascending SpecProb, ascending scan, ascending charge, ascending peptide, and ascending protein
-        Array.Sort(udtFilteredSearchResults, 0, intFilteredSearchResultCount, New MSGFDBSearchResultsComparerSpecProbScanChargePeptide)
+		' Sort udtFilteredSearchResults by ascending SpecProb, ascending scan, ascending charge, ascending peptide, and ascending protein
+		Array.Sort(udtFilteredSearchResults, 0, intFilteredSearchResultCount, New MSGFDBSearchResultsComparerSpecProbScanChargePeptide)
 
-        For intIndex = 0 To intFilteredSearchResultCount - 1
-            WriteSearchResultToFile(intIndex + 1, swResultFile, udtFilteredSearchResults(intIndex), strErrorLog, blnIncludeFDRandPepFDR)
-        Next intIndex
+		For intIndex = 0 To intFilteredSearchResultCount - 1
+			WriteSearchResultToFile(intIndex + 1, swResultFile, udtFilteredSearchResults(intIndex), strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR)
+		Next intIndex
 
-    End Sub
+	End Sub
 
 	Private Sub StoreScanGroupInfo(ByVal strScanGroupFilePath As String, ByRef lstScanGroupDetails As System.Collections.Generic.List(Of udtScanGroupInfoType))
 
@@ -2379,87 +2400,94 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
-    Private Sub WriteSynFHTFileHeader(ByRef swResultFile As System.IO.StreamWriter, _
-                                      ByRef strErrorLog As String, _
-                                      ByVal blnIncludeFDRandPepFDR As Boolean)
+	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As System.IO.StreamWriter, _
+									  ByRef strErrorLog As String, _
+									  ByVal blnIncludeFDRandPepFDR As Boolean, _
+									  ByVal blnIncludeEFDR As Boolean)
 
-        ' Write out the header line for synopsis / first hits files
-        Try
-            Dim strSuffix As String = String.Empty
-            If blnIncludeFDRandPepFDR Then
-                strSuffix = ControlChars.Tab & "FDR" & ControlChars.Tab & "PepFDR"
-            End If
+		' Write out the header line for synopsis / first hits files
+		Try
+			Dim strSuffix As String = String.Empty
+			If blnIncludeFDRandPepFDR Then
+				strSuffix = ControlChars.Tab & "FDR" & ControlChars.Tab & "PepFDR"
+			ElseIf blnIncludeEFDR Then
+				' Note that we'll write out a "1" for "PepFDR" for every result
+				strSuffix = ControlChars.Tab & "EFDR" & ControlChars.Tab & "PepFDR"
+			End If
 
 			swResultFile.WriteLine("ResultID" & ControlChars.Tab & _
-								   "Scan" & ControlChars.Tab & _
-								   "FragMethod" & ControlChars.Tab & _
-								   "SpecIndex" & ControlChars.Tab & _
-								   "Charge" & ControlChars.Tab & _
-								   "PrecursorMZ" & ControlChars.Tab & _
-								   "DelM" & ControlChars.Tab & _
-								   "DelM_PPM" & ControlChars.Tab & _
-								   "MH" & ControlChars.Tab & _
-								   "Peptide" & ControlChars.Tab & _
-								   "Protein" & ControlChars.Tab & _
-								   "NTT" & ControlChars.Tab & _
-								   "DeNovoScore" & ControlChars.Tab & _
-								   "MSGFScore" & ControlChars.Tab & _
-								   "MSGFDB_SpecProb" & ControlChars.Tab & _
-								   "Rank_MSGFDB_SpecProb" & ControlChars.Tab & _
-								   "PValue" & _
-								   strSuffix)
+					"Scan" & ControlChars.Tab & _
+					"FragMethod" & ControlChars.Tab & _
+					"SpecIndex" & ControlChars.Tab & _
+					"Charge" & ControlChars.Tab & _
+					"PrecursorMZ" & ControlChars.Tab & _
+					"DelM" & ControlChars.Tab & _
+					"DelM_PPM" & ControlChars.Tab & _
+					"MH" & ControlChars.Tab & _
+					"Peptide" & ControlChars.Tab & _
+					"Protein" & ControlChars.Tab & _
+					"NTT" & ControlChars.Tab & _
+					"DeNovoScore" & ControlChars.Tab & _
+					"MSGFScore" & ControlChars.Tab & _
+					"MSGFDB_SpecProb" & ControlChars.Tab & _
+					"Rank_MSGFDB_SpecProb" & ControlChars.Tab & _
+					"PValue" & _
+					strSuffix)
 
 
-        Catch ex As Exception
-            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
-            End If
-        End Try
+		Catch ex As Exception
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
+			End If
+		End Try
 
-    End Sub
+	End Sub
 
-    Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
-                                        ByRef swResultFile As System.IO.StreamWriter, _
-                                        ByRef udtSearchResult As udtMSGFDBSearchResultType, _
-                                        ByRef strErrorLog As String, _
-                                        ByVal blnIncludeFDRandPepFDR As Boolean)
+	Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
+										ByRef swResultFile As System.IO.StreamWriter, _
+										ByRef udtSearchResult As udtMSGFDBSearchResultType, _
+										ByRef strErrorLog As String, _
+										ByVal blnIncludeFDRandPepFDR As Boolean, _
+										ByVal blnIncludeEFDR As Boolean)
 
-        ' Writes an entry to a synopsis or first hits file
-        Try
-            ' Columns:
+		' Writes an entry to a synopsis or first hits file
+		Try
+			' Columns:
 			' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb  Rank_MSGFDB_SpecProb  PValue  FDR  PepFDR
 
-            Dim strSuffix As String = String.Empty
-            If blnIncludeFDRandPepFDR Then
-                strSuffix = ControlChars.Tab & udtSearchResult.FDR & ControlChars.Tab & udtSearchResult.PepFDR
-            End If
+			Dim strSuffix As String = String.Empty
+			If blnIncludeFDRandPepFDR Then
+				strSuffix = ControlChars.Tab & udtSearchResult.FDR & ControlChars.Tab & udtSearchResult.PepFDR
+			ElseIf blnIncludeEFDR Then
+				strSuffix = ControlChars.Tab & udtSearchResult.FDR & ControlChars.Tab & "1"
+			End If
 
 			swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
-								   udtSearchResult.Scan & ControlChars.Tab & _
-								   udtSearchResult.FragMethod & ControlChars.Tab & _
-								   udtSearchResult.SpecIndex & ControlChars.Tab & _
-								   udtSearchResult.Charge & ControlChars.Tab & _
-								   udtSearchResult.PrecursorMZ & ControlChars.Tab & _
-								   udtSearchResult.PMErrorDa & ControlChars.Tab & _
-								   udtSearchResult.PMErrorPPM & ControlChars.Tab & _
-								   udtSearchResult.MH & ControlChars.Tab & _
-								   udtSearchResult.Peptide & ControlChars.Tab & _
-								   udtSearchResult.Protein & ControlChars.Tab & _
-								   udtSearchResult.NTT & ControlChars.Tab & _
-								   udtSearchResult.DeNovoScore & ControlChars.Tab & _
-								   udtSearchResult.MSGFScore & ControlChars.Tab & _
-								   udtSearchResult.SpecProb & ControlChars.Tab & _
-								   udtSearchResult.RankSpecProb & ControlChars.Tab & _
-								   udtSearchResult.PValue & _
-								   strSuffix)
+					udtSearchResult.Scan & ControlChars.Tab & _
+					udtSearchResult.FragMethod & ControlChars.Tab & _
+					udtSearchResult.SpecIndex & ControlChars.Tab & _
+					udtSearchResult.Charge & ControlChars.Tab & _
+					udtSearchResult.PrecursorMZ & ControlChars.Tab & _
+					udtSearchResult.PMErrorDa & ControlChars.Tab & _
+					udtSearchResult.PMErrorPPM & ControlChars.Tab & _
+					udtSearchResult.MH & ControlChars.Tab & _
+					udtSearchResult.Peptide & ControlChars.Tab & _
+					udtSearchResult.Protein & ControlChars.Tab & _
+					udtSearchResult.NTT & ControlChars.Tab & _
+					udtSearchResult.DeNovoScore & ControlChars.Tab & _
+					udtSearchResult.MSGFScore & ControlChars.Tab & _
+					udtSearchResult.SpecProb & ControlChars.Tab & _
+					udtSearchResult.RankSpecProb & ControlChars.Tab & _
+					udtSearchResult.PValue & _
+					strSuffix)
 
-        Catch ex As Exception
-            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
-            End If
-        End Try
+		Catch ex As Exception
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
+			End If
+		End Try
 
-    End Sub
+	End Sub
 
 #Region "IComparer Classes"
 

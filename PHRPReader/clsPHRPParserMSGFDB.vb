@@ -33,8 +33,9 @@ Public Class clsPHRPParserMSGFDB
 	Public Const DATA_COLUMN_MSGFDB_SpecProb As String = "MSGFDB_SpecProb"
 	Public Const DATA_COLUMN_Rank_MSGFDB_SpecProb As String = "Rank_MSGFDB_SpecProb"
 	Public Const DATA_COLUMN_PValue As String = "PValue"
-	Public Const DATA_COLUMN_FDR As String = "FDR"
-	Public Const DATA_COLUMN_PepFDR As String = "PepFDR"
+	Public Const DATA_COLUMN_FDR As String = "FDR"				' Only present if a Target/Decoy (TDA) search was used
+	Public Const DATA_COLUMN_EFDR As String = "EFDR"			' Only present if a Target/Decoy (TDA) search was not used
+	Public Const DATA_COLUMN_PepFDR As String = "PepFDR"		' Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
 
 	Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GF+"
 #End Region
@@ -84,6 +85,7 @@ Public Class clsPHRPParserMSGFDB
 		AddHeaderColumn(DATA_COLUMN_Rank_MSGFDB_SpecProb)
 		AddHeaderColumn(DATA_COLUMN_PValue)
 		AddHeaderColumn(DATA_COLUMN_FDR)
+		AddHeaderColumn(DATA_COLUMN_EFDR)
 		AddHeaderColumn(DATA_COLUMN_PepFDR)
 
 	End Sub
@@ -330,7 +332,9 @@ Public Class clsPHRPParserMSGFDB
 				AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb)
 				AddScore(objPSM, strColumns, DATA_COLUMN_PValue)
 				AddScore(objPSM, strColumns, DATA_COLUMN_FDR)
+				AddScore(objPSM, strColumns, DATA_COLUMN_EFDR)		' This column will not be present if a Target/Decoy (TDA) search was performed
 				AddScore(objPSM, strColumns, DATA_COLUMN_PepFDR)
+
 			End If
 
 		Catch ex As Exception

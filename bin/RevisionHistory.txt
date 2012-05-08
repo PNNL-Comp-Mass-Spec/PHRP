@@ -1,5 +1,10 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.4.4511; May 8, 2012
+	- New version of PeptideHitResultsProcessor that adds support for the EFDR column in MSGFDB results
+		- This column is included if a target/decoy search is not run and if MSGFDB is instructed to just write out the top hit for each spectrum
+		- Reported in the _msgfdb_syn.txt file under the FDR column (the PepFDR column will show 1 for every record in this case)
+
 Version 1.4.4504; May 1, 2012
 	- Now looking for the search engine parameter file and ModDefs file in the same folder as the input folder if not found in the working directory
 	- New version of PeptideHitResultsProcessor
