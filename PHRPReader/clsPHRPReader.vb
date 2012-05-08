@@ -1050,6 +1050,25 @@ Public Class clsPHRPReader
 		Return System.IO.Path.GetFileNameWithoutExtension(strSynopsisOrFirstHitsFileName) & MSGF_RESULT_FILENAME_SUFFIX
 	End Function
 
+	Public Shared Function GetPeptideHitResultType(ResultTypeName As String) As ePeptideHitResultType
+		Select Case ResultTypeName.ToLower()
+			Case "Peptide_Hit".ToLower
+				Return clsPHRPReader.ePeptideHitResultType.Sequest
+
+			Case "XT_Peptide_Hit".ToLower
+				Return clsPHRPReader.ePeptideHitResultType.XTandem
+
+			Case "IN_Peptide_Hit".ToLower
+				Return clsPHRPReader.ePeptideHitResultType.Inspect
+
+			Case "MSG_Peptide_Hit".ToLower
+				Return clsPHRPReader.ePeptideHitResultType.MSGFDB
+
+			Case Else
+				Return clsPHRPReader.ePeptideHitResultType.Unknown
+		End Select
+	End Function
+
 	''' <summary>
 	''' Returns the default first-hits file name for the given PeptideHit result type
 	''' </summary>
