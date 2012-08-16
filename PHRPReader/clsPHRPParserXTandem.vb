@@ -294,12 +294,15 @@ Public Class clsPHRPParserXTandem
 
 	End Function
 
-	Public Function ParseXTandemParamFile(ByVal strParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters, blnLookForDefaultParamsFileName As Boolean) As Boolean
+	Public Function ParseXTandemParamFile(ByVal strParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters, ByVal blnLookForDefaultParamsFileName As Boolean) As Boolean
+		Return ParseXTandemParamFile(strParamFileName, objSearchEngineParams, blnLookForDefaultParamsFileName, blnDetermineFastaFileNameUsingTaxonomyFile:=True)
+	End Function
+
+	Public Function ParseXTandemParamFile(ByVal strParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters, ByVal blnLookForDefaultParamsFileName As Boolean, ByVal blnDetermineFastaFileNameUsingTaxonomyFile As Boolean) As Boolean
 
 		Dim strParamFilePath As String
 		Dim strErrorMessage As String = String.Empty
 
-		Dim blnDetermineFastaFileNameUsingTaxonomyFile As Boolean
 		Dim blnSuccess As Boolean
 
 		Try
@@ -310,7 +313,6 @@ Public Class clsPHRPParserXTandem
 			Else
 
 				Try
-					blnDetermineFastaFileNameUsingTaxonomyFile = True
 					blnSuccess = ParseXTandemParamFileWork(mInputFolderPath, strParamFileName, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile, blnLookForDefaultParamsFileName, strErrorMessage)
 				Catch ex As Exception
 					ReportError("Error in ParseXTandemParamFileWork: " & ex.Message)
