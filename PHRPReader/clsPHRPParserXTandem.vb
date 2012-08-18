@@ -257,6 +257,10 @@ Public Class clsPHRPParserXTandem
 
 	End Function
 
+	Public Shared Function GetSearchEngineName() As String
+		Return XT_SEARCH_ENGINE_NAME
+	End Function
+
 	Protected Shared Function GetXTandemDefaultParamsFilename(ByVal strParamFilePath As String) As String
 
 		Dim strDefaultParamsFilename As String = String.Empty
@@ -330,6 +334,8 @@ Public Class clsPHRPParserXTandem
 		Catch ex As Exception
 			ReportError("Error in ParseXTandemParamFile: " & ex.Message)
 		End Try
+
+		ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
 
 		Return blnSuccess
 

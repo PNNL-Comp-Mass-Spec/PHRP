@@ -156,6 +156,10 @@ Public Class clsPHRPParserInspect
 		Return strDatasetName & "_inspect_syn_SeqToProteinMap.txt"
 	End Function
 
+	Public Shared Function GetSearchEngineName() As String
+		Return INS_SEARCH_ENGINE_NAME
+	End Function
+
 	''' <summary>
 	''' Parses the specified Inspect parameter file
 	''' </summary>
@@ -164,6 +168,21 @@ Public Class clsPHRPParserInspect
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+
+		Dim blnSuccess As Boolean
+
+		objSearchEngineParams = New clsSearchEngineParameters(INS_SEARCH_ENGINE_NAME, mModInfo)
+
+		blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
+
+		ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+
 		Dim strParamFilePath As String
 		Dim blnSuccess As Boolean
 
@@ -175,8 +194,6 @@ Public Class clsPHRPParserInspect
 		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
 
 		Try
-			objSearchEngineParams = New clsSearchEngineParameters(INS_SEARCH_ENGINE_NAME, mModInfo)
-
 			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
 			If Not System.IO.File.Exists(strParamFilePath) Then

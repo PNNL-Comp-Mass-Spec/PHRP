@@ -161,6 +161,10 @@ Public Class clsPHRPParserSequest
 		Return strDatasetName & "_syn_SeqToProteinMap.txt"
 	End Function
 
+	Public Shared Function GetSearchEngineName() As String
+		Return SEQ_SEARCH_ENGINE_NAME
+	End Function
+
 	''' <summary>
 	''' Parses the specified Sequest parameter file
 	''' </summary>
@@ -169,8 +173,23 @@ Public Class clsPHRPParserSequest
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
-		Dim strParamFilePath As String
+
 		Dim blnSuccess As Boolean
+
+		objSearchEngineParams = New clsSearchEngineParameters(SEQ_SEARCH_ENGINE_NAME, mModInfo)
+		objSearchEngineParams.Enzyme = "trypsin"
+
+		blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
+
+		ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+
+		Dim strParamFilePath As String
 		Dim strLineIn As String
 
 		Dim strFastaFilePath As String
@@ -184,9 +203,9 @@ Public Class clsPHRPParserSequest
 		Dim reEnzymeSpecificity As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("^\S+\s(\d)\s\d\s.+", Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
 		Dim reMatch As System.Text.RegularExpressions.Match
 
+		Dim blnSuccess As Boolean = False
+
 		Try
-			objSearchEngineParams = New clsSearchEngineParameters(SEQ_SEARCH_ENGINE_NAME, mModInfo)
-			objSearchEngineParams.Enzyme = "trypsin"
 
 			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
@@ -315,7 +334,7 @@ Public Class clsPHRPParserSequest
 			End If
 
 		Catch ex As Exception
-			ReportError("Error in LoadSearchEngineParameters: " & ex.Message)
+			ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
 		End Try
 
 		Return blnSuccess

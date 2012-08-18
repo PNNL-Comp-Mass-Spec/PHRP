@@ -1281,6 +1281,32 @@ Public Class clsPHRPReader
 		Return strDatasetName & EXTENDED_SCAN_STATS_FILENAME_SUFFIX
 	End Function
 
+	Public Shared Function GetToolVersionInfoFilename(ByVal eResultType As ePeptideHitResultType) As String
+
+		Dim strToolVersionInfoFilename As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				' Tool_Version_Info_Sequest.txt
+				strToolVersionInfoFilename = "Tool_Version_Info_Sequest.txt"
+
+			Case ePeptideHitResultType.XTandem
+				' Tool_Version_Info_XTandem.txt
+				strToolVersionInfoFilename = "Tool_Version_Info_XTandem.txt"
+
+			Case ePeptideHitResultType.Inspect
+				' Tool_Version_Info_Inspect.txt
+				strToolVersionInfoFilename = "Tool_Version_Info_Inspect.txt"
+
+			Case ePeptideHitResultType.MSGFDB
+				' Tool_Version_Info_MSGFDB.txt
+				strToolVersionInfoFilename = "Tool_Version_Info_MSGFDB.txt"
+
+		End Select
+
+		Return strToolVersionInfoFilename
+	End Function
+
 	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
 		If String.IsNullOrEmpty(strBaseMessage) Then
 			strBaseMessage = "Error"

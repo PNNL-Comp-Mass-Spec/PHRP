@@ -37,7 +37,8 @@ Public Class clsPHRPParserMSGFDB
 	Public Const DATA_COLUMN_EFDR As String = "EFDR"			' Only present if a Target/Decoy (TDA) search was not used
 	Public Const DATA_COLUMN_PepFDR As String = "PepFDR"		' Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
 
-	Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GF+"
+	''Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GF+"
+	Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GFDB"
 #End Region
 
 	''' <summary>
@@ -157,6 +158,10 @@ Public Class clsPHRPParserMSGFDB
 		Return strDatasetName & "_msgfdb_syn_SeqToProteinMap.txt"
 	End Function
 
+	Public Shared Function GetSearchEngineName() As String
+		Return MSGFDB_SEARCH_ENGINE_NAME
+	End Function
+
 	''' <summary>
 	''' Parses the specified MSGFDB (aka MS-GF+) parameter file
 	''' </summary>
@@ -165,6 +170,20 @@ Public Class clsPHRPParserMSGFDB
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+
+		Dim blnSuccess As Boolean
+
+		objSearchEngineParams = New clsSearchEngineParameters(MSGFDB_SEARCH_ENGINE_NAME, mModInfo)
+
+		blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
+
+		ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 		Dim strParamFilePath As String
 		Dim blnSuccess As Boolean
 
@@ -177,12 +196,10 @@ Public Class clsPHRPParserMSGFDB
 		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
 
 		Try
-			objSearchEngineParams = New clsSearchEngineParameters(MSGFDB_SEARCH_ENGINE_NAME, mModInfo)
-
 			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
 			If Not System.IO.File.Exists(strParamFilePath) Then
-				ReportError("MSGF DB param file not found: " & strParamFilePath)
+				ReportError("MSGF-DB param file not found: " & strParamFilePath)
 			Else
 				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
@@ -252,7 +269,7 @@ Public Class clsPHRPParserMSGFDB
 
 			End If
 		Catch ex As Exception
-			ReportError("Error in LoadSearchEngineParameters: " & ex.Message)
+			ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
 		End Try
 
 		Return blnSuccess

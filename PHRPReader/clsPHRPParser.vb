@@ -226,6 +226,7 @@ Public MustInherit Class clsPHRPParser
 
 	''' <summary>
 	''' Parses the specified parameter file
+	''' Also reads the Tool_Version_Info file in the same folder (if present)
 	''' </summary>
 	''' <param name="strSearchEngineParamFileName">Name of the parameter file to parse (must reside in InputFolderPath)</param>
 	''' <param name="objSearchEngineParams">Search engine parameters class (output)</param>
@@ -446,23 +447,104 @@ Public MustInherit Class clsPHRPParser
 	''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
 	''' <remarks>Automatically trims whitespace</remarks>
 	Protected Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char) As System.Collections.Generic.KeyValuePair(Of String, String)
-		Dim strSplitLine() As String
 		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
+		Dim strKey As String
+		Dim strValue As String
+		Dim intCharIndex As Integer
 
 		If Not String.IsNullOrEmpty(strText) Then
-			strSplitLine = strText.Split(chDelimiter)
-
-			If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
-				If strSplitLine.Length = 1 Then
-					kvSetting = New System.Collections.Generic.KeyValuePair(Of String, String)(strSplitLine(0).Trim(), String.Empty)
+			intCharIndex = strText.IndexOf(chDelimiter)
+			If intCharIndex > 0 Then
+				strKey = strText.Substring(0, intCharIndex).Trim()
+				If intCharIndex < strText.Length - 1 Then
+					strValue = strText.Substring(intCharIndex + 1).Trim()
 				Else
-					kvSetting = New System.Collections.Generic.KeyValuePair(Of String, String)(strSplitLine(0).Trim(), strSplitLine(1).Trim())
+					strValue = String.Empty
 				End If
+				kvSetting = New System.Collections.Generic.KeyValuePair(Of String, String)(strKey, strValue)
 				Return kvSetting
 			End If
 		End If
 
 		Return New System.Collections.Generic.KeyValuePair(Of String, String)(String.Empty, String.Empty)
+
+	End Function
+
+	Protected Function ReadSearchEngineVersion(ByVal strFolderPath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+
+		Dim strToolVersionInfoFilePath As String
+		Dim strLineIn As String
+
+		Dim strSearchEngineVersion As String
+		Dim dtSearchDate As System.DateTime
+
+		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
+
+		Dim blnValidDate As Boolean
+		Dim blnValidVersion As Boolean
+		Dim blnSuccess As Boolean = False
+
+		Try
+			' Read the Tool_Version_Info file to determine the analysis time and the tool version
+			strToolVersionInfoFilePath = System.IO.Path.Combine(mInputFolderPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType))			
+
+			If Not System.IO.File.Exists(strToolVersionInfoFilePath) Then
+				ReportWarning("Tool version info file not found: " & strToolVersionInfoFilePath)
+			Else
+				strSearchEngineVersion = "Unknown"
+				dtSearchDate = New System.DateTime(1980, 1, 1)
+
+				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strToolVersionInfoFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+
+					While srInFile.Peek > -1
+						strLineIn = srInFile.ReadLine().TrimStart()
+
+						' Split the line on a colon
+						kvSetting = ParseKeyValueSetting(strLineIn, ":"c)
+
+						Select Case kvSetting.Key.ToLower()
+							Case "date"
+								blnValidDate = System.DateTime.TryParse(kvSetting.Value, dtSearchDate)
+
+							Case "toolversioninfo"
+								If Not String.IsNullOrEmpty(kvSetting.Value) Then
+									strSearchEngineVersion = String.Copy(kvSetting.Value)
+									blnValidVersion = True
+								Else
+									' The next line contains the search engine version
+									If srInFile.Peek > -1 Then
+										strLineIn = srInFile.ReadLine().TrimStart()
+										strSearchEngineVersion = String.Copy(strLineIn)
+										blnValidVersion = True
+									End If
+								End If
+							Case Else
+								' Ignore the line
+						End Select
+					End While
+
+				End Using
+
+				If Not blnValidDate Then
+					ReportError("Date line not found in the ToolVersionInfo file")
+					blnSuccess = False
+				ElseIf Not blnValidVersion Then
+					ReportError("ToolVersionInfo line not found in the ToolVersionInfo file")
+					blnSuccess = False
+				Else
+					blnSuccess = True
+				End If
+
+				objSearchEngineParams.UpdateSearchEngineVersion(strSearchEngineVersion)
+				objSearchEngineParams.UpdateSearchDate(dtSearchDate)
+
+			End If
+
+		Catch ex As Exception
+			ReportError("Error in ReadSearchEngineVersion: " & ex.Message)
+		End Try
+
+		Return blnSuccess
 
 	End Function
 

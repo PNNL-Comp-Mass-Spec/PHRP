@@ -1,5 +1,11 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4612; August 17, 2012
+	- Now reading the Tool_Version_Info file to determine the search engine version and the search date/time
+
+Version 1.1.4611; August 16, 2012
+	- Overloaded function ParseXTandemParamFile in clsPHRPParserXTandem to expose parameter blnDetermineFastaFileNameUsingTaxonomyFile
+
 Version 1.1.4511; May 8, 2012
 	- Added support for the EFDR column in MSGFDB results
 

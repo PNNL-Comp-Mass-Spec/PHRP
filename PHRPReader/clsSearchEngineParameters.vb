@@ -6,6 +6,9 @@ Public Class clsSearchEngineParameters
 	Public Const MASS_TYPE_AVERAGE As String = "average"
 
 	Protected mSearchEngineName As String
+	Protected mSearchEngineVersion As String
+	Protected mSearchDate As System.DateTime
+
 	Protected mFastaFilePath As String
 
 	Protected mPrecursorMassToleranceDa As Double	' Precursor mass tolerance, in Da; 0 if unknown
@@ -105,6 +108,19 @@ Public Class clsSearchEngineParameters
 			Return mSearchEngineName
 		End Get
 	End Property
+
+	Public ReadOnly Property SearchEngineVersion As String
+		Get
+			Return mSearchEngineVersion
+		End Get
+	End Property
+
+	Public ReadOnly Property SearchDate As System.DateTime
+		Get
+			Return mSearchDate
+		End Get
+	End Property
+
 #End Region
 
 	Public Sub New(ByVal SearchEngineName As String)
@@ -119,6 +135,7 @@ Public Class clsSearchEngineParameters
 		Me.InitializeDefaults()
 
 		mSearchEngineName = SearchEngineName
+
 		mModInfo = objModInfo
 
 		If objModInfo Is Nothing Then
@@ -149,6 +166,9 @@ Public Class clsSearchEngineParameters
 
 	Protected Sub InitializeDefaults()
 		mSearchEngineName = "Unknown"
+		mSearchEngineVersion = "Unknown"
+		mSearchDate = New System.DateTime(1980, 1, 1)
+
 		mFastaFilePath = String.Empty
 
 		mPrecursorMassToleranceDa = 0
@@ -159,6 +179,14 @@ Public Class clsSearchEngineParameters
 		mMaxNumberInternalCleavages = 4
 		mMinNumberTermini = 0
 
+	End Sub
+
+	Public Sub UpdateSearchEngineVersion(ByVal strSearchEngineVersion As String)
+		mSearchEngineVersion = String.Copy(strSearchEngineVersion)
+	End Sub
+
+	Public Sub UpdateSearchDate(ByVal dtSearchDate As System.DateTime)
+		mSearchDate = dtSearchDate
 	End Sub
 
 End Class
