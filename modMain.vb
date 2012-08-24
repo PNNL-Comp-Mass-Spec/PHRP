@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "May 8, 2012"
+	Public Const PROGRAM_DATE As String = "August 24, 2012"
 
 	Private mInputFilePath As String
 	Private mOutputFolderName As String							' Optional
@@ -145,7 +145,7 @@ Module modMain
 					Else
 						intReturnCode = mPeptideHitResultsProcRunner.ErrorCode
 						If intReturnCode <> 0 AndAlso Not mQuietMode Then
-							Console.WriteLine("Error while processing: " & mPeptideHitResultsProcRunner.GetErrorMessage())
+							ShowErrorMessage("Error while processing: " & mPeptideHitResultsProcRunner.GetErrorMessage())
 						End If
 					End If
 				End If
@@ -154,7 +154,7 @@ Module modMain
 			End If
 
 		Catch ex As Exception
-			Console.WriteLine("Error occurred in modMain->Main: " & ControlChars.NewLine & ex.Message)
+			ShowErrorMessage("Error occurred in modMain->Main: " & System.Environment.NewLine & ex.Message)
 			intReturnCode = -1
 		End Try
 
@@ -168,7 +168,7 @@ Module modMain
 			Console.WriteLine()
 		End If
 		If intPercentComplete > 100 Then intPercentComplete = 100
-		Console.Write("Processing: " & intPercentComplete.ToString & "% ")
+		Console.Write("Processing: " & intPercentComplete.ToString() & "% ")
 
 		If blnAddCarriageReturn Then
 			Console.WriteLine()
@@ -178,7 +178,7 @@ Module modMain
 	Private Function GetAppVersion() As String
 		'Return System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")"
 
-		Return System.Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString & " (" & PROGRAM_DATE & ")"
+		Return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() & " (" & PROGRAM_DATE & ")"
 	End Function
 
 	''' <summary>
@@ -215,6 +215,8 @@ Module modMain
 		' Returns True if no problems; otherwise, returns false
 
 		Dim strValue As String = String.Empty
+		Dim sngValue As Single
+		Dim intValue As Integer
 		Dim blnValue As Boolean
 		Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
 
@@ -250,15 +252,15 @@ Module modMain
 					End If
 
 					If .RetrieveValueForParameter("SynPvalue", strValue) Then
-						If IsNumeric(strValue) Then
-							mInspectSynopsisFilePValueThreshold = CSng(strValue)
+						If Single.TryParse(strValue, sngValue) Then
+							mInspectSynopsisFilePValueThreshold = sngValue
 						End If
 					End If
 
 					If .RetrieveValueForParameter("S", strValue) Then
 						mRecurseFolders = True
-						If IsNumeric(strValue) Then
-							mRecurseFoldersMaxLevels = CInt(strValue)
+						If Integer.TryParse(strValue, intValue) Then
+							mRecurseFoldersMaxLevels = intValue
 						End If
 					End If
 					If .RetrieveValueForParameter("A", strValue) Then mOutputFolderAlternatePath = strValue
@@ -279,10 +281,22 @@ Module modMain
 			End If
 
 		Catch ex As Exception
-			Console.WriteLine("Error parsing the command line parameters: " & ControlChars.NewLine & ex.Message)
+			ShowErrorMessage("Error parsing the command line parameters: " & System.Environment.NewLine & ex.Message)
 		End Try
 
 	End Function
+
+	Private Sub ShowErrorMessage(ByVal strMessage As String)
+		Dim strSeparator As String = "------------------------------------------------------------------------------"
+
+		Console.WriteLine()
+		Console.WriteLine(strSeparator)
+		Console.WriteLine(strMessage)
+		Console.WriteLine(strSeparator)
+		Console.WriteLine()
+
+		WriteToErrorStream(strMessage)
+	End Sub
 
 	Private Sub ShowProgramHelp()
 
@@ -331,9 +345,23 @@ Module modMain
 			System.Threading.Thread.Sleep(750)
 
 		Catch ex As Exception
-			Console.WriteLine("Error displaying the program syntax: " & ex.Message)
+			ShowErrorMessage("Error displaying the program syntax: " & ex.Message)
 		End Try
 
+	End Sub
+
+	Private Sub WriteToErrorStream(strErrorMessage As String)
+		Try
+			Using swErrorStream As System.IO.StreamWriter = New System.IO.StreamWriter(Console.OpenStandardError())
+				swErrorStream.WriteLine(strErrorMessage)
+			End Using
+		Catch ex As Exception
+			' Ignore errors here
+		End Try
+	End Sub
+
+	Private Sub mPeptideHitResultsProcRunner_ErrorEvent(strMessage As String) Handles mPeptideHitResultsProcRunner.ErrorEvent
+		WriteToErrorStream(strMessage)
 	End Sub
 
 	Private Sub mPeptideHitResultsProcRunner_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single) Handles mPeptideHitResultsProcRunner.ProgressChanged

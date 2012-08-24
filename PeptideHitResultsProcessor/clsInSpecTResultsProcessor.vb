@@ -33,7 +33,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "August 18, 2011"
+		MyBase.mFileDate = "August 24, 2012"
         InitializeLocalVariables()
     End Sub
 
@@ -1902,40 +1902,44 @@ Public Class clsInSpecTResultsProcessor
                                       ByRef strErrorLog As String)
 
         ' Write out the header line for synopsis / first hits files
-        Try
-            swResultFile.WriteLine("ResultID" & ControlChars.Tab & _
-                                   "Scan" & ControlChars.Tab & _
-                                   "Peptide" & ControlChars.Tab & _
-                                   "Protein" & ControlChars.Tab & _
-                                   "Charge" & ControlChars.Tab & _
-                                   "MQScore" & ControlChars.Tab & _
-                                   "Length" & ControlChars.Tab & _
-                                   "TotalPRMScore" & ControlChars.Tab & _
-                                   "MedianPRMScore" & ControlChars.Tab & _
-                                   "FractionY" & ControlChars.Tab & _
-                                   "FractionB" & ControlChars.Tab & _
-                                   "Intensity" & ControlChars.Tab & _
-                                   "NTT" & ControlChars.Tab & _
-                                   "PValue" & ControlChars.Tab & _
-                                   "FScore" & ControlChars.Tab & _
-                                   "DeltaScore" & ControlChars.Tab & _
-                                   "DeltaScoreOther" & ControlChars.Tab & _
-                                   "DeltaNormMQScore" & ControlChars.Tab & _
-                                   "DeltaNormTotalPRMScore" & ControlChars.Tab & _
-                                   "RankTotalPRMScore" & ControlChars.Tab & _
-                                   "RankFScore" & ControlChars.Tab & _
-                                   "MH" & ControlChars.Tab & _
-                                   "RecordNumber" & ControlChars.Tab & _
-                                   "DBFilePos" & ControlChars.Tab & _
-                                   "SpecFilePos" & ControlChars.Tab & _
-                                   "PrecursorMZ" & ControlChars.Tab & _
-                                   "PrecursorError" & ControlChars.Tab & _
-                                   "DelM_PPM")
-        Catch ex As Exception
-            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
-            End If
-        End Try
+		Try
+			Dim lstData As New System.Collections.Generic.List(Of String)
+			lstData.Add("ResultID")
+			lstData.Add("Scan")
+			lstData.Add("Peptide")
+			lstData.Add("Protein")
+			lstData.Add("Charge")
+			lstData.Add("MQScore")
+			lstData.Add("Length")
+			lstData.Add("TotalPRMScore")
+			lstData.Add("MedianPRMScore")
+			lstData.Add("FractionY")
+			lstData.Add("FractionB")
+			lstData.Add("Intensity")
+			lstData.Add("NTT")
+			lstData.Add("PValue")
+			lstData.Add("FScore")
+			lstData.Add("DeltaScore")
+			lstData.Add("DeltaScoreOther")
+			lstData.Add("DeltaNormMQScore")
+			lstData.Add("DeltaNormTotalPRMScore")
+			lstData.Add("RankTotalPRMScore")
+			lstData.Add("RankFScore")
+			lstData.Add("MH")
+			lstData.Add("RecordNumber")
+			lstData.Add("DBFilePos")
+			lstData.Add("SpecFilePos")
+			lstData.Add("PrecursorMZ")
+			lstData.Add("PrecursorError")
+			lstData.Add("DelM_PPM")
+
+			swResultFile.WriteLine(CollapseList(lstData))
+
+		Catch ex As Exception
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
+			End If
+		End Try
 
     End Sub
 

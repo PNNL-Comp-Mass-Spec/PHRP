@@ -30,7 +30,7 @@ Imports PHRPReader
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "September 26, 2011"
+		mFileDate = "August 24, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -469,6 +469,24 @@ Public MustInherit Class clsPHRPBaseClass
 			SetErrorCode(ePHRPErrorCodes.FilePathError)
 			Return False
 		End Try
+
+	End Function
+
+	''' <summary>
+	''' Collapses a list of strings to a tab-delimited line of text
+	''' </summary>
+	''' <param name="lstFields"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function CollapseList(lstFields As System.Collections.Generic.List(Of String)) As String
+		Dim sbText As New System.Text.StringBuilder
+
+		For Each item As String In lstFields
+			If sbText.Length > 0 Then sbText.Append(ControlChars.Tab)
+			sbText.Append(item)
+		Next
+
+		Return sbText.ToString()
 
 	End Function
 
