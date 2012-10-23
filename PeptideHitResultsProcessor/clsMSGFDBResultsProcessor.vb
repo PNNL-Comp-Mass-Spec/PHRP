@@ -186,13 +186,6 @@ Public Class clsMSGFDBResultsProcessor
 		Public ModSymbol As Char
 	End Structure
 
-	Protected Structure udtPepToProteinMappingType
-		Public Peptide As String
-		Public Protein As String
-		Public ResidueStart As Integer
-		Public ResidueEnd As Integer
-	End Structure
-
 	Protected Structure udtScanGroupInfoType
 		Public ScanGroupID As Integer
 		Public Charge As Short
@@ -1019,13 +1012,13 @@ Public Class clsMSGFDBResultsProcessor
 	''' <param name="strPepToProteinMapFilePath"></param>
 	''' <param name="strOutputFolderPath"></param>
 	''' <param name="udtMSGFDBModInfo"></param>
-	''' <param name="udtPepToProteinMapping"></param>
+	''' <param name="lstPepToProteinMapping"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Protected Function LoadPeptideToProteinMapInfo(ByVal strPepToProteinMapFilePath As String, _
-		 ByVal strOutputFolderPath As String, _
-		 ByRef udtMSGFDBModInfo() As udtModInfoType, _
-		 ByRef udtPepToProteinMapping() As udtPepToProteinMappingType) As Boolean
+	  ByVal strOutputFolderPath As String, _
+	  ByRef udtMSGFDBModInfo() As udtModInfoType, _
+	  ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType)) As Boolean
 
 		Dim strMTSPepToProteinMapFilePath As String = String.Empty
 		Dim strMTSCompatiblePeptide As String
@@ -1036,13 +1029,12 @@ Public Class clsMSGFDBResultsProcessor
 		Dim intLinesRead As Integer
 		Dim intValue As Integer
 
-		Dim intProteinCount As Integer
 		Dim blnSuccess As Boolean = False
 
 		Dim dblTotalModMass As Double = 0
 
 		Try
-			' Initialize udtPepToProteinMapping
+			' Initialize lstPepToProteinMapping
 			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
 				SetErrorMessage("Warning: PepToProteinMap file is not defined")
 				Return False
@@ -1051,8 +1043,7 @@ Public Class clsMSGFDBResultsProcessor
 				Return False
 			End If
 
-			intProteinCount = 0
-			ReDim udtPepToProteinMapping(999)
+			lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
 
 			' Open strProteinToPeptideMappingFilePath for reading
 			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strPepToProteinMapFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
@@ -1077,29 +1068,26 @@ Public Class clsMSGFDBResultsProcessor
 								If intLinesRead = 0 AndAlso Not Integer.TryParse(strSplitLine(2), intValue) Then
 									' Header line
 									swOutFile.WriteLine(strLineIn)
-								Else
-									If intProteinCount >= udtPepToProteinMapping.Length Then
-										ReDim Preserve udtPepToProteinMapping(udtPepToProteinMapping.Length * 2 - 1)
-									End If
-
+								Else									
 									' Replace any mod text names in the peptide sequence with the appropriate mod symbols
 									' In addition, replace the * terminus symbols with dashes
 									strMTSCompatiblePeptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(strSplitLine(0)), udtMSGFDBModInfo, dblTotalModMass)
 
-									With udtPepToProteinMapping(intProteinCount)
+									Dim udtPepToProteinMappingEntry As udtPepToProteinMappingType
+									With udtPepToProteinMappingEntry
 										.Peptide = strMTSCompatiblePeptide
 										.Protein = String.Copy(strSplitLine(1))
 										Integer.TryParse(strSplitLine(2), .ResidueStart)
 										Integer.TryParse(strSplitLine(3), .ResidueEnd)
 									End With
 
+									lstPepToProteinMapping.Add(udtPepToProteinMappingEntry)
 
 									swOutFile.WriteLine(strMTSCompatiblePeptide & ControlChars.Tab & _
 									  strSplitLine(1) & ControlChars.Tab & _
 									  strSplitLine(2) & ControlChars.Tab & _
 									  strSplitLine(3))
 
-									intProteinCount += 1
 								End If
 							End If
 						End If
@@ -1108,9 +1096,6 @@ Public Class clsMSGFDBResultsProcessor
 
 				End Using
 			End Using
-
-			' Shrink udtPepToProteinMapping to the appropriate length
-			ReDim Preserve udtPepToProteinMapping(intProteinCount - 1)
 
 			Console.WriteLine()
 
@@ -1127,7 +1112,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	Protected Function ParseMSGFDBSynopsisFile(ByVal strInputFilePath As String, ByRef udtPepToProteinMapping() As udtPepToProteinMappingType, Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+	Protected Function ParseMSGFDBSynopsisFile(ByVal strInputFilePath As String, ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
 		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
 		Dim strPreviousSpecProb As String
@@ -1183,9 +1168,9 @@ Public Class clsMSGFDBResultsProcessor
 			' Initialize objPeptideSearchComparer
 			objPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer
 
-			' Assure that udtPepToProteinMapping is sorted on peptide
-			If udtPepToProteinMapping.Length > 1 Then
-				Array.Sort(udtPepToProteinMapping, New PepToProteinMappingComparer)
+			' Assure that lstPepToProteinMapping is sorted on peptide
+			If lstPepToProteinMapping.Count > 1 Then
+				lstPepToProteinMapping.Sort(New PepToProteinMappingComparer)
 			End If
 
 			Try
@@ -1258,31 +1243,33 @@ Public Class clsMSGFDBResultsProcessor
 
 									MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
 
-									If udtPepToProteinMapping.Length > 0 Then
+									If lstPepToProteinMapping.Count > 0 Then
 										' Add the additional proteins for this peptide
 
-										' Use binary search to find this peptide in udtPepToProteinMapping
-										intPepToProteinMapIndex = Array.BinarySearch(udtPepToProteinMapping, strCurrentPeptideWithMods, objPeptideSearchComparer)
+										' Use binary search to find this peptide in lstPepToProteinMapping
+										Dim udtItemToFind As udtPepToProteinMappingType = New udtPepToProteinMappingType
+										udtItemToFind.Peptide = strCurrentPeptideWithMods
+										intPepToProteinMapIndex = lstPepToProteinMapping.BinarySearch(udtItemToFind, objPeptideSearchComparer)
 
 										If intPepToProteinMapIndex >= 0 Then
 											' Step Backward until the first match is found
-											Do While intPepToProteinMapIndex > 0 AndAlso udtPepToProteinMapping(intPepToProteinMapIndex - 1).Peptide = strCurrentPeptideWithMods
+											Do While intPepToProteinMapIndex > 0 AndAlso lstPepToProteinMapping(intPepToProteinMapIndex - 1).Peptide = strCurrentPeptideWithMods
 												intPepToProteinMapIndex -= 1
 											Loop
 
-											' Call MyBase.SaveResultsFileEntrySeqInfo for each entry in udtPepToProteinMapping() for peptide , skipping objSearchResult.ProteinName
+											' Call MyBase.SaveResultsFileEntrySeqInfo for each entry in lstPepToProteinMapping() for peptide , skipping objSearchResult.ProteinName
 											strCurrentProtein = String.Copy(objSearchResult.ProteinName)
 											Do
-												If udtPepToProteinMapping(intPepToProteinMapIndex).Protein <> strCurrentProtein Then
-													objSearchResult.ProteinName = String.Copy(udtPepToProteinMapping(intPepToProteinMapIndex).Protein)
+												If lstPepToProteinMapping(intPepToProteinMapIndex).Protein <> strCurrentProtein Then
+													objSearchResult.ProteinName = String.Copy(lstPepToProteinMapping(intPepToProteinMapIndex).Protein)
 													MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), False)
 												End If
 
 												intPepToProteinMapIndex += 1
-											Loop While intPepToProteinMapIndex < udtPepToProteinMapping.Length AndAlso strCurrentPeptideWithMods = udtPepToProteinMapping(intPepToProteinMapIndex).Peptide
+											Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso strCurrentPeptideWithMods = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
 										Else
 											' Match not found; this is unexpected
-											Console.WriteLine("Warning: no match for '" & strCurrentPeptideWithMods & "' in udtPepToProteinMapping")
+											Console.WriteLine("Warning: no match for '" & strCurrentPeptideWithMods & "' in lstPepToProteinMapping")
 										End If
 									End If
 
@@ -1686,11 +1673,11 @@ Public Class clsMSGFDBResultsProcessor
 	End Function
 
 	Private Function ParseMSGFDBSynFileEntry(ByRef strLineIn As String, _
-		 ByRef objSearchResult As clsSearchResultsMSGFDB, _
-		 ByRef strErrorLog As String, _
-		 ByVal intResultsProcessed As Integer, _
-		 ByRef intColumnMapping() As Integer, _
-		 ByRef strPeptideSequenceWithMods As String) As Boolean
+	  ByRef objSearchResult As clsSearchResultsMSGFDB, _
+	  ByRef strErrorLog As String, _
+	  ByVal intResultsProcessed As Integer, _
+	  ByRef intColumnMapping() As Integer, _
+	  ByRef strPeptideSequenceWithMods As String) As Boolean
 
 		' Parses an entry from the MSGFDB Synopsis file
 
@@ -1820,7 +1807,7 @@ Public Class clsMSGFDBResultsProcessor
 		Dim strScanGroupFilePath As String
 
 		Dim udtMSGFDBModInfo() As udtModInfoType
-		Dim udtPepToProteinMapping() As udtPepToProteinMappingType
+		Dim lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType)
 
 		Dim blnSuccess As Boolean
 
@@ -1849,7 +1836,7 @@ Public Class clsMSGFDBResultsProcessor
 						strInputFilePathFull = ioInputFile.FullName
 
 						ReDim udtMSGFDBModInfo(-1)
-						ReDim udtPepToProteinMapping(-1)
+						lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
 
 						' Load the MSGF-DB Parameter File so that we can determine the modification names and masses
 						' If the MSGFDB_Mods.txt file was defined, then the mod symbols in that file will be used to define the mod symbols in udtMSGFDBModInfo 
@@ -1904,7 +1891,7 @@ Public Class clsMSGFDBResultsProcessor
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
-							LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, strOutputFolderPath, udtMSGFDBModInfo, udtPepToProteinMapping)
+							LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, strOutputFolderPath, udtMSGFDBModInfo, lstPepToProteinMapping)
 
 
 							' Create the other PHRP-specific files
@@ -1914,7 +1901,7 @@ Public Class clsMSGFDBResultsProcessor
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
 							' Now parse the _syn.txt file that we just created to next create the other PHRP files
-							blnSuccess = ParseMSGFDBSynopsisFile(strSynOutputFilePath, udtPepToProteinMapping, False)
+							blnSuccess = ParseMSGFDBSynopsisFile(strSynOutputFilePath, lstPepToProteinMapping, False)
 
 						End If
 
@@ -2612,49 +2599,6 @@ Public Class clsMSGFDBResultsProcessor
 						End If
 					End If
 				End If
-			End If
-
-		End Function
-	End Class
-
-	Protected Class PepToProteinMappingComparer
-		Implements System.Collections.IComparer
-
-		Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-			Dim xData As udtPepToProteinMappingType = DirectCast(x, udtPepToProteinMappingType)
-			Dim yData As udtPepToProteinMappingType = DirectCast(y, udtPepToProteinMappingType)
-
-			If xData.Peptide > yData.Peptide Then
-				Return 1
-			ElseIf xData.Peptide < yData.Peptide Then
-				Return -1
-			Else
-				If xData.Protein > yData.Protein Then
-					Return 1
-				ElseIf xData.Protein < yData.Protein Then
-					Return -1
-				Else
-					Return 0
-				End If
-			End If
-
-		End Function
-	End Class
-
-	Protected Class PepToProteinMappingPeptideSearchComparer
-		Implements System.Collections.IComparer
-
-		Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-			Dim xData As udtPepToProteinMappingType = DirectCast(x, udtPepToProteinMappingType)
-			Dim strPeptide As String = DirectCast(y, String)
-
-			If xData.Peptide > strPeptide Then
-				Return 1
-			ElseIf xData.Peptide < strPeptide Then
-				Return -1
-			Else
-
-				Return 0
 			End If
 
 		End Function

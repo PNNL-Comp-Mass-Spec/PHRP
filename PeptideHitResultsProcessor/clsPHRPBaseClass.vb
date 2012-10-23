@@ -95,6 +95,14 @@ Public MustInherit Class clsPHRPBaseClass
 		Dim ModName As String
 		Dim ResidueLocInPeptide As Integer
 	End Structure
+
+	Protected Structure udtPepToProteinMappingType
+		Public Peptide As String
+		Public Protein As String
+		Public ResidueStart As Integer
+		Public ResidueEnd As Integer
+	End Structure
+
 #End Region
 
 #Region "Classwide Variables"
@@ -1200,4 +1208,45 @@ Public MustInherit Class clsPHRPBaseClass
 			End If
 		End Function
 	End Class
+
+	Protected Class PepToProteinMappingComparer
+		Implements System.Collections.Generic.IComparer(Of udtPepToProteinMappingType)
+
+		Public Function Compare(x As udtPepToProteinMappingType, y As udtPepToProteinMappingType) As Integer Implements System.Collections.Generic.IComparer(Of udtPepToProteinMappingType).Compare
+
+			If x.Peptide > y.Peptide Then
+				Return 1
+			ElseIf x.Peptide < y.Peptide Then
+				Return -1
+			Else
+				If x.Protein > y.Protein Then
+					Return 1
+				ElseIf x.Protein < y.Protein Then
+					Return -1
+				Else
+					Return 0
+				End If
+			End If
+
+		End Function
+
+	End Class
+
+	Protected Class PepToProteinMappingPeptideSearchComparer
+		Implements System.Collections.Generic.IComparer(Of udtPepToProteinMappingType)
+
+		Public Function Compare(x As clsPHRPBaseClass.udtPepToProteinMappingType, y As clsPHRPBaseClass.udtPepToProteinMappingType) As Integer Implements System.Collections.Generic.IComparer(Of clsPHRPBaseClass.udtPepToProteinMappingType).Compare
+
+			If x.Peptide > y.Peptide Then
+				Return 1
+			ElseIf x.Peptide < y.Peptide Then
+				Return -1
+			Else
+				Return 0
+			End If
+
+		End Function
+
+	End Class
+
 End Class
