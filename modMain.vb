@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "August 24, 2012"
+	Public Const PROGRAM_DATE As String = "October 25, 2012"
 
 	Private mInputFilePath As String
 	Private mOutputFolderName As String							' Optional
@@ -25,6 +25,17 @@ Module modMain
 	Private mMassCorrectionTagsFilePath As String				' Optional
 	Private mModificationDefinitionsFilePath As String			' Optional
 	Private mSearchToolParameterFilePath As String				' Optional
+
+	' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
+	Private mCreateProteinModsFile As Boolean
+	Private mFastaFilePath As String
+	Private mIgnorePeptideToProteinMapperErrors As Boolean
+	Private mProteinModsFileIncludesReversedProteins As Boolean
+	Private mUseExistingMTSPepToProteinMapFile As Boolean
+
+	' Setting this to true assumes the input file is a valid PHRP data file
+	' Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
+	Private mCreateProteinModsUsingPHRPDataFile As Boolean
 
 	Private mCreateInspectOrMSGFDBFirstHitsFile As Boolean
 	Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
@@ -86,6 +97,14 @@ Module modMain
 		mModificationDefinitionsFilePath = String.Empty
 		mSearchToolParameterFilePath = String.Empty
 
+		mCreateProteinModsFile = False
+		mFastaFilePath = String.Empty
+		mIgnorePeptideToProteinMapperErrors = False
+		mProteinModsFileIncludesReversedProteins = False
+		mUseExistingMTSPepToProteinMapFile = False
+
+		mCreateProteinModsUsingPHRPDataFile = False
+
 		' These should default to True
 		mCreateInspectOrMSGFDBFirstHitsFile = True
 		mCreateInspectOrMSGFDBSynopsisFile = True
@@ -127,6 +146,14 @@ Module modMain
 					.SearchToolParameterFilePath = mSearchToolParameterFilePath
 
 					.WarnMissingParameterFileSection = True
+
+					.CreateProteinModsFile = mCreateProteinModsFile
+					.FastaFilePath = mFastaFilePath
+					.IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors
+					.ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins
+					.UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile
+
+					.CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile
 
 					.CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
 					.CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
@@ -218,7 +245,7 @@ Module modMain
 		Dim sngValue As Single
 		Dim intValue As Integer
 		Dim blnValue As Boolean
-		Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
+		Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "ProteinMods", "F", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
 
 		Try
 			' Make sure no invalid parameters are present
@@ -228,16 +255,29 @@ Module modMain
 				With objParseCommandLine
 					' Query objParseCommandLine to see if various parameters are present
 					If .RetrieveValueForParameter("I", strValue) Then
-						mInputFilePath = strValue
+						mInputFilePath = String.Copy(strValue)
 					ElseIf .NonSwitchParameterCount > 0 Then
 						mInputFilePath = .RetrieveNonSwitchParameter(0)
 					End If
 
-					If .RetrieveValueForParameter("O", strValue) Then mOutputFolderName = strValue
-					If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = strValue
-					If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = strValue
-					If .RetrieveValueForParameter("T", strValue) Then mMassCorrectionTagsFilePath = strValue
-					If .RetrieveValueForParameter("N", strValue) Then mSearchToolParameterFilePath = strValue
+					If .RetrieveValueForParameter("O", strValue) Then mOutputFolderName = String.Copy(strValue)
+					If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = String.Copy(strValue)
+					If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = String.Copy(strValue)
+					If .RetrieveValueForParameter("T", strValue) Then mMassCorrectionTagsFilePath = String.Copy(strValue)
+					If .RetrieveValueForParameter("N", strValue) Then mSearchToolParameterFilePath = String.Copy(strValue)
+
+					If .RetrieveValueForParameter("ProteinMods", strValue) Then
+						mCreateProteinModsFile = True
+					End If
+
+					If .RetrieveValueForParameter("ProteinModsViaPHRP", strValue) Then
+						mCreateProteinModsUsingPHRPDataFile = True
+					End If
+
+					If .RetrieveValueForParameter("F", strValue) Then mFastaFilePath = String.Copy(strValue)
+					If .RetrieveValueForParameter("IgnorePepToProtMapErrors", strValue) Then mIgnorePeptideToProteinMapperErrors = True
+					If .RetrieveValueForParameter("ProteinModsIncludeReversed", strValue) Then mProteinModsFileIncludesReversedProteins = True
+					If .RetrieveValueForParameter("UseExistingPepToProteinMapFile", strValue) Then mUseExistingMTSPepToProteinMapFile = True
 
 					If .RetrieveValueForParameter("InsFHT", strValue) Then
 						If ParseBoolean(strValue, blnValue) Then
@@ -263,14 +303,14 @@ Module modMain
 							mRecurseFoldersMaxLevels = intValue
 						End If
 					End If
-					If .RetrieveValueForParameter("A", strValue) Then mOutputFolderAlternatePath = strValue
+					If .RetrieveValueForParameter("A", strValue) Then mOutputFolderAlternatePath = String.Copy(strValue)
 					If .RetrieveValueForParameter("R", strValue) Then mRecreateFolderHierarchyInAlternatePath = True
 
 					If .RetrieveValueForParameter("L", strValue) Then
 						mLogMessagesToFile = True
 
 						If Not strValue Is Nothing AndAlso strValue.Length > 0 Then
-							mLogFilePath = strValue.Trim(""""c)
+							mLogFilePath = String.Copy(strValue).Trim(""""c)
 						End If
 					End If
 
@@ -309,6 +349,8 @@ Module modMain
 			Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
 										" InputFilePath [/O:OutputFolderPath]")
 			Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
+			Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]")
+			Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]")
 			Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] [/SynPvalue:0.2]")
 			Console.WriteLine(" [/InsFHT:True|False] [/InsSyn:True|False]")
 			Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
@@ -318,6 +360,13 @@ Module modMain
 			Console.WriteLine("The parameter file path is optional.  If included, it should point to a valid XML parameter file.")
 			Console.WriteLine()
 			Console.WriteLine("Use /M to specify the file containing the modification definitions.  This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).")
+			Console.WriteLine()
+			Console.WriteLine("Use /ProteinMods to indicate that the _ProteinMods.txt file should be created.  This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F")
+			Console.WriteLine("Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file and thus the PHRP data files should not be re-created; only the _ProteinMods.txt file should be created.  This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F")
+			Console.WriteLine("Use /IgnorePepToProtMapErrors to ignore peptide to protein mapping errors that occur when creating a missing _PepToProtMapMTS.txt file")
+			Console.WriteLine("Use /ProteinModsIncludeReversed to include Reversed proteins in the _ProteinMods.txt file")
+			Console.WriteLine("Use /UseExistingPepToProteinMapFile to use an existing _PepToProtMapMTS.txt file if it exists")
+			Console.WriteLine()
 			Console.WriteLine("Use /T to specify the file containing the mass correction tag info.  This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).")
 			Console.WriteLine("Use /N to specify the parameter file provided to the search tool.  This is only used when processing Inspect or MSGF-DB files.")
 			Console.WriteLine()
@@ -339,7 +388,7 @@ Module modMain
 			Console.WriteLine()
 
 			Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
-			Console.WriteLine("Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/")
+			Console.WriteLine("Website: http://panomics.pnnl.gov/ or http://www.sysbio.org/resources/staff/")
 
 			' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
 			System.Threading.Thread.Sleep(750)
@@ -364,6 +413,10 @@ Module modMain
 		WriteToErrorStream(strMessage)
 	End Sub
 
+	Private Sub mPeptideHitResultsProcRunner_MessageEvent(strMessage As String) Handles mPeptideHitResultsProcRunner.MessageEvent
+		Console.WriteLine(strMessage)
+	End Sub
+
 	Private Sub mPeptideHitResultsProcRunner_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single) Handles mPeptideHitResultsProcRunner.ProgressChanged
 		Const PERCENT_REPORT_INTERVAL As Integer = 25
 		Const PROGRESS_DOT_INTERVAL_MSEC As Integer = 250
@@ -386,5 +439,9 @@ Module modMain
 	Private Sub mPeptideHitResultsProcRunner_ProgressReset() Handles mPeptideHitResultsProcRunner.ProgressReset
 		mLastProgressReportTime = DateTime.UtcNow
 		mLastProgressReportValue = 0
+	End Sub
+
+	Private Sub mPeptideHitResultsProcRunner_WarningEvent(strMessage As String) Handles mPeptideHitResultsProcRunner.WarningEvent
+		Console.WriteLine("Warning: " & strMessage)
 	End Sub
 End Module

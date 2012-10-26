@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4681; October 25, 2012
+	- Added several new switches to support creating a _ProteinMods.txt file with details on modified residues for each protein
+
 Version 1.4.4619; August 24, 2012
 	- Added support for columns IMS_Scan and IMS_Drift_Time in MSGFDB search results
 	- New version of PHRPReader
