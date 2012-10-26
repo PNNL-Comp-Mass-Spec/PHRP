@@ -140,6 +140,10 @@ Public Class clsPHRPParserXTandem
 		Return strDatasetName & "_xt_ModSummary.txt"
 	End Function
 
+	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_xt_ProteinMods.txt"
+	End Function
+
 	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_xt.txt"
 	End Function

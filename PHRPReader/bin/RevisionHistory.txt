@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4682; October 26, 2012
+	- Added function GetPHRPProteinModsFileName
+
 Version 1.1.4681; October 25, 2012
 	- Now looking for _fht_ModSummary.txt if _syn_ModSummary.txt was not found
 	- Updated clsPHRPSeqMapReader to support loading SeqInfo files for first-hits files (e.g. _fht_SeqInfo.txt)

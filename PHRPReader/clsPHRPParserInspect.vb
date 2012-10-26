@@ -140,6 +140,10 @@ Public Class clsPHRPParserInspect
 		Return strDatasetName & "_inspect_syn_ModSummary.txt"
 	End Function
 
+	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_inspect_syn_ProteinMods.txt"
+	End Function
+
 	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_inspect_syn.txt"
 	End Function

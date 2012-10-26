@@ -1176,6 +1176,38 @@ Public Class clsPHRPReader
 	End Function
 
 	''' <summary>
+	''' Returns the default ProteinMods file name for the given PeptideHit result type
+	''' </summary>
+	''' <param name="eResultType"></param>
+	''' <param name="strDatasetName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Shared Function GetPHRPProteinModsFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+		Dim strPHRPModSummaryFileName As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				' Sequest: _syn.txt
+				strPHRPModSummaryFileName = clsPHRPParserSequest.GetPHRPProteinModsFileName(strDatasetName)
+
+			Case ePeptideHitResultType.XTandem
+				' X!Tandem: _xt.txt
+				strPHRPModSummaryFileName = clsPHRPParserXTandem.GetPHRPProteinModsFileName(strDatasetName)
+
+			Case ePeptideHitResultType.Inspect
+				' Inspect: _inspect_syn.txt
+				strPHRPModSummaryFileName = clsPHRPParserInspect.GetPHRPProteinModsFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSGFDB
+				' MSGFDB: _msgfdb_syn.txt
+				strPHRPModSummaryFileName = clsPHRPParserMSGFDB.GetPHRPProteinModsFileName(strDatasetName)
+
+		End Select
+
+		Return strPHRPModSummaryFileName
+	End Function
+
+	''' <summary>
 	''' Returns the default Synopsis file name for the given PeptideHit result type
 	''' </summary>
 	''' <param name="eResultType"></param>
