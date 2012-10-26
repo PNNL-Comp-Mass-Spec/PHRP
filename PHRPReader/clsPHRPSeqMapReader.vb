@@ -78,8 +78,9 @@ Public Class clsPHRPSeqMapReader
 	''' <param name="strDatasetName">Dataset name</param>
 	''' <param name="strInputFolderPath">Input file path</param>
 	''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
+	''' <param name="strPHRPDataFileName">The base PHRP data file name; used when calling AutoSwitchToFHTIfRequired</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFolderPath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType)
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFolderPath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal strPHRPDataFileName As String)
 		mDatasetName = strDatasetName
 
 		If String.IsNullOrEmpty(mDatasetName) Then
@@ -98,18 +99,24 @@ Public Class clsPHRPSeqMapReader
 		If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
 			mErrorMessage = "Unable to determine ResultToSeqMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
 			Throw New Exception(mErrorMessage)
+		Else
+			mResultToSeqMapFilename = IO.Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mResultToSeqMapFilename, strPHRPDataFileName))
 		End If
 
 		mSeqToProteinMapFilename = clsPHRPReader.GetPHRPSeqToProteinMapFileName(mPeptideHitResultType, mDatasetName)
 		If String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
 			mErrorMessage = "Unable to determine SeqToProteinMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
 			Throw New Exception(mErrorMessage)
+		Else
+			mSeqToProteinMapFilename = IO.Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqToProteinMapFilename, strPHRPDataFileName))
 		End If
 
 		mSeqInfoFilename = clsPHRPReader.GetPHRPSeqInfoFileName(mPeptideHitResultType, mDatasetName)
 		If String.IsNullOrEmpty(mSeqInfoFilename) Then
 			mErrorMessage = "Unable to determine SeqInfo filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
 			Throw New Exception(mErrorMessage)
+		Else
+			mSeqInfoFilename = IO.Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqInfoFilename, strPHRPDataFileName))
 		End If
 
 	End Sub

@@ -412,6 +412,44 @@ Public Class clsPHRPReader
 	End Sub
 
 	''' <summary>
+	''' Updates strFilePath to have _fht instead of _syn if strFilePath contains_syn yet strBasePHRPFileName contains _fht
+	''' </summary>
+	''' <param name="strFilePath"></param>
+	''' <param name="strBasePHRPFileName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Shared Function AutoSwitchToFHTIfRequired(ByVal strFilePath As String, ByVal strBasePHRPFileName As String) As String
+
+		Dim fiFileInfo As System.IO.FileInfo
+		Dim intSynIndex As Integer
+		Dim strFilePathFHT As String
+
+		fiFileInfo = New System.IO.FileInfo(strBasePHRPFileName)
+		If fiFileInfo.Name.ToLower().IndexOf("_fht") > 0 Then
+			' strBasePHRPFileName is first-hits-file based
+
+			fiFileInfo = New System.IO.FileInfo(strFilePath)
+			intSynIndex = fiFileInfo.Name.ToLower().IndexOf("_syn")
+			If intSynIndex > 0 Then
+				' strFilePath is synopsis-file based
+				' Change strFilePath to contain _fht instead of _syn
+
+				strFilePathFHT = fiFileInfo.Name.Substring(0, intSynIndex) & "_fht" & fiFileInfo.Name.Substring(intSynIndex + 4)
+
+				If IO.Path.IsPathRooted(strFilePath) Then
+					Return System.IO.Path.Combine(fiFileInfo.DirectoryName, strFilePathFHT)
+				Else
+					Return strFilePathFHT
+				End If
+
+			End If
+
+		End If
+
+		Return strFilePath
+	End Function
+
+	''' <summary>
 	''' Clear any cached error messages
 	''' </summary>
 	''' <remarks></remarks>
@@ -1681,6 +1719,8 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean = False
 
 		Try
+			strMSGFFilePath = AutoSwitchToFHTIfRequired(strMSGFFilePath, mInputFilePath)
+
 			If System.IO.File.Exists(strMSGFFilePath) Then
 
 				Dim oMSGFReader As New clsMSGFResultsReader()
@@ -1994,7 +2034,14 @@ Public Class clsPHRPReader
 		If mLoadModsAndSeqInfo Then
 			strModSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName)
 			strModSummaryFilePath = System.IO.Path.Combine(fiFileInfo.DirectoryName, strModSummaryFilePath)
-			If Not ValidateRequiredFileExists("ModSummary file", strModSummaryFilePath) Then
+
+			Dim strModSummaryFilePathPreferred As String
+			strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, fiFileInfo.Name)
+			If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso System.IO.File.Exists(strModSummaryFilePathPreferred) Then
+				strModSummaryFilePath = strModSummaryFilePathPreferred
+			End If
+
+			If Not ValidateRequiredFileExists("ModSummary file", strModSummaryFilePath) AndAlso fiFileInfo.Name.ToLower().Contains("_fht") Then
 				SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound)
 				Return False
 			End If

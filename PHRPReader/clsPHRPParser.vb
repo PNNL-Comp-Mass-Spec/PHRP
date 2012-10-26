@@ -200,10 +200,33 @@ Public MustInherit Class clsPHRPParser
 		End If
 
 		If mModInfoLoaded AndAlso blnLoadModsAndSeqInfo Then
-			' Read the ResultToSeqMapInfo (if the files exist)
-			' We can only read these files if the source file is a _syn.txt file; cannot read this data if it is a _fht.txt file
+			' Read the ResultToSeqMapInfo (if the files exist)			
 			If blnIsSynopsisFile Then
+				' Assume the files exist
 				LoadSeqInfo()
+			Else
+				' Only continue if the fht versions exists
+
+				Dim strResultToSeqMapFilePath As String = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName)
+				Dim blnSeqInfoLoaded As Boolean = False
+
+				If Not String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
+					strResultToSeqMapFilePath = System.IO.Path.Combine(mInputFolderPath, strResultToSeqMapFilePath)
+					strResultToSeqMapFilePath = clsPHRPReader.AutoSwitchToFHTIfRequired(strResultToSeqMapFilePath, mInputFilePath)
+
+					If System.IO.File.Exists(strResultToSeqMapFilePath) Then
+						blnSeqInfoLoaded = LoadSeqInfo()
+					End If
+				End If
+
+				If Not blnSeqInfoLoaded Then
+					If String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
+						ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file and unable to determine the ResultToSeqMapFilename using clsPHRPReader.GetPHRPResultToSeqMapFileName()")
+					Else
+						ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file but the ResultToSeqMap file does not exist: " & strResultToSeqMapFilePath)
+					End If
+				End If
+
 			End If
 		End If
 
@@ -307,6 +330,7 @@ Public MustInherit Class clsPHRPParser
 		Dim objModSummaryReader As clsPHRPModSummaryReader
 
 		Dim strModSummaryFilePath As String
+		Dim strModSummaryFilePathPreferred As String
 
 		Dim blnSuccess As Boolean
 
@@ -318,6 +342,11 @@ Public MustInherit Class clsPHRPParser
 			End If
 
 			strModSummaryFilePath = System.IO.Path.Combine(mInputFolderPath, strModSummaryFilePath)
+			strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, mInputFilePath)
+			If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso System.IO.File.Exists(strModSummaryFilePathPreferred) Then
+				strModSummaryFilePath = strModSummaryFilePathPreferred
+			End If
+
 			If Not System.IO.File.Exists(strModSummaryFilePath) Then
 				ReportWarning("ModSummary file not found: " & strModSummaryFilePath)
 				Return False
@@ -351,7 +380,7 @@ Public MustInherit Class clsPHRPParser
 			ShowMessage("Reading the PHRP SeqInfo file")
 
 			' Instantiate the reader
-			objReader = New clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType)
+			objReader = New clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType, mInputFilePath)
 
 			' Read the files
 			blnSuccess = objReader.GetProteinMapping(mResultToSeqMap, mSeqToProteinMap, mSeqInfo)
