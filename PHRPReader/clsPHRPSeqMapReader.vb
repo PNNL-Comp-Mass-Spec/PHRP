@@ -78,6 +78,17 @@ Public Class clsPHRPSeqMapReader
 	''' <param name="strDatasetName">Dataset name</param>
 	''' <param name="strInputFolderPath">Input file path</param>
 	''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
+	''' <remarks></remarks>
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFolderPath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType)
+		Me.New(strDatasetName, strInputFolderPath, ePeptideHitResultType, PHRPReader.clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, strDatasetName))
+	End Sub
+
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFolderPath">Input file path</param>
+	''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
 	''' <param name="strPHRPDataFileName">The base PHRP data file name; used when calling AutoSwitchToFHTIfRequired</param>
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFolderPath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal strPHRPDataFileName As String)

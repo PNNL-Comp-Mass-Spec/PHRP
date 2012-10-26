@@ -2,6 +2,7 @@ PHRPReader.dll Revision History
 
 Version 1.1.4682; October 26, 2012
 	- Added function GetPHRPProteinModsFileName
+	- Restored clsPHRPSeqMapReader constructor that accepted DatasetName, InputFolderPath, and PeptideHitResultType
 
 Version 1.1.4681; October 25, 2012
 	- Now looking for _fht_ModSummary.txt if _syn_ModSummary.txt was not found

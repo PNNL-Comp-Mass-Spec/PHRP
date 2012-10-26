@@ -424,6 +424,10 @@ Public Class clsPHRPReader
 		Dim intSynIndex As Integer
 		Dim strFilePathFHT As String
 
+		If String.IsNullOrEmpty(strBasePHRPFileName) Then
+			Return strFilePath
+		End If
+
 		fiFileInfo = New System.IO.FileInfo(strBasePHRPFileName)
 		If fiFileInfo.Name.ToLower().IndexOf("_fht") > 0 Then
 			' strBasePHRPFileName is first-hits-file based
