@@ -40,7 +40,6 @@ Public Class clsInSpecTResultsProcessor
 #Region "Constants and Enums"
 
     Public Const FILENAME_SUFFIX_INSPECT_FILE As String = "_inspect"
-    Public Const FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING As String = "_PepToProtMap"
 
     Private Const INSPECT_SYN_FILE_MIN_COL_COUNT As Integer = 5
 
@@ -240,19 +239,19 @@ Public Class clsInSpecTResultsProcessor
     End Property
 #End Region
 
-    Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
-                                                     ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-                                                     ByRef udtSearchResult As udtInspectSearchResultType, _
-                                                     ByRef strErrorLog As String)
+	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
+	  ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
+	  ByRef udtSearchResult As udtInspectSearchResultType, _
+	  ByRef strErrorLog As String)
 
-        If intCurrentScanResultsCount >= udtSearchResultsCurrentScan.Length Then
-            ReDim Preserve udtSearchResultsCurrentScan(udtSearchResultsCurrentScan.Length * 2 - 1)
-        End If
+		If intCurrentScanResultsCount >= udtSearchResultsCurrentScan.Length Then
+			ReDim Preserve udtSearchResultsCurrentScan(udtSearchResultsCurrentScan.Length * 2 - 1)
+		End If
 
-        udtSearchResultsCurrentScan(intCurrentScanResultsCount) = udtSearchResult
-        intCurrentScanResultsCount += 1
+		udtSearchResultsCurrentScan(intCurrentScanResultsCount) = udtSearchResult
+		intCurrentScanResultsCount += 1
 
-    End Sub
+	End Sub
 
     Private Sub AddDynamicAndStaticResidueMods(ByRef objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean)
         ' Step through .PeptideSequenceWithMods
@@ -499,7 +498,7 @@ Public Class clsInSpecTResultsProcessor
 
 						' Parse the input file
 						Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
-							strLineIn = srDataFile.ReadLine
+							strLineIn = srDataFile.ReadLine()
 							If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 								' Initialize udtSearchResult
 								udtSearchResult.Clear()
@@ -625,25 +624,18 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
-    Private Function CIntSafe(ByVal strValue As String, ByVal intDefaultValue As Integer) As Integer
-        Try
-            ' Note: Integer.Parse() fails if strValue contains a decimal point, even if it is "8.000"
-            ' Thus, we're using CInt() instead
-            Return CInt(strValue)
-        Catch ex As Exception
-            ' Error converting strValue to a number; return the default
-            Return intDefaultValue
-        End Try
-    End Function
+	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+		Dim strPepToProteinMapFilePath As String = String.Empty
 
-    Private Function CSngSafe(ByVal strValue As String, ByVal sngDefaultValue As Single) As Single
-        Try
-            Return Single.Parse(strValue)
-        Catch ex As Exception
-            ' Error converting strValue to a number; return the default
-            Return sngDefaultValue
-        End Try
-    End Function
+		strPepToProteinMapFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+		If strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_fht") Then
+			' Remove _syn or _fht
+			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
+		End If
+
+		Return MyBase.ConstructPepToProteinMapFilePath(strPepToProteinMapFilePath, strOutputFolderPath, MTS)
+
+	End Function
 
     Private Function ExtractModInfoFromInspectParamFile(ByVal strInspectParameterFilePath As String, ByRef udtModList() As udtModInfoType) As Boolean
 
@@ -672,9 +664,7 @@ Public Class clsInSpecTResultsProcessor
 			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInspectParameterFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
 				Do While srInFile.Peek <> -1
-					strLineIn = srInFile.ReadLine
-
-					strLineIn = strLineIn.Trim
+					strLineIn = srInFile.ReadLine().Trim()
 
 					If strLineIn.Length > 0 Then
 
@@ -790,7 +780,7 @@ Public Class clsInSpecTResultsProcessor
     End Sub
 
     ''' <summary>
-    ''' Load the PeptideToProteinMap information; in addition, writes out an updated _inspect_PepToProtMap.txt file with the new mod symbols and corrected terminii symbols
+	''' Load the PeptideToProteinMap information; in addition, creates the _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
     ''' </summary>
     ''' <param name="strPepToProteinMapFilePath"></param>
     ''' <param name="strOutputFolderPath"></param>
@@ -798,94 +788,68 @@ Public Class clsInSpecTResultsProcessor
 	''' <param name="lstPepToProteinMapping"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadPeptideToProteinMapInfo(ByVal strPepToProteinMapFilePath As String, _
-				  ByVal strOutputFolderPath As String, _
-				  ByRef udtInspectModInfo() As udtModInfoType, _
-				  ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType)) As Boolean
+	Protected Function LoadPeptideToProteinMapInfoInspect(ByVal strPepToProteinMapFilePath As String, _
+	  ByVal strOutputFolderPath As String, _
+	  ByRef udtInspectModInfo() As udtModInfoType, _
+	  ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), _
+	  ByRef strMTSPepToProteinMapFilePath As String) As Boolean
 
-		Dim strMTSPepToProteinMapFilePath As String = String.Empty
+		Dim strHeaderLine As String = String.Empty
 		Dim strMTSCompatiblePeptide As String
-
-		Dim strLineIn As String
-		Dim strSplitLine As String()
-
-		Dim intLinesRead As Integer
-		Dim intValue As Integer
 
 		Dim blnSuccess As Boolean = False
 
 		Try
-			' Initialize lstPepToProteinMapping
+			strMTSPepToProteinMapFilePath = String.Empty
+
 			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
 				SetErrorMessage("Warning: PepToProteinMap file is not defined")
 				Return False
 			ElseIf Not System.IO.File.Exists(strPepToProteinMapFilePath) Then
-				SetErrorMessage("Warning: PepToProteinMap file does not exist")
+				SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
 				Return False
 			End If
 
+			' Initialize lstPepToProteinMapping
 			lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
 
-			' Open strProteinToPeptideMappingFilePath for reading
+			' Read the data in strProteinToPeptideMappingFilePath
+			blnSuccess = LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
 
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strPepToProteinMapFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
-
+			If blnSuccess Then
 				strMTSPepToProteinMapFilePath = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
+
 				Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strMTSPepToProteinMapFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+					If Not String.IsNullOrEmpty(strHeaderLine) Then
+						' Header line
+						swOutFile.WriteLine(strHeaderLine)
+					End If
 
-					intLinesRead = 0
-					Do While srInFile.Peek <> -1
-						strLineIn = srInFile.ReadLine
+					For intIndex As Integer = 0 To lstPepToProteinMapping.Count - 1
+						' Replace any mod text names in the peptide sequence with the appropriate mod symbols
+						' In addition, replace the * terminus symbols with dashes
+						strMTSCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), udtInspectModInfo)
 
-						strLineIn = strLineIn.Trim
-
-						If strLineIn.Length > 0 Then
-
-							' Split the line on tabs
-							strSplitLine = strLineIn.Split(ControlChars.Tab)
-
-							If strSplitLine.Length >= 4 Then
-
-								If intLinesRead = 0 AndAlso Not Integer.TryParse(strSplitLine(2), intValue) Then
-									' Header line
-									swOutFile.WriteLine(strLineIn)
-								Else
-
-									' Replace any mod text names in the peptide sequence with the appropriate mod symbols
-									' In addition, replace the * terminus symbols with dashes
-									strMTSCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(strSplitLine(0)), udtInspectModInfo)
-
-									Dim udtPepToProteinMappingEntry As udtPepToProteinMappingType
-									With udtPepToProteinMappingEntry
-										.Peptide = strMTSCompatiblePeptide
-										.Protein = String.Copy(strSplitLine(1))
-										Integer.TryParse(strSplitLine(2), .ResidueStart)
-										Integer.TryParse(strSplitLine(3), .ResidueEnd)
-									End With
-
-									lstPepToProteinMapping.Add(udtPepToProteinMappingEntry)
-
-									swOutFile.WriteLine(strMTSCompatiblePeptide & ControlChars.Tab & _
-									  strSplitLine(1) & ControlChars.Tab & _
-									  strSplitLine(2) & ControlChars.Tab & _
-									  strSplitLine(3))
-
-								End If
-							End If
+						If lstPepToProteinMapping(intIndex).Peptide <> strMTSCompatiblePeptide Then
+							UpdatePepToProteinMapPeptide(lstPepToProteinMapping, intIndex, strMTSCompatiblePeptide)
 						End If
 
-					Loop
+						swOutFile.WriteLine( _
+						  lstPepToProteinMapping(intIndex).Peptide & ControlChars.Tab & _
+						  lstPepToProteinMapping(intIndex).Protein & ControlChars.Tab & _
+						  lstPepToProteinMapping(intIndex).ResidueStart & ControlChars.Tab & _
+						  lstPepToProteinMapping(intIndex).ResidueEnd)
+
+					Next
+
+
 				End Using
-			End Using
 
-			Console.WriteLine()
-
-			blnSuccess = True
+			End If
 
 		Catch ex As Exception
-			SetErrorMessage("Error reading the Peptide to Protein Map File (" & System.IO.Path.GetFileName(strPepToProteinMapFilePath) & ") " & _
-			 "and writing the new map file (" & System.IO.Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
+			SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" & System.IO.Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
 			blnSuccess = False
 		End Try
 
@@ -894,7 +858,7 @@ Public Class clsInSpecTResultsProcessor
 	End Function
 
 	Private Function ParseInspectSynFileHeaderLine(ByVal strLineIn As String, _
-				  ByRef intColumnMapping() As Integer) As Boolean
+		 ByRef intColumnMapping() As Integer) As Boolean
 
 		' Parse the header line
 
@@ -956,7 +920,7 @@ Public Class clsInSpecTResultsProcessor
 
 	End Function
 
-	Protected Function ParseInSpectSynopsisFile(ByVal strInputFilePath As String, ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+	Protected Function ParseInSpectSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
 		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
 		Dim strPreviousTotalPRMScore As String
@@ -976,6 +940,7 @@ Public Class clsInSpecTResultsProcessor
 
 		Dim intResultsProcessed As Integer
 		Dim intPepToProteinMapIndex As Integer
+		Dim sngPercentComplete As Single
 
 		Dim strCurrentPeptideWithMods As String = String.Empty
 		Dim strCurrentProtein As String
@@ -1028,12 +993,13 @@ Public Class clsInSpecTResultsProcessor
 					blnHeaderParsed = False
 
 					' Create the output files
-					blnSuccess = MyBase.InitializeSequenceOutputFiles(strInputFilePath)
+					Dim strBaseOutputFilePath As String = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileName(strInputFilePath))
+					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
 					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
 
-						strLineIn = srDataFile.ReadLine
+						strLineIn = srDataFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
 							blnDataLine = True
@@ -1096,16 +1062,9 @@ Public Class clsInSpecTResultsProcessor
 									' Add the additional proteins for this peptide
 
 									' Use binary search to find this peptide in lstPepToProteinMapping
-									Dim udtItemToFind As udtPepToProteinMappingType = New udtPepToProteinMappingType
-									udtItemToFind.Peptide = strCurrentPeptideWithMods
-									intPepToProteinMapIndex = lstPepToProteinMapping.BinarySearch(udtItemToFind, objPeptideSearchComparer)
+									intPepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, strCurrentPeptideWithMods)
 
-									If intPepToProteinMapIndex >= 0 Then
-										' Step Backward until the first match is found
-										Do While intPepToProteinMapIndex > 0 AndAlso lstPepToProteinMapping(intPepToProteinMapIndex - 1).Peptide = strCurrentPeptideWithMods
-											intPepToProteinMapIndex -= 1
-										Loop
-
+									If intPepToProteinMapIndex >= 0 Then									
 										' Call MyBase.SaveResultsFileEntrySeqInfo for each entry in lstPepToProteinMapping() for peptide , skipping objSearchResult.ProteinName
 										strCurrentProtein = String.Copy(objSearchResult.ProteinName)
 										Do
@@ -1125,7 +1084,11 @@ Public Class clsInSpecTResultsProcessor
 							End If
 
 							' Update the progress
-							UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+							sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+							If mCreateProteinModsFile Then
+								sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+							End If
+							UpdateProgress(sngPercentComplete)
 
 							intResultsProcessed += 1
 						End If
@@ -1135,7 +1098,9 @@ Public Class clsInSpecTResultsProcessor
 				If mCreateModificationSummaryFile Then
 					' Create the modification summary file
 					Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
-					strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY)
+					strModificationSummaryFilePath = System.IO.Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+					strModificationSummaryFilePath = System.IO.Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
+
 					SaveModificationSummaryFile(strModificationSummaryFilePath)
 				End If
 
@@ -1165,10 +1130,10 @@ Public Class clsInSpecTResultsProcessor
 	End Function
 
 	Private Function ParseInspectResultsFileEntry(ByRef strLineIn As String, _
-				 ByRef udtInspectModInfo() As udtModInfoType, _
-				 ByRef udtSearchResult As udtInspectSearchResultType, _
-				 ByRef strErrorLog As String, _
-				 ByVal intResultsProcessed As Integer) As Boolean
+		ByRef udtInspectModInfo() As udtModInfoType, _
+		ByRef udtSearchResult As udtInspectSearchResultType, _
+		ByRef strErrorLog As String, _
+		ByVal intResultsProcessed As Integer) As Boolean
 
 		' Parses an entry from the Inspect results file
 		' The expected header line is:
@@ -1268,7 +1233,7 @@ Public Class clsInSpecTResultsProcessor
 							dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
 
 							dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, _
-											dblPeptideMonoisotopicMass, True)
+								dblPeptideMonoisotopicMass, True)
 
 							.DelMPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 4, True)
 
@@ -1304,10 +1269,10 @@ Public Class clsInSpecTResultsProcessor
 	End Function
 
 	Private Function ParseInSpectSynFileEntry(ByRef strLineIn As String, _
-				ByRef intColumnMapping() As Integer, _
-				ByRef objSearchResult As clsSearchResultsInSpecT, _
-				ByRef strErrorLog As String, _
-				ByRef strPeptideSequenceWithMods As String) As Boolean
+	   ByRef intColumnMapping() As Integer, _
+	   ByRef objSearchResult As clsSearchResultsInSpecT, _
+	   ByRef strErrorLog As String, _
+	   ByRef strPeptideSequenceWithMods As String) As Boolean
 
 		' Parses an entry from the Inspect Synopsis file
 
@@ -1415,19 +1380,24 @@ Public Class clsInSpecTResultsProcessor
 
 	End Function
 
-	' Main processing function
+	''' <summary>
+	''' Main processing function
+	''' </summary>
+	''' <param name="strInputFilePath">Inspect results file</param>
+	''' <param name="strOutputFolderPath">Output folder</param>
+	''' <param name="strParameterFilePath">Parameter file</param>
+	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
-		' Returns True if success, False if failure
 
 		Dim ioInputFile As System.IO.FileInfo
 
-		Dim strInputFilePathFull As String
 		Dim strOutputFilePath As String
 		Dim strSynOutputFilePath As String
 		Dim strPepToProteinMapFilePath As String
 
 		Dim udtInspectModInfo() As udtModInfoType
 		Dim lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType)
+		Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
 		Dim blnSuccess As Boolean
 
@@ -1453,7 +1423,6 @@ Public Class clsInSpecTResultsProcessor
 					Try
 						' Obtain the full path to the input file
 						ioInputFile = New System.IO.FileInfo(strInputFilePath)
-						strInputFilePathFull = ioInputFile.FullName
 
 						ReDim udtInspectModInfo(-1)
 						lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
@@ -1515,16 +1484,16 @@ Public Class clsInSpecTResultsProcessor
 
 							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.SynFile)
 
-							' Load the PeptideToProteinMap information; if any modified peptides are present, then write out an updated _inspect_PepToProtMap.txt file with the new mod symbols (file will be named _PepToProtMapMTS.txt)
-							' If the file doesn't exist, then a warning will be displayed, but processing will continue
-							strPepToProteinMapFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(strInputFilePathFull), System.IO.Path.GetFileNameWithoutExtension(strInputFilePathFull) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
+							' Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
+							' LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
+							strPepToProteinMapFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ioInputFile.FullName), System.IO.Path.GetFileNameWithoutExtension(ioInputFile.FullName) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
 
 							MyBase.ResetProgress("Loading the PepToProtein map file: " & System.IO.Path.GetFileName(strPepToProteinMapFilePath))
 							Console.WriteLine()
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
-							LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, strOutputFolderPath, udtInspectModInfo, lstPepToProteinMapping)
+							LoadPeptideToProteinMapInfoInspect(strPepToProteinMapFilePath, strOutputFolderPath, udtInspectModInfo, lstPepToProteinMapping, strMTSPepToProteinMapFilePath)
 
 
 							' Create the other PHRP-specific files
@@ -1533,7 +1502,15 @@ Public Class clsInSpecTResultsProcessor
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
-							blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, lstPepToProteinMapping, False)
+							blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
+
+							If blnSuccess AndAlso mCreateProteinModsFile Then
+								' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+								MyBase.ValidatePHRPReaderSupportFiles(strInputFilePath, strOutputFolderPath)
+
+								' Create the Protein Mods file
+								blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect)
+							End If
 
 						End If
 
@@ -1892,9 +1869,9 @@ Public Class clsInSpecTResultsProcessor
         ' Write out the header line for synopsis / first hits files
 		Try
 			Dim lstData As New System.Collections.Generic.List(Of String)
-			lstData.Add("ResultID")
+			lstData.Add(COLUMN_NAME_RESULTID)
 			lstData.Add("Scan")
-			lstData.Add("Peptide")
+			lstData.Add(COLUMN_NAME_PEPTIDE)
 			lstData.Add("Protein")
 			lstData.Add("Charge")
 			lstData.Add("MQScore")

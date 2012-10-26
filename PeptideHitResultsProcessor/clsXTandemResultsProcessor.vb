@@ -369,6 +369,7 @@ Public Class clsXTandemResultsProcessor
 
         Dim intSearchResultIndex As Integer
         Dim intResultsProcessed As Integer
+		Dim sngPercentComplete As Single
 
         Dim blnSuccess As Boolean
 
@@ -464,7 +465,12 @@ Public Class clsXTandemResultsProcessor
 														intResultsProcessed += 1
 
 														' Update the progress
-														UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+														sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+														If mCreateProteinModsFile Then
+															sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+														End If
+														UpdateProgress(sngPercentComplete)
+
 													End If
 												Else
 													' Group doesn't have any attributes; ignore it
@@ -488,7 +494,11 @@ Public Class clsXTandemResultsProcessor
 					If mCreateModificationSummaryFile Then
 						' Create the modification summary file
 						Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
-						strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY)
+						Dim fiOutputFile As System.IO.FileInfo = New System.IO.FileInfo(strOutputFilePath)
+
+						strModificationSummaryFilePath = System.IO.Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+						strModificationSummaryFilePath = System.IO.Path.Combine(fiOutputFile.DirectoryName, strModificationSummaryFilePath)
+
 						SaveModificationSummaryFile(strModificationSummaryFilePath)
 					End If
 
@@ -1342,55 +1352,86 @@ Public Class clsXTandemResultsProcessor
 
     End Sub
 
-    ' Main processing function
+	''' <summary>
+	''' Main processing function
+	''' </summary>
+	''' <param name="strInputFilePath">X!Tandem results file</param>
+	''' <param name="strOutputFolderPath">Output folder</param>
+	''' <param name="strParameterFilePath">Parameter file</param>
+	''' <returns>True if success, False if failure</returns>
     Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
-        ' Returns True if success, False if failure
+        
+		Dim ioInputFile As System.IO.FileInfo
 
-        Dim ioFile As System.IO.FileInfo
+		Dim strXtandemXTFilePath As String
 
-        Dim strInputFilePathFull As String
-        Dim strOutputFilePath As String
+		Dim blnSuccess As Boolean
 
-        Dim blnSuccess As Boolean
+		If Not LoadParameterFileSettings(strParameterFilePath) Then
+			SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, True)
+			Return False
+		End If
 
-        If Not LoadParameterFileSettings(strParameterFilePath) Then
-            SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, True)
-            Return False
-        End If
+		Try
+			If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
+				SetErrorMessage("Input file name is empty")
+				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
+			Else
 
-        Try
-            If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
-                SetErrorMessage("Input file name is empty")
-                SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
-            Else
+				blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
+				If Not blnSuccess Then
+					Exit Try
+				End If
 
-                blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
-                If Not blnSuccess Then
-                    Exit Try
-                End If
+				MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
 
-                MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
+				If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
+					Try
+						' Obtain the full path to the input file
+						ioInputFile = New System.IO.FileInfo(strInputFilePath)
 
-                If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
-                    Try
-                        ' Obtain the full path to the input file
-                        ioFile = New System.IO.FileInfo(strInputFilePath)
-                        strInputFilePathFull = ioFile.FullName
+						' Define the output file name based on strInputFilePath
+						' The name will be DatasetName_xt.txt
 
-                        ' Define the output file name based on strInputFilePath
-						strOutputFilePath = MyBase.ReplaceFilenameSuffix(ioFile, ".txt")
-                        blnSuccess = ParseXTandemResultsFile(strInputFilePathFull, strOutputFilePath, False)
+						strXtandemXTFilePath = System.IO.Path.GetFileName(MyBase.ReplaceFilenameSuffix(ioInputFile, ".txt"))
+						strXtandemXTFilePath = System.IO.Path.Combine(strOutputFolderPath, strXtandemXTFilePath)
+						blnSuccess = ParseXTandemResultsFile(ioInputFile.FullName, strXtandemXTFilePath, False)
 
-                    Catch ex As Exception
-                        SetErrorMessage("Error calling ParseXTandemResultsFile" & ex.message)
-                        SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-                    End Try
-                End If
-            End If
-        Catch ex As Exception
-            SetErrorMessage("Error in ProcessFile:" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
-        End Try
+						If blnSuccess AndAlso mCreateProteinModsFile Then
+
+							' First create the MTS PepToProteinMap file using ioInputFile
+							Dim lstSourcePHRPDataFiles As Generic.List(Of String) = New Generic.List(Of String)
+							Dim strMTSPepToProteinMapFilePath As String = String.Empty
+
+							lstSourcePHRPDataFiles.Add(strXtandemXTFilePath)
+
+							strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strInputFilePath, strOutputFolderPath, MTS:=True)
+
+							If System.IO.File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+								blnSuccess = True
+							Else
+								blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+							End If
+
+							If blnSuccess Then
+								' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+								MyBase.ValidatePHRPReaderSupportFiles(strInputFilePath, strOutputFolderPath)
+
+								' Now create the Protein Mods file
+								blnSuccess = MyBase.CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem)
+							End If
+						End If
+
+					Catch ex As Exception
+						SetErrorMessage("Error calling ParseXTandemResultsFile" & ex.message)
+						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+					End Try
+				End If
+			End If
+		Catch ex As Exception
+			SetErrorMessage("Error in ProcessFile:" & ex.Message)
+			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+		End Try
 
         Return blnSuccess
 

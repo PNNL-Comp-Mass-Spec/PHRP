@@ -27,7 +27,6 @@ Public Class clsMSGFDBResultsProcessor
 #Region "Constants and Enums"
 
 	Public Const FILENAME_SUFFIX_MSGFDB_FILE As String = "_msgfdb"
-	Public Const FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING As String = "_PepToProtMap"
 
 	Public Const N_TERMINUS_SYMBOL_MSGFDB As String = "_."
 	Public Const C_TERMINUS_SYMBOL_MSGFDB As String = "._"
@@ -309,8 +308,8 @@ Public Class clsMSGFDBResultsProcessor
 	''' <param name="intEndIndex"></param>
 	''' <remarks></remarks>
 	Private Sub AssignRankAndDeltaNormValues(ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
-		 ByVal intStartIndex As Integer, _
-		 ByVal intEndIndex As Integer)
+	  ByVal intStartIndex As Integer, _
+	  ByVal intEndIndex As Integer)
 
 		Dim intIndex As Integer
 
@@ -397,8 +396,8 @@ Public Class clsMSGFDBResultsProcessor
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Protected Function ComputeDelMCorrectedPPM(ByVal dblPrecursorErrorDa As Double, ByVal dblPrecursorMZ As Double, _
-		ByVal intCharge As Integer, ByVal dblPeptideMonoisotopicMass As Double, _
-		ByVal blnAdjustPrecursorMassForC13 As Boolean) As Double
+	 ByVal intCharge As Integer, ByVal dblPeptideMonoisotopicMass As Double, _
+	 ByVal blnAdjustPrecursorMassForC13 As Boolean) As Double
 
 		Dim dblPeptideDeltaMassCorrectedPpm As Double
 
@@ -433,6 +432,19 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
+	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+		Dim strPepToProteinMapFilePath As String = String.Empty
+
+		strPepToProteinMapFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+		If strPepToProteinMapFilePath.ToLower().EndsWith("_msgfdb_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msgfdb_fht") Then
+			' Remove _syn or _fht
+			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
+		End If
+
+		Return MyBase.ConstructPepToProteinMapFilePath(strPepToProteinMapFilePath, strOutputFolderPath, MTS)
+
+	End Function
+
 	''' <summary>
 	''' Parses the digits in strModValues to convert them to one or more modification symbols
 	''' </summary>
@@ -441,11 +453,11 @@ Public Class clsMSGFDBResultsProcessor
 	''' <returns>True if success; false if a problem</returns>
 	''' <remarks></remarks>
 	Protected Function ConvertMGSFModMassesToSymbols(ByVal strModDigits As String, _
-		ByRef strModSymbols As String, _
-		ByRef udtMSGFDBModInfo() As udtModInfoType, _
-		ByVal blnNterminalMod As Boolean, _
-		ByVal blnPossibleCTerminalMod As Boolean, _
-		ByRef dblModMassFound As Double) As Boolean
+	 ByRef strModSymbols As String, _
+	 ByRef udtMSGFDBModInfo() As udtModInfoType, _
+	 ByVal blnNterminalMod As Boolean, _
+	 ByVal blnPossibleCTerminalMod As Boolean, _
+	 ByRef dblModMassFound As Double) As Boolean
 
 		Static reModMassRegEx As New System.Text.RegularExpressions.Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
@@ -577,6 +589,7 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim intSearchResultsCount As Integer
 		Dim udtSearchResults() As udtMSGFDBSearchResultType
+		Dim sngPercentComplete As Single
 
 		Dim intFilteredSearchResultCount As Integer
 		Dim udtFilteredSearchResults() As udtMSGFDBSearchResultType
@@ -629,7 +642,7 @@ Public Class clsMSGFDBResultsProcessor
 
 						' Parse the input file
 						Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
-							strLineIn = srDataFile.ReadLine
+							strLineIn = srDataFile.ReadLine()
 							If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
 								If Not blnHeaderParsed Then
@@ -667,7 +680,12 @@ Public Class clsMSGFDBResultsProcessor
 									End If
 
 									' Update the progress
-									UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+									sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+									If mCreateProteinModsFile Then
+										sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+									End If
+									UpdateProgress(sngPercentComplete)
+
 									intResultsProcessed += 1
 								End If
 							End If
@@ -785,26 +803,6 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	Private Function CIntSafe(ByVal strValue As String, ByVal intDefaultValue As Integer) As Integer
-		Try
-			' Note: Integer.Parse() fails if strValue contains a decimal point, even if it is "8.000"
-			' Thus, we're using CInt() instead
-			Return CInt(strValue)
-		Catch ex As Exception
-			' Error converting strValue to a number; return the default
-			Return intDefaultValue
-		End Try
-	End Function
-
-	Private Function CDblSafe(ByVal strValue As String, ByVal dblgDefaultValue As Double) As Double
-		Try
-			Return Double.Parse(strValue)
-		Catch ex As Exception
-			' Error converting strValue to a number; return the default
-			Return dblgDefaultValue
-		End Try
-	End Function
-
 	''' <summary>
 	''' Extracts mod info from either a MSGF-DB param file or from a MSGFDB_Mods.txt file
 	''' </summary>
@@ -844,7 +842,7 @@ Public Class clsMSGFDBResultsProcessor
 			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strMSGFDBParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
 				Do While srInFile.Peek <> -1
-					strLineIn = srInFile.ReadLine.Trim()
+					strLineIn = srInFile.ReadLine().Trim()
 
 					If strLineIn.Length > 0 Then
 
@@ -1007,7 +1005,7 @@ Public Class clsMSGFDBResultsProcessor
 	End Sub
 
 	''' <summary>
-	''' Load the PeptideToProteinMap information; in addition, writes out an updated _inspect_PepToProtMap.txt file with the new mod symbols and corrected terminii symbols
+	''' Load the PeptideToProteinMap information; in addition, creates the _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
 	''' </summary>
 	''' <param name="strPepToProteinMapFilePath"></param>
 	''' <param name="strOutputFolderPath"></param>
@@ -1015,96 +1013,70 @@ Public Class clsMSGFDBResultsProcessor
 	''' <param name="lstPepToProteinMapping"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadPeptideToProteinMapInfo(ByVal strPepToProteinMapFilePath As String, _
+	Protected Function LoadPeptideToProteinMapInfoMSGFDB(ByVal strPepToProteinMapFilePath As String, _
 	  ByVal strOutputFolderPath As String, _
 	  ByRef udtMSGFDBModInfo() As udtModInfoType, _
-	  ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType)) As Boolean
+	  ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), _
+	  ByRef strMTSPepToProteinMapFilePath As String) As Boolean
 
-		Dim strMTSPepToProteinMapFilePath As String = String.Empty
+		Dim strHeaderLine As String = String.Empty
 		Dim strMTSCompatiblePeptide As String
 
-		Dim strLineIn As String
-		Dim strSplitLine As String()
-
-		Dim intLinesRead As Integer
-		Dim intValue As Integer
+		' Not used by this function but required for the call to ReplaceMSGFModTextWithSymbol
+		Dim dblTotalModMass As Double = 0
 
 		Dim blnSuccess As Boolean = False
 
-		Dim dblTotalModMass As Double = 0
-
 		Try
-			' Initialize lstPepToProteinMapping
+			strMTSPepToProteinMapFilePath = String.Empty
+
 			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
 				SetErrorMessage("Warning: PepToProteinMap file is not defined")
 				Return False
 			ElseIf Not System.IO.File.Exists(strPepToProteinMapFilePath) Then
-				SetErrorMessage("Warning: PepToProteinMap file does not exist")
+				SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
 				Return False
 			End If
 
+			' Initialize lstPepToProteinMapping
 			lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
 
-			' Open strProteinToPeptideMappingFilePath for reading
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strPepToProteinMapFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+			' Read the data in strProteinToPeptideMappingFilePath
+			blnSuccess = LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
 
+			If blnSuccess Then
 				strMTSPepToProteinMapFilePath = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
 
 				Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strMTSPepToProteinMapFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+					If Not String.IsNullOrEmpty(strHeaderLine) Then
+						' Header line
+						swOutFile.WriteLine(strHeaderLine)
+					End If
 
-					intLinesRead = 0
-					Do While srInFile.Peek <> -1
-						strLineIn = srInFile.ReadLine
+					For intIndex As Integer = 0 To lstPepToProteinMapping.Count - 1
+						' Replace any mod text names in the peptide sequence with the appropriate mod symbols
+						' In addition, replace the * terminus symbols with dashes
+						strMTSCompatiblePeptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), udtMSGFDBModInfo, dblTotalModMass)
 
-						strLineIn = strLineIn.Trim
-
-						If strLineIn.Length > 0 Then
-
-							' Split the line on tabs
-							strSplitLine = strLineIn.Split(ControlChars.Tab)
-
-							If strSplitLine.Length >= 4 Then
-
-								If intLinesRead = 0 AndAlso Not Integer.TryParse(strSplitLine(2), intValue) Then
-									' Header line
-									swOutFile.WriteLine(strLineIn)
-								Else									
-									' Replace any mod text names in the peptide sequence with the appropriate mod symbols
-									' In addition, replace the * terminus symbols with dashes
-									strMTSCompatiblePeptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(strSplitLine(0)), udtMSGFDBModInfo, dblTotalModMass)
-
-									Dim udtPepToProteinMappingEntry As udtPepToProteinMappingType
-									With udtPepToProteinMappingEntry
-										.Peptide = strMTSCompatiblePeptide
-										.Protein = String.Copy(strSplitLine(1))
-										Integer.TryParse(strSplitLine(2), .ResidueStart)
-										Integer.TryParse(strSplitLine(3), .ResidueEnd)
-									End With
-
-									lstPepToProteinMapping.Add(udtPepToProteinMappingEntry)
-
-									swOutFile.WriteLine(strMTSCompatiblePeptide & ControlChars.Tab & _
-									  strSplitLine(1) & ControlChars.Tab & _
-									  strSplitLine(2) & ControlChars.Tab & _
-									  strSplitLine(3))
-
-								End If
-							End If
+						If lstPepToProteinMapping(intIndex).Peptide <> strMTSCompatiblePeptide Then
+							UpdatePepToProteinMapPeptide(lstPepToProteinMapping, intIndex, strMTSCompatiblePeptide)
 						End If
 
-					Loop
+						swOutFile.WriteLine( _
+						  lstPepToProteinMapping(intIndex).Peptide & ControlChars.Tab & _
+						  lstPepToProteinMapping(intIndex).Protein & ControlChars.Tab & _
+						  lstPepToProteinMapping(intIndex).ResidueStart & ControlChars.Tab & _
+						  lstPepToProteinMapping(intIndex).ResidueEnd)
+
+					Next
 
 				End Using
-			End Using
 
-			Console.WriteLine()
-
-			blnSuccess = True
+			End If
 
 		Catch ex As Exception
-			SetErrorMessage("Error reading the Peptide to Protein Map File (" & System.IO.Path.GetFileName(strPepToProteinMapFilePath) & ") " & _
-			 "and writing the new map file (" & System.IO.Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
+			SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" & System.IO.Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
 			blnSuccess = False
 		End Try
 
@@ -1112,7 +1084,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	Protected Function ParseMSGFDBSynopsisFile(ByVal strInputFilePath As String, ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+	Protected Function ParseMSGFDBSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
 		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
 		Dim strPreviousSpecProb As String
@@ -1134,6 +1106,7 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim intResultsProcessed As Integer
 		Dim intPepToProteinMapIndex As Integer
+		Dim sngPercentComplete As Single
 
 		Dim blnHeaderParsed As Boolean
 		Dim intColumnMapping() As Integer = Nothing
@@ -1146,8 +1119,6 @@ Public Class clsMSGFDBResultsProcessor
 		Dim blnFirstMatchForGroup As Boolean
 
 		Dim strErrorLog As String = String.Empty
-
-		Dim objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer
 
 		Try
 			' Possibly reset the mass correction tags and Mod Definitions
@@ -1164,9 +1135,6 @@ Public Class clsMSGFDBResultsProcessor
 			' Initialize htPeptidesFoundForSpecProbLevel
 			htPeptidesFoundForSpecProbLevel = New Hashtable
 			strPreviousSpecProb = String.Empty
-
-			' Initialize objPeptideSearchComparer
-			objPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer
 
 			' Assure that lstPepToProteinMapping is sorted on peptide
 			If lstPepToProteinMapping.Count > 1 Then
@@ -1185,12 +1153,13 @@ Public Class clsMSGFDBResultsProcessor
 					blnHeaderParsed = False
 
 					' Create the output files
-					blnSuccess = MyBase.InitializeSequenceOutputFiles(strInputFilePath)
+					Dim strBaseOutputFilePath As String = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileName(strInputFilePath))
+					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
 					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
 
-						strLineIn = srDataFile.ReadLine
+						strLineIn = srDataFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
 							If Not blnHeaderParsed Then
@@ -1247,16 +1216,9 @@ Public Class clsMSGFDBResultsProcessor
 										' Add the additional proteins for this peptide
 
 										' Use binary search to find this peptide in lstPepToProteinMapping
-										Dim udtItemToFind As udtPepToProteinMappingType = New udtPepToProteinMappingType
-										udtItemToFind.Peptide = strCurrentPeptideWithMods
-										intPepToProteinMapIndex = lstPepToProteinMapping.BinarySearch(udtItemToFind, objPeptideSearchComparer)
+										intPepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, strCurrentPeptideWithMods)
 
 										If intPepToProteinMapIndex >= 0 Then
-											' Step Backward until the first match is found
-											Do While intPepToProteinMapIndex > 0 AndAlso lstPepToProteinMapping(intPepToProteinMapIndex - 1).Peptide = strCurrentPeptideWithMods
-												intPepToProteinMapIndex -= 1
-											Loop
-
 											' Call MyBase.SaveResultsFileEntrySeqInfo for each entry in lstPepToProteinMapping() for peptide , skipping objSearchResult.ProteinName
 											strCurrentProtein = String.Copy(objSearchResult.ProteinName)
 											Do
@@ -1276,7 +1238,11 @@ Public Class clsMSGFDBResultsProcessor
 								End If
 
 								' Update the progress
-								UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+								sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+								If mCreateProteinModsFile Then
+									sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+								End If
+								UpdateProgress(sngPercentComplete)
 
 								intResultsProcessed += 1
 							End If
@@ -1289,7 +1255,9 @@ Public Class clsMSGFDBResultsProcessor
 				If mCreateModificationSummaryFile Then
 					' Create the modification summary file
 					Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
-					strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY)
+					strModificationSummaryFilePath = System.IO.Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+					strModificationSummaryFilePath = System.IO.Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
+
 					SaveModificationSummaryFile(strModificationSummaryFilePath)
 				End If
 
@@ -1794,20 +1762,25 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	' Main processing function
+	''' <summary>
+	''' Main processing function
+	''' </summary>
+	''' <param name="strInputFilePath">MSGFDB results file</param>
+	''' <param name="strOutputFolderPath">Output folder</param>
+	''' <param name="strParameterFilePath">Parameter file</param>
+	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
-		' Returns True if success, False if failure
 
 		Dim ioInputFile As System.IO.FileInfo
 
-		Dim strInputFilePathFull As String
-		Dim strOutputFilePath As String
-		Dim strSynOutputFilePath As String
+		Dim strFhtOutputFilePath As String = String.Empty
+		Dim strSynOutputFilePath As String = String.Empty
 		Dim strPepToProteinMapFilePath As String
 		Dim strScanGroupFilePath As String
 
 		Dim udtMSGFDBModInfo() As udtModInfoType
 		Dim lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType)
+		Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
 		Dim blnSuccess As Boolean
 
@@ -1833,7 +1806,6 @@ Public Class clsMSGFDBResultsProcessor
 					Try
 						' Obtain the full path to the input file
 						ioInputFile = New System.IO.FileInfo(strInputFilePath)
-						strInputFilePathFull = ioInputFile.FullName
 
 						ReDim udtMSGFDBModInfo(-1)
 						lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
@@ -1856,12 +1828,12 @@ Public Class clsMSGFDBResultsProcessor
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
-							strOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
-							strOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strOutputFilePath & SEQUEST_FIRST_HITS_FILE_SUFFIX)
+							strFhtOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+							strFhtOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strFhtOutputFilePath & SEQUEST_FIRST_HITS_FILE_SUFFIX)
 
 							strScanGroupFilePath = String.Empty
 
-							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, strScanGroupFilePath, udtMSGFDBModInfo, eFilteredOutputFileTypeConstants.FHTFile)
+							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strFhtOutputFilePath, strScanGroupFilePath, udtMSGFDBModInfo, eFilteredOutputFileTypeConstants.FHTFile)
 
 						End If
 
@@ -1882,16 +1854,16 @@ Public Class clsMSGFDBResultsProcessor
 
 							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, udtMSGFDBModInfo, eFilteredOutputFileTypeConstants.SynFile)
 
-							' Load the PeptideToProteinMap information; if any modified peptides are present, then write out an updated _inspect_PepToProtMap.txt file with the new mod symbols (file will be named _PepToProtMapMTS.txt)
-							' If the file doesn't exist, then a warning will be displayed, but processing will continue
-							strPepToProteinMapFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(strInputFilePathFull), System.IO.Path.GetFileNameWithoutExtension(strInputFilePathFull) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
+							' Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
+							' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols							
+							strPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(ioInputFile.FullName, strOutputFolderPath, MTS:=False)
 
 							MyBase.ResetProgress("Loading the PepToProtein map file: " & System.IO.Path.GetFileName(strPepToProteinMapFilePath))
 							Console.WriteLine()
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
-							LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, strOutputFolderPath, udtMSGFDBModInfo, lstPepToProteinMapping)
+							LoadPeptideToProteinMapInfoMSGFDB(strPepToProteinMapFilePath, strOutputFolderPath, udtMSGFDBModInfo, lstPepToProteinMapping, strMTSPepToProteinMapFilePath)
 
 
 							' Create the other PHRP-specific files
@@ -1901,7 +1873,51 @@ Public Class clsMSGFDBResultsProcessor
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
 							' Now parse the _syn.txt file that we just created to next create the other PHRP files
-							blnSuccess = ParseMSGFDBSynopsisFile(strSynOutputFilePath, lstPepToProteinMapping, False)
+							blnSuccess = ParseMSGFDBSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
+
+							If blnSuccess AndAlso mCreateProteinModsFile Then
+								If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) OrElse Not System.IO.File.Exists(strMTSPepToProteinMapFilePath) Then
+									' MTSPepToProteinMap file not found; auto-create it
+
+									If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) Then
+										strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strInputFilePath, strOutputFolderPath, MTS:=True)
+									End If
+
+									Dim lstSourcePHRPDataFiles As Generic.List(Of String) = New Generic.List(Of String)
+
+									If Not String.IsNullOrEmpty(strFhtOutputFilePath) Then
+										lstSourcePHRPDataFiles.Add(strFhtOutputFilePath)
+									End If
+
+									If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
+										lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
+									End If
+
+									If lstSourcePHRPDataFiles.Count = 0 Then
+										SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
+										SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+										blnSuccess = False
+									Else
+										If System.IO.File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+											blnSuccess = True
+										Else
+											' Auto-change mIgnorePeptideToProteinMapperErrors to True
+											' We only do this for MSGFDB since it often includes reverse protein peptides in the results even though the FASTA file doesn't have reverse proteins
+											mIgnorePeptideToProteinMapperErrors = True
+											blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+										End If
+									End If
+
+								End If
+
+								If blnSuccess Then
+									' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+									MyBase.ValidatePHRPReaderSupportFiles(strInputFilePath, strOutputFolderPath)
+
+									' Create the Protein Mods file
+									blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB)
+								End If
+							End If
 
 						End If
 
@@ -2102,8 +2118,8 @@ Public Class clsMSGFDBResultsProcessor
 
 
 	Protected Function ReplaceMSGFModTextWithMatchedSymbol(ByVal strPeptide As String, _
-		ByRef reGroup As System.Text.RegularExpressions.Group, _
-		ByVal strModSymbols As String) As String
+	 ByRef reGroup As System.Text.RegularExpressions.Group, _
+	 ByVal strModSymbols As String) As String
 		Dim strPeptideNew As String
 
 		If reGroup.Index > 0 Then
@@ -2322,11 +2338,11 @@ Public Class clsMSGFDBResultsProcessor
 	End Sub
 
 	Private Sub StoreSynMatches(ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
-		ByVal intStartIndex As Integer, _
-		ByVal intEndIndex As Integer, _
-		ByRef intFilteredSearchResultCount As Integer, _
-		ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
-		ByRef strErrorLog As String)
+	 ByVal intStartIndex As Integer, _
+	 ByVal intEndIndex As Integer, _
+	 ByRef intFilteredSearchResultCount As Integer, _
+	 ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
+	 ByRef strErrorLog As String)
 
 		Dim intIndex As Integer
 		Dim intCurrentCharge As Short = Short.MinValue
@@ -2413,7 +2429,7 @@ Public Class clsMSGFDBResultsProcessor
 		' Write out the header line for synopsis / first hits files
 		Try
 			Dim lstData As New System.Collections.Generic.List(Of String)
-			lstData.Add("ResultID")
+			lstData.Add(COLUMN_NAME_RESULTID)
 			lstData.Add("Scan")
 			lstData.Add("FragMethod")
 			lstData.Add("SpecIndex")
@@ -2422,7 +2438,7 @@ Public Class clsMSGFDBResultsProcessor
 			lstData.Add("DelM")
 			lstData.Add("DelM_PPM")
 			lstData.Add("MH")
-			lstData.Add("Peptide")
+			lstData.Add(COLUMN_NAME_PEPTIDE)
 			lstData.Add("Protein")
 			lstData.Add("NTT")
 			lstData.Add("DeNovoScore")

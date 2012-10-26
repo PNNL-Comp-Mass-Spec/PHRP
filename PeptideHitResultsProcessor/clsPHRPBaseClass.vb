@@ -30,13 +30,23 @@ Imports PHRPReader
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "August 24, 2012"
+		mFileDate = "October 25, 2012"
 		InitializeLocalVariables()
 	End Sub
 
 #Region "Constants and Enums"
 	Protected Const SEP_CHAR As Char = ControlChars.Tab
 	Protected Const UNIQUE_SEQ_TO_PROTEIN_MAP_SEP As String = "_"c
+
+	Protected Const COLUMN_NAME_UNIQUE_SEQ_ID As String = "Unique_Seq_ID"
+	Protected Const COLUMN_NAME_PROTEIN_NAME As String = "Protein_Name"
+	Protected Const COLUMN_NAME_RESULTID As String = "ResultID"
+	Protected Const COLUMN_NAME_PEPTIDE As String = "Peptide"
+	Protected Const COLUMN_NAME_RESIDUE As String = "Residue"
+	Protected Const COLUMN_NAME_PROTEIN_RESIDUE_NUMBER As String = "Protein_Residue_Num"
+	Protected Const COLUMN_NAME_RESIDUE_MOD_NAME As String = "Mod_Name"
+	Protected Const COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER As String = "Peptide_Residue_Num"
+	Protected Const COLUMN_NAME_MSGF_SPECPROB As String = "MSGF_SpecProb"
 
 	Public Const XTANDEM_RESULTS_FILE_SUFFIX As String = "_xt.xml"
 	Public Const SEQUEST_SYNOPSIS_FILE_SUFFIX As String = "_syn.txt"
@@ -54,6 +64,13 @@ Public MustInherit Class clsPHRPBaseClass
 	Public Const FILENAME_SUFFIX_SEQ_INFO As String = "_SeqInfo.txt"
 	Public Const FILENAME_SUFFIX_MOD_DETAILS As String = "_ModDetails.txt"
 	Public Const FILENAME_SUFFIX_MOD_SUMMARY As String = "_ModSummary.txt"
+
+	Public Const FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING As String = "_PepToProtMap"
+	Public Const FILENAME_SUFFIX_PROTEIN_MODS As String = "_ProteinMods.txt"
+	Public Const FILENAME_SUFFIX_MSGF As String = "_MSGF.txt"
+
+	Protected Const PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE As Single = 90
+	Protected Const PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE As Single = 95
 
 	Public Enum ePeptideHitResultsFileFormatConstants As Integer
 		AutoDetermine = 0
@@ -116,6 +133,13 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Protected mCreateModificationSummaryFile As Boolean
 
+	' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
+	Protected mCreateProteinModsFile As Boolean
+	Protected mFastaFilePath As String
+	Protected mIgnorePeptideToProteinMapperErrors As Boolean
+	Protected mProteinModsFileIncludesReversedProteins As Boolean
+	Protected mUseExistingMTSPepToProteinMapFile As Boolean
+
 	' The following two options are only used by the clsInSpecTResultsProcessor
 	Protected mCreateInspectOrMSGFDbSynopsisFile As Boolean
 	Protected mCreateInspectOrMSGFDbFirstHitsFile As Boolean
@@ -142,6 +166,7 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected mModDetailsFile As System.IO.StreamWriter
 	Protected mSeqToProteinMapFile As System.IO.StreamWriter
 
+	Protected mNextPeptideToProteinMapperLevel As Integer = 0
 #End Region
 
 #Region "Progress Events and Variables"
@@ -150,6 +175,7 @@ Public MustInherit Class clsPHRPBaseClass
 	Public Event ProgressComplete()
 
 	Public Event ErrorOccurred(ByVal ErrorMessage As String)
+	Public Event WarningMessageEvent(ByVal WarningMessage As String)
 
 	Protected mProgressStepDescription As String = String.Empty
 	Protected mProgressPercentComplete As Single		' Ranges from 0 to 100, but can contain decimal percentage values
@@ -210,6 +236,15 @@ Public MustInherit Class clsPHRPBaseClass
 		End Set
 	End Property
 
+	Public Property CreateProteinModsFile() As Boolean
+		Get
+			Return mCreateProteinModsFile
+		End Get
+		Set(value As Boolean)
+			mCreateProteinModsFile = value
+		End Set
+	End Property
+
 	Public Property EnzymeMatchSpec() As udtEnzymeMatchSpecType
 		Get
 			Return mEnzymeMatchSpec
@@ -231,6 +266,15 @@ Public MustInherit Class clsPHRPBaseClass
 		End Get
 	End Property
 
+	Public Property FastaFilePath() As String
+		Get
+			Return mFastaFilePath
+		End Get
+		Set(value As String)
+			mFastaFilePath = value
+		End Set
+	End Property
+
 	Public ReadOnly Property FileVersion() As String
 		Get
 			FileVersion = GetVersionForExecutingAssembly()
@@ -241,6 +285,15 @@ Public MustInherit Class clsPHRPBaseClass
 		Get
 			FileDate = mFileDate
 		End Get
+	End Property
+
+	Public Property IgnorePeptideToProteinMapperErrors As Boolean
+		Get
+			Return mIgnorePeptideToProteinMapperErrors
+		End Get
+		Set(value As Boolean)
+			mIgnorePeptideToProteinMapperErrors = value
+		End Set
 	End Property
 
 	Public Property InspectSynopsisFilePValueThreshold() As Single
@@ -306,6 +359,15 @@ Public MustInherit Class clsPHRPBaseClass
 		End Set
 	End Property
 
+	Public Property ProteinModsFileIncludesReversedProteins() As Boolean
+		Get
+			Return mProteinModsFileIncludesReversedProteins
+		End Get
+		Set(value As Boolean)
+			mProteinModsFileIncludesReversedProteins = value
+		End Set
+	End Property
+
 	Public Overridable ReadOnly Property ProgressStepDescription() As String
 		Get
 			Return mProgressStepDescription
@@ -327,6 +389,16 @@ Public MustInherit Class clsPHRPBaseClass
 			mSearchToolParameterFilePath = value
 		End Set
 	End Property
+
+	Public Property UseExistingMTSPepToProteinMapFile As Boolean
+		Get
+			Return mUseExistingMTSPepToProteinMapFile
+		End Get
+		Set(value As Boolean)
+			mUseExistingMTSPepToProteinMapFile = False
+		End Set
+	End Property
+
 	Public Property WarnMissingParameterFileSection() As Boolean
 		Get
 			Return mWarnMissingParameterFileSection
@@ -342,8 +414,8 @@ Public MustInherit Class clsPHRPBaseClass
 	End Sub
 
 	Public Shared Function AutoDefinePeptideHitResultsFilePath(ByVal ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants, _
-															   ByVal strSourceFolderPath As String, _
-															   ByVal strBaseName As String) As String
+	  ByVal strSourceFolderPath As String, _
+	  ByVal strBaseName As String) As String
 
 		If Not strBaseName Is Nothing AndAlso strBaseName.Length > 0 Then
 			Select Case ePeptideHitResultFileFormat
@@ -433,6 +505,35 @@ Public MustInherit Class clsPHRPBaseClass
 		End Try
 
 		Return blnExistingMapFound
+	End Function
+
+	Protected Function CIntSafe(ByVal strValue As String, ByVal intDefaultValue As Integer) As Integer
+		Try
+			' Note: Integer.Parse() fails if strValue contains a decimal point, even if it is "8.000"
+			' Thus, we're using CInt() instead
+			Return CInt(strValue)
+		Catch ex As Exception
+			' Error converting strValue to a number; return the default
+			Return intDefaultValue
+		End Try
+	End Function
+
+	Protected Function CDblSafe(ByVal strValue As String, ByVal dblDefaultValue As Double) As Double
+		Try
+			Return Double.Parse(strValue)
+		Catch ex As Exception
+			' Error converting strValue to a number; return the default
+			Return dblDefaultValue
+		End Try
+	End Function
+
+	Protected Function CSngSafe(ByVal strValue As String, ByVal sngDefaultValue As Single) As Single
+		Try
+			Return Single.Parse(strValue)
+		Catch ex As Exception
+			' Error converting strValue to a number; return the default
+			Return sngDefaultValue
+		End Try
 	End Function
 
 	Protected Function CleanupFilePaths(ByRef strInputFilePath As String, ByRef strOutputFolderPath As String) As Boolean
@@ -604,6 +705,451 @@ Public MustInherit Class clsPHRPBaseClass
 
 	End Sub
 
+	Protected Overridable Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+		Dim strPepToProteinMapFilePath As String = String.Empty
+
+		strPepToProteinMapFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+
+		If MTS Then
+			strPepToProteinMapFilePath &= FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & "MTS.txt"
+		Else
+			strPepToProteinMapFilePath &= FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt"
+		End If
+
+		If String.IsNullOrWhiteSpace(strOutputFolderPath) Then
+			Dim ioInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
+			strOutputFolderPath = ioInputFile.DirectoryName
+		End If
+
+		strPepToProteinMapFilePath = System.IO.Path.Combine(strOutputFolderPath, strPepToProteinMapFilePath)
+
+		Return strPepToProteinMapFilePath
+
+	End Function
+
+	''' <summary>
+	''' Use the PeptideToProteinMapEngine to create the Peptide to Protein map file for the file or files in lstSourcePHRPDataFiles
+	''' </summary>
+	''' <param name="lstSourcePHRPDataFiles"></param>
+	''' <param name="strMTSPepToProteinMapFilePath"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function CreatePepToProteinMapFile(ByVal lstSourcePHRPDataFiles As Generic.List(Of String), ByVal strMTSPepToProteinMapFilePath As String) As Boolean
+
+		Dim objPeptideToProteinMapper As PeptideToProteinMapEngine.clsPeptideToProteinMapEngine
+
+		Dim strLineIn As String
+		Dim strSplitLine() As String
+		Dim strPeptideAndProteinKey As String
+
+		Dim htPeptideToProteinMapResults As Collections.Hashtable
+
+		Dim blnSuccess As Boolean = False
+
+		Try
+
+			If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) Then
+				SetErrorMessage("Cannot create the PepToProtein map file because strMTSPepToProteinMapFilePath is empty; likely a programming bug")
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+				Return False
+			End If
+
+			If String.IsNullOrEmpty(mFastaFilePath) Then
+				SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File Path is not defined")
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+				Return False
+			ElseIf Not IO.File.Exists(mFastaFilePath) Then
+				SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File was not found: " & mFastaFilePath)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+				Return False
+			End If
+
+			Console.WriteLine()
+			Console.WriteLine()
+			UpdateProgress("Creating Peptide to Protein Map file", PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE)
+
+			' Initialize items
+			Dim fiMTSPepToProteinMapFile As System.IO.FileInfo = New System.IO.FileInfo(strMTSPepToProteinMapFilePath)
+			Dim strOutputFolderPath As String = fiMTSPepToProteinMapFile.DirectoryName
+
+			fiMTSPepToProteinMapFile = New System.IO.FileInfo(strMTSPepToProteinMapFilePath)
+			strOutputFolderPath = fiMTSPepToProteinMapFile.DirectoryName
+			htPeptideToProteinMapResults = New Collections.Hashtable
+
+			objPeptideToProteinMapper = New PeptideToProteinMapEngine.clsPeptideToProteinMapEngine
+
+			With objPeptideToProteinMapper
+				.DeleteTempFiles = True
+				.IgnoreILDifferences = False
+				.InspectParameterFilePath = String.Empty
+				.LogMessagesToFile = False
+				.MatchPeptidePrefixAndSuffixToProtein = False
+				.OutputProteinSequence = False
+				.PeptideInputFileFormat = PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.ePeptideInputFileFormatConstants.PHRPFile
+				.PeptideFileSkipFirstLine = False
+				.ProteinDataRemoveSymbolCharacters = True
+				.ProteinInputFilePath = mFastaFilePath
+				.SaveProteinToPeptideMappingFile = True
+				.SearchAllProteinsForPeptideSequence = True
+				.SearchAllProteinsSkipCoverageComputationSteps = True
+				.ShowMessages = True
+			End With
+
+			Using swMTSpepToProteinMapFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strMTSPepToProteinMapFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+
+				For Each strInputFilePath As String In lstSourcePHRPDataFiles
+
+					Dim strResultsFilePath As String
+					strResultsFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath) & PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING
+					strResultsFilePath = System.IO.Path.Combine(strOutputFolderPath, strResultsFilePath)
+
+					' Make sure the results file doesn't already exist
+					DeleteFileIgnoreErrors(strResultsFilePath)
+
+					AddHandler objPeptideToProteinMapper.ProgressChanged, AddressOf PeptideToProteinMapper_ProgressChanged
+					mNextPeptideToProteinMapperLevel = 25
+
+					blnSuccess = objPeptideToProteinMapper.ProcessFile(strInputFilePath, strOutputFolderPath, String.Empty, True)
+
+					RemoveHandler objPeptideToProteinMapper.ProgressChanged, AddressOf PeptideToProteinMapper_ProgressChanged
+
+					If blnSuccess Then
+						If Not System.IO.File.Exists(strResultsFilePath) Then
+							SetErrorMessage("Peptide to protein mapping file was not created for " & strInputFilePath)
+							SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+							blnSuccess = False
+							Exit For
+						Else
+							blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, mIgnorePeptideToProteinMapperErrors)
+						End If
+					Else
+						If objPeptideToProteinMapper.GetErrorMessage.Length = 0 AndAlso objPeptideToProteinMapper.StatusMessage.ToLower().Contains("error") Then
+							SetErrorMessage("Error running clsPeptideToProteinMapEngine: " & objPeptideToProteinMapper.StatusMessage)
+						Else
+							If objPeptideToProteinMapper.StatusMessage.Length > 0 Then
+								SetErrorMessage("clsPeptideToProteinMapEngine status: " & objPeptideToProteinMapper.StatusMessage)
+							End If
+							SetErrorMessage("Error running clsPeptideToProteinMapEngine: " & objPeptideToProteinMapper.GetErrorMessage())
+						End If
+
+						If mIgnorePeptideToProteinMapperErrors Then
+
+							RaiseEvent WarningMessageEvent("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True")
+
+							If System.IO.File.Exists(strResultsFilePath) Then
+								blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, mIgnorePeptideToProteinMapperErrors)
+							Else
+								mErrorMessage = String.Empty
+								mErrorCode = ePHRPErrorCodes.NoError
+								blnSuccess = True
+							End If
+
+						Else
+							SetErrorMessage("Error in CreatePepToProteinMapFile")
+							SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+							blnSuccess = False
+						End If
+					End If
+
+
+					If IO.File.Exists(strResultsFilePath) Then
+						' Read the newly created file and append new entries to strMTSPepToProteinMapFilePath
+						Using srResultsFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strResultsFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+							While srResultsFile.Peek > -1
+								strLineIn = srResultsFile.ReadLine()
+
+								If Not String.IsNullOrWhiteSpace(strLineIn) Then
+									strSplitLine = Split(strLineIn, ControlChars.Tab, 2)
+									If strSplitLine.Length >= 2 Then
+										strPeptideAndProteinKey = strSplitLine(0) & "_" & strSplitLine(1)
+
+										If Not htPeptideToProteinMapResults.ContainsKey(strPeptideAndProteinKey) Then
+											htPeptideToProteinMapResults.Add(strPeptideAndProteinKey, 0)
+											swMTSpepToProteinMapFile.WriteLine(strLineIn)
+										End If
+									End If
+
+								End If
+							End While
+
+						End Using
+
+						' Delete the interim results file
+						DeleteFileIgnoreErrors(strResultsFilePath)
+
+					End If
+
+				Next
+
+			End Using
+
+			objPeptideToProteinMapper.CloseLogFileNow()
+
+
+		Catch ex As Exception
+			SetErrorMessage("Error in CreatePepToProteinMapFile:" & ex.Message)
+			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	''' <summary>
+	''' Create the protein mod details file for the specified PHRP data file
+	''' </summary>
+	''' <param name="strPHRPDataFilePath"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Function CreateProteinModDetailsFile(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String) As Boolean
+
+		Dim strMTSPepToProteinMapFilePath As String
+		Dim ioInputFile As System.IO.FileInfo
+
+		Dim blnSuccess As Boolean = False
+
+		Try
+			ioInputFile = New System.IO.FileInfo(strPHRPDataFilePath)
+
+			Dim lstSourcePHRPDataFiles As Generic.List(Of String) = New Generic.List(Of String)
+			lstSourcePHRPDataFiles.Add(ioInputFile.FullName)
+
+			strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(ioInputFile.FullName, strOutputFolderPath, MTS:=True)
+
+			blnSuccess = CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+
+			If blnSuccess Then
+				blnSuccess = CreateProteinModDetailsFile(strPHRPDataFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Unknown)
+			End If
+
+		Catch ex As Exception
+
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Public Function CreateProteinModDetailsFile(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String, ByVal strMTSPepToProteinMapFilePath As String, ByVal ePHRPResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType) As Boolean
+
+		Dim objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer
+		Dim intPepToProteinMapIndex As Integer
+
+		Dim lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType) = New Generic.List(Of udtPepToProteinMappingType)
+		Dim strHeaderLine As String = String.Empty
+
+		Dim fiPHRPDataFile As System.IO.FileInfo
+		Dim strProteinModsFilePath As String
+
+		Dim strResidue As String
+		Dim strCleanSequence As String
+		Dim intResidueLocInProtein As Integer
+
+		Dim sngProgressAtStart As Single
+
+		Dim blnSkipProtein As Boolean
+		Dim blnSuccess As Boolean = False
+
+		Try
+			Console.WriteLine()
+
+			sngProgressAtStart = mProgressPercentComplete
+			UpdateProgress("Creating the Protein Mod Details file", PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE)
+
+			' Confirm that the PHRP data file exists
+			fiPHRPDataFile = New System.IO.FileInfo(strPHRPDataFilePath)
+			If Not fiPHRPDataFile.Exists() Then
+				SetErrorMessage("PHRP data file not found in CreateProteinModDetailsFile: " & strPHRPDataFilePath)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+				Return False
+			End If
+
+			' Confirm that the _PepToProtMapMTS.txt file exists
+			If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) Then
+				SetErrorMessage("Cannot create the ProteinMods file because strMTSPepToProteinMapFilePath is empty")
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+				Return False
+			End If
+
+			' Read the _PepToProtMapMTS file
+			blnSuccess = LoadPeptideToProteinMapInfo(strMTSPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
+			If Not blnSuccess Then
+				Return False
+			End If
+
+			' Initialize objPeptideSearchComparer
+			objPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer
+
+			' Assure that lstPepToProteinMapping is sorted on peptide
+			If lstPepToProteinMapping.Count > 1 Then
+				lstPepToProteinMapping.Sort(New PepToProteinMappingComparer)
+			End If
+
+			strProteinModsFilePath = ReplaceFilenameSuffix(fiPHRPDataFile, FILENAME_SUFFIX_PROTEIN_MODS)
+			If Not String.IsNullOrEmpty(strOutputFolderPath) Then
+				strProteinModsFilePath = IO.Path.Combine(strOutputFolderPath, IO.Path.GetFileName(strProteinModsFilePath))
+			End If
+
+			' Create a ProteinMods file parallel to the PHRP file
+			Using swProteinModsFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strProteinModsFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+
+				' Write the header line
+				swProteinModsFile.WriteLine( _
+				   COLUMN_NAME_RESULTID & ControlChars.Tab & _
+				   COLUMN_NAME_PEPTIDE & ControlChars.Tab & _
+				   COLUMN_NAME_UNIQUE_SEQ_ID & ControlChars.Tab & _
+				   COLUMN_NAME_PROTEIN_NAME & ControlChars.Tab & _
+				   COLUMN_NAME_RESIDUE & ControlChars.Tab & _
+				   COLUMN_NAME_PROTEIN_RESIDUE_NUMBER & ControlChars.Tab & _
+				   COLUMN_NAME_RESIDUE_MOD_NAME & ControlChars.Tab & _
+				   COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER & ControlChars.Tab & _
+				   COLUMN_NAME_MSGF_SPECPROB)
+
+				Dim blnLoadMSGFResults As Boolean = False
+				If ePHRPResultType <> clsPHRPReader.ePeptideHitResultType.MSGFDB Then
+					blnLoadMSGFResults = True
+				End If
+
+				Using objReader As New clsPHRPReader(strPHRPDataFilePath, ePHRPResultType, blnLoadModsAndSeqInfo:=True, blnLoadMSGFResults:=blnLoadMSGFResults, blnLoadScanStats:=False)
+					objReader.EchoMessagesToConsole = True
+					objReader.SkipDuplicatePSMs = True
+
+					For Each strErrorMessage As String In objReader.ErrorMessages
+						RaiseEvent ErrorOccurred(strErrorMessage)
+					Next
+
+					For Each strWarningMessage As String In objReader.WarningMessages
+						If strWarningMessage.StartsWith("MSGF file not found") Then
+							strWarningMessage = "MSGF file not found; column " & COLUMN_NAME_MSGF_SPECPROB & " will not have any data"
+						End If
+						RaiseEvent WarningMessageEvent(strWarningMessage)
+					Next
+
+					objReader.ClearErrors()
+					objReader.ClearWarnings()
+
+					AddHandler objReader.ErrorEvent, AddressOf PHRPReader_ErrorEvent
+					AddHandler objReader.WarningEvent, AddressOf PHRPReader_WarningEvent
+
+					Do While objReader.MoveNext()
+
+						' Use binary search to find this peptide in lstPepToProteinMapping
+						intPepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, objReader.CurrentPSM.Peptide)
+
+						If intPepToProteinMapIndex >= 0 Then
+							Do
+								blnSkipProtein = False
+								If Not mProteinModsFileIncludesReversedProteins Then
+									blnSkipProtein = IsReversedProtein(lstPepToProteinMapping(intPepToProteinMapIndex).Protein)
+								End If
+
+								If Not blnSkipProtein Then
+
+									For Each objMod As PHRPReader.clsAminoAcidModInfo In objReader.CurrentPSM.ModifiedResidues
+
+										intResidueLocInProtein = lstPepToProteinMapping(intPepToProteinMapIndex).ResidueStart + objMod.ResidueLocInPeptide - 1
+
+										If Char.IsLetter(objMod.Residue) Then
+											strResidue = objMod.Residue
+										Else
+											strCleanSequence = objReader.CurrentPSM.PeptideCleanSequence
+
+											If objMod.ResidueLocInPeptide < 1 Then
+												' This shouldn't be the case, but we'll check for it anyway
+												strResidue = strCleanSequence.Substring(0, 1)
+
+											ElseIf objMod.ResidueLocInPeptide > strCleanSequence.Length Then
+												' This shouldn't be the case, but we'll check for it anyway
+												strResidue = strCleanSequence.Substring(strCleanSequence.Length - 1, 1)
+
+											Else
+												strResidue = strCleanSequence.Substring(objMod.ResidueLocInPeptide - 1, 1)
+											End If
+
+										End If
+
+										If lstPepToProteinMapping(intPepToProteinMapIndex).Protein = "__NoMatch__" AndAlso IsReversedProtein(objReader.CurrentPSM.ProteinFirst) Then
+											' Skip this result
+										Else
+											swProteinModsFile.WriteLine( _
+											  objReader.CurrentPSM.ResultID & ControlChars.Tab & _
+											  objReader.CurrentPSM.Peptide & ControlChars.Tab & _
+											  objReader.CurrentPSM.SeqID & ControlChars.Tab & _
+											  lstPepToProteinMapping(intPepToProteinMapIndex).Protein & ControlChars.Tab & _
+											  strResidue & ControlChars.Tab & _
+											  intResidueLocInProtein.ToString() & ControlChars.Tab & _
+											  objMod.ModDefinition.MassCorrectionTag & ControlChars.Tab & _
+											  objMod.ResidueLocInPeptide.ToString() & ControlChars.Tab & _
+											  objReader.CurrentPSM.MSGFSpecProb)
+										End If
+
+									Next
+								End If
+
+
+								intPepToProteinMapIndex += 1
+							Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso objReader.CurrentPSM.Peptide = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
+
+						Else
+							Console.WriteLine("Warning: Peptide not found in lstPepToProteinMapping: " & objReader.CurrentPSM.Peptide)
+						End If
+
+						UpdateProgress(sngProgressAtStart + objReader.PercentComplete * (100 - sngProgressAtStart) / 100)
+					Loop
+
+					RemoveHandler objReader.ErrorEvent, AddressOf PHRPReader_ErrorEvent
+					RemoveHandler objReader.WarningEvent, AddressOf PHRPReader_WarningEvent
+
+				End Using
+			End Using
+
+			blnSuccess = True
+
+		Catch ex As Exception
+			SetErrorMessage("Error in CreateProteinModDetailsFile:" & ex.Message)
+			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Sub DeleteFileIgnoreErrors(strFilePath As String)
+
+		Try
+			If IO.File.Exists(strFilePath) Then
+				Threading.Thread.Sleep(200)
+				System.IO.File.Delete(strFilePath)
+			End If
+
+		Catch ex As Exception
+			' Ignore errors here
+		End Try
+	End Sub
+
+	Protected Function FindFirstMatchInPepToProteinMapping(ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByVal strPeptideToFind As String) As Integer
+
+		Static objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer()
+
+		Dim intPepToProteinMapIndex As Integer
+
+		' Use binary search to find this peptide in lstPepToProteinMapping
+		Dim udtItemToFind As udtPepToProteinMappingType = New udtPepToProteinMappingType
+		udtItemToFind.Peptide = strPeptideToFind
+
+		intPepToProteinMapIndex = lstPepToProteinMapping.BinarySearch(udtItemToFind, objPeptideSearchComparer)
+
+		If intPepToProteinMapIndex > 0 Then
+			' Step Backward until the first match is found
+			Do While intPepToProteinMapIndex > 0 AndAlso lstPepToProteinMapping(intPepToProteinMapIndex - 1).Peptide = strPeptideToFind
+				intPepToProteinMapIndex -= 1
+			Loop
+		End If
+
+		Return intPepToProteinMapIndex
+
+	End Function
+
 	''' <summary>
 	''' If intColumnIndex is >= 0 then updates strValue with the value at strSplitLine(intColumnIndex)
 	''' Otherwise, updates strValue to String.Empty
@@ -733,6 +1279,11 @@ Public MustInherit Class clsPHRPBaseClass
 		mWarnMissingParameterFileSection = False
 
 		mCreateModificationSummaryFile = True
+		mCreateProteinModsFile = False
+		mFastaFilePath = String.Empty
+		mIgnorePeptideToProteinMapperErrors = False
+		mProteinModsFileIncludesReversedProteins = False
+		mUseExistingMTSPepToProteinMapFile = False
 
 		mCreateInspectOrMSGFDbFirstHitsFile = True
 		mCreateInspectOrMSGFDbSynopsisFile = True
@@ -788,37 +1339,37 @@ Public MustInherit Class clsPHRPBaseClass
 
 		' Initialize the ResultToSeqMap file
 		mResultToSeqMapFile = New System.IO.StreamWriter(strResultToSeqMapFilePath)
-		mResultToSeqMapFile.WriteLine("Result_ID" & SEP_CHAR & "Unique_Seq_ID")
+		mResultToSeqMapFile.WriteLine("Result_ID" & SEP_CHAR & COLUMN_NAME_UNIQUE_SEQ_ID)
 
 
 		' Initialize the SeqInfo file
 		mSeqInfoFile = New System.IO.StreamWriter(strSeqInfoFilePath, False)
-		mSeqInfoFile.WriteLine("Unique_Seq_ID" & SEP_CHAR & _
-							   "Mod_Count" & SEP_CHAR & _
-							   "Mod_Description" & SEP_CHAR & _
-							   "Monoisotopic_Mass")
+		mSeqInfoFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
+	"Mod_Count" & SEP_CHAR & _
+	"Mod_Description" & SEP_CHAR & _
+	"Monoisotopic_Mass")
 
 		' Initialize the ModDetails file
 		mModDetailsFile = New System.IO.StreamWriter(strModDetailsFilePath)
-		mModDetailsFile.WriteLine("Unique_Seq_ID" & SEP_CHAR & _
-								  "Mass_Correction_Tag" & SEP_CHAR & _
-								  "Position")
+		mModDetailsFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
+	"Mass_Correction_Tag" & SEP_CHAR & _
+	"Position")
 
 
 		' Initialize the SeqToProtein map file
 		mSeqToProteinMapFile = New System.IO.StreamWriter(strSeqToProteinMapFilePath, False)
-		mSeqToProteinMapFile.WriteLine("Unique_Seq_ID" & SEP_CHAR & _
-									   "Cleavage_State" & SEP_CHAR & _
-									   "Terminus_State" & SEP_CHAR & _
-									   "Protein_Name" & SEP_CHAR & _
-									   "Protein_Expectation_Value_Log(e)" & SEP_CHAR & _
-									   "Protein_Intensity_Log(I)")
+		mSeqToProteinMapFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
+		 "Cleavage_State" & SEP_CHAR & _
+		 "Terminus_State" & SEP_CHAR & _
+		 COLUMN_NAME_PROTEIN_NAME & SEP_CHAR & _
+		 "Protein_Expectation_Value_Log(e)" & SEP_CHAR & _
+		 "Protein_Intensity_Log(I)")
 
 		Return True
 
 	End Function
 
-	Public Shared Function IsNumber(ByVal strValue As String) As Boolean		
+	Public Shared Function IsNumber(ByVal strValue As String) As Boolean
 		Dim dblValue As Double
 		Try
 			Return Double.TryParse(strValue, dblValue)
@@ -827,6 +1378,33 @@ Public MustInherit Class clsPHRPBaseClass
 		End Try
 	End Function
 
+	Protected Function IsReversedProtein(ByVal strProteinName As String) As Boolean
+
+		Dim strProteinNameLCase As String = strProteinName.ToLower()
+
+		If strProteinNameLCase.StartsWith("reversed_") Then
+			' Used in DMS-generated protein collections
+			Return True
+		ElseIf strProteinName.StartsWith("REV_") Then
+			' Used by MSGFDB
+			Return True
+		ElseIf strProteinNameLCase.StartsWith("scrambled_") Then
+			' Used in DMS-generated protein collections
+			Return True
+		ElseIf strProteinNameLCase.StartsWith("xxx_") Then
+			' Used by MSGF+
+			Return True
+		ElseIf strProteinNameLCase.StartsWith("xxx.") Then
+			' Used by Inspect
+			Return True
+		ElseIf strProteinNameLCase.EndsWith(":reversed") Then
+			' Used by X!Tandem
+			Return True
+		End If
+
+		Return False
+
+	End Function
 	Protected Overridable Function LoadParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
 
 		Const OPTIONS_SECTION As String = "PeptideHitResultsProcessorOptions"
@@ -869,6 +1447,11 @@ Public MustInherit Class clsPHRPBaseClass
 
 					mCreateModificationSummaryFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", mCreateModificationSummaryFile)
 
+					mCreateProteinModsFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", mCreateProteinModsFile)
+					mFastaFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", mFastaFilePath)
+					mProteinModsFileIncludesReversedProteins = objSettingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", mProteinModsFileIncludesReversedProteins)
+					mUseExistingMTSPepToProteinMapFile = objSettingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", mUseExistingMTSPepToProteinMapFile)
+
 					With mEnzymeMatchSpec
 						strLeftResidueRegEx = String.Copy(.LeftResidueRegEx)
 						strRightResidueRegEx = String.Copy(.RightResidueRegEx)
@@ -902,6 +1485,92 @@ Public MustInherit Class clsPHRPBaseClass
 
 	End Function
 
+	''' <summary>
+	''' Load the PeptideToProteinMap information
+	''' </summary>
+	''' <param name="strPepToProteinMapFilePath">File to read</param>
+	''' <param name="lstPepToProteinMapping">Output parameter: peptide to protein mapping</param>
+	''' <param name="strHeaderLine">Output parameter: Header line text</param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function LoadPeptideToProteinMapInfo(ByVal strPepToProteinMapFilePath As String, ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByRef strHeaderLine As String) As Boolean
+
+		Dim strLineIn As String
+		Dim strSplitLine As String()
+
+		Dim intLinesRead As Integer
+		Dim intValue As Integer
+
+		Dim blnSuccess As Boolean = False
+
+		Try
+
+			' Initialize the output parameters
+			If lstPepToProteinMapping Is Nothing Then
+				lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
+			Else
+				lstPepToProteinMapping.Clear()
+			End If
+			strHeaderLine = String.Empty
+
+			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
+				SetErrorMessage("Warning: PepToProteinMap file is not defined")
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
+				Return False
+			ElseIf Not System.IO.File.Exists(strPepToProteinMapFilePath) Then
+				SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
+				Return False
+			End If
+
+			' Open strProteinToPeptideMappingFilePath for reading
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strPepToProteinMapFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+
+				intLinesRead = 0
+				Do While srInFile.Peek <> -1
+					strLineIn = srInFile.ReadLine().Trim()
+
+					If strLineIn.Length > 0 Then
+
+						' Split the line on tabs
+						strSplitLine = strLineIn.Split(ControlChars.Tab)
+
+						If strSplitLine.Length >= 4 Then
+
+							If intLinesRead = 0 AndAlso Not Integer.TryParse(strSplitLine(2), intValue) Then
+								' Header line; cache it
+								strHeaderLine = String.Copy(strLineIn)
+							Else
+								Dim udtPepToProteinMappingEntry As udtPepToProteinMappingType
+								With udtPepToProteinMappingEntry
+									.Peptide = String.Copy(strSplitLine(0))
+									.Protein = String.Copy(strSplitLine(1))
+									Integer.TryParse(strSplitLine(2), .ResidueStart)
+									Integer.TryParse(strSplitLine(3), .ResidueEnd)
+								End With
+
+								lstPepToProteinMapping.Add(udtPepToProteinMappingEntry)
+
+							End If
+						End If
+					End If
+
+				Loop
+
+			End Using
+
+			blnSuccess = True
+
+		Catch ex As Exception
+			SetErrorMessage("Error reading the Peptide to Protein Map File (" & System.IO.Path.GetFileName(strPepToProteinMapFilePath) & "): " & ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
+			blnSuccess = False
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
 	Protected Function NumToString(ByVal intNumber As Integer, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
 		Return intNumber.ToString()
 	End Function
@@ -922,7 +1591,7 @@ Public MustInherit Class clsPHRPBaseClass
 				If intDigitsOfPrecision <= 0 Then
 					strFormatString = "0"
 				Else
-					strFormatString = "0." & New String("0"c, intDigitsOfPrecision)					
+					strFormatString = "0." & New String("0"c, intDigitsOfPrecision)
 				End If
 				intFormatStringPrecision = intDigitsOfPrecision
 			End If
@@ -1018,11 +1687,11 @@ Public MustInherit Class clsPHRPBaseClass
 
 				' Write the header line
 				swOutFile.WriteLine("Modification_Symbol" & SEP_CHAR & _
-					 "Modification_Mass" & SEP_CHAR & _
-					 "Target_Residues" & SEP_CHAR & _
-					 "Modification_Type" & SEP_CHAR & _
-					 "Mass_Correction_Tag" & SEP_CHAR & _
-					 "Occurence_Count")
+				  "Modification_Mass" & SEP_CHAR & _
+				  "Target_Residues" & SEP_CHAR & _
+				  "Modification_Type" & SEP_CHAR & _
+				  "Mass_Correction_Tag" & SEP_CHAR & _
+				  "Occurence_Count")
 
 				For intIndex = 0 To mPeptideMods.ModificationCount - 1
 					With mPeptideMods.GetModificationByIndex(intIndex)
@@ -1039,7 +1708,7 @@ Public MustInherit Class clsPHRPBaseClass
 			End Using
 
 		Catch ex As Exception
-			Throw ex	
+			Throw ex
 		End Try
 
 	End Sub
@@ -1066,10 +1735,10 @@ Public MustInherit Class clsPHRPBaseClass
 				If Not blnExistingSequenceFound Then
 					' Write a new entry to the SeqInfo file
 					mSeqInfoFile.WriteLine( _
-									intUniqueSeqID.ToString & SEP_CHAR & _
-									.SearchResultModificationCount & SEP_CHAR & _
-									.PeptideModDescription & SEP_CHAR & _
-									.PeptideMonoisotopicMass.ToString("0.0000000"))
+					 intUniqueSeqID.ToString & SEP_CHAR & _
+					 .SearchResultModificationCount & SEP_CHAR & _
+					 .PeptideModDescription & SEP_CHAR & _
+					 .PeptideMonoisotopicMass.ToString("0.0000000"))
 
 
 					If .SearchResultModificationCount > 0 Then
@@ -1096,9 +1765,9 @@ Public MustInherit Class clsPHRPBaseClass
 						For intIndex = 0 To .SearchResultModificationCount - 1
 							With .GetSearchResultModDetailsByIndex(intPointerArray(intIndex))
 								mModDetailsFile.WriteLine( _
-												intUniqueSeqID.ToString & SEP_CHAR & _
-												.ModDefinition.MassCorrectionTag & SEP_CHAR & _
-												.ResidueLocInPeptide.ToString)
+								 intUniqueSeqID.ToString & SEP_CHAR & _
+								 .ModDefinition.MassCorrectionTag & SEP_CHAR & _
+								 .ResidueLocInPeptide.ToString)
 							End With
 						Next intIndex
 					End If
@@ -1108,12 +1777,12 @@ Public MustInherit Class clsPHRPBaseClass
 			' Write a new entry to the SeqToProteinMap file if not yet defined
 			If Not CheckSeqToProteinMapDefined(intUniqueSeqID, .ProteinName) Then
 				mSeqToProteinMapFile.WriteLine( _
-										intUniqueSeqID.ToString & SEP_CHAR & _
-										CInt(.PeptideCleavageState).ToString & SEP_CHAR & _
-										CInt(.PeptideTerminusState).ToString & SEP_CHAR & _
-										.ProteinName & SEP_CHAR & _
-										.ProteinExpectationValue & SEP_CHAR & _
-										.ProteinIntensity)
+				   intUniqueSeqID.ToString & SEP_CHAR & _
+				   CInt(.PeptideCleavageState).ToString & SEP_CHAR & _
+				   CInt(.PeptideTerminusState).ToString & SEP_CHAR & _
+				   .ProteinName & SEP_CHAR & _
+				   .ProteinExpectationValue & SEP_CHAR & _
+				   .ProteinIntensity)
 			End If
 		End With
 
@@ -1140,6 +1809,13 @@ Public MustInherit Class clsPHRPBaseClass
 		End If
 	End Sub
 
+	Protected Sub UpdatePepToProteinMapPeptide(ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByVal intIndex As Integer, ByVal strPeptide As String)
+		Dim udtItem As udtPepToProteinMappingType
+		udtItem = lstPepToProteinMapping(intIndex)
+		udtItem.Peptide = strPeptide
+		lstPepToProteinMapping(intIndex) = udtItem
+	End Sub
+
 	Protected Sub UpdateProgress(ByVal strProgressStepDescription As String)
 		UpdateProgress(strProgressStepDescription, mProgressPercentComplete)
 	End Sub
@@ -1159,6 +1835,131 @@ Public MustInherit Class clsPHRPBaseClass
 
 		RaiseEvent ProgressChanged(Me.ProgressStepDescription, Me.ProgressPercentComplete)
 	End Sub
+
+	Private Function ValidatePeptideToProteinMapResults(ByVal strPeptideToProteinMapFilePath As String, ByVal blnIgnorePeptideToProteinMapperErrors As Boolean) As Boolean
+
+		Const PROTEIN_NAME_NO_MATCH As String = "__NoMatch__"
+
+		Dim blnSuccess As Boolean = False
+
+		Dim intPeptideCount As Integer = 0
+		Dim intPeptideCountNoMatch As Integer = 0
+		Dim intLinesRead As Integer = 0
+
+		Try
+			' Validate that none of the results in strPeptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH
+
+			Dim strLineIn As String
+
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strPeptideToProteinMapFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+
+				Do While srInFile.Peek > -1
+					strLineIn = srInFile.ReadLine()
+					intLinesRead += 1
+
+					If intLinesRead > 1 AndAlso Not String.IsNullOrEmpty(strLineIn) Then
+						intPeptideCount += 1
+						If strLineIn.Contains(PROTEIN_NAME_NO_MATCH) Then
+							intPeptideCountNoMatch += 1
+						End If
+					End If
+				Loop
+
+			End Using
+
+			If intPeptideCount = 0 Then
+				SetErrorMessage("Peptide to protein mapping file is empty: " & strPeptideToProteinMapFilePath)
+				SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+				blnSuccess = False
+
+			ElseIf intPeptideCountNoMatch = 0 Then
+				blnSuccess = True
+
+			Else
+				Dim dblErrorPercent As Double	' Value between 0 and 100
+				dblErrorPercent = intPeptideCountNoMatch / intPeptideCount * 100.0
+
+				Dim strErrorMessage As String
+				strErrorMessage = dblErrorPercent.ToString("0.0") & "% of the entries in the peptide to protein map file (" & IO.Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & IO.Path.GetFileName(mFastaFilePath) & ")"
+
+				If blnIgnorePeptideToProteinMapperErrors Then
+					RaiseEvent WarningMessageEvent(strErrorMessage)
+					blnSuccess = True
+				Else
+					SetErrorMessage(strErrorMessage)
+					blnSuccess = False
+				End If
+			End If
+
+		Catch ex As Exception
+			SetErrorMessage("Error in ValidatePeptideToProteinMapResults:" & ex.Message)
+			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+			blnSuccess = False
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Sub ValidatePHRPReaderSupportFiles(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String)
+
+		Dim ioPHRPFile As System.IO.FileInfo
+		Dim ioOutputFolder As System.IO.DirectoryInfo
+		Dim strMSGFFileName As String
+		Dim strSourcePath As String
+		Dim strTargetPath As String
+
+		Try
+			If Not String.IsNullOrWhiteSpace(strOutputFolderPath) Then
+
+				ioPHRPFile = New System.IO.FileInfo(strPHRPDataFilePath)
+				ioOutputFolder = New System.IO.DirectoryInfo(strOutputFolderPath)
+
+				If ioPHRPFile.DirectoryName.ToLower() <> ioOutputFolder.FullName.ToLower() Then
+					strMSGFFileName = IO.Path.GetFileName(ReplaceFilenameSuffix(ioPHRPFile, FILENAME_SUFFIX_MSGF))
+
+					strSourcePath = IO.Path.Combine(ioPHRPFile.DirectoryName, strMSGFFileName)
+					strTargetPath = IO.Path.Combine(ioOutputFolder.FullName, strMSGFFileName)
+
+					If IO.File.Exists(strSourcePath) And Not IO.File.Exists(strTargetPath) Then
+						IO.File.Copy(strSourcePath, strTargetPath)
+					End If
+
+				End If
+
+			End If
+
+		Catch ex As Exception
+			Console.WriteLine("Error in ValidatePHRPReaderSupportFiles: " & ex.Message)
+		End Try
+
+	End Sub
+
+#Region "PHRPReader Event Handlers"
+
+	Private Sub PHRPReader_ErrorEvent(strErrorMessage As String)
+		RaiseEvent ErrorOccurred(strErrorMessage)
+	End Sub
+
+	Private Sub PHRPReader_WarningEvent(strWarningMessage As String)
+		RaiseEvent WarningMessageEvent(strWarningMessage)
+	End Sub
+#End Region
+
+
+#Region "PeptideToProteinMapper Event Handlers"
+
+	Private Sub PeptideToProteinMapper_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single)
+		If percentComplete >= mNextPeptideToProteinMapperLevel Then
+			mNextPeptideToProteinMapperLevel += 25
+			UpdateProgress(PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE + percentComplete * (PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE - PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE) / 100)
+			Console.WriteLine(" PeptideToProteinMapper is " & percentComplete.ToString("0") & "% complete")
+		End If
+	End Sub
+
+#End Region
+
+#Region "IComparer classes"
 
 	Protected Class ISearchOptionModificationInfoComparer
 		Implements System.Collections.IComparer
@@ -1248,5 +2049,7 @@ Public MustInherit Class clsPHRPBaseClass
 		End Function
 
 	End Class
+
+#End Region
 
 End Class

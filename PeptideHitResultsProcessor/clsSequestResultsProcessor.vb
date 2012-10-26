@@ -198,62 +198,76 @@ Public Class clsSequestResultsProcessor
 
     End Function
 
+	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+		Dim strPepToProteinMapFilePath As String = String.Empty
+
+		strPepToProteinMapFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+		If strPepToProteinMapFilePath.ToLower().EndsWith("_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_fht") Then
+			' Remove _syn or _fht
+			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
+		End If
+
+		Return MyBase.ConstructPepToProteinMapFilePath(strPepToProteinMapFilePath, strOutputFolderPath, MTS)
+
+	End Function
+
     Private Sub InitializeLocalVariables()
         ' Reserved for future use
     End Sub
 
-    Protected Function ParseSynopsisOrFirstHitsFile(ByVal strInputFilePath As String, Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
-        ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
+	Protected Function ParseSynopsisOrFirstHitsFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
+		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-        Dim strPreviousXCorr As String
+		Dim strPreviousXCorr As String
 
-        ' Note that synopsis files are normally sorted on XCorr descending, with lines
-        '  duplicated when peptide search results are mapped to multiple proteins
-        ' In order to prevent duplicate entries from being made to the ResultToSeqMap file,
-        '  we will keep track of the scan, charge, and peptide information parsed for each unique XCorr encountered
+		' Note that synopsis files are normally sorted on XCorr descending, with lines
+		'  duplicated when peptide search results are mapped to multiple proteins
+		' In order to prevent duplicate entries from being made to the ResultToSeqMap file,
+		'  we will keep track of the scan, charge, and peptide information parsed for each unique XCorr encountered
 
-        Dim htPeptidesFoundForXCorrLevel As Hashtable
+		Dim htPeptidesFoundForXCorrLevel As Hashtable
 
-        Dim strKey As String
+		Dim strKey As String
 
-        Dim strLineIn As String
-        Dim strModificationSummaryFilePath As String
+		Dim strLineIn As String
+		Dim strModificationSummaryFilePath As String
 
-        Dim objSearchResult As clsSearchResultsSequest
+		Dim objSearchResult As clsSearchResultsSequest
 
-        Dim intResultsProcessed As Integer
+		Dim intResultsProcessed As Integer
+		Dim sngPercentComplete As Single
 
-        Dim blnSuccess As Boolean
-        Dim blnDataLine As Boolean
-        Dim blnValidSearchResult As Boolean
-        Dim blnFirstMatchForGroup As Boolean
+		Dim blnSuccess As Boolean
+		Dim blnDataLine As Boolean
+		Dim blnValidSearchResult As Boolean
+		Dim blnFirstMatchForGroup As Boolean
 
-        Dim blnHeaderParsed As Boolean
-        Dim intColumnMapping() As Integer = Nothing
+		Dim blnHeaderParsed As Boolean
+		Dim intColumnMapping() As Integer = Nothing
 
-        Dim strErrorLog As String = String.Empty
+		Dim strErrorLog As String = String.Empty
 
-        Try
-            ' Possibly reset the mass correction tags and Mod Definitions
-            If blnResetMassCorrectionTagsAndModificationDefinitions Then
-                ResetMassCorrectionTagsAndModificationDefinitions()
-            End If
+		Try
+			' Possibly reset the mass correction tags and Mod Definitions
+			If blnResetMassCorrectionTagsAndModificationDefinitions Then
+				ResetMassCorrectionTagsAndModificationDefinitions()
+			End If
 
-            ' Reset .OccurrenceCount
-            mPeptideMods.ResetOccurrenceCountStats()
+			' Reset .OccurrenceCount
+			mPeptideMods.ResetOccurrenceCountStats()
 
-            ' Initialize objSearchResult
-            objSearchResult = New clsSearchResultsSequest(mPeptideMods)
+			' Initialize objSearchResult
+			objSearchResult = New clsSearchResultsSequest(mPeptideMods)
 
-            ' Initialize htPeptidesFoundForXCorrLevel
-            htPeptidesFoundForXCorrLevel = New Hashtable
-            strPreviousXCorr = String.Empty
+			' Initialize htPeptidesFoundForXCorrLevel
+			htPeptidesFoundForXCorrLevel = New Hashtable
+			strPreviousXCorr = String.Empty
 
-            Try
-                UpdateSearchResultEnzymeAndTerminusInfo(objSearchResult)
+			Try
+				UpdateSearchResultEnzymeAndTerminusInfo(objSearchResult)
 
-                ' Open the input file and parse it
-                ' Initialize the stream reader
+				' Open the input file and parse it
+				' Initialize the stream reader
 				Using srDataFile As System.IO.StreamReader = New System.IO.StreamReader(strInputFilePath)
 
 					strErrorLog = String.Empty
@@ -261,12 +275,13 @@ Public Class clsSequestResultsProcessor
 					blnHeaderParsed = False
 
 					' Create the output files
-					blnSuccess = MyBase.InitializeSequenceOutputFiles(strInputFilePath)
+					Dim strBaseOutputFilePath As String = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileName(strInputFilePath))
+					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
 					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
 
-						strLineIn = srDataFile.ReadLine
+						strLineIn = srDataFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
 							blnDataLine = True
@@ -331,7 +346,11 @@ Public Class clsSequestResultsProcessor
 							End If
 
 							' Update the progress
-							UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+							sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+							If mCreateProteinModsFile Then
+								sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+							End If
+							UpdateProgress(sngPercentComplete)
 
 							intResultsProcessed += 1
 						End If
@@ -342,7 +361,9 @@ Public Class clsSequestResultsProcessor
 				If mCreateModificationSummaryFile Then
 					' Create the modification summary file
 					Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
-					strModificationSummaryFilePath = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY)
+					strModificationSummaryFilePath = System.IO.Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+					strModificationSummaryFilePath = System.IO.Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
+
 					SaveModificationSummaryFile(strModificationSummaryFilePath)
 				End If
 
@@ -358,18 +379,18 @@ Public Class clsSequestResultsProcessor
 				SetErrorMessage(ex.Message)
 				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
 				blnSuccess = False
-			Finally			
+			Finally
 				MyBase.CloseSequenceOutputFiles()
 			End Try
-        Catch ex As Exception
-            SetErrorMessage(ex.Message)
-            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-            blnSuccess = False
-        End Try
+		Catch ex As Exception
+			SetErrorMessage(ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+			blnSuccess = False
+		End Try
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
     Private Function ParseSequestResultsFileEntry(ByRef strLineIn As String, _
                                                   ByRef intColumnMapping() As Integer, _
@@ -462,58 +483,103 @@ Public Class clsSequestResultsProcessor
         Return blnValidSearchResult
     End Function
 
-    ' Main processing function
-    Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
-        ' Returns True if success, False if failure
+	''' <summary>
+	''' Main processing function
+	''' </summary>
+	''' <param name="strInputFilePath">Sequest Synopsis or First-hits file</param>
+	''' <param name="strOutputFolderPath">Output folder</param>
+	''' <param name="strParameterFilePath">Parameter file</param>
+	''' <returns>True if success, False if failure</returns>
+	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
 
-        Dim ioInputFile As System.IO.FileInfo
+		Dim ioInputFile As System.IO.FileInfo
 
-        Dim strInputFilePathFull As String
+		Dim blnSuccess As Boolean
 
-        Dim blnSuccess As Boolean
+		If Not LoadParameterFileSettings(strParameterFilePath) Then
+			SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, True)
+			Return False
+		End If
 
-        If Not LoadParameterFileSettings(strParameterFilePath) Then
-            SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, True)
-            Return False
-        End If
+		Try
+			If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
+				SetErrorMessage("Input file name is empty")
+				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
+			Else
 
-        Try
-            If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
-                SetErrorMessage("Input file name is empty")
-                SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
-            Else
+				' Set this to true since Sequest param files can have the same mod mass on different residues, and those residues may use different symbols
+				mPeptideMods.ConsiderModSymbolWhenFindingIdenticalMods = True
 
-                ' Set this to true since Sequest param files can have the same mod mass on different residues, and those residues may use different symbols
-                mPeptideMods.ConsiderModSymbolWhenFindingIdenticalMods = True
+				blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
+				If Not blnSuccess Then
+					Exit Try
+				End If
 
-                blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
-                If Not blnSuccess Then
-                    Exit Try
-                End If
+				MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
 
-                MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
+				If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
+					' Obtain the full path to the input file
+					ioInputFile = New System.IO.FileInfo(strInputFilePath)
 
-                If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
-                    Try
-                        ' Obtain the full path to the input file
-                        ioInputFile = New System.IO.FileInfo(strInputFilePath)
-                        strInputFilePathFull = ioInputFile.FullName
+					Try
+						blnSuccess = ParseSynopsisOrFirstHitsFile(ioInputFile.FullName, strOutputFolderPath, False)
+					Catch ex As Exception
+						SetErrorMessage("Error calling ParseSynopsisOrFirstHitsFile" & ex.Message)
+						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+						blnSuccess = False
+					End Try
 
-                        blnSuccess = ParseSynopsisOrFirstHitsFile(strInputFilePathFull, False)
-                    Catch ex As Exception
-                        SetErrorMessage("Error calling ParseSynopsisOrFirstHitsFile" & ex.message)
-                        SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-                    End Try
-                End If
-            End If
-        Catch ex As Exception
-            SetErrorMessage("Error in ProcessFile:" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
-        End Try
+					If blnSuccess AndAlso mCreateProteinModsFile Then
+						' First create the MTS PepToProteinMap file using ioInputFile
+						' Will also look for the first hits or synopsis file and use that too if it is present
 
-        Return blnSuccess
+						Dim lstSourcePHRPDataFiles As Generic.List(Of String) = New Generic.List(Of String)
+						Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
-    End Function
+						Dim strAdditionalFile As String
+						Dim strInputFileBaseName As String = IO.Path.GetFileNameWithoutExtension(ioInputFile.Name)
+
+						lstSourcePHRPDataFiles.Add(ioInputFile.FullName)
+						If strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE) Then
+							strAdditionalFile = MyBase.ReplaceFilenameSuffix(ioInputFile, FILENAME_SUFFIX_FIRST_HITS_FILE)
+							If System.IO.File.Exists(strAdditionalFile) Then
+								lstSourcePHRPDataFiles.Add(strAdditionalFile)
+							End If
+
+						ElseIf strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE) Then
+							strAdditionalFile = MyBase.ReplaceFilenameSuffix(ioInputFile, FILENAME_SUFFIX_SYNOPSIS_FILE)
+							If System.IO.File.Exists(strAdditionalFile) Then
+								lstSourcePHRPDataFiles.Add(strAdditionalFile)
+							End If
+						End If
+
+						strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(ioInputFile.FullName, strOutputFolderPath, MTS:=True)
+
+						If System.IO.File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+							blnSuccess = True
+						Else
+							blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+						End If
+
+						If blnSuccess Then
+							' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+							MyBase.ValidatePHRPReaderSupportFiles(strInputFilePath, strOutputFolderPath)
+
+							' Now create the Protein Mods file
+							blnSuccess = MyBase.CreateProteinModDetailsFile(strInputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest)
+						End If
+					End If
+
+				End If
+			End If
+		Catch ex As Exception
+			SetErrorMessage("Error in ProcessFile:" & ex.Message)
+			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+		End Try
+
+		Return blnSuccess
+
+	End Function
 
     Private Function ParseSequestSynFileHeaderLine(ByVal strLineIn As String, _
                                                    ByRef intColumnMapping() As Integer) As Boolean

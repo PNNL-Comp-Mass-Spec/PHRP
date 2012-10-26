@@ -1,6 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
-Version 1.4.4511; May 8, 2012
+Version 1.5.4681; October 25, 2012
+	- Added support for creating a _ProteinMods.txt file with details on modified residues for each protein
+
+Version 1.5.4511; May 8, 2012
 	- Added support for the EFDR column in MSGFDB results
 		- This column is included if a target/decoy search is not run and if MSGFDB is instructed to just write out the top hit for each spectrum
 		- Reported in the _msgfdb_syn.txt file under the FDR column (the PepFDR column will show 1 for every record in this case)

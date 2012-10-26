@@ -771,7 +771,7 @@ Public Class clsPeptideModificationContainer
 					End If
 
 					Do While srMassCorrectionTagsFile.Peek() >= 0
-						strLineIn = srMassCorrectionTagsFile.ReadLine
+						strLineIn = srMassCorrectionTagsFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Length > 0 Then
 							strSplitLine = strLineIn.Split(ControlChars.Tab)
 
@@ -841,7 +841,7 @@ Public Class clsPeptideModificationContainer
 					ClearModifications()
 
 					Do While srModificationFile.Peek() >= 0
-						strLineIn = srModificationFile.ReadLine
+						strLineIn = srModificationFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Length > 0 Then
 							strSplitLine = strLineIn.Split(ControlChars.Tab)
 
