@@ -30,14 +30,26 @@ Public Class clsPHRPParserMSGFDB
 	Public Const DATA_COLUMN_NTT As String = "NTT"
 	Public Const DATA_COLUMN_DeNovoScore As String = "DeNovoScore"
 	Public Const DATA_COLUMN_MSGFScore As String = "MSGFScore"
-	Public Const DATA_COLUMN_MSGFDB_SpecProb As String = "MSGFDB_SpecProb"
-	Public Const DATA_COLUMN_Rank_MSGFDB_SpecProb As String = "Rank_MSGFDB_SpecProb"
-	Public Const DATA_COLUMN_PValue As String = "PValue"
-	Public Const DATA_COLUMN_FDR As String = "FDR"				' Only present if a Target/Decoy (TDA) search was used
-	Public Const DATA_COLUMN_EFDR As String = "EFDR"			' Only present if a Target/Decoy (TDA) search was not used
-	Public Const DATA_COLUMN_PepFDR As String = "PepFDR"		' Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
 
-	''Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GF+"
+	Public Const DATA_COLUMN_MSGFDB_SpecProb As String = "MSGFDB_SpecProb"					' MSGFDB
+	Public Const DATA_COLUMN_Rank_MSGFDB_SpecProb As String = "Rank_MSGFDB_SpecProb"		' MSGFDB
+
+	Public Const DATA_COLUMN_MSGFDB_SpecEValue As String = "MSGFDB_SpecEValue"				' MSGF+
+	Public Const DATA_COLUMN_Rank_MSGFDB_SpecEValue As String = "Rank_MSGFDB_SpecEValue"	' MSGF+
+
+	Public Const DATA_COLUMN_PValue As String = "PValue"		' MSGFDB
+	Public Const DATA_COLUMN_EValue As String = "EValue"		' MSGF+
+
+	Public Const DATA_COLUMN_FDR As String = "FDR"							' MSGFDB; Only present if a Target/Decoy (TDA) search was used
+	Public Const DATA_COLUMN_PepFDR As String = "PepFDR"					' MSGFDB; Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
+
+	Public Const DATA_COLUMN_QValue As String = "QValue"					' MSGF+ reports QValue instead of FDR
+	Public Const DATA_COLUMN_PepQValue As String = "PepQValue"				' MSGF+ reports pepQValue instead of PepFDR
+
+	Public Const DATA_COLUMN_EFDR As String = "EFDR"						' Only present if a Target/Decoy (TDA) search was not used
+
+	Public Const DATA_COLUMN_Isotope_Error As String = "IsotopeError"		' Only reported by MSGF+
+
 	Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GFDB"
 #End Region
 
@@ -88,6 +100,16 @@ Public Class clsPHRPParserMSGFDB
 		AddHeaderColumn(DATA_COLUMN_FDR)
 		AddHeaderColumn(DATA_COLUMN_EFDR)
 		AddHeaderColumn(DATA_COLUMN_PepFDR)
+
+		' Add the MSGF+ columns
+		AddHeaderColumn(DATA_COLUMN_MSGFDB_SpecEValue)
+		AddHeaderColumn(DATA_COLUMN_Rank_MSGFDB_SpecEValue)
+		AddHeaderColumn(DATA_COLUMN_EValue)
+
+		AddHeaderColumn(DATA_COLUMN_QValue)
+		AddHeaderColumn(DATA_COLUMN_PepQValue)
+
+		AddHeaderColumn(DATA_COLUMN_Isotope_Error)
 
 	End Sub
 
@@ -296,9 +318,16 @@ Public Class clsPHRPParserMSGFDB
 		Dim dblPrecursorMZ As Double
 		Dim dblSpecProb As Double
 
+		Dim blnMSGFPlusResults As Boolean
 		Dim blnSuccess As Boolean
 
 		Try
+
+			If LookupColumnIndex(DATA_COLUMN_MSGFDB_SpecEValue, mColumnHeaders) >= 0 Then
+				blnMSGFPlusResults = True
+			Else
+				blnMSGFPlusResults = False
+			End If
 
 			If objPSM Is Nothing Then
 				objPSM = New clsPSM
@@ -330,7 +359,11 @@ Public Class clsPHRPParserMSGFDB
 					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
 					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
-					.MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders)
+					If blnMSGFPlusResults Then
+						.MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecEValue, mColumnHeaders)
+					Else
+						.MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders)
+					End If
 
 					If .MSGFSpecProb.Length > 13 Then
 						' Attempt to shorten the SpecProb value
@@ -349,12 +382,34 @@ Public Class clsPHRPParserMSGFDB
 				' Store the remaining scores
 				AddScore(objPSM, strColumns, DATA_COLUMN_DeNovoScore)
 				AddScore(objPSM, strColumns, DATA_COLUMN_MSGFScore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_MSGFDB_SpecProb)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb)
-				AddScore(objPSM, strColumns, DATA_COLUMN_PValue)
-				AddScore(objPSM, strColumns, DATA_COLUMN_FDR)
+
+				If blnMSGFPlusResults Then
+
+					AddScore(objPSM, strColumns, DATA_COLUMN_MSGFDB_SpecEValue)
+					AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFDB_SpecEValue)
+					AddScore(objPSM, strColumns, DATA_COLUMN_EValue)
+					AddScore(objPSM, strColumns, DATA_COLUMN_QValue)
+					AddScore(objPSM, strColumns, DATA_COLUMN_PepQValue)
+					AddScore(objPSM, strColumns, DATA_COLUMN_Isotope_Error)
+
+					' Duplicate the score values to provide backwards compatibility
+					Dim strValue As String = String.Empty
+
+					If objPSM.TryGetScore(DATA_COLUMN_MSGFDB_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_MSGFDB_SpecProb, strValue)
+					If objPSM.TryGetScore(DATA_COLUMN_Rank_MSGFDB_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, strValue)
+					If objPSM.TryGetScore(DATA_COLUMN_EValue, strValue) Then objPSM.SetScore(DATA_COLUMN_PValue, strValue)
+					If objPSM.TryGetScore(DATA_COLUMN_QValue, strValue) Then objPSM.SetScore(DATA_COLUMN_FDR, strValue)
+					If objPSM.TryGetScore(DATA_COLUMN_PepQValue, strValue) Then objPSM.SetScore(DATA_COLUMN_PepFDR, strValue)
+
+				Else
+					AddScore(objPSM, strColumns, DATA_COLUMN_MSGFDB_SpecProb)
+					AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb)
+					AddScore(objPSM, strColumns, DATA_COLUMN_PValue)
+					AddScore(objPSM, strColumns, DATA_COLUMN_FDR)
+					AddScore(objPSM, strColumns, DATA_COLUMN_PepFDR)
+				End If
+
 				AddScore(objPSM, strColumns, DATA_COLUMN_EFDR)		' This column will not be present if a Target/Decoy (TDA) search was performed
-				AddScore(objPSM, strColumns, DATA_COLUMN_PepFDR)
 
 			End If
 

@@ -666,6 +666,24 @@ Public Class clsPSM
 			mAdditionalScores.Add(strScoreName, strScoreValue)
 		End If
 	End Sub
+	
+	''' <summary>
+	''' Returns the value stored for the specified score
+	''' </summary>
+	''' <param name="strScoreName"></param>
+	''' <param name="strScoreValue"></param>
+	''' <returns>True if the score is defined, otherwise false</returns>
+	''' <remarks></remarks>
+	Public Function TryGetScore(ByVal strScoreName As String, ByRef strScoreValue As String) As Boolean
+
+		strScoreValue = String.Empty
+		If mAdditionalScores.TryGetValue(strScoreName, strScoreValue) Then
+			Return True
+		Else
+			Return False
+		End If
+
+	End Function
 
 	''' <summary>
 	''' Auto-determine the number of missed cleavages, cleavage state, and number of tryptic terminii based on the peptide sequence

@@ -1408,6 +1408,27 @@ Public Class clsPHRPReader
 	End Function
 
 	''' <summary>
+	''' Returns the index of the indicated column, as tracked by objColumnHeaders
+	''' </summary>
+	''' <param name="strColumnName"></param>
+	''' <param name="objColumnHeaders"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Shared Function LookupColumnIndex(ByVal strColumnName As String, ByRef objColumnHeaders As SortedDictionary(Of String, Integer)) As Integer
+
+		Dim intColIndex As Integer
+
+		If objColumnHeaders.TryGetValue(strColumnName, intColIndex) Then
+			If intColIndex >= 0 Then
+				Return intColIndex
+			End If
+		End If
+
+		Return -1
+
+	End Function
+
+	''' <summary>
 	''' Returns the string stored in the given named column (using objColumnHeaders to dereference column name with column index)
 	''' </summary>
 	''' <returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
@@ -1432,14 +1453,14 @@ Public Class clsPHRPReader
 		Dim intColIndex As Integer
 
 		If Not strColumns Is Nothing Then
-			If objColumnHeaders.TryGetValue(strColumnName, intColIndex) Then
-				If intColIndex >= 0 AndAlso intColIndex < strColumns.Length Then
-					If String.IsNullOrWhiteSpace(strColumns(intColIndex)) Then
-						Return String.Empty
-					Else
-						Return strColumns(intColIndex)
-					End If
+			intColIndex = LookupColumnIndex(strColumnName, objColumnHeaders)
+			If intColIndex >= 0 AndAlso intColIndex < strColumns.Length Then
+				If String.IsNullOrWhiteSpace(strColumns(intColIndex)) Then
+					Return String.Empty
+				Else
+					Return strColumns(intColIndex)
 				End If
+
 			End If
 		End If
 
