@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "October 25, 2012"
+	Public Const PROGRAM_DATE As String = "November 27, 2012"
 
 	Private mInputFilePath As String
 	Private mOutputFolderName As String							' Optional
@@ -342,7 +342,7 @@ Module modMain
 
 		Try
 
-			Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, or MSGF-DB search result file, then creates a tab-delimited text file with the data in a standard format used at PNNL.  ")
+			Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF-DB search result file, or MSGF+ search result file, then creates a tab-delimited text file with the data in a standard format used at PNNL.  ")
 			Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides.  Parallel files will be created containing sequence info and modification details.  ")
 			Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
 			Console.WriteLine()
@@ -355,7 +355,7 @@ Module modMain
 			Console.WriteLine(" [/InsFHT:True|False] [/InsSyn:True|False]")
 			Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
 			Console.WriteLine()
-			Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), or a MSGF-DB results file (_msgfdb.txt)")
+			Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), or an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv)")
 			Console.WriteLine("The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file.")
 			Console.WriteLine("The parameter file path is optional.  If included, it should point to a valid XML parameter file.")
 			Console.WriteLine()

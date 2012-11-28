@@ -1,5 +1,10 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.4714; November 27, 2012
+	- Added support for MSGF+ results
+		- Filename must end in _msgfdb.tsv, _msgfdb.txt, _msgfplus.tsv, or _msgfplus.txt
+	- New versions of PeptideToProteinMapEngine.DLL, PHRPReader.DLL, and ProteinCoverageSummarizer.DLL to support MSGF+ column names
+
 Version 1.5.4681; October 25, 2012
 	- Added support for creating a _ProteinMods.txt file with details on modified residues for each protein
 

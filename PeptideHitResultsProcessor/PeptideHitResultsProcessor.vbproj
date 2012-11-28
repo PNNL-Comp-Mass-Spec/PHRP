@@ -69,6 +69,14 @@
     <Reference Include="PHRPReader">
       <HintPath>..\PHRPReader\bin\PHRPReader.dll</HintPath>
     </Reference>
+    <Reference Include="ProteinCoverageSummarizer, Version=1.1.4714.25491, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\ProteinCoverageSummarizer.dll</HintPath>
+    </Reference>
+    <Reference Include="ProteinFileReader, Version=1.2.4603.24135, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\ProteinFileReader.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>

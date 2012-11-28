@@ -372,18 +372,33 @@ Public Class clsPeptideModificationContainer
 		End If
 
 		' No match was found
-		' Compare against modifications with empty .TargetResidues
-		For intIndex = 0 To mModifications.Count - 1
-			If (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
-			   mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
-			   mModifications(intIndex).TargetResidues.Length = 0 Then
-				If mModifications(intIndex).ModificationSymbol = chModificationSymbol Then
-					' Matching mass found
-					blnExistingModFound = True
-					Return mModifications(intIndex)
+		' First compare against modifications, only considering those with empty .TargetResidues
+		' If still not match, then we'll try again but ignore .TargetResidues
+		Dim blnConsiderTargetResidues As Boolean = True
+
+		Do
+			For intIndex = 0 To mModifications.Count - 1
+				If mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
+				   mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType Then
+
+					If (blnConsiderTargetResidues And mModifications(intIndex).TargetResidues.Length = 0) OrElse Not blnConsiderTargetResidues Then
+						If mModifications(intIndex).ModificationSymbol = chModificationSymbol Then
+							' Matching mass found
+							blnExistingModFound = True
+							Return mModifications(intIndex)
+						End If
+					End If
+
 				End If
+			Next intIndex
+
+			If blnConsiderTargetResidues Then
+				' No match; try again, but ignore .TargetResidues
+				blnConsiderTargetResidues = False
+			Else				
+				Exit Do
 			End If
-		Next intIndex
+		Loop	
 
 		' Still no match; return a default modification with a mass of 0
 		objModificationDefinition = New clsModificationDefinition(chModificationSymbol, 0)

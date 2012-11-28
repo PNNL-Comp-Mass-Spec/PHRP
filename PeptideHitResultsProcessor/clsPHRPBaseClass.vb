@@ -30,7 +30,7 @@ Imports PHRPReader
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "October 25, 2012"
+		mFileDate = "November 27, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -602,19 +602,32 @@ Public MustInherit Class clsPHRPBaseClass
 	Public Shared Function DetermineResultsFileFormat(ByVal strFilePath As String) As ePeptideHitResultsFileFormatConstants
 		' Examine the extension on strFilePath to determine the file format
 
-		If System.IO.Path.GetExtension(strFilePath).ToLower = ".xml" Then
+		Dim strExtensionLCase As String
+		Dim strBaseFileNameLCase As String
+
+		strExtensionLCase = System.IO.Path.GetExtension(strFilePath).ToLower()
+		strBaseFileNameLCase = System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower()
+
+		If strExtensionLCase = ".xml" Then
 			Return ePeptideHitResultsFileFormatConstants.XTandemXMLFile
 
-		ElseIf System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE.ToLower) Then
+		ElseIf strBaseFileNameLCase.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE.ToLower) Then
 			Return ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile
 
-		ElseIf System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE.ToLower) Then
+		ElseIf strBaseFileNameLCase.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE.ToLower) Then
 			Return ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
 
-		ElseIf System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE.ToLower) Then
+		ElseIf strBaseFileNameLCase.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE.ToLower) Then
 			Return ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
-		ElseIf System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE.ToLower) Then
+		ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE.ToLower) Then
+			Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+
+		ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE.ToLower) Then
+			Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+
+		ElseIf strExtensionLCase = ".tsv" Then
+			' Assume this is an MSGF+ TSV file
 			Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
 		Else
@@ -1638,6 +1651,32 @@ Public MustInherit Class clsPHRPBaseClass
 		strNewFileName = System.IO.Path.Combine(fiOriginalFile.DirectoryName, strNewFileName)
 
 		Return strNewFileName
+
+	End Function
+
+	Protected Function ReplaceIgnoreCase(ByVal strTextToSearch As String, strTextToFind As String, strReplacementText As String) As String
+
+		Dim intCharIndex As Integer
+		intCharIndex = strTextToSearch.ToLower().IndexOf(strTextToFind)
+
+		If intCharIndex < 0 Then
+			Return strTextToSearch
+		Else
+			Dim strNewText As String
+			If intCharIndex = 0 Then
+				strNewText = String.Empty
+			Else
+				strNewText = strTextToSearch.Substring(0, intCharIndex)
+			End If
+
+			strNewText &= strReplacementText
+
+			If intCharIndex + strTextToFind.Length < strTextToSearch.Length Then
+				strNewText &= strTextToSearch.Substring(intCharIndex + strTextToFind.Length)
+			End If
+
+			Return strNewText
+		End If
 
 	End Function
 

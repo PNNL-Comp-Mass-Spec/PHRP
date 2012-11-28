@@ -588,24 +588,30 @@ Public Class clsPeptideHitResultsProcRunner
 				' If ePeptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
 				blnSuccess = False
 
-				strMessage = "Error: Could not determine the format of the input file.  It must end in " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, or .xml"
+				strMessage = "Error: Could not determine the format of the input file.  It must end in " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, .xml (for X!Tandem), " & PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE & ".txt, or " & PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE & ".tsv"
 				ShowErrorMessage(strMessage)
 			Else
+
 				Select Case ePeptideHitResultsFormat
 					Case ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile
 						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsSequestResultsProcessor
+						LogMessage("Detected SEQUEST First Hits file")
 
 					Case ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
 						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsSequestResultsProcessor
+						LogMessage("Detected SEQUEST Synopsis file")
 
 					Case ePeptideHitResultsFileFormatConstants.XTandemXMLFile
 						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsXTandemResultsProcessor
+						LogMessage("Detected X!Tandem XML file")
 
 					Case ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsInSpecTResultsProcessor
+						LogMessage("Detected Inspect results file")
 
 					Case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMSGFDBResultsProcessor
+						LogMessage("Detected MSGFDB (or MSGF+) results file")
 
 					Case Else
 						' Unknown format

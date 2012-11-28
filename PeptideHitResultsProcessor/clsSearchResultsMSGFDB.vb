@@ -26,18 +26,20 @@ Public Class clsSearchResultsMSGFDB
 
     Public Property DeNovoScore As String
     Public Property MSGFScore As String
-    Public Property SpecProb As String
+	Public Property SpecProb As String			' SpecProb in MSGFDB; SpecEValue in MSGF+
     Public Property RankSpecProb As String
-    Public Property PValue As String
+	Public Property PValue As String			' PValue in MSGFDB; EValue in MSGF+
 
-	Public Property FDR As String			' Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used
-    Public Property PepFDR As String        ' Only present if searched using -tda 1
+	Public Property FDR As String			' Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
+	Public Property PepFDR As String		' Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+
 
     Public Property PrecursorMZ As String
     Public Property MSGFDbComputedDelM As String
     Public Property MSGFDbComputedDelMPPM As String
 
+	Public Property IsotopeError As String		' Only reported by MSGF+
 
+	Public Property MSGFPlusResults As Boolean
 #End Region
 
     Public Sub New(ByRef objPeptideMods As clsPeptideModificationContainer)
@@ -62,7 +64,10 @@ Public Class clsSearchResultsMSGFDB
 
         PrecursorMZ = String.Empty
         MSGFDbComputedDelM = String.Empty
-        MSGFDbComputedDelMPPM = String.Empty
+		MSGFDbComputedDelMPPM = String.Empty
+
+		IsotopeError = String.Empty
+		MSGFPlusResults = False
     End Sub
 
 End Class

@@ -1506,7 +1506,7 @@ Public Class clsInSpecTResultsProcessor
 
 							If blnSuccess AndAlso mCreateProteinModsFile Then
 								' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-								MyBase.ValidatePHRPReaderSupportFiles(strInputFilePath, strOutputFolderPath)
+								MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(ioInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
 								' Create the Protein Mods file
 								blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect)
