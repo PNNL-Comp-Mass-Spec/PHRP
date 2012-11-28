@@ -1616,8 +1616,8 @@ Public Class clsMSGFDBResultsProcessor
 		lstColumnNames.Add("PepQValue", eMSGFDBResultsFileColumns.PepFDR_PepQValue)
 
 		lstColumnNames.Add("EFDR", eMSGFDBResultsFileColumns.EFDR)
-		lstColumnNames.Add("IMS_Scan", eMSGFDBResultsFileColumns.IMSScan)
-		lstColumnNames.Add("IMS_Drift_Time", eMSGFDBResultsFileColumns.IMSDriftTime)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Scan, eMSGFDBResultsFileColumns.IMSScan)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time, eMSGFDBResultsFileColumns.IMSDriftTime)
 
 		Try
 			' Initialize each entry in intColumnMapping to -1
@@ -1656,39 +1656,39 @@ Public Class clsMSGFDBResultsProcessor
 
 		ReDim intColumnMapping(MSGFDBSynFileColCount - 1)
 
-		lstColumnNames.Add("ResultID", eMSFDBSynFileColumns.ResultID)
-		lstColumnNames.Add("Scan", eMSFDBSynFileColumns.Scan)
-		lstColumnNames.Add("FragMethod", eMSFDBSynFileColumns.FragMethod)
-		lstColumnNames.Add("SpecIndex", eMSFDBSynFileColumns.SpecIndex)
-		lstColumnNames.Add("Charge", eMSFDBSynFileColumns.Charge)
-		lstColumnNames.Add("PrecursorMZ", eMSFDBSynFileColumns.PrecursorMZ)
-		lstColumnNames.Add("DelM", eMSFDBSynFileColumns.DelM)
-		lstColumnNames.Add("DelM_PPM", eMSFDBSynFileColumns.DelMPPM)
-		lstColumnNames.Add("MH", eMSFDBSynFileColumns.MH)
-		lstColumnNames.Add("Peptide", eMSFDBSynFileColumns.Peptide)
-		lstColumnNames.Add("Protein", eMSFDBSynFileColumns.Protein)
-		lstColumnNames.Add("NTT", eMSFDBSynFileColumns.NTT)
-		lstColumnNames.Add("DeNovoScore", eMSFDBSynFileColumns.DeNovoScore)
-		lstColumnNames.Add("MSGFScore", eMSFDBSynFileColumns.MSGFScore)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_ResultID, eMSFDBSynFileColumns.ResultID)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Scan, eMSFDBSynFileColumns.Scan)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_FragMethod, eMSFDBSynFileColumns.FragMethod)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_SpecIndex, eMSFDBSynFileColumns.SpecIndex)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Charge, eMSFDBSynFileColumns.Charge)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PrecursorMZ, eMSFDBSynFileColumns.PrecursorMZ)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_DelM, eMSFDBSynFileColumns.DelM)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_DelM_PPM, eMSFDBSynFileColumns.DelMPPM)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_MH, eMSFDBSynFileColumns.MH)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Peptide, eMSFDBSynFileColumns.Peptide)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Protein, eMSFDBSynFileColumns.Protein)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_NTT, eMSFDBSynFileColumns.NTT)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore, eMSFDBSynFileColumns.DeNovoScore)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, eMSFDBSynFileColumns.MSGFScore)
 
-		lstColumnNames.Add("MSGFDB_SpecProb", eMSFDBSynFileColumns.SpecProb_EValue)
-		lstColumnNames.Add("MSGFDB_SpecEValue", eMSFDBSynFileColumns.SpecProb_EValue)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb, eMSFDBSynFileColumns.SpecProb_EValue)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue, eMSFDBSynFileColumns.SpecProb_EValue)
 
-		lstColumnNames.Add("Rank_MSGFDB_SpecProb", eMSFDBSynFileColumns.RankSpecProb)
-		lstColumnNames.Add("Rank_MSGFDB_SpecEValue", eMSFDBSynFileColumns.RankSpecProb)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecProb, eMSFDBSynFileColumns.RankSpecProb)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecEValue, eMSFDBSynFileColumns.RankSpecProb)
 
-		lstColumnNames.Add("PValue", eMSFDBSynFileColumns.PValue_EValue)
-		lstColumnNames.Add("EValue", eMSFDBSynFileColumns.PValue_EValue)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PValue, eMSFDBSynFileColumns.PValue_EValue)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_EValue, eMSFDBSynFileColumns.PValue_EValue)
 
-		lstColumnNames.Add("FDR", eMSFDBSynFileColumns.FDR_QValue)
-		lstColumnNames.Add("QValue", eMSFDBSynFileColumns.FDR_QValue)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_FDR, eMSFDBSynFileColumns.FDR_QValue)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_QValue, eMSFDBSynFileColumns.FDR_QValue)
 
-		lstColumnNames.Add("PepFDR", eMSFDBSynFileColumns.PepFDR_PepQValue)
-		lstColumnNames.Add("PepQValue", eMSFDBSynFileColumns.PepFDR_PepQValue)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PepFDR, eMSFDBSynFileColumns.PepFDR_PepQValue)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PepQValue, eMSFDBSynFileColumns.PepFDR_PepQValue)
 
-		lstColumnNames.Add("EFDR", eMSFDBSynFileColumns.EFDR)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_EFDR, eMSFDBSynFileColumns.EFDR)
 
-		lstColumnNames.Add("IsotopeError", eMSFDBSynFileColumns.IsotopeError)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Isotope_Error, eMSFDBSynFileColumns.IsotopeError)
 
 		Try
 			' Initialize each entry in intColumnMapping to -1
@@ -2532,54 +2532,54 @@ Public Class clsMSGFDBResultsProcessor
 		' Write out the header line for synopsis / first hits files
 		Try
 			Dim lstData As New System.Collections.Generic.List(Of String)
-			lstData.Add(COLUMN_NAME_RESULTID)
-			lstData.Add("Scan")
-			lstData.Add("FragMethod")
-			lstData.Add("SpecIndex")
-			lstData.Add("Charge")
-			lstData.Add("PrecursorMZ")
-			lstData.Add("DelM")
-			lstData.Add("DelM_PPM")
-			lstData.Add("MH")
-			lstData.Add(COLUMN_NAME_PEPTIDE)
-			lstData.Add("Protein")
-			lstData.Add("NTT")
-			lstData.Add("DeNovoScore")
-			lstData.Add("MSGFScore")
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_ResultID)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Scan)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_FragMethod)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_SpecIndex)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Charge)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PrecursorMZ)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_DelM)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_DelM_PPM)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_MH)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Peptide)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Protein)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_NTT)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore)
+			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore)
 
 			If blnMSGFPlus Then
-				lstData.Add("MSGFDB_SpecEValue")
-				lstData.Add("Rank_MSGFDB_SpecEValue")
-				lstData.Add("EValue")
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue)
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecEValue)
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_EValue)
 			Else
-				lstData.Add("MSGFDB_SpecProb")
-				lstData.Add("Rank_MSGFDB_SpecProb")
-				lstData.Add("PValue")
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb)
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecProb)
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PValue)
 			End If
 
 			If blnIncludeFDRandPepFDR Then
 
 				If blnMSGFPlus Then
-					lstData.Add("QValue")
-					lstData.Add("PepQValue")
+					lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_QValue)
+					lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PepQValue)
 				Else
-					lstData.Add("FDR")
-					lstData.Add("PepFDR")
+					lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_FDR)
+					lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PepFDR)
 				End If
 
 			ElseIf blnIncludeEFDR Then
 				' Note that we'll write out a "1" for "PepFDR" for every result
-				lstData.Add("EFDR")
-				lstData.Add("PepFDR")
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_EFDR)
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_PepFDR)
 			End If
 
 			If blnMSGFPlus Then
-				lstData.Add("IsotopeError")
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Isotope_Error)
 			End If
 
 			If blnIncludeIMSFields Then
-				lstData.Add("IMS_Scan")
-				lstData.Add("IMS_Drift_Time")
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Scan)
+				lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time)
 			End If
 
 			swResultFile.WriteLine(CollapseList(lstData))
