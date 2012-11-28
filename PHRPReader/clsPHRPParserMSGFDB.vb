@@ -48,6 +48,9 @@ Public Class clsPHRPParserMSGFDB
 
 	Public Const DATA_COLUMN_EFDR As String = "EFDR"						' Only present if a Target/Decoy (TDA) search was not used
 
+	Public Const DATA_COLUMN_IMS_Scan As String = "IMS_Scan"
+	Public Const DATA_COLUMN_IMS_Drift_Time As String = "IMS_Drift_Time"
+
 	Public Const DATA_COLUMN_Isotope_Error As String = "IsotopeError"		' Only reported by MSGF+
 
 	Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GFDB"
@@ -109,6 +112,8 @@ Public Class clsPHRPParserMSGFDB
 		AddHeaderColumn(DATA_COLUMN_QValue)
 		AddHeaderColumn(DATA_COLUMN_PepQValue)
 
+		AddHeaderColumn(DATA_COLUMN_IMS_Scan)
+		AddHeaderColumn(DATA_COLUMN_IMS_Drift_Time)
 		AddHeaderColumn(DATA_COLUMN_Isotope_Error)
 
 	End Sub
@@ -410,6 +415,9 @@ Public Class clsPHRPParserMSGFDB
 				End If
 
 				AddScore(objPSM, strColumns, DATA_COLUMN_EFDR)		' This column will not be present if a Target/Decoy (TDA) search was performed
+
+				AddScore(objPSM, strColumns, DATA_COLUMN_IMS_Scan)
+				AddScore(objPSM, strColumns, DATA_COLUMN_IMS_Drift_Time)
 
 			End If
 

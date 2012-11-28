@@ -2,6 +2,7 @@ PHRPReader.dll Revision History
 
 Version 1.1.4714; November 27, 2012
 	- Added support for MSGF+ columns
+	- Added support for IMS columns
 
 Version 1.1.4682; October 26, 2012
 	- Added function GetPHRPProteinModsFileName
