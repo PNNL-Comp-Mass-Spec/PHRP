@@ -657,6 +657,7 @@ Public Class clsMSGFDBResultsProcessor
 	   ByVal strScanGroupFilePath As String, _
 	   ByRef lstMSGFDBModInfo As Generic.List(Of udtModInfoType), _
 	   ByRef blnMSGFPlus As Boolean, _
+	   ByRef lstSpecIdToIndex As Generic.Dictionary(Of String, Integer), _
 	   ByVal eFilteredOutputFileType As eFilteredOutputFileTypeConstants, _
 	   Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
 
@@ -758,7 +759,7 @@ Public Class clsMSGFDBResultsProcessor
 
 									blnValidSearchResult = ParseMSGFDBResultsFileEntry(strLineIn, blnMSGFPlus, lstMSGFDBModInfo, lstSearchResults, _
 									  strErrorLog, intResultsProcessed, _
-									  intColumnMapping, intNextScanGroupID, lstScanGroupDetails, htScanGroupCombo)
+									  intColumnMapping, intNextScanGroupID, lstScanGroupDetails, htScanGroupCombo, lstSpecIdToIndex)
 
 									If blnValidSearchResult Then
 										AddCurrentRecordToSearchResults(intSearchResultsCount, udtSearchResults, lstSearchResults, strErrorLog)
@@ -1343,7 +1344,8 @@ Public Class clsMSGFDBResultsProcessor
 	   ByRef intColumnMapping() As Integer, _
 	   ByRef intNextScanGroupID As Integer, _
 	   ByRef lstScanGroupDetails As Generic.List(Of udtScanGroupInfoType), _
-	   ByRef htScanGroupCombo As Generic.Dictionary(Of String, Boolean)) As Boolean
+	   ByRef htScanGroupCombo As Generic.Dictionary(Of String, Boolean), _
+	   ByRef lstSpecIdToIndex As Generic.Dictionary(Of String, Integer)) As Boolean
 
 		' Parses an entry from the MSGF-DB results file
 
@@ -1386,8 +1388,18 @@ Public Class clsMSGFDBResultsProcessor
 					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecIndex), .SpecIndex)
 
 					If blnMSGFPlus Then
-						' MSGF+ includes "index=" in the SpecID column; remove that text
-						.SpecIndex = .SpecIndex.Replace("index=", String.Empty)
+						Dim intSpecIndex As Integer
+						If Not Integer.TryParse(.SpecIndex, intSpecIndex) Then
+							' MSGF+ includes text in the SpecID column, for example: controllerType=0 controllerNumber=1 scan=6390
+							' Need to convert these to an integer
+
+							If Not lstSpecIdToIndex.TryGetValue(.SpecIndex, intSpecIndex) Then
+								intSpecIndex = lstSpecIdToIndex.Count + 1
+								lstSpecIdToIndex.Add(.SpecIndex, intSpecIndex)							
+							End If
+
+							.SpecIndex = intSpecIndex.ToString()
+						End If
 					End If
 
 					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Scan), .Scan) Then
@@ -1908,6 +1920,7 @@ Public Class clsMSGFDBResultsProcessor
 		Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
 		Dim blnMSGFPlus As Boolean
+		Dim lstSpecIdToIndex As Generic.Dictionary(Of String, Integer)
 
 		Dim blnSuccess As Boolean
 
@@ -1926,6 +1939,8 @@ Public Class clsMSGFDBResultsProcessor
 				If Not blnSuccess Then
 					Exit Try
 				End If
+
+				lstSpecIdToIndex = New Generic.Dictionary(Of String, Integer)
 
 				MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
 
@@ -1963,7 +1978,7 @@ Public Class clsMSGFDBResultsProcessor
 
 							strScanGroupFilePath = String.Empty
 
-							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strFhtOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, eFilteredOutputFileTypeConstants.FHTFile)
+							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strFhtOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, lstSpecIdToIndex, eFilteredOutputFileTypeConstants.FHTFile)
 
 						End If
 
@@ -1979,7 +1994,7 @@ Public Class clsMSGFDBResultsProcessor
 
 							strScanGroupFilePath = System.IO.Path.Combine(strOutputFolderPath, strBaseName & "_ScanGroupInfo.txt")
 
-							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, eFilteredOutputFileTypeConstants.SynFile)
+							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, lstSpecIdToIndex, eFilteredOutputFileTypeConstants.SynFile)
 
 							' Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
 							' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols							
