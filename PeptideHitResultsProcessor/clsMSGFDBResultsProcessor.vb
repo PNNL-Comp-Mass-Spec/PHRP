@@ -1389,16 +1389,28 @@ Public Class clsMSGFDBResultsProcessor
 
 					If blnMSGFPlus Then
 						Dim intSpecIndex As Integer
+						Dim blnGenerateSpecIndex As Boolean = True
+
 						If Not Integer.TryParse(.SpecIndex, intSpecIndex) Then
-							' MSGF+ includes text in the SpecID column, for example: controllerType=0 controllerNumber=1 scan=6390
+							' MSGF+ includes text in the SpecID column, for example: "controllerType=0 controllerNumber=1 scan=6390" or "index=4323"
 							' Need to convert these to an integer
 
-							If Not lstSpecIdToIndex.TryGetValue(.SpecIndex, intSpecIndex) Then
-								intSpecIndex = lstSpecIdToIndex.Count + 1
-								lstSpecIdToIndex.Add(.SpecIndex, intSpecIndex)							
+							If .SpecIndex.StartsWith("index=") Then
+								.SpecIndex = .SpecIndex.Substring("index=".Length)
+								If Integer.TryParse(.SpecIndex, intSpecIndex) Then
+									blnGenerateSpecIndex = False
+								End If
 							End If
 
-							.SpecIndex = intSpecIndex.ToString()
+							If blnGenerateSpecIndex Then
+								If Not lstSpecIdToIndex.TryGetValue(.SpecIndex, intSpecIndex) Then
+									intSpecIndex = lstSpecIdToIndex.Count + 1
+									lstSpecIdToIndex.Add(.SpecIndex, intSpecIndex)
+								End If
+
+								.SpecIndex = intSpecIndex.ToString()
+							End If
+						
 						End If
 					End If
 
