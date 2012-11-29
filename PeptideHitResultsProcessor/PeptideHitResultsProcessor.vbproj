@@ -106,6 +106,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="clsInSpecTResultsProcessor.vb" />
+    <Compile Include="clsMSAlignResultsProcessor.vb" />
     <Compile Include="clsMSGFDBResultsProcessor.vb" />
     <Compile Include="clsPeptideModificationContainer.vb">
       <SubType>Code</SubType>
@@ -117,6 +118,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="clsSearchResultsInSpecT.vb" />
+    <Compile Include="clsSearchResultsMSAlign.vb" />
     <Compile Include="clsSearchResultsMSGFDB.vb" />
     <Compile Include="clsSearchResultsSequest.vb">
       <SubType>Code</SubType>

@@ -38,11 +38,11 @@ Public Class clsPSM
 	Protected mNumMissedCleavages As Short
 	Protected mNumTrypticTerminii As Short
 
-	Protected mPrecursorNeutralMass As Double		' Uncharged monoisotopic mass of the precursor
+	Protected mPrecursorNeutralMass As Double		' Uncharged monoisotopic mass of the observed precursor
 	Protected mMassErrorDa As String
 	Protected mMassErrorPPM As String
 
-	Protected mPeptideMonoisotopicMass As Double
+	Protected mPeptideMonoisotopicMass As Double	' Theoretical (computed) monoisotopic mass
 
 	' Note that protein names are case-sensitive
 	Protected mProteins As System.Collections.Generic.List(Of String)

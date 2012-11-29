@@ -12,7 +12,7 @@ Option Strict On
 ' Last updated June 26, 2006
 '
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
+' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -55,7 +55,7 @@ Public MustInherit Class clsSearchResultsBaseClass
 	Protected mGroupID As Integer								' Group ID assigned by XTandem
 	Protected mScan As String
 	Protected mCharge As String
-	Protected mParentIonMH As String
+	Protected mParentIonMH As String							' Observed precursor m/z value converted to M+H
 
 	Protected mMultipleProteinCount As String					' Multiple protein count: 0 if the peptide is only in 1 protein; 1 if the protein is in 2 proteins, etc.
 	Protected mProteinName As String
@@ -76,8 +76,8 @@ Public MustInherit Class clsSearchResultsBaseClass
 	Protected mPeptideCleavageState As ePeptideCleavageStateConstants
 	Protected mPeptideTerminusState As ePeptideTerminusStateConstants
 
-	Protected mPeptideMH As String					' In XTandem this is the theoretical monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect and MSGFDB, this is the theoretical monoisotopic MH; note that this is (M+H)+
-	Protected mPeptideDeltaMass As String			' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation); in Sequest this is Theoretical Mass - Observed Mass; The XTandem XML file stores DelM as Observed - Theoretical, but PHRP negates this to match Sequest; Inspect stores this value as Observed - Theoretical, but PHRP negates this to match Sequest; MSGFDB stores this value as Observed - Theoretical, but PHRP negates this to match Sequest
+	Protected mPeptideMH As String					' In XTandem this is the theoretical monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, MSGFDB, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
+	Protected mPeptideDeltaMass As String			' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation); in Sequest this is Theoretical Mass - Observed Mass.  In XTandem, Inspect, MSGFDB, and MSAlign the DelM value is listed as Observed - Theoretical, however, PHRP negates while reading the synopsis file to match Sequest
 
 	'Protected mPeptideDeltaMassCorrectedPpm As Double         ' Computed using either mPeptideDeltaMass (negating to bring back to Observed minus Theoretical) or using PrecursorMass - mPeptideMonoisotopicMass; In either case, we must add/subtract 1 until value is between -0.5 and 0.5, then convert to ppm (using mPeptideMonoisotopicMass for ppm basis)
 
@@ -830,6 +830,21 @@ Public MustInherit Class clsSearchResultsBaseClass
 		If Math.Round(Math.Abs(dblCTerminalMassChange - mPeptideSeqMassCalculator.PeptideCTerminusMass), MASS_DIGITS_OF_PRECISION) > 0 Then
 			mPeptideSeqMassCalculator.PeptideCTerminusMass = dblCTerminalMassChange
 		End If
+	End Sub
+
+	Public Sub UpdateSearchResultEnzymeAndTerminusInfo(ByVal udtEnzymeMatchSpec As udtEnzymeMatchSpecType, ByVal dblPeptideNTerminusMassChange As Double, ByVal dblPeptideCTerminusMassChange As Double)
+
+		SetEnzymeMatchSpec(udtEnzymeMatchSpec)
+
+		' Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
+		If dblPeptideNTerminusMassChange <> 0 Then
+			UpdatePeptideNTerminusMass(dblPeptideNTerminusMassChange)
+		End If
+
+		If dblPeptideCTerminusMassChange <> 0 Then
+			UpdatePeptideCTerminusMass(dblPeptideCTerminusMassChange)
+		End If
+
 	End Sub
 
 	Public Function SequenceWithPrefixAndSuffix(ByVal blnReturnSequenceWithMods As Boolean) As String

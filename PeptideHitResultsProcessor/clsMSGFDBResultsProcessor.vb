@@ -199,10 +199,6 @@ Public Class clsMSGFDBResultsProcessor
 
 #Region "Classwide Variables"
 	Protected mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
-	Protected mReplaceSymbols As System.Text.RegularExpressions.Regex
-#End Region
-
-#Region "Properties"
 #End Region
 
 	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
@@ -452,7 +448,7 @@ Public Class clsMSGFDBResultsProcessor
 	End Function
 
 	''' <summary>
-	''' Parses the digits in strModValues to convert them to one or more modification symbols
+	''' Parses the digits in strModDigits to convert them to one or more modification symbols
 	''' </summary>
 	''' <param name="strModDigits">Example: +57.021 or +79.9663+14.0157 or -18.0106</param>
 	''' <param name="strModSymbols"></param>
@@ -460,7 +456,7 @@ Public Class clsMSGFDBResultsProcessor
 	''' <remarks></remarks>
 	Protected Function ConvertMGSFModMassesToSymbols(ByVal strModDigits As String, _
 	 ByRef strModSymbols As String, _
-	 ByRef udtMSGFDBModInfo() As udtModInfoType, _
+	 ByRef lstMSGFDBModInfo As Generic.List(Of udtModInfoType), _
 	 ByVal blnNterminalMod As Boolean, _
 	 ByVal blnPossibleCTerminalMod As Boolean, _
 	 ByRef dblModMassFound As Double, _
@@ -501,12 +497,12 @@ Public Class clsMSGFDBResultsProcessor
 				dblCandidateMassDiff = Double.MaxValue
 
 				' Step through the known modifications to find the closest match
-				For intIndex As Integer = 0 To udtMSGFDBModInfo.Length - 1
+				For intIndex As Integer = 0 To lstMSGFDBModInfo.Count - 1
 
 					If blnNterminalMod Then
 						' Only test N-terminal mods
-						If udtMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermPeptide OrElse _
-						 udtMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermProtein Then
+						If lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermPeptide OrElse _
+						 lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermProtein Then
 							blnTestMod = True
 						Else
 							blnTestMod = False
@@ -514,8 +510,8 @@ Public Class clsMSGFDBResultsProcessor
 
 					ElseIf blnPossibleCTerminalMod Then
 						' Only test C-terminal mods
-						If udtMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermPeptide OrElse _
-						 udtMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermProtein Then
+						If lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermPeptide OrElse _
+						 lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermProtein Then
 							blnTestMod = True
 						Else
 							blnTestMod = False
@@ -526,13 +522,13 @@ Public Class clsMSGFDBResultsProcessor
 					End If
 
 					If blnTestMod Then
-						dblCandidateMassDiff = Math.Abs(udtMSGFDBModInfo(intIndex).ModMassVal - dblModMass)
+						dblCandidateMassDiff = Math.Abs(lstMSGFDBModInfo(intIndex).ModMassVal - dblModMass)
 						If dblCandidateMassDiff < 0.25 Then
 							' Possible match found
 							If intBestMatchIndex < 0 OrElse dblCandidateMassDiff < dblBestMassDiff OrElse (dblCandidateMassDiff = dblBestMassDiff And chSymbolBestMatch = "-"c) Then
 								intBestMatchIndex = intIndex
 								dblBestMassDiff = dblCandidateMassDiff
-								chSymbolBestMatch = udtMSGFDBModInfo(intIndex).ModSymbol
+								chSymbolBestMatch = lstMSGFDBModInfo(intIndex).ModSymbol
 								blnMatchFound = True
 							End If
 						End If
@@ -553,10 +549,10 @@ Public Class clsMSGFDBResultsProcessor
 
 			If blnMatchFound Then
 				' Match found; use the mod symbol
-				strModSymbols &= udtMSGFDBModInfo(intBestMatchIndex).ModSymbol
+				strModSymbols &= lstMSGFDBModInfo(intBestMatchIndex).ModSymbol
 				intModSymbolsFound += 1
 
-				If udtMSGFDBModInfo(intBestMatchIndex).ModType = eMSGFDBModType.StaticMod Then
+				If lstMSGFDBModInfo(intBestMatchIndex).ModType = eMSGFDBModType.StaticMod Then
 					blnIsStaticMod = True
 				End If
 			Else
@@ -583,7 +579,7 @@ Public Class clsMSGFDBResultsProcessor
 	''' <param name="strInputFilePath"></param>
 	''' <param name="strOutputFilePath"></param>
 	''' <param name="strScanGroupFilePath"></param>
-	''' <param name="udtMSGFDBModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
+	''' <param name="lstMSGFDBModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
 	''' <param name="blnMSGFPlus">Output parameter: this function will set this to True if we're processing MSGF+ results</param>
 	''' <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
 	''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
@@ -592,7 +588,7 @@ Public Class clsMSGFDBResultsProcessor
 	Protected Function CreateFHTorSYNResultsFile(ByVal strInputFilePath As String, _
 	   ByVal strOutputFilePath As String, _
 	   ByVal strScanGroupFilePath As String, _
-	   ByRef udtMSGFDBModInfo() As udtModInfoType, _
+	   ByRef lstMSGFDBModInfo As Generic.List(Of udtModInfoType), _
 	   ByRef blnMSGFPlus As Boolean, _
 	   ByVal eFilteredOutputFileType As eFilteredOutputFileTypeConstants, _
 	   Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
@@ -691,7 +687,7 @@ Public Class clsMSGFDBResultsProcessor
 									WriteSynFHTFileHeader(swResultFile, strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
 								Else
 
-									blnValidSearchResult = ParseMSGFDBResultsFileEntry(strLineIn, blnMSGFPlus, udtMSGFDBModInfo, lstSearchResults, _
+									blnValidSearchResult = ParseMSGFDBResultsFileEntry(strLineIn, blnMSGFPlus, lstMSGFDBModInfo, lstSearchResults, _
 									  strErrorLog, intResultsProcessed, _
 									  intColumnMapping, intNextScanGroupID, lstScanGroupDetails, htScanGroupCombo)
 
@@ -827,10 +823,10 @@ Public Class clsMSGFDBResultsProcessor
 	''' Extracts mod info from either a MSGF-DB param file or from a MSGFDB_Mods.txt file
 	''' </summary>
 	''' <param name="strMSGFDBParamFilePath"></param>
-	''' <param name="udtModList"></param>
+	''' <param name="lstModInfo"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Private Function ExtractModInfoFromMSGFDBModsFile(ByVal strMSGFDBParamFilePath As String, ByRef udtModList() As udtModInfoType) As Boolean
+	Private Function ExtractModInfoFromMSGFDBModsFile(ByVal strMSGFDBParamFilePath As String, ByRef lstModInfo As Generic.List(Of udtModInfoType)) As Boolean
 
 		Const STATIC_MOD_TAG As String = "StaticMod"
 		Const DYNAMIC_MOD_TAG As String = "DynamicMod"
@@ -838,17 +834,18 @@ Public Class clsMSGFDBResultsProcessor
 		Dim strLineIn As String
 		Dim strSplitLine As String()
 		Dim strModSpec As String
-		Dim intPoundIndex As Integer
 
-		Dim intModCount As Integer
 		Dim intUnnamedModID As Integer
 
 		Dim blnSuccess As Boolean = False
 
 		Try
-			' Initialize udtModList and intUnnamedModID
-			intModCount = 0
-			ReDim udtModList(-1)
+			' Initialize the modification list and intUnnamedModID
+			If lstModInfo Is Nothing Then
+				lstModInfo = New Generic.List(Of udtModInfoType)
+			Else
+				lstModInfo.Clear()
+			End If
 
 			intUnnamedModID = 0
 
@@ -871,12 +868,6 @@ Public Class clsMSGFDBResultsProcessor
 						If strLineIn.StartsWith("#"c) Then
 							' Comment line; skip it
 						Else
-							intPoundIndex = strLineIn.IndexOf("#"c)
-							If intPoundIndex > 0 Then
-								' Trim out the comment from the end
-								strLineIn = strLineIn.Substring(0, intPoundIndex).Trim()
-							End If
-
 							strModSpec = ValidateIsValidModSpec(strLineIn, STATIC_MOD_TAG)
 							If Not String.IsNullOrEmpty(strModSpec) Then
 								' Line resembles StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
@@ -902,13 +893,9 @@ Public Class clsMSGFDBResultsProcessor
 
 							If strSplitLine.Length >= 5 Then
 
-								If udtModList.Length = 0 Then
-									ReDim udtModList(0)
-								ElseIf intModCount >= udtModList.Length Then
-									ReDim Preserve udtModList(udtModList.Length * 2 - 1)
-								End If
+								Dim udtModInfo As udtModInfoType = New udtModInfoType
 
-								With udtModList(intModCount)
+								With udtModInfo
 									.ModMass = strSplitLine(0).Trim()
 
 									If Not Double.TryParse(.ModMass, .ModMassVal) Then
@@ -926,7 +913,7 @@ Public Class clsMSGFDBResultsProcessor
 										Case "fix"
 											.ModType = eMSGFDBModType.StaticMod
 										Case Else
-											SetErrorMessage("Warning: Unrecognized Mod Type in the MSGFDB parameter file; should be 'opt' or 'fix'")
+											ReportWarning("Unrecognized Mod Type in the MSGFDB parameter file; should be 'opt' or 'fix'")
 											.ModType = eMSGFDBModType.DynamicMod
 									End Select
 
@@ -948,7 +935,7 @@ Public Class clsMSGFDBResultsProcessor
 											.Residues = PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
 											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
 										Case Else
-											SetErrorMessage("Warning: Unrecognized Mod Type in the MSGFDB parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
+											ReportWarning("Unrecognized Mod Type in the MSGFDB parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
 									End Select
 
 									.ModName = strSplitLine(4).Trim()
@@ -959,15 +946,13 @@ Public Class clsMSGFDBResultsProcessor
 
 								End With
 
-								intModCount += 1
+								lstModInfo.Add(udtModInfo)
+
 							End If
 						End If
 					End If
 				Loop
 			End Using
-
-			' Shrink udtModList to the appropriate length
-			ReDim Preserve udtModList(intModCount - 1)
 
 			Console.WriteLine()
 
@@ -983,34 +968,6 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	Protected Function GetCleanSequence(ByVal strSequenceWithMods As String) As String
-		Dim strPrefix As String = String.Empty
-		Dim strSuffix As String = String.Empty
-
-		Return GetCleanSequence(strSequenceWithMods, strPrefix, strSuffix)
-	End Function
-
-	Protected Function GetCleanSequence(ByVal strSequenceWithMods As String, ByRef strPrefix As String, ByRef strSuffix As String) As String
-
-		Dim strPrimarySequence As String = String.Empty
-		strPrefix = String.Empty
-		strSuffix = String.Empty
-
-		If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
-
-			' Remove any non-letter characters when calling .ComputeCleavageState()
-
-			strPrimarySequence = mReplaceSymbols.Replace(strPrimarySequence, String.Empty)
-
-		Else
-			' Unable to determine cleavage-state
-			strPrimarySequence = mReplaceSymbols.Replace(strSequenceWithMods, String.Empty)
-		End If
-
-		Return strPrimarySequence
-
-	End Function
-
 	Private Sub InitializeLocalVariables()
 
 		' Initialize mPeptideCleavageStateCalculator
@@ -1019,9 +976,6 @@ Public Class clsMSGFDBResultsProcessor
 			mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.eStandardCleavageAgentConstants.Trypsin)
 		End If
 
-		' Define a RegEx to replace all of the non-letter characters
-		mReplaceSymbols = New System.Text.RegularExpressions.Regex("[^A-Za-z]", System.Text.RegularExpressions.RegexOptions.Compiled)
-
 	End Sub
 
 	''' <summary>
@@ -1029,7 +983,7 @@ Public Class clsMSGFDBResultsProcessor
 	''' </summary>
 	''' <param name="strPepToProteinMapFilePath"></param>
 	''' <param name="strOutputFolderPath"></param>
-	''' <param name="udtMSGFDBModInfo"></param>
+	''' <param name="lstMSGFDBModInfo"></param>
 	''' <param name="blnMSGFPlus">Should be set to True if processing MSGF+ results</param>
 	''' <param name="lstPepToProteinMapping"></param>
 	''' <param name="strMTSPepToProteinMapFilePath"></param>
@@ -1037,7 +991,7 @@ Public Class clsMSGFDBResultsProcessor
 	''' <remarks></remarks>
 	Protected Function LoadPeptideToProteinMapInfoMSGFDB(ByVal strPepToProteinMapFilePath As String, _
 	  ByVal strOutputFolderPath As String, _
-	  ByRef udtMSGFDBModInfo() As udtModInfoType, _
+	  ByRef lstMSGFDBModInfo As Generic.List(Of udtModInfoType), _
 	  ByVal blnMSGFPlus As Boolean, _
 	  ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), _
 	  ByRef strMTSPepToProteinMapFilePath As String) As Boolean
@@ -1054,10 +1008,12 @@ Public Class clsMSGFDBResultsProcessor
 			strMTSPepToProteinMapFilePath = String.Empty
 
 			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
-				SetErrorMessage("Warning: PepToProteinMap file is not defined")
+				Console.WriteLine()
+				ReportWarning("PepToProteinMap file is not defined")
 				Return False
 			ElseIf Not System.IO.File.Exists(strPepToProteinMapFilePath) Then
-				SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
+				Console.WriteLine()
+				ReportWarning("PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
 				Return False
 			End If
 
@@ -1079,7 +1035,7 @@ Public Class clsMSGFDBResultsProcessor
 					For intIndex As Integer = 0 To lstPepToProteinMapping.Count - 1
 						' Replace any mod text names in the peptide sequence with the appropriate mod symbols
 						' In addition, replace the * terminus symbols with dashes
-						strMTSCompatiblePeptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), udtMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
+						strMTSCompatiblePeptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
 
 						If lstPepToProteinMapping(intIndex).Peptide <> strMTSCompatiblePeptide Then
 							UpdatePepToProteinMapPeptide(lstPepToProteinMapping, intIndex, strMTSCompatiblePeptide)
@@ -1165,7 +1121,7 @@ Public Class clsMSGFDBResultsProcessor
 			End If
 
 			Try
-				UpdateSearchResultEnzymeAndTerminusInfo(objSearchResult)
+				objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
 				' Open the input file and parse it
 				' Initialize the stream reader
@@ -1254,7 +1210,7 @@ Public Class clsMSGFDBResultsProcessor
 											Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso strCurrentPeptideWithMods = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
 										Else
 											' Match not found; this is unexpected
-											Console.WriteLine("Warning: no match for '" & strCurrentPeptideWithMods & "' in lstPepToProteinMapping")
+											ReportWarning("no match for '" & strCurrentPeptideWithMods & "' in lstPepToProteinMapping")
 										End If
 									End If
 
@@ -1311,7 +1267,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Private Function ParseMSGFDBResultsFileEntry(ByRef strLineIn As String, _
 	   ByVal blnMSGFPlus As Boolean, _
-	   ByRef udtMSGFDBModInfo() As udtModInfoType, _
+	   ByRef lstMSGFDBModInfo As Generic.List(Of udtModInfoType), _
 	   ByRef lstSearchResults As System.Collections.Generic.List(Of udtMSGFDBSearchResultType), _
 	   ByRef strErrorLog As String, _
 	   ByVal intResultsProcessed As Integer, _
@@ -1437,7 +1393,7 @@ Public Class clsMSGFDBResultsProcessor
 					' Replace any mod text values in the peptide sequence with the appropriate mod symbols
 					' In addition, replace the _ terminus symbols with dashes
 					Dim dblTotalModMass As Double
-					.Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), udtMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
+					.Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
 
 					' Compute monoisotopic mass of the peptide
 					Dim dblPeptideMonoisotopicMass As Double
@@ -1821,6 +1777,15 @@ Public Class clsMSGFDBResultsProcessor
 						.MSGFPlusResults = False
 					End If
 
+					' Compute PrecursorMH using PrecursorMZ and charge
+					Dim dblPrecursorMZ As Double
+					Dim intCharge As Integer
+					If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
+						If Integer.TryParse(.Charge, intCharge) Then
+							.ParentIonMH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, intCharge, 1), 6, True)
+						End If
+					End If
+
 				End With
 
 				blnValidSearchResult = True
@@ -1859,7 +1824,7 @@ Public Class clsMSGFDBResultsProcessor
 		Dim strPepToProteinMapFilePath As String
 		Dim strScanGroupFilePath As String
 
-		Dim udtMSGFDBModInfo() As udtModInfoType
+		Dim lstMSGFDBModInfo As Generic.List(Of udtModInfoType)
 		Dim lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType)
 		Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
@@ -1890,19 +1855,15 @@ Public Class clsMSGFDBResultsProcessor
 						' Obtain the full path to the input file
 						ioInputFile = New System.IO.FileInfo(strInputFilePath)
 
-						ReDim udtMSGFDBModInfo(-1)
+						lstMSGFDBModInfo = New Generic.List(Of udtModInfoType)
 						lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
 
 						' Load the MSGF-DB Parameter File so that we can determine the modification names and masses
-						' If the MSGFDB_Mods.txt file was defined, then the mod symbols in that file will be used to define the mod symbols in udtMSGFDBModInfo 
-						If Not ExtractModInfoFromMSGFDBModsFile(mSearchToolParameterFilePath, udtMSGFDBModInfo) Then
-							If udtMSGFDBModInfo Is Nothing OrElse udtMSGFDBModInfo.Length = 0 Then
-								ReDim udtMSGFDBModInfo(-1)
-							End If
-						End If
+						' If the MSGFDB_Mods.txt file was defined, then the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
+						ExtractModInfoFromMSGFDBModsFile(mSearchToolParameterFilePath, lstMSGFDBModInfo)
 
-						' Resolve the mods in udtMSGFDBModInfo with the ModDefs mods
-						ResolveInspectModsWithModDefinitions(udtMSGFDBModInfo)
+						' Resolve the mods in lstMSGFDBModInfo with the ModDefs mods
+						ResolveMSGFDBModsWithModDefinitions(lstMSGFDBModInfo)
 
 						' Define the base output filename using strInputFilePath
 						strBaseName = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
@@ -1923,7 +1884,7 @@ Public Class clsMSGFDBResultsProcessor
 
 							strScanGroupFilePath = String.Empty
 
-							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strFhtOutputFilePath, strScanGroupFilePath, udtMSGFDBModInfo, blnMSGFPlus, eFilteredOutputFileTypeConstants.FHTFile)
+							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strFhtOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, eFilteredOutputFileTypeConstants.FHTFile)
 
 						End If
 
@@ -1939,7 +1900,7 @@ Public Class clsMSGFDBResultsProcessor
 
 							strScanGroupFilePath = System.IO.Path.Combine(strOutputFolderPath, strBaseName & "_ScanGroupInfo.txt")
 
-							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, udtMSGFDBModInfo, blnMSGFPlus, eFilteredOutputFileTypeConstants.SynFile)
+							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, eFilteredOutputFileTypeConstants.SynFile)
 
 							' Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
 							' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols							
@@ -1950,7 +1911,7 @@ Public Class clsMSGFDBResultsProcessor
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
-							LoadPeptideToProteinMapInfoMSGFDB(strPepToProteinMapFilePath, strOutputFolderPath, udtMSGFDBModInfo, blnMSGFPlus, lstPepToProteinMapping, strMTSPepToProteinMapFilePath)
+							LoadPeptideToProteinMapInfoMSGFDB(strPepToProteinMapFilePath, strOutputFolderPath, lstMSGFDBModInfo, blnMSGFPlus, lstPepToProteinMapping, strMTSPepToProteinMapFilePath)
 
 
 							' Create the other PHRP-specific files
@@ -2013,9 +1974,9 @@ Public Class clsMSGFDBResultsProcessor
 						End If
 
 					Catch ex As Exception
-						SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " & ex.Message)
-						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-					End Try
+			SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " & ex.Message)
+			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+		End Try
 				End If
 			End If
 		Catch ex As Exception
@@ -2031,13 +1992,13 @@ Public Class clsMSGFDBResultsProcessor
 	''' Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
 	''' </summary>
 	''' <param name="strPeptide"></param>
-	''' <param name="udtMSGFDBModInfo">This function assumes that each entry in udtMSGFDBModInfo() has both .ModName and .ModSymbol defined</param>
+	''' <param name="lstMSGFDBModInfo">This function assumes that each entry in lstMSGFDBModInfo has both .ModName and .ModSymbol defined</param>
 	''' <param name="blnMSGFPlus">Should be set to True if processing MSGF+ results</param>
 	''' <param name="dblTotalModMass">Output parameter: total mass of all modifications</param>
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Protected Function ReplaceMSGFModTextWithSymbol(ByVal strPeptide As String, _
-	   ByRef udtMSGFDBModInfo() As udtModInfoType, _
+	   ByRef lstMSGFDBModInfo As Generic.List(Of udtModInfoType), _
 	   ByVal blnMSGFPlus As Boolean, _
 	   ByRef dblTotalModMass As Double) As String
 
@@ -2088,8 +2049,7 @@ Public Class clsMSGFDBResultsProcessor
 			blnIsStaticMod = False
 
 			' Convert the mod mass (or masses) to one or more mod symbols
-			If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, udtMSGFDBModInfo, _
-			   blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
+			If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, lstMSGFDBModInfo, blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
 
 				' Replace the mod digits with the mod symbols
 
@@ -2173,8 +2133,8 @@ Public Class clsMSGFDBResultsProcessor
 				blnNterminalMod = False
 
 				' Convert the mod mass (or masses) to one or more mod symbols
-				If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, udtMSGFDBModInfo, _
-				   blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
+				If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, lstMSGFDBModInfo, _
+				  blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
 
 					strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, blnMSGFPlus, blnIsStaticMod)
 					dblTotalModMass += dblModMassFound
@@ -2227,7 +2187,10 @@ Public Class clsMSGFDBResultsProcessor
 			strPeptideNew = String.Empty
 		End If
 
-		If Not (blnMSGFPlus And blnIsStaticMod) Then
+		If blnMSGFPlus AndAlso blnIsStaticMod Then
+			' MSGF+ shows mod masses for static mods
+			' However, for consistency with other PHRP results, we do not add a symbol to the peptide for this static mod
+		Else
 			strPeptideNew &= strModSymbols
 		End If
 
@@ -2253,9 +2216,8 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	Protected Sub ResolveInspectModsWithModDefinitions(ByRef udtMSGFDBModInfo() As udtModInfoType)
+	Protected Sub ResolveMSGFDBModsWithModDefinitions(ByRef lstMSGFDBModInfo As Generic.List(Of udtModInfoType))
 
-		Dim intIndex As Integer
 		Dim intResidueIndex As Integer
 		Dim intResIndexStart As Integer
 		Dim intResIndexEnd As Integer
@@ -2267,11 +2229,15 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim objModificationDefinition As clsModificationDefinition
 
-		If Not udtMSGFDBModInfo Is Nothing Then
-			For intIndex = 0 To udtMSGFDBModInfo.Length - 1
-				' Call .LookupModificationDefinitionByMass for each entry in udtMSGFDBModInfo
+		If Not lstMSGFDBModInfo Is Nothing Then
 
-				With udtMSGFDBModInfo(intIndex)
+			' Call .LookupModificationDefinitionByMass for each entry in lstMSGFDBModInfo
+			For intIndex As Integer = 0 To lstMSGFDBModInfo.Count - 1
+
+				Dim udtModInfo As udtModInfoType
+				udtModInfo = lstMSGFDBModInfo(intIndex)
+
+				With udtModInfo
 
 					If .Residues.Length > 0 Then
 						intResIndexStart = 0
@@ -2329,15 +2295,16 @@ Public Class clsMSGFDBResultsProcessor
 						objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMassAndModType(.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
 
 						If intResidueIndex = intResIndexStart Then
+							' Update the Mod Symbol
 							.ModSymbol = objModificationDefinition.ModificationSymbol
 						End If
 
 					Next intResidueIndex
 
-
 				End With
 
-			Next intIndex
+				lstMSGFDBModInfo(intIndex) = udtModInfo
+			Next
 		End If
 
 	End Sub
@@ -2463,59 +2430,23 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Sub
 
-	''' <summary>
-	''' Return the text up to (but not including) the first space in strProteinNameAndDescription
-	''' </summary>
-	''' <param name="strProteinNameAndDescription"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Private Function TruncateProteinName(ByVal strProteinNameAndDescription As String) As String
-
-		Dim intIndex As Integer
-
-		intIndex = strProteinNameAndDescription.IndexOf(" "c)
-		If intIndex > 0 Then
-			Return strProteinNameAndDescription.Substring(0, intIndex)
-		Else
-			Return strProteinNameAndDescription
-		End If
-
-	End Function
-
-	Private Sub UpdateSearchResultEnzymeAndTerminusInfo(ByRef objSearchResult As clsSearchResultsMSGFDB)
-		With objSearchResult
-			.SetEnzymeMatchSpec(mEnzymeMatchSpec)
-
-			' Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
-			If mPeptideNTerminusMassChange <> 0 Then
-				.UpdatePeptideNTerminusMass(mPeptideNTerminusMassChange)
-			End If
-
-			If mPeptideCTerminusMassChange <> 0 Then
-				.UpdatePeptideCTerminusMass(mPeptideCTerminusMassChange)
-			End If
-		End With
-	End Sub
-
 	Private Function ValidateIsValidModSpec(ByVal strLineIn As String, ByVal strModTag As String) As String
 
+		Dim kvSetting As Generic.KeyValuePair(Of String, String)
 		Dim strModSpec As String = String.Empty
 
 		If strLineIn.ToLower.StartsWith(strModTag.ToLower()) Then
-			strModSpec = strLineIn.Substring(strModTag.Length)
 
-			If strModSpec.StartsWith("="c) Then
-				' Mod spec found
-				strModSpec = strModSpec.Substring(1)
+			kvSetting = PHRPReader.clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
 
-				If strModSpec.ToLower() = "none" Then
-					' None means no-mods
-					strModSpec = String.Empty
-				End If
-
-			Else
+			If String.IsNullOrEmpty(kvSetting.Value) OrElse kvSetting.Value.ToLower() = "none" Then
+				' Not a valid mod spec
 				strModSpec = String.Empty
+			Else
+				' Mod spec found
+				strModSpec = kvSetting.Value
 			End If
+
 		End If
 
 		Return strModSpec
@@ -2672,39 +2603,37 @@ Public Class clsMSGFDBResultsProcessor
 #Region "IComparer Classes"
 
 	Protected Class MSGFDBSearchResultsComparerScanChargeSpecProbPeptide
-		Implements System.Collections.IComparer
+		Implements System.Collections.Generic.IComparer(Of udtMSGFDBSearchResultType)
 
-		Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-			Dim xData As udtMSGFDBSearchResultType = DirectCast(x, udtMSGFDBSearchResultType)
-			Dim yData As udtMSGFDBSearchResultType = DirectCast(y, udtMSGFDBSearchResultType)
+		Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtMSGFDBSearchResultType).Compare
 
-			If xData.ScanNum > yData.ScanNum Then
+			If x.ScanNum > y.ScanNum Then
 				Return 1
-			ElseIf xData.ScanNum < yData.ScanNum Then
+			ElseIf x.ScanNum < y.ScanNum Then
 				Return -1
 			Else
 				' Scan is the same, check charge
-				If xData.ChargeNum > yData.ChargeNum Then
+				If x.ChargeNum > y.ChargeNum Then
 					Return 1
-				ElseIf xData.ChargeNum < yData.ChargeNum Then
+				ElseIf x.ChargeNum < y.ChargeNum Then
 					Return -1
 				Else
 					' Charge is the same; check SpecProb
-					If xData.SpecProbNum > yData.SpecProbNum Then
+					If x.SpecProbNum > y.SpecProbNum Then
 						Return 1
-					ElseIf xData.SpecProbNum < yData.SpecProbNum Then
+					ElseIf x.SpecProbNum < y.SpecProbNum Then
 						Return -1
 					Else
 						' SpecProb is the same; check peptide
-						If xData.Peptide > yData.Peptide Then
+						If x.Peptide > y.Peptide Then
 							Return 1
-						ElseIf xData.Peptide < yData.Peptide Then
+						ElseIf x.Peptide < y.Peptide Then
 							Return -1
 						Else
 							' Peptide is the same, check Protein
-							If xData.Protein > yData.Protein Then
+							If x.Protein > y.Protein Then
 								Return 1
-							ElseIf xData.Protein < yData.Protein Then
+							ElseIf x.Protein < y.Protein Then
 								Return -1
 							Else
 								Return 0
@@ -2715,42 +2644,41 @@ Public Class clsMSGFDBResultsProcessor
 			End If
 
 		End Function
+
 	End Class
 
 	Protected Class MSGFDBSearchResultsComparerSpecProbScanChargePeptide
-		Implements System.Collections.IComparer
+		Implements System.Collections.Generic.IComparer(Of udtMSGFDBSearchResultType)
 
-		Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-			Dim xData As udtMSGFDBSearchResultType = DirectCast(x, udtMSGFDBSearchResultType)
-			Dim yData As udtMSGFDBSearchResultType = DirectCast(y, udtMSGFDBSearchResultType)
+		Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtMSGFDBSearchResultType).Compare
 
-			If xData.SpecProbNum > yData.SpecProbNum Then
+			If x.SpecProbNum > y.SpecProbNum Then
 				Return 1
-			ElseIf xData.SpecProbNum < yData.SpecProbNum Then
+			ElseIf x.SpecProbNum < y.SpecProbNum Then
 				Return -1
 			Else
 				' SpecProbNum is the same; check scan number
-				If xData.ScanNum > yData.ScanNum Then
+				If x.ScanNum > y.ScanNum Then
 					Return 1
-				ElseIf xData.ScanNum < yData.ScanNum Then
+				ElseIf x.ScanNum < y.ScanNum Then
 					Return -1
 				Else
 					' Scan is the same, check charge
-					If xData.ChargeNum > yData.ChargeNum Then
+					If x.ChargeNum > y.ChargeNum Then
 						Return 1
-					ElseIf xData.ChargeNum < yData.ChargeNum Then
+					ElseIf x.ChargeNum < y.ChargeNum Then
 						Return -1
 					Else
 						' Charge is the same; check peptide
-						If xData.Peptide > yData.Peptide Then
+						If x.Peptide > y.Peptide Then
 							Return 1
-						ElseIf xData.Peptide < yData.Peptide Then
+						ElseIf x.Peptide < y.Peptide Then
 							Return -1
 						Else
 							' Peptide is the same, check Protein
-							If xData.Protein > yData.Protein Then
+							If x.Protein > y.Protein Then
 								Return 1
-							ElseIf xData.Protein < yData.Protein Then
+							ElseIf x.Protein < y.Protein Then
 								Return -1
 							Else
 								Return 0
@@ -2761,6 +2689,7 @@ Public Class clsMSGFDBResultsProcessor
 			End If
 
 		End Function
+
 	End Class
 
 #End Region

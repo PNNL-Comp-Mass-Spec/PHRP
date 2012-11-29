@@ -13,7 +13,7 @@ Option Strict On
 ' Program started January 2, 2006
 '
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
+' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -264,7 +264,7 @@ Public Class clsSequestResultsProcessor
 			strPreviousXCorr = String.Empty
 
 			Try
-				UpdateSearchResultEnzymeAndTerminusInfo(objSearchResult)
+				objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
 				' Open the input file and parse it
 				' Initialize the stream reader
@@ -645,22 +645,6 @@ Public Class clsSequestResultsProcessor
         Return True
 
     End Function
-
-    Private Sub UpdateSearchResultEnzymeAndTerminusInfo(ByRef objSearchResult As clsSearchResultsSequest)
-        With objSearchResult
-            .SetEnzymeMatchSpec(mEnzymeMatchSpec)
-
-            ' Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
-            If mPeptideNTerminusMassChange <> 0 Then
-                .UpdatePeptideNTerminusMass(mPeptideNTerminusMassChange)
-            End If
-
-            If mPeptideCTerminusMassChange <> 0 Then
-                .UpdatePeptideCTerminusMass(mPeptideCTerminusMassChange)
-            End If
-        End With
-
-    End Sub
 
     ''Private Sub SaveSequestResultsFileEntry(ByRef objSearchResult As clsSearchResultsSequest, ByRef swSynopsisOutputFile As System.IO.StreamWriter)
 

@@ -8,7 +8,7 @@ Option Strict On
 ' Started January 6, 2006
 '
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
+' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -58,6 +58,8 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Public Const MSGFDB_RESULTS_FILE_SUFFIX As String = "_msgfdb.txt"
 
+	Public Const MSALIGN_RESULTS_FILE_SUFFIX As String = "_MSAlign_ResultTable.txt"
+
 	Public Const FILENAME_SUFFIX_RESULT_TO_SEQ_MAP As String = "_ResultToSeqMap.txt"
 	Public Const FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP As String = "_SeqToProteinMap.txt"
 
@@ -79,6 +81,7 @@ Public MustInherit Class clsPHRPBaseClass
 		XTandemXMLFile = 3
 		InSpectTXTFile = 4
 		MSGFDbTXTFile = 5
+		MSAlignTXTFile = 6
 	End Enum
 
 	Public Enum ePHRPErrorCodes
@@ -101,7 +104,7 @@ Public MustInherit Class clsPHRPBaseClass
 #End Region
 
 #Region "Structures"
-	Friend Structure udtSearchOptionModificationInfoType
+	Protected Structure udtSearchOptionModificationInfoType
 		Dim SortOrder As Integer
 		Dim ModificationMass As Double
 		Dim TargetResidues As String
@@ -150,6 +153,8 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Protected mInspectSynopsisFilePValueThreshold As Single		' Only used by clsInSpecTResultsProcessor; note that lower p-values are higher confidence results
 
+	Protected mMSAlignSynopsisFilePValueThreshold As Single		' Only used by clsMSAlignResultsProcessor; note that lower p-values are higher confidence results
+
 	Protected mMSGFDBSynopsisFilePValueThreshold As Single		' Only used by clsMSGFDBResultsProcessor; note that lower p-values are higher confidence results
 	Protected mMSGFDBSynopsisFileSpecProbThreshold As Single	' Only used by clsMSGFDBResultsProcessor; note that lower SpecProb values are higher confidence results
 
@@ -167,6 +172,8 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected mSeqToProteinMapFile As System.IO.StreamWriter
 
 	Protected mNextPeptideToProteinMapperLevel As Integer = 0
+
+	Protected mReplaceSymbols As System.Text.RegularExpressions.Regex
 #End Region
 
 #Region "Progress Events and Variables"
@@ -323,6 +330,15 @@ Public MustInherit Class clsPHRPBaseClass
 		End Set
 	End Property
 
+	Public Property MSAlignSynopsisFilePValueThreshold() As Single
+		Get
+			Return mMSAlignSynopsisFilePValueThreshold
+		End Get
+		Set(value As Single)
+			mMSAlignSynopsisFilePValueThreshold = value
+		End Set
+	End Property
+
 	Public Property MSGFDBSynopsisFilePValueThreshold() As Single
 		Get
 			Return mMSGFDBSynopsisFilePValueThreshold
@@ -433,6 +449,9 @@ Public MustInherit Class clsPHRPBaseClass
 
 				Case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 					Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & MSGFDB_RESULTS_FILE_SUFFIX)
+
+				Case ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
+					Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & MSALIGN_RESULTS_FILE_SUFFIX)
 
 				Case Else
 					' Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
@@ -625,6 +644,9 @@ Public MustInherit Class clsPHRPBaseClass
 
 		ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE.ToLower) Then
 			Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+
+		ElseIf strBaseFileNameLCase.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE.ToLower) Then
+			Return ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 
 		ElseIf strExtensionLCase = ".tsv" Then
 			' Assume this is an MSGF+ TSV file
@@ -847,7 +869,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 						If mIgnorePeptideToProteinMapperErrors Then
 
-							RaiseEvent WarningMessageEvent("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True")
+							ReportWarning("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True")
 
 							If System.IO.File.Exists(strResultsFilePath) Then
 								blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, mIgnorePeptideToProteinMapperErrors)
@@ -1035,7 +1057,7 @@ Public MustInherit Class clsPHRPBaseClass
 						If strWarningMessage.StartsWith("MSGF file not found") Then
 							strWarningMessage = "MSGF file not found; column " & COLUMN_NAME_MSGF_SPECPROB & " will not have any data"
 						End If
-						RaiseEvent WarningMessageEvent(strWarningMessage)
+						ReportWarning(strWarningMessage)
 					Next
 
 					objReader.ClearErrors()
@@ -1104,7 +1126,7 @@ Public MustInherit Class clsPHRPBaseClass
 							Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso objReader.CurrentPSM.Peptide = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
 
 						Else
-							Console.WriteLine("Warning: Peptide not found in lstPepToProteinMapping: " & objReader.CurrentPSM.Peptide)
+							ReportWarning("Peptide not found in lstPepToProteinMapping: " & objReader.CurrentPSM.Peptide)
 						End If
 
 						UpdateProgress(sngProgressAtStart + objReader.PercentComplete * (100 - sngProgressAtStart) / 100)
@@ -1160,6 +1182,34 @@ Public MustInherit Class clsPHRPBaseClass
 		End If
 
 		Return intPepToProteinMapIndex
+
+	End Function
+
+	Protected Function GetCleanSequence(ByVal strSequenceWithMods As String) As String
+		Dim strPrefix As String = String.Empty
+		Dim strSuffix As String = String.Empty
+
+		Return GetCleanSequence(strSequenceWithMods, strPrefix, strSuffix)
+	End Function
+
+	Protected Function GetCleanSequence(ByVal strSequenceWithMods As String, ByRef strPrefix As String, ByRef strSuffix As String) As String
+
+		Dim strPrimarySequence As String = String.Empty
+		strPrefix = String.Empty
+		strSuffix = String.Empty
+
+		If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
+
+			' Remove any non-letter characters when calling .ComputeCleavageState()
+
+			strPrimarySequence = mReplaceSymbols.Replace(strPrimarySequence, String.Empty)
+
+		Else
+			' Unable to determine cleavage-state
+			strPrimarySequence = mReplaceSymbols.Replace(strSequenceWithMods, String.Empty)
+		End If
+
+		Return strPrimarySequence
 
 	End Function
 
@@ -1307,6 +1357,8 @@ Public MustInherit Class clsPHRPBaseClass
 
 		mInspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
+		mMSAlignSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+
 		mMSGFDBSynopsisFilePValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 		mMSGFDBSynopsisFileSpecProbThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD
 
@@ -1323,6 +1375,9 @@ Public MustInherit Class clsPHRPBaseClass
 
 		' Initialize mSeqToProteinMap
 		mSeqToProteinMap = New Hashtable
+
+		' Define a RegEx to replace all of the non-letter characters
+		mReplaceSymbols = New System.Text.RegularExpressions.Regex("[^A-Za-z]", System.Text.RegularExpressions.RegexOptions.Compiled)
 
 	End Sub
 
@@ -1680,6 +1735,10 @@ Public MustInherit Class clsPHRPBaseClass
 
 	End Function
 
+	Protected Sub ReportWarning(strMessage As String)
+		RaiseEvent WarningMessageEvent(strMessage)
+	End Sub
+
 	Public Function ResetMassCorrectionTagsAndModificationDefinitions() As Boolean
 		Dim blnSuccess As Boolean
 		Dim blnFileNotFound As Boolean
@@ -1848,6 +1907,25 @@ Public MustInherit Class clsPHRPBaseClass
 		End If
 	End Sub
 
+	''' <summary>
+	''' Return the text up to (but not including) the first space in strProteinNameAndDescription
+	''' </summary>
+	''' <param name="strProteinNameAndDescription"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Overridable Function TruncateProteinName(ByVal strProteinNameAndDescription As String) As String
+
+		Dim intIndex As Integer
+
+		intIndex = strProteinNameAndDescription.IndexOf(" "c)
+		If intIndex > 0 Then
+			Return strProteinNameAndDescription.Substring(0, intIndex)
+		Else
+			Return strProteinNameAndDescription
+		End If
+
+	End Function
+
 	Protected Sub UpdatePepToProteinMapPeptide(ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByVal intIndex As Integer, ByVal strPeptide As String)
 		Dim udtItem As udtPepToProteinMappingType
 		udtItem = lstPepToProteinMapping(intIndex)
@@ -1922,7 +2000,7 @@ Public MustInherit Class clsPHRPBaseClass
 				strErrorMessage = dblErrorPercent.ToString("0.0") & "% of the entries in the peptide to protein map file (" & IO.Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & IO.Path.GetFileName(mFastaFilePath) & ")"
 
 				If blnIgnorePeptideToProteinMapperErrors Then
-					RaiseEvent WarningMessageEvent(strErrorMessage)
+					ReportWarning(strErrorMessage)
 					blnSuccess = True
 				Else
 					SetErrorMessage(strErrorMessage)
@@ -1981,7 +2059,7 @@ Public MustInherit Class clsPHRPBaseClass
 	End Sub
 
 	Private Sub PHRPReader_WarningEvent(strWarningMessage As String)
-		RaiseEvent WarningMessageEvent(strWarningMessage)
+		ReportWarning(strWarningMessage)
 	End Sub
 #End Region
 
@@ -2001,52 +2079,50 @@ Public MustInherit Class clsPHRPBaseClass
 #Region "IComparer classes"
 
 	Protected Class ISearchOptionModificationInfoComparer
-		Implements System.Collections.IComparer
+		Implements System.Collections.Generic.IComparer(Of udtSearchOptionModificationInfoType)
 
-		Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-			Dim xData As udtSearchOptionModificationInfoType = DirectCast(x, udtSearchOptionModificationInfoType)
-			Dim yData As udtSearchOptionModificationInfoType = DirectCast(y, udtSearchOptionModificationInfoType)
+		Public Function Compare(x As udtSearchOptionModificationInfoType, y As udtSearchOptionModificationInfoType) As Integer Implements System.Collections.Generic.IComparer(Of udtSearchOptionModificationInfoType).Compare
 
-			If xData.SortOrder > yData.SortOrder Then
+			If x.SortOrder > y.SortOrder Then
 				Return 1
-			ElseIf xData.SortOrder < yData.SortOrder Then
+			ElseIf x.SortOrder < y.SortOrder Then
 				Return -1
 			Else
-				If xData.ModificationMass > yData.ModificationMass Then
+				If x.ModificationMass > y.ModificationMass Then
 					Return 1
-				ElseIf xData.ModificationMass < yData.ModificationMass Then
+				ElseIf x.ModificationMass < y.ModificationMass Then
 					Return -1
 				Else
 					Return 0
 				End If
 			End If
 		End Function
+
 	End Class
 
 	Friend Class IModNameAndResidueLocComparer
-		Implements System.Collections.IComparer
+		Implements System.Collections.Generic.IComparer(Of udtModNameAndResidueLocType)
 
-		Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-			Dim xData As udtModNameAndResidueLocType = DirectCast(x, udtModNameAndResidueLocType)
-			Dim yData As udtModNameAndResidueLocType = DirectCast(y, udtModNameAndResidueLocType)
+		Public Function Compare(x As udtModNameAndResidueLocType, y As udtModNameAndResidueLocType) As Integer Implements System.Collections.Generic.IComparer(Of udtModNameAndResidueLocType).Compare
 
-			If xData.ResidueLocInPeptide > yData.ResidueLocInPeptide Then
+			If x.ResidueLocInPeptide > y.ResidueLocInPeptide Then
 				Return 1
-			ElseIf xData.ResidueLocInPeptide < yData.ResidueLocInPeptide Then
+			ElseIf x.ResidueLocInPeptide < y.ResidueLocInPeptide Then
 				Return -1
 			Else
-				If xData.ModName Is Nothing Then xData.ModName = String.Empty
-				If yData.ModName Is Nothing Then yData.ModName = String.Empty
+				If x.ModName Is Nothing Then x.ModName = String.Empty
+				If y.ModName Is Nothing Then y.ModName = String.Empty
 
-				If xData.ModName > yData.ModName Then
+				If x.ModName > y.ModName Then
 					Return 1
-				ElseIf xData.ModName < yData.ModName Then
+				ElseIf x.ModName < y.ModName Then
 					Return -1
 				Else
 					Return 0
 				End If
 			End If
 		End Function
+
 	End Class
 
 	Protected Class PepToProteinMappingComparer

@@ -152,12 +152,24 @@ Public Class clsSearchEngineParameters
 
 	End Sub
 
+	Public Sub AddModification(ByVal objModInfo As clsModificationDefinition)
+		mModInfo.Add(objModInfo)
+	End Sub
+
+	Public Sub AddUpdateParameter(ByVal kvSetting As System.Collections.Generic.KeyValuePair(Of String, String))
+		AddUpdateParameter(kvSetting.Key, kvSetting.Value)
+	End Sub
+
 	Public Sub AddUpdateParameter(ByVal ParamName As String, ParamValue As String)
 		If mParameters.ContainsKey(ParamName) Then
 			mParameters(ParamName) = ParamValue
 		Else
 			mParameters.Add(ParamName, ParamValue)
 		End If
+	End Sub
+
+	Public Sub ClearModifications()
+		mModInfo.Clear()
 	End Sub
 
 	Public Sub ClearParameters()

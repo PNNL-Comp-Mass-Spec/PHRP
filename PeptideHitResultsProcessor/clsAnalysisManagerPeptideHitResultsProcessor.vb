@@ -284,6 +284,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
                 Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
                     m_PeptideHitResultsProcessor = New clsMSGFDBResultsProcessor
 
+				Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
+					m_PeptideHitResultsProcessor = New clsMSAlignResultsProcessor
+
                 Case Else
                     ' Unknown format; cannot continue
                     LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " & m_PeptideHitResultsFileFormat.ToString, Nothing)
@@ -411,9 +414,13 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         ElseIf m_AnalysisToolName.ToLower.IndexOf("msgfdb") >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
+		ElseIf m_AnalysisToolName.ToLower.IndexOf("msalign") >= 0 Then
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
+
         ElseIf m_AnalysisToolName.ToLower.IndexOf("dataextractor") >= 0 Then
             ' Data Extractor step-tool; we'll need to auto-determine the results format
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
+
         Else
             ' Unrecognized analysis tool name
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine

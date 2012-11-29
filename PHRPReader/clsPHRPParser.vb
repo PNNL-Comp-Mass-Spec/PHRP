@@ -475,7 +475,19 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="chDelimiter"></param>
 	''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
 	''' <remarks>Automatically trims whitespace</remarks>
-	Protected Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char) As System.Collections.Generic.KeyValuePair(Of String, String)
+	Public Shared Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char) As System.Collections.Generic.KeyValuePair(Of String, String)
+		Return ParseKeyValueSetting(strText, chDelimiter, String.Empty)
+	End Function
+
+	''' <summary>
+	''' Splits strText on strText, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
+	''' </summary>
+	''' <param name="strText"></param>
+	''' <param name="chDelimiter"></param>
+	''' <param name="strCommentChar">If defined, then looks for this character in the value portion of the setting and removes that character plus any text after it</param>
+	''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
+	''' <remarks>Automatically trims whitespace</remarks>
+	Public Shared Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char, ByVal strCommentChar As String) As System.Collections.Generic.KeyValuePair(Of String, String)
 		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
 		Dim strKey As String
 		Dim strValue As String
@@ -487,15 +499,72 @@ Public MustInherit Class clsPHRPParser
 				strKey = strText.Substring(0, intCharIndex).Trim()
 				If intCharIndex < strText.Length - 1 Then
 					strValue = strText.Substring(intCharIndex + 1).Trim()
+
+					If Not String.IsNullOrEmpty(strCommentChar) Then
+						' Look for the comment character
+						Dim intCommentCharIndex As Integer
+						intCommentCharIndex = strValue.IndexOf(strCommentChar)
+						If intCommentCharIndex > 0 Then
+							' Trim off the comment
+							strValue = strValue.Substring(0, intCommentCharIndex).Trim()
+						End If
+					End If
+
 				Else
 					strValue = String.Empty
 				End If
+
 				kvSetting = New System.Collections.Generic.KeyValuePair(Of String, String)(strKey, strValue)
 				Return kvSetting
 			End If
 		End If
 
 		Return New System.Collections.Generic.KeyValuePair(Of String, String)(String.Empty, String.Empty)
+
+	End Function
+
+	Protected Function ReadKeyValuePairSearchEngineParamFile(ByVal strSearchEngineName As String, ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+		Dim strParamFilePath As String
+		Dim blnSuccess As Boolean
+
+		Dim strLineIn As String
+
+		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
+
+		Try
+			If String.IsNullOrWhiteSpace(strSearchEngineName) Then strSearchEngineName = "?? Unknown tool ??"
+
+			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+
+			If Not System.IO.File.Exists(strParamFilePath) Then
+				ReportError(strSearchEngineName & " param file not found: " & strParamFilePath)
+			Else
+				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+
+					While srInFile.Peek > -1
+						strLineIn = srInFile.ReadLine().TrimStart()
+
+						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso strLineIn.Contains("="c) Then
+
+							' Split the line on the equals sign
+							kvSetting = ParseKeyValueSetting(strLineIn, "="c, "#")
+
+							If Not String.IsNullOrEmpty(kvSetting.Key) Then
+								objSearchEngineParams.AddUpdateParameter(kvSetting)
+							End If
+						End If
+
+					End While
+				End Using
+
+				blnSuccess = True
+
+			End If
+		Catch ex As Exception
+			ReportError("Error in ReadKeyValuePairSearchEngineParamFile for " & strSearchEngineName & ": " & ex.Message)
+		End Try
+
+		Return blnSuccess
 
 	End Function
 

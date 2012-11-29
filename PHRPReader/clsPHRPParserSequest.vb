@@ -39,6 +39,9 @@ Public Class clsPHRPParserSequest
 	Public Const DATA_COLUMN_NumTrypticEnds As String = "NumTrypticEnds"
 	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
+	Public Const FILENAME_SUFFIX_SYN As String = "_syn.txt"
+	Public Const FILENAME_SUFFIX_FHT As String = "_fht.txt"
+
 	Protected Const SEQ_SEARCH_ENGINE_NAME As String = "SEQUEST"
 #End Region
 
@@ -138,7 +141,7 @@ Public Class clsPHRPParserSequest
 	End Function
 
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_fht.txt"
+		Return strDatasetName & FILENAME_SUFFIX_FHT
 	End Function
 
 	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
@@ -150,7 +153,7 @@ Public Class clsPHRPParserSequest
 	End Function
 
 	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_syn.txt"
+		Return strDatasetName & FILENAME_SUFFIX_SYN
 	End Function
 
 	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String

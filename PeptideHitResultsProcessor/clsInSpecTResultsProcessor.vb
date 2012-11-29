@@ -455,7 +455,7 @@ Public Class clsInSpecTResultsProcessor
         Dim blnValidSearchResult As Boolean
 
         Dim strErrorLog As String = String.Empty
-        Dim objSortComparer As IComparer
+		Dim objSortComparer As Generic.IComparer(Of udtInspectSearchResultType)
 
         Try
             ' Initialize variables
@@ -699,7 +699,7 @@ Public Class clsInSpecTResultsProcessor
 											Case "cterminal"
 												.ModType = eInspectModType.DynCTermPeptide
 											Case Else
-												SetErrorMessage("Warning: Unrecognized Mod Type in the Inspect parameter file")
+												ReportWarning("Unrecognized Mod Type in the Inspect parameter file")
 												.ModType = eInspectModType.DynamicMod
 										End Select
 									Else
@@ -803,10 +803,12 @@ Public Class clsInSpecTResultsProcessor
 			strMTSPepToProteinMapFilePath = String.Empty
 
 			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
-				SetErrorMessage("Warning: PepToProteinMap file is not defined")
+				Console.WriteLine()
+				ReportWarning("PepToProteinMap file is not defined")
 				Return False
 			ElseIf Not System.IO.File.Exists(strPepToProteinMapFilePath) Then
-				SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
+				Console.WriteLine()
+				ReportWarning("PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
 				Return False
 			End If
 
@@ -982,7 +984,7 @@ Public Class clsInSpecTResultsProcessor
 			End If
 
 			Try
-				UpdateSearchResultEnzymeAndTerminusInfo(objSearchResult)
+				objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
 				' Open the input file and parse it
 				' Initialize the stream reader
@@ -1077,7 +1079,7 @@ Public Class clsInSpecTResultsProcessor
 										Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso strCurrentPeptideWithMods = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
 									Else
 										' Match not found; this is unexpected
-										Console.WriteLine("Warning: no match for '" & strCurrentPeptideWithMods & "' in lstPepToProteinMapping")
+										ReportWarning("no match for '" & strCurrentPeptideWithMods & "' in lstPepToProteinMapping")
 									End If
 								End If
 
@@ -1693,8 +1695,9 @@ Public Class clsInSpecTResultsProcessor
 		Dim objModificationDefinition As clsModificationDefinition
 
 		If Not udtInspectModInfo Is Nothing Then
+
+			' Call .LookupModificationDefinitionByMass for each entry in udtInspectModInfo
 			For intIndex = 0 To udtInspectModInfo.Length - 1
-				' Call .LookupModificationDefinitionByMass for each entry in udtInspectModInfo
 
 				With udtInspectModInfo(intIndex)
 					If Double.TryParse(.ModMass, dblModMass) Then
@@ -1772,96 +1775,62 @@ Public Class clsInSpecTResultsProcessor
 
     End Sub
 
-    Private Sub StoreTopFHTMatch(ByRef swResultFile As System.IO.StreamWriter, _
-                                      ByRef intResultID As Integer, _
-                                      ByVal intCurrentScanResultsCount As Integer, _
-                                      ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-                                      ByRef intFilteredSearchResultCount As Integer, _
-                                      ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-                                      ByRef strErrorLog As String, _
-                                      ByRef objSortComparer As IComparer)
+	Private Sub StoreTopFHTMatch(ByRef swResultFile As System.IO.StreamWriter, _
+									  ByRef intResultID As Integer, _
+									  ByVal intCurrentScanResultsCount As Integer, _
+									  ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
+									  ByRef intFilteredSearchResultCount As Integer, _
+									  ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+									  ByRef strErrorLog As String, _
+									  ByRef objSortComparer As Generic.IComparer(Of udtInspectSearchResultType))
 
-        Dim intIndex As Integer
-        Dim intCurrentCharge As Short = Short.MinValue
+		Dim intIndex As Integer
+		Dim intCurrentCharge As Short = Short.MinValue
 
-        AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
+		AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
 
-        ' Sort udtFilteredSearchResults by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on objSortComparer)
-        ' All of the data in udtSearchResultsCurrentScan should have the same scan number
-        Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortComparer)
+		' Sort udtFilteredSearchResults by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on objSortComparer)
+		' All of the data in udtSearchResultsCurrentScan should have the same scan number
+		Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortComparer)
 
-        ' Now store or write out the first match for each charge for this scan
-        For intIndex = 0 To intCurrentScanResultsCount - 1
-            If intIndex = 0 OrElse intCurrentCharge <> udtSearchResultsCurrentScan(intIndex).ChargeNum Then
-                StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-                intCurrentCharge = udtSearchResultsCurrentScan(intIndex).ChargeNum
-            End If
-        Next intIndex
+		' Now store or write out the first match for each charge for this scan
+		For intIndex = 0 To intCurrentScanResultsCount - 1
+			If intIndex = 0 OrElse intCurrentCharge <> udtSearchResultsCurrentScan(intIndex).ChargeNum Then
+				StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+				intCurrentCharge = udtSearchResultsCurrentScan(intIndex).ChargeNum
+			End If
+		Next intIndex
 
-    End Sub
+	End Sub
 
-    Private Sub StoreSynMatches(ByRef swResultFile As System.IO.StreamWriter, _
-                                ByRef intResultID As Integer, _
-                                ByVal intCurrentScanResultsCount As Integer, _
-                                ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-                                ByRef intFilteredSearchResultCount As Integer, _
-                                ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-                                ByRef strErrorLog As String, _
-                                ByRef objSortComparer As IComparer)
+	Private Sub StoreSynMatches(ByRef swResultFile As System.IO.StreamWriter, _
+								ByRef intResultID As Integer, _
+								ByVal intCurrentScanResultsCount As Integer, _
+								ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
+								ByRef intFilteredSearchResultCount As Integer, _
+								ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+								ByRef strErrorLog As String, _
+								ByRef objSortComparer As Generic.IComparer(Of udtInspectSearchResultType))
 
-        Dim intIndex As Integer
-        Dim intCurrentCharge As Short = Short.MinValue
+		Dim intIndex As Integer
+		Dim intCurrentCharge As Short = Short.MinValue
 
-        AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
+		AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
 
-        ' Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
-        ' All of the data in udtSearchResultsCurrentScan should have the same scan number
-        Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortComparer)
+		' Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
+		' All of the data in udtSearchResultsCurrentScan should have the same scan number
+		Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortComparer)
 
-        ' Now store or write out the matches that pass the filters
-        For intIndex = 0 To intCurrentScanResultsCount - 1
-            If udtSearchResultsCurrentScan(intIndex).PValueNum <= mInspectSynopsisFilePValueThreshold OrElse _
-               udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse _
-               udtSearchResultsCurrentScan(intIndex).FScoreNum >= FSCORE_THRESHOLD Then
-                StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-            End If
-        Next intIndex
+		' Now store or write out the matches that pass the filters
+		For intIndex = 0 To intCurrentScanResultsCount - 1
+			If udtSearchResultsCurrentScan(intIndex).PValueNum <= mInspectSynopsisFilePValueThreshold OrElse _
+			   udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse _
+			   udtSearchResultsCurrentScan(intIndex).FScoreNum >= FSCORE_THRESHOLD Then
+				StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+			End If
+		Next intIndex
 
-    End Sub
-
-    ''' <summary>
-    ''' Return the text up to (but not including) the first space in strProteinNameAndDescription
-    ''' </summary>
-    ''' <param name="strProteinNameAndDescription"></param>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Private Function TruncateProteinName(ByVal strProteinNameAndDescription As String) As String
-
-        Dim intIndex As Integer
-
-        intIndex = strProteinNameAndDescription.IndexOf(" "c)
-        If intIndex > 0 Then
-            Return strProteinNameAndDescription.Substring(0, intIndex)
-        Else
-            Return strProteinNameAndDescription
-        End If
-
-    End Function
-
-    Private Sub UpdateSearchResultEnzymeAndTerminusInfo(ByRef objSearchResult As clsSearchResultsInSpecT)
-        With objSearchResult
-            .SetEnzymeMatchSpec(mEnzymeMatchSpec)
-
-            ' Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
-            If mPeptideNTerminusMassChange <> 0 Then
-                .UpdatePeptideNTerminusMass(mPeptideNTerminusMassChange)
-            End If
-
-            If mPeptideCTerminusMassChange <> 0 Then
-                .UpdatePeptideCTerminusMass(mPeptideCTerminusMassChange)
-            End If
-        End With
-    End Sub
+	End Sub
 
     Private Sub WriteSynFHTFileHeader(ByRef swResultFile As System.IO.StreamWriter, _
                                       ByRef strErrorLog As String)
@@ -1955,164 +1924,160 @@ Public Class clsInSpecTResultsProcessor
 #Region "IComparer Classes"
 
     Protected Class InspectSearchResultsComparerTotalPRMDescScanChargePeptide
-        Implements System.Collections.IComparer
+		Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType)
 
-        Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-            Dim xData As udtInspectSearchResultType = DirectCast(x, udtInspectSearchResultType)
-            Dim yData As udtInspectSearchResultType = DirectCast(y, udtInspectSearchResultType)
+		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType).Compare
 
-            If xData.TotalPRMScoreNum > yData.TotalPRMScoreNum Then
-                Return -1
-            ElseIf xData.TotalPRMScoreNum < yData.TotalPRMScoreNum Then
-                Return 1
-            Else
-                ' TotalPRMScore is the same; check scan number
-                If xData.ScanNum > yData.ScanNum Then
-                    Return 1
-                ElseIf xData.ScanNum < yData.ScanNum Then
-                    Return -1
-                Else
-                    ' Scan is the same, check charge
-                    If xData.ChargeNum > yData.ChargeNum Then
-                        Return 1
-                    ElseIf xData.ChargeNum < yData.ChargeNum Then
-                        Return -1
-                    Else
-                        ' Charge is the same; check peptide
-                        If xData.PeptideAnnotation > yData.PeptideAnnotation Then
-                            Return 1
-                        ElseIf xData.PeptideAnnotation < yData.PeptideAnnotation Then
-                            Return -1
-                        Else
-                            ' Peptide is the same, check Protein
-                            If xData.Protein > yData.Protein Then
-                                Return 1
-                            ElseIf xData.Protein < yData.Protein Then
-                                Return -1
-                            Else
-                                Return 0
-                            End If
-                        End If
-                    End If
-                End If
-            End If
+			If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
+				Return -1
+			ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
+				Return 1
+			Else
+				' TotalPRMScore is the same; check scan number
+				If x.ScanNum > y.ScanNum Then
+					Return 1
+				ElseIf x.ScanNum < y.ScanNum Then
+					Return -1
+				Else
+					' Scan is the same, check charge
+					If x.ChargeNum > y.ChargeNum Then
+						Return 1
+					ElseIf x.ChargeNum < y.ChargeNum Then
+						Return -1
+					Else
+						' Charge is the same; check peptide
+						If x.PeptideAnnotation > y.PeptideAnnotation Then
+							Return 1
+						ElseIf x.PeptideAnnotation < y.PeptideAnnotation Then
+							Return -1
+						Else
+							' Peptide is the same, check Protein
+							If x.Protein > y.Protein Then
+								Return 1
+							ElseIf x.Protein < y.Protein Then
+								Return -1
+							Else
+								Return 0
+							End If
+						End If
+					End If
+				End If
+			End If
 
-        End Function
-    End Class
+		End Function
 
-    Protected Class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
-        Implements System.Collections.IComparer
+	End Class
 
-        Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-            Dim xData As udtInspectSearchResultType = DirectCast(x, udtInspectSearchResultType)
-            Dim yData As udtInspectSearchResultType = DirectCast(y, udtInspectSearchResultType)
+	Protected Class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
+		Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType)
 
-            If xData.ScanNum > yData.ScanNum Then
-                Return 1
-            ElseIf xData.ScanNum < yData.ScanNum Then
-                Return -1
-            Else
-                If xData.ChargeNum > yData.ChargeNum Then
-                    Return 1
-                ElseIf xData.ChargeNum < yData.ChargeNum Then
-                    Return -1
-                Else
-                    ' Charge is the same; check TotalPRMScore (sort on descending TotalPRMScore)
-                    If xData.TotalPRMScoreNum > yData.TotalPRMScoreNum Then
-                        Return -1
-                    ElseIf xData.TotalPRMScoreNum < yData.TotalPRMScoreNum Then
-                        Return 1
-                    Else
-                        ' TotalPRMScore is the same; check FScore (sort on descending FScore)
-                        If xData.FScoreNum > yData.FScoreNum Then
-                            Return -1
-                        ElseIf xData.FScoreNum < yData.FScoreNum Then
-                            Return 1
-                        Else
-                            Return 0
-                        End If
-                    End If
-                End If
-            End If
+		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType).Compare
 
-        End Function
-    End Class
+			If x.ScanNum > y.ScanNum Then
+				Return 1
+			ElseIf x.ScanNum < y.ScanNum Then
+				Return -1
+			Else
+				If x.ChargeNum > y.ChargeNum Then
+					Return 1
+				ElseIf x.ChargeNum < y.ChargeNum Then
+					Return -1
+				Else
+					' Charge is the same; check TotalPRMScore (sort on descending TotalPRMScore)
+					If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
+						Return -1
+					ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
+						Return 1
+					Else
+						' TotalPRMScore is the same; check FScore (sort on descending FScore)
+						If x.FScoreNum > y.FScoreNum Then
+							Return -1
+						ElseIf x.FScoreNum < y.FScoreNum Then
+							Return 1
+						Else
+							Return 0
+						End If
+					End If
+				End If
+			End If
 
-    Protected Class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
-        Implements System.Collections.IComparer
+		End Function
 
-        Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-            Dim xData As udtInspectSearchResultType = DirectCast(x, udtInspectSearchResultType)
-            Dim yData As udtInspectSearchResultType = DirectCast(y, udtInspectSearchResultType)
+	End Class
 
-            If xData.ScanNum > yData.ScanNum Then
-                Return 1
-            ElseIf xData.ScanNum < yData.ScanNum Then
-                Return -1
-            Else
-                If xData.ChargeNum > yData.ChargeNum Then
-                    Return 1
-                ElseIf xData.ChargeNum < yData.ChargeNum Then
-                    Return -1
-                Else
-                    ' Charge is the same; check FScore (sort on descending FScore)
-                    If xData.FScoreNum > yData.FScoreNum Then
-                        Return -1
-                    ElseIf xData.FScoreNum < yData.FScoreNum Then
-                        Return 1
-                    Else
-                        ' FScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
-                        If xData.TotalPRMScoreNum > yData.TotalPRMScoreNum Then
-                            Return -1
-                        ElseIf xData.TotalPRMScoreNum < yData.TotalPRMScoreNum Then
-                            Return 1
-                        Else
-                            Return 0
-                        End If
-                    End If
-                End If
-            End If
+	Protected Class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
+		Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType)
 
-        End Function
-    End Class
+		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType).Compare
 
-    Protected Class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
-        Implements System.Collections.IComparer
+			If x.ScanNum > y.ScanNum Then
+				Return 1
+			ElseIf x.ScanNum < y.ScanNum Then
+				Return -1
+			Else
+				If x.ChargeNum > y.ChargeNum Then
+					Return 1
+				ElseIf x.ChargeNum < y.ChargeNum Then
+					Return -1
+				Else
+					' Charge is the same; check FScore (sort on descending FScore)
+					If x.FScoreNum > y.FScoreNum Then
+						Return -1
+					ElseIf x.FScoreNum < y.FScoreNum Then
+						Return 1
+					Else
+						' FScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
+						If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
+							Return -1
+						ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
+							Return 1
+						Else
+							Return 0
+						End If
+					End If
+				End If
+			End If
 
-        Public Function Compare(ByVal x As Object, ByVal y As Object) As Integer Implements System.Collections.IComparer.Compare
-            Dim xData As udtInspectSearchResultType = DirectCast(x, udtInspectSearchResultType)
-            Dim yData As udtInspectSearchResultType = DirectCast(y, udtInspectSearchResultType)
+		End Function
 
-            If xData.ScanNum > yData.ScanNum Then
-                Return 1
-            ElseIf xData.ScanNum < yData.ScanNum Then
-                Return -1
-            Else
-                If xData.ChargeNum > yData.ChargeNum Then
-                    Return 1
-                ElseIf xData.ChargeNum < yData.ChargeNum Then
-                    Return -1
-                Else
-                    ' Charge is the same; check MQScore (sort on descending MQScore)
-                    If xData.MQScoreNum > yData.MQScoreNum Then
-                        Return -1
-                    ElseIf xData.MQScoreNum < yData.MQScoreNum Then
-                        Return 1
-                    Else
-                        ' MQScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
-                        If xData.TotalPRMScoreNum > yData.TotalPRMScoreNum Then
-                            Return -1
-                        ElseIf xData.TotalPRMScoreNum < yData.TotalPRMScoreNum Then
-                            Return 1
-                        Else
-                            Return 0
-                        End If
-                    End If
-                End If
-            End If
+	End Class
 
-        End Function
-    End Class
+	Protected Class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
+		Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType)
+
+		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType).Compare
+
+			If x.ScanNum > y.ScanNum Then
+				Return 1
+			ElseIf x.ScanNum < y.ScanNum Then
+				Return -1
+			Else
+				If x.ChargeNum > y.ChargeNum Then
+					Return 1
+				ElseIf x.ChargeNum < y.ChargeNum Then
+					Return -1
+				Else
+					' Charge is the same; check MQScore (sort on descending MQScore)
+					If x.MQScoreNum > y.MQScoreNum Then
+						Return -1
+					ElseIf x.MQScoreNum < y.MQScoreNum Then
+						Return 1
+					Else
+						' MQScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
+						If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
+							Return -1
+						ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
+							Return 1
+						Else
+							Return 0
+						End If
+					End If
+				End If
+			End If
+
+		End Function
+
+	End Class
 
 #End Region
 

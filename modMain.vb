@@ -11,7 +11,7 @@ Option Strict On
 ' Program started January 2, 2006
 '
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
+' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 
@@ -342,7 +342,7 @@ Module modMain
 
 		Try
 
-			Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF-DB search result file, or MSGF+ search result file, then creates a tab-delimited text file with the data in a standard format used at PNNL.  ")
+			Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF-DB search result file, MSGF+ search result file, or MSAlign results file then creates a tab-delimited text file with the data in a standard format used at PNNL.  ")
 			Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides.  Parallel files will be created containing sequence info and modification details.  ")
 			Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
 			Console.WriteLine()
@@ -355,7 +355,7 @@ Module modMain
 			Console.WriteLine(" [/InsFHT:True|False] [/InsSyn:True|False]")
 			Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
 			Console.WriteLine()
-			Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), or an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv)")
+			Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)")
 			Console.WriteLine("The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file.")
 			Console.WriteLine("The parameter file path is optional.  If included, it should point to a valid XML parameter file.")
 			Console.WriteLine()

@@ -53,6 +53,9 @@ Public Class clsPHRPParserMSGFDB
 
 	Public Const DATA_COLUMN_Isotope_Error As String = "IsotopeError"		' Only reported by MSGF+
 
+	Public Const FILENAME_SUFFIX_SYN As String = "_msgfdb_syn.txt"
+	Public Const FILENAME_SUFFIX_FHT As String = "_msgfdb_fht.txt"
+
 	Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GFDB"
 #End Region
 
@@ -156,13 +159,13 @@ Public Class clsPHRPParserMSGFDB
 
 		End If
 
-	
+
 		Return dblToleranceDa
 
 	End Function
 
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msgfdb_fht.txt"
+		Return strDatasetName & FILENAME_SUFFIX_FHT
 	End Function
 
 	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
@@ -174,7 +177,7 @@ Public Class clsPHRPParserMSGFDB
 	End Function
 
 	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msgfdb_syn.txt"
+		Return strDatasetName & FILENAME_SUFFIX_SYN
 	End Function
 
 	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
@@ -215,90 +218,77 @@ Public Class clsPHRPParserMSGFDB
 	End Function
 
 	Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
-		Dim strParamFilePath As String
+		Dim strSettingValue As String = String.Empty
+		Dim intValue As Integer
 		Dim blnSuccess As Boolean
 
-		Dim strLineIn As String
-		Dim strSettingValue As String
-
-		Dim intCharIndex As Integer
-		Dim intValue As Integer
-
-		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
-
 		Try
-			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+			blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSGFDB_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, objSearchEngineParams)
 
-			If Not System.IO.File.Exists(strParamFilePath) Then
-				ReportError("MSGF-DB param file not found: " & strParamFilePath)
-			Else
-				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+			If blnSuccess Then
 
-					While srInFile.Peek > -1
-						strLineIn = srInFile.ReadLine().TrimStart()
+				' Determine the enzyme name
+				If objSearchEngineParams.Parameters.TryGetValue("enzymeid", strSettingValue) Then
+					If Integer.TryParse(strSettingValue, intValue) Then
+						Select Case intValue
+							Case 0 : objSearchEngineParams.Enzyme = "no_enzyme"
+							Case 1 : objSearchEngineParams.Enzyme = "trypsin"
+							Case 2 : objSearchEngineParams.Enzyme = "Chymotrypsin"
+							Case 3 : objSearchEngineParams.Enzyme = "Lys-C "
+							Case 4 : objSearchEngineParams.Enzyme = "Lys-N  "
+							Case 5 : objSearchEngineParams.Enzyme = "Glu-C  "
+							Case 6 : objSearchEngineParams.Enzyme = "Arg-C "
+							Case 7 : objSearchEngineParams.Enzyme = "Asp-N"
+						End Select
+					End If
+				End If
 
-						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso strLineIn.Contains("="c) Then
+				' Determine the cleavage specificity
+				If objSearchEngineParams.Parameters.TryGetValue("nnet", strSettingValue) Then
+					' NNET means number of non-enzymatic terminii
 
-							' Split the line on the equals sign
-							kvSetting = ParseKeyValueSetting(strLineIn, "="c)
+					If Integer.TryParse(strSettingValue, intValue) Then
+						Select Case intValue
+							Case 0
+								' Fully-tryptic
+								objSearchEngineParams.MinNumberTermini = 2
+							Case 1
+								' Partially-tryptic
+								objSearchEngineParams.MinNumberTermini = 1
+							Case Else
+								' No-enzyme search
+								objSearchEngineParams.MinNumberTermini = 0
+						End Select
 
-							If Not String.IsNullOrEmpty(kvSetting.Key) Then
+					End If
+				Else
+					' MSGF+ uses ntt instead of nnet; thus look for ntt
 
-								' Trim off any text that occurs after a # in kvSetting.Value
-								strSettingValue = kvSetting.Value
-								intCharIndex = strSettingValue.IndexOf("#"c)
-								If intCharIndex > 0 Then
-									strSettingValue = strSettingValue.Substring(intCharIndex).Trim()
-								End If
+					If objSearchEngineParams.Parameters.TryGetValue("ntt", strSettingValue) Then
+						' NTT means number of tolerable terminii
 
-								objSearchEngineParams.AddUpdateParameter(kvSetting.Key, strSettingValue)
+						If Integer.TryParse(strSettingValue, intValue) Then
+							Select Case intValue
+								Case 0
+									' No-enzyme search
+									objSearchEngineParams.MinNumberTermini = 0
+								Case 1
+									' Partially-tryptic
+									objSearchEngineParams.MinNumberTermini = 1
+								Case Else
+									' Fully-tryptic
+									objSearchEngineParams.MinNumberTermini = 2
+							End Select
 
-								Select Case kvSetting.Key.ToLower()
-									Case "enzymeid"
-
-										If Integer.TryParse(strSettingValue, intValue) Then
-											Select Case intValue
-												Case 0 : objSearchEngineParams.Enzyme = "no_enzyme"
-												Case 1 : objSearchEngineParams.Enzyme = "trypsin"
-												Case 2 : objSearchEngineParams.Enzyme = "Chymotrypsin"
-												Case 3 : objSearchEngineParams.Enzyme = "Lys-C "
-												Case 4 : objSearchEngineParams.Enzyme = "Lys-N  "
-												Case 5 : objSearchEngineParams.Enzyme = "Glu-C  "
-												Case 6 : objSearchEngineParams.Enzyme = "Arg-C "
-												Case 7 : objSearchEngineParams.Enzyme = "Asp-N"
-											End Select
-										End If
-
-									Case "nnet"
-										' NNET means number of non-enzymatic terminii
-
-										If Integer.TryParse(strSettingValue, intValue) Then
-											Select Case intValue
-												Case 0
-													' Fully-tryptic
-													objSearchEngineParams.MinNumberTermini = 2
-												Case 1
-													' Partially-tryptic
-													objSearchEngineParams.MinNumberTermini = 1
-												Case Else
-													' No-enzyme search
-													objSearchEngineParams.MinNumberTermini = 0
-											End Select
-
-										End If
-								End Select
-							End If
 						End If
+					End If
 
-					End While
-				End Using
+				End If
 
 				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
 				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
-
-				blnSuccess = True
-
 			End If
+
 		Catch ex As Exception
 			ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
 		End Try

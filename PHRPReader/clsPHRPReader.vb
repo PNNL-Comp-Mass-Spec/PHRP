@@ -47,7 +47,8 @@ Public Class clsPHRPReader
 		Sequest = 1
 		XTandem = 2
 		Inspect = 3
-		MSGFDB = 4
+		MSGFDB = 4		' Aka MSGF+
+		MSAlign = 5
 	End Enum
 
 	Public Enum ePHRPReaderErrorCodes As Integer
@@ -100,7 +101,7 @@ Public Class clsPHRPReader
 	'The keys are ScanNumber and values are clsScanStatsInfo objects
 	Protected mScanStats As Dictionary(Of Integer, clsScanStatsInfo)
 
-	' This dictionary tracks extended scan stats values, in particular parent ion mz (via MonoisotopicMZ)
+	' This dictionary tracks extended scan stats values, including parent ion mz (via MonoisotopicMZ)and collision mode
 	'The keys are ScanNumber and values are clsScanStatsExInfo objects
 	Protected mScanStatsEx As Dictionary(Of Integer, clsScanStatsExInfo)
 
@@ -629,25 +630,20 @@ Public Class clsPHRPReader
 			' Instantiate the appropriare PHRP Parser
 			Select Case eResultType
 				Case ePeptideHitResultType.Sequest
-
-					' Convert Sequest results to input format required for MSGF
 					mPHRPParser = New clsPHRPParserSequest(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
 				Case ePeptideHitResultType.XTandem
-
-					' Convert X!Tandem results to input format required for MSGF
 					' Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
 					mPHRPParser = New clsPHRPParserXTandem(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
 				Case ePeptideHitResultType.Inspect
-
-					' Convert Inspect results to input format required for MSGF
 					mPHRPParser = New clsPHRPParserInspect(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
 				Case ePeptideHitResultType.MSGFDB
-
-					' Convert MSGFDB results to input format required for MSGF
 					mPHRPParser = New clsPHRPParserMSGFDB(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
+
+				Case ePeptideHitResultType.MSAlign				
+					mPHRPParser = New clsPHRPParserMSAlign(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
 				Case Else
 					'Should never get here; invalid result type specified
@@ -717,7 +713,7 @@ Public Class clsPHRPReader
 		strInputFileName = System.IO.Path.GetFileNameWithoutExtension(strFilePath)
 
 		Select Case eResultType
-			Case ePeptideHitResultType.Sequest, ePeptideHitResultType.Inspect, ePeptideHitResultType.MSGFDB
+			Case ePeptideHitResultType.Sequest, ePeptideHitResultType.Inspect, ePeptideHitResultType.MSGFDB, ePeptideHitResultType.MSAlign
 				If strInputFileName.ToLower.EndsWith("_fht") OrElse strInputFileName.ToLower.EndsWith("_syn") Then
 					strDatasetName = strInputFileName.Substring(0, strInputFileName.Length - 4)
 
@@ -773,16 +769,19 @@ Public Class clsPHRPReader
 		strFilePathLCase = strFilePath.ToLower()
 
 		Try
-			If strFilePathLCase.EndsWith("_xt.txt") Then
+			If strFilePathLCase.EndsWith(clsPHRPParserXTandem.FILENAME_SUFFIX_SYN) Then
 				eResultType = ePeptideHitResultType.XTandem
 			Else
-				If strFilePathLCase.EndsWith("_msgfdb_syn.txt") OrElse strFilePathLCase.EndsWith("_msgfdb_fht.txt") Then
+				If strFilePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT) Then
 					eResultType = ePeptideHitResultType.MSGFDB
 
-				ElseIf strFilePathLCase.EndsWith("_inspect_syn.txt") OrElse strFilePathLCase.EndsWith("_inspect_fht.txt") Then
+				ElseIf strFilePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_FHT) Then
+					eResultType = ePeptideHitResultType.MSAlign
+
+				ElseIf strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_FHT) Then
 					eResultType = ePeptideHitResultType.Inspect
 
-				ElseIf strFilePathLCase.EndsWith("_syn.txt") OrElse strFilePathLCase.EndsWith("_fht.txt") Then
+				ElseIf strFilePathLCase.EndsWith(clsPHRPParserSequest.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserSequest.FILENAME_SUFFIX_FHT) Then
 					' Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
 
 					If Not System.IO.File.Exists(strFilePath) Then
@@ -1106,6 +1105,9 @@ Public Class clsPHRPReader
 			Case "MSG_Peptide_Hit".ToLower
 				Return clsPHRPReader.ePeptideHitResultType.MSGFDB
 
+			Case "MSA_Peptide_Hit".ToLower
+				Return clsPHRPReader.ePeptideHitResultType.MSAlign
+
 			Case Else
 				Return clsPHRPReader.ePeptideHitResultType.Unknown
 		End Select
@@ -1139,6 +1141,10 @@ Public Class clsPHRPReader
 				' MSGFDB: _msgfdb_fht.txt
 				strPHRPResultsFileName = clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(strDatasetName)
 
+			Case ePeptideHitResultType.MSAlign
+				' MSAlign: _msalign_fht.txt
+				strPHRPResultsFileName = clsPHRPParserMSAlign.GetPHRPFirstHitsFileName(strDatasetName)
+
 		End Select
 
 		Return strPHRPResultsFileName
@@ -1158,20 +1164,19 @@ Public Class clsPHRPReader
 
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest
-				' Sequest: _syn.txt
 				strPHRPModSummaryFileName = clsPHRPParserSequest.GetPHRPModSummaryFileName(strDatasetName)
 
 			Case ePeptideHitResultType.XTandem
-				' X!Tandem: _xt.txt
 				strPHRPModSummaryFileName = clsPHRPParserXTandem.GetPHRPModSummaryFileName(strDatasetName)
 
 			Case ePeptideHitResultType.Inspect
-				' Inspect: _inspect_syn.txt
 				strPHRPModSummaryFileName = clsPHRPParserInspect.GetPHRPModSummaryFileName(strDatasetName)
 
 			Case ePeptideHitResultType.MSGFDB
-				' MSGFDB: _msgfdb_syn.txt
 				strPHRPModSummaryFileName = clsPHRPParserMSGFDB.GetPHRPModSummaryFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSAlign
+				strPHRPModSummaryFileName = clsPHRPParserMSAlign.GetPHRPModSummaryFileName(strDatasetName)
 
 		End Select
 
@@ -1191,20 +1196,19 @@ Public Class clsPHRPReader
 
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest
-				' Sequest: _syn.txt
 				strPHRPModSummaryFileName = clsPHRPParserSequest.GetPHRPProteinModsFileName(strDatasetName)
 
 			Case ePeptideHitResultType.XTandem
-				' X!Tandem: _xt.txt
 				strPHRPModSummaryFileName = clsPHRPParserXTandem.GetPHRPProteinModsFileName(strDatasetName)
 
 			Case ePeptideHitResultType.Inspect
-				' Inspect: _inspect_syn.txt
 				strPHRPModSummaryFileName = clsPHRPParserInspect.GetPHRPProteinModsFileName(strDatasetName)
 
 			Case ePeptideHitResultType.MSGFDB
-				' MSGFDB: _msgfdb_syn.txt
 				strPHRPModSummaryFileName = clsPHRPParserMSGFDB.GetPHRPProteinModsFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSAlign
+				strPHRPModSummaryFileName = clsPHRPParserMSAlign.GetPHRPProteinModsFileName(strDatasetName)
 
 		End Select
 
@@ -1239,6 +1243,10 @@ Public Class clsPHRPReader
 				' MSGFDB: _msgfdb_syn.txt
 				strPHRPResultsFileName = clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(strDatasetName)
 
+			Case ePeptideHitResultType.MSAlign
+				' MSAlign: _msalign_syn.txt
+				strPHRPResultsFileName = clsPHRPParserMSAlign.GetPHRPSynopsisFileName(strDatasetName)
+
 		End Select
 
 		Return strPHRPResultsFileName
@@ -1258,20 +1266,19 @@ Public Class clsPHRPReader
 
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest
-				' Sequest: _syn.txt
 				strPHRPResultsFileName = clsPHRPParserSequest.GetPHRPResultToSeqMapFileName(strDatasetName)
 
 			Case ePeptideHitResultType.XTandem
-				' X!Tandem: _xt.txt
 				strPHRPResultsFileName = clsPHRPParserXTandem.GetPHRPResultToSeqMapFileName(strDatasetName)
 
 			Case ePeptideHitResultType.Inspect
-				' Inspect: _inspect_syn.txt
 				strPHRPResultsFileName = clsPHRPParserInspect.GetPHRPResultToSeqMapFileName(strDatasetName)
 
 			Case ePeptideHitResultType.MSGFDB
-				' MSGFDB: _msgfdb_syn.txt
 				strPHRPResultsFileName = clsPHRPParserMSGFDB.GetPHRPResultToSeqMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSAlign
+				strPHRPResultsFileName = clsPHRPParserMSAlign.GetPHRPResultToSeqMapFileName(strDatasetName)
 
 		End Select
 
@@ -1292,20 +1299,19 @@ Public Class clsPHRPReader
 
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest
-				' Sequest: _syn.txt
 				strSeqInfoFilename = clsPHRPParserSequest.GetPHRPSeqInfoFileName(strDatasetName)
 
 			Case ePeptideHitResultType.XTandem
-				' X!Tandem: _xt.txt
 				strSeqInfoFilename = clsPHRPParserXTandem.GetPHRPSeqInfoFileName(strDatasetName)
 
 			Case ePeptideHitResultType.Inspect
-				' Inspect: _inspect_syn.txt
 				strSeqInfoFilename = clsPHRPParserInspect.GetPHRPSeqInfoFileName(strDatasetName)
 
 			Case ePeptideHitResultType.MSGFDB
-				' MSGFDB: _msgfdb_syn.txt
 				strSeqInfoFilename = clsPHRPParserMSGFDB.GetPHRPSeqInfoFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSAlign
+				strSeqInfoFilename = clsPHRPParserMSAlign.GetPHRPSeqInfoFileName(strDatasetName)
 
 		End Select
 
@@ -1326,20 +1332,19 @@ Public Class clsPHRPReader
 
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest
-				' Sequest: _syn.txt
 				strSeqToProteinMapFileName = clsPHRPParserSequest.GetPHRPSeqToProteinMapFileName(strDatasetName)
 
 			Case ePeptideHitResultType.XTandem
-				' X!Tandem: _xt.txt
 				strSeqToProteinMapFileName = clsPHRPParserXTandem.GetPHRPSeqToProteinMapFileName(strDatasetName)
 
 			Case ePeptideHitResultType.Inspect
-				' Inspect: _inspect_syn.txt
 				strSeqToProteinMapFileName = clsPHRPParserInspect.GetPHRPSeqToProteinMapFileName(strDatasetName)
 
 			Case ePeptideHitResultType.MSGFDB
-				' MSGFDB: _msgfdb_syn.txt
 				strSeqToProteinMapFileName = clsPHRPParserMSGFDB.GetPHRPSeqToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSAlign
+				strSeqToProteinMapFileName = clsPHRPParserMSAlign.GetPHRPSeqToProteinMapFileName(strDatasetName)
 
 		End Select
 
@@ -1361,21 +1366,19 @@ Public Class clsPHRPReader
 
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest
-				' Tool_Version_Info_Sequest.txt
 				strToolVersionInfoFilename = "Tool_Version_Info_Sequest.txt"
 
 			Case ePeptideHitResultType.XTandem
-				' Tool_Version_Info_XTandem.txt
 				strToolVersionInfoFilename = "Tool_Version_Info_XTandem.txt"
 
 			Case ePeptideHitResultType.Inspect
-				' Tool_Version_Info_Inspect.txt
 				strToolVersionInfoFilename = "Tool_Version_Info_Inspect.txt"
 
 			Case ePeptideHitResultType.MSGFDB
-				' Tool_Version_Info_MSGFDB.txt
 				strToolVersionInfoFilename = "Tool_Version_Info_MSGFDB.txt"
 
+			Case ePeptideHitResultType.MSAlign
+				strToolVersionInfoFilename = "Tool_Version_Info_MSAlign.txt"
 		End Select
 
 		Return strToolVersionInfoFilename

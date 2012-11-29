@@ -2,9 +2,9 @@
 ' Written by Matthew Monroe for the US Department of Energy 
 ' Pacific Northwest National Laboratory, Richland, WA
 '
-' Created 04/04/2012
+' Created 11/28/2012
 '
-' This class parses data lines from Inspect _inspect_syn.txt files
+' This class parses data lines from MSAlign msalign_syn.txt files
 '
 '*********************************************************************************************************
 
@@ -12,43 +12,35 @@ Option Strict On
 
 Imports PHRPReader.clsPHRPReader
 
-Public Class clsPHRPParserInspect
+Public Class clsPHRPParserMSAlign
 	Inherits clsPHRPParser
 
 #Region "Constants"
 	Public Const DATA_COLUMN_ResultID As String = "ResultID"
 	Public Const DATA_COLUMN_Scan As String = "Scan"
+	Public Const DATA_COLUMN_Prsm_ID As String = "Prsm_ID"
+	Public Const DATA_COLUMN_Spectrum_ID As String = "Spectrum_ID"
+	Public Const DATA_COLUMN_Charge As String = "Charge"
+	Public Const DATA_COLUMN_PrecursorMZ As String = "PrecursorMZ"
+	Public Const DATA_COLUMN_DelM As String = "DelM"
+	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
+	Public Const DATA_COLUMN_MH As String = "MH"
 	Public Const DATA_COLUMN_Peptide As String = "Peptide"
 	Public Const DATA_COLUMN_Protein As String = "Protein"
-	Public Const DATA_COLUMN_Charge As String = "Charge"
-	Public Const DATA_COLUMN_MQScore As String = "MQScore"
-	Public Const DATA_COLUMN_Length As String = "Length"
-	Public Const DATA_COLUMN_TotalPRMScore As String = "TotalPRMScore"
-	Public Const DATA_COLUMN_MedianPRMScore As String = "MedianPRMScore"
-	Public Const DATA_COLUMN_FractionY As String = "FractionY"
-	Public Const DATA_COLUMN_FractionB As String = "FractionB"
-	Public Const DATA_COLUMN_Intensity As String = "Intensity"
-	Public Const DATA_COLUMN_NTT As String = "NTT"
+	Public Const DATA_COLUMN_Protein_Mass As String = "Protein_Mass"
+	Public Const DATA_COLUMN_Unexpected_Mod_Count As String = "Unexpected_Mod_Count"
+	Public Const DATA_COLUMN_Peak_Count As String = "Peak_Count"
+	Public Const DATA_COLUMN_Matched_Peak_Count As String = "Matched_Peak_Count"
+	Public Const DATA_COLUMN_Matched_Fragment_Ion_Count As String = "Matched_Fragment_Ion_Count"
 	Public Const DATA_COLUMN_PValue As String = "PValue"
-	Public Const DATA_COLUMN_FScore As String = "FScore"
-	Public Const DATA_COLUMN_DeltaScore As String = "DeltaScore"
-	Public Const DATA_COLUMN_DeltaScoreOther As String = "DeltaScoreOther"
-	Public Const DATA_COLUMN_DeltaNormMQScore As String = "DeltaNormMQScore"
-	Public Const DATA_COLUMN_DeltaNormTotalPRMScore As String = "DeltaNormTotalPRMScore"
-	Public Const DATA_COLUMN_RankTotalPRMScore As String = "RankTotalPRMScore"
-	Public Const DATA_COLUMN_RankFScore As String = "RankFScore"
-	Public Const DATA_COLUMN_MH As String = "MH"
-	Public Const DATA_COLUMN_RecordNumber As String = "RecordNumber"
-	Public Const DATA_COLUMN_DBFilePos As String = "DBFilePos"
-	Public Const DATA_COLUMN_SpecFilePos As String = "SpecFilePos"
-	Public Const DATA_COLUMN_PrecursorMZ As String = "PrecursorMZ"
-	Public Const DATA_COLUMN_PrecursorError As String = "PrecursorError"
-	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
+	Public Const DATA_COLUMN_Rank_PValue As String = "Rank_PValue"
+	Public Const DATA_COLUMN_EValue As String = "EValue"
+	Public Const DATA_COLUMN_FDR As String = "FDR"
 
-	Public Const FILENAME_SUFFIX_SYN As String = "_inspect_syn.txt"
-	Public Const FILENAME_SUFFIX_FHT As String = "_inspect_fht.txt"
+	Public Const FILENAME_SUFFIX_SYN As String = "_msalign_syn.txt"
+	Public Const FILENAME_SUFFIX_FHT As String = "_msalign_fht.txt"
 
-	Protected Const INS_SEARCH_ENGINE_NAME As String = "Inspect"
+	Protected Const MSAlign_SEARCH_ENGINE_NAME As String = "MSAlign"
 #End Region
 
 	''' <summary>
@@ -69,7 +61,7 @@ Public Class clsPHRPParserInspect
 	''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
-		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.Inspect, blnLoadModsAndSeqInfo)
+		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSAlign, blnLoadModsAndSeqInfo)
 		mInitialized = True
 	End Sub
 
@@ -77,61 +69,44 @@ Public Class clsPHRPParserInspect
 
 		mColumnHeaders.Clear()
 
-		' Define the default column mapping
+		' Define the default column mapping	
 		AddHeaderColumn(DATA_COLUMN_ResultID)
 		AddHeaderColumn(DATA_COLUMN_Scan)
+		AddHeaderColumn(DATA_COLUMN_Prsm_ID)
+		AddHeaderColumn(DATA_COLUMN_Spectrum_ID)
+		AddHeaderColumn(DATA_COLUMN_Charge)
+		AddHeaderColumn(DATA_COLUMN_PrecursorMZ)
+		AddHeaderColumn(DATA_COLUMN_DelM)
+		AddHeaderColumn(DATA_COLUMN_DelM_PPM)
+		AddHeaderColumn(DATA_COLUMN_MH)
 		AddHeaderColumn(DATA_COLUMN_Peptide)
 		AddHeaderColumn(DATA_COLUMN_Protein)
-		AddHeaderColumn(DATA_COLUMN_Charge)
-		AddHeaderColumn(DATA_COLUMN_MQScore)
-		AddHeaderColumn(DATA_COLUMN_Length)
-		AddHeaderColumn(DATA_COLUMN_TotalPRMScore)
-		AddHeaderColumn(DATA_COLUMN_MedianPRMScore)
-		AddHeaderColumn(DATA_COLUMN_FractionY)
-		AddHeaderColumn(DATA_COLUMN_FractionB)
-		AddHeaderColumn(DATA_COLUMN_Intensity)
-		AddHeaderColumn(DATA_COLUMN_NTT)
+		AddHeaderColumn(DATA_COLUMN_Protein_Mass)
+		AddHeaderColumn(DATA_COLUMN_Unexpected_Mod_Count)
+		AddHeaderColumn(DATA_COLUMN_Peak_Count)
+		AddHeaderColumn(DATA_COLUMN_Matched_Peak_Count)
+		AddHeaderColumn(DATA_COLUMN_Matched_Fragment_Ion_Count)
 		AddHeaderColumn(DATA_COLUMN_PValue)
-		AddHeaderColumn(DATA_COLUMN_FScore)
-		AddHeaderColumn(DATA_COLUMN_DeltaScore)
-		AddHeaderColumn(DATA_COLUMN_DeltaScoreOther)
-		AddHeaderColumn(DATA_COLUMN_DeltaNormMQScore)
-		AddHeaderColumn(DATA_COLUMN_DeltaNormTotalPRMScore)
-		AddHeaderColumn(DATA_COLUMN_RankTotalPRMScore)
-		AddHeaderColumn(DATA_COLUMN_RankFScore)
-		AddHeaderColumn(DATA_COLUMN_MH)
-		AddHeaderColumn(DATA_COLUMN_RecordNumber)
-		AddHeaderColumn(DATA_COLUMN_DBFilePos)
-		AddHeaderColumn(DATA_COLUMN_SpecFilePos)
-		AddHeaderColumn(DATA_COLUMN_PrecursorMZ)
-		AddHeaderColumn(DATA_COLUMN_PrecursorError)
-		AddHeaderColumn(DATA_COLUMN_DelM_PPM)
+		AddHeaderColumn(DATA_COLUMN_Rank_PValue)
+		AddHeaderColumn(DATA_COLUMN_EValue)
+		AddHeaderColumn(DATA_COLUMN_FDR)
 
 	End Sub
 
 	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters) As Double
 		Dim strTolerance As String = String.Empty
-		Dim strUnits As String = String.Empty
 
-		Dim dblTolerancePPM As Double = 0
+		Dim dblTolerancePPM As Double
 		Dim dblToleranceDa As Double = 0
-		Dim dblTolerance As Double = 0
 
-		If objSearchEngineParams.Parameters.TryGetValue("ParentPPM", strTolerance) Then
+		If objSearchEngineParams.Parameters.TryGetValue("errorTolerance", strTolerance) Then
 			' Parent mass tolerance, in ppm
-			Double.TryParse(strTolerance, dblTolerancePPM)
-			' Convert from PPM to dalton (assuming a mass of 2000 m/z)
-			dblTolerance = clsPeptideMassCalculator.PPMToMass(dblTolerancePPM, 2000)
+			If Double.TryParse(strTolerance, dblTolerancePPM) Then
+				dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblTolerancePPM, 2000)
+			End If
 		End If
 
-		If objSearchEngineParams.Parameters.TryGetValue("PMTolerance", strTolerance) Then
-			' Parent mass tolerance, in Da
-			Double.TryParse(strTolerance, dblToleranceDa)
-		End If
-
-		dblTolerance = Math.Max(dblTolerance, dblToleranceDa)
-
-		Return dblTolerance
+		Return dblToleranceDa
 
 	End Function
 
@@ -140,11 +115,11 @@ Public Class clsPHRPParserInspect
 	End Function
 
 	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_inspect_syn_ModSummary.txt"
+		Return strDatasetName & "_msalign_syn_ModSummary.txt"
 	End Function
 
 	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_inspect_syn_ProteinMods.txt"
+		Return strDatasetName & "_msalign_syn_ProteinMods.txt"
 	End Function
 
 	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
@@ -152,23 +127,23 @@ Public Class clsPHRPParserInspect
 	End Function
 
 	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_inspect_syn_ResultToSeqMap.txt"
+		Return strDatasetName & "_msalign_syn_ResultToSeqMap.txt"
 	End Function
 
 	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_inspect_syn_SeqInfo.txt"
+		Return strDatasetName & "_msalign_syn_SeqInfo.txt"
 	End Function
 
 	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_inspect_syn_SeqToProteinMap.txt"
+		Return strDatasetName & "_msalign_syn_SeqToProteinMap.txt"
 	End Function
 
 	Public Shared Function GetSearchEngineName() As String
-		Return INS_SEARCH_ENGINE_NAME
+		Return MSAlign_SEARCH_ENGINE_NAME
 	End Function
 
 	''' <summary>
-	''' Parses the specified Inspect parameter file
+	''' Parses the specified MSAlign parameter file
 	''' </summary>
 	''' <param name="strSearchEngineParamFileName"></param>
 	''' <param name="objSearchEngineParams"></param>
@@ -178,7 +153,7 @@ Public Class clsPHRPParserInspect
 
 		Dim blnSuccess As Boolean
 
-		objSearchEngineParams = New clsSearchEngineParameters(INS_SEARCH_ENGINE_NAME, mModInfo)
+		objSearchEngineParams = New clsSearchEngineParameters(MSAlign_SEARCH_ENGINE_NAME)
 
 		blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
 
@@ -189,31 +164,27 @@ Public Class clsPHRPParserInspect
 	End Function
 
 	Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
-
 		Dim strSettingValue As String = String.Empty
+		Dim objModDef As clsModificationDefinition
 		Dim blnSuccess As Boolean
 
 		Try
-			blnSuccess = ReadKeyValuePairSearchEngineParamFile(INS_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, objSearchEngineParams)
+			blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, objSearchEngineParams)
 
 			If blnSuccess Then
+				If objSearchEngineParams.Parameters.TryGetValue("cysteineProtection", strSettingValue) Then
 
-				' Determine the enzyme name
-				If objSearchEngineParams.Parameters.TryGetValue("protease", strSettingValue) Then
-					Select Case strSettingValue.ToLower()
-						Case "trypsin"
-							objSearchEngineParams.Enzyme = "trypsin"
-						Case "none"
-							objSearchEngineParams.Enzyme = "no_enzyme"
-						Case "chymotrypsin"
-							objSearchEngineParams.Enzyme = "chymotrypsin"
-						Case Else
-							If Not String.IsNullOrEmpty(strSettingValue) Then
-								objSearchEngineParams.Enzyme = strSettingValue
-							End If
+					Select Case strSettingValue
+						Case "C57"
+							objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 57.0215, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcet")
+							objSearchEngineParams.AddModification(objModDef)
+						Case "C58"
+							objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 58.0055, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcid")
+							objSearchEngineParams.AddModification(objModDef)
 					End Select
+
 				End If
-			
+
 				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
 				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
 			End If
@@ -238,6 +209,7 @@ Public Class clsPHRPParserInspect
 		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
 		Dim strPeptide As String
 		Dim strProtein As String
+
 		Dim dblPrecursorMZ As Double
 
 		Dim blnSuccess As Boolean
@@ -255,8 +227,9 @@ Public Class clsPHRPParserInspect
 				If .ScanNumber = -100 Then
 					' Data line is not valid
 				Else
+
 					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
-					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_RankTotalPRMScore, mColumnHeaders, 0)
+					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1)
 
 					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 					.SetPeptide(strPeptide, mCleavageStateCalculator)
@@ -269,33 +242,36 @@ Public Class clsPHRPParserInspect
 					dblPrecursorMZ = LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0#)
 					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .Charge, 0)
 
-					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_PrecursorError, mColumnHeaders)
+					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
 					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
 					blnSuccess = True
 				End If
 			End With
 
-
 			If blnSuccess Then
 				UpdatePSMUsingSeqInfo(objPSM)
 
 				' Store the remaining scores
-				AddScore(objPSM, strColumns, DATA_COLUMN_MQScore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_TotalPRMScore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_MedianPRMScore)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Prsm_ID)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Spectrum_ID)
+
+				AddScore(objPSM, strColumns, DATA_COLUMN_MH)
+
+				AddScore(objPSM, strColumns, DATA_COLUMN_Protein_Mass)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Unexpected_Mod_Count)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Peak_Count)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Matched_Peak_Count)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Matched_Fragment_Ion_Count)
+
 				AddScore(objPSM, strColumns, DATA_COLUMN_PValue)
-				AddScore(objPSM, strColumns, DATA_COLUMN_FScore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_DeltaScore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_DeltaScoreOther)
-				AddScore(objPSM, strColumns, DATA_COLUMN_DeltaNormMQScore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_DeltaNormTotalPRMScore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_RankTotalPRMScore)
-				AddScore(objPSM, strColumns, DATA_COLUMN_RankFScore)
+				AddScore(objPSM, strColumns, DATA_COLUMN_EValue)
+				AddScore(objPSM, strColumns, DATA_COLUMN_FDR)
+
 			End If
 
 		Catch ex As Exception
-			MyBase.ReportError("Error parsing line " & intLinesRead & " in the Inspect data file: " & ex.Message)
+			MyBase.ReportError("Error parsing line " & intLinesRead & " in the MSAlign data file: " & ex.Message)
 		End Try
 
 		Return blnSuccess

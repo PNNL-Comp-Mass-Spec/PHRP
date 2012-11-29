@@ -13,7 +13,7 @@ Option Strict On
 ' Program started January 2, 2006
 '
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://ncrr.pnnl.gov/ or http://www.sysbio.org/resources/staff/
+' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 ' 
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
@@ -403,7 +403,7 @@ Public Class clsXTandemResultsProcessor
                 End If
 
                 For intSearchResultIndex = 0 To objSearchResults.Length - 1
-                    UpdateSearchResultEnzymeAndTerminusInfo(objSearchResults(intSearchResultIndex))
+					objSearchResults(intSearchResultIndex).UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
                 Next intSearchResultIndex
 
                 ' Open the input file and parse it
@@ -635,7 +635,7 @@ Public Class clsXTandemResultsProcessor
                                 ReDim Preserve objSearchResults(objSearchResults.Length * 2 - 1)
                                 For intSearchResultIndex = intSearchResultCount - 1 To objSearchResults.Length - 1
                                     objSearchResults(intSearchResultIndex) = New clsSearchResultsXTandem(mPeptideMods)
-                                    UpdateSearchResultEnzymeAndTerminusInfo(objSearchResults(intSearchResultIndex))
+									objSearchResults(intSearchResultIndex).UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
                                 Next intSearchResultIndex
                             End If
 
@@ -1467,44 +1467,25 @@ Public Class clsXTandemResultsProcessor
 
     End Sub
 
-    Private Function TruncateProteinName(ByVal strProteinNameAndDescription As String) As String
+	Protected Overrides Function TruncateProteinName(ByVal strProteinNameAndDescription As String) As String
 
-        Dim intIndex As Integer
-        Dim blnIsReversed As Boolean
+		Dim blnIsReversed As Boolean
 
-        If mLookForReverseSequenceTag Then
-            blnIsReversed = strProteinNameAndDescription.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR)
-        Else
-            blnIsReversed = False
-        End If
+		If mLookForReverseSequenceTag Then
+			blnIsReversed = strProteinNameAndDescription.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR)
+		Else
+			blnIsReversed = False
+		End If
 
-        intIndex = strProteinNameAndDescription.IndexOf(" "c)
-        If intIndex > 0 Then
-            strProteinNameAndDescription = strProteinNameAndDescription.Substring(0, intIndex)
-        End If
+		strProteinNameAndDescription = MyBase.TruncateProteinName(strProteinNameAndDescription)
 
-        If blnIsReversed Then
-            Return strProteinNameAndDescription & REVERSED_PROTEIN_SEQUENCE_INDICATOR
-        Else
-            Return strProteinNameAndDescription
-        End If
+		If blnIsReversed Then
+			Return strProteinNameAndDescription & REVERSED_PROTEIN_SEQUENCE_INDICATOR
+		Else
+			Return strProteinNameAndDescription
+		End If
 
-    End Function
-
-    Private Sub UpdateSearchResultEnzymeAndTerminusInfo(ByRef objSearchResult As clsSearchResultsXTandem)
-        With objSearchResult
-            .SetEnzymeMatchSpec(mEnzymeMatchSpec)
-
-            ' Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
-            If mPeptideNTerminusMassChange <> 0 Then
-                .UpdatePeptideNTerminusMass(mPeptideNTerminusMassChange)
-            End If
-
-            If mPeptideCTerminusMassChange <> 0 Then
-                .UpdatePeptideCTerminusMass(mPeptideCTerminusMassChange)
-            End If
-        End With
-    End Sub
+	End Function
 
     Private Function XMLTextReaderGetAttributeValue(ByRef objXMLReader As System.Xml.XmlTextReader, ByVal strAttributeName As String, ByVal strValueIfMissing As String) As String
         objXMLReader.MoveToAttribute(strAttributeName)

@@ -38,6 +38,9 @@ Public Class clsPHRPParserXTandem
 	Public Const DATA_COLUMN_Peptide_Intensity_LogI As String = "Peptide_Intensity_Log(I)"
 	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
+	Public Const FILENAME_SUFFIX_SYN As String = "_xt.txt"
+	Public Const FILENAME_SUFFIX_FHT As String = "_xt.txt"
+
 	Protected Const XT_SEARCH_ENGINE_NAME As String = "X! Tandem"
 
 	Protected Const TAXONOMY_INFO_KEY_NAME As String = "list path, taxonomy information"
@@ -145,7 +148,7 @@ Public Class clsPHRPParserXTandem
 	End Function
 
 	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_xt.txt"
+		Return strDatasetName & FILENAME_SUFFIX_SYN
 	End Function
 
 	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
