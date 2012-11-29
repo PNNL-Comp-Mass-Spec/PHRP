@@ -1,6 +1,14 @@
 PeptideHitResultsProcessor.dll Revision History
 
-Version 1.5.4714; November 27, 2012
+Version 1.5.4715; November 29, 2012
+	- Added support for MSGF+ results with semicolon-separated protein names
+		- Example: AT1G55490.1(pre=K,post=V);AT1G55490.2(pre=K,post=V);AT3G13470.1(pre=K,post=V)
+		- Synopsis files will have one row for each protein
+	- Now supports adding over 100 unknown mods
+		- Mod names are UnkMod01 through UnkMod99, then Mod00100 through Mod99999, then M0100000 through M9999999
+	- Now ignoring PeptideToProtein mapping errors if fewer than 0.1% of the peptides did not match a protein
+
+Version 1.5.4713; November 27, 2012
 	- Added support for MSGF+ results
 		- Filename must end in _msgfdb.tsv, _msgfdb.txt, _msgfplus.tsv, or _msgfplus.txt
 	- New versions of PeptideToProteinMapEngine.DLL, PHRPReader.DLL, and ProteinCoverageSummarizer.DLL to support MSGF+ column names

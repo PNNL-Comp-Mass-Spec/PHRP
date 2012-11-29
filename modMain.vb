@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "November 27, 2012"
+	Public Const PROGRAM_DATE As String = "November 29, 2012"
 
 	Private mInputFilePath As String
 	Private mOutputFolderName As String							' Optional
@@ -403,6 +403,7 @@ Module modMain
 		Try
 			Using swErrorStream As System.IO.StreamWriter = New System.IO.StreamWriter(Console.OpenStandardError())
 				swErrorStream.WriteLine(strErrorMessage)
+				swErrorStream.WriteLine()
 			End Using
 		Catch ex As Exception
 			' Ignore errors here

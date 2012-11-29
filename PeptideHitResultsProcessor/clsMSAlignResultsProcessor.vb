@@ -1375,6 +1375,9 @@ Public Class clsMSAlignResultsProcessor
 								If System.IO.File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
 									blnSuccess = True
 								Else
+									' Auto-change mIgnorePeptideToProteinMapperErrors to True
+									' We only do this since a small number of peptides reported by MSAlign don't perfectly match the fasta file
+									mIgnorePeptideToProteinMapperErrors = True
 									blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
 								End If
 							End If

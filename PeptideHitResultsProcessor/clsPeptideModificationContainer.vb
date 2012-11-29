@@ -207,6 +207,12 @@ Public Class clsPeptideModificationContainer
 
 	Public Function LookupMassCorrectionTagByMass(ByVal dblModificationMass As Double, Optional ByVal MassDigitsOfPrecision As Byte = MASS_DIGITS_OF_PRECISION, Optional ByVal blnAddToModificationListIfUnknown As Boolean = True) As String
 
+		Const UNKNOWN_MOD_3LETTER As String = "Mod"
+		Const UNKNOWN_MOD_1LETTER As String = "M"
+
+		Static reUnknownModMatcher3Letter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex(UNKNOWN_MOD_3LETTER & "(\d{5,5})", Text.RegularExpressions.RegexOptions.Compiled)
+		Static reUnknownModMatcher1Letter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex(UNKNOWN_MOD_1LETTER & "(\d{7,7})", Text.RegularExpressions.RegexOptions.Compiled)
+
 		Dim objEnum As System.Collections.IDictionaryEnumerator
 
 		Dim intMassDigitsOfPrecisionCurrent As Integer
@@ -220,6 +226,7 @@ Public Class clsPeptideModificationContainer
 
 		Dim intUnknownModValue As Integer
 		Dim intLargestUnknownModValue As Integer
+		Dim reMatch As System.Text.RegularExpressions.Match
 
 		If MassDigitsOfPrecision < 0 Then MassDigitsOfPrecision = 0
 
@@ -246,16 +253,31 @@ Public Class clsPeptideModificationContainer
 						dblClosestMassCorrectionTagMassDiff = dblMassDiff
 					End If
 
+					intUnknownModValue = 0
 					If strMassCorrectionTag.StartsWith(clsModificationDefinition.UNKNOWN_MOD_BASE_NAME) Then
+						' Modification name starts with UnkMod
 						Try
 							intUnknownModValue = CInt(strMassCorrectionTag.Substring(clsModificationDefinition.UNKNOWN_MOD_BASE_NAME.Length))
 						Catch ex As Exception
 							intUnknownModValue = 0
 						End Try
-						If intUnknownModValue > intLargestUnknownModValue Then
-							intLargestUnknownModValue = intUnknownModValue
+
+					Else
+						reMatch = reUnknownModMatcher3Letter.Match(strMassCorrectionTag)
+						If Not reMatch.Success Then
+							' Modification name does not match Mod00000; what about M0000000 ?
+							reMatch = reUnknownModMatcher1Letter.Match(strMassCorrectionTag)
+						End If
+
+						If reMatch.Success Then
+							intUnknownModValue = CInt(reMatch.Groups(1).Value)
 						End If
 					End If
+
+					If intUnknownModValue > 0 AndAlso intUnknownModValue > intLargestUnknownModValue Then
+						intLargestUnknownModValue = intUnknownModValue
+					End If
+
 				Loop
 			Catch ex As Exception
 				' Error enumerating through mMassCorrectionTags
@@ -268,8 +290,19 @@ Public Class clsPeptideModificationContainer
 				If intMassDigitsOfPrecisionCurrent > intMassDigitsOfPrecisionStop Then
 					' Let the For loop go through another iteration to see if we find a match
 				Else
-					If intLargestUnknownModValue < 99 Then
-						strClosestMassCorrectionTag = clsModificationDefinition.UNKNOWN_MOD_BASE_NAME & (intLargestUnknownModValue + 1).ToString("00")
+					If intLargestUnknownModValue < 9999999 Then
+
+						If intLargestUnknownModValue < 99 Then
+							strClosestMassCorrectionTag = clsModificationDefinition.UNKNOWN_MOD_BASE_NAME & (intLargestUnknownModValue + 1).ToString("00")
+
+						ElseIf intLargestUnknownModValue < 99999 Then
+							strClosestMassCorrectionTag = UNKNOWN_MOD_3LETTER & (intLargestUnknownModValue + 1).ToString("00000")
+
+						ElseIf intLargestUnknownModValue < 9999999 Then
+							strClosestMassCorrectionTag = UNKNOWN_MOD_1LETTER & (intLargestUnknownModValue + 1).ToString("0000000")
+
+						End If
+
 						If blnAddToModificationListIfUnknown Then
 							Try
 								mMassCorrectionTags.Add(strClosestMassCorrectionTag, dblModificationMass)
@@ -546,9 +579,15 @@ Public Class clsPeptideModificationContainer
 					clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, _
 					True)
 
-		If blnAddToModificationListIfUnknown AndAlso mDefaultModificationSymbols.Count > 0 Then
+		If blnAddToModificationListIfUnknown Then
+
 			' Append objModificationDefinition to mModifications()
-			intNewModIndex = AddModification(objModificationDefinition, True)
+			If mDefaultModificationSymbols.Count > 0 Then
+				intNewModIndex = AddModification(objModificationDefinition, blnUseNextAvailableModificationSymbol:=True)
+			Else
+				intNewModIndex = AddModification(objModificationDefinition, blnUseNextAvailableModificationSymbol:=False)
+			End If
+
 			If intNewModIndex >= 0 Then
 				Return mModifications(intNewModIndex)
 			Else

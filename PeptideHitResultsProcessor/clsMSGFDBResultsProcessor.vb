@@ -20,7 +20,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "November 27, 2012"
+		MyBase.mFileDate = "November 29, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -50,6 +50,7 @@ Public Class clsMSGFDBResultsProcessor
 	Private Const MSGFDB_CTERMINAL_MOD_MASS_REGEX As String = "([0-9\.\+\-]+)$"
 
 	Private Const MSGFDB_MOD_MASS_REGEX As String = "([+-][0-9\.]+)"
+	Private Const PROTEIN_AND_TERM_SYMBOLS_REGEX As String = "([^;]+)\(pre=(.),post=(.)\)"
 
 	Private Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
 
@@ -195,6 +196,11 @@ Public Class clsMSGFDBResultsProcessor
 		Public Charge As Short
 		Public Scan As Integer
 	End Structure
+
+	Protected Structure udtTerminusCharsType
+		Public NTerm As Char
+		Public CTerm As Char
+	End Structure
 #End Region
 
 #Region "Classwide Variables"
@@ -203,7 +209,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
 	  ByRef udtSearchResultsCurrentScan() As udtMSGFDBSearchResultType, _
-	  ByRef lstSearchResults As System.Collections.Generic.List(Of udtMSGFDBSearchResultType), _
+	  ByRef lstSearchResults As Generic.List(Of udtMSGFDBSearchResultType), _
 	  ByRef strErrorLog As String)
 
 		For Each udtSearchResult As udtMSGFDBSearchResultType In lstSearchResults
@@ -277,8 +283,55 @@ Public Class clsMSGFDBResultsProcessor
 		End With
 	End Sub
 
-	Protected Sub AppendToScanGroupDetails(lstScanGroupDetails As System.Collections.Generic.List(Of udtScanGroupInfoType), _
-	   ByRef htScanGroupCombo As System.Collections.Generic.Dictionary(Of String, Boolean), _
+	''' <summary>
+	''' Adds or updates the prefix and suffix residues to the peptide, as defined in kvProteinInfo
+	''' </summary>
+	''' <param name="strPeptide"></param>
+	''' <param name="kvProteinInfo"></param>
+	''' <returns>Peptide sequence with N-terminal and C-Terminal residues</returns>
+	''' <remarks></remarks>
+	Protected Function AddUpdatePrefixAndSuffixResidues(ByVal strPeptide As String, ByVal kvProteinInfo As Generic.KeyValuePair(Of String, udtTerminusCharsType)) As String
+
+		If strPeptide.IndexOf(".") < 0 Then
+			Return kvProteinInfo.Value.NTerm & "." & strPeptide & "." & kvProteinInfo.Value.CTerm
+		Else
+			Dim strPeptideNew As String
+
+			If strPeptide.Length >= 2 Then
+				If strPeptide.Chars(1) = "."c Then
+					' Peptide already has the N-terminal residue
+					' Replace it using kvProteinInfo
+					strPeptideNew = kvProteinInfo.Value.NTerm & "." & strPeptide.Substring(2)
+
+				ElseIf strPeptide.Chars(0) = "."c Then
+					strPeptideNew = kvProteinInfo.Value.NTerm & strPeptide
+				Else
+					strPeptideNew = kvProteinInfo.Value.NTerm & "." & strPeptide
+				End If
+			Else
+				strPeptideNew = String.Copy(strPeptide)
+			End If
+
+			If strPeptideNew.Length >= 4 Then
+				If strPeptideNew.Chars(strPeptideNew.Length - 2) = "."c Then
+					' Peptide already has the C-terminal residue
+					' Replace it using kvProteinInfo
+					strPeptideNew = strPeptideNew.Substring(0, strPeptideNew.Length - 2) & "." & kvProteinInfo.Value.CTerm
+
+				ElseIf strPeptideNew.Chars(strPeptideNew.Length - 1) = "."c Then
+					strPeptideNew = strPeptideNew & kvProteinInfo.Value.CTerm
+				Else
+					strPeptideNew = strPeptideNew & "." & kvProteinInfo.Value.CTerm
+				End If
+			End If
+
+			Return strPeptideNew
+		End If
+
+	End Function
+
+	Protected Sub AppendToScanGroupDetails(lstScanGroupDetails As Generic.List(Of udtScanGroupInfoType), _
+	   ByRef htScanGroupCombo As Generic.Dictionary(Of String, Boolean), _
 	   ByVal udtScanGroupInfo As udtScanGroupInfoType, _
 	   ByRef intCurrentScanGroupID As Integer, _
 	   ByRef intNextScanGroupID As Integer)
@@ -301,6 +354,20 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Sub
 
+	Private Sub AppendToSearchResults(ByRef lstSearchResults As Generic.List(Of udtMSGFDBSearchResultType), ByVal udtSearchResult As udtMSGFDBSearchResultType, ByVal lstProteinInfo As Generic.Dictionary(Of String, udtTerminusCharsType))
+
+		If lstProteinInfo.Count = 0 Then
+			lstSearchResults.Add(udtSearchResult)
+		Else
+			For Each kvEntry As Generic.KeyValuePair(Of String, udtTerminusCharsType) In lstProteinInfo
+				udtSearchResult.Protein = kvEntry.Key
+				udtSearchResult.Peptide = AddUpdatePrefixAndSuffixResidues(udtSearchResult.Peptide, kvEntry)
+
+				lstSearchResults.Add(udtSearchResult)
+			Next
+		End If
+
+	End Sub
 
 	''' <summary>
 	''' Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb)
@@ -596,7 +663,7 @@ Public Class clsMSGFDBResultsProcessor
 		Dim strLineIn As String
 		Dim protein As String = String.Empty
 
-		Dim lstSearchResults As New System.Collections.Generic.List(Of udtMSGFDBSearchResultType)
+		Dim lstSearchResults As New Generic.List(Of udtMSGFDBSearchResultType)
 
 		Dim intSearchResultsCount As Integer
 		Dim udtSearchResults() As udtMSGFDBSearchResultType
@@ -615,8 +682,8 @@ Public Class clsMSGFDBResultsProcessor
 		Dim intResultsProcessed As Integer
 
 		Dim intNextScanGroupID As Integer
-		Dim lstScanGroupDetails As New System.Collections.Generic.List(Of udtScanGroupInfoType)
-		Dim htScanGroupCombo As New System.Collections.Generic.Dictionary(Of String, Boolean)
+		Dim lstScanGroupDetails As Generic.List(Of udtScanGroupInfoType)
+		Dim htScanGroupCombo As Generic.Dictionary(Of String, Boolean)
 
 		Dim blnSuccess As Boolean
 		Dim blnValidSearchResult As Boolean
@@ -625,6 +692,8 @@ Public Class clsMSGFDBResultsProcessor
 
 		Try
 			blnMSGFPlus = False
+			lstScanGroupDetails = New Generic.List(Of udtScanGroupInfoType)
+			htScanGroupCombo = New Generic.Dictionary(Of String, Boolean)
 
 			Try
 				' Open the input file and parse it
@@ -1268,13 +1337,13 @@ Public Class clsMSGFDBResultsProcessor
 	Private Function ParseMSGFDBResultsFileEntry(ByRef strLineIn As String, _
 	   ByVal blnMSGFPlus As Boolean, _
 	   ByRef lstMSGFDBModInfo As Generic.List(Of udtModInfoType), _
-	   ByRef lstSearchResults As System.Collections.Generic.List(Of udtMSGFDBSearchResultType), _
+	   ByRef lstSearchResults As Generic.List(Of udtMSGFDBSearchResultType), _
 	   ByRef strErrorLog As String, _
 	   ByVal intResultsProcessed As Integer, _
 	   ByRef intColumnMapping() As Integer, _
 	   ByRef intNextScanGroupID As Integer, _
-	   ByRef lstScanGroupDetails As System.Collections.Generic.List(Of udtScanGroupInfoType), _
-	   ByRef htScanGroupCombo As System.Collections.Generic.Dictionary(Of String, Boolean)) As Boolean
+	   ByRef lstScanGroupDetails As Generic.List(Of udtScanGroupInfoType), _
+	   ByRef htScanGroupCombo As Generic.Dictionary(Of String, Boolean)) As Boolean
 
 		' Parses an entry from the MSGF-DB results file
 
@@ -1286,6 +1355,8 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim udtMergedScanInfo() As udtMSGFDBSearchResultType = Nothing
 
+		Dim lstProteinInfo As Generic.Dictionary(Of String, udtTerminusCharsType)
+
 		Dim blnValidSearchResult As Boolean
 		Dim intSlashIndex As Integer
 		Dim blnTargetDecoyFDRValid As Boolean
@@ -1294,9 +1365,11 @@ Public Class clsMSGFDBResultsProcessor
 			' Set this to False for now
 			blnValidSearchResult = False
 
+			lstProteinInfo = New Generic.Dictionary(Of String, udtTerminusCharsType)
+
 			' Reset lstSearchResults
 			If lstSearchResults Is Nothing Then
-				lstSearchResults = New System.Collections.Generic.List(Of udtMSGFDBSearchResultType)
+				lstSearchResults = New Generic.List(Of udtMSGFDBSearchResultType)
 			Else
 				lstSearchResults.Clear()
 			End If
@@ -1390,6 +1463,17 @@ Public Class clsMSGFDBResultsProcessor
 						Throw New EvaluateException("Peptide column is missing or invalid")
 					End If
 
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Protein), .Protein)
+
+					' MSGF+ .tsv files may have a semicolon separated list of protein names; check for this
+					.Protein = SplitProteinList(.Protein, lstProteinInfo)
+
+					If lstProteinInfo.Count > 0 Then
+						' Need to add the prefix and suffix residues
+						.Peptide = AddUpdatePrefixAndSuffixResidues(.Peptide, lstProteinInfo.First)
+					End If
+
 					' Replace any mod text values in the peptide sequence with the appropriate mod symbols
 					' In addition, replace the _ terminus symbols with dashes
 					Dim dblTotalModMass As Double
@@ -1398,7 +1482,6 @@ Public Class clsMSGFDBResultsProcessor
 					' Compute monoisotopic mass of the peptide
 					Dim dblPeptideMonoisotopicMass As Double
 					dblPeptideMonoisotopicMass = ComputePeptideMass(.Peptide, dblTotalModMass)
-
 
 					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
 					.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
@@ -1436,10 +1519,6 @@ Public Class clsMSGFDBResultsProcessor
 						End If
 
 					End If
-
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Protein), .Protein)
-					.Protein = TruncateProteinName(.Protein)
 
 					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.DeNovoScore), .DeNovoScore)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.MSGFScore), .MSGFScore)
@@ -1479,7 +1558,7 @@ Public Class clsMSGFDBResultsProcessor
 						udtSearchResult.SpecIndex = udtMergedScanInfo(intIndex).SpecIndex
 						udtSearchResult.FragMethod = udtMergedScanInfo(intIndex).FragMethod
 
-						lstSearchResults.Add(udtSearchResult)
+						AppendToSearchResults(lstSearchResults, udtSearchResult, lstProteinInfo)
 
 						' Append an entry to lstScanGroupDetails
 						udtScanGroupInfo.Scan = udtSearchResult.ScanNum
@@ -1487,7 +1566,7 @@ Public Class clsMSGFDBResultsProcessor
 					Next
 				Else
 					' This is not a merged result; simply append udtSearchResult to lstSearchResults
-					lstSearchResults.Add(udtSearchResult)
+					AppendToSearchResults(lstSearchResults, udtSearchResult, lstProteinInfo)
 
 					' Also append an entry to lstScanGroupDetails
 					udtScanGroupInfo.Scan = udtSearchResult.ScanNum
@@ -1530,8 +1609,8 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim strSplitLine() As String
 		Dim eResultFileColumn As eMSGFDBResultsFileColumns
-		Dim lstColumnNames As System.Collections.Generic.SortedDictionary(Of String, eMSGFDBResultsFileColumns)
-		lstColumnNames = New System.Collections.Generic.SortedDictionary(Of String, eMSGFDBResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+		Dim lstColumnNames As Generic.SortedDictionary(Of String, eMSGFDBResultsFileColumns)
+		lstColumnNames = New Generic.SortedDictionary(Of String, eMSGFDBResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
 
 		ReDim intColumnMapping(MSGFDBResultsFileColCount - 1)
 
@@ -1607,8 +1686,8 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim strSplitLine() As String
 		Dim eResultFileColumn As eMSFDBSynFileColumns
-		Dim lstColumnNames As System.Collections.Generic.SortedDictionary(Of String, eMSFDBSynFileColumns)
-		lstColumnNames = New System.Collections.Generic.SortedDictionary(Of String, eMSFDBSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+		Dim lstColumnNames As Generic.SortedDictionary(Of String, eMSFDBSynFileColumns)
+		lstColumnNames = New Generic.SortedDictionary(Of String, eMSFDBSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
 
 		ReDim intColumnMapping(MSGFDBSynFileColCount - 1)
 
@@ -1974,9 +2053,9 @@ Public Class clsMSGFDBResultsProcessor
 						End If
 
 					Catch ex As Exception
-			SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " & ex.Message)
-			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-		End Try
+						SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " & ex.Message)
+						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+					End Try
 				End If
 			End If
 		Catch ex As Exception
@@ -2309,6 +2388,53 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Sub
 
+	''' <summary>
+	''' Examines strProteinList to look for a semi-colon separated list of proteins and terminus symbols, for example
+	''' AT1G26570.1(pre=K,post=N);AT3G29360.1(pre=K,post=N);AT3G29360.2(pre=K,post=N)
+	''' </summary>
+	''' <param name="strProteinList">Protein list to examine</param>
+	''' <param name="lstProteinInfo">Protein information, if it is of the form ProteinName(pre=X,post=Y)</param>
+	''' <returns>The name of the first protein</returns>
+	''' <remarks></remarks>
+	Protected Function SplitProteinList(ByVal strProteinList As String, ByRef lstProteinInfo As Generic.Dictionary(Of String, udtTerminusCharsType)) As String
+
+		Static reProteinInfo As New System.Text.RegularExpressions.Regex(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS)
+
+		Dim reMatches As System.Text.RegularExpressions.MatchCollection
+
+		If lstProteinInfo Is Nothing Then
+			lstProteinInfo = New Generic.Dictionary(Of String, udtTerminusCharsType)
+		Else
+			lstProteinInfo.Clear()
+		End If
+
+		reMatches = reProteinInfo.Matches(strProteinList)
+
+		If reMatches.Count = 0 Then
+			' No match; likely just one protein
+			Return TruncateProteinName(strProteinList)
+		Else
+			For Each reMatch As System.Text.RegularExpressions.Match In reMatches
+				Dim strProteinName As String
+				Dim udtTerminusChars As udtTerminusCharsType
+
+				strProteinName = TruncateProteinName(reMatch.Groups(1).Value)
+				udtTerminusChars.NTerm = reMatch.Groups(2).Value.Chars(0)
+				udtTerminusChars.CTerm = reMatch.Groups(3).Value.Chars(0)
+
+				If lstProteinInfo.ContainsKey(strProteinName) Then
+					' Skip this protein since it's already present
+				Else
+					lstProteinInfo.Add(strProteinName, udtTerminusChars)
+				End If
+
+			Next
+
+			Return lstProteinInfo.First.Key
+		End If
+
+
+	End Function
 	Protected Sub StoreSearchResult(ByRef udtSearchResult As udtMSGFDBSearchResultType, _
 	  ByRef intFilteredSearchResultCount As Integer, _
 	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
@@ -2343,7 +2469,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Sub
 
-	Private Sub StoreScanGroupInfo(ByVal strScanGroupFilePath As String, ByRef lstScanGroupDetails As System.Collections.Generic.List(Of udtScanGroupInfoType))
+	Private Sub StoreScanGroupInfo(ByVal strScanGroupFilePath As String, ByRef lstScanGroupDetails As Generic.List(Of udtScanGroupInfoType))
 
 		Dim intScanGroupIDPrevious As Integer
 		Dim blnCreateFile As Boolean
@@ -2462,7 +2588,7 @@ Public Class clsMSGFDBResultsProcessor
 
 		' Write out the header line for synopsis / first hits files
 		Try
-			Dim lstData As New System.Collections.Generic.List(Of String)
+			Dim lstData As New Generic.List(Of String)
 			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_ResultID)
 			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_Scan)
 			lstData.Add(PHRPReader.clsPHRPParserMSGFDB.DATA_COLUMN_FragMethod)
@@ -2554,7 +2680,7 @@ Public Class clsMSGFDBResultsProcessor
 			' MSGF+
 			' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecEValue  Rank_MSGFDB_SpecEValue  EValue  QValue  PepQValue  IsotopeError
 
-			Dim lstData As New System.Collections.Generic.List(Of String)
+			Dim lstData As New Generic.List(Of String)
 			lstData.Add(intResultID.ToString)
 			lstData.Add(udtSearchResult.Scan)
 			lstData.Add(udtSearchResult.FragMethod)
@@ -2603,9 +2729,9 @@ Public Class clsMSGFDBResultsProcessor
 #Region "IComparer Classes"
 
 	Protected Class MSGFDBSearchResultsComparerScanChargeSpecProbPeptide
-		Implements System.Collections.Generic.IComparer(Of udtMSGFDBSearchResultType)
+		Implements Generic.IComparer(Of udtMSGFDBSearchResultType)
 
-		Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtMSGFDBSearchResultType).Compare
+		Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements Generic.IComparer(Of udtMSGFDBSearchResultType).Compare
 
 			If x.ScanNum > y.ScanNum Then
 				Return 1
@@ -2648,9 +2774,9 @@ Public Class clsMSGFDBResultsProcessor
 	End Class
 
 	Protected Class MSGFDBSearchResultsComparerSpecProbScanChargePeptide
-		Implements System.Collections.Generic.IComparer(Of udtMSGFDBSearchResultType)
+		Implements Generic.IComparer(Of udtMSGFDBSearchResultType)
 
-		Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtMSGFDBSearchResultType).Compare
+		Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements Generic.IComparer(Of udtMSGFDBSearchResultType).Compare
 
 			If x.SpecProbNum > y.SpecProbNum Then
 				Return 1

@@ -980,6 +980,8 @@ Public MustInherit Class clsPHRPBaseClass
 		Dim strCleanSequence As String
 		Dim intResidueLocInProtein As Integer
 
+		Dim intPSMCount As Integer
+		Dim intPSMCountSkippedSinceReversedOrScrambledProtein As Integer
 		Dim sngProgressAtStart As Single
 
 		Dim blnSkipProtein As Boolean
@@ -1024,6 +1026,9 @@ Public MustInherit Class clsPHRPBaseClass
 			If Not String.IsNullOrEmpty(strOutputFolderPath) Then
 				strProteinModsFilePath = IO.Path.Combine(strOutputFolderPath, IO.Path.GetFileName(strProteinModsFilePath))
 			End If
+
+			intPSMCount = 0
+			intPSMCountSkippedSinceReversedOrScrambledProtein = 0
 
 			' Create a ProteinMods file parallel to the PHRP file
 			Using swProteinModsFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strProteinModsFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
@@ -1072,10 +1077,16 @@ Public MustInherit Class clsPHRPBaseClass
 						intPepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, objReader.CurrentPSM.Peptide)
 
 						If intPepToProteinMapIndex >= 0 Then
+
 							Do
+								intPSMCount += 1
+
 								blnSkipProtein = False
 								If Not mProteinModsFileIncludesReversedProteins Then
 									blnSkipProtein = IsReversedProtein(lstPepToProteinMapping(intPepToProteinMapIndex).Protein)
+									If blnSkipProtein Then
+										intPSMCountSkippedSinceReversedOrScrambledProtein += 1
+									End If
 								End If
 
 								If Not blnSkipProtein Then
@@ -1105,6 +1116,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 										If lstPepToProteinMapping(intPepToProteinMapIndex).Protein = "__NoMatch__" AndAlso IsReversedProtein(objReader.CurrentPSM.ProteinFirst) Then
 											' Skip this result
+											intPSMCountSkippedSinceReversedOrScrambledProtein += 1
 										Else
 											swProteinModsFile.WriteLine( _
 											  objReader.CurrentPSM.ResultID & ControlChars.Tab & _
@@ -1121,7 +1133,6 @@ Public MustInherit Class clsPHRPBaseClass
 									Next
 								End If
 
-
 								intPepToProteinMapIndex += 1
 							Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso objReader.CurrentPSM.Peptide = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
 
@@ -1134,6 +1145,16 @@ Public MustInherit Class clsPHRPBaseClass
 
 					RemoveHandler objReader.ErrorEvent, AddressOf PHRPReader_ErrorEvent
 					RemoveHandler objReader.WarningEvent, AddressOf PHRPReader_WarningEvent
+
+					If intPSMCount > 0 Then
+						If intPSMCountSkippedSinceReversedOrScrambledProtein = intPSMCount Then
+							Console.WriteLine()
+							ReportWarning("All PSMs map to reversed or scrambled proteins; the _ProteinMods.txt file is empty")
+						ElseIf intPSMCountSkippedSinceReversedOrScrambledProtein > 0 Then
+							Console.WriteLine()
+							Console.WriteLine("Note: skipped " & intPSMCountSkippedSinceReversedOrScrambledProtein & " / " & intPSMCount & " PSMs that map to reversed or scrambled proteins while creating the _ProteinMods.txt file")
+						End If
+					End If
 
 				End Using
 			End Using
@@ -1784,12 +1805,13 @@ Public MustInherit Class clsPHRPBaseClass
 			Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(strModificationSummaryFilePath, False)
 
 				' Write the header line
-				swOutFile.WriteLine("Modification_Symbol" & SEP_CHAR & _
-				  "Modification_Mass" & SEP_CHAR & _
-				  "Target_Residues" & SEP_CHAR & _
-				  "Modification_Type" & SEP_CHAR & _
-				  "Mass_Correction_Tag" & SEP_CHAR & _
-				  "Occurence_Count")
+				swOutFile.WriteLine( _
+				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol & SEP_CHAR & _
+				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass & SEP_CHAR & _
+				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues & SEP_CHAR & _
+				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type & SEP_CHAR & _
+				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag & SEP_CHAR & _
+				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count)
 
 				For intIndex = 0 To mPeptideMods.ModificationCount - 1
 					With mPeptideMods.GetModificationByIndex(intIndex)
@@ -1997,9 +2019,9 @@ Public MustInherit Class clsPHRPBaseClass
 				dblErrorPercent = intPeptideCountNoMatch / intPeptideCount * 100.0
 
 				Dim strErrorMessage As String
-				strErrorMessage = dblErrorPercent.ToString("0.0") & "% of the entries in the peptide to protein map file (" & IO.Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & IO.Path.GetFileName(mFastaFilePath) & ")"
+				strErrorMessage = dblErrorPercent.ToString("0.00") & "% of the entries (" & intPeptideCountNoMatch & " / " & intPeptideCount & ") in the peptide to protein map file (" & IO.Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & IO.Path.GetFileName(mFastaFilePath) & ")"
 
-				If blnIgnorePeptideToProteinMapperErrors Then
+				If blnIgnorePeptideToProteinMapperErrors OrElse dblErrorPercent < 0.1 Then
 					ReportWarning(strErrorMessage)
 					blnSuccess = True
 				Else

@@ -675,7 +675,7 @@ Public MustInherit Class clsSearchResultsBaseClass
 			mErrorMessage = "Invalid value for intResidueLocInPeptide: " & intResidueLocInPeptide.ToString & " (objModificationDefinition.ModificationType = " & objModificationDefinition.ModificationType.ToString & ")"
 		Else
 			If blnUpdateModOccurrenceCounts Then
-				' Increment OccurenceCount
+				' Increment OccurrenceCount
 				objModificationDefinition.OccurrenceCount += 1
 			End If
 
