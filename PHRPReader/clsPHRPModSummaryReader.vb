@@ -2,12 +2,12 @@
 
 Public Class clsPHRPModSummaryReader
 
-	Protected Const MOD_SUMMARY_COLUMN_Modification_Symbol As String = "Modification_Symbol"
-	Protected Const MOD_SUMMARY_COLUMN_Modification_Mass As String = "Modification_Mass"
-	Protected Const MOD_SUMMARY_COLUMN_Target_Residues As String = "Target_Residues"
-	Protected Const MOD_SUMMARY_COLUMN_Modification_Type As String = "Modification_Type"
-	Protected Const MOD_SUMMARY_COLUMN_Mass_Correction_Tag As String = "Mass_Correction_Tag"
-	Protected Const MOD_SUMMARY_COLUMN_Occurence_Count As String = "Occurence_Count"
+	Public Const MOD_SUMMARY_COLUMN_Modification_Symbol As String = "Modification_Symbol"
+	Public Const MOD_SUMMARY_COLUMN_Modification_Mass As String = "Modification_Mass"
+	Public Const MOD_SUMMARY_COLUMN_Target_Residues As String = "Target_Residues"
+	Public Const MOD_SUMMARY_COLUMN_Modification_Type As String = "Modification_Type"
+	Public Const MOD_SUMMARY_COLUMN_Mass_Correction_Tag As String = "Mass_Correction_Tag"
+	Public Const MOD_SUMMARY_COLUMN_Occurrence_Count As String = "Occurrence_Count"
 
 	Protected mModificationDefs As System.Collections.Generic.List(Of clsModificationDefinition)
 
@@ -104,11 +104,11 @@ Public Class clsPHRPModSummaryReader
 		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Target_Residues, 2)
 		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Type, 3)
 		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Mass_Correction_Tag, 4)
-		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Occurence_Count, 5)
+		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Occurrence_Count, 5)
 
 		' Read the data from the ModSummary.txt file
 		' The first line is typically a header line:
-		' Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	Occurence_Count
+		' Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
 
 		Using srModSummaryFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strModSummaryFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
 
@@ -124,6 +124,10 @@ Public Class clsPHRPModSummaryReader
 					If Not blnHeaderLineParsed Then
 						If strSplitLine(0).ToLower() = MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower() Then
 							' Parse the header line to confirm the column ordering
+							' The Occurrence_Count column was mispelled prior to December 2012; need to check for this
+							For intIndex As Integer = 0 To strSplitLine.Length - 1
+								If strSplitLine(intIndex) = "Occurence_Count" Then strSplitLine(intIndex) = MOD_SUMMARY_COLUMN_Occurrence_Count
+							Next
 							clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
 							blnSkipLine = True
 						End If

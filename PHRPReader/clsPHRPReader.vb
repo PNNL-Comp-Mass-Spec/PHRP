@@ -727,6 +727,11 @@ Public Class clsPHRPReader
 							strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_msgfdb".Length)
 						End If
 
+					ElseIf eResultType = ePeptideHitResultType.MSAlign Then
+						If strDatasetName.ToLower.EndsWith("_msalign") Then
+							strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_msalign".Length)
+						End If
+
 					End If
 				End If
 

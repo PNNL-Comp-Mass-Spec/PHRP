@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4716; November 29, 2012
+	- Renamed column Occurence_Count to Occurence_Count
+
 Version 1.1.4715; November 28, 2012
 	- Added support for MSAlign results
 
