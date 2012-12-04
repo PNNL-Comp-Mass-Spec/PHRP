@@ -187,8 +187,6 @@ Public Class clsPeptideModificationContainer
 		Dim strTargetResidues As String
 		Dim objModificationDefinition As clsModificationDefinition
 
-		' Still no match; define a new custom modification
-		' First, need to populate strTargetResidues
 		If chTargetResidue = Nothing Then
 			strTargetResidues = String.Empty
 		Else
