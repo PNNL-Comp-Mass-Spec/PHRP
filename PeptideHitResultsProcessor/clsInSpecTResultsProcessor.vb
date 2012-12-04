@@ -33,7 +33,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-		MyBase.mFileDate = "August 24, 2012"
+		MyBase.mFileDate = "December 3, 2012"
         InitializeLocalVariables()
     End Sub
 
@@ -1725,7 +1725,7 @@ Public Class clsInSpecTResultsProcessor
 							End If
 							blnExistingModFound = False
 
-							objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(dblModMass, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
+							objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(dblModMass, chTargetResidue, eResidueTerminusState, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
 
 							If intResidueIndex = intResIndexStart Then
 								.ModSymbol = objModificationDefinition.ModificationSymbol

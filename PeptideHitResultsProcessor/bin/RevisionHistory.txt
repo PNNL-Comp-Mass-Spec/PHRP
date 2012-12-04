@@ -1,5 +1,12 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.4720; December 3, 2012
+	- Added support for results from MSAlign v0.5
+	- Updated GetColumnValue() to allow for a header line having more columns than a data line
+	- Updated clsSearchResultsBaseClass to use 2 for MASS_DIGITS_OF_PRECISION
+		- If a new unknown modification's mass is within 0.005 Da of an existing dynamic mod, then we assume the new mod matches the existing one
+		- Previously, MASS_DIGITS_OF_PRECISION was 3, meaning mods had to agree within 0.0005 Da
+
 Version 1.5.4716; November 29, 2012
 	- Added support for MSGF+ results with semicolon-separated protein names
 		- Example: AT1G55490.1(pre=K,post=V);AT1G55490.2(pre=K,post=V);AT3G13470.1(pre=K,post=V)

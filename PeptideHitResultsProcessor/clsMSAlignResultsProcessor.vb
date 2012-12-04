@@ -17,7 +17,7 @@ Public Class clsMSAlignResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "November 28, 2012"
+		MyBase.mFileDate = "December 3, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -40,28 +40,29 @@ Public Class clsMSAlignResultsProcessor
 	Private Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
 
 	' These columns correspond to the tab-delimited file created directly by MSAlign
-	Protected Const MSAlignResultsFileColCount As Integer = 20
+	Protected Const MSAlignResultsFileColCount As Integer = 21
 	Public Enum eMSAlignResultsFileColumns As Integer
 		Data_file_name = 0
 		Prsm_ID = 1
 		Spectrum_ID = 2
-		Scans = 3
-		Peaks = 4
-		Charge = 5
-		Precursor_mass = 6				' Monoisotopic mass value of the observed precursor_mz
-		Adjusted_precursor_mass = 7		' Theoretical monoisotopic mass of the peptide (including mods)
-		Protein_ID = 8
-		Protein_name = 9				' Protein name and description
-		Protein_mass = 10
-		First_residue = 11
-		Last_residue = 12
-		Peptide = 13
-		Unexpected_modifications = 14
-		Matched_peaks = 15
-		Matched_fragment_ions = 16
-		Pvalue = 17
-		Evalue = 18
-		FDR = 19
+		Protein_Sequence_ID = 3			' Used by MSAlign v0.5, but not by v0.6
+		Scans = 4
+		Peaks = 5
+		Charge = 6
+		Precursor_mass = 7				' Monoisotopic mass value of the observed precursor_mz
+		Adjusted_precursor_mass = 8		' Theoretical monoisotopic mass of the peptide (including mods)
+		Protein_ID = 9
+		Protein_name = 10				' Protein name and description
+		Protein_mass = 11
+		First_residue = 12
+		Last_residue = 13
+		Peptide = 14
+		Unexpected_modifications = 15
+		Matched_peaks = 16
+		Matched_fragment_ions = 17
+		Pvalue = 18
+		Evalue = 19
+		FDR = 20
 	End Enum
 
 	' These columns correspond to the Synopsis file created by this class
@@ -913,15 +914,22 @@ Public Class clsMSAlignResultsProcessor
 			If strSplitLine.Length >= 13 Then
 
 				With udtSearchResult
-					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Data_file_name), .Data_file_name) Then
-						Throw New EvaluateException("Data_file_name column is missing or invalid")
+					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Data_file_name), .Data_file_name)
+					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Prsm_ID), .Prsm_ID) Then
+						Throw New EvaluateException("Prsm_ID column is missing or invalid")
 					End If
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Prsm_ID), .Prsm_ID)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Spectrum_ID), .Spectrum_ID)
 
 					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Scans), .Scans) Then
 						Throw New EvaluateException("Scan(s) column is missing or invalid")
 					End If
+
+					' The expected header from MSAlign v0.5 is:
+					'                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                             Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
+
+					' The expected header from MSAlign v0.6 is:
+					' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR
+
 
 					If Not Integer.TryParse(.Scans, .ScanNum) Then
 						' .Scans likely has a list of scan numbers; extract the first scan number from .scans
@@ -951,20 +959,13 @@ Public Class clsMSAlignResultsProcessor
 						End If
 					End If
 
-					' Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Adjusted_precursor_mass), .Adjusted_precursor_mass)
+					If intColumnMapping(eMSAlignResultsFileColumns.Adjusted_precursor_mass) >= 0 Then
+						' Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
+						GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Adjusted_precursor_mass), .Adjusted_precursor_mass)
 
-					' Compute DelM and DelM_PPM
-					If Double.TryParse(.Adjusted_precursor_mass, dblPeptideMonoMassMSAlign) Then
-						dblDelM = dblPrecursorMonoMass - dblPeptideMonoMassMSAlign
-						.DelM = NumToString(dblDelM, 6, True)
-
-						If dblPrecursorMZ > 0 Then
-							.DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, dblPrecursorMZ), 5, True)
-						Else
-							.DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, 1000), 5, True)
-						End If
-
+						Double.TryParse(.Adjusted_precursor_mass, dblPeptideMonoMassMSAlign)
+					Else
+						dblPeptideMonoMassMSAlign = 0
 					End If
 
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_ID), .Protein_ID)
@@ -990,6 +991,10 @@ Public Class clsMSAlignResultsProcessor
 					' Compute monoisotopic mass of the peptide
 					dblPeptideMonoMassPHRP = ComputePeptideMass(.Peptide, dblTotalModMass)
 
+					If dblPeptideMonoMassMSAlign = 0 Then
+						dblPeptideMonoMassMSAlign = dblPeptideMonoMassPHRP
+					End If
+
 					If Math.Abs(dblPeptideMonoMassPHRP - dblPeptideMonoMassMSAlign) > 0.1 Then
 						' Computed monoisotopic mass values differ by more than 0.1 Da; this is unexpected
 						Dim strFirst30Residues As String
@@ -999,6 +1004,18 @@ Public Class clsMSAlignResultsProcessor
 							strFirst30Residues = .Peptide.Substring(0, 27) & "..."
 						End If
 						ReportWarning("The monoisotopic mass computed by PHRP is more than 0.1 Da away from the mass computed by MSAlign: " & dblPeptideMonoMassPHRP.ToString("0.0000") & " vs. " & dblPeptideMonoMassMSAlign.ToString("0.0000") & "; peptide " & strFirst30Residues)
+					End If
+
+					If dblPeptideMonoMassMSAlign > 0 Then
+						' Compute DelM and DelM_PPM
+						dblDelM = dblPrecursorMonoMass - dblPeptideMonoMassMSAlign
+						.DelM = NumToString(dblDelM, 6, True)
+
+						If dblPrecursorMZ > 0 Then
+							.DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, dblPrecursorMZ), 5, True)
+						Else
+							.DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, 1000), 5, True)
+						End If
 					End If
 
 					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
@@ -1041,8 +1058,11 @@ Public Class clsMSAlignResultsProcessor
 
 		' Parse the header line
 
-		' The expected header from MSAlign is:
-		' Data_file_name    Prsm_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR
+		' The expected header from MSAlign v0.5 is:
+		'                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                             Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
+
+		' The expected header from MSAlign v0.6 is:
+		' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR
 
 
 		Dim strSplitLine() As String
@@ -1055,6 +1075,7 @@ Public Class clsMSAlignResultsProcessor
 		lstColumnNames.Add("Data_file_name", eMSAlignResultsFileColumns.Data_file_name)
 		lstColumnNames.Add("Prsm_ID", eMSAlignResultsFileColumns.Prsm_ID)
 		lstColumnNames.Add("Spectrum_ID", eMSAlignResultsFileColumns.Spectrum_ID)
+		lstColumnNames.Add("Protein_Sequence_ID", eMSAlignResultsFileColumns.Protein_Sequence_ID)
 		lstColumnNames.Add("Scan(s)", eMSAlignResultsFileColumns.Scans)
 		lstColumnNames.Add("#peaks", eMSAlignResultsFileColumns.Peaks)
 		lstColumnNames.Add("Charge", eMSAlignResultsFileColumns.Charge)
@@ -1436,10 +1457,10 @@ Public Class clsMSAlignResultsProcessor
 			' Call .LookupModificationDefinitionByMass for each entry in lstMSAlignModInfo
 			For Each objModInfo As clsModificationDefinition In lstMSAlignModInfo
 				If String.IsNullOrEmpty(objModInfo.TargetResidues) Then
-					objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True)
+					objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
 				Else
 					For Each chTargetResidue As Char In objModInfo.TargetResidues
-						objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True)
+						objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
 					Next
 				End If
 			Next

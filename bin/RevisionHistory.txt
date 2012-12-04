@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4720; December 3, 2012
+	- Added support for results from MSAlign v0.5
+
 Version 1.5.4716; November 29, 2012
 	- Added support for MSGF+ results with semicolon-separated protein names
 	- Now supports adding over 100 unknown mods

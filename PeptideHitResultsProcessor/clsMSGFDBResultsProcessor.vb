@@ -20,7 +20,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "November 29, 2012"
+		MyBase.mFileDate = "December 3, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -2398,7 +2398,7 @@ Public Class clsMSGFDBResultsProcessor
 
 						blnExistingModFound = False
 
-						objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMassAndModType(.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, blnExistingModFound, True)
+						objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMassAndModType(.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
 
 						If intResidueIndex = intResIndexStart Then
 							' Update the Mod Symbol

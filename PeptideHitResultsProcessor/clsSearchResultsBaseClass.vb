@@ -34,7 +34,7 @@ Imports PHRPReader.clsPeptideCleavageStateCalculator
 Public MustInherit Class clsSearchResultsBaseClass
 
 #Region "Constants and Enums"
-    Protected Const MASS_DIGITS_OF_PRECISION As Integer = 3
+	Public Const MASS_DIGITS_OF_PRECISION As Integer = 2
     Public Const MASS_C13 As Double = 1.00335483
 #End Region
 
@@ -634,18 +634,19 @@ Public MustInherit Class clsSearchResultsBaseClass
 			' Lookup the modification definition given the modification information
 			' If the modification mass is unknown, then will auto-add it to the list of known modifications
 			objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass( _
-					 dblModificationMass, _
-					 chTargetResidue, _
-					 eResidueTerminusState, _
-					 blnExistingModFound, _
-					 True)
+			  dblModificationMass, _
+			  chTargetResidue, _
+			  eResidueTerminusState, _
+			  blnExistingModFound, _
+			  True, MASS_DIGITS_OF_PRECISION)
 
 			blnSuccess = SearchResultAddModification( _
-				 objModificationDefinition, _
-				 chTargetResidue, _
-				 intResidueLocInPeptide, _
-				 eResidueTerminusState, _
-				 blnUpdateModOccurrenceCounts)
+			  objModificationDefinition, _
+			  chTargetResidue, _
+			  intResidueLocInPeptide, _
+			  eResidueTerminusState, _
+			  blnUpdateModOccurrenceCounts)
+
 		End If
 
 		Return blnSuccess

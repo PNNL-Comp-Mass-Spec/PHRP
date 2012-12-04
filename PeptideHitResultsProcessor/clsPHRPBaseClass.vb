@@ -30,7 +30,7 @@ Imports PHRPReader
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "November 27, 2012"
+		mFileDate = "December 3, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -1261,7 +1261,7 @@ Public MustInherit Class clsPHRPBaseClass
 	''' <returns>True if intColumnIndex >= 0</returns>
 	''' <remarks></remarks>
 	Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef strValue As String, ByVal strValueIfMissing As String) As Boolean
-		If intColumnIndex >= 0 Then
+		If intColumnIndex >= 0 AndAlso intColumnIndex < strSplitLine.Length Then
 			strValue = String.Copy(strSplitLine(intColumnIndex))
 			Return True
 		Else
