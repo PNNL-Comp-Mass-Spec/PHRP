@@ -17,7 +17,7 @@ Public Class clsMSAlignResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "December 3, 2012"
+		MyBase.mFileDate = "December 4, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -387,6 +387,23 @@ Public Class clsMSAlignResultsProcessor
 		Next intIndex
 
 	End Sub
+
+	Protected Function AssureInteger(ByVal strInteger As String, ByVal intDefaultValue As Integer) As String
+
+		Dim intValue As Integer
+		Dim dblValue As Double
+
+		If strInteger.EndsWith(".0") Then strInteger = strInteger.Substring(0, strInteger.Length - 2)
+
+		If Integer.TryParse(strInteger, intValue) Then
+			Return intValue.ToString()
+		ElseIf Double.TryParse(strInteger, dblValue) Then
+			Return dblValue.ToString("0")
+		Else
+			Return intDefaultValue.ToString()
+		End If
+
+	End Function
 
 	Protected Function ComputePeptideMass(ByVal strPeptide As String, ByVal dblTotalModMass As Double) As Double
 
@@ -1026,6 +1043,12 @@ Public Class clsMSAlignResultsProcessor
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Matched_fragment_ions), .Matched_fragment_ions)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Pvalue), .Pvalue)
 					If Not Double.TryParse(.Pvalue, .PValueNum) Then .PValueNum = 0
+
+					' Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
+					.Unexpected_modifications = AssureInteger(.Unexpected_modifications, 0)	' Unexpected_Mod_Count
+					.Peaks = AssureInteger(.Peaks, 0)										' Peak_count
+					.Matched_peaks = AssureInteger(.Matched_peaks, 0)						' Matched_Peak_Count
+					.Matched_fragment_ions = AssureInteger(.Matched_fragment_ions, 0)		' Matched_Fragment_Ion_Count
 
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Evalue), .Evalue)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.FDR), .FDR)

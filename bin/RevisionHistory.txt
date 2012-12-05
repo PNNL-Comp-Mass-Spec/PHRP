@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4721; December 4, 2012
+	- Now assuring that the various Count columns in MSAlign results contain integers
+
 Version 1.5.4720; December 3, 2012
 	- Added support for results from MSAlign v0.5
 
