@@ -1,7 +1,13 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.4723; December 6, 2012
+	- Now naming new, unknown modifications using the modification mass instead of using UnkMod01, UnkMod02, etc.
+		- Modification names for unknown mods will always be 8 characters long and will always start with a plus sign or minus sign
+		- Example 1: a modification mass of   7.01 is assigned the name +7.01000
+		- Example 2: a modification mass of -54.98 is assigned the name -54.9800
+
 Version 1.5.4721; December 4, 2012
-	- Now assuring that the various Count columns in MSAlign results contain integers
+	- Now ensuring that the various Count columns in MSAlign results contain integers
 
 Version 1.5.4720; December 3, 2012
 	- Added support for results from MSAlign v0.5

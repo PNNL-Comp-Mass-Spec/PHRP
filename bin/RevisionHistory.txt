@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4723; December 6, 2012
+	- Now naming new, unknown modifications using the modification mass instead of using UnkMod01, UnkMod02, etc.
+
 Version 1.5.4721; December 4, 2012
 	- Now assuring that the various Count columns in MSAlign results contain integers
 

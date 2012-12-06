@@ -30,7 +30,7 @@ Imports PHRPReader
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "December 3, 2012"
+		mFileDate = "December 6, 2012"
 		InitializeLocalVariables()
 	End Sub
 

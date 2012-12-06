@@ -33,15 +33,15 @@ Imports PHRPReader.clsAminoAcidModInfo
 Public Class clsPeptideModificationContainer
 
 #Region "Constants and Enums"
-    Public Const DEFAULT_MODIFICATION_SYMBOLS As String = "*#@$&!%~†‡¤º^`×÷+=ø¢"         ' A few other possibilities: €£¥§
+	Public Const DEFAULT_MODIFICATION_SYMBOLS As String = "*#@$&!%~†‡¤º^`×÷+=ø¢"		 ' A few other possibilities: €£¥§
 
-    Public Const MASS_DIGITS_OF_PRECISION As Byte = 3
+	Public Const MASS_DIGITS_OF_PRECISION As Byte = 3
 
-    Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "["c
-    Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "]"c
+	Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "["c
+	Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "]"c
 
-    Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "["c
-    Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "]"c
+	Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "["c
+	Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "]"c
 
 #End Region
 
@@ -49,33 +49,33 @@ Public Class clsPeptideModificationContainer
 #End Region
 
 #Region "Classwide Variables"
-    ' List of available modification symbols
-    Protected mDefaultModificationSymbols As System.Collections.Queue
+	' List of available modification symbols
+	Protected mDefaultModificationSymbols As System.Collections.Queue
 
-    ' List of known mass correction tags
-    Protected mMassCorrectionTags As Hashtable
+	' List of known mass correction tags
+	Protected mMassCorrectionTags As Hashtable
 
-    ' List of known modifications
+	' List of known modifications
 	Protected mModifications As System.Collections.Generic.List(Of clsModificationDefinition)
 
-    Protected mErrorMessage As String
+	Protected mErrorMessage As String
 
-    ' This array holds modifications that Sequest or XTandem will often use but for 
-    ' which the auto-addition method sometimes incorrectly notes
-    Protected mStandardRefinementModifications() As clsModificationDefinition
+	' This array holds modifications that Sequest or XTandem will often use but for 
+	' which the auto-addition method sometimes incorrectly notes
+	Protected mStandardRefinementModifications() As clsModificationDefinition
 
-    Protected mConsiderModSymbolWhenFindingIdenticalMods As Boolean
+	Protected mConsiderModSymbolWhenFindingIdenticalMods As Boolean
 #End Region
 
 #Region "Properties"
-    Public ReadOnly Property ErrorMessage() As String
-        Get
-            Return mErrorMessage
-        End Get
-    End Property
+	Public ReadOnly Property ErrorMessage() As String
+		Get
+			Return mErrorMessage
+		End Get
+	End Property
 
-    Public ReadOnly Property ModificationCount() As Integer
-        Get
+	Public ReadOnly Property ModificationCount() As Integer
+		Get
 			Return mModifications.Count
 		End Get
 	End Property
@@ -259,6 +259,70 @@ Public Class clsPeptideModificationContainer
 		mModifications.Clear()
 	End Sub
 
+	''' <summary>
+	''' Converts a modification mass to a generic 8 character name
+	''' The name will always start with + or - then will have the modification mass, rounded as necessary to give an 8 character name
+	''' </summary>
+	''' <param name="dblModificationMass"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function GenerateGenericModMassName(ByVal dblModificationMass As Double) As String
+
+		Dim strModMass As String
+		Dim strFormatString As String
+		Dim intFormatDigits As Integer
+		Dim intMaxLength As Integer
+
+		If dblModificationMass = 0 Then
+			Return "+0.00000"
+		ElseIf dblModificationMass < -9999999 Then
+			' Modification mass is too negative; always return -9999999
+			Return "-9999999"
+		ElseIf dblModificationMass > 9999999 Then
+			' Modification mass is too positve; always return +9999999
+			Return "+9999999"
+		End If
+
+		' Determine the number of digits that we will display to the left of the decimal point
+		intFormatDigits = CInt(Math.Ceiling(Math.Log10(Math.Abs(dblModificationMass))))
+		If intFormatDigits < 1 Then intFormatDigits = 1
+
+		' Generate the format string
+		' For example, a modification mass of 15.9994 will have strFormatString = "+00.0000"
+		' Negative modification masses do not start with a minus sign in the format string since Visual Studio auto-adds it
+		' Thus, a modification mass of -15.9994 will have strFormatString = "00.0000"
+		strFormatString = New String("0"c, intFormatDigits)
+
+		If dblModificationMass > 0 Then
+			strFormatString = "+" & strFormatString
+			intMaxLength = 8
+		Else
+			intMaxLength = 7
+		End If
+
+		If strFormatString.Length < intMaxLength Then
+			strFormatString &= "."
+		End If
+
+		Do While strFormatString.Length() < intMaxLength
+			strFormatString &= "0"
+		Loop
+
+		strModMass = dblModificationMass.ToString(strFormatString)
+
+		If strModMass.Length < 8 AndAlso strModMass.IndexOf("."c) < 0 Then
+			strModMass &= "."
+		End If
+
+		Do While strModMass.Length < 8
+			' Append extra zeroes (this code will likely never be reached)
+			strModMass &= "0"
+		Loop
+
+		Return strModMass
+
+	End Function
+
 	Public Function GetModificationByIndex(ByVal intIndex As Integer) As clsModificationDefinition
 		If intIndex >= 0 And intIndex < mModifications.Count Then
 			Return mModifications(intIndex)
@@ -296,12 +360,6 @@ Public Class clsPeptideModificationContainer
 
 	Public Function LookupMassCorrectionTagByMass(ByVal dblModificationMass As Double, ByVal MassDigitsOfPrecision As Byte, ByVal blnAddToModificationListIfUnknown As Boolean, ByVal MassDigitsOfPrecisionLoose As Byte) As String
 
-		Const UNKNOWN_MOD_3LETTER As String = "Mod"
-		Const UNKNOWN_MOD_1LETTER As String = "M"
-
-		Static reUnknownModMatcher3Letter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex(UNKNOWN_MOD_3LETTER & "(\d{5,5})", Text.RegularExpressions.RegexOptions.Compiled)
-		Static reUnknownModMatcher1Letter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex(UNKNOWN_MOD_1LETTER & "(\d{7,7})", Text.RegularExpressions.RegexOptions.Compiled)
-
 		Dim objEnum As System.Collections.IDictionaryEnumerator
 
 		Dim intMassDigitsOfPrecisionCurrent As Integer
@@ -312,10 +370,6 @@ Public Class clsPeptideModificationContainer
 
 		Dim strClosestMassCorrectionTag As String
 		Dim dblClosestMassCorrectionTagMassDiff As Double
-
-		Dim intUnknownModValue As Integer
-		Dim intLargestUnknownModValue As Integer
-		Dim reMatch As System.Text.RegularExpressions.Match
 
 		If MassDigitsOfPrecision < 0 Then MassDigitsOfPrecision = 0
 
@@ -330,11 +384,9 @@ Public Class clsPeptideModificationContainer
 		For intMassDigitsOfPrecisionCurrent = MassDigitsOfPrecision To intMassDigitsOfPrecisionStop Step -1
 			strClosestMassCorrectionTag = String.Empty
 			dblClosestMassCorrectionTagMassDiff = Double.MaxValue
-			intLargestUnknownModValue = 0
 
 			Try
 				' First look for an exact match in mMassCorrectionTags
-				' At the same time, look for entries starting with clsModificationDefinition.UNKNOWN_MOD_BASE_NAME
 				objEnum = mMassCorrectionTags.GetEnumerator
 				Do While objEnum.MoveNext
 					strMassCorrectionTag = CStr(objEnum.Key)
@@ -343,32 +395,6 @@ Public Class clsPeptideModificationContainer
 						strClosestMassCorrectionTag = CStr(objEnum.Key)
 						dblClosestMassCorrectionTagMassDiff = dblMassDiff
 					End If
-
-					intUnknownModValue = 0
-					If strMassCorrectionTag.StartsWith(clsModificationDefinition.UNKNOWN_MOD_BASE_NAME) Then
-						' Modification name starts with UnkMod
-						Try
-							intUnknownModValue = CInt(strMassCorrectionTag.Substring(clsModificationDefinition.UNKNOWN_MOD_BASE_NAME.Length))
-						Catch ex As Exception
-							intUnknownModValue = 0
-						End Try
-
-					Else
-						reMatch = reUnknownModMatcher3Letter.Match(strMassCorrectionTag)
-						If Not reMatch.Success Then
-							' Modification name does not match Mod00000; what about M0000000 ?
-							reMatch = reUnknownModMatcher1Letter.Match(strMassCorrectionTag)
-						End If
-
-						If reMatch.Success Then
-							intUnknownModValue = CInt(reMatch.Groups(1).Value)
-						End If
-					End If
-
-					If intUnknownModValue > 0 AndAlso intUnknownModValue > intLargestUnknownModValue Then
-						intLargestUnknownModValue = intUnknownModValue
-					End If
-
 				Loop
 			Catch ex As Exception
 				' Error enumerating through mMassCorrectionTags
@@ -381,29 +407,17 @@ Public Class clsPeptideModificationContainer
 				If intMassDigitsOfPrecisionCurrent > intMassDigitsOfPrecisionStop Then
 					' Let the For loop go through another iteration to see if we find a match
 				Else
-					If intLargestUnknownModValue < 9999999 Then
+					' Match not found
+					' Name the modification based on the mod mass
+					strClosestMassCorrectionTag = GenerateGenericModMassName(dblModificationMass)
 
-						If intLargestUnknownModValue < 99 Then
-							strClosestMassCorrectionTag = clsModificationDefinition.UNKNOWN_MOD_BASE_NAME & (intLargestUnknownModValue + 1).ToString("00")
-
-						ElseIf intLargestUnknownModValue < 99999 Then
-							strClosestMassCorrectionTag = UNKNOWN_MOD_3LETTER & (intLargestUnknownModValue + 1).ToString("00000")
-
-						ElseIf intLargestUnknownModValue < 9999999 Then
-							strClosestMassCorrectionTag = UNKNOWN_MOD_1LETTER & (intLargestUnknownModValue + 1).ToString("0000000")
-
-						End If
-
-						If blnAddToModificationListIfUnknown Then
-							Try
-								mMassCorrectionTags.Add(strClosestMassCorrectionTag, dblModificationMass)
-							Catch ex As Exception
-								' This shouldn't happen, due to searching about for mass correction tags starting with clsModificationDefinition.UNKNOWN_MOD_BASE_NAME
-								' Ignore the error
-							End Try
-						End If
-					Else
-						strClosestMassCorrectionTag = clsModificationDefinition.UNKNOWN_MOD_BASE_NAME & "99"
+					If blnAddToModificationListIfUnknown Then
+						Try
+							mMassCorrectionTags.Add(strClosestMassCorrectionTag, dblModificationMass)
+						Catch ex As Exception
+							' This shouldn't happen; a match should have been found earlier in this function
+							' Ignore the error
+						End Try
 					End If
 
 					Return strClosestMassCorrectionTag
