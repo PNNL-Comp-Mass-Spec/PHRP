@@ -268,8 +268,9 @@ Public Class clsPeptideModificationContainer
 	''' <remarks></remarks>
 	Protected Function GenerateGenericModMassName(ByVal dblModificationMass As Double) As String
 
-		Dim strModMass As String
+		Dim strModMassName As String
 		Dim strFormatString As String
+		Dim dblFormatDigits As Double
 		Dim intFormatDigits As Integer
 		Dim intMaxLength As Integer
 
@@ -284,7 +285,14 @@ Public Class clsPeptideModificationContainer
 		End If
 
 		' Determine the number of digits that we will display to the left of the decimal point
-		intFormatDigits = CInt(Math.Ceiling(Math.Log10(Math.Abs(dblModificationMass))))
+		dblFormatDigits = Math.Log10(Math.Abs(dblModificationMass))
+		If dblFormatDigits = CInt(dblFormatDigits) Then
+			' ModMass is a power of 10
+			intFormatDigits = CInt(dblFormatDigits) + 1
+		Else
+			intFormatDigits = CInt(Math.Ceiling(dblFormatDigits))
+		End If
+
 		If intFormatDigits < 1 Then intFormatDigits = 1
 
 		' Generate the format string
@@ -308,18 +316,22 @@ Public Class clsPeptideModificationContainer
 			strFormatString &= "0"
 		Loop
 
-		strModMass = dblModificationMass.ToString(strFormatString)
+		strModMassName = dblModificationMass.ToString(strFormatString)
 
-		If strModMass.Length < 8 AndAlso strModMass.IndexOf("."c) < 0 Then
-			strModMass &= "."
+		If strModMassName.Length < 8 AndAlso strModMassName.IndexOf("."c) < 0 Then
+			strModMassName &= "."
 		End If
 
-		Do While strModMass.Length < 8
+		Do While strModMassName.Length < 8
 			' Append extra zeroes (this code will likely never be reached)
-			strModMass &= "0"
+			strModMassName &= "0"
 		Loop
 
-		Return strModMass
+		If strModMassName.Length > 8 Then
+			Throw New ArgumentOutOfRangeException("Generated Mod Name is longer than 8 characters: " & strModMassName)
+		End If
+
+		Return strModMassName
 
 	End Function
 
