@@ -274,26 +274,26 @@ Public Class clsInSpecTResultsProcessor
             For intIndex = 0 To strSequence.Length - 1
                 chChar = strSequence.Chars(intIndex)
 
-                If Char.IsLetter(chChar) Then
-                    chMostRecentLetter = chChar
-                    intResidueLocInPeptide += 1
+				If IsLetterAtoZ(chChar) Then
+					chMostRecentLetter = chChar
+					intResidueLocInPeptide += 1
 
-                    For intModIndex = 0 To mPeptideMods.ModificationCount - 1
-                        If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
-                            objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+					For intModIndex = 0 To mPeptideMods.ModificationCount - 1
+						If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+							objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
 
-                            If objModificationDefinition.TargetResiduesContain(chChar) Then
-                                ' Match found; add this modification
-                                .SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
-                            End If
-                        End If
-                    Next intModIndex
-                ElseIf Char.IsLetter(chMostRecentLetter) Then
-                    .SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
-                Else
-                    ' We found a modification symbol but chMostRecentLetter is not a letter
-                    ' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
-                End If
+							If objModificationDefinition.TargetResiduesContain(chChar) Then
+								' Match found; add this modification
+								.SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+							End If
+						End If
+					Next intModIndex
+				ElseIf IsLetterAtoZ(chMostRecentLetter) Then
+					.SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+				Else
+					' We found a modification symbol but chMostRecentLetter is not a letter
+					' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
+				End If
 
             Next intIndex
         End With

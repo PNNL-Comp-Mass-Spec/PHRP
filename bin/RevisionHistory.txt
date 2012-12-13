@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4727; December 10, 2012
+	- Replaced Char.IsLetter() calls with a RegEx that matches [A-Za-z]
+
 Version 1.5.4723; December 6, 2012
 	- Now naming new, unknown modifications using the modification mass instead of using UnkMod01, UnkMod02, etc.
 

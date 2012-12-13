@@ -30,7 +30,7 @@ Imports PHRPReader
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "December 6, 2012"
+		mFileDate = "December 10, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -1095,7 +1095,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 										intResidueLocInProtein = lstPepToProteinMapping(intPepToProteinMapIndex).ResidueStart + objMod.ResidueLocInPeptide - 1
 
-										If Char.IsLetter(objMod.Residue) Then
+										If IsLetterAtoZ(objMod.Residue) Then
 											strResidue = objMod.Residue
 										Else
 											strCleanSequence = objReader.CurrentPSM.PeptideCleanSequence
@@ -1458,13 +1458,41 @@ Public MustInherit Class clsPHRPBaseClass
 
 	End Function
 
-	Public Shared Function IsNumber(ByVal strValue As String) As Boolean
-		Dim dblValue As Double
-		Try
-			Return Double.TryParse(strValue, dblValue)
-		Catch ex As Exception
+	''' <summary>
+	''' Returns true if the character is a letter between A and Z or a and z
+	''' </summary>
+	''' <param name="chChar">Character to examine</param>
+	''' <returns></returns>
+	''' <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
+	Public Shared Function IsLetterAtoZ(chChar As Char) As Boolean
+
+		Static reIsLetter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[A-Za-z]", Text.RegularExpressions.RegexOptions.Compiled)
+
+		If reIsLetter.IsMatch(chChar) Then
+			Return True
+		Else
 			Return False
+		End If
+
+	End Function
+
+	''' <summary>
+	''' Examines the string to determine if it is numeric
+	''' </summary>
+	''' <param name="strData"></param>
+	''' <returns>True if a number, otherwise false</returns>
+	Public Shared Function IsNumber(ByVal strData As String) As Boolean
+		Try
+			If Double.TryParse(strData, 0) Then
+				Return True
+			ElseIf Integer.TryParse(strData, 0) Then
+				Return True
+			End If
+		Catch ex As Exception
+			' Ignore errors here
 		End Try
+
+		Return False
 	End Function
 
 	Protected Function IsReversedProtein(ByVal strProteinName As String) As Boolean

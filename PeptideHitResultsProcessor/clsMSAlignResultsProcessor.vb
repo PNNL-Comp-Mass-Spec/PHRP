@@ -229,7 +229,7 @@ Public Class clsMSAlignResultsProcessor
 			For intIndex = 0 To strSequence.Length - 1
 				chChar = strSequence.Chars(intIndex)
 
-				If Char.IsLetter(chChar) Then
+				If IsLetterAtoZ(chChar) Then
 					chMostRecentResidue = chChar
 					intResidueLocInPeptide += 1
 

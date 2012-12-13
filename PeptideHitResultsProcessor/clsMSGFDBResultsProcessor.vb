@@ -20,7 +20,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "December 3, 2012"
+		MyBase.mFileDate = "December 10, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -248,10 +248,11 @@ Public Class clsMSGFDBResultsProcessor
 
 		With objSearchResult
 			strSequence = .PeptideSequenceWithMods
+			
 			For intIndex = 0 To strSequence.Length - 1
 				chChar = strSequence.Chars(intIndex)
 
-				If Char.IsLetter(chChar) Then
+				If IsLetterAtoZ(chChar) Then
 					chMostRecentLetter = chChar
 					intResidueLocInPeptide += 1
 
@@ -265,7 +266,7 @@ Public Class clsMSGFDBResultsProcessor
 							End If
 						End If
 					Next intModIndex
-				ElseIf Char.IsLetter(chMostRecentLetter) Then
+				ElseIf IsLetterAtoZ(chMostRecentLetter) Then
 					blnSuccess = .SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
 					If Not blnSuccess Then
 						Dim strErrorMessage As String = .ErrorMessage
@@ -2178,21 +2179,21 @@ Public Class clsMSGFDBResultsProcessor
 
 		' Find the index of the last residue
 		intIndex = strPeptide.Length - 1
-		Do While intIndex > 0 AndAlso Not Char.IsLetter(strPeptide.Chars(intIndex))
+		Do While intIndex > 0 AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndex))
 			intIndex -= 1
 		Loop
 		intIndexLastResidue = intIndex
 
 		' Find the index of the first residue
 		intIndex = 0
-		Do While intIndex < strPeptide.Length AndAlso Not Char.IsLetter(strPeptide.Chars(intIndex))
+		Do While intIndex < strPeptide.Length AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndex))
 			intIndex += 1
 		Loop
 		intIndexFirstResidue = intIndex
 
 		Do While intIndex < strPeptide.Length
 
-			If Char.IsLetter(strPeptide.Chars(intIndex)) Then
+			If IsLetterAtoZ(strPeptide.Chars(intIndex)) Then
 
 				Dim objModificationDefinition As clsModificationDefinition
 
@@ -2261,7 +2262,7 @@ Public Class clsMSGFDBResultsProcessor
 
 		' Update intIndexFirstResidue
 		intIndexFirstResidue = 0
-		Do While intIndexFirstResidue < strPeptide.Length AndAlso Not Char.IsLetter(strPeptide.Chars(intIndexFirstResidue))
+		Do While intIndexFirstResidue < strPeptide.Length AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndexFirstResidue))
 			intIndexFirstResidue += 1
 		Loop
 
