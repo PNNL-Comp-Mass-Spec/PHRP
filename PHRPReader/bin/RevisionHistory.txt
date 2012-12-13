@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4727; December 10, 2012
+	- Replaced Char.IsLetter() calls with a RegEx that matches [A-Za-z]
+
 Version 1.1.4715; November 29, 2012
 	- Renamed column Occurence_Count to Occurence_Count
 

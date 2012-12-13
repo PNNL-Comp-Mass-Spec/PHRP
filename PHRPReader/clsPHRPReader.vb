@@ -927,7 +927,7 @@ Public Class clsPHRPReader
 					' We're before or after the primary peptide sequence; simply append the character
 					sbNewPeptide.Append(strPeptide.Chars(intIndex))
 				Else
-					If Char.IsLetter(strPeptide.Chars(intIndex)) Then
+					If IsLetterAtoZ(strPeptide.Chars(intIndex)) Then
 						chMostRecentResidue = strPeptide.Chars(intIndex)
 						intResidueLocInPeptide += 1
 						If intResidueLocInPeptide = 1 Then
@@ -1399,20 +1399,40 @@ Public Class clsPHRPReader
 	End Sub
 
 	''' <summary>
+	''' Returns true if the character is a letter between A and Z or a and z
+	''' </summary>
+	''' <param name="chChar">Character to examine</param>
+	''' <returns></returns>
+	''' <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
+	Public Shared Function IsLetterAtoZ(chChar As Char) As Boolean
+
+		Static reIsLetter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[A-Za-z]", Text.RegularExpressions.RegexOptions.Compiled)
+
+		If reIsLetter.IsMatch(chChar) Then
+			Return True
+		Else
+			Return False
+		End If
+
+	End Function
+
+	''' <summary>
 	''' Examines the string to determine if it is numeric
 	''' </summary>
 	''' <param name="strData"></param>
 	''' <returns>True if a number, otherwise false</returns>
 	Public Shared Function IsNumber(ByVal strData As String) As Boolean
-
-		If Double.TryParse(strData, 0) Then
-			Return True
-		ElseIf Integer.TryParse(strData, 0) Then
-			Return True
-		End If
+		Try
+			If Double.TryParse(strData, 0) Then
+				Return True
+			ElseIf Integer.TryParse(strData, 0) Then
+				Return True
+			End If
+		Catch ex As Exception
+			' Ignore errors here
+		End Try
 
 		Return False
-
 	End Function
 
 	''' <summary>

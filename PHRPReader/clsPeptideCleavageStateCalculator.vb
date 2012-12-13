@@ -251,7 +251,7 @@ Public Class clsPeptideCleavageStateCalculator
 				For intIndex As Integer = 0 To strPrimarySequence.Length - 1
 					Dim chCurrent As Char = strPrimarySequence.Chars(intIndex)
 
-					If Char.IsLetter(chCurrent) Then
+					If clsPHRPReader.IsLetterAtoZ(chCurrent) Then
 
 						If Not String.IsNullOrEmpty(strPreviousLetter) Then
 							If TestCleavageRule(strPreviousLetter.Chars(0), chCurrent) Then
@@ -377,7 +377,7 @@ Public Class clsPeptideCleavageStateCalculator
 			End If
 
 			For Each chChar In strPrimarySequence
-				If Char.IsLetter(chChar) Then
+				If clsPHRPReader.IsLetterAtoZ(chChar) Then
 					strCleanSequence &= chChar
 				End If
 			Next chChar
@@ -395,7 +395,7 @@ Public Class clsPeptideCleavageStateCalculator
 		Else
 			intIndex = strText.Length - 1
 			chMatch = strText.Chars(intIndex)
-			Do While Not (Char.IsLetter(chMatch) OrElse Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) AndAlso intIndex > 0
+			Do While Not (clsPHRPReader.IsLetterAtoZ(chMatch) OrElse Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) AndAlso intIndex > 0
 				intIndex -= 1
 				chMatch = strText.Chars(intIndex)
 			Loop
@@ -414,7 +414,7 @@ Public Class clsPeptideCleavageStateCalculator
 		Else
 			intIndex = 0
 			chMatch = strText.Chars(intIndex)
-			Do While Not (Char.IsLetter(chMatch) OrElse Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) AndAlso intIndex < strText.Length - 1
+			Do While Not (clsPHRPReader.IsLetterAtoZ(chMatch) OrElse Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) AndAlso intIndex < strText.Length - 1
 				intIndex += 1
 				chMatch = strText.Chars(intIndex)
 			Loop
