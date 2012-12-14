@@ -2060,6 +2060,9 @@ Public Class clsMSGFDBResultsProcessor
 											' We only do this for MSGFDB since it often includes reverse protein peptides in the results even though the FASTA file often does not have reverse proteins
 											mIgnorePeptideToProteinMapperErrors = True
 											blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+											If Not blnSuccess Then
+												ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+											End If
 										End If
 									End If
 
@@ -2072,6 +2075,11 @@ Public Class clsMSGFDBResultsProcessor
 									' Create the Protein Mods file
 									blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB)
 								End If
+
+								If Not blnSuccess Then
+									' Do not treat this as a fatal error
+									blnSuccess = True
+								End If
 							End If
 
 						End If
@@ -2081,13 +2089,13 @@ Public Class clsMSGFDBResultsProcessor
 						End If
 
 					Catch ex As Exception
-						SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " & ex.Message)
+						SetErrorMessage("Error in clsMSGFDBResultsProcessor.ProcessFile (2):  " & ex.Message)
 						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
 					End Try
 				End If
 			End If
 		Catch ex As Exception
-			SetErrorMessage("Error in ProcessFile:" & ex.Message)
+			SetErrorMessage("Error in clsMSGFDBResultsProcessor.ProcessFile (1):" & ex.Message)
 			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
 		End Try
 

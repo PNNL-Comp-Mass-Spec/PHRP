@@ -1411,6 +1411,9 @@ Public Class clsXTandemResultsProcessor
 								blnSuccess = True
 							Else
 								blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+								If Not blnSuccess Then
+									ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+								End If
 							End If
 
 							If blnSuccess Then
@@ -1420,16 +1423,21 @@ Public Class clsXTandemResultsProcessor
 								' Now create the Protein Mods file
 								blnSuccess = MyBase.CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem)
 							End If
+
+							If Not blnSuccess Then
+								' Do not treat this as a fatal error
+								blnSuccess = True
+							End If
 						End If
 
 					Catch ex As Exception
-						SetErrorMessage("Error calling ParseXTandemResultsFile" & ex.message)
+						SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (2): " & ex.Message)
 						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
 					End Try
 				End If
 			End If
 		Catch ex As Exception
-			SetErrorMessage("Error in ProcessFile:" & ex.Message)
+			SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (1):" & ex.Message)
 			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
 		End Try
 

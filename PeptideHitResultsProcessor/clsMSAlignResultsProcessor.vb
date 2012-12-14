@@ -1423,32 +1423,39 @@ Public Class clsMSAlignResultsProcessor
 									' We only do this since a small number of peptides reported by MSAlign don't perfectly match the fasta file
 									mIgnorePeptideToProteinMapperErrors = True
 									blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+									If Not blnSuccess Then
+										ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+									End If
 								End If
 							End If
 
+							If blnSuccess Then
+								' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+								MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(ioInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+
+								' Create the Protein Mods file
+								blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSAlign)
+							End If
+
+							If Not blnSuccess Then
+								' Do not treat this as a fatal error
+								blnSuccess = True
+							End If
+
 						End If
-
-						If blnSuccess Then
-							' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-							MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(ioInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
-
-							' Create the Protein Mods file
-							blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSAlign)
-						End If
-
 
 						If blnSuccess Then
 							MyBase.OperationComplete()
 						End If
 
 					Catch ex As Exception
-						SetErrorMessage("Error calling CreateSynResultsFile: " & ex.Message)
+						SetErrorMessage("Error in clsMSAlignResultsProcessor.ProcessFile (2):  " & ex.Message)
 						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
 					End Try
 				End If
 			End If
 		Catch ex As Exception
-			SetErrorMessage("Error in ProcessFile:" & ex.Message)
+			SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
 			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
 		End Try
 

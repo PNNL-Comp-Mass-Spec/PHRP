@@ -799,6 +799,12 @@ Public MustInherit Class clsPHRPBaseClass
 				Return False
 			End If
 
+			' Verify that the fasta file is not a DNA-sequence based fasta file
+			blnSuccess = ValidateProteinFastaFile(mFastaFilePath)
+			If Not blnSuccess Then
+				Return False
+			End If
+
 			Console.WriteLine()
 			Console.WriteLine()
 			UpdateProgress("Creating Peptide to Protein Map file", PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE)
@@ -2097,10 +2103,82 @@ Public MustInherit Class clsPHRPBaseClass
 			End If
 
 		Catch ex As Exception
-			Console.WriteLine("Error in ValidatePHRPReaderSupportFiles: " & ex.Message)
+			ReportWarning("Error in ValidatePHRPReaderSupportFiles: " & ex.Message)
 		End Try
 
 	End Sub
+
+	Protected Function ValidateProteinFastaFile(ByVal strFastaFilePath As String) As Boolean
+
+		Dim objFastaFile As ProteinFileReader.FastaFileReader
+
+		' This RegEx looks for standard amino acids, skipping A, T, C, and G
+		Dim reDefiniteAminoAcid As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[DEFHIKLMNPQRSVWY]", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+
+		' This RegEx looks for A, T, C, and G
+		Dim rePotentialNucleicAcid As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[ATCG]", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+
+		' This matches any letter
+		Dim reLetter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[A-Z]", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+
+		Dim intDefiniteAminoAcidCount As Integer
+		Dim intPotentialNucleicAcidCount As Integer
+		Dim intLetterCount As Integer
+
+		Dim intValidProteinCount As Integer = 0
+		Dim intInvalidProteinCount As Integer = 0
+
+		Try
+
+			If String.IsNullOrEmpty(strFastaFilePath) Then
+				Console.WriteLine()
+				ReportWarning("strFastaFilePath is not defined in ValidateProteinFastaFile")
+				Return False
+			ElseIf Not IO.File.Exists(mFastaFilePath) Then
+				Console.WriteLine()
+				ReportWarning("Fasta file not found: " & strFastaFilePath)
+				Return False
+			End If
+
+			objFastaFile = New ProteinFileReader.FastaFileReader()
+			If Not objFastaFile.OpenFile(strFastaFilePath) Then
+				Console.WriteLine()
+				ReportWarning("Error opening the fasta file: " & strFastaFilePath)
+				Return False
+			End If
+
+			' Read the first 100 proteins and confirm that each contains amino acid residues
+			Do While objFastaFile.ReadNextProteinEntry()
+				intDefiniteAminoAcidCount = reDefiniteAminoAcid.Matches(objFastaFile.ProteinSequence).Count
+				intPotentialNucleicAcidCount = rePotentialNucleicAcid.Matches(objFastaFile.ProteinSequence).Count
+				intLetterCount = reLetter.Matches(objFastaFile.ProteinSequence).Count
+
+				If intDefiniteAminoAcidCount > 0.1 * intLetterCount Then
+					intValidProteinCount += 1
+				ElseIf intPotentialNucleicAcidCount > 0.95 * intLetterCount Then
+					intInvalidProteinCount += 1
+				End If
+
+				If intValidProteinCount + intInvalidProteinCount >= 1000 Then
+					Exit Do
+				End If
+			Loop
+
+			If intValidProteinCount < intInvalidProteinCount Then
+				Console.WriteLine()
+				ReportWarning("Fasta file contains Nucleic Acids, not Amino Acids: " & IO.Path.GetFileName(strFastaFilePath))
+				Return False
+			End If
+
+		Catch ex As Exception
+			Console.WriteLine()
+			ReportWarning("Exception in ValidateProteinFastaFile: " & ex.Message)
+			Return False
+		End Try
+
+		Return True
+
+	End Function
 
 #Region "PHRPReader Event Handlers"
 

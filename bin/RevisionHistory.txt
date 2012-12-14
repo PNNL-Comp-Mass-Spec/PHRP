@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4730; December 13, 2012
+	- Now skipping the ProteinMods step if the FASTA file contains nucleic acids instead of amino acids
+
 Version 1.5.4727; December 10, 2012
 	- Replaced Char.IsLetter() calls with a RegEx that matches [A-Za-z]
 

@@ -558,7 +558,11 @@ Public Class clsSequestResultsProcessor
 						If System.IO.File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
 							blnSuccess = True
 						Else
+							' Mapping file does not exist
 							blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+							If Not blnSuccess Then
+								ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+							End If							
 						End If
 
 						If blnSuccess Then
@@ -568,12 +572,22 @@ Public Class clsSequestResultsProcessor
 							' Now create the Protein Mods file
 							blnSuccess = MyBase.CreateProteinModDetailsFile(strInputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest)
 						End If
+
+						If Not blnSuccess Then
+							' Do not treat this as a fatal error
+							blnSuccess = True
+						End If
+
+					End If
+
+					If blnSuccess Then
+						MyBase.OperationComplete()
 					End If
 
 				End If
 			End If
 		Catch ex As Exception
-			SetErrorMessage("Error in ProcessFile:" & ex.Message)
+			SetErrorMessage("Error in clsSequestResultsProcessor.ProcessFile:  " & ex.Message)
 			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
 		End Try
 
