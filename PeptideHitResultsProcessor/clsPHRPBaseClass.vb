@@ -2018,11 +2018,14 @@ Public MustInherit Class clsPHRPBaseClass
 		Dim intPeptideCount As Integer = 0
 		Dim intPeptideCountNoMatch As Integer = 0
 		Dim intLinesRead As Integer = 0
+		Dim chSplitChars() As Char = New Char() {ControlChars.Tab}
 
 		Try
 			' Validate that none of the results in strPeptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH
 
 			Dim strLineIn As String
+			Dim strLastPeptide As String = String.Empty			
+			Dim strSplitLine() As String
 
 			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strPeptideToProteinMapFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
@@ -2031,10 +2034,19 @@ Public MustInherit Class clsPHRPBaseClass
 					intLinesRead += 1
 
 					If intLinesRead > 1 AndAlso Not String.IsNullOrEmpty(strLineIn) Then
-						intPeptideCount += 1
-						If strLineIn.Contains(PROTEIN_NAME_NO_MATCH) Then
-							intPeptideCountNoMatch += 1
+
+						strSplitLine = strLineIn.Split(chSplitChars, 2)
+						If strSplitLine.Count > 0 Then
+							If strSplitLine(0) <> strLastPeptide Then
+								intPeptideCount += 1
+								strLastPeptide = String.Copy(strSplitLine(0))
+							End If
+
+							If strLineIn.Contains(PROTEIN_NAME_NO_MATCH) Then
+								intPeptideCountNoMatch += 1
+							End If
 						End If
+
 					End If
 				Loop
 
