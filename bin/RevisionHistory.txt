@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4734; December 17, 2012
+	- MSGF+ static mod bug fix
+
 Version 1.5.4730; December 13, 2012
 	- Now skipping the ProteinMods step if the FASTA file contains nucleic acids instead of amino acids
 

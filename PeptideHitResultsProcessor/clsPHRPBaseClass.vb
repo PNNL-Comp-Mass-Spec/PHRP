@@ -2122,6 +2122,19 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Protected Function ValidateProteinFastaFile(ByVal strFastaFilePath As String) As Boolean
 
+		Dim blnSuccess As Boolean
+		Dim strWarningMessage As String = String.Empty
+		blnSuccess = ValidateProteinFastaFile(strFastaFilePath, strWarningMessage)
+
+		If Not blnSuccess Then
+			ReportWarning(strWarningMessage)
+		End If
+
+		Return blnSuccess
+	End Function
+
+	Public Shared Function ValidateProteinFastaFile(ByVal strFastaFilePath As String, ByRef strWarningMessage As String) As Boolean
+
 		Dim objFastaFile As ProteinFileReader.FastaFileReader
 
 		' This RegEx looks for standard amino acids, skipping A, T, C, and G
@@ -2141,25 +2154,26 @@ Public MustInherit Class clsPHRPBaseClass
 		Dim intInvalidProteinCount As Integer = 0
 
 		Try
+			strWarningMessage = String.Empty
 
 			If String.IsNullOrEmpty(strFastaFilePath) Then
 				Console.WriteLine()
-				ReportWarning("strFastaFilePath is not defined in ValidateProteinFastaFile")
+				strWarningMessage = "strFastaFilePath is not defined in ValidateProteinFastaFile"
 				Return False
-			ElseIf Not IO.File.Exists(mFastaFilePath) Then
+			ElseIf Not IO.File.Exists(strFastaFilePath) Then
 				Console.WriteLine()
-				ReportWarning("Fasta file not found: " & strFastaFilePath)
+				strWarningMessage = "Fasta file not found: " & strFastaFilePath
 				Return False
 			End If
 
 			objFastaFile = New ProteinFileReader.FastaFileReader()
 			If Not objFastaFile.OpenFile(strFastaFilePath) Then
 				Console.WriteLine()
-				ReportWarning("Error opening the fasta file: " & strFastaFilePath)
+				strWarningMessage = "Error opening the fasta file: " & strFastaFilePath
 				Return False
 			End If
 
-			' Read the first 100 proteins and confirm that each contains amino acid residues
+			' Read the first 500 proteins and confirm that each contains amino acid residues
 			Do While objFastaFile.ReadNextProteinEntry()
 				intDefiniteAminoAcidCount = reDefiniteAminoAcid.Matches(objFastaFile.ProteinSequence).Count
 				intPotentialNucleicAcidCount = rePotentialNucleicAcid.Matches(objFastaFile.ProteinSequence).Count
@@ -2171,20 +2185,20 @@ Public MustInherit Class clsPHRPBaseClass
 					intInvalidProteinCount += 1
 				End If
 
-				If intValidProteinCount + intInvalidProteinCount >= 1000 Then
+				If intValidProteinCount + intInvalidProteinCount >= 500 Then
 					Exit Do
 				End If
 			Loop
 
 			If intValidProteinCount < intInvalidProteinCount Then
 				Console.WriteLine()
-				ReportWarning("Fasta file contains Nucleic Acids, not Amino Acids: " & IO.Path.GetFileName(strFastaFilePath))
+				strWarningMessage = "Fasta file contains Nucleic Acids, not Amino Acids: " & IO.Path.GetFileName(strFastaFilePath)
 				Return False
 			End If
 
 		Catch ex As Exception
 			Console.WriteLine()
-			ReportWarning("Exception in ValidateProteinFastaFile: " & ex.Message)
+			strWarningMessage = "Exception in ValidateProteinFastaFile: " & ex.Message
 			Return False
 		End Try
 

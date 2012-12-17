@@ -20,7 +20,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "December 10, 2012"
+		MyBase.mFileDate = "December 17, 2012"
 		InitializeLocalVariables()
 	End Sub
 
@@ -1501,7 +1501,7 @@ Public Class clsMSGFDBResultsProcessor
 
 					' Replace any mod text values in the peptide sequence with the appropriate mod symbols
 					' In addition, replace the _ terminus symbols with dashes
-					Dim dblTotalModMass As Double
+					Dim dblTotalModMass As Double					
 					.Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
 
 					' Compute monoisotopic mass of the peptide
@@ -2254,7 +2254,13 @@ Public Class clsMSGFDBResultsProcessor
 					strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, blnMSGFPlus, blnIsStaticMod)
 					dblTotalModMass += dblModMassFound
 
-					intIndex += strModSymbols.Length
+					If blnMSGFPlus AndAlso blnIsStaticMod Then
+						' MSGF+ shows mod masses for static mods
+						' Thus, we have removed the static mod mass and did not add a mod symbol
+						' Therefore, leave intIndex unchanged
+					Else
+						intIndex += strModSymbols.Length
+					End If
 
 				Else
 					intIndex += reMatch.Groups(1).Value.Length
