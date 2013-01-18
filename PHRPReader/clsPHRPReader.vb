@@ -575,9 +575,8 @@ Public Class clsPHRPReader
 						' Note that the PHRPParser also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo.txt file is not found
 						blnSuccess = ReadModSummaryFile(strModSummaryFilePath, mDynamicMods, mStaticMods)
 						If Not blnSuccess Then
-							SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, True)
-							If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
-							Return False
+							mModSummaryFileLoaded = False
+							blnSuccess = True
 						Else
 							mModSummaryFileLoaded = True
 						End If
@@ -1849,7 +1848,11 @@ Public Class clsPHRPReader
 			If String.IsNullOrEmpty(strModSummaryFilePath) Then
 				ReportError("ModSummaryFile path is empty; unable to continue")
 				Return False
+			ElseIf Not IO.File.Exists(strModSummaryFilePath) Then
+				ReportError("ModSummary file not found: " & strModSummaryFilePath)
+				Return False
 			End If
+
 
 			ShowMessage("Reading the PHRP ModSummary file")
 
