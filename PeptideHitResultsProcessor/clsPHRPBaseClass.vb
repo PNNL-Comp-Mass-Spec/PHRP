@@ -1764,32 +1764,6 @@ Public MustInherit Class clsPHRPBaseClass
 
 	End Function
 
-	Protected Function ReplaceIgnoreCase(ByVal strTextToSearch As String, strTextToFind As String, strReplacementText As String) As String
-
-		Dim intCharIndex As Integer
-		intCharIndex = strTextToSearch.ToLower().IndexOf(strTextToFind)
-
-		If intCharIndex < 0 Then
-			Return strTextToSearch
-		Else
-			Dim strNewText As String
-			If intCharIndex = 0 Then
-				strNewText = String.Empty
-			Else
-				strNewText = strTextToSearch.Substring(0, intCharIndex)
-			End If
-
-			strNewText &= strReplacementText
-
-			If intCharIndex + strTextToFind.Length < strTextToSearch.Length Then
-				strNewText &= strTextToSearch.Substring(intCharIndex + strTextToFind.Length)
-			End If
-
-			Return strNewText
-		End If
-
-	End Function
-
 	Protected Sub ReportWarning(strMessage As String)
 		RaiseEvent WarningMessageEvent(strMessage)
 	End Sub

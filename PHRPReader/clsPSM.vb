@@ -14,6 +14,8 @@ Public Class clsPSM
 
 	Public Const UNKNOWN_COLLISION_MODE As String = "n/a"
 
+	Protected mDataLineText As String = String.Empty
+
 	' Note: Be sure to update the Clone() function if you add new class-wide variables
 	Protected mResultID As Integer
 	Protected mScoreRank As Integer					' Top scoring peptide is rank 1, next lowest score is rank 2, etc.
@@ -110,6 +112,19 @@ Public Class clsPSM
 		End Set
 	End Property
 
+	Public Property DataLineText As String
+		Get
+			Return mDataLineText
+		End Get
+		Set(value As String)
+			If String.IsNullOrEmpty(value) Then
+				mDataLineText = String.Empty
+			Else
+				mDataLineText = value
+			End If
+
+		End Set
+	End Property
 	''' <summary>
 	''' Elution time (in minutes) of the spectrum
 	''' </summary>
@@ -461,6 +476,7 @@ Public Class clsPSM
 	''' </summary>
 	''' <remarks></remarks>
 	Public Sub Clear()
+		mDataLineText = String.Empty
 		mScanNumber = 0
 		mElutionTimeMinutes = 0
 

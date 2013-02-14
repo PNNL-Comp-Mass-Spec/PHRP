@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4778; January 30, 2013
+	- Added property DataLineText to clsPSM
+
 Version 1.1.4765; January 17, 2013
 	- No longer throwing an exception if the ModSummary file is not found when instantiating clsPHRPReader
 

@@ -1625,6 +1625,7 @@ Public Class clsPHRPReader
 				If Not blnSkipLine Then
 
 					mPSMCurrent = New clsPSM()
+
 					blnSuccess = mPHRPParser.ParsePHRPDataLine(strLineIn, mSourceFileLinesRead, mPSMCurrent)
 
 					If blnSuccess Then

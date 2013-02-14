@@ -331,6 +331,7 @@ Public Class clsPHRPParserMSGFDB
 			End If
 
 			With objPSM
+				.DataLineText = strLine
 				.ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100)
 				If .ScanNumber = -100 Then
 					' Data line is not valid
