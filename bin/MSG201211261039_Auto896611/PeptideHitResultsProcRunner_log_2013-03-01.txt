@@ -1,0 +1,8 @@
+Date	Type	Message
+2013-03-01 12:22:28 PM	Normal	Parsing QC_Shew_12_2_500ng_2_23Nov12_Polaroid_12-02-32_msgfdb.txt
+2013-03-01 12:22:28 PM	Normal	Detected MSGFDB (or MSGF+) results file
+2013-03-01 12:22:28 PM	Normal	Creating the FHT file (0.0% complete)
+2013-03-01 12:22:30 PM	Normal	Creating the SYN file (0.0% complete)
+2013-03-01 12:22:33 PM	Warning	PepToProteinMap file does not exist: F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\MSG201211261039_Auto896611\QC_Shew_12_2_500ng_2_23Nov12_Polaroid_12-02-32_msgfdb_PepToProtMap.txt
+2013-03-01 12:22:33 PM	Normal	Creating the PHRP files for QC_Shew_12_2_500ng_2_23Nov12_Polaroid_12-02-32_msgfdb_syn.txt (0.0% complete)
+2013-03-01 12:22:34 PM	Normal	Processing Complete
