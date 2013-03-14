@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4821; March 14, 2013
+	- Updated modMain to latest standard format
+
 Version 1.5.4734; December 17, 2012
 	- MSGF+ static mod bug fix
 
