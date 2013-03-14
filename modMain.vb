@@ -16,10 +16,10 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "December 17, 2012"
+	Public Const PROGRAM_DATE As String = "March 14, 2013"
 
 	Private mInputFilePath As String
-	Private mOutputFolderName As String							' Optional
+	Private mOutputFolderPath As String							' Optional
 	Private mParameterFilePath As String						' Optional
 
 	Private mMassCorrectionTagsFilePath As String				' Optional
@@ -53,6 +53,7 @@ Module modMain
 
 	Private mLogMessagesToFile As Boolean
 	Private mLogFilePath As String = String.Empty
+	Private mLogFolderPath As String = String.Empty
 	Private mQuietMode As Boolean
 
 	Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
@@ -90,7 +91,7 @@ Module modMain
 
 		intReturnCode = 0
 		mInputFilePath = String.Empty
-		mOutputFolderName = String.Empty
+		mOutputFolderPath = String.Empty
 		mParameterFilePath = String.Empty
 
 		mMassCorrectionTagsFilePath = String.Empty
@@ -119,6 +120,7 @@ Module modMain
 		mQuietMode = False
 		mLogMessagesToFile = False
 		mLogFilePath = String.Empty
+		mLogFolderPath = String.Empty
 
 		Try
 			blnProceed = False
@@ -139,6 +141,7 @@ Module modMain
 					.ShowMessages = Not mQuietMode
 					.LogMessagesToFile = mLogMessagesToFile
 					.LogFilePath = mLogFilePath
+					.LogFolderPath = mLogFolderPath
 
 					' Note: These options will get overridden if defined in the parameter file
 					.MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath
@@ -161,13 +164,13 @@ Module modMain
 				End With
 
 				If mRecurseFolders Then
-					If mPeptideHitResultsProcRunner.ProcessFilesAndRecurseFolders(mInputFilePath, mOutputFolderName, mOutputFolderAlternatePath, mRecreateFolderHierarchyInAlternatePath, mParameterFilePath, mRecurseFoldersMaxLevels) Then
+					If mPeptideHitResultsProcRunner.ProcessFilesAndRecurseFolders(mInputFilePath, mOutputFolderPath, mOutputFolderAlternatePath, mRecreateFolderHierarchyInAlternatePath, mParameterFilePath, mRecurseFoldersMaxLevels) Then
 						intReturnCode = 0
 					Else
 						intReturnCode = mPeptideHitResultsProcRunner.ErrorCode
 					End If
 				Else
-					If mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputFolderName, mParameterFilePath) Then
+					If mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputFolderPath, mParameterFilePath) Then
 						intReturnCode = 0
 					Else
 						intReturnCode = mPeptideHitResultsProcRunner.ErrorCode
@@ -203,9 +206,7 @@ Module modMain
 	End Sub
 
 	Private Function GetAppVersion() As String
-		'Return System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")"
-
-		Return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() & " (" & PROGRAM_DATE & ")"
+		Return clsProcessFilesBaseClass.GetAppVersion(PROGRAM_DATE)
 	End Function
 
 	''' <summary>
@@ -245,11 +246,13 @@ Module modMain
 		Dim sngValue As Single
 		Dim intValue As Integer
 		Dim blnValue As Boolean
-		Dim strValidParameters() As String = New String() {"I", "O", "P", "M", "T", "N", "ProteinMods", "F", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
+		Dim lstValidParameters As Generic.List(Of String) = New Generic.List(Of String) From {"I", "O", "P", "M", "T", "N", "ProteinMods", "F", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
 
 		Try
 			' Make sure no invalid parameters are present
-			If objParseCommandLine.InvalidParametersPresent(strValidParameters) Then
+			If objParseCommandLine.InvalidParametersPresent(lstValidParameters) Then
+				ShowErrorMessage("Invalid commmand line parameters",
+				  (From item In objParseCommandLine.InvalidParameters(lstValidParameters) Select "/" + item).ToList())
 				Return False
 			Else
 				With objParseCommandLine
@@ -260,7 +263,7 @@ Module modMain
 						mInputFilePath = .RetrieveNonSwitchParameter(0)
 					End If
 
-					If .RetrieveValueForParameter("O", strValue) Then mOutputFolderName = String.Copy(strValue)
+					If .RetrieveValueForParameter("O", strValue) Then mOutputFolderPath = String.Copy(strValue)
 					If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = String.Copy(strValue)
 					If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = String.Copy(strValue)
 					If .RetrieveValueForParameter("T", strValue) Then mMassCorrectionTagsFilePath = String.Copy(strValue)
@@ -309,11 +312,17 @@ Module modMain
 					If .RetrieveValueForParameter("L", strValue) Then
 						mLogMessagesToFile = True
 
-						If Not strValue Is Nothing AndAlso strValue.Length > 0 Then
+						If Not String.IsNullOrEmpty(strValue) Then
 							mLogFilePath = String.Copy(strValue).Trim(""""c)
 						End If
 					End If
 
+					If .RetrieveValueForParameter("LogFolder", strValue) Then
+						mLogMessagesToFile = True
+						If Not String.IsNullOrEmpty(strValue) Then
+							mLogFolderPath = String.Copy(strValue)
+						End If
+					End If
 					If .RetrieveValueForParameter("Q", strValue) Then mQuietMode = True
 				End With
 
@@ -323,6 +332,8 @@ Module modMain
 		Catch ex As Exception
 			ShowErrorMessage("Error parsing the command line parameters: " & System.Environment.NewLine & ex.Message)
 		End Try
+
+		Return False
 
 	End Function
 
@@ -338,6 +349,25 @@ Module modMain
 		WriteToErrorStream(strMessage)
 	End Sub
 
+	Private Sub ShowErrorMessage(ByVal strTitle As String, ByVal items As List(Of String))
+		Dim strSeparator As String = "------------------------------------------------------------------------------"
+		Dim strMessage As String
+
+		Console.WriteLine()
+		Console.WriteLine(strSeparator)
+		Console.WriteLine(strTitle)
+		strMessage = strTitle & ":"
+
+		For Each item As String In items
+			Console.WriteLine("   " + item)
+			strMessage &= " " & item
+		Next
+		Console.WriteLine(strSeparator)
+		Console.WriteLine()
+
+		WriteToErrorStream(strMessage)
+	End Sub
+
 	Private Sub ShowProgramHelp()
 
 		Try
@@ -346,8 +376,8 @@ Module modMain
 			Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides.  Parallel files will be created containing sequence info and modification details.  ")
 			Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
 			Console.WriteLine()
-			Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
-										" InputFilePath [/O:OutputFolderPath]")
+			Console.WriteLine("Program syntax:" & System.Environment.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
+				   " InputFilePath [/O:OutputFolderPath]")
 			Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
 			Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]")
 			Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]")
@@ -388,7 +418,8 @@ Module modMain
 			Console.WriteLine()
 
 			Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
-			Console.WriteLine("Website: http://panomics.pnnl.gov/ or http://www.sysbio.org/resources/staff/")
+			Console.WriteLine("Website: http://panomics.pnnl.gov/ or http://omics.pnl.gov")
+			Console.WriteLine()
 
 			' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
 			System.Threading.Thread.Sleep(750)
@@ -403,7 +434,6 @@ Module modMain
 		Try
 			Using swErrorStream As System.IO.StreamWriter = New System.IO.StreamWriter(Console.OpenStandardError())
 				swErrorStream.WriteLine(strErrorMessage)
-				swErrorStream.WriteLine()
 			End Using
 		Catch ex As Exception
 			' Ignore errors here

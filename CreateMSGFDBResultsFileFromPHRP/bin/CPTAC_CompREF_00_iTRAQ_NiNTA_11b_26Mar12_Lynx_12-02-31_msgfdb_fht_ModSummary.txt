@@ -1,0 +1,7 @@
+Modification_Symbol	Modification_Mass	Target_Residues	Modification_Type	Mass_Correction_Tag	Occurrence_Count
+*	79.966	STY	D	Phospho	0
+@	15.9949	M	D	Plus1Oxy	0
+$	-17.027	Q	D	Pyro-glu	0
+-	144.102063	K	S	itrac	0
+-	144.102063	<	T	itrac	0
+-	57.0215	C	S	IodoAcet	0
