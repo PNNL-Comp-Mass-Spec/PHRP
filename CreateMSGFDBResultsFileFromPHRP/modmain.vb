@@ -75,7 +75,7 @@ Module modMain
 			reMatch = reFindItraq.Match(strPrimarySequence)
 
 			If reMatch.Success Then
-				strPeptide = reMatch.Groups(2).Value & reMatch.Groups(1).Value & reMatch.Groups(3).Value
+				strPeptide = strPrefix & "." & reMatch.Groups(2).Value & reMatch.Groups(1).Value & reMatch.Groups(3).Value & "." & strSuffix
 			End If
 		End If
 
@@ -173,11 +173,15 @@ Module modMain
 	End Function
 
 	Private Function FlattenList(ByVal lstValues As Generic.List(Of String)) As String
+		Return FlattenList(lstValues, ControlChars.Tab)
+	End Function
+
+	Private Function FlattenList(ByVal lstValues As Generic.List(Of String), ByVal chSepChar As Char) As String
 		Dim sbOutline As System.Text.StringBuilder = New System.Text.StringBuilder()
 
 		For intIndex As Integer = 0 To lstValues.Count - 1
 			If intIndex > 0 Then
-				sbOutline.Append(ControlChars.Tab)
+				sbOutline.Append(chSepChar)
 			End If
 			sbOutline.Append(lstValues(intIndex))
 		Next
