@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4841; April 3, 2013
+	- Added MSAlign columns Species_ID and FragMethod
+
 Version 1.1.4778; January 30, 2013
 	- Added property DataLineText to clsPSM
 

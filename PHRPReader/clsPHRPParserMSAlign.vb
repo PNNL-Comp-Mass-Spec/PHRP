@@ -36,6 +36,8 @@ Public Class clsPHRPParserMSAlign
 	Public Const DATA_COLUMN_Rank_PValue As String = "Rank_PValue"
 	Public Const DATA_COLUMN_EValue As String = "EValue"
 	Public Const DATA_COLUMN_FDR As String = "FDR"
+	Public Const DATA_COLUMN_Species_ID As String = "Species_ID"
+	Public Const DATA_COLUMN_FragMethod As String = "FragMethod"
 
 	Public Const FILENAME_SUFFIX_SYN As String = "_msalign_syn.txt"
 	Public Const FILENAME_SUFFIX_FHT As String = "_msalign_fht.txt"
@@ -90,6 +92,8 @@ Public Class clsPHRPParserMSAlign
 		AddHeaderColumn(DATA_COLUMN_Rank_PValue)
 		AddHeaderColumn(DATA_COLUMN_EValue)
 		AddHeaderColumn(DATA_COLUMN_FDR)
+		AddHeaderColumn(DATA_COLUMN_Species_ID)
+		AddHeaderColumn(DATA_COLUMN_FragMethod)
 
 	End Sub
 
@@ -268,6 +272,9 @@ Public Class clsPHRPParserMSAlign
 				AddScore(objPSM, strColumns, DATA_COLUMN_PValue)
 				AddScore(objPSM, strColumns, DATA_COLUMN_EValue)
 				AddScore(objPSM, strColumns, DATA_COLUMN_FDR)
+
+				AddScore(objPSM, strColumns, DATA_COLUMN_Species_ID)
+				AddScore(objPSM, strColumns, DATA_COLUMN_FragMethod)
 
 			End If
 
