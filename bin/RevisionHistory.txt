@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4841; April 3, 2013
+	- Added MSAlign columns Species_ID and FragMethod
+
+
 Version 1.5.4821; March 14, 2013
 	- Updated modMain to latest standard format
 

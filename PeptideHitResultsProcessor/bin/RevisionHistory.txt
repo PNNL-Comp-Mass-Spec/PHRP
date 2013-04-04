@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.4841; April 3, 2013
+	- Added MSAlign columns Species_ID and FragMethod
+	- Updated MSAlign vs. PHRP mass difference warning threshold to automatically increase values over 0.1 Da for peptides over 5000 Da
+
 Version 1.5.4734; December 17, 2012
 	- Fixed bug replacing static mod masses with an empty string in peptide sequences from MSGF+
 

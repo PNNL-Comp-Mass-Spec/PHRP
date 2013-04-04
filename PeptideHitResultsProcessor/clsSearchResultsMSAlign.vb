@@ -38,6 +38,9 @@ Public Class clsSearchResultsMSAlign
 	Public Property EValue As String
 	Public Property FDR As String
 
+	Public Property Species_ID As String
+	Public Property FragMethod As String
+
 	Public Property Precursor_mz As String				' Observed precursor_mz
 	Public Property MSAlignComputedDelM As String
 	Public Property MSAlignComputedDelMPPM As String
@@ -67,6 +70,9 @@ Public Class clsSearchResultsMSAlign
 
 		EValue = String.Empty
 		FDR = String.Empty
+
+		Species_ID = String.Empty
+		FragMethod = String.Empty
 
 		Precursor_mz = String.Empty
 		MSAlignComputedDelM = String.Empty

@@ -17,7 +17,7 @@ Public Class clsMSAlignResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "December 4, 2012"
+		MyBase.mFileDate = "April 3, 2013"
 		InitializeLocalVariables()
 	End Sub
 
@@ -40,7 +40,7 @@ Public Class clsMSAlignResultsProcessor
 	Private Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
 
 	' These columns correspond to the tab-delimited file created directly by MSAlign
-	Protected Const MSAlignResultsFileColCount As Integer = 21
+	Protected Const MSAlignResultsFileColCount As Integer = 23
 	Public Enum eMSAlignResultsFileColumns As Integer
 		Data_file_name = 0
 		Prsm_ID = 1
@@ -63,10 +63,12 @@ Public Class clsMSAlignResultsProcessor
 		Pvalue = 18
 		Evalue = 19
 		FDR = 20
+		Species_ID = 21				' Present between Protein_ID and Protein_name in MSAlign_Histone result files
+		FragMethod = 22				' Present as the last column in MSAlign_Histone result files
 	End Enum
 
 	' These columns correspond to the Synopsis file created by this class
-	Protected Const MSAlignSynFileColCount As Integer = 20
+	Protected Const MSAlignSynFileColCount As Integer = 22
 	Public Enum eMSAlignSynFileColumns As Integer
 		ResultID = 0
 		Scan = 1
@@ -88,6 +90,8 @@ Public Class clsMSAlignResultsProcessor
 		Rank_PValue = 17
 		EValue = 18
 		FDR = 19
+		Species_ID = 20
+		FragMethod = 21
 	End Enum
 
 #End Region
@@ -111,6 +115,7 @@ Public Class clsMSAlignResultsProcessor
 		Public DelM As String						' Computed using Precursor_mass - Adjusted_precursor_mass
 		Public DelM_PPM As String					' Computed using DelM and Adjusted_precursor_mass
 		Public Protein_ID As String
+		Public Species_ID As String					' Only present in MSAlign_Histone results
 		Public Protein As String
 		Public Protein_mass As String
 		Public First_residue As String
@@ -123,6 +128,7 @@ Public Class clsMSAlignResultsProcessor
 		Public PValueNum As Double
 		Public Evalue As String
 		Public FDR As String
+		Public FragMethod As String					' Only present in MSAlign_Histone results
 		Public RankPValue As Integer
 
 		Public Sub Clear()
@@ -140,6 +146,7 @@ Public Class clsMSAlignResultsProcessor
 			DelM = String.Empty
 			DelM_PPM = String.Empty
 			Protein_ID = String.Empty
+			Species_ID = String.Empty
 			Protein = String.Empty
 			Protein_mass = String.Empty
 			First_residue = String.Empty
@@ -152,6 +159,7 @@ Public Class clsMSAlignResultsProcessor
 			PValueNum = 0
 			Evalue = String.Empty
 			FDR = String.Empty
+			FragMethod = String.Empty
 			RankPValue = 0
 		End Sub
 	End Structure
@@ -909,6 +917,7 @@ Public Class clsMSAlignResultsProcessor
 
 		Dim dblPrecursorMZ As Double
 		Dim dblDelM As Double
+		Dim dblFDR As Double
 
 		Dim dblTotalModMass As Double
 
@@ -940,13 +949,6 @@ Public Class clsMSAlignResultsProcessor
 					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Scans), .Scans) Then
 						Throw New EvaluateException("Scan(s) column is missing or invalid")
 					End If
-
-					' The expected header from MSAlign v0.5 is:
-					'                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                             Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
-
-					' The expected header from MSAlign v0.6 is:
-					' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR
-
 
 					If Not Integer.TryParse(.Scans, .ScanNum) Then
 						' .Scans likely has a list of scan numbers; extract the first scan number from .scans
@@ -986,6 +988,7 @@ Public Class clsMSAlignResultsProcessor
 					End If
 
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_ID), .Protein_ID)
+					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Species_ID), .Species_ID)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_name), .Protein)
 					.Protein = TruncateProteinName(.Protein)
 
@@ -1012,15 +1015,18 @@ Public Class clsMSAlignResultsProcessor
 						dblPeptideMonoMassMSAlign = dblPeptideMonoMassPHRP
 					End If
 
-					If Math.Abs(dblPeptideMonoMassPHRP - dblPeptideMonoMassMSAlign) > 0.1 Then
-						' Computed monoisotopic mass values differ by more than 0.1 Da; this is unexpected
+					Dim dblMassDiffThreshold As Double = dblPeptideMonoMassMSAlign / 50000
+					If dblMassDiffThreshold < 0.1 Then dblMassDiffThreshold = 0.1
+
+					If Math.Abs(dblPeptideMonoMassPHRP - dblPeptideMonoMassMSAlign) > dblMassDiffThreshold Then
+						' Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
 						Dim strFirst30Residues As String
 						If .Peptide.Length < 27 Then
 							strFirst30Residues = .Peptide
 						Else
 							strFirst30Residues = .Peptide.Substring(0, 27) & "..."
 						End If
-						ReportWarning("The monoisotopic mass computed by PHRP is more than 0.1 Da away from the mass computed by MSAlign: " & dblPeptideMonoMassPHRP.ToString("0.0000") & " vs. " & dblPeptideMonoMassMSAlign.ToString("0.0000") & "; peptide " & strFirst30Residues)
+						ReportWarning("The monoisotopic mass computed by PHRP is more than " & dblMassDiffThreshold.ToString("0.00") & " Da away from the mass computed by MSAlign: " & dblPeptideMonoMassPHRP.ToString("0.0000") & " vs. " & dblPeptideMonoMassMSAlign.ToString("0.0000") & "; peptide " & strFirst30Residues)
 					End If
 
 					If dblPeptideMonoMassMSAlign > 0 Then
@@ -1053,6 +1059,14 @@ Public Class clsMSAlignResultsProcessor
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Evalue), .Evalue)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.FDR), .FDR)
 
+					If .FDR.ToLower() = "infinity" Then
+						.FDR = "10"
+					ElseIf Not String.IsNullOrEmpty(.FDR) And Not Double.TryParse(.FDR, dblFDR) Then
+						.FDR = ""
+					End If
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.FragMethod), .FragMethod)
+
 				End With
 
 				' Append udtSearchResult to lstSearchResults
@@ -1082,10 +1096,14 @@ Public Class clsMSAlignResultsProcessor
 		' Parse the header line
 
 		' The expected header from MSAlign v0.5 is:
-		'                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                             Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
+		'                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                                           Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
 
 		' The expected header from MSAlign v0.6 is:
-		' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR
+		' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID                  Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR
+
+		' The expected header from MSAlign_Histone v0.9 is
+		' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Species_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR    FragMethod
+
 
 
 		Dim strSplitLine() As String
@@ -1105,6 +1123,7 @@ Public Class clsMSAlignResultsProcessor
 		lstColumnNames.Add("Precursor_mass", eMSAlignResultsFileColumns.Precursor_mass)
 		lstColumnNames.Add("Adjusted_precursor_mass", eMSAlignResultsFileColumns.Adjusted_precursor_mass)
 		lstColumnNames.Add("Protein_ID", eMSAlignResultsFileColumns.Protein_ID)
+		lstColumnNames.Add("Species_ID", eMSAlignResultsFileColumns.Species_ID)
 		lstColumnNames.Add("Protein_name", eMSAlignResultsFileColumns.Protein_name)
 		lstColumnNames.Add("Protein_mass", eMSAlignResultsFileColumns.Protein_mass)
 		lstColumnNames.Add("First_residue", eMSAlignResultsFileColumns.First_residue)
@@ -1116,6 +1135,7 @@ Public Class clsMSAlignResultsProcessor
 		lstColumnNames.Add("P-value", eMSAlignResultsFileColumns.Pvalue)
 		lstColumnNames.Add("E-value", eMSAlignResultsFileColumns.Evalue)
 		lstColumnNames.Add("FDR", eMSAlignResultsFileColumns.FDR)
+		lstColumnNames.Add("FragMethod", eMSAlignResultsFileColumns.FragMethod)
 
 		Try
 			' Initialize each entry in intColumnMapping to -1
@@ -1174,6 +1194,8 @@ Public Class clsMSAlignResultsProcessor
 		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue, eMSAlignSynFileColumns.Rank_PValue)
 		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_EValue, eMSAlignSynFileColumns.EValue)
 		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FDR, eMSAlignSynFileColumns.FDR)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Species_ID, eMSAlignSynFileColumns.Species_ID)
+		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FragMethod, eMSAlignSynFileColumns.FragMethod)
 
 		Try
 			' Initialize each entry in intColumnMapping to -1
@@ -1296,6 +1318,8 @@ Public Class clsMSAlignResultsProcessor
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.Rank_PValue), .Rank_PValue)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.EValue), .EValue)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.FDR), .FDR)
+					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.Species_ID), .Species_ID)
+					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.FragMethod), .FragMethod)
 
 				End With
 
@@ -1578,6 +1602,8 @@ Public Class clsMSAlignResultsProcessor
 			lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue)
 			lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_EValue)
 			lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FDR)
+			lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Species_ID)
+			lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FragMethod)
 
 			swResultFile.WriteLine(CollapseList(lstData))
 
@@ -1630,6 +1656,8 @@ Public Class clsMSAlignResultsProcessor
 			lstData.Add(udtSearchResult.RankPValue.ToString())
 			lstData.Add(udtSearchResult.Evalue)
 			lstData.Add(udtSearchResult.FDR)
+			lstData.Add(udtSearchResult.Species_ID)
+			lstData.Add(udtSearchResult.FragMethod)
 
 			swResultFile.WriteLine(CollapseList(lstData))
 
