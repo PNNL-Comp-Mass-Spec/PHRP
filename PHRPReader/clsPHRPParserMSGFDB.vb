@@ -393,9 +393,44 @@ Public Class clsPHRPParserMSGFDB
 
 					If objPSM.TryGetScore(DATA_COLUMN_MSGFDB_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_MSGFDB_SpecProb, strValue)
 					If objPSM.TryGetScore(DATA_COLUMN_Rank_MSGFDB_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, strValue)
-					If objPSM.TryGetScore(DATA_COLUMN_EValue, strValue) Then objPSM.SetScore(DATA_COLUMN_PValue, strValue)
 					If objPSM.TryGetScore(DATA_COLUMN_QValue, strValue) Then objPSM.SetScore(DATA_COLUMN_FDR, strValue)
 					If objPSM.TryGetScore(DATA_COLUMN_PepQValue, strValue) Then objPSM.SetScore(DATA_COLUMN_PepFDR, strValue)
+
+					Dim strEValue As String = String.Empty
+					Dim dblEValue As Double
+
+					Dim strSpecEValue As String = String.Empty
+					Dim dblSpecEValue As Double
+
+					Dim blnPValueStored As Boolean = False
+
+					If objPSM.TryGetScore(DATA_COLUMN_EValue, strEValue) Then
+						If objPSM.TryGetScore(DATA_COLUMN_MSGFDB_SpecEValue, strSpecEValue) Then
+							' Compute PValue using EValue and SpecEValue
+							If Double.TryParse(strEValue, dblEValue) Then
+								If Double.TryParse(strSpecEValue, dblSpecEValue) Then
+									If dblSpecEValue > 0 Then
+										Dim dblN As Double = dblEValue / dblSpecEValue
+										Dim dblPValue As Double = 1 - (1 - dblSpecEValue) ^ dblN
+
+										If dblPValue = 0 Then
+											objPSM.SetScore(DATA_COLUMN_PValue, "0")
+										Else
+											objPSM.SetScore(DATA_COLUMN_PValue, dblPValue.ToString("0.00000E-00"))
+										End If
+
+										blnPValueStored = True
+									End If
+								End If
+							End If
+						End If
+
+						If Not blnPValueStored Then
+							' Store E-value as P-value (these values are not identical, and will only be close for high-confidence results, i.e. results with FDR < 2%)
+							objPSM.SetScore(DATA_COLUMN_PValue, strEValue)
+						End If
+
+					End If
 
 				Else
 					AddScore(objPSM, strColumns, DATA_COLUMN_MSGFDB_SpecProb)

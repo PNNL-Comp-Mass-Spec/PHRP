@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.4875; May 7, 2013
+	- Now properly computing PValue for MGSF+ results using EValue and SpecEValue
+
 Version 1.1.4841; April 3, 2013
 	- Added MSAlign columns Species_ID and FragMethod
 
