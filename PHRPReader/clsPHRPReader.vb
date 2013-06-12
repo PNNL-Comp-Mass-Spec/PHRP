@@ -789,7 +789,7 @@ Public Class clsPHRPReader
 		Dim lstDatasetNames As Generic.List(Of String) = New Generic.List(Of String)
 		lstDatasetNames.Add(strDatasetName)
 
-		Return AutoDetermineBestInputFile(strInputFolderPath, strDatasetName, eMatchedResultType)
+		Return AutoDetermineBestInputFile(strInputFolderPath, lstDatasetNames, eMatchedResultType)
 	End Function
 
 	''' <summary>
