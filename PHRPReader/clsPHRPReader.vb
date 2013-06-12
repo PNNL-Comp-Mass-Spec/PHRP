@@ -684,6 +684,210 @@ Public Class clsPHRPReader
 	End Function
 
 	''' <summary>
+	''' Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified folder
+	''' If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+	''' </summary>
+	''' <param name="strInputFolderPath">Input folder path</param>
+	''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+	''' <remarks></remarks>
+	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String) As String
+		Dim eMatchedResultType As ePeptideHitResultType = ePeptideHitResultType.Unknown
+		Return AutoDetermineBestInputFile(strInputFolderPath, eMatchedResultType)
+	End Function
+
+	''' <summary>
+	''' Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified folder
+	''' If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+	''' </summary>
+	''' <param name="strInputFolderPath">Input folder path</param>
+	''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
+	''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+	''' <remarks></remarks>
+	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByRef eMatchedResultType As ePeptideHitResultType) As String
+		' Find candidate dataset names in strInputFolderPath
+
+		Dim fiInputFolder As IO.DirectoryInfo
+		Dim lstDatasetNames As Generic.SortedSet(Of String) = New Generic.SortedSet(Of String)(StringComparer.CurrentCultureIgnoreCase)
+		Dim lstFileSpec As Generic.List(Of String) = New Generic.List(Of String)
+
+		Dim strDataset As String
+		Dim intCharIndex As Integer
+
+		If String.IsNullOrWhiteSpace(strInputFolderPath) Then
+			Throw New IO.DirectoryNotFoundException("Input folder path is empty")
+		End If
+
+		fiInputFolder = New IO.DirectoryInfo(strInputFolderPath)
+		If Not fiInputFolder.Exists Then
+			Throw New IO.DirectoryNotFoundException("Input folder not found: " & strInputFolderPath)
+		End If
+
+		' MSGF+
+		lstFileSpec.Add(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN)
+		lstFileSpec.Add(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT)
+
+		' X!Tandem (only has _xt.txt files)
+		lstFileSpec.Add(clsPHRPParserXTandem.FILENAME_SUFFIX_SYN)
+
+		' MSAlign
+		lstFileSpec.Add(clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN)
+		lstFileSpec.Add(clsPHRPParserMSAlign.FILENAME_SUFFIX_FHT)
+
+		' Inspect
+		lstFileSpec.Add(clsPHRPParserInspect.FILENAME_SUFFIX_SYN)
+		lstFileSpec.Add(clsPHRPParserInspect.FILENAME_SUFFIX_FHT)
+
+		' Sequest (needs to be added last since files simply end in _syn.txt or _fht.txt)
+		lstFileSpec.Add(clsPHRPParserSequest.FILENAME_SUFFIX_SYN)
+		lstFileSpec.Add(clsPHRPParserSequest.FILENAME_SUFFIX_FHT)
+
+
+		For Each strFileSpec In lstFileSpec
+
+			For Each fiFile In fiInputFolder.GetFiles("*" & strFileSpec)
+				strDataset = fiFile.Name
+
+				intCharIndex = strDataset.ToLower().IndexOf(strFileSpec)
+				If intCharIndex > 0 Then
+					strDataset = strDataset.Substring(0, intCharIndex)
+
+					If Not lstDatasetNames.Contains(strDataset) Then
+						lstDatasetNames.Add(strDataset)
+					End If
+				End If
+			Next
+
+		Next
+
+		Return AutoDetermineBestInputFile(strInputFolderPath, lstDatasetNames.ToList(), eMatchedResultType)
+
+	End Function
+
+	''' <summary>
+	''' Looks for a valid _syn.txt or _fht.txt file for the specified dataset in the specified folder
+	''' If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+	''' </summary>
+	''' <param name="strInputFolderPath">Input folder path</param>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+	''' <remarks></remarks>
+	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal strDatasetName As String) As String
+		Dim eMatchedResultType As ePeptideHitResultType = ePeptideHitResultType.Unknown
+		Return AutoDetermineBestInputFile(strInputFolderPath, strDatasetName, eMatchedResultType)
+	End Function
+
+	''' <summary>
+	''' Looks for a valid _syn.txt or _fht.txt file for the specified dataset in the specified folder
+	''' If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+	''' </summary>
+	''' <param name="strInputFolderPath">Input folder path</param>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
+	''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+	''' <remarks></remarks>
+	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal strDatasetName As String, ByRef eMatchedResultType As ePeptideHitResultType) As String
+		Dim lstDatasetNames As Generic.List(Of String) = New Generic.List(Of String)
+		lstDatasetNames.Add(strDatasetName)
+
+		Return AutoDetermineBestInputFile(strInputFolderPath, strDatasetName, eMatchedResultType)
+	End Function
+
+	''' <summary>
+	''' Looks for a valid _syn.txt or _fht.txt file for the given list of datasets in the specified folder
+	''' If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+	''' </summary>
+	''' <param name="strInputFolderPath">Input folder path</param>
+	''' <param name="lstDatasetNames">List of dataset names to search for</param>
+	''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
+	''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
+	''' <remarks></remarks>
+	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal lstDatasetNames As Generic.List(Of String), ByRef eMatchedResultType As ePeptideHitResultType) As String
+
+		Dim fiInputFolder As IO.DirectoryInfo
+
+		' Items in this list are KeyValuePairs where the key is a filename to look for and the value is a PeptideHitResultType
+		Dim lstFilesToFind As Generic.List(Of Generic.KeyValuePair(Of String, ePeptideHitResultType))
+
+		' This list contains the standard PHRP file suffixes
+		Dim lstAuxiliaryFileSuffixes As Generic.List(Of String) = GetPHRPAuxiliaryFileSuffixes()
+
+		' The key in this variable is the full path to the best Synopsis or First hits file and the value is the number of PHRP-related auxiliary files
+		Dim kvBestSynOrFHTFile As Generic.KeyValuePair(Of String, Integer)
+		kvBestSynOrFHTFile = New Generic.KeyValuePair(Of String, Integer)(String.Empty, 0)
+
+		' Set the matched result type to Unknown for now
+		eMatchedResultType = ePeptideHitResultType.Unknown
+
+		If String.IsNullOrWhiteSpace(strInputFolderPath) Then
+			Throw New IO.DirectoryNotFoundException("Input folder path is empty")
+		End If
+
+		fiInputFolder = New IO.DirectoryInfo(strInputFolderPath)
+		If Not fiInputFolder.Exists Then
+			Throw New IO.DirectoryNotFoundException("Input folder not found: " & strInputFolderPath)
+		End If
+
+		If lstDatasetNames Is Nothing OrElse lstDatasetNames.Count = 0 Then
+			Throw New ArgumentException("Generic.list lstDatasetNames cannot be empty")
+		End If
+
+		' Construct a list of the files to search for
+		lstFilesToFind = New Generic.List(Of Generic.KeyValuePair(Of String, ePeptideHitResultType))
+
+		For Each strDataset As String In lstDatasetNames
+			' MSGF+
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSGFDB))
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MSGFDB))
+
+			' X!Tandem
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserXTandem.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.XTandem))
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserXTandem.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.XTandem))
+
+			' MSAlign
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSAlign.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSAlign))
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSAlign.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MSAlign))
+
+			' Inspect
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.Inspect))
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.Inspect))
+
+			' Sequest (needs to be added last since files simply end in _syn.txt or _fht.txt)
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserSequest.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.Sequest))
+			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserSequest.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.Sequest))
+		Next
+
+		For Each kvFileToFind As Generic.KeyValuePair(Of String, ePeptideHitResultType) In lstFilesToFind
+			If Not String.IsNullOrEmpty(kvFileToFind.Key) Then
+				Dim fiSynOrFHTFile As IO.FileInfo = New IO.FileInfo(IO.Path.Combine(fiInputFolder.FullName, kvFileToFind.Key))
+
+				If fiSynOrFHTFile.Exists Then
+					' Match found
+					' Look for PHRP-related auxiliary files
+
+					Dim intAuxFileCount As Integer = 0
+					Dim strBaseName As String
+					strBaseName = IO.Path.Combine(fiSynOrFHTFile.Directory.FullName, IO.Path.GetFileNameWithoutExtension(fiSynOrFHTFile.Name))
+
+					For Each strSuffix As String In lstAuxiliaryFileSuffixes
+						If IO.File.Exists(strBaseName & strSuffix) Then
+							intAuxFileCount += 1
+						End If
+					Next
+
+					If String.IsNullOrEmpty(kvBestSynOrFHTFile.Key) OrElse intAuxFileCount > kvBestSynOrFHTFile.Value Then
+						kvBestSynOrFHTFile = New Generic.KeyValuePair(Of String, Integer)(fiSynOrFHTFile.FullName, intAuxFileCount)
+						eMatchedResultType = kvFileToFind.Value
+					End If
+				End If
+			End If
+		Next
+
+		' kvBestSynOrFHTFile should now contain the PHRP result file with the most auxiliary files
+		Return kvBestSynOrFHTFile.Key
+
+	End Function
+
+	''' <summary>
 	''' Auto-determine the dataset name using the input file path
 	''' </summary>
 	''' <param name="strFilePath"></param>
@@ -845,12 +1049,7 @@ Public Class clsPHRPReader
 
 		' Check whether strfilePathLCase ends in other known PHRP extensions
 		Dim lstExtraSuffixes As List(Of String)
-		lstExtraSuffixes = New List(Of String)
-
-		lstExtraSuffixes.Add("_ResultToSeqMap.txt")
-		lstExtraSuffixes.Add("_SeqToProteinMap.txt")
-		lstExtraSuffixes.Add("_SeqInfo.txt")
-		lstExtraSuffixes.Add("_MSGF.txt")
+		lstExtraSuffixes = GetPHRPAuxiliaryFileSuffixes()
 
 		For Each strSuffix As String In lstExtraSuffixes
 			If strFilePath.ToLower().EndsWith(strSuffix.ToLower()) Then
@@ -1115,6 +1314,20 @@ Public Class clsPHRPReader
 			Case Else
 				Return clsPHRPReader.ePeptideHitResultType.Unknown
 		End Select
+	End Function
+
+	Public Shared Function GetPHRPAuxiliaryFileSuffixes() As Generic.List(Of String)
+		Dim lstAuxSuffixes As List(Of String)
+		lstAuxSuffixes = New List(Of String)
+
+		lstAuxSuffixes.Add("_ResultToSeqMap.txt")
+		lstAuxSuffixes.Add("_SeqToProteinMap.txt")
+		lstAuxSuffixes.Add("_SeqInfo.txt")
+		lstAuxSuffixes.Add("_MSGF.txt")
+		lstAuxSuffixes.Add("_ProteinMods.txt")
+
+		Return lstAuxSuffixes
+
 	End Function
 
 	''' <summary>
