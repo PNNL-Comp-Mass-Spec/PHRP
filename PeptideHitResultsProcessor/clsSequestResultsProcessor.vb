@@ -36,7 +36,7 @@ Public Class clsSequestResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "August 18, 2011"
+		MyBase.mFileDate = "June 28, 2013"
         InitializeLocalVariables()
     End Sub
 
@@ -502,7 +502,7 @@ Public Class clsSequestResultsProcessor
 		End If
 
 		Try
-			If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strInputFilePath) Then
 				SetErrorMessage("Input file name is empty")
 				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
 			Else
@@ -562,7 +562,7 @@ Public Class clsSequestResultsProcessor
 							blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
 							If Not blnSuccess Then
 								ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
-							End If							
+							End If
 						End If
 
 						If blnSuccess Then

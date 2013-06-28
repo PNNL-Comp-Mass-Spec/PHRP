@@ -30,7 +30,7 @@ Imports PHRPReader
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "December 10, 2012"
+		mFileDate = "June 28, 2013"
 		InitializeLocalVariables()
 	End Sub
 
@@ -570,7 +570,7 @@ Public MustInherit Class clsPHRPBaseClass
 				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
 				Return False
 			Else
-				If strOutputFolderPath Is Nothing OrElse strOutputFolderPath.Length = 0 Then
+				If String.IsNullOrWhiteSpace(strOutputFolderPath) Then
 					' Define strOutputFolderPath based on strInputFilePath
 					strOutputFolderPath = ioFileInfo.DirectoryName
 				End If
@@ -864,7 +864,7 @@ Public MustInherit Class clsPHRPBaseClass
 							blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, mIgnorePeptideToProteinMapperErrors)
 						End If
 					Else
-						If objPeptideToProteinMapper.GetErrorMessage.Length = 0 AndAlso objPeptideToProteinMapper.StatusMessage.ToLower().Contains("error") Then
+						If String.IsNullOrWhiteSpace(objPeptideToProteinMapper.GetErrorMessage) AndAlso objPeptideToProteinMapper.StatusMessage.ToLower().Contains("error") Then
 							SetErrorMessage("Error running clsPeptideToProteinMapEngine: " & objPeptideToProteinMapper.StatusMessage)
 						Else
 							If objPeptideToProteinMapper.StatusMessage.Length > 0 Then
@@ -1539,7 +1539,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 		Try
 
-			If strParameterFilePath Is Nothing OrElse strParameterFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strParameterFilePath) Then
 				' No parameter file specified; nothing to load
 				Return True
 			End If
@@ -1636,7 +1636,7 @@ Public MustInherit Class clsPHRPBaseClass
 			End If
 			strHeaderLine = String.Empty
 
-			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
 				SetErrorMessage("Warning: PepToProteinMap file is not defined")
 				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
 				Return False

@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "June 27, 2013"
+	Public Const PROGRAM_DATE As String = "June 28, 2013"
 
 	Private mInputFilePath As String
 	Private mOutputFolderPath As String							' Optional
@@ -131,7 +131,7 @@ Module modMain
 			If Not blnProceed OrElse _
 			   objParseCommandLine.NeedToShowHelp OrElse _
 			   objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse _
-			   mInputFilePath.Length = 0 Then
+			   String.IsNullOrWhiteSpace(mInputFilePath) Then
 				ShowProgramHelp()
 				intReturnCode = -1
 			Else

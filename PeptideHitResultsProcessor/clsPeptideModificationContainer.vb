@@ -531,7 +531,7 @@ Public Class clsPeptideModificationContainer
 				If mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
 				   mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType Then
 
-					If (blnConsiderTargetResidues And mModifications(intIndex).TargetResidues.Length = 0) OrElse Not blnConsiderTargetResidues Then
+					If (blnConsiderTargetResidues AndAlso String.IsNullOrWhiteSpace(mModifications(intIndex).TargetResidues)) OrElse Not blnConsiderTargetResidues Then
 						If mModifications(intIndex).ModificationSymbol = chModificationSymbol Then
 							' Matching mass found
 							blnExistingModFound = True
@@ -626,7 +626,7 @@ Public Class clsPeptideModificationContainer
 			If (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
 			 mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
 			 mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
-			 mModifications(intIndex).TargetResidues.Length = 0 Then
+			 String.IsNullOrWhiteSpace(mModifications(intIndex).TargetResidues) Then
 
 				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
 					' Matching mass found
@@ -793,7 +793,7 @@ Public Class clsPeptideModificationContainer
 			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse
 			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod OrElse
 			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso
-			  mModifications(intIndex).TargetResidues.Length = 0 Then
+			  String.IsNullOrWhiteSpace(mModifications(intIndex).TargetResidues) Then
 
 				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
 					' Matching mass found
@@ -887,7 +887,7 @@ Public Class clsPeptideModificationContainer
 			' Column 1 is the mass correction tag name
 			' Column 2 is the monoisotopic mass for the mass correction (positive or negative number)
 
-			If strFilePath Is Nothing OrElse strFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strFilePath) Then
 				SetDefaultMassCorrectionTags()
 				blnSuccess = True
 			ElseIf Not System.IO.File.Exists(strFilePath) Then
@@ -961,7 +961,7 @@ Public Class clsPeptideModificationContainer
 			' Column 4, which is optional, specifies the type of modification: D, S, T, I, or P (corresponding to clsModificationDefinition.eModificationTypeConstants)
 			' Column 5, which is optional, specifies the mass correction tag associated with the given modification
 
-			If strFilePath Is Nothing OrElse strFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strFilePath) Then
 				ClearModifications()
 				blnSuccess = True
 			ElseIf Not System.IO.File.Exists(strFilePath) Then

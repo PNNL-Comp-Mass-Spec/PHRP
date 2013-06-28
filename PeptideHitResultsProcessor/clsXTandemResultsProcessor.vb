@@ -36,7 +36,7 @@ Public Class clsXTandemResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "March 25, 2008"
+		MyBase.mFileDate = "June 28, 2013"
         InitializeLocalVariables()
     End Sub
 
@@ -214,80 +214,80 @@ Public Class clsXTandemResultsProcessor
         Dim blnSuccess As Boolean
 
         Try
-            If strParamValue Is Nothing OrElse strParamValue.Length = 0 Then
-                ' Empty parameter; no definition to parse
-            Else
-                ' Parse strParamValue
-                ' Each modification entry can have multiple modification definitions separated separated by commas, so we first split strParamValue
-                strModDefs = strParamValue.Split(MOD_LIST_SEP_CHAR)
-                For intIndex = 0 To strModDefs.Length - 1
-                    ' Modification definitions typically look like "15.9949@M"
-                    ' However, a neutral loss can be specified using "79.9663:-97.98@STY"
-                    '   Thus, mod mass is number up to first non-numeric character (typically a colon or @ sign)
-                    ' Target residues are the residues after the @
-                    ' If the Target residues contain an X, then the modification can apply to any residue
+			If String.IsNullOrWhiteSpace(strParamValue) Then
+				' Empty parameter; no definition to parse
+			Else
+				' Parse strParamValue
+				' Each modification entry can have multiple modification definitions separated separated by commas, so we first split strParamValue
+				strModDefs = strParamValue.Split(MOD_LIST_SEP_CHAR)
+				For intIndex = 0 To strModDefs.Length - 1
+					' Modification definitions typically look like "15.9949@M"
+					' However, a neutral loss can be specified using "79.9663:-97.98@STY"
+					'   Thus, mod mass is number up to first non-numeric character (typically a colon or @ sign)
+					' Target residues are the residues after the @
+					' If the Target residues contain an X, then the modification can apply to any residue
 
-                    dblModificationMass = 0
+					dblModificationMass = 0
 
-                    ' Look for a colon and an @ sign
-                    intColonIndex = strModDefs(intIndex).IndexOf(":"c)
-                    intAtSignIndex = strModDefs(intIndex).IndexOf("@"c)
+					' Look for a colon and an @ sign
+					intColonIndex = strModDefs(intIndex).IndexOf(":"c)
+					intAtSignIndex = strModDefs(intIndex).IndexOf("@"c)
 
-                    If intAtSignIndex < 0 Then
-                        ' At sign not found; skip this mod def
-                    Else
-                        If intColonIndex > intAtSignIndex Then
-                            ' Ignore this colon since it's present after the @ sign
-                            intColonIndex = -1
-                        End If
+					If intAtSignIndex < 0 Then
+						' At sign not found; skip this mod def
+					Else
+						If intColonIndex > intAtSignIndex Then
+							' Ignore this colon since it's present after the @ sign
+							intColonIndex = -1
+						End If
 
-                        If intColonIndex > 0 Then
-                            ' Colon found; see if the text up to intColonIndex is a number
-                            If clsPHRPBaseClass.IsNumber(strModDefs(intIndex).Substring(0, intColonIndex)) Then
-                                dblModificationMass = Double.Parse(strModDefs(intIndex).Substring(0, intColonIndex))
-                            End If
-                        Else
-                            ' Colon not found; see if the text up to intAtSignIndex is a number
-                            If clsPHRPBaseClass.IsNumber(strModDefs(intIndex).Substring(0, intAtSignIndex)) Then
-                                dblModificationMass = Double.Parse(strModDefs(intIndex).Substring(0, intAtSignIndex))
-                            End If
-                        End If
+						If intColonIndex > 0 Then
+							' Colon found; see if the text up to intColonIndex is a number
+							If clsPHRPBaseClass.IsNumber(strModDefs(intIndex).Substring(0, intColonIndex)) Then
+								dblModificationMass = Double.Parse(strModDefs(intIndex).Substring(0, intColonIndex))
+							End If
+						Else
+							' Colon not found; see if the text up to intAtSignIndex is a number
+							If clsPHRPBaseClass.IsNumber(strModDefs(intIndex).Substring(0, intAtSignIndex)) Then
+								dblModificationMass = Double.Parse(strModDefs(intIndex).Substring(0, intAtSignIndex))
+							End If
+						End If
 
-                        If dblModificationMass <> 0 Then
-                            ' Valid mass found; now extract the target residues
-                            If Not blnParsingMotifDef AndAlso intAtSignIndex + 1 < strModDefs(intIndex).Length Then
-                                strTargetResidues = strModDefs(intIndex).Substring(intAtSignIndex + 1)
-                            Else
-                                strTargetResidues = String.Empty
-                            End If
+						If dblModificationMass <> 0 Then
+							' Valid mass found; now extract the target residues
+							If Not blnParsingMotifDef AndAlso intAtSignIndex + 1 < strModDefs(intIndex).Length Then
+								strTargetResidues = strModDefs(intIndex).Substring(intAtSignIndex + 1)
+							Else
+								strTargetResidues = String.Empty
+							End If
 
-                            If strTargetResidues.IndexOf("X"c) >= 0 Then
-                                ' Modification can affect any residue; set strTargetResidues to ""
-                                strTargetResidues = String.Empty
-                            End If
+							If strTargetResidues.IndexOf("X"c) >= 0 Then
+								' Modification can affect any residue; set strTargetResidues to ""
+								strTargetResidues = String.Empty
+							End If
 
-                            If strTargetResidues.Length > 0 Then
-                                ' Convert from X!Tandem-style N-Terminus notation to DMS-style notation
+							If strTargetResidues.Length > 0 Then
+								' Convert from X!Tandem-style N-Terminus notation to DMS-style notation
 								strTargetResidues = strTargetResidues.Replace(clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS)
 								strTargetResidues = strTargetResidues.Replace(clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
-                            End If
+							End If
 
-                            ' Append the new mod information to udtModInfo
-                            If intModInfoCount >= udtModInfo.Length Then
-                                ReDim Preserve udtModInfo(udtModInfo.Length * 2 - 1)
-                            End If
+							' Append the new mod information to udtModInfo
+							If intModInfoCount >= udtModInfo.Length Then
+								ReDim Preserve udtModInfo(udtModInfo.Length * 2 - 1)
+							End If
 
-                            With udtModInfo(intModInfoCount)
-                                .SortOrder = intSortOrder
-                                .ModificationMass = dblModificationMass
-                                .TargetResidues = strTargetResidues
-                                .ModificationType = eModificationType
-                            End With
-                            intModInfoCount += 1
-                        End If
-                    End If
-                Next intIndex
-            End If
+							With udtModInfo(intModInfoCount)
+								.SortOrder = intSortOrder
+								.ModificationMass = dblModificationMass
+								.TargetResidues = strTargetResidues
+								.ModificationType = eModificationType
+							End With
+							intModInfoCount += 1
+						End If
+					End If
+				Next intIndex
+			End If
 
             blnSuccess = True
 
@@ -310,37 +310,37 @@ Public Class clsXTandemResultsProcessor
         Dim blnSuccess As Boolean
 
         Try
-            If strParamValue Is Nothing OrElse strParamValue.Length = 0 Then
-                ' Empty parameter; no definition to parse
-            Else
-                ' See if strParamValue is a non-zero number
+			If String.IsNullOrWhiteSpace(strParamValue) Then
+				' Empty parameter; no definition to parse
+			Else
+				' See if strParamValue is a non-zero number
 
-                dblModificationMass = 0
-                If clsPHRPBaseClass.IsNumber(strParamValue) Then
-                    dblModificationMass = Double.Parse(strParamValue)
-                End If
+				dblModificationMass = 0
+				If clsPHRPBaseClass.IsNumber(strParamValue) Then
+					dblModificationMass = Double.Parse(strParamValue)
+				End If
 
-                If dblModificationMass <> 0 Then
-                    ' Append the new mod information to udtModInfo
-                    If intModInfoCount >= udtModInfo.Length Then
-                        ReDim Preserve udtModInfo(udtModInfo.Length * 2 - 1)
-                    End If
+				If dblModificationMass <> 0 Then
+					' Append the new mod information to udtModInfo
+					If intModInfoCount >= udtModInfo.Length Then
+						ReDim Preserve udtModInfo(udtModInfo.Length * 2 - 1)
+					End If
 
-                    With udtModInfo(intModInfoCount)
-                        .SortOrder = intSortOrder
-                        If blnNTerminus Then
+					With udtModInfo(intModInfoCount)
+						.SortOrder = intSortOrder
+						If blnNTerminus Then
 							strTargetResidues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
-                        Else
+						Else
 							strTargetResidues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
-                        End If
+						End If
 
-                        .ModificationMass = dblModificationMass
-                        .TargetResidues = strTargetResidues
-                        .ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
-                    End With
-                    intModInfoCount += 1
-                End If
-            End If
+						.ModificationMass = dblModificationMass
+						.TargetResidues = strTargetResidues
+						.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+					End With
+					intModInfoCount += 1
+				End If
+			End If
 
             blnSuccess = True
 
@@ -1316,11 +1316,11 @@ Public Class clsXTandemResultsProcessor
                 Select Case objXMLReader.Name.ToLower
                     Case XTANDEM_XML_ELEMENT_NAME_AMINOACID
                         strValue = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty).Trim
-                        If strValue.Length = 0 Then
-                            chTargetResidue = Nothing
-                        Else
-                            chTargetResidue = strValue.Chars(0)
-                        End If
+						If String.IsNullOrWhiteSpace(strValue) Then
+							chTargetResidue = Nothing
+						Else
+							chTargetResidue = strValue.Chars(0)
+						End If
 
                         intModifiedResiduePosInProtein = XMLTextReaderGetAttributeValue(objXMLReader, "at", 0)
 
@@ -1373,7 +1373,7 @@ Public Class clsXTandemResultsProcessor
 		End If
 
 		Try
-			If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strInputFilePath) Then
 				SetErrorMessage("Input file name is empty")
 				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
 			Else

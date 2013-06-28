@@ -372,28 +372,28 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         If Not VerifyDirExists(m_OutFolderPath) Then Return False 'Error msg handled by VerifyDirExists
 
         'Analysis tool name defined?
-        If m_AnalysisToolName Is Nothing OrElse m_AnalysisToolName.Length = 0 Then
-            m_ErrMsg = "Analysis tool name not specified"
-            Return False
-        End If
+		If String.IsNullOrWhiteSpace(m_AnalysisToolName) Then
+			m_ErrMsg = "Analysis tool name not specified"
+			Return False
+		End If
 
         'Dataset name defined?
-        If m_DSName Is Nothing OrElse m_DSName.Length = 0 Then
-            m_ErrMsg = "Dataset name not specified"
-            Return False
-        End If
+		If String.IsNullOrWhiteSpace(m_DSName) Then
+			m_ErrMsg = "Dataset name not specified"
+			Return False
+		End If
 
         'Settings file name defined?
-        If m_SettingsFileName Is Nothing OrElse m_SettingsFileName.Length = 0 Then
-            m_ErrMsg = "Settings file name not specified"
-            Return False
-        End If
+		If String.IsNullOrWhiteSpace(m_SettingsFileName) Then
+			m_ErrMsg = "Settings file name not specified"
+			Return False
+		End If
 
         'Parameter file name defined?
-        If m_ParameterFileName Is Nothing OrElse m_ParameterFileName.Length = 0 Then
-            m_ErrMsg = "Parameter file name not specified"
-            Return False
-        End If
+		If String.IsNullOrWhiteSpace(m_ParameterFileName) Then
+			m_ErrMsg = "Parameter file name not specified"
+			Return False
+		End If
 
         'Define the parameter file path; this is passed as the search tool parameter file
         m_ParameterFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_ParameterFileName)
@@ -436,11 +436,11 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         'Define the peptide hit results file name
-        If m_PeptideHitResultsFileName Is Nothing OrElse m_PeptideHitResultsFileName.Length = 0 Then
-            m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, m_SourceFolderPath, m_DSName)
-        Else
-            m_PeptideHitResultsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_PeptideHitResultsFileName)
-        End If
+		If String.IsNullOrWhiteSpace(m_PeptideHitResultsFileName) Then
+			m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, m_SourceFolderPath, m_DSName)
+		Else
+			m_PeptideHitResultsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_PeptideHitResultsFileName)
+		End If
 
         If Me.DebugLevel >= 3 Then
             RaiseEvent DebugEvent("Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath)
@@ -452,18 +452,18 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End If
 
         'Define the mass correction tags file path
-        If m_MassCorrectionTagsFileName Is Nothing OrElse m_MassCorrectionTagsFileName.Length = 0 Then
-            m_MassCorrectionTagsFilePath = System.IO.Path.Combine(m_SourceFolderPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME)
-        Else
-            m_MassCorrectionTagsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_MassCorrectionTagsFileName)
-        End If
+		If String.IsNullOrWhiteSpace(m_MassCorrectionTagsFileName) Then
+			m_MassCorrectionTagsFilePath = System.IO.Path.Combine(m_SourceFolderPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME)
+		Else
+			m_MassCorrectionTagsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_MassCorrectionTagsFileName)
+		End If
 
         'Define the modification definitions file path
-        If m_ModificationDefinitionsFileName Is Nothing OrElse m_ModificationDefinitionsFileName.Length = 0 Then
-            m_ModificationDefinitionsFilePath = System.IO.Path.Combine(m_SourceFolderPath, System.IO.Path.GetFileNameWithoutExtension(m_ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX)
-        Else
-            m_ModificationDefinitionsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_ModificationDefinitionsFileName)
-        End If
+		If String.IsNullOrWhiteSpace(m_ModificationDefinitionsFileName) Then
+			m_ModificationDefinitionsFilePath = System.IO.Path.Combine(m_SourceFolderPath, System.IO.Path.GetFileNameWithoutExtension(m_ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX)
+		Else
+			m_ModificationDefinitionsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_ModificationDefinitionsFileName)
+		End If
 
         If Me.DebugLevel >= 3 Then
             RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)

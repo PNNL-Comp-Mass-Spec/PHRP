@@ -20,7 +20,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "June 27, 2013"
+		MyBase.mFileDate = "June 28, 2013"
 		InitializeLocalVariables()
 	End Sub
 
@@ -953,7 +953,7 @@ Public Class clsMSGFDBResultsProcessor
 				Do While srInFile.Peek <> -1
 					strLineIn = srInFile.ReadLine().Trim()
 
-					If strLineIn.Length = 0 Then Continue Do
+					If String.IsNullOrWhiteSpace(strLineIn) Then Continue Do
 
 					strModSpec = String.Empty
 
@@ -1091,7 +1091,7 @@ Public Class clsMSGFDBResultsProcessor
 				Do While srInFile.Peek <> -1
 					strLineIn = srInFile.ReadLine().Trim()
 
-					If strLineIn.Length = 0 Then Continue Do
+					If String.IsNullOrWhiteSpace(strLineIn) Then Continue Do
 
 					If strLineIn.StartsWith("#"c) Then
 						' Comment line; skip it
@@ -1192,7 +1192,7 @@ Public Class clsMSGFDBResultsProcessor
 		Try
 			strMTSPepToProteinMapFilePath = String.Empty
 
-			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
 				Console.WriteLine()
 				ReportWarning("PepToProteinMap file is not defined")
 				Return False

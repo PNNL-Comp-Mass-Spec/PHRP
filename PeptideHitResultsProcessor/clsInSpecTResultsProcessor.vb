@@ -33,7 +33,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-		MyBase.mFileDate = "December 3, 2012"
+		MyBase.mFileDate = "June 28, 2013"
         InitializeLocalVariables()
     End Sub
 
@@ -600,25 +600,25 @@ Public Class clsInSpecTResultsProcessor
         Dim intCharge As Integer
         Dim dblPeptideMH As Double = 0
 
-        If strPrecursorMZ Is Nothing OrElse strPrecursorMZ.Length = 0 OrElse strPrecursorMZ = "0" Then
-            ' Precursor m/z is undefined; cannot continue
-            dblPeptideMH = 0
-        ElseIf strPrecursorError Is Nothing OrElse strPrecursorError.Length = 0 Then
-            ' Precursor error is undefined; cannot continue
-            dblPeptideMH = 0
-        Else
-            intCharge = CIntSafe(strCharge, -1)
+		If String.IsNullOrWhiteSpace(strPrecursorMZ) OrElse strPrecursorMZ = "0" Then
+			' Precursor m/z is undefined; cannot continue
+			dblPeptideMH = 0
+		ElseIf String.IsNullOrWhiteSpace(strPrecursorError) Then
+			' Precursor error is undefined; cannot continue
+			dblPeptideMH = 0
+		Else
+			intCharge = CIntSafe(strCharge, -1)
 
-            If intCharge >= 1 Then
-                If Double.TryParse(strPrecursorMZ, dblPrecursorMZ) Then
-                    If Double.TryParse(strPrecursorError, dblPrecursorError) Then
-                        ' Note: the October 2008 version of Inspect uses an Absolute Value function when computing the PrecursorError; the version used by PNNL does not use Absolute Value
-                        ' Note: switched to compute (M+H)+ in August 2011; prior to this, we were computing uncharged monoisotopic mass
-                        dblPeptideMH = (dblPrecursorMZ - dblPrecursorError) * intCharge - (intCharge - 1) * clsPeptideMassCalculator.MASS_PROTON
-                    End If
-                End If
-            End If
-        End If
+			If intCharge >= 1 Then
+				If Double.TryParse(strPrecursorMZ, dblPrecursorMZ) Then
+					If Double.TryParse(strPrecursorError, dblPrecursorError) Then
+						' Note: the October 2008 version of Inspect uses an Absolute Value function when computing the PrecursorError; the version used by PNNL does not use Absolute Value
+						' Note: switched to compute (M+H)+ in August 2011; prior to this, we were computing uncharged monoisotopic mass
+						dblPeptideMH = (dblPrecursorMZ - dblPrecursorError) * intCharge - (intCharge - 1) * clsPeptideMassCalculator.MASS_PROTON
+					End If
+				End If
+			End If
+		End If
 
         Return dblPeptideMH
 
@@ -654,11 +654,11 @@ Public Class clsInSpecTResultsProcessor
 
             intUnnamedModID = 0
 
-            If strInspectParameterFilePath Is Nothing OrElse strInspectParameterFilePath.Length = 0 Then
-                SetErrorMessage("Inspect Parameter File name not defined; unable to extract mod info")
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
-                Return False
-            End If
+			If String.IsNullOrWhiteSpace(strInspectParameterFilePath) Then
+				SetErrorMessage("Inspect Parameter File name not defined; unable to extract mod info")
+				SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+				Return False
+			End If
 
             ' Read the contents of the inspect parameter file
 			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInspectParameterFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
@@ -677,7 +677,7 @@ Public Class clsInSpecTResultsProcessor
 							strSplitLine = strLineIn.Split(","c)
 
 							If strSplitLine.Length >= 3 AndAlso strSplitLine(0).ToLower.Trim = "mod" Then
-								If udtModList.Length = 0 Then
+								If udtModList Is Nothing OrElse udtModList.Length = 0 Then
 									ReDim udtModList(0)
 								ElseIf intModCount >= udtModList.Length Then
 									ReDim Preserve udtModList(udtModList.Length * 2 - 1)
@@ -802,7 +802,7 @@ Public Class clsInSpecTResultsProcessor
 		Try
 			strMTSPepToProteinMapFilePath = String.Empty
 
-			If strPepToProteinMapFilePath Is Nothing OrElse strPepToProteinMapFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
 				Console.WriteLine()
 				ReportWarning("PepToProteinMap file is not defined")
 				Return False
@@ -1409,7 +1409,7 @@ Public Class clsInSpecTResultsProcessor
 		End If
 
 		Try
-			If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strInputFilePath) Then
 				SetErrorMessage("Input file name is empty")
 				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
 			Else
@@ -1547,24 +1547,24 @@ Public Class clsInSpecTResultsProcessor
             reAllZeroes = New System.Text.RegularExpressions.Regex("\.0+$", Text.RegularExpressions.RegexOptions.Compiled)
         End If
 
-        If strValue Is Nothing OrElse strValue.Length = 0 Then
-            Return String.Empty
-        Else
-            reMatch = reAllZeroes.Match(strValue)
-            If reMatch.Success AndAlso reMatch.Index > 0 Then
-                strValue = strValue.Substring(0, reMatch.Index)
-            Else
-                reMatch = reNumPlusZeroes.Match(strValue)
-                If reMatch.Success AndAlso reMatch.Index > 0 Then
-                    If reMatch.Groups.Count > 1 Then
-                        ' Number is of the form 1.0030 or 1.300 or 1.030
-                        strValue = strValue.Substring(0, reMatch.Index) & reMatch.Groups(1).Value
-                    End If
-                End If
-            End If
+		If String.IsNullOrWhiteSpace(strValue) Then
+			Return String.Empty
+		Else
+			reMatch = reAllZeroes.Match(strValue)
+			If reMatch.Success AndAlso reMatch.Index > 0 Then
+				strValue = strValue.Substring(0, reMatch.Index)
+			Else
+				reMatch = reNumPlusZeroes.Match(strValue)
+				If reMatch.Success AndAlso reMatch.Index > 0 Then
+					If reMatch.Groups.Count > 1 Then
+						' Number is of the form 1.0030 or 1.300 or 1.030
+						strValue = strValue.Substring(0, reMatch.Index) & reMatch.Groups(1).Value
+					End If
+				End If
+			End If
 
-            Return strValue
-        End If
+			Return strValue
+		End If
 
     End Function
 

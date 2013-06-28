@@ -359,10 +359,10 @@ Public Class clsPeptideHitResultsProcRunner
 
         Try
 
-            If strParameterFilePath Is Nothing OrElse strParameterFilePath.Length = 0 Then
-                ' No parameter file specified; nothing to load
-                Return True
-            End If
+			If String.IsNullOrWhiteSpace(strParameterFilePath) Then
+				' No parameter file specified; nothing to load
+				Return True
+			End If
 
             If Not System.IO.File.Exists(strParameterFilePath) Then
                 ' See if strParameterFilePath points to a file in the same directory as the application
@@ -422,17 +422,17 @@ Public Class clsPeptideHitResultsProcRunner
         End If
 
         Try
-            If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
+			If String.IsNullOrWhiteSpace(strInputFilePath) Then
 				ShowErrorMessage("Input file name is empty")
-                MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.InvalidInputFilePath)
-            Else
-                ' Note that CleanupFilePaths() will update mOutputFolderPath, which is used by LogMessage()
-                If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
-                    MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.FilePathError)
-                Else
-                    MyBase.mProgressStepDescription = "Parsing " & System.IO.Path.GetFileName(strInputFilePath)
-                    LogMessage(MyBase.mProgressStepDescription)
-                    MyBase.ResetProgress()
+				MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.InvalidInputFilePath)
+			Else
+				' Note that CleanupFilePaths() will update mOutputFolderPath, which is used by LogMessage()
+				If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
+					MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.FilePathError)
+				Else
+					MyBase.mProgressStepDescription = "Parsing " & System.IO.Path.GetFileName(strInputFilePath)
+					LogMessage(MyBase.mProgressStepDescription)
+					MyBase.ResetProgress()
 
 					If mCreateProteinModsUsingPHRPDataFile Then
 						blnSuccess = StartCreateProteinModsViaPHRPData(strInputFilePath, strOutputFolderPath, strParameterFilePath)
