@@ -748,9 +748,11 @@ Public Class clsPeptideModificationContainer
 			' First compare against modifications with 1 or more residues in .TargetResidues
 			For intIndex = 0 To mModifications.Count - 1
 				If mModifications(intIndex).ModificationType = eModType AndAlso _
-				 (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
-				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
-				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
+				 (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse
+				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse
+				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse
+				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod OrElse
+				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso
 				  mModifications(intIndex).TargetResidues.Length > 0 Then
 
 					If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
@@ -785,10 +787,12 @@ Public Class clsPeptideModificationContainer
 		' No match was found
 		' Compare against modifications with empty .TargetResidues
 		For intIndex = 0 To mModifications.Count - 1
-			If mModifications(intIndex).ModificationType = eModType AndAlso _
-			 (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
-			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
-			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
+			If mModifications(intIndex).ModificationType = eModType AndAlso
+			 (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse
+			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse
+			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse
+			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod OrElse
+			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso
 			  mModifications(intIndex).TargetResidues.Length = 0 Then
 
 				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
@@ -800,7 +804,7 @@ Public Class clsPeptideModificationContainer
 		Next intIndex
 
 		' Still no match; look for the modification mass and residue in mStandardRefinementModifications
-		' Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing
+		' Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing or chTargetResidue = '<' or chTargetResidue = '>'
 		If Not chTargetResidue = Nothing Then
 			For intIndex = 0 To mStandardRefinementModifications.Length - 1
 				If Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
@@ -832,13 +836,11 @@ Public Class clsPeptideModificationContainer
 			Next intIndex
 		End If
 
+
 		' No match was found
 		' Compare against modifications of the same type, but ignore .TargetResidues
 		For intIndex = 0 To mModifications.Count - 1
-			If mModifications(intIndex).ModificationType = eModType AndAlso _
-			 (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
-			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
-			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) Then
+			If mModifications(intIndex).ModificationType = eModType Then
 
 				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
 					' Matching mass found
@@ -1120,136 +1122,71 @@ Public Class clsPeptideModificationContainer
 			' Note: If the mass correction tag names in this list contain spaces at the 
 			'       beginning or end, then function StoreMassCorrectionTag will remove them
 
-			StoreMassCorrectionTag("4xDeut  ", 4.0251)
-			StoreMassCorrectionTag("6C132N15", 8.0143)
-			StoreMassCorrectionTag("6C134N15", 10.0085)
-			StoreMassCorrectionTag("6xC13N15", 7.0172)
-			StoreMassCorrectionTag("9xC13N15", 10.0273)
-			StoreMassCorrectionTag("AcetAmid", 41.0266)
-			StoreMassCorrectionTag("Acetyl  ", 42.0106)
+			StoreMassCorrectionTag("6C134N15", 10.008269)
+			StoreMassCorrectionTag("6xC13N15", 7.017164)
+			StoreMassCorrectionTag("AcetAmid", 41.02655)
+			StoreMassCorrectionTag("Acetyl  ", 42.010567)
+			StoreMassCorrectionTag("Acrylmid", 71.037117)
+			StoreMassCorrectionTag("ADPRibos", 541.061096)
 			StoreMassCorrectionTag("AlkSulf ", -25.0316)
-			StoreMassCorrectionTag("AlkSulf2", -9.0367)
-			StoreMassCorrectionTag("AmAdipic", -1.031634)
-			StoreMassCorrectionTag("Aminaton", 15.0109)
+			StoreMassCorrectionTag("Aminaton", 15.010899)
 			StoreMassCorrectionTag("AmOxButa", -2.01565)
-			StoreMassCorrectionTag("BioPeoAm", 356.1882)
-			StoreMassCorrectionTag("Biotinyl", 89.0061)
-			StoreMassCorrectionTag("Bromo   ", 77.9105)
-			StoreMassCorrectionTag("C12_PIC ", 119.038)
-			StoreMassCorrectionTag("C13_PIC ", 125.0581)
-			StoreMassCorrectionTag("Carbamyl", 43.0059)
-			StoreMassCorrectionTag("Chloro  ", 33.96103)
-			StoreMassCorrectionTag("Cys_EDTI", 117.0248)
-			StoreMassCorrectionTag("Cystnyl ", 119.0041)
-			StoreMassCorrectionTag("DCAT_D0 ", 42.0375)
-			StoreMassCorrectionTag("DCAT_D3 ", 44.9957)
-			StoreMassCorrectionTag("Deamide ", 0.984)
-			StoreMassCorrectionTag("DeutMeth", 17.0345)
-			StoreMassCorrectionTag("DiAcet_K", 84.0212)
-			StoreMassCorrectionTag("DiffDeut", 1.0063)
-			StoreMassCorrectionTag("Dimethyl", 28.0314)
-			StoreMassCorrectionTag("DuMtO18 ", 19.0387)
-			StoreMassCorrectionTag("EDPHeavy", 253.1032)
-			StoreMassCorrectionTag("EDPLight", 246.0819)
-			StoreMassCorrectionTag("EDT_Addn", 75.9805)
-			StoreMassCorrectionTag("EDT_D0  ", 177.1055)
-			StoreMassCorrectionTag("EDT_D0C7", 253.0819)
-			StoreMassCorrectionTag("EDT_D4C7", 257.0819)
-			StoreMassCorrectionTag("EDT+Iodo", 133.002)
-			StoreMassCorrectionTag("EtShD0  ", 44.0085)
-			StoreMassCorrectionTag("FarnesC ", 204.3511)
-			StoreMassCorrectionTag("Formyl  ", 27.9949)
-			StoreMassCorrectionTag("Furylium", 78.01057)
-			StoreMassCorrectionTag("GamGluAl", -43.053433)
-			StoreMassCorrectionTag("GluCPD4 ", 550.1953)
-			StoreMassCorrectionTag("Gluthone", 305.0682)
-			StoreMassCorrectionTag("Guanid  ", 42.0218)
+			StoreMassCorrectionTag("BS3Olnk ", 156.078644)
+			StoreMassCorrectionTag("C13DtFrm", 36.07567)
+			StoreMassCorrectionTag("Carbamyl", 43.005814)
+			StoreMassCorrectionTag("Cyano   ", 24.995249)
+			StoreMassCorrectionTag("Cys-Dha ", -33.98772)
+			StoreMassCorrectionTag("Deamide ", 0.984016)
+			StoreMassCorrectionTag("DeutForm", 32.056407)
+			StoreMassCorrectionTag("Dimethyl", 28.0313)
+			StoreMassCorrectionTag("DTBP_Alk", 144.03573)
+			StoreMassCorrectionTag("Formyl  ", 27.994915)
+			StoreMassCorrectionTag("GalNAFuc", 648.2603)
+			StoreMassCorrectionTag("GalNAMan", 664.2551)
+			StoreMassCorrectionTag("Gluthone", 305.068146)
+			StoreMassCorrectionTag("Guanid  ", 42.021797)
 			StoreMassCorrectionTag("Heme_615", 615.1694)
-			StoreMassCorrectionTag("Heme_617", 617)
-			StoreMassCorrectionTag("Heme_Alt", 616.1772)
-			StoreMassCorrectionTag("Heme_Sas", 614.1819)
-			StoreMassCorrectionTag("HemeAddn", 616.18)
-			StoreMassCorrectionTag("Hexosam ", 203.0794)
-			StoreMassCorrectionTag("Hexose  ", 162.0528)
-			StoreMassCorrectionTag("HMOSERLC", -48.1086)
-			StoreMassCorrectionTag("ICAT_C12", 227.127)
-			StoreMassCorrectionTag("ICAT_C13", 236.1572)
-			StoreMassCorrectionTag("ICAT_D0 ", 442.225)
-			StoreMassCorrectionTag("ICAT_D8 ", 450.2752)
-			StoreMassCorrectionTag("IodoAcet", 57.0215)
-			StoreMassCorrectionTag("IodoAcid", 58.0055)
-			StoreMassCorrectionTag("Iso_C13 ", 1.00335)
-			StoreMassCorrectionTag("Iso_N15 ", 0.9971)
-			StoreMassCorrectionTag("Iso_O18 ", 2.0042)
-			StoreMassCorrectionTag("itrac   ", 144.102063)
-			StoreMassCorrectionTag("iTRAQ8  ", 304.2022)
-			StoreMassCorrectionTag("LeuToMet", 17.9564)
-			StoreMassCorrectionTag("Lipid2  ", 576.51)
-			StoreMassCorrectionTag("Lipoyl  ", 188.033)
+			StoreMassCorrectionTag("Hexosam ", 203.079376)
+			StoreMassCorrectionTag("Hexose  ", 162.052826)
+			StoreMassCorrectionTag("IodoAcet", 57.021465)
+			StoreMassCorrectionTag("IodoAcid", 58.005478)
+			StoreMassCorrectionTag("Iso_N15 ", 0.997035)
+			StoreMassCorrectionTag("itrac   ", 144.102066)
+			StoreMassCorrectionTag("iTRAQ8  ", 304.205353)
 			StoreMassCorrectionTag("Mercury ", 199.9549)
-			StoreMassCorrectionTag("Met_2O18", 18.0243)
-			StoreMassCorrectionTag("Met_O18 ", 16.02)
-			StoreMassCorrectionTag("Methyl  ", 14.0157)
-			StoreMassCorrectionTag("MinusH2O", -18.0106)
-			StoreMassCorrectionTag("MTSLAddn", 184.076)
-			StoreMassCorrectionTag("NEM     ", 125.047679)
-			StoreMassCorrectionTag("NH+10Da ", 25.0109)
-			StoreMassCorrectionTag("NH3_Loss", -17.026549)
-			StoreMassCorrectionTag("NHS_SS  ", 87.9983)
-			StoreMassCorrectionTag("NHSLCBio", 339.1617)
-			StoreMassCorrectionTag("NHSPEO4 ", 588.2465)
-			StoreMassCorrectionTag("Nitrosyl", 28.9902)
-			StoreMassCorrectionTag("NO2_Addn", 44.9851)
-			StoreMassCorrectionTag("NO2_Alt ", 44.9975)
-			StoreMassCorrectionTag("NO2+10Da", 54.9851)
+			StoreMassCorrectionTag("Met_O18 ", 16.028204)
+			StoreMassCorrectionTag("Methyl  ", 14.01565)
+			StoreMassCorrectionTag("MinusH2O", -18.010565)
+			StoreMassCorrectionTag("NEM     ", 125.047676)
+			StoreMassCorrectionTag("NH3_Loss", -17.026548)
+			StoreMassCorrectionTag("NHS_SS  ", 87.998283)
+			StoreMassCorrectionTag("NO2_Addn", 44.985077)
 			StoreMassCorrectionTag("None    ", 0)
-			StoreMassCorrectionTag("OMinus2H", 13.9793)
-			StoreMassCorrectionTag("One_O18 ", 2.0042)
-			StoreMassCorrectionTag("Oxid_PEO", 430.1886)
-			StoreMassCorrectionTag("PCGalNAz", 502.2023)
-			StoreMassCorrectionTag("PEO     ", 414.1937)
-			StoreMassCorrectionTag("PEO4Addn", 442.2553)
-			StoreMassCorrectionTag("PhIATD0 ", 490.1742)
-			StoreMassCorrectionTag("PhIATD4 ", 494.1993)
-			StoreMassCorrectionTag("PhIATMod", 136.0017)
-			StoreMassCorrectionTag("Phosph  ", 79.9663)
-			StoreMassCorrectionTag("PhosphH ", 95.9612)
-			StoreMassCorrectionTag("Plus1Oxy", 15.9949)
-			StoreMassCorrectionTag("Plus2Oxy", 31.9898)
-			StoreMassCorrectionTag("Plus3Oxy", 47.9847)
-			StoreMassCorrectionTag("PMA     ", 278.0019)
-			StoreMassCorrectionTag("Pro2Azet", -14.01565)
-			StoreMassCorrectionTag("Propnyl ", 56.02621)
-			StoreMassCorrectionTag("ROBLOSS ", -11.876)
+			StoreMassCorrectionTag("OMinus2H", 13.979265)
+			StoreMassCorrectionTag("One_C12 ", 12)
+			StoreMassCorrectionTag("One_O18 ", 2.004246)
+			StoreMassCorrectionTag("OxoAla  ", -17.992805)
+			StoreMassCorrectionTag("palmtlic", 236.21402)
+			StoreMassCorrectionTag("PCGalNAz", 502.202332)
+			StoreMassCorrectionTag("PhosAden", 329.052521)
+			StoreMassCorrectionTag("Phosph  ", 79.966331)
+			StoreMassCorrectionTag("PhosUrid", 306.025299)
+			StoreMassCorrectionTag("Plus1Oxy", 15.994915)
+			StoreMassCorrectionTag("Plus2Oxy", 31.989828)
+			StoreMassCorrectionTag("Propnyl ", 56.026215)
+			StoreMassCorrectionTag("Pyro-cmC", 39.994915)
 			StoreMassCorrectionTag("SATA_Alk", 131.0041)
-			StoreMassCorrectionTag("SATA_Hvy", 129.9963)
 			StoreMassCorrectionTag("SATA_Lgt", 115.9932)
-			StoreMassCorrectionTag("SATAIodo", 146.015)
-			StoreMassCorrectionTag("SBEDBait", 88.01)
-			StoreMassCorrectionTag("SBEDCapt", 547.22)
-			StoreMassCorrectionTag("SelCandM", 47.9444)
-			StoreMassCorrectionTag("SP_Heavy", 177.1583)
-			StoreMassCorrectionTag("SP_Light", 170.1055)
-			StoreMassCorrectionTag("Sucinate", 116.011)
-			StoreMassCorrectionTag("Sulf-10 ", -35.0316)
-			StoreMassCorrectionTag("Sulf2-10", -19.0367)
-			StoreMassCorrectionTag("SulfoNHS", 226.0776)
-			StoreMassCorrectionTag("SumoEstr", 498.2417)
-			StoreMassCorrectionTag("Sumoylat", 484.226)
-			StoreMassCorrectionTag("TriAcetK", 126.0318)
-			StoreMassCorrectionTag("TriMeth ", 42.0471)
-			StoreMassCorrectionTag("TrypOxy ", 3.9949)
-			StoreMassCorrectionTag("TrypPD4 ", 494.74)
-			StoreMassCorrectionTag("Two_O18 ", 4.0085)
-			StoreMassCorrectionTag("Ubiq_02 ", 114.1)
-			StoreMassCorrectionTag("Ubiq_H  ", 104.0473)
-			StoreMassCorrectionTag("Ubiq_H02", 233.1583)
-			StoreMassCorrectionTag("Ubiq_H03", 176.1255)
-			StoreMassCorrectionTag("Ubiq_L  ", 100.016)
-			StoreMassCorrectionTag("Ubiq_L02", 229.127)
-			StoreMassCorrectionTag("Ubiq_L03", 172.0942)
-			StoreMassCorrectionTag("UbiqLRGG", 383.228103)
-			StoreMassCorrectionTag("ValToMet", 31.9721)
+			StoreMassCorrectionTag("Sucinate", 116.010956)
+			StoreMassCorrectionTag("SulfoNHS", 226.077591)
+			StoreMassCorrectionTag("Sumoylat", 484.228149)
+			StoreMassCorrectionTag("TMT0Tag ", 224.152481)
+			StoreMassCorrectionTag("TMT6Tag ", 229.162933)
+			StoreMassCorrectionTag("TriMeth ", 42.046951)
+			StoreMassCorrectionTag("Two_O18 ", 4.008491)
+			StoreMassCorrectionTag("Ubiq_02 ", 114.042931)
+			StoreMassCorrectionTag("Ubiq_L  ", 100.016045)
+			StoreMassCorrectionTag("ValToMet", 31.972071)
 
 		Catch ex As Exception
 			' Ignore errors here

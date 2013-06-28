@@ -1,8 +1,13 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.4926; June 27, 2013
+	- Updated default Mass Correction Tags
+	- Now comparing DelM_PPM value computed by MSGF+ with the search tolerances used
+		- If the computed value is more than 1.5 fold larger than the search tolerances, then a new DelM_PPM value is computed
+		- This change was prompted by Analysis Job 957459
+
 Version 1.5.4841; April 3, 2013
 	- Added MSAlign columns Species_ID and FragMethod
-
 
 Version 1.5.4821; March 14, 2013
 	- Updated modMain to latest standard format

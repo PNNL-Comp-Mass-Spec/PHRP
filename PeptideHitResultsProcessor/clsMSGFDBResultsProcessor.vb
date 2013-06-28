@@ -20,7 +20,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "December 17, 2012"
+		MyBase.mFileDate = "June 27, 2013"
 		InitializeLocalVariables()
 	End Sub
 
@@ -201,10 +201,30 @@ Public Class clsMSGFDBResultsProcessor
 		Public NTerm As Char
 		Public CTerm As Char
 	End Structure
+
+	Protected Structure udtParentMassToleranceType
+		' Given a tolerance of 20ppm, we would have ToleranceLeft=20, ToleranceRight=20, and ToleranceIsPPM=True
+		' Given a tolerance of 0.5Da,2.5Da, we would have ToleranceLeft=0.5, ToleranceRight=2.5, and ToleranceIsPPM=False
+		Public ToleranceLeft As Double
+		Public ToleranceRight As Double
+		Public IsPPM As Boolean
+
+		Public Sub Clear()
+			ToleranceLeft = 0
+			ToleranceRight = 0
+			IsPPM = False
+		End Sub
+	End Structure
+
 #End Region
 
 #Region "Classwide Variables"
 	Protected mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
+
+	Protected mParentMassToleranceInfo As udtParentMassToleranceType
+
+	Protected mPrecursorMassErrorWarningCount As Integer
+
 #End Region
 
 	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
@@ -248,7 +268,7 @@ Public Class clsMSGFDBResultsProcessor
 
 		With objSearchResult
 			strSequence = .PeptideSequenceWithMods
-			
+
 			For intIndex = 0 To strSequence.Length - 1
 				chChar = strSequence.Chars(intIndex)
 
@@ -471,13 +491,12 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim dblPeptideDeltaMassCorrectedPpm As Double
 
-
 		Dim intCorrectionCount As Integer = 0
 
 		Dim dblPrecursorMonoMass As Double
 
 		' Compute the original value for the precursor monoisotopic mass
-		dblPrecursorMonoMass = dblPrecursorMZ * intCharge - intCharge * clsPeptideMassCalculator.MASS_PROTON
+		dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, intCharge, 0)
 
 		dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
 
@@ -697,6 +716,8 @@ Public Class clsMSGFDBResultsProcessor
 			lstScanGroupDetails = New Generic.List(Of udtScanGroupInfoType)
 			htScanGroupCombo = New Generic.Dictionary(Of String, Boolean)
 
+			mPrecursorMassErrorWarningCount = 0
+
 			Try
 				' Open the input file and parse it
 				' Initialize the stream reader and the stream Text writer
@@ -895,7 +916,7 @@ Public Class clsMSGFDBResultsProcessor
 	''' </summary>
 	''' <param name="strMSGFDBParamFilePath"></param>
 	''' <param name="lstModInfo"></param>
-	''' <returns></returns>
+	''' <returns>True if success; false if a problem</returns>
 	''' <remarks></remarks>
 	Private Function ExtractModInfoFromMSGFDBModsFile(ByVal strMSGFDBParamFilePath As String, ByRef lstModInfo As Generic.List(Of udtModInfoType)) As Boolean
 
@@ -932,95 +953,96 @@ Public Class clsMSGFDBResultsProcessor
 				Do While srInFile.Peek <> -1
 					strLineIn = srInFile.ReadLine().Trim()
 
-					If strLineIn.Length > 0 Then
+					If strLineIn.Length = 0 Then Continue Do
 
-						strModSpec = String.Empty
+					strModSpec = String.Empty
 
-						If strLineIn.StartsWith("#"c) Then
-							' Comment line; skip it
+					If strLineIn.StartsWith("#"c) Then
+						' Comment line; skip it
+						Continue Do
+					Else
+						strModSpec = ValidateIsValidModSpec(strLineIn, STATIC_MOD_TAG)
+						If Not String.IsNullOrEmpty(strModSpec) Then
+							' Line resembles StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
 						Else
-							strModSpec = ValidateIsValidModSpec(strLineIn, STATIC_MOD_TAG)
+							strModSpec = ValidateIsValidModSpec(strLineIn, DYNAMIC_MOD_TAG)
 							If Not String.IsNullOrEmpty(strModSpec) Then
-								' Line resembles StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
+								' Line resembles DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
 							Else
-								strModSpec = ValidateIsValidModSpec(strLineIn, DYNAMIC_MOD_TAG)
-								If Not String.IsNullOrEmpty(strModSpec) Then
-									' Line resembles DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
-								Else
-									If strLineIn.Contains(",opt,") OrElse strLineIn.Contains(",fix,") Then
-										strModSpec = strLineIn
-									End If
+								If strLineIn.Contains(",opt,") OrElse strLineIn.Contains(",fix,") Then
+									strModSpec = strLineIn
 								End If
 							End If
+						End If
+
+					End If
+
+					If Not String.IsNullOrEmpty(strModSpec) Then
+
+						' Modification definition line found
+
+						' Split the line on commas
+						strSplitLine = strModSpec.Split(","c)
+
+						If strSplitLine.Length >= 5 Then
+
+							Dim udtModInfo As udtModInfoType = New udtModInfoType
+
+							With udtModInfo
+								.ModMass = strSplitLine(0).Trim()
+
+								If Not Double.TryParse(.ModMass, .ModMassVal) Then
+									' Mod is specified as an empirical formula
+									' Compute the mass
+									.ModMassVal = ComputeMass(.ModMass)
+								End If
+
+								.Residues = strSplitLine(1).Trim()
+								.ModSymbol = UNKNOWN_MSGFDB_MOD_SYMBOL
+
+								Select Case strSplitLine(2).Trim().ToLower()
+									Case "opt"
+										.ModType = eMSGFDBModType.DynamicMod
+									Case "fix"
+										.ModType = eMSGFDBModType.StaticMod
+									Case Else
+										ReportWarning("Unrecognized Mod Type in the MSGFDB parameter file; should be 'opt' or 'fix'")
+										.ModType = eMSGFDBModType.DynamicMod
+								End Select
+
+								Select Case strSplitLine(3).Trim().ToLower().Replace("-", String.Empty)
+									Case "any"
+										' Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
+									Case "nterm"
+										.Residues = PHRPReader.clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
+										If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermPeptide
+									Case "cterm"
+										.Residues = PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+										If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermPeptide
+									Case "protnterm"
+										' Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
+										.Residues = PHRPReader.clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
+										If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermProtein
+									Case "protcterm"
+										' Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
+										.Residues = PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
+										If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
+									Case Else
+										ReportWarning("Unrecognized Mod Type in the MSGFDB parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
+								End Select
+
+								.ModName = strSplitLine(4).Trim()
+								If String.IsNullOrEmpty(.ModName) Then
+									intUnnamedModID += 1
+									.ModName = "UnnamedMod" & intUnnamedModID.ToString
+								End If
+
+							End With
+
+							lstModInfo.Add(udtModInfo)
 
 						End If
 
-						If Not String.IsNullOrEmpty(strModSpec) Then
-
-							' Modification definition line found
-
-							' Split the line on commas
-							strSplitLine = strModSpec.Split(","c)
-
-							If strSplitLine.Length >= 5 Then
-
-								Dim udtModInfo As udtModInfoType = New udtModInfoType
-
-								With udtModInfo
-									.ModMass = strSplitLine(0).Trim()
-
-									If Not Double.TryParse(.ModMass, .ModMassVal) Then
-										' Mod is specified as an empirical formula
-										' Compute the mass
-										.ModMassVal = ComputeMass(.ModMass)
-									End If
-
-									.Residues = strSplitLine(1).Trim()
-									.ModSymbol = UNKNOWN_MSGFDB_MOD_SYMBOL
-
-									Select Case strSplitLine(2).Trim().ToLower()
-										Case "opt"
-											.ModType = eMSGFDBModType.DynamicMod
-										Case "fix"
-											.ModType = eMSGFDBModType.StaticMod
-										Case Else
-											ReportWarning("Unrecognized Mod Type in the MSGFDB parameter file; should be 'opt' or 'fix'")
-											.ModType = eMSGFDBModType.DynamicMod
-									End Select
-
-									Select Case strSplitLine(3).Trim().ToLower().Replace("-", String.Empty)
-										Case "any"
-											' Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
-										Case "nterm"
-											.Residues = PHRPReader.clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
-											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermPeptide
-										Case "cterm"
-											.Residues = PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
-											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermPeptide
-										Case "protnterm"
-											' Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
-											.Residues = PHRPReader.clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
-											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermProtein
-										Case "protcterm"
-											' Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
-											.Residues = PHRPReader.clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
-											If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
-										Case Else
-											ReportWarning("Unrecognized Mod Type in the MSGFDB parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
-									End Select
-
-									.ModName = strSplitLine(4).Trim()
-									If String.IsNullOrEmpty(.ModName) Then
-										intUnnamedModID += 1
-										.ModName = "UnnamedMod" & intUnnamedModID.ToString
-									End If
-
-								End With
-
-								lstModInfo.Add(udtModInfo)
-
-							End If
-						End If
 					End If
 				Loop
 			End Using
@@ -1030,12 +1052,104 @@ Public Class clsMSGFDBResultsProcessor
 			blnSuccess = True
 
 		Catch ex As Exception
-			SetErrorMessage("Error reading the MSGF-DB parameter file (" & System.IO.Path.GetFileName(strMSGFDBParamFilePath) & "): " & ex.Message)
+			SetErrorMessage("Error reading mod info the MSGF-DB parameter file (" & System.IO.Path.GetFileName(strMSGFDBParamFilePath) & "): " & ex.Message)
 			SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
 			blnSuccess = False
 		End Try
 
 		Return blnSuccess
+
+	End Function
+
+	''' <summary>
+	''' Extracts parent mass tolerance from a MSGF-DB parameter file
+	''' </summary>
+	''' <param name="strMSGFDBParamFilePath"></param>	
+	''' <returns>Parent mass tolerance info.  Tolerances will be 0 if an error occurs</returns>
+	''' <remarks></remarks>
+	Private Function ExtractParentMassToleranceFromParamFile(ByVal strMSGFDBParamFilePath As String) As udtParentMassToleranceType
+
+		Const PM_TOLERANCE_TAG As String = "PMTolerance"
+
+		Dim strLineIn As String
+		Dim strSplitLine As String()
+
+		Dim udtParentMassToleranceInfo As udtParentMassToleranceType
+
+		Try
+			udtParentMassToleranceInfo.Clear()
+
+			If String.IsNullOrEmpty(strMSGFDBParamFilePath) Then
+				SetErrorMessage("MSGFDB Parameter File name not defined; unable to extract parent mass tolerance info")
+				SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+				Return udtParentMassToleranceInfo
+			End If
+
+			' Read the contents of the parameter file
+			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strMSGFDBParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+
+				Do While srInFile.Peek <> -1
+					strLineIn = srInFile.ReadLine().Trim()
+
+					If strLineIn.Length = 0 Then Continue Do
+
+					If strLineIn.StartsWith("#"c) Then
+						' Comment line; skip it
+						Continue Do
+					End If
+
+					If strLineIn.ToLower.StartsWith(PM_TOLERANCE_TAG.ToLower()) Then
+
+						Dim kvSetting As Generic.KeyValuePair(Of String, String)
+						kvSetting = PHRPReader.clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
+
+						If Not String.IsNullOrEmpty(kvSetting.Value) Then
+							' Parent ion tolerance line found
+
+							' Split the line on commas
+							strSplitLine = kvSetting.Value.Split(","c)
+
+							Dim dblTolerance As Double
+							Dim blnIsPPM As Boolean
+
+							If strSplitLine.Count = 1 Then
+
+								If ParseParentMassTolerance(strSplitLine(0), dblTolerance, blnIsPPM) Then
+									udtParentMassToleranceInfo.ToleranceLeft = dblTolerance
+									udtParentMassToleranceInfo.ToleranceRight = dblTolerance
+									udtParentMassToleranceInfo.IsPPM = blnIsPPM
+								End If
+
+							ElseIf strSplitLine.Count > 1 Then
+								If ParseParentMassTolerance(strSplitLine(0), dblTolerance, blnIsPPM) Then
+									udtParentMassToleranceInfo.ToleranceLeft = dblTolerance
+									udtParentMassToleranceInfo.IsPPM = blnIsPPM
+
+									If ParseParentMassTolerance(strSplitLine(1), dblTolerance, blnIsPPM) Then
+										udtParentMassToleranceInfo.ToleranceRight = dblTolerance
+									Else
+										udtParentMassToleranceInfo.ToleranceRight = udtParentMassToleranceInfo.ToleranceLeft
+									End If
+
+								End If
+							End If
+						End If
+
+						Exit Do
+
+					End If
+				Loop
+
+			End Using
+
+			Console.WriteLine()
+
+		Catch ex As Exception
+			SetErrorMessage("Error reading ParentMass tolerance from the MSGF-DB parameter file (" & System.IO.Path.GetFileName(strMSGFDBParamFilePath) & "): " & ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+		End Try
+
+		Return udtParentMassToleranceInfo
 
 	End Function
 
@@ -1411,7 +1525,7 @@ Public Class clsMSGFDBResultsProcessor
 
 								.SpecIndex = intSpecIndex.ToString()
 							End If
-						
+
 						End If
 					End If
 
@@ -1501,7 +1615,7 @@ Public Class clsMSGFDBResultsProcessor
 
 					' Replace any mod text values in the peptide sequence with the appropriate mod symbols
 					' In addition, replace the _ terminus symbols with dashes
-					Dim dblTotalModMass As Double					
+					Dim dblTotalModMass As Double
 					.Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
 
 					' Compute monoisotopic mass of the peptide
@@ -1523,14 +1637,41 @@ Public Class clsMSGFDBResultsProcessor
 							' In other words, it may not be the actual m/z selected for fragmentation.
 
 							If Double.TryParse(.PMErrorPPM, dblPMErrorPPM) Then
-								dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
 
-								' Note that this will be a C13-corrected precursor error; not the true precursor error
-								.PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
+								If mParentMassToleranceInfo.IsPPM AndAlso
+								  (dblPMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 OrElse dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
+
+									' PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
+
+									mPrecursorMassErrorWarningCount += 1
+									If mPrecursorMassErrorWarningCount <= 10 Then
+										ReportWarning("Precursor mass error computed by MSGF+ is 1.5-fold larger than search tolerance: " & .PMErrorPPM & " vs. " & mParentMassToleranceInfo.ToleranceLeft.ToString("0") & "ppm," & mParentMassToleranceInfo.ToleranceRight.ToString("0") & "ppm")
+										If mPrecursorMassErrorWarningCount = 10 Then
+											ReportWarning("Additional mass errors will not be reported")
+										End If
+									End If
+
+
+									Dim dblPrecursorMonoMass As Double
+									dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .ChargeNum, 0)
+
+									dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
+
+									.PMErrorPPM = String.Empty
+
+								Else
+
+									dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
+
+									' Note that this will be a C13-corrected precursor error; not the true precursor error
+									.PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
+								End If
+
 							End If
 						End If
+					End If
 
-					Else
+					If String.IsNullOrEmpty(.PMErrorPPM) Then
 
 						Dim dblPrecursorMZ As Double
 						If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
@@ -1540,6 +1681,13 @@ Public Class clsMSGFDBResultsProcessor
 							 .ChargeNum, dblPeptideMonoisotopicMass, True)
 
 							.PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 5, True)
+
+							If String.IsNullOrEmpty(.PMErrorDa) Then
+								dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPeptideDeltaMassCorrectedPpm, dblPeptideMonoisotopicMass)
+
+								' Note that this will be a C13-corrected precursor error; not the true precursor error
+								.PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
+							End If
 
 						End If
 
@@ -1911,6 +2059,33 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
+	Protected Function ParseParentMassTolerance(ByVal strToleranceText As String, ByRef dblTolerance As Double, ByRef blnIsPPM As Boolean) As Boolean
+		dblTolerance = 0
+		blnIsPPM = False
+
+		strToleranceText = strToleranceText.ToLower().Trim()
+
+		If strToleranceText.EndsWith("da") Then
+			strToleranceText = strToleranceText.Substring(0, strToleranceText.Length - 2)
+			blnIsPPM = False
+
+		ElseIf strToleranceText.EndsWith("ppm") Then
+			strToleranceText = strToleranceText.Substring(0, strToleranceText.Length - 3)
+			blnIsPPM = True
+
+		Else
+			Return False
+		End If
+
+
+		If Double.TryParse(strToleranceText, dblTolerance) Then
+			Return True
+		Else
+			Return False
+		End If
+
+	End Function
+
 	''' <summary>
 	''' Main processing function
 	''' </summary>
@@ -1968,6 +2143,8 @@ Public Class clsMSGFDBResultsProcessor
 						' Load the MSGF-DB Parameter File so that we can determine the modification names and masses
 						' If the MSGFDB_Mods.txt file was defined, then the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
 						ExtractModInfoFromMSGFDBModsFile(mSearchToolParameterFilePath, lstMSGFDBModInfo)
+
+						mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(mSearchToolParameterFilePath)
 
 						' Resolve the mods in lstMSGFDBModInfo with the ModDefs mods
 						ResolveMSGFDBModsWithModDefinitions(lstMSGFDBModInfo)
