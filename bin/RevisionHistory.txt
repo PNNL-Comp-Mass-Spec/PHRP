@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5050; October 29, 2013
+	- New version of ThermoRawFileReaderDLL
+
 Version 1.5.4927; June 28, 2013
 	- Now using String.IsNullOrWhiteSpace
 

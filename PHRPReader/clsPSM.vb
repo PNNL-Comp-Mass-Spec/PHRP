@@ -439,6 +439,7 @@ Public Class clsPSM
 			mScanList.Add(intScanNumber)
 		End If
 	End Sub
+
 	''' <summary>
 	''' Add the details for a modified residue
 	''' </summary>
