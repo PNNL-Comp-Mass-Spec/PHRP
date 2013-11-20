@@ -1,4 +1,5 @@
 ﻿Option Strict On
+Imports System.IO
 
 Public Class clsPHRPModSummaryReader
 
@@ -9,14 +10,14 @@ Public Class clsPHRPModSummaryReader
 	Public Const MOD_SUMMARY_COLUMN_Mass_Correction_Tag As String = "Mass_Correction_Tag"
 	Public Const MOD_SUMMARY_COLUMN_Occurrence_Count As String = "Occurrence_Count"
 
-	Protected mModificationDefs As System.Collections.Generic.List(Of clsModificationDefinition)
+	Protected mModificationDefs As List(Of clsModificationDefinition)
 
 	' The keys in this dictionary are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
-	Protected mModDefMassesAsText As System.Collections.Generic.Dictionary(Of String, String)
+	Protected mModDefMassesAsText As Dictionary(Of String, String)
 
 	Protected mSuccess As Boolean
 
-	Public ReadOnly Property ModificationDefs() As System.Collections.Generic.List(Of clsModificationDefinition)
+	Public ReadOnly Property ModificationDefs() As List(Of clsModificationDefinition)
 		Get
 			Return mModificationDefs
 		End Get
@@ -30,15 +31,15 @@ Public Class clsPHRPModSummaryReader
 
 	Public Sub New(ByVal strModSummaryFilePath As String)
 
-		mModificationDefs = New System.Collections.Generic.List(Of clsModificationDefinition)
-		mModDefMassesAsText = New System.Collections.Generic.Dictionary(Of String, String)
+		mModificationDefs = New List(Of clsModificationDefinition)
+		mModDefMassesAsText = New Dictionary(Of String, String)
 
 		mSuccess = False
 
 		If String.IsNullOrEmpty(strModSummaryFilePath) Then
 			Throw New Exception("ModSummaryFilePath is empty; unable to continue")
-		ElseIf Not System.IO.File.Exists(strModSummaryFilePath) Then
-			Throw New System.IO.FileNotFoundException("ModSummary file not found: " & strModSummaryFilePath)
+		ElseIf Not File.Exists(strModSummaryFilePath) Then
+			Throw New FileNotFoundException("ModSummary file not found: " & strModSummaryFilePath)
 		End If
 
 		mSuccess = ReadModSummaryFile(strModSummaryFilePath, mModificationDefs)
@@ -61,7 +62,7 @@ Public Class clsPHRPModSummaryReader
 		End If
 	End Function
 
-	Protected Function ReadModSummaryFile(ByVal strModSummaryFilePath As String, ByRef lstModInfo As System.Collections.Generic.List(Of clsModificationDefinition)) As Boolean
+	Protected Function ReadModSummaryFile(ByVal strModSummaryFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
 
 		Dim strLineIn As String
 		Dim strSplitLine() As String
@@ -85,7 +86,7 @@ Public Class clsPHRPModSummaryReader
 
 
 		If lstModInfo Is Nothing Then
-			lstModInfo = New System.Collections.Generic.List(Of clsModificationDefinition)
+			lstModInfo = New List(Of clsModificationDefinition)
 		Else
 			lstModInfo.Clear()
 		End If
@@ -110,11 +111,11 @@ Public Class clsPHRPModSummaryReader
 		' The first line is typically a header line:
 		' Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
 
-		Using srModSummaryFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strModSummaryFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+		Using srModSummaryFile As StreamReader = New StreamReader(New FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 			blnHeaderLineParsed = False
 
-			Do While srModSummaryFile.Peek >= 0
+			Do While srModSummaryFile.Peek > -1
 				strLineIn = srModSummaryFile.ReadLine
 				blnSkipLine = False
 

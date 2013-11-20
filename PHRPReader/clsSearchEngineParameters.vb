@@ -7,7 +7,7 @@ Public Class clsSearchEngineParameters
 
 	Protected mSearchEngineName As String
 	Protected mSearchEngineVersion As String
-	Protected mSearchDate As System.DateTime
+	Protected mSearchDate As DateTime
 
 	Protected mFastaFilePath As String
 
@@ -20,9 +20,9 @@ Public Class clsSearchEngineParameters
 	Protected mMaxNumberInternalCleavages As Integer
 	Protected mMinNumberTermini As Integer						' 0 means no-enzyme, 1 means partially tryptic, 2 means fully tryptic
 
-	Protected mModInfo As System.Collections.Generic.List(Of clsModificationDefinition)
+	Protected mModInfo As List(Of clsModificationDefinition)
 
-	Protected mParameters As System.Collections.Generic.Dictionary(Of String, String)
+	Protected mParameters As Dictionary(Of String, String)
 
 #Region "Properties"
 	Public Property Enzyme As String
@@ -72,13 +72,13 @@ Public Class clsSearchEngineParameters
 		End Set
 	End Property
 
-	Public ReadOnly Property ModInfo As System.Collections.Generic.List(Of clsModificationDefinition)
+	Public ReadOnly Property ModInfo As List(Of clsModificationDefinition)
 		Get
 			Return mModInfo
 		End Get
 	End Property
 
-	Public ReadOnly Property Parameters As System.Collections.Generic.Dictionary(Of String, String)
+	Public ReadOnly Property Parameters As Dictionary(Of String, String)
 		Get
 			Return mParameters
 		End Get
@@ -115,7 +115,7 @@ Public Class clsSearchEngineParameters
 		End Get
 	End Property
 
-	Public ReadOnly Property SearchDate As System.DateTime
+	Public ReadOnly Property SearchDate As DateTime
 		Get
 			Return mSearchDate
 		End Get
@@ -124,14 +124,14 @@ Public Class clsSearchEngineParameters
 #End Region
 
 	Public Sub New(ByVal SearchEngineName As String)
-		Me.New(SearchEngineName, New System.Collections.Generic.List(Of clsModificationDefinition), Nothing)
+		Me.New(SearchEngineName, New List(Of clsModificationDefinition), Nothing)
 	End Sub
 
-	Public Sub New(ByVal SearchEngineName As String, ByVal objModInfo As System.Collections.Generic.List(Of clsModificationDefinition))
+	Public Sub New(ByVal SearchEngineName As String, ByVal objModInfo As List(Of clsModificationDefinition))
 		Me.New(SearchEngineName, objModInfo, Nothing)
 	End Sub
 
-	Public Sub New(ByVal SearchEngineName As String, ByVal objModInfo As System.Collections.Generic.List(Of clsModificationDefinition), ByVal Parameters As System.Collections.Generic.Dictionary(Of String, String))
+	Public Sub New(ByVal SearchEngineName As String, ByVal objModInfo As List(Of clsModificationDefinition), ByVal Parameters As Dictionary(Of String, String))
 		Me.InitializeDefaults()
 
 		mSearchEngineName = SearchEngineName
@@ -139,13 +139,13 @@ Public Class clsSearchEngineParameters
 		mModInfo = objModInfo
 
 		If objModInfo Is Nothing Then
-			mModInfo = New System.Collections.Generic.List(Of clsModificationDefinition)
+			mModInfo = New List(Of clsModificationDefinition)
 		Else
 			mModInfo = objModInfo
 		End If
 
 		If mParameters Is Nothing Then
-			mParameters = New System.Collections.Generic.Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
+			mParameters = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
 		Else
 			mParameters = Parameters
 		End If
@@ -156,7 +156,7 @@ Public Class clsSearchEngineParameters
 		mModInfo.Add(objModInfo)
 	End Sub
 
-	Public Sub AddUpdateParameter(ByVal kvSetting As System.Collections.Generic.KeyValuePair(Of String, String))
+	Public Sub AddUpdateParameter(ByVal kvSetting As KeyValuePair(Of String, String))
 		AddUpdateParameter(kvSetting.Key, kvSetting.Value)
 	End Sub
 
@@ -179,7 +179,7 @@ Public Class clsSearchEngineParameters
 	Protected Sub InitializeDefaults()
 		mSearchEngineName = "Unknown"
 		mSearchEngineVersion = "Unknown"
-		mSearchDate = New System.DateTime(1980, 1, 1)
+		mSearchDate = New DateTime(1980, 1, 1)
 
 		mFastaFilePath = String.Empty
 
@@ -197,7 +197,7 @@ Public Class clsSearchEngineParameters
 		mSearchEngineVersion = String.Copy(strSearchEngineVersion)
 	End Sub
 
-	Public Sub UpdateSearchDate(ByVal dtSearchDate As System.DateTime)
+	Public Sub UpdateSearchDate(ByVal dtSearchDate As DateTime)
 		mSearchDate = dtSearchDate
 	End Sub
 

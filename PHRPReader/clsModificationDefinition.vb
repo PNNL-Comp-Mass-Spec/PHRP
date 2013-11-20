@@ -309,7 +309,7 @@ Public Class clsModificationDefinition
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Public Function CanAffectPeptideOrProteinTerminus() As Boolean
-		Dim lstTerminalSymbols As System.Collections.Generic.SortedSet(Of Char) = GetTerminalSymbols()
+		Dim lstTerminalSymbols As SortedSet(Of Char) = GetTerminalSymbols()
 
 		If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
 			Return True
@@ -324,8 +324,8 @@ Public Class clsModificationDefinition
 
 	End Function
 
-	Public Function CanAffectPeptideResidues() As Boolean		
-		Dim lstTerminalSymbols As System.Collections.Generic.SortedSet(Of Char) = GetTerminalSymbols()
+	Public Function CanAffectPeptideResidues() As Boolean
+		Dim lstTerminalSymbols As SortedSet(Of Char) = GetTerminalSymbols()
 
 		If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
 			Return False
@@ -345,10 +345,10 @@ Public Class clsModificationDefinition
 
 	End Function
 
-	Public Shared Function GetTerminalSymbols() As System.Collections.Generic.SortedSet(Of Char)
-		Dim lstTerminalSymbols As System.Collections.Generic.SortedSet(Of Char)
+	Public Shared Function GetTerminalSymbols() As SortedSet(Of Char)
+		Dim lstTerminalSymbols As SortedSet(Of Char)
 
-		lstTerminalSymbols = New System.Collections.Generic.SortedSet(Of Char)
+		lstTerminalSymbols = New SortedSet(Of Char)
 
 		lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)
 		lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS)

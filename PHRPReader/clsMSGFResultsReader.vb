@@ -9,6 +9,7 @@
 '*********************************************************************************************************
 
 Option Strict On
+Imports System.IO
 
 Public Class clsMSGFResultsReader
 
@@ -24,7 +25,7 @@ Public Class clsMSGFResultsReader
 
 #Region "Class-wide variables"
 	' Column headers
-	Protected mColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
+	Protected mColumnHeaders As SortedDictionary(Of String, Integer)
 	Protected mErrorMessage As String = String.Empty
 #End Region
 
@@ -46,7 +47,7 @@ Public Class clsMSGFResultsReader
 	''' </summary>
 	''' <remarks></remarks>
 	Public Sub New()
-		mColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)
+		mColumnHeaders = New SortedDictionary(Of String, Integer)
 	End Sub
 
 	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
@@ -73,10 +74,10 @@ Public Class clsMSGFResultsReader
 	''' </summary>
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
-	Public Function ReadMSGFData(ByVal strInputFilePath As String) As System.Collections.Generic.Dictionary(Of Integer, String)
+	Public Function ReadMSGFData(ByVal strInputFilePath As String) As Dictionary(Of Integer, String)
 
-		Dim lstMSGFData As System.Collections.Generic.Dictionary(Of Integer, String)
-		lstMSGFData = New System.Collections.Generic.Dictionary(Of Integer, String)
+		Dim lstMSGFData As Dictionary(Of Integer, String)
+		lstMSGFData = New Dictionary(Of Integer, String)
 
 		Dim strLineIn As String
 		Dim strSplitLine() As String
@@ -92,7 +93,7 @@ Public Class clsMSGFResultsReader
 			intLinesRead = 0
 			mErrorMessage = String.Empty
 
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInputFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 				Do While srInFile.Peek() > -1
 					strLineIn = srInFile.ReadLine()
 					intLinesRead += 1

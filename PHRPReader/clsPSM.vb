@@ -22,14 +22,14 @@ Public Class clsPSM
 
 	Protected mScanNumber As Integer
 	Protected mElutionTimeMinutes As Single
-	Protected mScanList As System.Collections.Generic.SortedSet(Of Integer)			' List of scans that were combined prior to identifying this peptide
+	Protected mScanList As SortedSet(Of Integer)			' List of scans that were combined prior to identifying this peptide
 
 	Protected mPeptide As String					' Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
 	Protected mPeptideWithNumericMods As String		' Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
 	Protected mPeptideCleanSequence As String
 	Protected mSeqID As Integer
 
-	Protected mModifiedPeptideResidues As System.Collections.Generic.List(Of clsAminoAcidModInfo)
+	Protected mModifiedPeptideResidues As List(Of clsAminoAcidModInfo)
 
 	Protected mCharge As Short
 	Protected mCollisionMode As String		' CID, ETD, HCD, or n/a
@@ -47,10 +47,10 @@ Public Class clsPSM
 	Protected mPeptideMonoisotopicMass As Double	' Theoretical (computed) monoisotopic mass
 
 	' Note that protein names are case-sensitive
-	Protected mProteins As System.Collections.Generic.List(Of String)
+	Protected mProteins As List(Of String)
 
 	' This dictionary tracks additional, tool-specific scores
-	Protected mAdditionalScores As System.Collections.Generic.Dictionary(Of String, String)
+	Protected mAdditionalScores As Dictionary(Of String, String)
 
 #Region "Properties"
 
@@ -60,7 +60,7 @@ Public Class clsPSM
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks>Update scores using SetScore</remarks>
-	Public ReadOnly Property AdditionalScores() As System.Collections.Generic.Dictionary(Of String, String)
+	Public ReadOnly Property AdditionalScores() As Dictionary(Of String, String)
 		Get
 			Return mAdditionalScores
 		End Get
@@ -176,7 +176,7 @@ Public Class clsPSM
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks>A given residue is allowed to have more than one modification</remarks>
-	Public ReadOnly Property ModifiedResidues As System.Collections.Generic.List(Of clsAminoAcidModInfo)
+	Public ReadOnly Property ModifiedResidues As List(Of clsAminoAcidModInfo)
 		Get
 			Return mModifiedPeptideResidues
 		End Get
@@ -325,7 +325,7 @@ Public Class clsPSM
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property Proteins() As System.Collections.Generic.List(Of String)
+	Public ReadOnly Property Proteins() As List(Of String)
 		Get
 			Return mProteins
 		End Get
@@ -352,7 +352,7 @@ Public Class clsPSM
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property ScanList() As System.Collections.Generic.SortedSet(Of Integer)
+	Public ReadOnly Property ScanList() As SortedSet(Of Integer)
 		Get
 			Return mScanList
 		End Get
@@ -427,10 +427,10 @@ Public Class clsPSM
 	''' </summary>
 	''' <remarks></remarks>
 	Public Sub New()
-		mScanList = New System.Collections.Generic.SortedSet(Of Integer)
-		mProteins = New System.Collections.Generic.List(Of String)
-		mModifiedPeptideResidues = New System.Collections.Generic.List(Of clsAminoAcidModInfo)
-		mAdditionalScores = New System.Collections.Generic.Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
+		mScanList = New SortedSet(Of Integer)
+		mProteins = New List(Of String)
+		mModifiedPeptideResidues = New List(Of clsAminoAcidModInfo)
+		mAdditionalScores = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
 		Me.Clear()
 	End Sub
 
@@ -554,7 +554,7 @@ Public Class clsPSM
 				.AddModifiedResidue(objItem.Residue, objItem.ResidueLocInPeptide, objItem.ResidueTerminusState, objItem.ModDefinition)
 			Next
 
-			For Each objScore As System.Collections.Generic.KeyValuePair(Of String, String) In mAdditionalScores
+			For Each objScore As KeyValuePair(Of String, String) In mAdditionalScores
 				.SetScore(objScore.Key, objScore.Value)
 			Next
 

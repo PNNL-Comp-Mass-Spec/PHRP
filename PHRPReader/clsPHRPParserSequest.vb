@@ -11,6 +11,8 @@
 Option Strict On
 
 Imports PHRPReader.clsPHRPReader
+Imports System.IO
+Imports System.Text.RegularExpressions
 
 Public Class clsPHRPParserSequest
 	Inherits clsPHRPParser
@@ -205,21 +207,21 @@ Public Class clsPHRPParserSequest
 		Dim intCharIndex As Integer
 		Dim intValue As Integer
 
-		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
+		Dim kvSetting As KeyValuePair(Of String, String)
 
-		Dim reEnzymeSpecificity As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("^\S+\s(\d)\s\d\s.+", Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
-		Dim reMatch As System.Text.RegularExpressions.Match
+		Dim reEnzymeSpecificity As Regex = New Regex("^\S+\s(\d)\s\d\s.+", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+		Dim reMatch As Match
 
 		Dim blnSuccess As Boolean = False
 
 		Try
 
-			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+			strParamFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
-			If Not System.IO.File.Exists(strParamFilePath) Then
+			If Not File.Exists(strParamFilePath) Then
 				ReportError("Sequest param file not found: " & strParamFilePath)
 			Else
-				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
@@ -243,7 +245,7 @@ Public Class clsPHRPParserSequest
 								Select Case kvSetting.Key.ToLower()
 									Case "first_database_name", "database_name"
 										Try
-											strFastaFilePath = System.IO.Path.Combine("C:\Database", System.IO.Path.GetFileName(strSettingValue))
+											strFastaFilePath = Path.Combine("C:\Database", Path.GetFileName(strSettingValue))
 										Catch ex As Exception
 											strFastaFilePath = strSettingValue
 										End Try

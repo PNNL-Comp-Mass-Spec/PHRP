@@ -10,6 +10,8 @@
 
 Option Strict On
 
+Imports System.IO
+
 Public Class clsExtendedScanStatsReader
 
 #Region "Constants"
@@ -37,7 +39,7 @@ Public Class clsExtendedScanStatsReader
 
 #Region "Class-wide variables"
 	' Column headers
-	Protected mColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
+	Protected mColumnHeaders As SortedDictionary(Of String, Integer)
 	Protected mErrorMessage As String = String.Empty
 #End Region
 
@@ -59,7 +61,7 @@ Public Class clsExtendedScanStatsReader
 	''' </summary>
 	''' <remarks></remarks>
 	Public Sub New()
-		mColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)
+		mColumnHeaders = New SortedDictionary(Of String, Integer)
 	End Sub
 
 	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
@@ -99,10 +101,10 @@ Public Class clsExtendedScanStatsReader
 	''' </summary>
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
-	Public Function ReadExtendedScanStatsData(ByVal strInputFilePath As String) As System.Collections.Generic.Dictionary(Of Integer, clsScanStatsExInfo)
+	Public Function ReadExtendedScanStatsData(ByVal strInputFilePath As String) As Dictionary(Of Integer, clsScanStatsExInfo)
 
-		Dim lstScanStats As System.Collections.Generic.Dictionary(Of Integer, clsScanStatsExInfo)
-		lstScanStats = New System.Collections.Generic.Dictionary(Of Integer, clsScanStatsExInfo)
+		Dim lstScanStats As Dictionary(Of Integer, clsScanStatsExInfo)
+		lstScanStats = New Dictionary(Of Integer, clsScanStatsExInfo)
 
 		Dim strLineIn As String
 		Dim strSplitLine() As String
@@ -117,7 +119,7 @@ Public Class clsExtendedScanStatsReader
 			intLinesRead = 0
 			mErrorMessage = String.Empty
 
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInputFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 				Do While srInFile.Peek() > -1
 					strLineIn = srInFile.ReadLine()
 					intLinesRead += 1

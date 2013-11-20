@@ -36,99 +36,101 @@
 
 Option Strict On
 
+Imports System.Text.RegularExpressions
+
 Public Class clsPeptideCleavageStateCalculator
 
 #Region "Constants and Enums"
 
-    Public Const GENERIC_RESIDUE_SYMBOL As Char = "X"c
-    Public Const TERMINUS_SYMBOL_SEQUEST As Char = "-"c
-    Public Const TERMINUS_SYMBOL_XTANDEM_NTerminus As Char = "["c
-    Public Const TERMINUS_SYMBOL_XTANDEM_CTerminus As Char = "]"c
+	Public Const GENERIC_RESIDUE_SYMBOL As Char = "X"c
+	Public Const TERMINUS_SYMBOL_SEQUEST As Char = "-"c
+	Public Const TERMINUS_SYMBOL_XTANDEM_NTerminus As Char = "["c
+	Public Const TERMINUS_SYMBOL_XTANDEM_CTerminus As Char = "]"c
 
-    Protected Const TRYPSIN_LEFT_RESIDUE_REGEX As String = "[KR]"
-    Protected Const TRYPSIN_RIGHT_RESIDUE_REGEX As String = "[^P]"
+	Protected Const TRYPSIN_LEFT_RESIDUE_REGEX As String = "[KR]"
+	Protected Const TRYPSIN_RIGHT_RESIDUE_REGEX As String = "[^P]"
 
-    Public Enum ePeptideCleavageStateConstants As Integer
-        NonSpecific = 0                         ' e.g. Non-tryptic
+	Public Enum ePeptideCleavageStateConstants As Integer
+		NonSpecific = 0							' e.g. Non-tryptic
 		[Partial] = 1							' e.g. Partially tryptic
-        Full = 2                                ' e.g. Fully tryptic
-    End Enum
+		Full = 2								' e.g. Fully tryptic
+	End Enum
 
-    Public Enum ePeptideTerminusStateConstants As Integer
-        None = 0                        ' The peptide is located in the middle of the protein
-        ProteinNTerminus = 1            ' The peptide is located at the protein's N-terminus
-        ProteinCTerminus = 2            ' The peptide is located at the protein's C-terminus
-        ProteinNandCCTerminus = 3       ' The peptide spans the entire length of the protein
-    End Enum
+	Public Enum ePeptideTerminusStateConstants As Integer
+		None = 0						' The peptide is located in the middle of the protein
+		ProteinNTerminus = 1			' The peptide is located at the protein's N-terminus
+		ProteinCTerminus = 2			' The peptide is located at the protein's C-terminus
+		ProteinNandCCTerminus = 3		' The peptide spans the entire length of the protein
+	End Enum
 
-    Public Enum eStandardCleavageAgentConstants As Integer
-        Trypsin = 0
-        TrypsinWithoutProlineRule = 1
-        TrypsinPlusFVLEY = 2
-        Chymotrypsin = 3
-        ChymotrypsinAndTrypsin = 4
-        V8_aka_GluC = 5
-        CyanBr = 6
-        EndoArgC = 7
-        EndoLysC = 8
-        EndoAspN = 9
-        V8 = 10
-    End Enum
+	Public Enum eStandardCleavageAgentConstants As Integer
+		Trypsin = 0
+		TrypsinWithoutProlineRule = 1
+		TrypsinPlusFVLEY = 2
+		Chymotrypsin = 3
+		ChymotrypsinAndTrypsin = 4
+		V8_aka_GluC = 5
+		CyanBr = 6
+		EndoArgC = 7
+		EndoLysC = 8
+		EndoAspN = 9
+		V8 = 10
+	End Enum
 #End Region
 
 #Region "Structures"
-    ' Example RegEx match strings for udtEnzymeMatchSpecType:
-    ' [KR] means to match K or R
-    ' [^P] means the residue cannot be P
-    ' [A-Z] means to match anything; empty string also means match anything
-    ' Note, this function will automatically change [X] to [A-Z] (provided GENERIC_RESIDUE_SYMBOL = "X")
-    Public Structure udtEnzymeMatchSpecType
-        Public LeftResidueRegEx As String           ' RegEx match string for matching the residue to the left of the cleavage point
-        Public RightResidueRegEx As String          ' RegEx match string for matching the residue to the right of the cleavage point
-    End Structure
+	' Example RegEx match strings for udtEnzymeMatchSpecType:
+	' [KR] means to match K or R
+	' [^P] means the residue cannot be P
+	' [A-Z] means to match anything; empty string also means match anything
+	' Note, this function will automatically change [X] to [A-Z] (provided GENERIC_RESIDUE_SYMBOL = "X")
+	Public Structure udtEnzymeMatchSpecType
+		Public LeftResidueRegEx As String			' RegEx match string for matching the residue to the left of the cleavage point
+		Public RightResidueRegEx As String			' RegEx match string for matching the residue to the right of the cleavage point
+	End Structure
 
 #End Region
 
 #Region "Classwide Variables"
-    Private mEnzymeMatchSpec As udtEnzymeMatchSpecType
-    Private mLeftRegEx As System.Text.RegularExpressions.Regex
-    Private mRightRegEx As System.Text.RegularExpressions.Regex
+	Private mEnzymeMatchSpec As udtEnzymeMatchSpecType
+	Private mLeftRegEx As Regex
+	Private mRightRegEx As Regex
 
-    ' This array holds TERMINUS_SYMBOL_SEQUEST, TERMINUS_SYMBOL_XTANDEM_NTerminus, and TERMINUS_SYMBOL_XTANDEM_CTerminus
-    '  and is useful for quickly checking for the presence of a terminus symbol using a binary search
-    Private mTerminusSymbols() As Char
+	' This array holds TERMINUS_SYMBOL_SEQUEST, TERMINUS_SYMBOL_XTANDEM_NTerminus, and TERMINUS_SYMBOL_XTANDEM_CTerminus
+	'  and is useful for quickly checking for the presence of a terminus symbol using a binary search
+	Private mTerminusSymbols() As Char
 #End Region
 
 #Region "Properties"
-    Public Property EnzymeMatchSpec() As udtEnzymeMatchSpecType
-        Get
-            Return mEnzymeMatchSpec
-        End Get
-        Set(ByVal Value As udtEnzymeMatchSpecType)
-            SetEnzymeMatchSpec(Value.LeftResidueRegEx, Value.RightResidueRegEx)
-        End Set
-    End Property
+	Public Property EnzymeMatchSpec() As udtEnzymeMatchSpecType
+		Get
+			Return mEnzymeMatchSpec
+		End Get
+		Set(ByVal Value As udtEnzymeMatchSpecType)
+			SetEnzymeMatchSpec(Value.LeftResidueRegEx, Value.RightResidueRegEx)
+		End Set
+	End Property
 
-    Public ReadOnly Property TerminusSymbols() As Char()
-        Get
-            Return mTerminusSymbols
-        End Get
-    End Property
+	Public ReadOnly Property TerminusSymbols() As Char()
+		Get
+			Return mTerminusSymbols
+		End Get
+	End Property
 #End Region
 
 	''' <summary>
 	''' Constructor
 	''' </summary>
 	''' <remarks></remarks>
-    Public Sub New()
-        ReDim mTerminusSymbols(2)
-        mTerminusSymbols(0) = TERMINUS_SYMBOL_SEQUEST
-        mTerminusSymbols(1) = TERMINUS_SYMBOL_XTANDEM_NTerminus
-        mTerminusSymbols(2) = TERMINUS_SYMBOL_XTANDEM_CTerminus
-        Array.Sort(mTerminusSymbols)
+	Public Sub New()
+		ReDim mTerminusSymbols(2)
+		mTerminusSymbols(0) = TERMINUS_SYMBOL_SEQUEST
+		mTerminusSymbols(1) = TERMINUS_SYMBOL_XTANDEM_NTerminus
+		mTerminusSymbols(2) = TERMINUS_SYMBOL_XTANDEM_CTerminus
+		Array.Sort(mTerminusSymbols)
 
-        SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin)
-    End Sub
+		SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin)
+	End Sub
 
 	''' <summary>
 	''' Converts Cleavage State to 0, 1, or 2
@@ -439,7 +441,7 @@ Public Class clsPeptideCleavageStateCalculator
 	End Function
 
 	Private Sub InitializeRegExObjects()
-		Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
+		Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
 		If mEnzymeMatchSpec.LeftResidueRegEx Is Nothing OrElse mEnzymeMatchSpec.RightResidueRegEx Is Nothing Then
 			' Note that calling SetStandardEnzymeMatchSpec will cause this sub to also be called
@@ -448,8 +450,8 @@ Public Class clsPeptideCleavageStateCalculator
 		End If
 
 		Try
-			mLeftRegEx = New System.Text.RegularExpressions.Regex(mEnzymeMatchSpec.LeftResidueRegEx, REGEX_OPTIONS)
-			mRightRegEx = New System.Text.RegularExpressions.Regex(mEnzymeMatchSpec.RightResidueRegEx, REGEX_OPTIONS)
+			mLeftRegEx = New Regex(mEnzymeMatchSpec.LeftResidueRegEx, REGEX_OPTIONS)
+			mRightRegEx = New Regex(mEnzymeMatchSpec.RightResidueRegEx, REGEX_OPTIONS)
 		Catch ex As Exception
 			' Ignore errors here
 		End Try

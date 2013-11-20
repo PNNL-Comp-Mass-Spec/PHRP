@@ -11,6 +11,8 @@
 
 Option Strict On
 
+Imports System.IO
+
 Public MustInherit Class clsPHRPParser
 
 #Region "Module variables"
@@ -21,7 +23,7 @@ Public MustInherit Class clsPHRPParser
 	Protected mInitialized As Boolean
 
 	' Column headers in the synopsis file and first hits file
-	Protected mColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
+	Protected mColumnHeaders As SortedDictionary(Of String, Integer)
 
 	Protected mErrorMessage As String = String.Empty
 
@@ -30,18 +32,18 @@ Public MustInherit Class clsPHRPParser
 
 	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 
-	Protected mModInfo As System.Collections.Generic.List(Of clsModificationDefinition)
+	Protected mModInfo As List(Of clsModificationDefinition)
 	Protected mModInfoLoaded As Boolean
 
-	Protected mResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, Integer)
-	Protected mSeqInfo As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)
-	Protected mSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))
+	Protected mResultToSeqMap As SortedList(Of Integer, Integer)
+	Protected mSeqInfo As SortedList(Of Integer, clsSeqInfo)
+	Protected mSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
 
 	' This List tracks the Protein Names for each ResultID
-	Protected mResultIDToProteins As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
+	Protected mResultIDToProteins As SortedList(Of Integer, List(Of String))
 
-	Protected mErrorMessages As System.Collections.Generic.List(Of String)
-	Protected mWarningMessages As System.Collections.Generic.List(Of String)
+	Protected mErrorMessages As List(Of String)
+	Protected mWarningMessages As List(Of String)
 
 #End Region
 
@@ -59,7 +61,7 @@ Public MustInherit Class clsPHRPParser
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property ErrorMessages() As System.Collections.Generic.List(Of String)
+	Public ReadOnly Property ErrorMessages() As List(Of String)
 		Get
 			Return mErrorMessages
 		End Get
@@ -107,7 +109,7 @@ Public MustInherit Class clsPHRPParser
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property ResultToSeqMap() As System.Collections.Generic.SortedList(Of Integer, Integer)
+	Public ReadOnly Property ResultToSeqMap() As SortedList(Of Integer, Integer)
 		Get
 			Return mResultToSeqMap
 		End Get
@@ -119,7 +121,7 @@ Public MustInherit Class clsPHRPParser
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property SeqInfo() As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)
+	Public ReadOnly Property SeqInfo() As SortedList(Of Integer, clsSeqInfo)
 		Get
 			Return mSeqInfo
 		End Get
@@ -131,7 +133,7 @@ Public MustInherit Class clsPHRPParser
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property SeqToProteinMap() As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))
+	Public ReadOnly Property SeqToProteinMap() As SortedList(Of Integer, List(Of clsProteinInfo))
 		Get
 			Return mSeqToProteinMap
 		End Get
@@ -143,7 +145,7 @@ Public MustInherit Class clsPHRPParser
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property WarningMessages() As System.Collections.Generic.List(Of String)
+	Public ReadOnly Property WarningMessages() As List(Of String)
 		Get
 			Return mWarningMessages
 		End Get
@@ -159,13 +161,13 @@ Public MustInherit Class clsPHRPParser
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean)
 
-		mErrorMessages = New System.Collections.Generic.List(Of String)
-		mWarningMessages = New System.Collections.Generic.List(Of String)
+		mErrorMessages = New List(Of String)
+		mWarningMessages = New List(Of String)
 
 		mDatasetName = strDatasetName
 		mPeptideHitResultType = ePeptideHitResultType
 
-		Dim fiFileInfo As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
+		Dim fiFileInfo As FileInfo = New FileInfo(strInputFilePath)
 		mInputFilePath = fiFileInfo.FullName
 		mInputFolderPath = fiFileInfo.DirectoryName
 
@@ -180,17 +182,17 @@ Public MustInherit Class clsPHRPParser
 
 		' Initialize the column mapping object
 		' Using a case-insensitive comparer
-		mColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+		mColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
 
 		mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
 		mPeptideMassCalculator = New clsPeptideMassCalculator()
 
 		' Initialize the tracking lists
-		mResultToSeqMap = New System.Collections.Generic.SortedList(Of Integer, Integer)
-		mSeqInfo = New System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)
-		mSeqToProteinMap = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))
+		mResultToSeqMap = New SortedList(Of Integer, Integer)
+		mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
+		mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
 
-		mResultIDToProteins = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of String))
+		mResultIDToProteins = New SortedList(Of Integer, List(Of String))
 
 		If blnLoadModsAndSeqInfo Then
 			' Read the ModSummary file (if it exists)
@@ -211,10 +213,10 @@ Public MustInherit Class clsPHRPParser
 				Dim blnSeqInfoLoaded As Boolean = False
 
 				If Not String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
-					strResultToSeqMapFilePath = System.IO.Path.Combine(mInputFolderPath, strResultToSeqMapFilePath)
+					strResultToSeqMapFilePath = Path.Combine(mInputFolderPath, strResultToSeqMapFilePath)
 					strResultToSeqMapFilePath = clsPHRPReader.AutoSwitchToFHTIfRequired(strResultToSeqMapFilePath, mInputFilePath)
 
-					If System.IO.File.Exists(strResultToSeqMapFilePath) Then
+					If File.Exists(strResultToSeqMapFilePath) Then
 						blnSeqInfoLoaded = LoadSeqInfo()
 					End If
 				End If
@@ -291,7 +293,7 @@ Public MustInherit Class clsPHRPParser
 	End Sub
 
 	Protected Function ConvertModsToNumericMods(ByVal strCleanSequence As String, ByRef lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
-		Static sbNewPeptide As New System.Text.StringBuilder
+		Static sbNewPeptide As New Text.StringBuilder
 
 		sbNewPeptide.Length = 0
 
@@ -341,13 +343,13 @@ Public MustInherit Class clsPHRPParser
 				Return False
 			End If
 
-			strModSummaryFilePath = System.IO.Path.Combine(mInputFolderPath, strModSummaryFilePath)
+			strModSummaryFilePath = Path.Combine(mInputFolderPath, strModSummaryFilePath)
 			strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, mInputFilePath)
-			If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso System.IO.File.Exists(strModSummaryFilePathPreferred) Then
+			If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso File.Exists(strModSummaryFilePathPreferred) Then
 				strModSummaryFilePath = strModSummaryFilePathPreferred
 			End If
 
-			If Not System.IO.File.Exists(strModSummaryFilePath) Then
+			If Not File.Exists(strModSummaryFilePath) Then
 				ReportWarning("ModSummary file not found: " & strModSummaryFilePath)
 				Return False
 			End If
@@ -397,14 +399,14 @@ Public MustInherit Class clsPHRPParser
 				Dim intResultID As Integer
 				Dim intSeqID As Integer
 
-				For Each objItem As System.Collections.Generic.KeyValuePair(Of Integer, Integer) In mResultToSeqMap
+				For Each objItem As KeyValuePair(Of Integer, Integer) In mResultToSeqMap
 
 					intResultID = objItem.Key
 					intSeqID = objItem.Value
 
-					Dim lstProteinsForSeqID As System.Collections.Generic.List(Of clsProteinInfo) = Nothing
-					Dim lstProteinsForResultID As System.Collections.Generic.List(Of String) = Nothing
-					lstProteinsForResultID = New System.Collections.Generic.List(Of String)
+					Dim lstProteinsForSeqID As List(Of clsProteinInfo) = Nothing
+					Dim lstProteinsForResultID As List(Of String) = Nothing
+					lstProteinsForResultID = New List(Of String)
 
 					If mSeqToProteinMap.TryGetValue(intSeqID, lstProteinsForSeqID) Then
 
@@ -475,7 +477,7 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="chDelimiter"></param>
 	''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
 	''' <remarks>Automatically trims whitespace</remarks>
-	Public Shared Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char) As System.Collections.Generic.KeyValuePair(Of String, String)
+	Public Shared Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char) As KeyValuePair(Of String, String)
 		Return ParseKeyValueSetting(strText, chDelimiter, String.Empty)
 	End Function
 
@@ -487,8 +489,8 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="strCommentChar">If defined, then looks for this character in the value portion of the setting and removes that character plus any text after it</param>
 	''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
 	''' <remarks>Automatically trims whitespace</remarks>
-	Public Shared Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char, ByVal strCommentChar As String) As System.Collections.Generic.KeyValuePair(Of String, String)
-		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
+	Public Shared Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char, ByVal strCommentChar As String) As KeyValuePair(Of String, String)
+		Dim kvSetting As KeyValuePair(Of String, String)
 		Dim strKey As String
 		Dim strValue As String
 		Dim intCharIndex As Integer
@@ -514,12 +516,12 @@ Public MustInherit Class clsPHRPParser
 					strValue = String.Empty
 				End If
 
-				kvSetting = New System.Collections.Generic.KeyValuePair(Of String, String)(strKey, strValue)
+				kvSetting = New KeyValuePair(Of String, String)(strKey, strValue)
 				Return kvSetting
 			End If
 		End If
 
-		Return New System.Collections.Generic.KeyValuePair(Of String, String)(String.Empty, String.Empty)
+		Return New KeyValuePair(Of String, String)(String.Empty, String.Empty)
 
 	End Function
 
@@ -529,17 +531,17 @@ Public MustInherit Class clsPHRPParser
 
 		Dim strLineIn As String
 
-		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
+		Dim kvSetting As KeyValuePair(Of String, String)
 
 		Try
 			If String.IsNullOrWhiteSpace(strSearchEngineName) Then strSearchEngineName = "?? Unknown tool ??"
 
-			strParamFilePath = System.IO.Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+			strParamFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
-			If Not System.IO.File.Exists(strParamFilePath) Then
+			If Not File.Exists(strParamFilePath) Then
 				ReportError(strSearchEngineName & " param file not found: " & strParamFilePath)
 			Else
-				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
@@ -576,7 +578,7 @@ Public MustInherit Class clsPHRPParser
 		Dim strSearchEngineVersion As String
 		Dim dtSearchDate As System.DateTime
 
-		Dim kvSetting As System.Collections.Generic.KeyValuePair(Of String, String)
+		Dim kvSetting As KeyValuePair(Of String, String)
 
 		Dim blnValidDate As Boolean
 		Dim blnValidVersion As Boolean
@@ -584,15 +586,15 @@ Public MustInherit Class clsPHRPParser
 
 		Try
 			' Read the Tool_Version_Info file to determine the analysis time and the tool version
-			strToolVersionInfoFilePath = System.IO.Path.Combine(mInputFolderPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType))			
+			strToolVersionInfoFilePath = Path.Combine(mInputFolderPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType))
 
-			If Not System.IO.File.Exists(strToolVersionInfoFilePath) Then
+			If Not File.Exists(strToolVersionInfoFilePath) Then
 				ReportWarning("Tool version info file not found: " & strToolVersionInfoFilePath)
 			Else
 				strSearchEngineVersion = "Unknown"
 				dtSearchDate = New System.DateTime(1980, 1, 1)
 
-				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strToolVersionInfoFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strToolVersionInfoFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
 
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
@@ -674,10 +676,10 @@ Public MustInherit Class clsPHRPParser
 		Dim objSeqInfo As clsSeqInfo = Nothing
 
 		Dim strMods() As String
-		Dim kvModDetails As System.Collections.Generic.KeyValuePair(Of String, String)
+		Dim kvModDetails As KeyValuePair(Of String, String)
 
-		Dim lstNTerminalModsAdded As System.Collections.Generic.List(Of String)
-		Dim lstCTerminalModsAdded As System.Collections.Generic.List(Of String)
+		Dim lstNTerminalModsAdded As List(Of String)
+		Dim lstCTerminalModsAdded As List(Of String)
 
 		Dim strMassCorrectionTag As String
 		Dim intResidueLoc As Integer
@@ -699,8 +701,8 @@ Public MustInherit Class clsPHRPParser
 				objPSM.SeqID = intSeqID
 				intPeptideResidueCount = objPSM.PeptideCleanSequence.Length
 
-				lstNTerminalModsAdded = New System.Collections.Generic.List(Of String)
-				lstCTerminalModsAdded = New System.Collections.Generic.List(Of String)
+				lstNTerminalModsAdded = New List(Of String)
+				lstCTerminalModsAdded = New List(Of String)
 
 				If mSeqInfo.TryGetValue(intSeqID, objSeqInfo) Then
 					objPSM.PeptideMonoisotopicMass = objSeqInfo.MonoisotopicMass
@@ -800,8 +802,8 @@ Public MustInherit Class clsPHRPParser
 
 		Dim blnMatchFound As Boolean
 
-		Dim lstMatchedDefs As System.Collections.Generic.List(Of clsModificationDefinition)
-		lstMatchedDefs = New System.Collections.Generic.List(Of clsModificationDefinition)
+		Dim lstMatchedDefs As List(Of clsModificationDefinition)
+		lstMatchedDefs = New List(Of clsModificationDefinition)
 
 		For Each objMod In mModInfo
 			If strMassCorrectionTag.ToLower() = objMod.MassCorrectionTag.ToLower() Then

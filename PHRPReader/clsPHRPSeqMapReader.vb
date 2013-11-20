@@ -1,6 +1,7 @@
 ﻿Option Strict On
 
 Imports PHRPReader.clsPeptideCleavageStateCalculator
+Imports System.IO
 
 Public Class clsPHRPSeqMapReader
 
@@ -173,9 +174,9 @@ Public Class clsPHRPSeqMapReader
 	''' <returns>True if success, false if an error</returns>
 	''' <remarks></remarks>
 	Public Function GetProteinMapping( _
-	  ByRef lstResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, Integer), _
-	  ByRef lstSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo)), _
-	  ByRef lstSeqInfo As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)) As Boolean
+	  ByRef lstResultToSeqMap As SortedList(Of Integer, Integer), _
+	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)), _
+	  ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
 		Dim blnSuccess As Boolean
 		Dim strFilePath As String
@@ -184,19 +185,19 @@ Public Class clsPHRPSeqMapReader
 		'       Instead, allow LoadResultToSeqMapping or LoadSeqToProteinMapping to raise exceptions
 
 		If lstResultToSeqMap Is Nothing Then
-			lstResultToSeqMap = New System.Collections.Generic.SortedList(Of Integer, Integer)
+			lstResultToSeqMap = New SortedList(Of Integer, Integer)
 		Else
 			lstResultToSeqMap.Clear()
 		End If
 
 		If lstSeqToProteinMap Is Nothing Then
-			lstSeqToProteinMap = New System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))
+			lstSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
 		Else
 			lstSeqToProteinMap.Clear()
 		End If
 
 		If lstSeqInfo Is Nothing Then
-			lstSeqInfo = New System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)
+			lstSeqInfo = New SortedList(Of Integer, clsSeqInfo)
 		Else
 			lstSeqInfo.Clear()
 		End If
@@ -204,8 +205,8 @@ Public Class clsPHRPSeqMapReader
 		If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
 			blnSuccess = False
 		Else
-			strFilePath = System.IO.Path.Combine(mInputFolderPath, mResultToSeqMapFilename)
-			If Not System.IO.File.Exists(strFilePath) Then
+			strFilePath = Path.Combine(mInputFolderPath, mResultToSeqMapFilename)
+			If Not File.Exists(strFilePath) Then
 				mErrorMessage = "SeqInfo file not found: " & strFilePath
 				blnSuccess = False
 			Else
@@ -216,15 +217,15 @@ Public Class clsPHRPSeqMapReader
 		If blnSuccess Then
 
 			If Not String.IsNullOrEmpty(mSeqInfoFilename) Then
-				strFilePath = System.IO.Path.Combine(mInputFolderPath, mSeqInfoFilename)
-				If System.IO.File.Exists(strFilePath) Then
+				strFilePath = Path.Combine(mInputFolderPath, mSeqInfoFilename)
+				If File.Exists(strFilePath) Then
 					LoadSeqInfo(strFilePath, lstSeqInfo)
 				End If
 			End If
 
 			If Not String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
-				strFilePath = System.IO.Path.Combine(mInputFolderPath, mSeqToProteinMapFilename)
-				If Not System.IO.File.Exists(strFilePath) Then
+				strFilePath = Path.Combine(mInputFolderPath, mSeqToProteinMapFilename)
+				If Not File.Exists(strFilePath) Then
 					mErrorMessage = "SeqInfo file not found: " & strFilePath
 					blnSuccess = False
 				Else
@@ -247,7 +248,7 @@ Public Class clsPHRPSeqMapReader
 	''' <param name="lstResultToSeqMap"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadResultToSeqMapping(ByVal strFilePath As String, ByRef lstResultToSeqMap As System.Collections.Generic.SortedList(Of Integer, Integer)) As Boolean
+	Protected Function LoadResultToSeqMapping(ByVal strFilePath As String, ByRef lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
 
 		Dim strLineIn As String
 		Dim strSplitLine() As String
@@ -258,9 +259,9 @@ Public Class clsPHRPSeqMapReader
 		Try
 
 			' Read the data from the result to sequence map file
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-				Do While srInFile.Peek >= 0
+				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine
 
 					If Not String.IsNullOrEmpty(strLineIn) Then
@@ -287,16 +288,16 @@ Public Class clsPHRPSeqMapReader
 
 
 		Catch ex As Exception
-			Throw New Exception("Exception loading Result to Seq Mapping from " & System.IO.Path.GetFileName(strFilePath) & ": " & ex.Message)
+			Throw New Exception("Exception loading Result to Seq Mapping from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
 		End Try
 
 		Return True
 
 	End Function
 
-	Protected Function LoadSeqInfo(ByVal strFilePath As String, ByRef lstSeqInfo As System.Collections.Generic.SortedList(Of Integer, clsSeqInfo)) As Boolean
+	Protected Function LoadSeqInfo(ByVal strFilePath As String, ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
-		Dim objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
+		Dim objColumnHeaders As SortedDictionary(Of String, Integer)
 
 		Dim strLineIn As String
 		Dim strSplitLine() As String
@@ -313,7 +314,7 @@ Public Class clsPHRPSeqMapReader
 
 			' Initialize the column mapping
 			' Using a case-insensitive comparer
-			objColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+			objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
 
 			' Define the default column mapping
 			objColumnHeaders.Add(SEQ_INFO_COLUMN_Unique_Seq_ID, 0)
@@ -322,9 +323,9 @@ Public Class clsPHRPSeqMapReader
 			objColumnHeaders.Add(SEQ_INFO_COLUMN_Monoisotopic_Mass, 3)
 
 			' Read the data from the sequence info file
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-				Do While srInFile.Peek >= 0
+				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine
 					blnSkipLine = False
 
@@ -363,7 +364,7 @@ Public Class clsPHRPSeqMapReader
 			End Using
 
 		Catch ex As Exception
-			Throw New Exception("Exception loading Seq Info from " & System.IO.Path.GetFileName(strFilePath) & ": " & ex.Message)
+			Throw New Exception("Exception loading Seq Info from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
 		End Try
 
 		Return True
@@ -379,11 +380,11 @@ Public Class clsPHRPSeqMapReader
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Protected Function LoadSeqToProteinMapping(ByVal strFilePath As String, _
-	  ByRef lstSeqToProteinMap As System.Collections.Generic.SortedList(Of Integer, System.Collections.Generic.List(Of clsProteinInfo))) As Boolean
+	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
 
-		Dim lstProteins As System.Collections.Generic.List(Of clsProteinInfo) = Nothing
+		Dim lstProteins As List(Of clsProteinInfo) = Nothing
 
-		Dim objColumnHeaders As System.Collections.Generic.SortedDictionary(Of String, Integer)
+		Dim objColumnHeaders As SortedDictionary(Of String, Integer)
 
 		Dim strLineIn As String
 		Dim strSplitLine() As String
@@ -402,7 +403,7 @@ Public Class clsPHRPSeqMapReader
 
 			' Initialize the column mapping
 			' Using a case-insensitive comparer
-			objColumnHeaders = New System.Collections.Generic.SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+			objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
 
 			' Define the default column mapping
 			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Unique_Seq_ID, 0)
@@ -413,9 +414,9 @@ Public Class clsPHRPSeqMapReader
 			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_Intensity, 5)
 
 			' Read the data from the sequence to protein map file
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-				Do While srInFile.Peek >= 0
+				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine
 					blnSkipLine = False
 
@@ -450,7 +451,7 @@ Public Class clsPHRPSeqMapReader
 										lstProteins.Add(objProteinInfo)
 									Else
 										' New Sequence ID
-										lstProteins = New System.Collections.Generic.List(Of clsProteinInfo)
+										lstProteins = New List(Of clsProteinInfo)
 										lstProteins.Add(objProteinInfo)
 										lstSeqToProteinMap.Add(intSeqID, lstProteins)
 									End If
@@ -467,7 +468,7 @@ Public Class clsPHRPSeqMapReader
 			End Using
 
 		Catch ex As Exception
-			Throw New Exception("Exception loading Seq to Protein Mapping from " & System.IO.Path.GetFileName(strFilePath) & ": " & ex.Message)
+			Throw New Exception("Exception loading Seq to Protein Mapping from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
 		End Try
 
 		Return True

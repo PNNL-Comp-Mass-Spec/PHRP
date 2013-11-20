@@ -11,6 +11,7 @@
 Option Strict On
 
 Imports PHRPReader.clsPHRPReader
+Imports System.Text.RegularExpressions
 
 Public Class clsPHRPParserMSGFDB
 	Inherits clsPHRPParser
@@ -125,9 +126,9 @@ Public Class clsPHRPParserMSGFDB
 		Dim strTolerance As String = String.Empty
 		Dim strToleranceSplit As String()
 
-		Dim reExtraTolerance As System.Text.RegularExpressions.Regex
-		Dim reMatch As System.Text.RegularExpressions.Match
-		reExtraTolerance = New System.Text.RegularExpressions.Regex("([0-9.]+)([A-Za-z]+)", Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
+		Dim reExtraTolerance As Regex
+		Dim reMatch As Match
+		reExtraTolerance = New Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
 
 		Dim dblToleranceDa As Double
 		Dim dblToleranceCurrent As Double
