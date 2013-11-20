@@ -14,8 +14,10 @@
 
 Option Strict On
 
-Imports System.Collections.Generic
 Imports PHRPReader.clsModificationDefinition
+Imports System.Collections.Generic
+Imports System.IO
+Imports System.Text.RegularExpressions
 
 Public Class clsPHRPReader
 	Implements IDisposable
@@ -80,7 +82,7 @@ Public Class clsPHRPReader
 	Protected mInitialized As Boolean
 	Protected mModSummaryFileLoaded As Boolean
 
-	Protected mSourceFile As System.IO.StreamReader
+	Protected mSourceFile As StreamReader
 	Protected mSourceFileLineCount As Integer
 	Protected mSourceFileLinesRead As Integer
 
@@ -111,8 +113,8 @@ Public Class clsPHRPReader
 	Protected mCachedLineAvailable As Boolean
 	Protected mCachedLine As String
 
-	Protected mErrorMessages As System.Collections.Generic.List(Of String)
-	Protected mWarningMessages As System.Collections.Generic.List(Of String)
+	Protected mErrorMessages As List(Of String)
+	Protected mWarningMessages As List(Of String)
 
 	Protected mErrorMessage As String = String.Empty
 	Protected mLocalErrorCode As ePHRPReaderErrorCodes
@@ -184,7 +186,7 @@ Public Class clsPHRPReader
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property ErrorMessages() As System.Collections.Generic.List(Of String)
+	Public ReadOnly Property ErrorMessages() As List(Of String)
 		Get
 			Return mErrorMessages
 		End Get
@@ -326,7 +328,7 @@ Public Class clsPHRPReader
 	''' <value></value>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public ReadOnly Property WarningMessages() As System.Collections.Generic.List(Of String)
+	Public ReadOnly Property WarningMessages() As List(Of String)
 		Get
 			Return mWarningMessages
 		End Get
@@ -421,7 +423,7 @@ Public Class clsPHRPReader
 	''' <remarks></remarks>
 	Public Shared Function AutoSwitchToFHTIfRequired(ByVal strFilePath As String, ByVal strBasePHRPFileName As String) As String
 
-		Dim fiFileInfo As System.IO.FileInfo
+		Dim fiFileInfo As FileInfo
 		Dim intSynIndex As Integer
 		Dim strFilePathFHT As String
 
@@ -429,11 +431,11 @@ Public Class clsPHRPReader
 			Return strFilePath
 		End If
 
-		fiFileInfo = New System.IO.FileInfo(strBasePHRPFileName)
+		fiFileInfo = New FileInfo(strBasePHRPFileName)
 		If fiFileInfo.Name.ToLower().IndexOf("_fht") > 0 Then
 			' strBasePHRPFileName is first-hits-file based
 
-			fiFileInfo = New System.IO.FileInfo(strFilePath)
+			fiFileInfo = New FileInfo(strFilePath)
 			intSynIndex = fiFileInfo.Name.ToLower().IndexOf("_syn")
 			If intSynIndex > 0 Then
 				' strFilePath is synopsis-file based
@@ -442,7 +444,7 @@ Public Class clsPHRPReader
 				strFilePathFHT = fiFileInfo.Name.Substring(0, intSynIndex) & "_fht" & fiFileInfo.Name.Substring(intSynIndex + 4)
 
 				If IO.Path.IsPathRooted(strFilePath) Then
-					Return System.IO.Path.Combine(fiFileInfo.DirectoryName, strFilePathFHT)
+					Return Path.Combine(fiFileInfo.DirectoryName, strFilePathFHT)
 				Else
 					Return strFilePathFHT
 				End If
@@ -471,7 +473,7 @@ Public Class clsPHRPReader
 
 		Try
 			intTotalLines = 0
-			Using srReader As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strTextFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+			Using srReader As StreamReader = New StreamReader(New FileStream(strTextFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
 				While srReader.Peek > -1
 					srReader.ReadLine()
 					intTotalLines += 1
@@ -479,7 +481,7 @@ Public Class clsPHRPReader
 			End Using
 
 		Catch ex As Exception
-			Throw New Exception("Error counting the lines in " & System.IO.Path.GetFileName(strTextFilePath) & ": " & ex.Message, ex)
+			Throw New Exception("Error counting the lines in " & Path.GetFileName(strTextFilePath) & ": " & ex.Message, ex)
 		End Try
 
 		Return intTotalLines
@@ -523,8 +525,8 @@ Public Class clsPHRPReader
 
 		mPeptideMassCalculator = New clsPeptideMassCalculator()
 
-		mErrorMessages = New System.Collections.Generic.List(Of String)
-		mWarningMessages = New System.Collections.Generic.List(Of String)
+		mErrorMessages = New List(Of String)
+		mWarningMessages = New List(Of String)
 
 		mSourceFileLineCount = 0
 
@@ -540,13 +542,13 @@ Public Class clsPHRPReader
 			If strInputFilePath Is Nothing OrElse strInputFilePath.Length = 0 Then
 				ReportError("Input file name is empty")
 				SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath)
-				If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
+				If Not mInitialized Then Throw New FileNotFoundException(mErrorMessage)
 				Return False
 			Else
 				' Confirm that the source file exists
 				' Make sure strInputFilePath points to a valid file
-				Dim fiFileInfo As System.IO.FileInfo
-				fiFileInfo = New System.IO.FileInfo(strInputFilePath)
+				Dim fiFileInfo As FileInfo
+				fiFileInfo = New FileInfo(strInputFilePath)
 
 				mInputFolderPath = fiFileInfo.DirectoryName
 				mInputFilePath = fiFileInfo.FullName
@@ -554,7 +556,7 @@ Public Class clsPHRPReader
 				If Not fiFileInfo.Exists Then
 					ReportError("Input file not found: " & strInputFilePath)
 					SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath)
-					If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
+					If Not mInitialized Then Throw New FileNotFoundException(mErrorMessage)
 					Return False
 				Else
 
@@ -562,7 +564,7 @@ Public Class clsPHRPReader
 					blnSuccess = ValidateInputFiles(strInputFilePath, eResultType, strModSummaryFilePath)
 					If Not blnSuccess Then
 						SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, True)
-						If Not mInitialized Then Throw New System.IO.FileNotFoundException(mErrorMessage)
+						If Not mInitialized Then Throw New FileNotFoundException(mErrorMessage)
 						Return False
 					End If
 
@@ -608,11 +610,16 @@ Public Class clsPHRPReader
 	Protected Function InitializeParser(ByVal eResultType As ePeptideHitResultType) As Boolean
 
 		Dim blnSuccess As Boolean = True
+		Dim strDatasetName As String = String.Copy(mDatasetName)
 
 		Try
-			If String.IsNullOrEmpty(mDatasetName) Then
-				ReportError("Dataset name is undefined; unable to continue")
-				Return False
+			If String.IsNullOrEmpty(strDatasetName) Then
+				If mLoadModsAndSeqInfo Or mLoadMSGFResults Or mLoadScanStatsData Then
+					ReportError("Dataset name is undefined; unable to continue")
+					Return False
+				Else
+					strDatasetName = "Unknown_Dataset"
+				End If
 			End If
 
 			' Initialize some tracking variables
@@ -629,20 +636,20 @@ Public Class clsPHRPReader
 			' Instantiate the appropriare PHRP Parser
 			Select Case eResultType
 				Case ePeptideHitResultType.Sequest
-					mPHRPParser = New clsPHRPParserSequest(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
+					mPHRPParser = New clsPHRPParserSequest(strDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
 				Case ePeptideHitResultType.XTandem
 					' Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
-					mPHRPParser = New clsPHRPParserXTandem(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
+					mPHRPParser = New clsPHRPParserXTandem(strDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
 				Case ePeptideHitResultType.Inspect
-					mPHRPParser = New clsPHRPParserInspect(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
+					mPHRPParser = New clsPHRPParserInspect(strDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
 				Case ePeptideHitResultType.MSGFDB
-					mPHRPParser = New clsPHRPParserMSGFDB(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
+					mPHRPParser = New clsPHRPParserMSGFDB(strDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
-				Case ePeptideHitResultType.MSAlign				
-					mPHRPParser = New clsPHRPParserMSAlign(mDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
+				Case ePeptideHitResultType.MSAlign
+					mPHRPParser = New clsPHRPParserMSAlign(strDatasetName, mInputFilePath, mLoadModsAndSeqInfo)
 
 				Case Else
 					'Should never get here; invalid result type specified
@@ -669,7 +676,7 @@ Public Class clsPHRPReader
 				mSourceFileLineCount = CountLines(mInputFilePath)
 
 				' Open the data file for reading
-				mSourceFile = New System.IO.StreamReader(New System.IO.FileStream(mInputFilePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+				mSourceFile = New StreamReader(New FileStream(mInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 				mCanRead = True
 
 			End If
@@ -707,8 +714,8 @@ Public Class clsPHRPReader
 		' Find candidate dataset names in strInputFolderPath
 
 		Dim fiInputFolder As IO.DirectoryInfo
-		Dim lstDatasetNames As Generic.SortedSet(Of String) = New Generic.SortedSet(Of String)(StringComparer.CurrentCultureIgnoreCase)
-		Dim lstFileSpec As Generic.List(Of String) = New Generic.List(Of String)
+		Dim lstDatasetNames As SortedSet(Of String) = New SortedSet(Of String)(StringComparer.CurrentCultureIgnoreCase)
+		Dim lstFileSpec As List(Of String) = New List(Of String)
 
 		Dim strDataset As String
 		Dim intCharIndex As Integer
@@ -786,7 +793,7 @@ Public Class clsPHRPReader
 	''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
 	''' <remarks></remarks>
 	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal strDatasetName As String, ByRef eMatchedResultType As ePeptideHitResultType) As String
-		Dim lstDatasetNames As Generic.List(Of String) = New Generic.List(Of String)
+		Dim lstDatasetNames As List(Of String) = New List(Of String)
 		lstDatasetNames.Add(strDatasetName)
 
 		Return AutoDetermineBestInputFile(strInputFolderPath, lstDatasetNames, eMatchedResultType)
@@ -801,19 +808,19 @@ Public Class clsPHRPReader
 	''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
 	''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
 	''' <remarks></remarks>
-	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal lstDatasetNames As Generic.List(Of String), ByRef eMatchedResultType As ePeptideHitResultType) As String
+	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal lstDatasetNames As List(Of String), ByRef eMatchedResultType As ePeptideHitResultType) As String
 
 		Dim fiInputFolder As IO.DirectoryInfo
 
 		' Items in this list are KeyValuePairs where the key is a filename to look for and the value is a PeptideHitResultType
-		Dim lstFilesToFind As Generic.List(Of Generic.KeyValuePair(Of String, ePeptideHitResultType))
+		Dim lstFilesToFind As List(Of KeyValuePair(Of String, ePeptideHitResultType))
 
 		' This list contains the standard PHRP file suffixes
-		Dim lstAuxiliaryFileSuffixes As Generic.List(Of String) = GetPHRPAuxiliaryFileSuffixes()
+		Dim lstAuxiliaryFileSuffixes As List(Of String) = GetPHRPAuxiliaryFileSuffixes()
 
 		' The key in this variable is the full path to the best Synopsis or First hits file and the value is the number of PHRP-related auxiliary files
-		Dim kvBestSynOrFHTFile As Generic.KeyValuePair(Of String, Integer)
-		kvBestSynOrFHTFile = New Generic.KeyValuePair(Of String, Integer)(String.Empty, 0)
+		Dim kvBestSynOrFHTFile As KeyValuePair(Of String, Integer)
+		kvBestSynOrFHTFile = New KeyValuePair(Of String, Integer)(String.Empty, 0)
 
 		' Set the matched result type to Unknown for now
 		eMatchedResultType = ePeptideHitResultType.Unknown
@@ -828,35 +835,35 @@ Public Class clsPHRPReader
 		End If
 
 		If lstDatasetNames Is Nothing OrElse lstDatasetNames.Count = 0 Then
-			Throw New ArgumentException("Generic.list lstDatasetNames cannot be empty")
+			Throw New ArgumentException("list lstDatasetNames cannot be empty")
 		End If
 
 		' Construct a list of the files to search for
-		lstFilesToFind = New Generic.List(Of Generic.KeyValuePair(Of String, ePeptideHitResultType))
+		lstFilesToFind = New List(Of KeyValuePair(Of String, ePeptideHitResultType))
 
 		For Each strDataset As String In lstDatasetNames
 			' MSGF+
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSGFDB))
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MSGFDB))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSGFDB))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MSGFDB))
 
 			' X!Tandem
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserXTandem.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.XTandem))
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserXTandem.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.XTandem))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserXTandem.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.XTandem))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserXTandem.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.XTandem))
 
 			' MSAlign
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSAlign.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSAlign))
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSAlign.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MSAlign))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSAlign.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSAlign))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSAlign.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MSAlign))
 
 			' Inspect
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.Inspect))
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.Inspect))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.Inspect))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.Inspect))
 
 			' Sequest (needs to be added last since files simply end in _syn.txt or _fht.txt)
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserSequest.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.Sequest))
-			lstFilesToFind.Add(New Generic.KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserSequest.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.Sequest))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserSequest.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.Sequest))
+			lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserSequest.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.Sequest))
 		Next
 
-		For Each kvFileToFind As Generic.KeyValuePair(Of String, ePeptideHitResultType) In lstFilesToFind
+		For Each kvFileToFind As KeyValuePair(Of String, ePeptideHitResultType) In lstFilesToFind
 			If Not String.IsNullOrEmpty(kvFileToFind.Key) Then
 				Dim fiSynOrFHTFile As IO.FileInfo = New IO.FileInfo(IO.Path.Combine(fiInputFolder.FullName, kvFileToFind.Key))
 
@@ -875,7 +882,7 @@ Public Class clsPHRPReader
 					Next
 
 					If String.IsNullOrEmpty(kvBestSynOrFHTFile.Key) OrElse intAuxFileCount > kvBestSynOrFHTFile.Value Then
-						kvBestSynOrFHTFile = New Generic.KeyValuePair(Of String, Integer)(fiSynOrFHTFile.FullName, intAuxFileCount)
+						kvBestSynOrFHTFile = New KeyValuePair(Of String, Integer)(fiSynOrFHTFile.FullName, intAuxFileCount)
 						eMatchedResultType = kvFileToFind.Value
 					End If
 				End If
@@ -913,7 +920,7 @@ Public Class clsPHRPReader
 		Dim strDatasetName As String = String.Empty
 		Dim strInputFileName As String
 
-		strInputFileName = System.IO.Path.GetFileNameWithoutExtension(strFilePath)
+		strInputFileName = Path.GetFileNameWithoutExtension(strFilePath)
 
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest, ePeptideHitResultType.Inspect, ePeptideHitResultType.MSGFDB, ePeptideHitResultType.MSAlign
@@ -989,41 +996,38 @@ Public Class clsPHRPReader
 				ElseIf strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_FHT) Then
 					eResultType = ePeptideHitResultType.Inspect
 
-				ElseIf strFilePathLCase.EndsWith(clsPHRPParserSequest.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserSequest.FILENAME_SUFFIX_FHT) Then
+				Else
 					' Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
 
-					If Not System.IO.File.Exists(strFilePath) Then
+					If Not File.Exists(strFilePath) Then
 						' File doesn't exist; assume Sequest
 						eResultType = ePeptideHitResultType.Sequest
 					Else
 
-						Try
-							Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+						Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
 
-								If srInFile.Peek() >= 0 Then
-									strHeaderLine = srInFile.ReadLine().ToLower
+							If srInFile.Peek() >= 0 Then
+								strHeaderLine = srInFile.ReadLine()
 
-									If strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_MQScore.ToLower) AndAlso _
-									   strHeaderLine.Contains(clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore.ToLower) Then
-										eResultType = ePeptideHitResultType.Inspect
+								If LineContainsValues(strHeaderLine, clsPHRPParserInspect.DATA_COLUMN_MQScore, clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore) Then
 
-									ElseIf strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore) AndAlso _
-									   strHeaderLine.Contains(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore) Then
-										eResultType = ePeptideHitResultType.MSGFDB
+									eResultType = ePeptideHitResultType.Inspect
 
-									ElseIf strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_XCorr.ToLower) AndAlso _
-									   strHeaderLine.Contains(clsPHRPParserSequest.DATA_COLUMN_DelCn.ToLower) Then
-										eResultType = ePeptideHitResultType.Sequest
+								ElseIf _
+								  LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb) OrElse
+								  LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue) OrElse
+								  LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore) Then
 
-									End If
+									eResultType = ePeptideHitResultType.MSGFDB
+
+								ElseIf LineContainsValues(strHeaderLine, clsPHRPParserSequest.DATA_COLUMN_XCorr, clsPHRPParserSequest.DATA_COLUMN_DelCn) Then
+
+									eResultType = ePeptideHitResultType.Sequest
+
 								End If
+							End If
 
-							End Using
-
-						Catch ex As Exception
-							' Error reading file; assume Sequest
-							eResultType = ePeptideHitResultType.Sequest
-						End Try
+						End Using
 
 					End If
 
@@ -1057,7 +1061,6 @@ Public Class clsPHRPReader
 				strFilePathTrimmed = strFilePath.Substring(0, strFilePath.Length - strSuffix.Length) & ".txt"
 				Return True
 
-				Exit For
 			End If
 		Next
 
@@ -1076,7 +1079,7 @@ Public Class clsPHRPReader
 	''' <remarks>strPeptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
 	Protected Function ConvertModsToNumericMods(ByVal strPeptide As String, ByRef strPeptideWithNumericMods As String, ByRef lstPeptideMods As List(Of clsAminoAcidModInfo)) As Boolean
 
-		Static sbNewPeptide As New System.Text.StringBuilder
+		Static sbNewPeptide As New Text.StringBuilder
 
 		Dim intPeptideLength As Integer
 		Dim chMostRecentResidue As Char
@@ -1147,12 +1150,12 @@ Public Class clsPHRPReader
 							If intIndex = intIndexStart AndAlso mStaticMods.Count > 0 Then
 								' We're at the N-terminus of the peptide
 								' Possibly add a static N-terminal peptide mod (for example, iTRAQ8, which is 304.2022 Da)
-								AddStaticModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus, sbNewPeptide, lstPeptideMods)
+								AddStaticModIfPresent(mStaticMods, N_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus, sbNewPeptide, lstPeptideMods)
 
-								If strPeptide.StartsWith(clsPHRPReader.PROTEIN_TERMINUS_SYMBOL_PHRP) Then
+								If strPeptide.StartsWith(PROTEIN_TERMINUS_SYMBOL_PHRP) Then
 									' We're at the N-terminus of the protein
 									' Possibly add a static N-terminal protein mod
-									AddStaticModIfPresent(mStaticMods, clsPHRPReader.N_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus, sbNewPeptide, lstPeptideMods)
+									AddStaticModIfPresent(mStaticMods, N_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus, sbNewPeptide, lstPeptideMods)
 								End If
 							End If
 						End If
@@ -1164,12 +1167,12 @@ Public Class clsPHRPReader
 
 					If intIndex = intIndexEnd AndAlso mStaticMods.Count > 0 Then
 						' Possibly add a static C-terminal peptide mod
-						AddStaticModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus, sbNewPeptide, lstPeptideMods)
+						AddStaticModIfPresent(mStaticMods, C_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus, sbNewPeptide, lstPeptideMods)
 
-						If strPeptide.EndsWith(clsPHRPReader.PROTEIN_TERMINUS_SYMBOL_PHRP) Then
+						If strPeptide.EndsWith(PROTEIN_TERMINUS_SYMBOL_PHRP) Then
 							' We're at the C-terminus of the protein
 							' Possibly add a static C-terminal protein mod
-							AddStaticModIfPresent(mStaticMods, clsPHRPReader.C_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus, sbNewPeptide, lstPeptideMods)
+							AddStaticModIfPresent(mStaticMods, C_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus, sbNewPeptide, lstPeptideMods)
 						End If
 
 					End If
@@ -1194,7 +1197,7 @@ Public Class clsPHRPReader
 	  ByVal chModSymbol As Char, _
 	  ByVal ResidueLocInPeptide As Integer, _
 	  ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
-	  ByRef sbNewPeptide As System.Text.StringBuilder, _
+	  ByRef sbNewPeptide As Text.StringBuilder, _
 	  ByRef lstPeptideMods As List(Of clsAminoAcidModInfo))
 
 		Dim objModDef As clsModificationDefinition = Nothing
@@ -1211,7 +1214,7 @@ Public Class clsPHRPReader
 	   ByVal chResidue As Char, _
 	   ByVal ResidueLocInPeptide As Integer, _
 	   ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
-	   ByRef sbNewPeptide As System.Text.StringBuilder, _
+	   ByRef sbNewPeptide As Text.StringBuilder, _
 	   ByRef lstPeptideMods As List(Of clsAminoAcidModInfo))
 
 		Dim lstModDefs As List(Of clsModificationDefinition) = Nothing
@@ -1291,32 +1294,32 @@ Public Class clsPHRPReader
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Public Shared Function GetMSGFFileName(strSynopsisOrFirstHitsFileName As String) As String
-		Return System.IO.Path.GetFileNameWithoutExtension(strSynopsisOrFirstHitsFileName) & MSGF_RESULT_FILENAME_SUFFIX
+		Return Path.GetFileNameWithoutExtension(strSynopsisOrFirstHitsFileName) & MSGF_RESULT_FILENAME_SUFFIX
 	End Function
 
 	Public Shared Function GetPeptideHitResultType(ResultTypeName As String) As ePeptideHitResultType
 		Select Case ResultTypeName.ToLower()
 			Case "Peptide_Hit".ToLower
-				Return clsPHRPReader.ePeptideHitResultType.Sequest
+				Return ePeptideHitResultType.Sequest
 
 			Case "XT_Peptide_Hit".ToLower
-				Return clsPHRPReader.ePeptideHitResultType.XTandem
+				Return ePeptideHitResultType.XTandem
 
 			Case "IN_Peptide_Hit".ToLower
-				Return clsPHRPReader.ePeptideHitResultType.Inspect
+				Return ePeptideHitResultType.Inspect
 
 			Case "MSG_Peptide_Hit".ToLower
-				Return clsPHRPReader.ePeptideHitResultType.MSGFDB
+				Return ePeptideHitResultType.MSGFDB
 
 			Case "MSA_Peptide_Hit".ToLower
-				Return clsPHRPReader.ePeptideHitResultType.MSAlign
+				Return ePeptideHitResultType.MSAlign
 
 			Case Else
-				Return clsPHRPReader.ePeptideHitResultType.Unknown
+				Return ePeptideHitResultType.Unknown
 		End Select
 	End Function
 
-	Public Shared Function GetPHRPAuxiliaryFileSuffixes() As Generic.List(Of String)
+	Public Shared Function GetPHRPAuxiliaryFileSuffixes() As List(Of String)
 		Dim lstAuxSuffixes As List(Of String)
 		lstAuxSuffixes = New List(Of String)
 
@@ -1601,7 +1604,7 @@ Public Class clsPHRPReader
 		Return strToolVersionInfoFilename
 	End Function
 
-	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
+	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As Exception)
 		If String.IsNullOrEmpty(strBaseMessage) Then
 			strBaseMessage = "Error"
 		End If
@@ -1618,7 +1621,7 @@ Public Class clsPHRPReader
 	''' <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
 	Public Shared Function IsLetterAtoZ(chChar As Char) As Boolean
 
-		Static reIsLetter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[A-Za-z]", Text.RegularExpressions.RegexOptions.Compiled)
+		Static reIsLetter As Regex = New Regex("[A-Za-z]", RegexOptions.Compiled)
 
 		If reIsLetter.IsMatch(chChar) Then
 			Return True
@@ -1645,6 +1648,23 @@ Public Class clsPHRPReader
 		End Try
 
 		Return False
+	End Function
+
+	Protected Shared Function LineContainsValues(ByVal strDataLine As String, ParamArray lstValuesToFind As String()) As Boolean
+		Dim intMatchCount As Integer = 0
+
+		For Each item In lstValuesToFind
+			If strDataLine.IndexOf(item, StringComparison.CurrentCultureIgnoreCase) > -1 Then
+				intMatchCount += 1
+			End If
+		Next
+
+		If intMatchCount = lstValuesToFind.Count Then
+			Return True
+		Else
+			Return False
+		End If
+
 	End Function
 
 	''' <summary>
@@ -1824,7 +1844,7 @@ Public Class clsPHRPReader
 				strSplitLine = strLineIn.Split(ControlChars.Tab)
 
 				If Not mHeaderLineParsed Then
-					If Not clsPHRPReader.IsNumber(strSplitLine(0)) Then
+					If Not IsNumber(strSplitLine(0)) Then
 						' Parse the header line to confirm the column ordering
 						mPHRPParser.ParseColumnHeaders(strSplitLine)
 
@@ -2001,7 +2021,7 @@ Public Class clsPHRPReader
 
 		Try
 			strMSGFFilePath = GetMSGFFileName(mInputFilePath)
-			strMSGFFilePath = System.IO.Path.Combine(mInputFolderPath, strMSGFFilePath)
+			strMSGFFilePath = Path.Combine(mInputFolderPath, strMSGFFilePath)
 
 			blnSuccess = ReadAndCacheMSGFData(strMSGFFilePath)
 
@@ -2019,7 +2039,7 @@ Public Class clsPHRPReader
 		Try
 			strMSGFFilePath = AutoSwitchToFHTIfRequired(strMSGFFilePath, mInputFilePath)
 
-			If System.IO.File.Exists(strMSGFFilePath) Then
+			If File.Exists(strMSGFFilePath) Then
 
 				Dim oMSGFReader As New clsMSGFResultsReader()
 				mMSGFCachedResults = oMSGFReader.ReadMSGFData(strMSGFFilePath)
@@ -2161,7 +2181,7 @@ Public Class clsPHRPReader
 
 		Try
 			strScanStatsFilePath = GetScanStatsFilename(mDatasetName)
-			strScanStatsFilePath = System.IO.Path.Combine(mInputFolderPath, strScanStatsFilePath)
+			strScanStatsFilePath = Path.Combine(mInputFolderPath, strScanStatsFilePath)
 
 			blnSuccess = ReadScanStatsData(strScanStatsFilePath)
 
@@ -2178,7 +2198,7 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean = False
 
 		Try
-			If System.IO.File.Exists(strScanStatsFilePath) Then
+			If File.Exists(strScanStatsFilePath) Then
 
 				Dim oScanStatsReader As New clsScanStatsReader()
 				mScanStats = oScanStatsReader.ReadScanStatsData(strScanStatsFilePath)
@@ -2207,7 +2227,7 @@ Public Class clsPHRPReader
 
 		Try
 			strExtendedScanStatsFilePath = GetExtendedScanStatsFilename(mDatasetName)
-			strExtendedScanStatsFilePath = System.IO.Path.Combine(mInputFolderPath, strExtendedScanStatsFilePath)
+			strExtendedScanStatsFilePath = Path.Combine(mInputFolderPath, strExtendedScanStatsFilePath)
 
 			blnSuccess = ReadExtendedScanStatsData(strExtendedScanStatsFilePath)
 
@@ -2224,7 +2244,7 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean = False
 
 		Try
-			If System.IO.File.Exists(strExtendedScanStatsFilePath) Then
+			If File.Exists(strExtendedScanStatsFilePath) Then
 
 				Dim oExtendedScanStatsReader As New clsExtendedScanStatsReader()
 				mScanStatsEx = oExtendedScanStatsReader.ReadExtendedScanStatsData(strExtendedScanStatsFilePath)
@@ -2305,9 +2325,9 @@ Public Class clsPHRPReader
 	  ByRef eResultType As ePeptideHitResultType, _
 	  ByRef strModSummaryFilePath As String) As Boolean
 
-		Dim fiFileInfo As System.IO.FileInfo
+		Dim fiFileInfo As FileInfo
 
-		fiFileInfo = New System.IO.FileInfo(strInputFilePath)
+		fiFileInfo = New FileInfo(strInputFilePath)
 		If Not fiFileInfo.Exists Then
 			SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath)
 			ReportError("Input file not found: " & strInputFilePath)
@@ -2328,18 +2348,22 @@ Public Class clsPHRPReader
 		' Extract the dataset name from the input file path
 		mDatasetName = AutoDetermineDatasetName(strInputFilePath, eResultType)
 		If mDatasetName Is Nothing OrElse mDatasetName.Length = 0 Then
-			ReportError("Error: Unable to auto-determine the dataset name frome the input file name: " & strInputFilePath)
-			SetLocalErrorCode(ePHRPReaderErrorCodes.InputFileFormatNotRecognized)
-			Return False
+			If mLoadModsAndSeqInfo Or mLoadMSGFResults Or mLoadScanStatsData Then
+				ReportError("Error: Unable to auto-determine the dataset name from the input file name: " & strInputFilePath)
+				SetLocalErrorCode(ePHRPReaderErrorCodes.InputFileFormatNotRecognized)
+				Return False
+			Else
+				ReportWarning("Unable to auto-determine the dataset name from the input file name; this is not a critical error since not reading related files: " & strInputFilePath)
+			End If
 		End If
 
 		If mLoadModsAndSeqInfo Then
 			strModSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName)
-			strModSummaryFilePath = System.IO.Path.Combine(fiFileInfo.DirectoryName, strModSummaryFilePath)
+			strModSummaryFilePath = Path.Combine(fiFileInfo.DirectoryName, strModSummaryFilePath)
 
 			Dim strModSummaryFilePathPreferred As String
-			strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, fiFileInfo.Name)
-			If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso System.IO.File.Exists(strModSummaryFilePathPreferred) Then
+			strModSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(strModSummaryFilePath, fiFileInfo.Name)
+			If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso File.Exists(strModSummaryFilePathPreferred) Then
 				strModSummaryFilePath = strModSummaryFilePathPreferred
 			End If
 
@@ -2367,7 +2391,7 @@ Public Class clsPHRPReader
 			End If
 			Return False
 
-		ElseIf Not System.IO.File.Exists(strFilePath) Then
+		ElseIf Not File.Exists(strFilePath) Then
 			If blnReportErrors Then
 				ReportError(strFileDescription & " not found: " & strFilePath)
 			End If

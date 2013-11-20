@@ -1,5 +1,9 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5072; November 20, 2013
+	- Added back support for reading files created by Mage Extractor
+		- Only valid if LoadModsAndSeqInfo, LoadMSGFResults, and LoadScanStats are false when calling the clsPHRPReader constructor
+
 Version 1.1.4911; June 12, 2013
 	- Added function AutoDetermineBestInputFile to clsPHRPReader
 
