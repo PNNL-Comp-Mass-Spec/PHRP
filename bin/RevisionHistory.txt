@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5072; November 20, 2013
+	- New versions of PHRPReader.dll, ProteinCoverageSummarizer.dll, and PeptideToProteinMapEngine.dll
+
 Version 1.5.5050; October 29, 2013
 	- New version of ThermoRawFileReaderDLL
 

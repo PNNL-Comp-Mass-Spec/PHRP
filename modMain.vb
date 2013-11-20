@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "October 29, 2013"
+	Public Const PROGRAM_DATE As String = "November 20, 2013"
 
 	Private mInputFilePath As String
 	Private mOutputFolderPath As String							' Optional
@@ -57,7 +57,7 @@ Module modMain
 	Private mQuietMode As Boolean
 
 	Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
-	Private mLastProgressReportTime As System.DateTime
+	Private mLastProgressReportTime As DateTime
 	Private mLastProgressReportValue As Integer
 
 	Public Function Main() As Integer
@@ -89,7 +89,6 @@ Module modMain
 		''
 		''Return 0
 
-		intReturnCode = 0
 		mInputFilePath = String.Empty
 		mOutputFolderPath = String.Empty
 		mParameterFilePath = String.Empty
@@ -184,7 +183,7 @@ Module modMain
 			End If
 
 		Catch ex As Exception
-			ShowErrorMessage("Error occurred in modMain->Main: " & System.Environment.NewLine & ex.Message)
+			ShowErrorMessage("Error occurred in modMain->Main: " & Environment.NewLine & ex.Message)
 			intReturnCode = -1
 		End Try
 
@@ -246,7 +245,7 @@ Module modMain
 		Dim sngValue As Single
 		Dim intValue As Integer
 		Dim blnValue As Boolean
-		Dim lstValidParameters As Generic.List(Of String) = New Generic.List(Of String) From {"I", "O", "P", "M", "T", "N", "ProteinMods", "F", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
+		Dim lstValidParameters As List(Of String) = New List(Of String) From {"I", "O", "P", "M", "T", "N", "ProteinMods", "F", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
 
 		Try
 			' Make sure no invalid parameters are present
@@ -330,7 +329,7 @@ Module modMain
 			End If
 
 		Catch ex As Exception
-			ShowErrorMessage("Error parsing the command line parameters: " & System.Environment.NewLine & ex.Message)
+			ShowErrorMessage("Error parsing the command line parameters: " & Environment.NewLine & ex.Message)
 		End Try
 
 		Return False
@@ -338,7 +337,7 @@ Module modMain
 	End Function
 
 	Private Sub ShowErrorMessage(ByVal strMessage As String)
-		Dim strSeparator As String = "------------------------------------------------------------------------------"
+		Const strSeparator As String = "------------------------------------------------------------------------------"
 
 		Console.WriteLine()
 		Console.WriteLine(strSeparator)
@@ -349,8 +348,8 @@ Module modMain
 		WriteToErrorStream(strMessage)
 	End Sub
 
-	Private Sub ShowErrorMessage(ByVal strTitle As String, ByVal items As List(Of String))
-		Dim strSeparator As String = "------------------------------------------------------------------------------"
+	Private Sub ShowErrorMessage(ByVal strTitle As String, ByVal items As IEnumerable(Of String))
+		Const strSeparator As String = "------------------------------------------------------------------------------"
 		Dim strMessage As String
 
 		Console.WriteLine()
@@ -376,8 +375,8 @@ Module modMain
 			Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides.  Parallel files will be created containing sequence info and modification details.  ")
 			Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
 			Console.WriteLine()
-			Console.WriteLine("Program syntax:" & System.Environment.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
-				   " InputFilePath [/O:OutputFolderPath]")
+			Console.WriteLine("Program syntax:" & Environment.NewLine & IO.Path.GetFileName(Reflection.Assembly.GetExecutingAssembly().Location) & _
+				" InputFilePath [/O:OutputFolderPath]")
 			Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
 			Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]")
 			Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]")
@@ -422,7 +421,7 @@ Module modMain
 			Console.WriteLine()
 
 			' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
-			System.Threading.Thread.Sleep(750)
+			Threading.Thread.Sleep(750)
 
 		Catch ex As Exception
 			ShowErrorMessage("Error displaying the program syntax: " & ex.Message)
@@ -432,7 +431,7 @@ Module modMain
 
 	Private Sub WriteToErrorStream(strErrorMessage As String)
 		Try
-			Using swErrorStream As System.IO.StreamWriter = New System.IO.StreamWriter(Console.OpenStandardError())
+			Using swErrorStream As IO.StreamWriter = New IO.StreamWriter(Console.OpenStandardError())
 				swErrorStream.WriteLine(strErrorMessage)
 			End Using
 		Catch ex As Exception

@@ -85,9 +85,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>PeptideHitResultsProcessor\bin\PeptideHitResultsProcessor.dll</HintPath>
     </Reference>
+    <Reference Include="PeptideToProteinMapEngine">
+      <HintPath>PeptideHitResultsProcessor\Lib\PeptideToProteinMapEngine.dll</HintPath>
+    </Reference>
     <Reference Include="PHRPReader">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>PHRPReader\bin\PHRPReader.dll</HintPath>
+    </Reference>
+    <Reference Include="ProteinCoverageSummarizer">
+      <HintPath>PeptideHitResultsProcessor\Lib\ProteinCoverageSummarizer.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>
