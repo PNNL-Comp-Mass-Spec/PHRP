@@ -889,6 +889,21 @@ Public Class clsPHRPReader
 			End If
 		Next
 
+		If String.IsNullOrWhiteSpace(kvBestSynOrFHTFile.Key) Then
+			If lstDatasetNames.Count = 1 Then
+				Console.WriteLine("Could not find a Synopsis or First Hits file for dataset " + lstDatasetNames.First())
+			Else
+				Console.WriteLine("Could not find a Synopsis or First Hits file for any of the candidate datasets")
+			End If
+
+			Console.WriteLine("Looked for the following files:")
+			For Each fileName In lstFilesToFind
+				If Not String.IsNullOrWhiteSpace(fileName.Key) Then
+					Console.WriteLine("  " & fileName.Key)
+				End If
+			Next
+		End If
+
 		' kvBestSynOrFHTFile should now contain the PHRP result file with the most auxiliary files
 		Return kvBestSynOrFHTFile.Key
 

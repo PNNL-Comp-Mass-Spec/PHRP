@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5122; January 9, 2014
+	- AutoDetermineBestInputFile now displays the list of filenames that were considered if a valid match cannot be found for a dataset
+ 
 Version 1.1.5072; November 20, 2013
 	- Added back support for reading files created by Mage Extractor
 		- Only valid if LoadModsAndSeqInfo, LoadMSGFResults, and LoadScanStats are false when calling the clsPHRPReader constructor
