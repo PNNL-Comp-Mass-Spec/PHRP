@@ -154,6 +154,24 @@ Public Class clsPHRPReader
 	End Property
 
 	''' <summary>
+	''' Returns the most recently loaded PSM's sequence info (if available)
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property CurrentPSMSeqInfo As clsSeqInfo
+		Get
+			If mPSMCurrent Is Nothing OrElse mPHRPParser.SeqInfo Is Nothing Then
+				Return Nothing
+			Else
+				Dim oSeqInfo As clsSeqInfo = Nothing
+				mPHRPParser.SeqInfo.TryGetValue(mPSMCurrent.SeqID, oSeqInfo)
+				Return oSeqInfo
+			End If
+		End Get
+	End Property
+
+	''' <summary>
 	''' Dataset name (auto-determined based on the input filename)
 	''' </summary>
 	''' <value></value>
@@ -308,6 +326,55 @@ Public Class clsPHRPReader
 	End Property
 
 	''' <summary>
+	''' Returns the cached mapping between ResultID and SeqID
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property ResultToSeqMap() As SortedList(Of Integer, Integer)
+		Get
+			If mPHRPParser Is Nothing Then
+				Return New SortedList(Of Integer, Integer)
+			Else
+				Return mPHRPParser.ResultToSeqMap
+			End If
+
+		End Get
+	End Property
+
+	''' <summary>
+	''' Returns the cached sequence info, where key is SeqID
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property SeqInfo() As SortedList(Of Integer, clsSeqInfo)
+		Get
+			If mPHRPParser Is Nothing Then
+				Return New SortedList(Of Integer, clsSeqInfo)
+			Else
+				Return mPHRPParser.SeqInfo
+			End If
+		End Get
+	End Property
+
+	''' <summary>
+	''' Returns the cached sequence to protein map information
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public ReadOnly Property SeqToProteinMap() As SortedList(Of Integer, List(Of clsProteinInfo))
+		Get
+			If mPHRPParser Is Nothing Then
+				Return New SortedList(Of Integer, List(Of clsProteinInfo))
+			Else
+				Return mPHRPParser.SeqToProteinMap
+			End If
+		End Get
+	End Property
+
+	''' <summary>
 	''' When True, then skips near-duplicate lines in the PHRP data file (lines with the same peptide in the same scan, but different protein names)
 	''' </summary>
 	''' <value></value>
@@ -403,7 +470,7 @@ Public Class clsPHRPReader
 
 		mInitialized = False
 
-		Me.InitializeMemberVariables()
+		InitializeMemberVariables()
 
 		mLoadModsAndSeqInfo = blnLoadModsAndSeqInfo
 		mLoadMSGFResults = blnLoadMSGFResults
@@ -432,18 +499,18 @@ Public Class clsPHRPReader
 		End If
 
 		fiFileInfo = New FileInfo(strBasePHRPFileName)
-		If fiFileInfo.Name.ToLower().IndexOf("_fht") > 0 Then
+		If fiFileInfo.Name.ToLower().IndexOf("_fht", StringComparison.Ordinal) > 0 Then
 			' strBasePHRPFileName is first-hits-file based
 
 			fiFileInfo = New FileInfo(strFilePath)
-			intSynIndex = fiFileInfo.Name.ToLower().IndexOf("_syn")
+			intSynIndex = fiFileInfo.Name.ToLower().IndexOf("_syn", StringComparison.Ordinal)
 			If intSynIndex > 0 Then
 				' strFilePath is synopsis-file based
 				' Change strFilePath to contain _fht instead of _syn
 
 				strFilePathFHT = fiFileInfo.Name.Substring(0, intSynIndex) & "_fht" & fiFileInfo.Name.Substring(intSynIndex + 4)
 
-				If IO.Path.IsPathRooted(strFilePath) Then
+				If Path.IsPathRooted(strFilePath) Then
 					Return Path.Combine(fiFileInfo.DirectoryName, strFilePathFHT)
 				Else
 					Return strFilePathFHT
@@ -473,7 +540,7 @@ Public Class clsPHRPReader
 
 		Try
 			intTotalLines = 0
-			Using srReader As StreamReader = New StreamReader(New FileStream(strTextFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+			Using srReader As StreamReader = New StreamReader(New FileStream(strTextFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 				While srReader.Peek > -1
 					srReader.ReadLine()
 					intTotalLines += 1
@@ -713,7 +780,7 @@ Public Class clsPHRPReader
 	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByRef eMatchedResultType As ePeptideHitResultType) As String
 		' Find candidate dataset names in strInputFolderPath
 
-		Dim fiInputFolder As IO.DirectoryInfo
+		Dim fiInputFolder As DirectoryInfo
 		Dim lstDatasetNames As SortedSet(Of String) = New SortedSet(Of String)(StringComparer.CurrentCultureIgnoreCase)
 		Dim lstFileSpec As List(Of String) = New List(Of String)
 
@@ -721,12 +788,12 @@ Public Class clsPHRPReader
 		Dim intCharIndex As Integer
 
 		If String.IsNullOrWhiteSpace(strInputFolderPath) Then
-			Throw New IO.DirectoryNotFoundException("Input folder path is empty")
+			Throw New DirectoryNotFoundException("Input folder path is empty")
 		End If
 
-		fiInputFolder = New IO.DirectoryInfo(strInputFolderPath)
+		fiInputFolder = New DirectoryInfo(strInputFolderPath)
 		If Not fiInputFolder.Exists Then
-			Throw New IO.DirectoryNotFoundException("Input folder not found: " & strInputFolderPath)
+			Throw New DirectoryNotFoundException("Input folder not found: " & strInputFolderPath)
 		End If
 
 		' MSGF+
@@ -754,7 +821,7 @@ Public Class clsPHRPReader
 			For Each fiFile In fiInputFolder.GetFiles("*" & strFileSpec)
 				strDataset = fiFile.Name
 
-				intCharIndex = strDataset.ToLower().IndexOf(strFileSpec)
+				intCharIndex = strDataset.ToLower().IndexOf(strFileSpec, StringComparison.Ordinal)
 				If intCharIndex > 0 Then
 					strDataset = strDataset.Substring(0, intCharIndex)
 
@@ -810,7 +877,7 @@ Public Class clsPHRPReader
 	''' <remarks></remarks>
 	Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal lstDatasetNames As List(Of String), ByRef eMatchedResultType As ePeptideHitResultType) As String
 
-		Dim fiInputFolder As IO.DirectoryInfo
+		Dim fiInputFolder As DirectoryInfo
 
 		' Items in this list are KeyValuePairs where the key is a filename to look for and the value is a PeptideHitResultType
 		Dim lstFilesToFind As List(Of KeyValuePair(Of String, ePeptideHitResultType))
@@ -826,12 +893,12 @@ Public Class clsPHRPReader
 		eMatchedResultType = ePeptideHitResultType.Unknown
 
 		If String.IsNullOrWhiteSpace(strInputFolderPath) Then
-			Throw New IO.DirectoryNotFoundException("Input folder path is empty")
+			Throw New DirectoryNotFoundException("Input folder path is empty")
 		End If
 
-		fiInputFolder = New IO.DirectoryInfo(strInputFolderPath)
+		fiInputFolder = New DirectoryInfo(strInputFolderPath)
 		If Not fiInputFolder.Exists Then
-			Throw New IO.DirectoryNotFoundException("Input folder not found: " & strInputFolderPath)
+			Throw New DirectoryNotFoundException("Input folder not found: " & strInputFolderPath)
 		End If
 
 		If lstDatasetNames Is Nothing OrElse lstDatasetNames.Count = 0 Then
@@ -865,7 +932,7 @@ Public Class clsPHRPReader
 
 		For Each kvFileToFind As KeyValuePair(Of String, ePeptideHitResultType) In lstFilesToFind
 			If Not String.IsNullOrEmpty(kvFileToFind.Key) Then
-				Dim fiSynOrFHTFile As IO.FileInfo = New IO.FileInfo(IO.Path.Combine(fiInputFolder.FullName, kvFileToFind.Key))
+				Dim fiSynOrFHTFile As FileInfo = New FileInfo(Path.Combine(fiInputFolder.FullName, kvFileToFind.Key))
 
 				If fiSynOrFHTFile.Exists Then
 					' Match found
@@ -873,10 +940,10 @@ Public Class clsPHRPReader
 
 					Dim intAuxFileCount As Integer = 0
 					Dim strBaseName As String
-					strBaseName = IO.Path.Combine(fiSynOrFHTFile.Directory.FullName, IO.Path.GetFileNameWithoutExtension(fiSynOrFHTFile.Name))
+					strBaseName = Path.Combine(fiSynOrFHTFile.Directory.FullName, Path.GetFileNameWithoutExtension(fiSynOrFHTFile.Name))
 
 					For Each strSuffix As String In lstAuxiliaryFileSuffixes
-						If IO.File.Exists(strBaseName & strSuffix) Then
+						If File.Exists(strBaseName & strSuffix) Then
 							intAuxFileCount += 1
 						End If
 					Next
@@ -1019,7 +1086,7 @@ Public Class clsPHRPReader
 						eResultType = ePeptideHitResultType.Sequest
 					Else
 
-						Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+						Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
 							If srInFile.Peek() >= 0 Then
 								strHeaderLine = srInFile.ReadLine()
@@ -1050,7 +1117,7 @@ Public Class clsPHRPReader
 			End If
 
 		Catch ex As Exception
-			Throw ex
+			Throw
 		End Try
 
 		If eResultType = ePeptideHitResultType.Unknown Then
@@ -1343,6 +1410,8 @@ Public Class clsPHRPReader
 		lstAuxSuffixes.Add("_SeqInfo.txt")
 		lstAuxSuffixes.Add("_MSGF.txt")
 		lstAuxSuffixes.Add("_ProteinMods.txt")
+		lstAuxSuffixes.Add("_ModDetails.txt")
+		lstAuxSuffixes.Add("_ModSummary.txt")
 
 		Return lstAuxSuffixes
 
@@ -1828,7 +1897,7 @@ Public Class clsPHRPReader
 		Dim strLineIn As String = String.Empty
 		Dim strSplitLine() As String
 
-		Dim blnSkipLine As Boolean = False
+		Dim blnSkipLine As Boolean
 		Dim blnSuccess As Boolean = False
 		Dim blnMatchFound As Boolean = False
 
@@ -1864,7 +1933,7 @@ Public Class clsPHRPReader
 						mPHRPParser.ParseColumnHeaders(strSplitLine)
 
 						mHeaderLineParsed = True
-						Return Me.MoveNext()
+						Return MoveNext()
 					End If
 
 					mHeaderLineParsed = True
@@ -1900,11 +1969,13 @@ Public Class clsPHRPReader
 									dblTotalModMass += objModEntry.ModDefinition.ModificationMass
 								Next
 
-								If mPSMCurrent.PeptideMonoisotopicMass = 0 Then
+								If Math.Abs(mPSMCurrent.PeptideMonoisotopicMass) < Double.Epsilon Then
 									mPSMCurrent.PeptideMonoisotopicMass = mPeptideMassCalculator.ComputeSequenceMass(mPSMCurrent.PeptideCleanSequence) + dblTotalModMass
 								End If
 
 							End If
+
+
 						End If
 
 						blnScanStatsValid = TryGetScanStats(mPSMCurrent.ScanNumber, objScanStatsInfo)
@@ -1951,7 +2022,7 @@ Public Class clsPHRPReader
 
 							End If
 
-							If dblMonoisotopicPrecursorMass = 0 AndAlso blnExtendedScanStatsValid Then
+							If Math.Abs(dblMonoisotopicPrecursorMass) < Double.Epsilon AndAlso blnExtendedScanStatsValid Then
 								If objExtendedScanStatsInfo.MonoisotopicMZ > 0 Then
 									' Determine the precursor m/z value using the Monoisotopic m/z value reported by the instrument
 									dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(objExtendedScanStatsInfo.MonoisotopicMZ, mPSMCurrent.Charge, 0)
@@ -2097,7 +2168,7 @@ Public Class clsPHRPReader
 			If String.IsNullOrEmpty(strModSummaryFilePath) Then
 				ReportError("ModSummaryFile path is empty; unable to continue")
 				Return False
-			ElseIf Not IO.File.Exists(strModSummaryFilePath) Then
+			ElseIf Not File.Exists(strModSummaryFilePath) Then
 				ReportError("ModSummary file not found: " & strModSummaryFilePath)
 				Return False
 			End If

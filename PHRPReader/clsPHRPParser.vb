@@ -154,12 +154,14 @@ Public MustInherit Class clsPHRPParser
 #End Region
 
 	''' <summary>
-	''' Constructor
+	''' Initialize the parser for the given dataset and input file
 	''' </summary>
 	''' <param name="strDatasetName">Dataset Name</param>
 	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
+	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean)
+	Protected Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean)
 
 		mErrorMessages = New List(Of String)
 		mWarningMessages = New List(Of String)
@@ -201,7 +203,7 @@ Public MustInherit Class clsPHRPParser
 			mModInfoLoaded = False
 		End If
 
-		If mModInfoLoaded AndAlso blnLoadModsAndSeqInfo Then
+		If blnLoadModsAndSeqInfo Then
 			' Read the ResultToSeqMapInfo (if the files exist)			
 			If blnIsSynopsisFile Then
 				' Assume the files exist
@@ -237,6 +239,84 @@ Public MustInherit Class clsPHRPParser
 
 	End Sub
 
+	''' <summary>
+	''' Returns the appropriate PHRPParser class based on the input file name; assumes blnLoadModsAndSeqInfo=True
+	''' </summary>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from strInputFilePath</remarks>
+	Public Shared Function GetParser(ByVal strInputFilePath As String) As clsPHRPParser
+		Return GetParser(strInputFilePath, True)
+	End Function
+
+	''' <summary>
+	''' Returns the appropriate PHRPParser class based on the input file name
+	''' </summary>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
+	''' <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from strInputFilePath</remarks>
+	Public Shared Function GetParser(ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
+		Dim ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strInputFilePath)
+
+		If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
+			Throw New Exception("Unable to auto-determine the PeptideHitResultType for " & strInputFilePath)
+		End If
+
+		Dim strDatasetName = clsPHRPReader.AutoDetermineDatasetName(strInputFilePath)
+		If String.IsNullOrEmpty(strDatasetName) Then
+			Throw New Exception("Unable to auto-determine the Dataset Name for " & strInputFilePath)
+		End If
+
+		Return GetParser(strInputFilePath, strDatasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo)
+	End Function
+
+	''' <summary>
+	''' Returns the appropriate PHRPParser class based on the input file name
+	''' </summary>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' ''' <param name="strDatasetName">Dataset Name</param>
+	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
+	''' <remarks>Throws an exception if unable to auto-determine the input file type from strInputFilePath</remarks>
+	Public Shared Function GetParser(ByVal strInputFilePath As String, ByVal strDatasetName As String, ByVal blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
+		Dim ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strInputFilePath)
+
+		If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
+			Throw New Exception("Unable to auto-determine the PeptideHitResultType for " & strInputFilePath)
+		End If
+
+		Return GetParser(strInputFilePath, strDatasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo)
+	End Function
+
+	''' <summary>
+	''' Returns the appropriate PHRPParser class based on ePeptideHitResultType
+	''' </summary>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="strDatasetName">Dataset Name</param>
+	''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
+	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
+	''' <remarks></remarks>
+	Public Shared Function GetParser(ByVal strInputFilePath As String, ByVal strDatasetName As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
+		Select Case ePeptideHitResultType
+			Case clsPHRPReader.ePeptideHitResultType.Inspect
+				Return New clsPHRPParserInspect(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+
+			Case clsPHRPReader.ePeptideHitResultType.MSAlign
+				Return New clsPHRPParserMSAlign(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+
+			Case clsPHRPReader.ePeptideHitResultType.MSGFDB
+				Return New clsPHRPParserMSGFDB(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+
+			Case clsPHRPReader.ePeptideHitResultType.Sequest
+				Return New clsPHRPParserSequest(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+
+			Case clsPHRPReader.ePeptideHitResultType.XTandem
+				Return New clsPHRPParserXTandem(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+
+			Case Else
+				Throw New Exception("Unrecognized value for PeptideHitResultType: " & ePeptideHitResultType.ToString())
+		End Select
+
+	End Function
+
 #Region "Functions overridden by derived classes"
 	Protected MustOverride Sub DefineColumnHeaders()
 
@@ -268,7 +348,7 @@ Public MustInherit Class clsPHRPParser
 		Const NOT_FOUND As String = "==SCORE_NOT_FOUND=="
 
 		Dim strValue As String
-		strValue = PHRPReader.clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders, NOT_FOUND)
+		strValue = clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders, NOT_FOUND)
 
 		If strValue <> NOT_FOUND Then
 			objPSM.SetScore(strScoreColumnName, strValue)
@@ -315,7 +395,7 @@ Public MustInherit Class clsPHRPParser
 
 	End Function
 
-	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As System.Exception)
+	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As Exception)
 		If String.IsNullOrEmpty(strBaseMessage) Then
 			strBaseMessage = "Error"
 		End If
@@ -405,8 +485,7 @@ Public MustInherit Class clsPHRPParser
 					intSeqID = objItem.Value
 
 					Dim lstProteinsForSeqID As List(Of clsProteinInfo) = Nothing
-					Dim lstProteinsForResultID As List(Of String) = Nothing
-					lstProteinsForResultID = New List(Of String)
+					Dim lstProteinsForResultID = New List(Of String)
 
 					If mSeqToProteinMap.TryGetValue(intSeqID, lstProteinsForSeqID) Then
 
@@ -505,7 +584,7 @@ Public MustInherit Class clsPHRPParser
 					If Not String.IsNullOrEmpty(strCommentChar) Then
 						' Look for the comment character
 						Dim intCommentCharIndex As Integer
-						intCommentCharIndex = strValue.IndexOf(strCommentChar)
+						intCommentCharIndex = strValue.IndexOf(strCommentChar, StringComparison.Ordinal)
 						If intCommentCharIndex > 0 Then
 							' Trim off the comment
 							strValue = strValue.Substring(0, intCommentCharIndex).Trim()
@@ -541,7 +620,7 @@ Public MustInherit Class clsPHRPParser
 			If Not File.Exists(strParamFilePath) Then
 				ReportError(strSearchEngineName & " param file not found: " & strParamFilePath)
 			Else
-				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
@@ -576,7 +655,7 @@ Public MustInherit Class clsPHRPParser
 		Dim strLineIn As String
 
 		Dim strSearchEngineVersion As String
-		Dim dtSearchDate As System.DateTime
+		Dim dtSearchDate As DateTime
 
 		Dim kvSetting As KeyValuePair(Of String, String)
 
@@ -592,9 +671,9 @@ Public MustInherit Class clsPHRPParser
 				ReportWarning("Tool version info file not found: " & strToolVersionInfoFilePath)
 			Else
 				strSearchEngineVersion = "Unknown"
-				dtSearchDate = New System.DateTime(1980, 1, 1)
+				dtSearchDate = New DateTime(1980, 1, 1)
 
-				Using srInFile As StreamReader = New StreamReader(New FileStream(strToolVersionInfoFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strToolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
@@ -604,7 +683,7 @@ Public MustInherit Class clsPHRPParser
 
 						Select Case kvSetting.Key.ToLower()
 							Case "date"
-								blnValidDate = System.DateTime.TryParse(kvSetting.Value, dtSearchDate)
+								blnValidDate = DateTime.TryParse(kvSetting.Value, dtSearchDate)
 
 							Case "toolversioninfo"
 								If Not String.IsNullOrEmpty(kvSetting.Value) Then
@@ -752,7 +831,14 @@ Public MustInherit Class clsPHRPParser
 										End If
 
 										Dim objMatchedModDef As clsModificationDefinition = Nothing
-										blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState, objMatchedModDef)
+
+										If mModInfo Is Nothing Then
+											objMatchedModDef = New clsModificationDefinition()
+											objMatchedModDef.MassCorrectionTag = strMassCorrectionTag
+											blnMatchFound = True
+										Else
+											blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState, objMatchedModDef)
+										End If
 
 										If blnMatchFound Then
 											objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
@@ -765,7 +851,7 @@ Public MustInherit Class clsPHRPParser
 											' Could not find a valid entry in mModInfo
 											ReportError("Unrecognized mass correction tag found in the SeqInfo file: " & strMassCorrectionTag)
 										End If
-
+								
 									End If
 								End If
 							Next intModIndex
@@ -799,6 +885,8 @@ Public MustInherit Class clsPHRPParser
 	  ByVal blnFavorTerminalMods As Boolean, _
 	  ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
 	  ByRef objMatchedModDef As clsModificationDefinition) As Boolean
+
+		If mModInfo Is Nothing Then Return False
 
 		Dim blnMatchFound As Boolean
 
