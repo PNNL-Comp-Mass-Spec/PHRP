@@ -27,6 +27,8 @@ Option Strict On
 ' this computer software.
 
 Imports PHRPReader
+Imports System.IO
+Imports System.Text.RegularExpressions
 
 Public Class clsInSpecTResultsProcessor
     Inherits clsPHRPBaseClass
@@ -60,183 +62,183 @@ Public Class clsInSpecTResultsProcessor
     Private Const INSPECT_NTERMINAL_MOD_MASS_REGEX As String = "^\+(\d+)"
     Private Const INSPECT_CTERMINAL_MOD_MASS_REGEX As String = "\+(\d+)$"
 
-    Private Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
+	Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
-    Private Const PHOS_MOD_NAME As String = "phos"
-    Private Const PHOS_MOD_MASS As String = "79.9663"
-    Private Const PHOS_MOD_RESIDUES As String = "STY"
+	Private Const PHOS_MOD_NAME As String = "phos"
+	Private Const PHOS_MOD_MASS As String = "79.9663"
+	Private Const PHOS_MOD_RESIDUES As String = "STY"
 
-    ' These columns correspond to the tab-delimited file created directly by Inspect
-    Public Enum eInspectResultsFileColumns As Integer
-        SpectrumFile = 0
-        Scan = 1
-        Annotation = 2
-        Protein = 3
-        Charge = 4
-        MQScore = 5
-        Length = 6
-        TotalPRMScore = 7
-        MedianPRMScore = 8
-        FractionY = 9
-        FractionB = 10
-        Intensity = 11
-        NTT = 12
-        pvalue = 13
-        FScore = 14
-        DeltaScore = 15
-        DeltaScoreOther = 16
-        RecordNumber = 17
-        DBFilePos = 18
-        SpecFilePos = 19
-        PrecursorMZ = 20
-        PrecursorError = 21
-    End Enum
+	' These columns correspond to the tab-delimited file created directly by Inspect
+	Public Enum eInspectResultsFileColumns As Integer
+		SpectrumFile = 0
+		Scan = 1
+		Annotation = 2
+		Protein = 3
+		Charge = 4
+		MQScore = 5
+		Length = 6
+		TotalPRMScore = 7
+		MedianPRMScore = 8
+		FractionY = 9
+		FractionB = 10
+		Intensity = 11
+		NTT = 12
+		pvalue = 13
+		FScore = 14
+		DeltaScore = 15
+		DeltaScoreOther = 16
+		RecordNumber = 17
+		DBFilePos = 18
+		SpecFilePos = 19
+		PrecursorMZ = 20
+		PrecursorError = 21
+	End Enum
 
-    ' These columns correspond to the Synopsis and First-Hits files created by this class
-    Protected Const InspectSynopsisFileColCount As Integer = 27
-    Public Enum eInspectSynFileColumns As Integer
-        ResultID = 0
-        Scan = 1
-        Peptide = 2
-        Protein = 3
-        Charge = 4
-        MQScore = 5
-        Length = 6
-        TotalPRMScore = 7
-        MedianPRMScore = 8
-        FractionY = 9
-        FractionB = 10
-        Intensity = 11
-        NTT = 12
-        PValue = 13
-        FScore = 14
-        DeltaScore = 15
-        DeltaScoreOther = 16
-        DeltaNormMQScore = 17                   ' Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, then also storing 0.   This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
-        DeltaNormTotalPRMScore = 18             ' Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, then also storing 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
-        RankTotalPRMScore = 19                  ' Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
-        RankFScore = 20                         ' Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
-        MH = 21                                 ' Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
-        RecordNumber = 22
-        DBFilePos = 23
-        SpecFilePos = 24
-        PrecursorMZ = 25
-        PrecursorError = 26
-    End Enum
+	' These columns correspond to the Synopsis and First-Hits files created by this class
+	Protected Const InspectSynopsisFileColCount As Integer = 27
+	Public Enum eInspectSynFileColumns As Integer
+		ResultID = 0
+		Scan = 1
+		Peptide = 2
+		Protein = 3
+		Charge = 4
+		MQScore = 5
+		Length = 6
+		TotalPRMScore = 7
+		MedianPRMScore = 8
+		FractionY = 9
+		FractionB = 10
+		Intensity = 11
+		NTT = 12
+		PValue = 13
+		FScore = 14
+		DeltaScore = 15
+		DeltaScoreOther = 16
+		DeltaNormMQScore = 17					' Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, then also storing 0.   This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
+		DeltaNormTotalPRMScore = 18				' Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, then also storing 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
+		RankTotalPRMScore = 19					' Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
+		RankFScore = 20							' Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
+		MH = 21									' Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
+		RecordNumber = 22
+		DBFilePos = 23
+		SpecFilePos = 24
+		PrecursorMZ = 25
+		PrecursorError = 26
+	End Enum
 
-    Protected Enum eInspectModType As Integer
-        Unknown = 0
-        DynamicMod = 1
-        StaticMod = 2
-        DynNTermPeptide = 3
-        DynCTermPeptide = 4
-    End Enum
+	Protected Enum eInspectModType As Integer
+		Unknown = 0
+		DynamicMod = 1
+		StaticMod = 2
+		DynNTermPeptide = 3
+		DynCTermPeptide = 4
+	End Enum
 
-    Protected Enum eFilteredOutputFileTypeConstants As Integer
-        SynFile = 0
-        FHTbyFScore = 1
-        FHTbyTotalPRM = 2
-    End Enum
+	Protected Enum eFilteredOutputFileTypeConstants As Integer
+		SynFile = 0
+		FHTbyFScore = 1
+		FHTbyTotalPRM = 2
+	End Enum
 #End Region
 
 #Region "Structures"
-    Protected Structure udtInspectSearchResultType
-        Public SpectrumFile As String
-        Public Scan As String
-        Public ScanNum As Integer
-        Public PeptideAnnotation As String
-        Public Protein As String
-        Public Charge As String
-        Public ChargeNum As Short
-        Public MQScore As String                ' Higher values are better scores; note that MQScore can be negative
-        Public MQScoreNum As Single             ' Store the value of the string for quick reference when sorting
-        Public Length As Integer
-        Public TotalPRMScore As String          ' Higher values are better scores
-        Public TotalPRMScoreNum As Single       ' We store the value of the string for quick reference when sorting
-        Public MedianPRMScore As String
-        Public FractionY As String
-        Public FractionB As String
-        Public Intensity As String
-        Public NTT As Integer
-        Public pValue As String                 ' Lower values are better scores
-        Public PValueNum As Single              ' Store the value of the string for quick reference when sorting
-        Public FScore As String                 ' Higher values are better scores
-        Public FScoreNum As Single              ' Store the value of the string for quick reference when sorting
-        Public DeltaScore As String
-        Public DeltaScoreOther As String
-        Public DeltaNormMQScore As Single
-        Public DeltaNormTotalPRMScore As Single
-        Public RankTotalPRMScore As Integer
-        Public RankFScore As Integer
-        Public MH As Double
-        Public RecordNumber As String
-        Public DBFilePos As String
-        Public SpecFilePos As String
-        Public PrecursorMZ As String
-        Public PrecursorError As String         ' Precursor error in; units are m/z (NOT Daltons)
-        Public DelMPPM As String                ' Computed by this application
+	Protected Structure udtInspectSearchResultType
+		Public SpectrumFile As String
+		Public Scan As String
+		Public ScanNum As Integer
+		Public PeptideAnnotation As String
+		Public Protein As String
+		Public Charge As String
+		Public ChargeNum As Short
+		Public MQScore As String				' Higher values are better scores; note that MQScore can be negative
+		Public MQScoreNum As Single				' Store the value of the string for quick reference when sorting
+		Public Length As Integer
+		Public TotalPRMScore As String			' Higher values are better scores
+		Public TotalPRMScoreNum As Single		' We store the value of the string for quick reference when sorting
+		Public MedianPRMScore As String
+		Public FractionY As String
+		Public FractionB As String
+		Public Intensity As String
+		Public NTT As Integer
+		Public pValue As String					' Lower values are better scores
+		Public PValueNum As Single				' Store the value of the string for quick reference when sorting
+		Public FScore As String					' Higher values are better scores
+		Public FScoreNum As Single				' Store the value of the string for quick reference when sorting
+		Public DeltaScore As String
+		Public DeltaScoreOther As String
+		Public DeltaNormMQScore As Single
+		Public DeltaNormTotalPRMScore As Single
+		Public RankTotalPRMScore As Integer
+		Public RankFScore As Integer
+		Public MH As Double
+		Public RecordNumber As String
+		Public DBFilePos As String
+		Public SpecFilePos As String
+		Public PrecursorMZ As String
+		Public PrecursorError As String			' Precursor error in; units are m/z (NOT Daltons)
+		Public DelMPPM As String				' Computed by this application
 
-        Public Sub Clear()
-            SpectrumFile = String.Empty
-            Scan = String.Empty
-            ScanNum = 0
-            PeptideAnnotation = String.Empty
-            Protein = String.Empty
-            Charge = String.Empty
-            ChargeNum = 0
-            MQScore = String.Empty
-            MQScoreNum = 0
-            Length = 0
-            TotalPRMScore = String.Empty
-            TotalPRMScoreNum = 0
-            MedianPRMScore = String.Empty
-            FractionY = String.Empty
-            FractionB = String.Empty
-            Intensity = String.Empty
-            NTT = 0
-            pValue = String.Empty
-            PValueNum = 0
-            FScore = String.Empty
-            FScoreNum = 0
-            DeltaScore = String.Empty
-            DeltaScoreOther = String.Empty
-            DeltaNormMQScore = 0
-            DeltaNormTotalPRMScore = 0
-            RankTotalPRMScore = 0
-            RankFScore = 0
-            MH = 0
-            RecordNumber = String.Empty
-            DBFilePos = String.Empty
-            SpecFilePos = String.Empty
-            PrecursorMZ = String.Empty
-            PrecursorError = String.Empty
-            DelMPPM = String.Empty
-        End Sub
-    End Structure
+		Public Sub Clear()
+			SpectrumFile = String.Empty
+			Scan = String.Empty
+			ScanNum = 0
+			PeptideAnnotation = String.Empty
+			Protein = String.Empty
+			Charge = String.Empty
+			ChargeNum = 0
+			MQScore = String.Empty
+			MQScoreNum = 0
+			Length = 0
+			TotalPRMScore = String.Empty
+			TotalPRMScoreNum = 0
+			MedianPRMScore = String.Empty
+			FractionY = String.Empty
+			FractionB = String.Empty
+			Intensity = String.Empty
+			NTT = 0
+			pValue = String.Empty
+			PValueNum = 0
+			FScore = String.Empty
+			FScoreNum = 0
+			DeltaScore = String.Empty
+			DeltaScoreOther = String.Empty
+			DeltaNormMQScore = 0
+			DeltaNormTotalPRMScore = 0
+			RankTotalPRMScore = 0
+			RankFScore = 0
+			MH = 0
+			RecordNumber = String.Empty
+			DBFilePos = String.Empty
+			SpecFilePos = String.Empty
+			PrecursorMZ = String.Empty
+			PrecursorError = String.Empty
+			DelMPPM = String.Empty
+		End Sub
+	End Structure
 
-    Protected Structure udtModInfoType
-        Public ModName As String            ' Mod names must be lower case, and 4 characters in length (or shorter)
-        Public ModMass As String            ' Storing as a string since reading from a text file and writing to a text file
-        Public Residues As String
-        Public ModType As eInspectModType
-        Public ModSymbol As String
-    End Structure
+	Protected Structure udtModInfoType
+		Public ModName As String			' Mod names must be lower case, and 4 characters in length (or shorter)
+		Public ModMass As String			' Storing as a string since reading from a text file and writing to a text file
+		Public Residues As String
+		Public ModType As eInspectModType
+		Public ModSymbol As String
+	End Structure
 
 #End Region
 
 #Region "Classwide Variables"
-    Protected mSortFHTandSynFiles As Boolean
+	Protected mSortFHTandSynFiles As Boolean
 #End Region
 
 #Region "Properties"
-    Public Property SortFHTandSynFiles() As Boolean
-        Get
-            Return mSortFHTandSynFiles
-        End Get
-        Set(ByVal value As Boolean)
-            mSortFHTandSynFiles = value
-        End Set
-    End Property
+	Public Property SortFHTandSynFiles() As Boolean
+		Get
+			Return mSortFHTandSynFiles
+		End Get
+		Set(ByVal value As Boolean)
+			mSortFHTandSynFiles = value
+		End Set
+	End Property
 #End Region
 
 	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
@@ -253,26 +255,26 @@ Public Class clsInSpecTResultsProcessor
 
 	End Sub
 
-    Private Sub AddDynamicAndStaticResidueMods(ByRef objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean)
-        ' Step through .PeptideSequenceWithMods
-        ' For each residue, check if a static mod is defined that affects that residue
-        ' For each mod symbol, determine the modification and add to objSearchResult
+	Private Sub AddDynamicAndStaticResidueMods(ByRef objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean)
+		' Step through .PeptideSequenceWithMods
+		' For each residue, check if a static mod is defined that affects that residue
+		' For each mod symbol, determine the modification and add to objSearchResult
 
-        Dim intIndex As Integer, intModIndex As Integer
-        Dim chChar As Char
-        Dim objModificationDefinition As clsModificationDefinition
+		Dim intIndex As Integer, intModIndex As Integer
+		Dim chChar As Char
+		Dim objModificationDefinition As clsModificationDefinition
 
-        Dim strSequence As String
-        Dim chMostRecentLetter As Char
-        Dim intResidueLocInPeptide As Integer
+		Dim strSequence As String
+		Dim chMostRecentLetter As Char
+		Dim intResidueLocInPeptide As Integer
 
-        chMostRecentLetter = "-"c
-        intResidueLocInPeptide = 0
+		chMostRecentLetter = "-"c
+		intResidueLocInPeptide = 0
 
-        With objSearchResult
-            strSequence = .PeptideSequenceWithMods
-            For intIndex = 0 To strSequence.Length - 1
-                chChar = strSequence.Chars(intIndex)
+		With objSearchResult
+			strSequence = .PeptideSequenceWithMods
+			For intIndex = 0 To strSequence.Length - 1
+				chChar = strSequence.Chars(intIndex)
 
 				If IsLetterAtoZ(chChar) Then
 					chMostRecentLetter = chChar
@@ -295,192 +297,192 @@ Public Class clsInSpecTResultsProcessor
 					' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
 				End If
 
-            Next intIndex
-        End With
-    End Sub
+			Next intIndex
+		End With
+	End Sub
 
-    ''' <summary>
-    ''' Sorts the data by descending TotalPRMScore, than ranks each entry; in addition, computes normalized delta score (DeltaNorm) values
-    ''' </summary>
-    ''' <param name="udtSearchResultsCurrentScan"></param>
-    ''' <param name="intCurrentScanResultsCount"></param>
-    ''' <remarks></remarks>
-    Private Sub AssignRankAndDeltaNormValues(ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, ByVal intCurrentScanResultsCount As Integer)
+	''' <summary>
+	''' Sorts the data by descending TotalPRMScore, than ranks each entry; in addition, computes normalized delta score (DeltaNorm) values
+	''' </summary>
+	''' <param name="udtSearchResultsCurrentScan"></param>
+	''' <param name="intCurrentScanResultsCount"></param>
+	''' <remarks></remarks>
+	Private Sub AssignRankAndDeltaNormValues(ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, ByVal intCurrentScanResultsCount As Integer)
 
-        Const DeltaNormMQScore_If_Undefined As Single = 0
-        Const DeltaNormTotalPRMScore_If_Undefined As Single = 0
+		Const DeltaNormMQScore_If_Undefined As Single = 0
+		Const DeltaNormTotalPRMScore_If_Undefined As Single = 0
 
-        Static objSortScanChargeFScore As New InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
-        Static objSortScanChargeMQScore As New InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
-        Static objSortScanChargeTotalPRMDesc As New InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
+		Static objSortScanChargeFScore As New InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
+		Static objSortScanChargeMQScore As New InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
+		Static objSortScanChargeTotalPRMDesc As New InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
 
-        Dim intIndex As Integer
+		Dim intIndex As Integer
 
-        Dim intLastCharge As Integer
-        Dim dblLastValue As Double
+		Dim intLastCharge As Integer
+		Dim dblLastValue As Double
 
-        Dim intCurrentRank As Integer
-
-
-        ' Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending RankFScore
-        ' All of the data in udtSearchResultsCurrentScan should have the same scan number
-        Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeFScore)
-
-        For intIndex = 0 To intCurrentScanResultsCount - 1
-            If intIndex = 0 OrElse udtSearchResultsCurrentScan(intIndex).ChargeNum <> intLastCharge Then
-                intLastCharge = udtSearchResultsCurrentScan(intIndex).ChargeNum
-                dblLastValue = udtSearchResultsCurrentScan(intIndex).FScoreNum
-                intCurrentRank = 1
-            Else
-                If udtSearchResultsCurrentScan(intIndex).FScoreNum <> dblLastValue Then
-                    dblLastValue = udtSearchResultsCurrentScan(intIndex).FScoreNum
-                    intCurrentRank += 1
-                End If
-            End If
-
-            udtSearchResultsCurrentScan(intIndex).RankFScore = intCurrentRank
-        Next intIndex
+		Dim intCurrentRank As Integer
 
 
-        ' Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending MQScore (note that MQScore can be negative)
-        ' All of the data in udtSearchResultsCurrentScan should have the same scan number
-        Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeMQScore)
+		' Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending RankFScore
+		' All of the data in udtSearchResultsCurrentScan should have the same scan number
+		Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeFScore)
 
-        For intIndex = 0 To intCurrentScanResultsCount - 1
-            If intIndex < intCurrentScanResultsCount - 1 AndAlso _
-               udtSearchResultsCurrentScan(intIndex).ChargeNum = udtSearchResultsCurrentScan(intIndex + 1).ChargeNum Then
-                udtSearchResultsCurrentScan(intIndex).DeltaNormMQScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan(intIndex).MQScoreNum, udtSearchResultsCurrentScan(intIndex + 1).MQScoreNum, DeltaNormMQScore_If_Undefined)
-            Else
-                udtSearchResultsCurrentScan(intIndex).DeltaNormMQScore = 0
-            End If
-        Next intIndex
+		For intIndex = 0 To intCurrentScanResultsCount - 1
+			If intIndex = 0 OrElse udtSearchResultsCurrentScan(intIndex).ChargeNum <> intLastCharge Then
+				intLastCharge = udtSearchResultsCurrentScan(intIndex).ChargeNum
+				dblLastValue = udtSearchResultsCurrentScan(intIndex).FScoreNum
+				intCurrentRank = 1
+			Else
+				If udtSearchResultsCurrentScan(intIndex).FScoreNum <> dblLastValue Then
+					dblLastValue = udtSearchResultsCurrentScan(intIndex).FScoreNum
+					intCurrentRank += 1
+				End If
+			End If
+
+			udtSearchResultsCurrentScan(intIndex).RankFScore = intCurrentRank
+		Next intIndex
 
 
-        ' Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending PValue
-        ' All of the data in udtSearchResultsCurrentScan should have the same scan number
-        Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeTotalPRMDesc)
+		' Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending MQScore (note that MQScore can be negative)
+		' All of the data in udtSearchResultsCurrentScan should have the same scan number
+		Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeMQScore)
 
-        For intIndex = 0 To intCurrentScanResultsCount - 1
-            If intIndex = 0 OrElse udtSearchResultsCurrentScan(intIndex).ChargeNum <> intLastCharge Then
-                intLastCharge = udtSearchResultsCurrentScan(intIndex).ChargeNum
-                dblLastValue = udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum
-                intCurrentRank = 1
-            Else
-                If udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum <> dblLastValue Then
-                    dblLastValue = udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum
-                    intCurrentRank += 1
-                End If
-            End If
+		For intIndex = 0 To intCurrentScanResultsCount - 1
+			If intIndex < intCurrentScanResultsCount - 1 AndAlso _
+			   udtSearchResultsCurrentScan(intIndex).ChargeNum = udtSearchResultsCurrentScan(intIndex + 1).ChargeNum Then
+				udtSearchResultsCurrentScan(intIndex).DeltaNormMQScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan(intIndex).MQScoreNum, udtSearchResultsCurrentScan(intIndex + 1).MQScoreNum, DeltaNormMQScore_If_Undefined)
+			Else
+				udtSearchResultsCurrentScan(intIndex).DeltaNormMQScore = 0
+			End If
+		Next intIndex
 
-            udtSearchResultsCurrentScan(intIndex).RankTotalPRMScore = intCurrentRank
 
-            If intIndex < intCurrentScanResultsCount - 1 AndAlso _
-               udtSearchResultsCurrentScan(intIndex).ChargeNum = udtSearchResultsCurrentScan(intIndex + 1).ChargeNum Then
-                udtSearchResultsCurrentScan(intIndex).DeltaNormTotalPRMScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum, udtSearchResultsCurrentScan(intIndex + 1).TotalPRMScoreNum, DeltaNormTotalPRMScore_If_Undefined)
-            Else
-                udtSearchResultsCurrentScan(intIndex).DeltaNormTotalPRMScore = 0
-            End If
+		' Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending PValue
+		' All of the data in udtSearchResultsCurrentScan should have the same scan number
+		Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeTotalPRMDesc)
 
-        Next intIndex
+		For intIndex = 0 To intCurrentScanResultsCount - 1
+			If intIndex = 0 OrElse udtSearchResultsCurrentScan(intIndex).ChargeNum <> intLastCharge Then
+				intLastCharge = udtSearchResultsCurrentScan(intIndex).ChargeNum
+				dblLastValue = udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum
+				intCurrentRank = 1
+			Else
+				If udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum <> dblLastValue Then
+					dblLastValue = udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum
+					intCurrentRank += 1
+				End If
+			End If
 
-    End Sub
+			udtSearchResultsCurrentScan(intIndex).RankTotalPRMScore = intCurrentRank
 
-    Private Function AddModificationsAndComputeMass(ByRef objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
-        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
+			If intIndex < intCurrentScanResultsCount - 1 AndAlso _
+			   udtSearchResultsCurrentScan(intIndex).ChargeNum = udtSearchResultsCurrentScan(intIndex + 1).ChargeNum Then
+				udtSearchResultsCurrentScan(intIndex).DeltaNormTotalPRMScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum, udtSearchResultsCurrentScan(intIndex + 1).TotalPRMScoreNum, DeltaNormTotalPRMScore_If_Undefined)
+			Else
+				udtSearchResultsCurrentScan(intIndex).DeltaNormTotalPRMScore = 0
+			End If
 
-        Dim blnSuccess As Boolean
+		Next intIndex
 
-        Try
-            ' If any modifications of type IsotopicMod are defined, add them to the Search Result Mods now
-            objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
+	End Sub
 
-            ' Parse .PeptideSequenceWithMods to determine the modified residues present
-            AddDynamicAndStaticResidueMods(objSearchResult, blnUpdateModOccurrenceCounts)
+	Private Function AddModificationsAndComputeMass(ByRef objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+		Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
 
-            ' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
-            ' Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
-            '  even though, biologically, that's typically not possible
-            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
-            '  (where two COOH groups are present)
-            objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
+		Dim blnSuccess As Boolean
 
-            ' Compute the monoisotopic mass for this peptide
-            objSearchResult.ComputeMonoisotopicMass()
+		Try
+			' If any modifications of type IsotopicMod are defined, add them to the Search Result Mods now
+			objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
 
-            ' Populate .PeptideModDescription
-            objSearchResult.UpdateModDescription()
+			' Parse .PeptideSequenceWithMods to determine the modified residues present
+			AddDynamicAndStaticResidueMods(objSearchResult, blnUpdateModOccurrenceCounts)
 
-            blnSuccess = True
-        Catch ex As Exception
-            blnSuccess = False
-        End Try
+			' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
+			' Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
+			'  even though, biologically, that's typically not possible
+			' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
+			'  (where two COOH groups are present)
+			objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
 
-        Return blnSuccess
+			' Compute the monoisotopic mass for this peptide
+			objSearchResult.ComputeMonoisotopicMass()
 
-    End Function
+			' Populate .PeptideModDescription
+			objSearchResult.UpdateModDescription()
 
-    ''' <summary>
-    ''' This routine creates a first hits file or synopsis file from the output from InSpecT
-    ''' </summary>
-    ''' <param name="strInputFilePath"></param>
-    ''' <param name="strOutputFilePath"></param>
-    ''' <param name="udtInspectModInfo">Used to replace Mod text entries in the peptides with Mod Symbols; assumes each entryin </param>
-    ''' <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
-    ''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Protected Function CreateFHTorSYNResultsFile(ByVal strInputFilePath As String, _
-                                                 ByVal strOutputFilePath As String, _
-                                                 ByRef udtInspectModInfo() As udtModInfoType, _
-                                                 ByVal eFilteredOutputFileType As eFilteredOutputFileTypeConstants, _
-                                                 Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+			blnSuccess = True
+		Catch ex As Exception
+			blnSuccess = False
+		End Try
 
-        Dim intPreviousScan As Integer
+		Return blnSuccess
 
-        Dim strLineIn As String
-        Dim protein As String = String.Empty
+	End Function
+
+	''' <summary>
+	''' This routine creates a first hits file or synopsis file from the output from InSpecT
+	''' </summary>
+	''' <param name="strInputFilePath"></param>
+	''' <param name="strOutputFilePath"></param>
+	''' <param name="udtInspectModInfo">Used to replace Mod text entries in the peptides with Mod Symbols; assumes each entryin </param>
+	''' <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
+	''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function CreateFHTorSYNResultsFile(ByVal strInputFilePath As String, _
+												 ByVal strOutputFilePath As String, _
+												 ByRef udtInspectModInfo() As udtModInfoType, _
+												 ByVal eFilteredOutputFileType As eFilteredOutputFileTypeConstants, _
+												 Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+
+		Dim intPreviousScan As Integer
+
+		Dim strLineIn As String
+		Dim protein As String = String.Empty
 
 		Dim udtSearchResult As udtInspectSearchResultType = New udtInspectSearchResultType
 
-        Dim intCurrentScanResultsCount As Integer
-        Dim udtSearchResultsCurrentScan() As udtInspectSearchResultType
+		Dim intCurrentScanResultsCount As Integer
+		Dim udtSearchResultsCurrentScan() As udtInspectSearchResultType
 
-        Dim intFilteredSearchResultCount As Integer
-        Dim udtFilteredSearchResults() As udtInspectSearchResultType
+		Dim intFilteredSearchResultCount As Integer
+		Dim udtFilteredSearchResults() As udtInspectSearchResultType
 
-        Dim intResultsProcessed As Integer
-        Dim intResultID As Integer = 0
+		Dim intResultsProcessed As Integer
+		Dim intResultID As Integer = 0
 
-        Dim blnSuccess As Boolean
-        Dim blnValidSearchResult As Boolean
+		Dim blnSuccess As Boolean
+		Dim blnValidSearchResult As Boolean
 
-        Dim strErrorLog As String = String.Empty
+		Dim strErrorLog As String = String.Empty
 		Dim objSortComparer As Generic.IComparer(Of udtInspectSearchResultType)
 
-        Try
-            ' Initialize variables
-            intPreviousScan = Int32.MinValue
+		Try
+			' Initialize variables
+			intPreviousScan = Int32.MinValue
 
-            If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-                ' Writes the synopsis file, which writes every record with a p-value below a set threshold or a TotalPRMScore above a certain threshold
-                objSortComparer = New InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
-            Else
-                If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.FHTbyTotalPRM Then
-                    ' Write the PRM first-hits file, which writes the record with the highest TotalPRMScore
-                    objSortComparer = New InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
-                Else
-                    ' eFilteredOutputFileTypeConstants.FHTbyFScore
-                    ' Write the FScore first-hits file, which writes the record with the highest FScore
-                    objSortComparer = New InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
-                End If
-            End If
+			If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
+				' Writes the synopsis file, which writes every record with a p-value below a set threshold or a TotalPRMScore above a certain threshold
+				objSortComparer = New InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
+			Else
+				If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.FHTbyTotalPRM Then
+					' Write the PRM first-hits file, which writes the record with the highest TotalPRMScore
+					objSortComparer = New InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
+				Else
+					' eFilteredOutputFileTypeConstants.FHTbyFScore
+					' Write the FScore first-hits file, which writes the record with the highest FScore
+					objSortComparer = New InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
+				End If
+			End If
 
-            Try
-                ' Open the input file and parse it
-                ' Initialize the stream reader and the stream Text writer
-				Using srDataFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInputFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+			Try
+				' Open the input file and parse it
+				' Initialize the stream reader and the stream Text writer
+				Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-					Using swResultFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strOutputFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+					Using swResultFile As StreamWriter = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
 						' Write the header line
 						WriteSynFHTFileHeader(swResultFile, strErrorLog)
@@ -558,47 +560,47 @@ Public Class clsInSpecTResultsProcessor
 				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
 				blnSuccess = False
 			End Try
-        Catch ex As Exception
-            SetErrorMessage(ex.Message)
-            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-            blnSuccess = False
-        End Try
+		Catch ex As Exception
+			SetErrorMessage(ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+			blnSuccess = False
+		End Try
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
-    Protected Function ComputeDelMCorrectedPPM(ByVal dblPrecursorErrorDa As Double, ByVal dblPrecursorMonoMass As Double, _
-                                               ByVal dblPeptideMonoisotopicMass As Double, _
-                                               ByVal blnAdjustPrecursorMassForC13 As Boolean) As Double
+	Protected Function ComputeDelMCorrectedPPM(ByVal dblPrecursorErrorDa As Double, ByVal dblPrecursorMonoMass As Double, _
+	 ByVal dblPeptideMonoisotopicMass As Double, _
+	 ByVal blnAdjustPrecursorMassForC13 As Boolean) As Double
 
-        Dim dblPeptideDeltaMassCorrectedPpm As Double
+		Dim dblPeptideDeltaMassCorrectedPpm As Double
 
 		dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
 
-        Return dblPeptideDeltaMassCorrectedPpm
+		Return dblPeptideDeltaMassCorrectedPpm
 
-    End Function
+	End Function
 
-    Private Function ComputeDeltaNormScore(ByVal sngCurrentScore As Single, ByVal sngNextScore As Single, ByVal sngValueIfCurrentScoreZero As Single) As Single
-        Try
-            If sngCurrentScore <> 0 Then
-                Return Math.Abs((sngCurrentScore - sngNextScore) / sngCurrentScore)
-            Else
-                Return sngValueIfCurrentScoreZero
-            End If
-        Catch ex As Exception
-            Return sngValueIfCurrentScoreZero
-        End Try
-    End Function
+	Private Function ComputeDeltaNormScore(ByVal sngCurrentScore As Single, ByVal sngNextScore As Single, ByVal sngValueIfCurrentScoreZero As Single) As Single
+		Try
+			If sngCurrentScore <> 0 Then
+				Return Math.Abs((sngCurrentScore - sngNextScore) / sngCurrentScore)
+			Else
+				Return sngValueIfCurrentScoreZero
+			End If
+		Catch ex As Exception
+			Return sngValueIfCurrentScoreZero
+		End Try
+	End Function
 
-    Private Function ComputePeptideMHFromPrecursorInfo(ByVal strPrecursorMZ As String, ByVal strPrecursorError As String, ByVal strCharge As String) As Double
-        ' Compute the theoretical peptide MH using the precursor m/z value and the precursor error values
+	Private Function ComputePeptideMHFromPrecursorInfo(ByVal strPrecursorMZ As String, ByVal strPrecursorError As String, ByVal strCharge As String) As Double
+		' Compute the theoretical peptide MH using the precursor m/z value and the precursor error values
 
-        Dim dblPrecursorMZ As Double
-        Dim dblPrecursorError As Double
-        Dim intCharge As Integer
-        Dim dblPeptideMH As Double = 0
+		Dim dblPrecursorMZ As Double
+		Dim dblPrecursorError As Double
+		Dim intCharge As Integer
+		Dim dblPeptideMH As Double = 0
 
 		If String.IsNullOrWhiteSpace(strPrecursorMZ) OrElse strPrecursorMZ = "0" Then
 			' Precursor m/z is undefined; cannot continue
@@ -620,14 +622,14 @@ Public Class clsInSpecTResultsProcessor
 			End If
 		End If
 
-        Return dblPeptideMH
+		Return dblPeptideMH
 
-    End Function
+	End Function
 
 	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
 		Dim strPepToProteinMapFilePath As String = String.Empty
 
-		strPepToProteinMapFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+		strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
 		If strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_fht") Then
 			' Remove _syn or _fht
 			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
@@ -637,22 +639,22 @@ Public Class clsInSpecTResultsProcessor
 
 	End Function
 
-    Private Function ExtractModInfoFromInspectParamFile(ByVal strInspectParameterFilePath As String, ByRef udtModList() As udtModInfoType) As Boolean
+	Private Function ExtractModInfoFromInspectParamFile(ByVal strInspectParameterFilePath As String, ByRef udtModList() As udtModInfoType) As Boolean
 
 		Dim strLineIn As String
-        Dim strSplitLine As String()
+		Dim strSplitLine As String()
 
-        Dim intModCount As Integer
-        Dim intUnnamedModID As Integer
+		Dim intModCount As Integer
+		Dim intUnnamedModID As Integer
 
-        Dim blnSuccess As Boolean = False
+		Dim blnSuccess As Boolean = False
 
-        Try
-            ' Initialize udtModList and intUnnamedModID
-            intModCount = 0
-            ReDim udtModList(-1)
+		Try
+			' Initialize udtModList and intUnnamedModID
+			intModCount = 0
+			ReDim udtModList(-1)
 
-            intUnnamedModID = 0
+			intUnnamedModID = 0
 
 			If String.IsNullOrWhiteSpace(strInspectParameterFilePath) Then
 				SetErrorMessage("Inspect Parameter File name not defined; unable to extract mod info")
@@ -660,8 +662,8 @@ Public Class clsInSpecTResultsProcessor
 				Return False
 			End If
 
-            ' Read the contents of the inspect parameter file
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInspectParameterFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+			' Read the contents of the inspect parameter file
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strInspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 				Do While srInFile.Peek <> -1
 					strLineIn = srInFile.ReadLine().Trim()
@@ -743,48 +745,48 @@ Public Class clsInSpecTResultsProcessor
 			blnSuccess = True
 
 		Catch ex As Exception
-			SetErrorMessage("Error reading the Inspect parameter file (" & System.IO.Path.GetFileName(strInspectParameterFilePath) & "): " & ex.Message)
+			SetErrorMessage("Error reading the Inspect parameter file (" & Path.GetFileName(strInspectParameterFilePath) & "): " & ex.Message)
 			SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
-			blnSuccess = False	
+			blnSuccess = False
 		End Try
 
-        Return blnSuccess
+		Return blnSuccess
 
-    End Function
+	End Function
 
-    Private Function ExtractScanNumFromDTAName(ByVal spectrumFile As String) As String
-        Static reScanNumberRegEx As New System.Text.RegularExpressions.Regex(DTA_FILENAME_SCAN_NUMBER_REGEX, REGEX_OPTIONS)
+	Private Function ExtractScanNumFromDTAName(ByVal spectrumFile As String) As String
+		Static reScanNumberRegEx As New Regex(DTA_FILENAME_SCAN_NUMBER_REGEX, REGEX_OPTIONS)
 
-        Dim scanNum As String = String.Empty
+		Dim scanNum As String = String.Empty
 
-        ' See if strValue resembles a .Dta file name
-        ' For example, "MyDataset.300.300.2.dta"
+		' See if strValue resembles a .Dta file name
+		' For example, "MyDataset.300.300.2.dta"
 
-        Try
-            With reScanNumberRegEx.Match(spectrumFile)
-                If .Success AndAlso .Groups.Count > 1 Then
-                    scanNum = .Groups(1).Value
-                End If
-            End With
-        Catch ex As Exception
-            ' Ignore errors here
-            scanNum = "0"
-        End Try
+		Try
+			With reScanNumberRegEx.Match(spectrumFile)
+				If .Success AndAlso .Groups.Count > 1 Then
+					scanNum = .Groups(1).Value
+				End If
+			End With
+		Catch ex As Exception
+			' Ignore errors here
+			scanNum = "0"
+		End Try
 
-        Return scanNum
+		Return scanNum
 
-    End Function
+	End Function
 
-    Private Sub InitializeLocalVariables()
-        mSortFHTandSynFiles = True
-    End Sub
+	Private Sub InitializeLocalVariables()
+		mSortFHTandSynFiles = True
+	End Sub
 
-    ''' <summary>
+	''' <summary>
 	''' Load the PeptideToProteinMap information; in addition, creates the _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
-    ''' </summary>
-    ''' <param name="strPepToProteinMapFilePath"></param>
-    ''' <param name="strOutputFolderPath"></param>
-    ''' <param name="udtInspectModInfo"></param>
+	''' </summary>
+	''' <param name="strPepToProteinMapFilePath"></param>
+	''' <param name="strOutputFolderPath"></param>
+	''' <param name="udtInspectModInfo"></param>
 	''' <param name="lstPepToProteinMapping"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
@@ -806,7 +808,7 @@ Public Class clsInSpecTResultsProcessor
 				Console.WriteLine()
 				ReportWarning("PepToProteinMap file is not defined")
 				Return False
-			ElseIf Not System.IO.File.Exists(strPepToProteinMapFilePath) Then
+			ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
 				Console.WriteLine()
 				ReportWarning("PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
 				Return False
@@ -819,9 +821,9 @@ Public Class clsInSpecTResultsProcessor
 			blnSuccess = LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
 
 			If blnSuccess Then
-				strMTSPepToProteinMapFilePath = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
+				strMTSPepToProteinMapFilePath = Path.Combine(strOutputFolderPath, Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
 
-				Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strMTSPepToProteinMapFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+				Using swOutFile As StreamWriter = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 					If Not String.IsNullOrEmpty(strHeaderLine) Then
 						' Header line
 						swOutFile.WriteLine(strHeaderLine)
@@ -850,7 +852,7 @@ Public Class clsInSpecTResultsProcessor
 			End If
 
 		Catch ex As Exception
-			SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" & System.IO.Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
+			SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" & Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
 			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
 			blnSuccess = False
 		End Try
@@ -860,7 +862,7 @@ Public Class clsInSpecTResultsProcessor
 	End Function
 
 	Private Function ParseInspectSynFileHeaderLine(ByVal strLineIn As String, _
-		 ByRef intColumnMapping() As Integer) As Boolean
+	  ByRef intColumnMapping() As Integer) As Boolean
 
 		' Parse the header line
 
@@ -988,14 +990,14 @@ Public Class clsInSpecTResultsProcessor
 
 				' Open the input file and parse it
 				' Initialize the stream reader
-				Using srDataFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInputFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 					strErrorLog = String.Empty
 					intResultsProcessed = 0
 					blnHeaderParsed = False
 
 					' Create the output files
-					Dim strBaseOutputFilePath As String = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileName(strInputFilePath))
+					Dim strBaseOutputFilePath As String = Path.Combine(strOutputFolderPath, Path.GetFileName(strInputFilePath))
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
@@ -1066,7 +1068,7 @@ Public Class clsInSpecTResultsProcessor
 									' Use binary search to find this peptide in lstPepToProteinMapping
 									intPepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, strCurrentPeptideWithMods)
 
-									If intPepToProteinMapIndex >= 0 Then									
+									If intPepToProteinMapIndex >= 0 Then
 										' Call MyBase.SaveResultsFileEntrySeqInfo for each entry in lstPepToProteinMapping() for peptide , skipping objSearchResult.ProteinName
 										strCurrentProtein = String.Copy(objSearchResult.ProteinName)
 										Do
@@ -1099,9 +1101,9 @@ Public Class clsInSpecTResultsProcessor
 
 				If mCreateModificationSummaryFile Then
 					' Create the modification summary file
-					Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
-					strModificationSummaryFilePath = System.IO.Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
-					strModificationSummaryFilePath = System.IO.Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
+					Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
+					strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+					strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
 
 					SaveModificationSummaryFile(strModificationSummaryFilePath)
 				End If
@@ -1132,10 +1134,10 @@ Public Class clsInSpecTResultsProcessor
 	End Function
 
 	Private Function ParseInspectResultsFileEntry(ByRef strLineIn As String, _
-		ByRef udtInspectModInfo() As udtModInfoType, _
-		ByRef udtSearchResult As udtInspectSearchResultType, _
-		ByRef strErrorLog As String, _
-		ByVal intResultsProcessed As Integer) As Boolean
+	 ByRef udtInspectModInfo() As udtModInfoType, _
+	 ByRef udtSearchResult As udtInspectSearchResultType, _
+	 ByRef strErrorLog As String, _
+	 ByVal intResultsProcessed As Integer) As Boolean
 
 		' Parses an entry from the Inspect results file
 		' The expected header line is:
@@ -1235,7 +1237,7 @@ Public Class clsInSpecTResultsProcessor
 							dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
 
 							dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, _
-								dblPeptideMonoisotopicMass, True)
+							 dblPeptideMonoisotopicMass, True)
 
 							.DelMPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 4, True)
 
@@ -1391,7 +1393,7 @@ Public Class clsInSpecTResultsProcessor
 	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
 
-		Dim ioInputFile As System.IO.FileInfo
+		Dim ioInputFile As FileInfo
 
 		Dim strOutputFilePath As String
 		Dim strSynOutputFilePath As String
@@ -1419,12 +1421,12 @@ Public Class clsInSpecTResultsProcessor
 					Exit Try
 				End If
 
-				MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
+				MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
 
 				If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
 					Try
 						' Obtain the full path to the input file
-						ioInputFile = New System.IO.FileInfo(strInputFilePath)
+						ioInputFile = New FileInfo(strInputFilePath)
 
 						ReDim udtInspectModInfo(-1)
 						lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
@@ -1453,8 +1455,8 @@ Public Class clsInSpecTResultsProcessor
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
-							strOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
-							strOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX)
+							strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+							strOutputFilePath = Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX)
 
 							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyTotalPRM)
 
@@ -1465,8 +1467,8 @@ Public Class clsInSpecTResultsProcessor
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
-							strOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
-							strOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX)
+							strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+							strOutputFilePath = Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX)
 
 							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyFScore)
 
@@ -1481,16 +1483,16 @@ Public Class clsInSpecTResultsProcessor
 							Console.WriteLine(MyBase.ProgressStepDescription)
 
 							'Define the synopsis output file name based on strInputFilePath
-							strSynOutputFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
-							strSynOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strSynOutputFilePath & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+							strSynOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+							strSynOutputFilePath = Path.Combine(strOutputFolderPath, strSynOutputFilePath & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
 							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.SynFile)
 
 							' Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
 							' LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
-							strPepToProteinMapFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ioInputFile.FullName), System.IO.Path.GetFileNameWithoutExtension(ioInputFile.FullName) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
+							strPepToProteinMapFilePath = Path.Combine(Path.GetDirectoryName(ioInputFile.FullName), Path.GetFileNameWithoutExtension(ioInputFile.FullName) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
 
-							MyBase.ResetProgress("Loading the PepToProtein map file: " & System.IO.Path.GetFileName(strPepToProteinMapFilePath))
+							MyBase.ResetProgress("Loading the PepToProtein map file: " & Path.GetFileName(strPepToProteinMapFilePath))
 							Console.WriteLine()
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
@@ -1499,7 +1501,7 @@ Public Class clsInSpecTResultsProcessor
 
 
 							' Create the other PHRP-specific files
-							MyBase.ResetProgress("Creating the PHRP files for " & System.IO.Path.GetFileName(strSynOutputFilePath))
+							MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
 							Console.WriteLine()
 							Console.WriteLine()
 							Console.WriteLine(MyBase.ProgressStepDescription)
@@ -1535,17 +1537,17 @@ Public Class clsInSpecTResultsProcessor
 
 	End Function
 
-    Private Function RemoveExtraneousDigits(ByVal strValue As String) As String
-        ' If strValue ends in .0000, then remove the .0000 portion
-        Static reNumPlusZeroes As System.Text.RegularExpressions.Regex
-        Static reAllZeroes As System.Text.RegularExpressions.Regex
+	Private Function RemoveExtraneousDigits(ByVal strValue As String) As String
+		' If strValue ends in .0000, then remove the .0000 portion
+		Static reNumPlusZeroes As Regex
+		Static reAllZeroes As Regex
 
-        Dim reMatch As System.Text.RegularExpressions.Match
+		Dim reMatch As Match
 
-        If reNumPlusZeroes Is Nothing Then
-            reNumPlusZeroes = New System.Text.RegularExpressions.Regex("(\.\d*[1-9])0+$", Text.RegularExpressions.RegexOptions.Compiled)
-            reAllZeroes = New System.Text.RegularExpressions.Regex("\.0+$", Text.RegularExpressions.RegexOptions.Compiled)
-        End If
+		If reNumPlusZeroes Is Nothing Then
+			reNumPlusZeroes = New Regex("(\.\d*[1-9])0+$", RegexOptions.Compiled)
+			reAllZeroes = New Regex("\.0+$", RegexOptions.Compiled)
+		End If
 
 		If String.IsNullOrWhiteSpace(strValue) Then
 			Return String.Empty
@@ -1566,129 +1568,129 @@ Public Class clsInSpecTResultsProcessor
 			Return strValue
 		End If
 
-    End Function
+	End Function
 
-    ''' <summary>
-    ''' Replaces modification name text in peptide sequences with modification symbols (uses case-sensitive comparisons)
-    ''' </summary>
-    ''' <param name="strPeptide"></param>
-    ''' <param name="udtInspectModInfo">This function assumes that each entry in udtInspectModInfo() has both .ModName and .ModSymbol defined</param>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Protected Function ReplaceInspectModTextWithSymbol(ByVal strPeptide As String, ByRef udtInspectModInfo() As udtModInfoType) As String
+	''' <summary>
+	''' Replaces modification name text in peptide sequences with modification symbols (uses case-sensitive comparisons)
+	''' </summary>
+	''' <param name="strPeptide"></param>
+	''' <param name="udtInspectModInfo">This function assumes that each entry in udtInspectModInfo() has both .ModName and .ModSymbol defined</param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function ReplaceInspectModTextWithSymbol(ByVal strPeptide As String, ByRef udtInspectModInfo() As udtModInfoType) As String
 
-        Dim intIndex As Integer
-        Dim strPrefix As String = String.Empty
-        Dim strSuffix As String = String.Empty
+		Dim intIndex As Integer
+		Dim strPrefix As String = String.Empty
+		Dim strSuffix As String = String.Empty
 
-        Dim strPeptideNew As String = String.Empty
+		Dim strPeptideNew As String = String.Empty
 
-        Dim intModMass As Integer
+		Dim intModMass As Integer
 
-        Static reNTerminalModMassRegEx As New System.Text.RegularExpressions.Regex(INSPECT_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
-        Static reCTerminalModMassRegEx As New System.Text.RegularExpressions.Regex(INSPECT_CTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
-        Dim reMatch As System.Text.RegularExpressions.Match
+		Static reNTerminalModMassRegEx As New Regex(INSPECT_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
+		Static reCTerminalModMassRegEx As New Regex(INSPECT_CTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
+		Dim reMatch As Match
 
-        If strPeptide.Length >= 4 Then
-            If strPeptide.Chars(1) = "."c AndAlso _
-               strPeptide.Chars(strPeptide.Length - 2) = "."c Then
-                strPrefix = strPeptide.Substring(0, 2)
-                strSuffix = strPeptide.Substring(strPeptide.Length - 2, 2)
+		If strPeptide.Length >= 4 Then
+			If strPeptide.Chars(1) = "."c AndAlso _
+			   strPeptide.Chars(strPeptide.Length - 2) = "."c Then
+				strPrefix = strPeptide.Substring(0, 2)
+				strSuffix = strPeptide.Substring(strPeptide.Length - 2, 2)
 
-                strPeptide = strPeptide.Substring(2, strPeptide.Length - 4)
-            End If
-        End If
+				strPeptide = strPeptide.Substring(2, strPeptide.Length - 4)
+			End If
+		End If
 
-        ' strPeptide should now be the clean peptide, without the prefix or suffix residues
-        For intIndex = 0 To udtInspectModInfo.Length - 1
-            If udtInspectModInfo(intIndex).ModType <> eInspectModType.StaticMod Then
-                strPeptide = strPeptide.Replace(udtInspectModInfo(intIndex).ModName, udtInspectModInfo(intIndex).ModSymbol)
+		' strPeptide should now be the clean peptide, without the prefix or suffix residues
+		For intIndex = 0 To udtInspectModInfo.Length - 1
+			If udtInspectModInfo(intIndex).ModType <> eInspectModType.StaticMod Then
+				strPeptide = strPeptide.Replace(udtInspectModInfo(intIndex).ModName, udtInspectModInfo(intIndex).ModSymbol)
 
-                If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Or _
-                   udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
+				If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Or _
+				   udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
 
-                    If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Then
-                        ' Inspect notates N-terminal mods like this: R.+14HVIFLAER.R   (Note: This behavior is not yet confirmed)
-                        ' Look for this using reNTerminalModMassRegEx
-                        reMatch = reNTerminalModMassRegEx.Match(strPeptide)
+					If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Then
+						' Inspect notates N-terminal mods like this: R.+14HVIFLAER.R   (Note: This behavior is not yet confirmed)
+						' Look for this using reNTerminalModMassRegEx
+						reMatch = reNTerminalModMassRegEx.Match(strPeptide)
 
-                    ElseIf udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
-                        ' Inspect notates C-terminal mods like this: R.HVIFLAER+14.R
-                        ' Look for this using reCTerminalModMassRegEx
-                        reMatch = reCTerminalModMassRegEx.Match(strPeptide)
+					ElseIf udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
+						' Inspect notates C-terminal mods like this: R.HVIFLAER+14.R
+						' Look for this using reCTerminalModMassRegEx
+						reMatch = reCTerminalModMassRegEx.Match(strPeptide)
 
-                    Else
-                        ' This code should never be reached
-                        reMatch = Nothing
-                    End If
+					Else
+						' This code should never be reached
+						reMatch = Nothing
+					End If
 
-                    If Not reMatch Is Nothing Then
-                        With reMatch
-                            If .Success AndAlso .Groups.Count > 1 Then
-                                ' Match found
-                                Try
-                                    intModMass = CInt(.Groups(1).Value)
+					If Not reMatch Is Nothing Then
+						With reMatch
+							If .Success AndAlso .Groups.Count > 1 Then
+								' Match found
+								Try
+									intModMass = CInt(.Groups(1).Value)
 
-                                    ' Compare the mod mass in the specification to this Mod's mod mass
-                                    ' If they are less than 0.5 Da apart, then assume we have a match; yes, this assumption is a bit flaky
-                                    If Math.Abs(intModMass - CDbl(udtInspectModInfo(intIndex).ModMass)) <= 0.5 Then
-                                        ' Match found
-                                        ' Replace the matched region with .ModSymbol
+									' Compare the mod mass in the specification to this Mod's mod mass
+									' If they are less than 0.5 Da apart, then assume we have a match; yes, this assumption is a bit flaky
+									If Math.Abs(intModMass - CDbl(udtInspectModInfo(intIndex).ModMass)) <= 0.5 Then
+										' Match found
+										' Replace the matched region with .ModSymbol
 
-                                        If .Groups(0).Index > 0 Then
-                                            strPeptideNew = strPeptide.Substring(0, .Groups(0).Index)
-                                        Else
-                                            strPeptideNew = String.Empty
-                                        End If
+										If .Groups(0).Index > 0 Then
+											strPeptideNew = strPeptide.Substring(0, .Groups(0).Index)
+										Else
+											strPeptideNew = String.Empty
+										End If
 
-                                        strPeptideNew &= udtInspectModInfo(intIndex).ModSymbol
+										strPeptideNew &= udtInspectModInfo(intIndex).ModSymbol
 
-                                        If .Groups(0).Index + .Groups(0).Length < strPeptide.Length Then
-                                            strPeptideNew &= strPeptide.Substring(.Groups(0).Index + .Groups(0).Length)
-                                        End If
+										If .Groups(0).Index + .Groups(0).Length < strPeptide.Length Then
+											strPeptideNew &= strPeptide.Substring(.Groups(0).Index + .Groups(0).Length)
+										End If
 
-                                        strPeptide = String.Copy(strPeptideNew)
-                                    End If
+										strPeptide = String.Copy(strPeptideNew)
+									End If
 
-                                Catch ex As Exception
-                                    Throw New Exception("Error comparing mod mass in peptide to mod mass in udtInspectModInfo", ex)
-                                End Try
+								Catch ex As Exception
+									Throw New Exception("Error comparing mod mass in peptide to mod mass in udtInspectModInfo", ex)
+								End Try
 
-                            End If
-                        End With
-                    End If
-                End If
+							End If
+						End With
+					End If
+				End If
 
-            End If
-        Next intIndex
+			End If
+		Next intIndex
 
-        Return strPrefix & strPeptide & strSuffix
+		Return strPrefix & strPeptide & strSuffix
 
-    End Function
+	End Function
 
-    Protected Function ReplaceTerminus(ByVal strPeptide As String) As String
+	Protected Function ReplaceTerminus(ByVal strPeptide As String) As String
 
-        If strPeptide.StartsWith(N_TERMINUS_SYMBOL_INSPECT) Then
-            strPeptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST & "." & strPeptide.Substring(N_TERMINUS_SYMBOL_INSPECT.Length)
-        End If
+		If strPeptide.StartsWith(N_TERMINUS_SYMBOL_INSPECT) Then
+			strPeptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST & "." & strPeptide.Substring(N_TERMINUS_SYMBOL_INSPECT.Length)
+		End If
 
-        If strPeptide.EndsWith(C_TERMINUS_SYMBOL_INSPECT) Then
-            strPeptide = strPeptide.Substring(0, strPeptide.Length - C_TERMINUS_SYMBOL_INSPECT.Length) & "." & clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST
-        End If
+		If strPeptide.EndsWith(C_TERMINUS_SYMBOL_INSPECT) Then
+			strPeptide = strPeptide.Substring(0, strPeptide.Length - C_TERMINUS_SYMBOL_INSPECT.Length) & "." & clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST
+		End If
 
-        Return strPeptide
+		Return strPeptide
 
-    End Function
+	End Function
 
-    Protected Sub ResolveInspectModsWithModDefinitions(ByRef udtInspectModInfo() As udtModInfoType)
+	Protected Sub ResolveInspectModsWithModDefinitions(ByRef udtInspectModInfo() As udtModInfoType)
 
-        Dim intIndex As Integer
-        Dim intResidueIndex As Integer
-        Dim intResIndexStart As Integer
-        Dim intResIndexEnd As Integer
+		Dim intIndex As Integer
+		Dim intResidueIndex As Integer
+		Dim intResIndexStart As Integer
+		Dim intResIndexEnd As Integer
 
-        Dim dblModMass As Double
-        Dim chTargetResidue As Char
+		Dim dblModMass As Double
+		Dim chTargetResidue As Char
 		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
 		Dim blnExistingModFound As Boolean
 
@@ -1738,51 +1740,51 @@ Public Class clsInSpecTResultsProcessor
 
 			Next intIndex
 		End If
-    End Sub
+	End Sub
 
-    Protected Sub StoreOrWriteSearchResult(ByRef swResultFile As System.IO.StreamWriter, _
-                                           ByRef intResultID As Integer, _
-                                           ByRef udtSearchResult As udtInspectSearchResultType, _
-                                           ByRef intFilteredSearchResultCount As Integer, _
-                                           ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-                                           ByRef strErrorLog As String)
-        If mSortFHTandSynFiles Then
-            If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
-                ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
-            End If
+	Protected Sub StoreOrWriteSearchResult(ByRef swResultFile As StreamWriter, _
+										   ByRef intResultID As Integer, _
+										   ByRef udtSearchResult As udtInspectSearchResultType, _
+										   ByRef intFilteredSearchResultCount As Integer, _
+										   ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+										   ByRef strErrorLog As String)
+		If mSortFHTandSynFiles Then
+			If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
+				ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
+			End If
 
-            udtFilteredSearchResults(intFilteredSearchResultCount) = udtSearchResult
-            intFilteredSearchResultCount += 1
-        Else
-            intResultID += 1
-            WriteSearchResultToFile(intResultID, swResultFile, udtSearchResult, strErrorLog)
-        End If
-    End Sub
+			udtFilteredSearchResults(intFilteredSearchResultCount) = udtSearchResult
+			intFilteredSearchResultCount += 1
+		Else
+			intResultID += 1
+			WriteSearchResultToFile(intResultID, swResultFile, udtSearchResult, strErrorLog)
+		End If
+	End Sub
 
-    Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As System.IO.StreamWriter, _
-                                                  ByVal intFilteredSearchResultCount As Integer, _
-                                                  ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-                                                  ByRef strErrorLog As String)
+	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter, _
+												  ByVal intFilteredSearchResultCount As Integer, _
+												  ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+												  ByRef strErrorLog As String)
 
-        Dim intIndex As Integer
+		Dim intIndex As Integer
 
-        ' Sort udtFilteredSearchResults by descending TotalPRMScore, ascending scan, ascending charge, ascending peptide, and ascending protein
-        Array.Sort(udtFilteredSearchResults, 0, intFilteredSearchResultCount, New InspectSearchResultsComparerTotalPRMDescScanChargePeptide)
+		' Sort udtFilteredSearchResults by descending TotalPRMScore, ascending scan, ascending charge, ascending peptide, and ascending protein
+		Array.Sort(udtFilteredSearchResults, 0, intFilteredSearchResultCount, New InspectSearchResultsComparerTotalPRMDescScanChargePeptide)
 
-        For intIndex = 0 To intFilteredSearchResultCount - 1
-            WriteSearchResultToFile(intIndex + 1, swResultFile, udtFilteredSearchResults(intIndex), strErrorLog)
-        Next intIndex
+		For intIndex = 0 To intFilteredSearchResultCount - 1
+			WriteSearchResultToFile(intIndex + 1, swResultFile, udtFilteredSearchResults(intIndex), strErrorLog)
+		Next intIndex
 
-    End Sub
+	End Sub
 
-	Private Sub StoreTopFHTMatch(ByRef swResultFile As System.IO.StreamWriter, _
-									  ByRef intResultID As Integer, _
-									  ByVal intCurrentScanResultsCount As Integer, _
-									  ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-									  ByRef intFilteredSearchResultCount As Integer, _
-									  ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-									  ByRef strErrorLog As String, _
-									  ByRef objSortComparer As Generic.IComparer(Of udtInspectSearchResultType))
+	Private Sub StoreTopFHTMatch(ByRef swResultFile As StreamWriter, _
+			  ByRef intResultID As Integer, _
+			  ByVal intCurrentScanResultsCount As Integer, _
+			  ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
+			  ByRef intFilteredSearchResultCount As Integer, _
+			  ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+			  ByRef strErrorLog As String, _
+			  ByRef objSortComparer As Generic.IComparer(Of udtInspectSearchResultType))
 
 		Dim intIndex As Integer
 		Dim intCurrentCharge As Short = Short.MinValue
@@ -1803,14 +1805,14 @@ Public Class clsInSpecTResultsProcessor
 
 	End Sub
 
-	Private Sub StoreSynMatches(ByRef swResultFile As System.IO.StreamWriter, _
-								ByRef intResultID As Integer, _
-								ByVal intCurrentScanResultsCount As Integer, _
-								ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-								ByRef intFilteredSearchResultCount As Integer, _
-								ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-								ByRef strErrorLog As String, _
-								ByRef objSortComparer As Generic.IComparer(Of udtInspectSearchResultType))
+	Private Sub StoreSynMatches(ByRef swResultFile As StreamWriter, _
+		   ByRef intResultID As Integer, _
+		   ByVal intCurrentScanResultsCount As Integer, _
+		   ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
+		   ByRef intFilteredSearchResultCount As Integer, _
+		   ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+		   ByRef strErrorLog As String, _
+		   ByRef objSortComparer As Generic.IComparer(Of udtInspectSearchResultType))
 
 		Dim intIndex As Integer
 		Dim intCurrentCharge As Short = Short.MinValue
@@ -1832,10 +1834,10 @@ Public Class clsInSpecTResultsProcessor
 
 	End Sub
 
-    Private Sub WriteSynFHTFileHeader(ByRef swResultFile As System.IO.StreamWriter, _
-                                      ByRef strErrorLog As String)
+	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
+									  ByRef strErrorLog As String)
 
-        ' Write out the header line for synopsis / first hits files
+		' Write out the header line for synopsis / first hits files
 		Try
 			Dim lstData As New System.Collections.Generic.List(Of String)
 			lstData.Add(COLUMN_NAME_RESULTID)
@@ -1875,15 +1877,15 @@ Public Class clsInSpecTResultsProcessor
 			End If
 		End Try
 
-    End Sub
+	End Sub
 
-    Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
-                                        ByRef swResultFile As System.IO.StreamWriter, _
-                                        ByRef udtSearchResult As udtInspectSearchResultType, _
-                                        ByRef strErrorLog As String)
+	Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
+										ByRef swResultFile As StreamWriter, _
+										ByRef udtSearchResult As udtInspectSearchResultType, _
+										ByRef strErrorLog As String)
 
-        ' Writes an entry to a synopsis or first hits file
-        Try
+		' Writes an entry to a synopsis or first hits file
+		Try
 			swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
 			  udtSearchResult.Scan & ControlChars.Tab & _
 			  udtSearchResult.PeptideAnnotation & ControlChars.Tab & _
@@ -1913,13 +1915,13 @@ Public Class clsInSpecTResultsProcessor
 			  udtSearchResult.PrecursorError & ControlChars.Tab & _
 			  udtSearchResult.DelMPPM)
 
-        Catch ex As Exception
-            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
-            End If
-        End Try
+		Catch ex As Exception
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
+			End If
+		End Try
 
-    End Sub
+	End Sub
 
 #Region "IComparer Classes"
 

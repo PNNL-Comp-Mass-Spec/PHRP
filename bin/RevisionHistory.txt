@@ -1,5 +1,13 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5150; February 6, 2014
+	- New version of PHRPReader.dll
+
+Version 1.5.5142; January 29, 2014
+	- Added 64-bit version
+	- New version of PHRPReader.dll
+	- Resharper code cleanup
+
 Version 1.5.5072; November 20, 2013
 	- New versions of PHRPReader.dll, ProteinCoverageSummarizer.dll, and PeptideToProteinMapEngine.dll
 

@@ -8,6 +8,8 @@ Option Strict On
 ' Copyright 2006, Battelle Memorial Institute
 ' Started January 6, 2006
 
+Imports System.IO
+
 Public Class clsAnalysisManagerPeptideHitResultsProcessor
     Implements IPeptideHitResultsProcessor
 
@@ -396,173 +398,173 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 		End If
 
         'Define the parameter file path; this is passed as the search tool parameter file
-        m_ParameterFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_ParameterFileName)
+		m_ParameterFilePath = Path.Combine(m_SourceFolderPath, m_ParameterFileName)
 
-        'Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
-        m_SettingsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_SettingsFileName)
+		'Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
+		m_SettingsFilePath = Path.Combine(m_SourceFolderPath, m_SettingsFileName)
 
-        'Define the peptide hit results format based on the analysis tool name
-        If m_AnalysisToolName.ToLower.IndexOf("xtandem") >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
+		'Define the peptide hit results format based on the analysis tool name
+		If m_AnalysisToolName.ToLower.IndexOf("xtandem") >= 0 Then
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
 
-        ElseIf m_AnalysisToolName.ToLower.IndexOf("sequest") >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
+		ElseIf m_AnalysisToolName.ToLower.IndexOf("sequest") >= 0 Then
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
 
-        ElseIf m_AnalysisToolName.ToLower.IndexOf("inspect") >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
+		ElseIf m_AnalysisToolName.ToLower.IndexOf("inspect") >= 0 Then
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
-        ElseIf m_AnalysisToolName.ToLower.IndexOf("msgfdb") >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+		ElseIf m_AnalysisToolName.ToLower.IndexOf("msgfdb") >= 0 Then
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
 		ElseIf m_AnalysisToolName.ToLower.IndexOf("msalign") >= 0 Then
 			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 
-        ElseIf m_AnalysisToolName.ToLower.IndexOf("dataextractor") >= 0 Then
-            ' Data Extractor step-tool; we'll need to auto-determine the results format
+		ElseIf m_AnalysisToolName.ToLower.IndexOf("dataextractor") >= 0 Then
+			' Data Extractor step-tool; we'll need to auto-determine the results format
 			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
 
-        Else
-            ' Unrecognized analysis tool name
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
-        End If
+		Else
+			' Unrecognized analysis tool name
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
+		End If
 
-        If Me.DebugLevel >= 3 Then
-            RaiseEvent DebugEvent("Setup params: AnalysisToolName = " & m_AnalysisToolName)
-            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
+		If Me.DebugLevel >= 3 Then
+			RaiseEvent DebugEvent("Setup params: AnalysisToolName = " & m_AnalysisToolName)
+			RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
 
-            RaiseEvent DebugEvent("Setup params: DSName = " & m_DSName)
-            RaiseEvent DebugEvent("Setup params: SettingsFilePath = " & m_SettingsFilePath)
-            RaiseEvent DebugEvent("Setup params: ParameterFilePath = " & m_ParameterFilePath)
-        End If
+			RaiseEvent DebugEvent("Setup params: DSName = " & m_DSName)
+			RaiseEvent DebugEvent("Setup params: SettingsFilePath = " & m_SettingsFilePath)
+			RaiseEvent DebugEvent("Setup params: ParameterFilePath = " & m_ParameterFilePath)
+		End If
 
-        'Define the peptide hit results file name
+		'Define the peptide hit results file name
 		If String.IsNullOrWhiteSpace(m_PeptideHitResultsFileName) Then
 			m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, m_SourceFolderPath, m_DSName)
 		Else
-			m_PeptideHitResultsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_PeptideHitResultsFileName)
+			m_PeptideHitResultsFilePath = Path.Combine(m_SourceFolderPath, m_PeptideHitResultsFileName)
 		End If
 
-        If Me.DebugLevel >= 3 Then
-            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath)
-        End If
+		If Me.DebugLevel >= 3 Then
+			RaiseEvent DebugEvent("Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath)
+		End If
 
-        'Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
-        If m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.DetermineResultsFileFormat(m_PeptideHitResultsFilePath)
-        End If
+		'Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
+		If m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine Then
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.DetermineResultsFileFormat(m_PeptideHitResultsFilePath)
+		End If
 
-        'Define the mass correction tags file path
+		'Define the mass correction tags file path
 		If String.IsNullOrWhiteSpace(m_MassCorrectionTagsFileName) Then
-			m_MassCorrectionTagsFilePath = System.IO.Path.Combine(m_SourceFolderPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME)
+			m_MassCorrectionTagsFilePath = Path.Combine(m_SourceFolderPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME)
 		Else
-			m_MassCorrectionTagsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_MassCorrectionTagsFileName)
+			m_MassCorrectionTagsFilePath = Path.Combine(m_SourceFolderPath, m_MassCorrectionTagsFileName)
 		End If
 
-        'Define the modification definitions file path
+		'Define the modification definitions file path
 		If String.IsNullOrWhiteSpace(m_ModificationDefinitionsFileName) Then
-			m_ModificationDefinitionsFilePath = System.IO.Path.Combine(m_SourceFolderPath, System.IO.Path.GetFileNameWithoutExtension(m_ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX)
+			m_ModificationDefinitionsFilePath = Path.Combine(m_SourceFolderPath, Path.GetFileNameWithoutExtension(m_ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX)
 		Else
-			m_ModificationDefinitionsFilePath = System.IO.Path.Combine(m_SourceFolderPath, m_ModificationDefinitionsFileName)
+			m_ModificationDefinitionsFilePath = Path.Combine(m_SourceFolderPath, m_ModificationDefinitionsFileName)
 		End If
 
-        If Me.DebugLevel >= 3 Then
-            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
-            RaiseEvent DebugEvent("Setup params: MassCorrectionTagsFilePath = " & m_MassCorrectionTagsFilePath)
-            RaiseEvent DebugEvent("Setup params: ModificationDefinitionsFilePath = " & m_ModificationDefinitionsFilePath)
-        End If
+		If Me.DebugLevel >= 3 Then
+			RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
+			RaiseEvent DebugEvent("Setup params: MassCorrectionTagsFilePath = " & m_MassCorrectionTagsFilePath)
+			RaiseEvent DebugEvent("Setup params: ModificationDefinitionsFilePath = " & m_ModificationDefinitionsFilePath)
+		End If
 
-        'Parameter file exists?
-        If Not VerifyFileExists(m_ParameterFilePath) Then Return False 'Error msg handled by VerifyFileExists
+		'Parameter file exists?
+		If Not VerifyFileExists(m_ParameterFilePath) Then Return False 'Error msg handled by VerifyFileExists
 
-        'Settings file exists?
-        If Not VerifyFileExists(m_SettingsFilePath) Then Return False 'Error msg handled by VerifyFileExists
+		'Settings file exists?
+		If Not VerifyFileExists(m_SettingsFilePath) Then Return False 'Error msg handled by VerifyFileExists
 
-        'Peptide hit results file exists?
-        If Not VerifyFileExists(m_PeptideHitResultsFilePath) Then Return False 'Error msg handled by VerifyFileExists
+		'Peptide hit results file exists?
+		If Not VerifyFileExists(m_PeptideHitResultsFilePath) Then Return False 'Error msg handled by VerifyFileExists
 
-        'Modification definitions file exists?
-        If Not VerifyFileExists(m_ModificationDefinitionsFilePath) Then Return False 'Error msg handled by VerifyFileExists
+		'Modification definitions file exists?
+		If Not VerifyFileExists(m_ModificationDefinitionsFilePath) Then Return False 'Error msg handled by VerifyFileExists
 
-        'Mass correction tags file exists?
-        If Not VerifyFileExists(m_MassCorrectionTagsFilePath) Then Return False 'Error msg handled by VerifyFileExists
+		'Mass correction tags file exists?
+		If Not VerifyFileExists(m_MassCorrectionTagsFilePath) Then Return False 'Error msg handled by VerifyFileExists
 
-        'If we got here, everything's OK
-        Return True
+		'If we got here, everything's OK
+		Return True
 
-    End Function
+	End Function
 
-    Private Sub LogErrors(ByVal strSource As String, ByVal strMessage As String, ByVal ex As Exception, Optional ByVal blnLogLocalOnly As Boolean = True)
+	Private Sub LogErrors(ByVal strSource As String, ByVal strMessage As String, ByVal ex As Exception, Optional ByVal blnLogLocalOnly As Boolean = True)
 
-        m_ErrMsg = String.Copy(strMessage).Replace(ControlChars.NewLine, "; ")
+		m_ErrMsg = String.Copy(strMessage).Replace(ControlChars.NewLine, "; ")
 
-        If ex Is Nothing Then
-            ex = New System.Exception("Error")
-        Else
-            If Not ex.Message Is Nothing AndAlso ex.Message.Length > 0 Then
-                m_ErrMsg &= "; " & ex.Message
-            End If
-        End If
+		If ex Is Nothing Then
+			ex = New System.Exception("Error")
+		Else
+			If Not ex.Message Is Nothing AndAlso ex.Message.Length > 0 Then
+				m_ErrMsg &= "; " & ex.Message
+			End If
+		End If
 
-        Trace.WriteLine(System.DateTime.Now().ToLongTimeString & "; " & m_ErrMsg, strSource)
-        Console.WriteLine(System.DateTime.Now().ToLongTimeString & "; " & m_ErrMsg, strSource)
+		Trace.WriteLine(System.DateTime.Now().ToLongTimeString & "; " & m_ErrMsg, strSource)
+		Console.WriteLine(System.DateTime.Now().ToLongTimeString & "; " & m_ErrMsg, strSource)
 
-        RaiseEvent ErrorOccurred(m_ErrMsg)
+		RaiseEvent ErrorOccurred(m_ErrMsg)
 
-    End Sub
+	End Sub
 
-    Protected Sub UpdateProgress(ByVal strProgressStepDescription As String, ByVal sngPercentComplete As Single)
-        Static strProgressStepDescriptionSaved As String = String.Empty
-        Static sngProgressPercentComplete As Single = 0
+	Protected Sub UpdateProgress(ByVal strProgressStepDescription As String, ByVal sngPercentComplete As Single)
+		Static strProgressStepDescriptionSaved As String = String.Empty
+		Static sngProgressPercentComplete As Single = 0
 
-        Dim blnDescriptionChanged As Boolean = False
+		Dim blnDescriptionChanged As Boolean = False
 
-        If strProgressStepDescription <> strProgressStepDescriptionSaved Then
-            blnDescriptionChanged = True
-        End If
+		If strProgressStepDescription <> strProgressStepDescriptionSaved Then
+			blnDescriptionChanged = True
+		End If
 
-        strProgressStepDescriptionSaved = String.Copy(strProgressStepDescription)
-        If sngPercentComplete < 0 Then
-            sngPercentComplete = 0
-        ElseIf sngPercentComplete > 100 Then
-            sngPercentComplete = 100
-        End If
-        sngProgressPercentComplete = sngPercentComplete
+		strProgressStepDescriptionSaved = String.Copy(strProgressStepDescription)
+		If sngPercentComplete < 0 Then
+			sngPercentComplete = 0
+		ElseIf sngPercentComplete > 100 Then
+			sngPercentComplete = 100
+		End If
+		sngProgressPercentComplete = sngPercentComplete
 
-        If blnDescriptionChanged And Me.DebugLevel >= 2 Then
-            If sngProgressPercentComplete = 0 Then
-                RaiseEvent DebugEvent(strProgressStepDescriptionSaved)
-            Else
-                RaiseEvent DebugEvent(strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)")
-            End If
-        End If
+		If blnDescriptionChanged And Me.DebugLevel >= 2 Then
+			If sngProgressPercentComplete = 0 Then
+				RaiseEvent DebugEvent(strProgressStepDescriptionSaved)
+			Else
+				RaiseEvent DebugEvent(strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)")
+			End If
+		End If
 
-        RaiseEvent ProgressChanged(strProgressStepDescription, sngPercentComplete)
-    End Sub
+		RaiseEvent ProgressChanged(strProgressStepDescription, sngPercentComplete)
+	End Sub
 
-    Protected Overridable Function VerifyDirExists(ByVal TestDir As String) As Boolean
+	Protected Overridable Function VerifyDirExists(ByVal TestDir As String) As Boolean
 
-        'Verifies that the specified directory exists
-        If System.IO.Directory.Exists(TestDir) Then
-            m_ErrMsg = ""
-            Return True
-        Else
-            m_ErrMsg = "Directory " & TestDir & " not found"
-            Return False
-        End If
+		'Verifies that the specified directory exists
+		If Directory.Exists(TestDir) Then
+			m_ErrMsg = ""
+			Return True
+		Else
+			m_ErrMsg = "Directory " & TestDir & " not found"
+			Return False
+		End If
 
-    End Function
+	End Function
 
-    Protected Overridable Function VerifyFileExists(ByVal TestFile As String) As Boolean
-        'Verifies specified file exists
-        If System.IO.File.Exists(TestFile) Then
-            m_ErrMsg = ""
-            Return True
-        Else
-            m_ErrMsg = "File " & TestFile & " not found"
-            Return False
-        End If
+	Protected Overridable Function VerifyFileExists(ByVal TestFile As String) As Boolean
+		'Verifies specified file exists
+		If File.Exists(TestFile) Then
+			m_ErrMsg = ""
+			Return True
+		Else
+			m_ErrMsg = "File " & TestFile & " not found"
+			Return False
+		End If
 
-    End Function
+	End Function
 
     Private Sub m_PeptideHitResultsProcessor_ErrorOccurred(ByVal ErrorMessage As String) Handles m_PeptideHitResultsProcessor.ErrorOccurred
         LogErrors("PeptideHitResultsProcessor", ErrorMessage, Nothing, True)

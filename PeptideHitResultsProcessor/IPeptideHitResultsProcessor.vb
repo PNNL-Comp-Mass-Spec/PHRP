@@ -28,7 +28,7 @@ Public Interface IPeptideHitResultsProcessor
         Dim OutputFolderPath As String
         Dim PeptideHitResultsFileName As String             ' If this is empty then it will be auto-defined using: DatasetName & XTANDEM_RESULTS_FILE_SUFFIX
         Dim MassCorrectionTagsFileName As String            ' If this is empty then it will be auto-defined using: Const DEFAULT_MASS_CORRECTION_TAGS_FILENAME = "Mass_Correction_Tags.txt"
-        Dim ModificationDefinitionsFileName As String       ' If this is empty then it will be auto-defined using: System.IO.Path.GetFileNameWithoutExtension(ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX where MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt"
+		Dim ModificationDefinitionsFileName As String		' If this is empty then it will be auto-defined using: Path.GetFileNameWithoutExtension(ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX where MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt"
         Dim MiscParams As System.Collections.Generic.Dictionary(Of String, String)
         Dim DebugLevel As Integer
 

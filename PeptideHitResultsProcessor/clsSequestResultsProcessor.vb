@@ -30,6 +30,7 @@ Option Strict On
 ' this computer software.
 
 Imports PHRPReader
+Imports System.IO
 
 Public Class clsSequestResultsProcessor
     Inherits clsPHRPBaseClass
@@ -201,7 +202,7 @@ Public Class clsSequestResultsProcessor
 	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
 		Dim strPepToProteinMapFilePath As String = String.Empty
 
-		strPepToProteinMapFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+		strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
 		If strPepToProteinMapFilePath.ToLower().EndsWith("_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_fht") Then
 			' Remove _syn or _fht
 			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
@@ -211,9 +212,9 @@ Public Class clsSequestResultsProcessor
 
 	End Function
 
-    Private Sub InitializeLocalVariables()
-        ' Reserved for future use
-    End Sub
+	Private Sub InitializeLocalVariables()
+		' Reserved for future use
+	End Sub
 
 	Protected Function ParseSynopsisOrFirstHitsFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
 		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
@@ -268,14 +269,14 @@ Public Class clsSequestResultsProcessor
 
 				' Open the input file and parse it
 				' Initialize the stream reader
-				Using srDataFile As System.IO.StreamReader = New System.IO.StreamReader(strInputFilePath)
+				Using srDataFile As StreamReader = New StreamReader(strInputFilePath)
 
 					strErrorLog = String.Empty
 					intResultsProcessed = 0
 					blnHeaderParsed = False
 
 					' Create the output files
-					Dim strBaseOutputFilePath As String = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileName(strInputFilePath))
+					Dim strBaseOutputFilePath As String = Path.Combine(strOutputFolderPath, Path.GetFileName(strInputFilePath))
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
@@ -360,9 +361,9 @@ Public Class clsSequestResultsProcessor
 
 				If mCreateModificationSummaryFile Then
 					' Create the modification summary file
-					Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
-					strModificationSummaryFilePath = System.IO.Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
-					strModificationSummaryFilePath = System.IO.Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
+					Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
+					strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+					strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
 
 					SaveModificationSummaryFile(strModificationSummaryFilePath)
 				End If
@@ -392,96 +393,96 @@ Public Class clsSequestResultsProcessor
 
 	End Function
 
-    Private Function ParseSequestResultsFileEntry(ByRef strLineIn As String, _
-                                                  ByRef intColumnMapping() As Integer, _
-                                                  ByRef objSearchResult As clsSearchResultsSequest, _
-                                                  ByRef strErrorLog As String) As Boolean
+	Private Function ParseSequestResultsFileEntry(ByRef strLineIn As String, _
+												  ByRef intColumnMapping() As Integer, _
+												  ByRef objSearchResult As clsSearchResultsSequest, _
+												  ByRef strErrorLog As String) As Boolean
 
-        Dim strSplitLine() As String = Nothing
-        Dim strPeptideSequenceWithMods As String = String.Empty
+		Dim strSplitLine() As String = Nothing
+		Dim strPeptideSequenceWithMods As String = String.Empty
 
-        Dim blnValidSearchResult As Boolean
-        blnValidSearchResult = False
+		Dim blnValidSearchResult As Boolean
+		blnValidSearchResult = False
 
-        Try
-            ' Set this to False for now
-            blnValidSearchResult = False
+		Try
+			' Set this to False for now
+			blnValidSearchResult = False
 
-            ' Reset objSearchResult
-            objSearchResult.Clear()
+			' Reset objSearchResult
+			objSearchResult.Clear()
 
-            strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
-            If strSplitLine.Length < SEQUEST_SYN_FILE_MIN_COL_COUNT Then
-                Exit Try
-            End If
+			strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
+			If strSplitLine.Length < SEQUEST_SYN_FILE_MIN_COL_COUNT Then
+				Exit Try
+			End If
 
-            With objSearchResult
-                If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RowIndex), .ResultID) Then
-                    Throw New EvaluateException("RowIndex column is missing or invalid")
-                End If
+			With objSearchResult
+				If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RowIndex), .ResultID) Then
+					Throw New EvaluateException("RowIndex column is missing or invalid")
+				End If
 
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Scan), .Scan)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NumScans), .NumScans)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Charge), .Charge)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideMH), .PeptideMH)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XCorr), .PeptideXCorr)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn), .PeptideDeltaCn)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Sp), .PeptideSp)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.ProteinName), .ProteinName)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MultipleProteinCount), .MultipleProteinCount)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Scan), .Scan)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NumScans), .NumScans)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Charge), .Charge)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideMH), .PeptideMH)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XCorr), .PeptideXCorr)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn), .PeptideDeltaCn)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Sp), .PeptideSp)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.ProteinName), .ProteinName)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MultipleProteinCount), .MultipleProteinCount)
 
-                If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideSequence), strPeptideSequenceWithMods) Then
-                    Throw New EvaluateException("Peptide column is missing or invalid")
-                End If
+				If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideSequence), strPeptideSequenceWithMods) Then
+					Throw New EvaluateException("Peptide column is missing or invalid")
+				End If
 
-                ' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
-                .SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
+				' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+				.SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
 
-            End With
+			End With
 
-            Dim objSearchResultBase As clsSearchResultsBaseClass
-            objSearchResultBase = DirectCast(objSearchResult, clsSearchResultsBaseClass)
+			Dim objSearchResultBase As clsSearchResultsBaseClass
+			objSearchResultBase = DirectCast(objSearchResult, clsSearchResultsBaseClass)
 
-            MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
+			MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
 
-            With objSearchResult
+			With objSearchResult
 
-                ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
-                ' will all be based on the first protein since Sequest only outputs the prefix and suffix letters for the first protein
-                .ComputePeptideCleavageStateInProtein()
+				' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+				' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
+				' will all be based on the first protein since Sequest only outputs the prefix and suffix letters for the first protein
+				.ComputePeptideCleavageStateInProtein()
 
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn2), .PeptideDeltaCn2)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankSP), .PeptideRankSP)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankXC), .PeptideRankXC)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelM), .PeptideDeltaMass)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XcRatio), .PeptideXcRatio)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PassFilt), .PeptidePassFilt)           ' Legacy/Unused
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MScore), .PeptideMScore)               ' Legacy/Unused
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NTT), .PeptideNTT)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn2), .PeptideDeltaCn2)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankSP), .PeptideRankSP)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankXC), .PeptideRankXC)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelM), .PeptideDeltaMass)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XcRatio), .PeptideXcRatio)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PassFilt), .PeptidePassFilt)			 ' Legacy/Unused
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MScore), .PeptideMScore)				 ' Legacy/Unused
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NTT), .PeptideNTT)
 
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsObserved), .IonsObserved)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsExpected), .IonsExpected)
-                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelMPPM), .DelMPPM)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsObserved), .IonsObserved)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsExpected), .IonsExpected)
+				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelMPPM), .DelMPPM)
 
-            End With
+			End With
 
-            blnValidSearchResult = True
+			blnValidSearchResult = True
 
-        Catch ex As Exception
-            ' Error parsing this row from the synopsis or first hits file
-            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
-                    strErrorLog &= "Error parsing Sequest Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
-                Else
-                    strErrorLog &= "Error parsing Sequest Results in ParseSequestResultsFileEntry" & ControlChars.NewLine
-                End If
-            End If
-            blnValidSearchResult = False
-        End Try
+		Catch ex As Exception
+			' Error parsing this row from the synopsis or first hits file
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+					strErrorLog &= "Error parsing Sequest Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+				Else
+					strErrorLog &= "Error parsing Sequest Results in ParseSequestResultsFileEntry" & ControlChars.NewLine
+				End If
+			End If
+			blnValidSearchResult = False
+		End Try
 
-        Return blnValidSearchResult
-    End Function
+		Return blnValidSearchResult
+	End Function
 
 	''' <summary>
 	''' Main processing function
@@ -492,7 +493,7 @@ Public Class clsSequestResultsProcessor
 	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
 
-		Dim ioInputFile As System.IO.FileInfo
+		Dim ioInputFile As FileInfo
 
 		Dim blnSuccess As Boolean
 
@@ -515,11 +516,11 @@ Public Class clsSequestResultsProcessor
 					Exit Try
 				End If
 
-				MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
+				MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
 
 				If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
 					' Obtain the full path to the input file
-					ioInputFile = New System.IO.FileInfo(strInputFilePath)
+					ioInputFile = New FileInfo(strInputFilePath)
 
 					Try
 						blnSuccess = ParseSynopsisOrFirstHitsFile(ioInputFile.FullName, strOutputFolderPath, False)
@@ -542,20 +543,20 @@ Public Class clsSequestResultsProcessor
 						lstSourcePHRPDataFiles.Add(ioInputFile.FullName)
 						If strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE) Then
 							strAdditionalFile = MyBase.ReplaceFilenameSuffix(ioInputFile, FILENAME_SUFFIX_FIRST_HITS_FILE)
-							If System.IO.File.Exists(strAdditionalFile) Then
+							If File.Exists(strAdditionalFile) Then
 								lstSourcePHRPDataFiles.Add(strAdditionalFile)
 							End If
 
 						ElseIf strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE) Then
 							strAdditionalFile = MyBase.ReplaceFilenameSuffix(ioInputFile, FILENAME_SUFFIX_SYNOPSIS_FILE)
-							If System.IO.File.Exists(strAdditionalFile) Then
+							If File.Exists(strAdditionalFile) Then
 								lstSourcePHRPDataFiles.Add(strAdditionalFile)
 							End If
 						End If
 
 						strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(ioInputFile.FullName, strOutputFolderPath, MTS:=True)
 
-						If System.IO.File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+						If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
 							blnSuccess = True
 						Else
 							' Mapping file does not exist
@@ -595,72 +596,72 @@ Public Class clsSequestResultsProcessor
 
 	End Function
 
-    Private Function ParseSequestSynFileHeaderLine(ByVal strLineIn As String, _
-                                                   ByRef intColumnMapping() As Integer) As Boolean
+	Private Function ParseSequestSynFileHeaderLine(ByVal strLineIn As String, _
+												   ByRef intColumnMapping() As Integer) As Boolean
 
-        ' Parse the header line
+		' Parse the header line
 
-        Dim strSplitLine() As String
-        Dim eResultFileColumn As eSequestSynopsisFileColumns
-        Dim lstColumnNames As System.Collections.Generic.SortedDictionary(Of String, eSequestSynopsisFileColumns)
-        lstColumnNames = New System.Collections.Generic.SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+		Dim strSplitLine() As String
+		Dim eResultFileColumn As eSequestSynopsisFileColumns
+		Dim lstColumnNames As System.Collections.Generic.SortedDictionary(Of String, eSequestSynopsisFileColumns)
+		lstColumnNames = New System.Collections.Generic.SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.CurrentCultureIgnoreCase)
 
-        ReDim intColumnMapping(SequestSynopsisFileColCount - 1)
+		ReDim intColumnMapping(SequestSynopsisFileColCount - 1)
 
-        lstColumnNames.Add("HitNum", eSequestSynopsisFileColumns.RowIndex)
-        lstColumnNames.Add("ScanNum", eSequestSynopsisFileColumns.Scan)
-        lstColumnNames.Add("ScanCount", eSequestSynopsisFileColumns.NumScans)
-        lstColumnNames.Add("ChargeState", eSequestSynopsisFileColumns.Charge)
-        lstColumnNames.Add("MH", eSequestSynopsisFileColumns.PeptideMH)
-        lstColumnNames.Add("XCorr", eSequestSynopsisFileColumns.XCorr)
-        lstColumnNames.Add("DelCn", eSequestSynopsisFileColumns.DeltaCn)
-        lstColumnNames.Add("Sp", eSequestSynopsisFileColumns.Sp)
-        lstColumnNames.Add("Reference", eSequestSynopsisFileColumns.ProteinName)
-        lstColumnNames.Add("MultiProtein", eSequestSynopsisFileColumns.MultipleProteinCount)                     ' Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
-        lstColumnNames.Add("Peptide", eSequestSynopsisFileColumns.PeptideSequence)
-        lstColumnNames.Add("DelCn2", eSequestSynopsisFileColumns.DeltaCn2)
-        lstColumnNames.Add("RankSP", eSequestSynopsisFileColumns.RankSP)
-        lstColumnNames.Add("RankXC", eSequestSynopsisFileColumns.RankXC)
-        lstColumnNames.Add("DelM", eSequestSynopsisFileColumns.DelM)
-        lstColumnNames.Add("XcRatio", eSequestSynopsisFileColumns.XcRatio)
-        lstColumnNames.Add("PassFilt", eSequestSynopsisFileColumns.PassFilt)                ' Legacy/unused
-        lstColumnNames.Add("MScore", eSequestSynopsisFileColumns.MScore)                    ' Legacy/unused
-        lstColumnNames.Add("NumTrypticEnds", eSequestSynopsisFileColumns.NTT)
-        lstColumnNames.Add("Ions_Observed", eSequestSynopsisFileColumns.IonsObserved)
-        lstColumnNames.Add("Ions_Expected", eSequestSynopsisFileColumns.IonsExpected)
-        lstColumnNames.Add("DelM_PPM", eSequestSynopsisFileColumns.DelMPPM)
+		lstColumnNames.Add("HitNum", eSequestSynopsisFileColumns.RowIndex)
+		lstColumnNames.Add("ScanNum", eSequestSynopsisFileColumns.Scan)
+		lstColumnNames.Add("ScanCount", eSequestSynopsisFileColumns.NumScans)
+		lstColumnNames.Add("ChargeState", eSequestSynopsisFileColumns.Charge)
+		lstColumnNames.Add("MH", eSequestSynopsisFileColumns.PeptideMH)
+		lstColumnNames.Add("XCorr", eSequestSynopsisFileColumns.XCorr)
+		lstColumnNames.Add("DelCn", eSequestSynopsisFileColumns.DeltaCn)
+		lstColumnNames.Add("Sp", eSequestSynopsisFileColumns.Sp)
+		lstColumnNames.Add("Reference", eSequestSynopsisFileColumns.ProteinName)
+		lstColumnNames.Add("MultiProtein", eSequestSynopsisFileColumns.MultipleProteinCount)					 ' Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
+		lstColumnNames.Add("Peptide", eSequestSynopsisFileColumns.PeptideSequence)
+		lstColumnNames.Add("DelCn2", eSequestSynopsisFileColumns.DeltaCn2)
+		lstColumnNames.Add("RankSP", eSequestSynopsisFileColumns.RankSP)
+		lstColumnNames.Add("RankXC", eSequestSynopsisFileColumns.RankXC)
+		lstColumnNames.Add("DelM", eSequestSynopsisFileColumns.DelM)
+		lstColumnNames.Add("XcRatio", eSequestSynopsisFileColumns.XcRatio)
+		lstColumnNames.Add("PassFilt", eSequestSynopsisFileColumns.PassFilt)				' Legacy/unused
+		lstColumnNames.Add("MScore", eSequestSynopsisFileColumns.MScore)					' Legacy/unused
+		lstColumnNames.Add("NumTrypticEnds", eSequestSynopsisFileColumns.NTT)
+		lstColumnNames.Add("Ions_Observed", eSequestSynopsisFileColumns.IonsObserved)
+		lstColumnNames.Add("Ions_Expected", eSequestSynopsisFileColumns.IonsExpected)
+		lstColumnNames.Add("DelM_PPM", eSequestSynopsisFileColumns.DelMPPM)
 
-        ' The following columns are computed by this program and appended to the input file or saved in a new file
-        lstColumnNames.Add("Cleavage_State", eSequestSynopsisFileColumns.Cleavage_State)
-        lstColumnNames.Add("Terminus_State", eSequestSynopsisFileColumns.Terminus_State)
-        lstColumnNames.Add("Mod_Count", eSequestSynopsisFileColumns.Mod_Count)
-        lstColumnNames.Add("Mod_Description", eSequestSynopsisFileColumns.Mod_Description)
-        lstColumnNames.Add("Monoisotopic_Mass", eSequestSynopsisFileColumns.Monoisotopic_Mass)
+		' The following columns are computed by this program and appended to the input file or saved in a new file
+		lstColumnNames.Add("Cleavage_State", eSequestSynopsisFileColumns.Cleavage_State)
+		lstColumnNames.Add("Terminus_State", eSequestSynopsisFileColumns.Terminus_State)
+		lstColumnNames.Add("Mod_Count", eSequestSynopsisFileColumns.Mod_Count)
+		lstColumnNames.Add("Mod_Description", eSequestSynopsisFileColumns.Mod_Description)
+		lstColumnNames.Add("Monoisotopic_Mass", eSequestSynopsisFileColumns.Monoisotopic_Mass)
 
-        Try
-            ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
-                intColumnMapping(intIndex) = -1
-            Next
+		Try
+			' Initialize each entry in intColumnMapping to -1
+			For intIndex As Integer = 0 To intColumnMapping.Length - 1
+				intColumnMapping(intIndex) = -1
+			Next
 
-            strSplitLine = strLineIn.Split(ControlChars.Tab)
-            For intIndex As Integer = 0 To strSplitLine.Length - 1
-                If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
-                    ' Recognized column name; update intColumnMapping
-                    intColumnMapping(eResultFileColumn) = intIndex
-                End If
-            Next
+			strSplitLine = strLineIn.Split(ControlChars.Tab)
+			For intIndex As Integer = 0 To strSplitLine.Length - 1
+				If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
+					' Recognized column name; update intColumnMapping
+					intColumnMapping(eResultFileColumn) = intIndex
+				End If
+			Next
 
-        Catch ex As Exception
-            SetErrorMessage("Error parsing header in Sequest synopsis file: " & ex.Message)
-            Return False
-        End Try
+		Catch ex As Exception
+			SetErrorMessage("Error parsing header in Sequest synopsis file: " & ex.Message)
+			Return False
+		End Try
 
-        Return True
+		Return True
 
-    End Function
+	End Function
 
-    ''Private Sub SaveSequestResultsFileEntry(ByRef objSearchResult As clsSearchResultsSequest, ByRef swSynopsisOutputFile As System.IO.StreamWriter)
+	''Private Sub SaveSequestResultsFileEntry(ByRef objSearchResult As clsSearchResultsSequest, ByRef swSynopsisOutputFile As StreamWriter)
 
     ''    ' Write the results to the output file
     ''    With objSearchResult

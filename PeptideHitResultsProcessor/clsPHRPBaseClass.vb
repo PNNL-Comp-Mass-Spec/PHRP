@@ -24,13 +24,15 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
-Imports PHRPReader.clsPeptideCleavageStateCalculator
 Imports PHRPReader
+Imports PHRPReader.clsPeptideCleavageStateCalculator
+Imports System.IO
+Imports System.Text.RegularExpressions
 
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "June 28, 2013"
+		mFileDate = "January 29, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -166,14 +168,14 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected mUniqueSequences As clsUniqueSequencesContainer
 	Protected mSeqToProteinMap As Hashtable
 
-	Protected mResultToSeqMapFile As System.IO.StreamWriter
-	Protected mSeqInfoFile As System.IO.StreamWriter
-	Protected mModDetailsFile As System.IO.StreamWriter
-	Protected mSeqToProteinMapFile As System.IO.StreamWriter
+	Protected mResultToSeqMapFile As StreamWriter
+	Protected mSeqInfoFile As StreamWriter
+	Protected mModDetailsFile As StreamWriter
+	Protected mSeqToProteinMapFile As StreamWriter
 
 	Protected mNextPeptideToProteinMapperLevel As Integer = 0
 
-	Protected mReplaceSymbols As System.Text.RegularExpressions.Regex
+	Protected mReplaceSymbols As Regex
 #End Region
 
 #Region "Progress Events and Variables"
@@ -436,22 +438,22 @@ Public MustInherit Class clsPHRPBaseClass
 		If Not strBaseName Is Nothing AndAlso strBaseName.Length > 0 Then
 			Select Case ePeptideHitResultFileFormat
 				Case ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile
-					Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & SEQUEST_FIRST_HITS_FILE_SUFFIX)
+					Return Path.Combine(strSourceFolderPath, strBaseName & SEQUEST_FIRST_HITS_FILE_SUFFIX)
 
 				Case ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
-					Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+					Return Path.Combine(strSourceFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
 				Case ePeptideHitResultsFileFormatConstants.XTandemXMLFile
-					Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & XTANDEM_RESULTS_FILE_SUFFIX)
+					Return Path.Combine(strSourceFolderPath, strBaseName & XTANDEM_RESULTS_FILE_SUFFIX)
 
 				Case ePeptideHitResultsFileFormatConstants.InSpectTXTFile
-					Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & INSPECT_RESULTS_FILE_SUFFIX)
+					Return Path.Combine(strSourceFolderPath, strBaseName & INSPECT_RESULTS_FILE_SUFFIX)
 
 				Case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
-					Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & MSGFDB_RESULTS_FILE_SUFFIX)
+					Return Path.Combine(strSourceFolderPath, strBaseName & MSGFDB_RESULTS_FILE_SUFFIX)
 
 				Case ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
-					Return System.IO.Path.Combine(strSourceFolderPath, strBaseName & MSALIGN_RESULTS_FILE_SUFFIX)
+					Return Path.Combine(strSourceFolderPath, strBaseName & MSALIGN_RESULTS_FILE_SUFFIX)
 
 				Case Else
 					' Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
@@ -466,8 +468,8 @@ Public MustInherit Class clsPHRPBaseClass
 		' Looks for a file ending in _syn.txt, _fht.txt, _xt.xml, or _inspect.txt in folder strSourceFolderPath
 		' Returns the first matching file found
 
-		Dim ioFolderInfo As System.IO.DirectoryInfo
-		Dim ioFileInfo As System.IO.FileInfo
+		Dim ioFolderInfo As DirectoryInfo
+		Dim ioFileInfo As FileInfo
 		Dim intIndex As Integer
 
 		Dim strMatchSpec As String = String.Empty
@@ -485,7 +487,7 @@ Public MustInherit Class clsPHRPBaseClass
 						strMatchSpec = "*" & INSPECT_RESULTS_FILE_SUFFIX
 				End Select
 
-				ioFolderInfo = New System.IO.DirectoryInfo(strSourceFolderPath)
+				ioFolderInfo = New DirectoryInfo(strSourceFolderPath)
 				For Each ioFileInfo In ioFolderInfo.GetFiles(strMatchSpec)
 					' If we get here, a match was found; return its path
 					Return ioFileInfo.FullName
@@ -558,12 +560,12 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected Function CleanupFilePaths(ByRef strInputFilePath As String, ByRef strOutputFolderPath As String) As Boolean
 		' Returns True if success, False if failure
 
-		Dim ioFileInfo As System.IO.FileInfo
-		Dim ioFolder As System.IO.DirectoryInfo
+		Dim ioFileInfo As FileInfo
+		Dim ioFolder As DirectoryInfo
 
 		Try
 			' Make sure strInputFilePath points to a valid file
-			ioFileInfo = New System.IO.FileInfo(strInputFilePath)
+			ioFileInfo = New FileInfo(strInputFilePath)
 
 			If Not ioFileInfo.Exists() Then
 				SetErrorMessage("Input file not found: " & strInputFilePath)
@@ -576,7 +578,7 @@ Public MustInherit Class clsPHRPBaseClass
 				End If
 
 				' Make sure strOutputFolderPath points to a folder
-				ioFolder = New System.IO.DirectoryInfo(strOutputFolderPath)
+				ioFolder = New DirectoryInfo(strOutputFolderPath)
 
 				If Not ioFolder.Exists() Then
 					' strOutputFolderPath points to a non-existent folder; attempt to create it
@@ -624,8 +626,8 @@ Public MustInherit Class clsPHRPBaseClass
 		Dim strExtensionLCase As String
 		Dim strBaseFileNameLCase As String
 
-		strExtensionLCase = System.IO.Path.GetExtension(strFilePath).ToLower()
-		strBaseFileNameLCase = System.IO.Path.GetFileNameWithoutExtension(strFilePath).ToLower()
+		strExtensionLCase = Path.GetExtension(strFilePath).ToLower()
+		strBaseFileNameLCase = Path.GetFileNameWithoutExtension(strFilePath).ToLower()
 
 		If strExtensionLCase = ".xml" Then
 			Return ePeptideHitResultsFileFormatConstants.XTandemXMLFile
@@ -743,7 +745,7 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected Overridable Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
 		Dim strPepToProteinMapFilePath As String = String.Empty
 
-		strPepToProteinMapFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+		strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
 
 		If MTS Then
 			strPepToProteinMapFilePath &= FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & "MTS.txt"
@@ -752,11 +754,11 @@ Public MustInherit Class clsPHRPBaseClass
 		End If
 
 		If String.IsNullOrWhiteSpace(strOutputFolderPath) Then
-			Dim ioInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
+			Dim ioInputFile As FileInfo = New FileInfo(strInputFilePath)
 			strOutputFolderPath = ioInputFile.DirectoryName
 		End If
 
-		strPepToProteinMapFilePath = System.IO.Path.Combine(strOutputFolderPath, strPepToProteinMapFilePath)
+		strPepToProteinMapFilePath = Path.Combine(strOutputFolderPath, strPepToProteinMapFilePath)
 
 		Return strPepToProteinMapFilePath
 
@@ -810,10 +812,10 @@ Public MustInherit Class clsPHRPBaseClass
 			UpdateProgress("Creating Peptide to Protein Map file", PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE)
 
 			' Initialize items
-			Dim fiMTSPepToProteinMapFile As System.IO.FileInfo = New System.IO.FileInfo(strMTSPepToProteinMapFilePath)
+			Dim fiMTSPepToProteinMapFile As FileInfo = New FileInfo(strMTSPepToProteinMapFilePath)
 			Dim strOutputFolderPath As String = fiMTSPepToProteinMapFile.DirectoryName
 
-			fiMTSPepToProteinMapFile = New System.IO.FileInfo(strMTSPepToProteinMapFilePath)
+			fiMTSPepToProteinMapFile = New FileInfo(strMTSPepToProteinMapFilePath)
 			strOutputFolderPath = fiMTSPepToProteinMapFile.DirectoryName
 			htPeptideToProteinMapResults = New Collections.Hashtable
 
@@ -836,13 +838,13 @@ Public MustInherit Class clsPHRPBaseClass
 				.ShowMessages = True
 			End With
 
-			Using swMTSpepToProteinMapFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strMTSPepToProteinMapFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+			Using swMTSpepToProteinMapFile As StreamWriter = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
 				For Each strInputFilePath As String In lstSourcePHRPDataFiles
 
 					Dim strResultsFilePath As String
-					strResultsFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath) & PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING
-					strResultsFilePath = System.IO.Path.Combine(strOutputFolderPath, strResultsFilePath)
+					strResultsFilePath = Path.GetFileNameWithoutExtension(strInputFilePath) & PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING
+					strResultsFilePath = Path.Combine(strOutputFolderPath, strResultsFilePath)
 
 					' Make sure the results file doesn't already exist
 					DeleteFileIgnoreErrors(strResultsFilePath)
@@ -855,7 +857,7 @@ Public MustInherit Class clsPHRPBaseClass
 					RemoveHandler objPeptideToProteinMapper.ProgressChanged, AddressOf PeptideToProteinMapper_ProgressChanged
 
 					If blnSuccess Then
-						If Not System.IO.File.Exists(strResultsFilePath) Then
+						If Not File.Exists(strResultsFilePath) Then
 							SetErrorMessage("Peptide to protein mapping file was not created for " & strInputFilePath)
 							SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
 							blnSuccess = False
@@ -877,7 +879,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 							ReportWarning("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True")
 
-							If System.IO.File.Exists(strResultsFilePath) Then
+							If File.Exists(strResultsFilePath) Then
 								blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, mIgnorePeptideToProteinMapperErrors)
 							Else
 								mErrorMessage = String.Empty
@@ -895,7 +897,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 					If IO.File.Exists(strResultsFilePath) Then
 						' Read the newly created file and append new entries to strMTSPepToProteinMapFilePath
-						Using srResultsFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strResultsFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+						Using srResultsFile As StreamReader = New StreamReader(New FileStream(strResultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 							While srResultsFile.Peek > -1
 								strLineIn = srResultsFile.ReadLine()
 
@@ -945,12 +947,12 @@ Public MustInherit Class clsPHRPBaseClass
 	Public Function CreateProteinModDetailsFile(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String) As Boolean
 
 		Dim strMTSPepToProteinMapFilePath As String
-		Dim ioInputFile As System.IO.FileInfo
+		Dim ioInputFile As FileInfo
 
 		Dim blnSuccess As Boolean = False
 
 		Try
-			ioInputFile = New System.IO.FileInfo(strPHRPDataFilePath)
+			ioInputFile = New FileInfo(strPHRPDataFilePath)
 
 			Dim lstSourcePHRPDataFiles As Generic.List(Of String) = New Generic.List(Of String)
 			lstSourcePHRPDataFiles.Add(ioInputFile.FullName)
@@ -979,7 +981,7 @@ Public MustInherit Class clsPHRPBaseClass
 		Dim lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType) = New Generic.List(Of udtPepToProteinMappingType)
 		Dim strHeaderLine As String = String.Empty
 
-		Dim fiPHRPDataFile As System.IO.FileInfo
+		Dim fiPHRPDataFile As FileInfo
 		Dim strProteinModsFilePath As String
 
 		Dim strResidue As String
@@ -1000,7 +1002,7 @@ Public MustInherit Class clsPHRPBaseClass
 			UpdateProgress("Creating the Protein Mod Details file", PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE)
 
 			' Confirm that the PHRP data file exists
-			fiPHRPDataFile = New System.IO.FileInfo(strPHRPDataFilePath)
+			fiPHRPDataFile = New FileInfo(strPHRPDataFilePath)
 			If Not fiPHRPDataFile.Exists() Then
 				SetErrorMessage("PHRP data file not found in CreateProteinModDetailsFile: " & strPHRPDataFilePath)
 				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
@@ -1037,7 +1039,7 @@ Public MustInherit Class clsPHRPBaseClass
 			intPSMCountSkippedSinceReversedOrScrambledProtein = 0
 
 			' Create a ProteinMods file parallel to the PHRP file
-			Using swProteinModsFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strProteinModsFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+			Using swProteinModsFile As StreamWriter = New StreamWriter(New FileStream(strProteinModsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
 				' Write the header line
 				swProteinModsFile.WriteLine( _
@@ -1181,7 +1183,7 @@ Public MustInherit Class clsPHRPBaseClass
 		Try
 			If IO.File.Exists(strFilePath) Then
 				Threading.Thread.Sleep(200)
-				System.IO.File.Delete(strFilePath)
+				File.Delete(strFilePath)
 			End If
 
 		Catch ex As Exception
@@ -1404,7 +1406,7 @@ Public MustInherit Class clsPHRPBaseClass
 		mSeqToProteinMap = New Hashtable
 
 		' Define a RegEx to replace all of the non-letter characters
-		mReplaceSymbols = New System.Text.RegularExpressions.Regex("[^A-Za-z]", System.Text.RegularExpressions.RegexOptions.Compiled)
+		mReplaceSymbols = New Regex("[^A-Za-z]", RegexOptions.Compiled)
 
 	End Sub
 
@@ -1412,13 +1414,13 @@ Public MustInherit Class clsPHRPBaseClass
 
 		' Initializes the StreamWriter objects using strBaseOutputFilePath as a base name and replacing the suffix with the default suffix names
 		' Returns True if success; does not catch errors; they will be thrown to the calling function if they occur
-		Dim fiOutputFileInfo As System.IO.FileInfo
+		Dim fiOutputFileInfo As FileInfo
 		Dim strResultToSeqMapFilePath As String
 		Dim strSeqInfoFilePath As String
 		Dim strModDetailsFilePath As String
 		Dim strSeqToProteinMapFilePath As String
 
-		fiOutputFileInfo = New System.IO.FileInfo(strBaseOutputFilePath)
+		fiOutputFileInfo = New FileInfo(strBaseOutputFilePath)
 
 		' Initialize the file paths based on strBaseOutputFilePath
 		strResultToSeqMapFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_RESULT_TO_SEQ_MAP)
@@ -1433,26 +1435,26 @@ Public MustInherit Class clsPHRPBaseClass
 		mSeqToProteinMap.Clear()
 
 		' Initialize the ResultToSeqMap file
-		mResultToSeqMapFile = New System.IO.StreamWriter(strResultToSeqMapFilePath)
+		mResultToSeqMapFile = New StreamWriter(strResultToSeqMapFilePath)
 		mResultToSeqMapFile.WriteLine("Result_ID" & SEP_CHAR & COLUMN_NAME_UNIQUE_SEQ_ID)
 
 
 		' Initialize the SeqInfo file
-		mSeqInfoFile = New System.IO.StreamWriter(strSeqInfoFilePath, False)
+		mSeqInfoFile = New StreamWriter(strSeqInfoFilePath, False)
 		mSeqInfoFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
-	"Mod_Count" & SEP_CHAR & _
-	"Mod_Description" & SEP_CHAR & _
-	"Monoisotopic_Mass")
+		  "Mod_Count" & SEP_CHAR & _
+		  "Mod_Description" & SEP_CHAR & _
+		  "Monoisotopic_Mass")
 
 		' Initialize the ModDetails file
-		mModDetailsFile = New System.IO.StreamWriter(strModDetailsFilePath)
+		mModDetailsFile = New StreamWriter(strModDetailsFilePath)
 		mModDetailsFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
-	"Mass_Correction_Tag" & SEP_CHAR & _
-	"Position")
+		  "Mass_Correction_Tag" & SEP_CHAR & _
+		  "Position")
 
 
 		' Initialize the SeqToProtein map file
-		mSeqToProteinMapFile = New System.IO.StreamWriter(strSeqToProteinMapFilePath, False)
+		mSeqToProteinMapFile = New StreamWriter(strSeqToProteinMapFilePath, False)
 		mSeqToProteinMapFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
 		 "Cleavage_State" & SEP_CHAR & _
 		 "Terminus_State" & SEP_CHAR & _
@@ -1472,7 +1474,7 @@ Public MustInherit Class clsPHRPBaseClass
 	''' <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
 	Public Shared Function IsLetterAtoZ(chChar As Char) As Boolean
 
-		Static reIsLetter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[A-Za-z]", Text.RegularExpressions.RegexOptions.Compiled)
+		Static reIsLetter As Regex = New Regex("[A-Za-z]", RegexOptions.Compiled)
 
 		If reIsLetter.IsMatch(chChar) Then
 			Return True
@@ -1544,10 +1546,10 @@ Public MustInherit Class clsPHRPBaseClass
 				Return True
 			End If
 
-			If Not System.IO.File.Exists(strParameterFilePath) Then
+			If Not File.Exists(strParameterFilePath) Then
 				' See if strParameterFilePath points to a file in the same directory as the application
-				strParameterFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), System.IO.Path.GetFileName(strParameterFilePath))
-				If Not System.IO.File.Exists(strParameterFilePath) Then
+				strParameterFilePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Path.GetFileName(strParameterFilePath))
+				If Not File.Exists(strParameterFilePath) Then
 					SetErrorCode(ePHRPErrorCodes.ParameterFileNotFound)
 					Return False
 				End If
@@ -1640,14 +1642,14 @@ Public MustInherit Class clsPHRPBaseClass
 				SetErrorMessage("Warning: PepToProteinMap file is not defined")
 				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
 				Return False
-			ElseIf Not System.IO.File.Exists(strPepToProteinMapFilePath) Then
+			ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
 				SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
 				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
 				Return False
 			End If
 
 			' Open strProteinToPeptideMappingFilePath for reading
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strPepToProteinMapFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strPepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 				intLinesRead = 0
 				Do While srInFile.Peek <> -1
@@ -1685,7 +1687,7 @@ Public MustInherit Class clsPHRPBaseClass
 			blnSuccess = True
 
 		Catch ex As Exception
-			SetErrorMessage("Error reading the Peptide to Protein Map File (" & System.IO.Path.GetFileName(strPepToProteinMapFilePath) & "): " & ex.Message)
+			SetErrorMessage("Error reading the Peptide to Protein Map File (" & Path.GetFileName(strPepToProteinMapFilePath) & "): " & ex.Message)
 			SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
 			blnSuccess = False
 		End Try
@@ -1734,7 +1736,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Public MustOverride Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
 
-	Protected Function ReplaceFilenameSuffix(ByVal fiOriginalFile As System.IO.FileInfo, ByVal strNewSuffix As String) As String
+	Protected Function ReplaceFilenameSuffix(ByVal fiOriginalFile As FileInfo, ByVal strNewSuffix As String) As String
 		' Appends strNewSuffix to the base name of the original file, then returns a full path to the file using the folder associated with strOriginalFilePath
 		' Note that strNewSuffix may contain a file extension though it does not have to
 		'  If strNewSuffix does not contain an extension, then the path returned will end in the same extension as strOriginalFilePath
@@ -1749,16 +1751,16 @@ Public MustInherit Class clsPHRPBaseClass
 		If strNewSuffix Is Nothing Then strNewSuffix = String.Empty
 
 		' Obtain the filename, without its extension
-		strNewFileName = System.IO.Path.GetFileNameWithoutExtension(fiOriginalFile.Name)
+		strNewFileName = Path.GetFileNameWithoutExtension(fiOriginalFile.Name)
 
 		' Append strNewSuffix to strNewFileName
-		If System.IO.Path.HasExtension(strNewSuffix) Then
+		If Path.HasExtension(strNewSuffix) Then
 			strNewFileName &= strNewSuffix
 		Else
 			strNewFileName &= strNewSuffix & strOriginalExtension
 		End If
 
-		strNewFileName = System.IO.Path.Combine(fiOriginalFile.DirectoryName, strNewFileName)
+		strNewFileName = Path.Combine(fiOriginalFile.DirectoryName, strNewFileName)
 
 		Return strNewFileName
 
@@ -1810,7 +1812,7 @@ Public MustInherit Class clsPHRPBaseClass
 		Dim intIndex As Integer
 
 		Try
-			Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(strModificationSummaryFilePath, False)
+			Using swOutFile As StreamWriter = New StreamWriter(strModificationSummaryFilePath, False)
 
 				' Write the header line
 				swOutFile.WriteLine( _
@@ -1998,10 +2000,10 @@ Public MustInherit Class clsPHRPBaseClass
 			' Validate that none of the results in strPeptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH
 
 			Dim strLineIn As String
-			Dim strLastPeptide As String = String.Empty			
+			Dim strLastPeptide As String = String.Empty
 			Dim strSplitLine() As String
 
-			Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strPeptideToProteinMapFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strPeptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine()
@@ -2062,8 +2064,8 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Protected Sub ValidatePHRPReaderSupportFiles(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String)
 
-		Dim ioPHRPFile As System.IO.FileInfo
-		Dim ioOutputFolder As System.IO.DirectoryInfo
+		Dim ioPHRPFile As FileInfo
+		Dim ioOutputFolder As DirectoryInfo
 		Dim strMSGFFileName As String
 		Dim strSourcePath As String
 		Dim strTargetPath As String
@@ -2071,8 +2073,8 @@ Public MustInherit Class clsPHRPBaseClass
 		Try
 			If Not String.IsNullOrWhiteSpace(strOutputFolderPath) Then
 
-				ioPHRPFile = New System.IO.FileInfo(strPHRPDataFilePath)
-				ioOutputFolder = New System.IO.DirectoryInfo(strOutputFolderPath)
+				ioPHRPFile = New FileInfo(strPHRPDataFilePath)
+				ioOutputFolder = New DirectoryInfo(strOutputFolderPath)
 
 				If ioPHRPFile.DirectoryName.ToLower() <> ioOutputFolder.FullName.ToLower() Then
 					strMSGFFileName = IO.Path.GetFileName(ReplaceFilenameSuffix(ioPHRPFile, FILENAME_SUFFIX_MSGF))
@@ -2112,13 +2114,13 @@ Public MustInherit Class clsPHRPBaseClass
 		Dim objFastaFile As ProteinFileReader.FastaFileReader
 
 		' This RegEx looks for standard amino acids, skipping A, T, C, and G
-		Dim reDefiniteAminoAcid As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[DEFHIKLMNPQRSVWY]", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+		Dim reDefiniteAminoAcid As Regex = New Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
 		' This RegEx looks for A, T, C, and G
-		Dim rePotentialNucleicAcid As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[ATCG]", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+		Dim rePotentialNucleicAcid As Regex = New Regex("[ATCG]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
 		' This matches any letter
-		Dim reLetter As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("[A-Z]", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+		Dim reLetter As Regex = New Regex("[A-Z]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
 		Dim intDefiniteAminoAcidCount As Integer
 		Dim intPotentialNucleicAcidCount As Integer

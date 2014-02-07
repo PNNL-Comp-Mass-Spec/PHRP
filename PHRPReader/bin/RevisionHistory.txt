@@ -1,5 +1,9 @@
 PHRPReader.dll Revision History
 
+Version 1.5.5150; February 6, 2014
+	- Added properties CurrentPSMSeqInfo, ResultToSeqMap, and SeqInfo to clsPHRPReader
+	- clsPHRPParser now defines the modified residues if the _SeqInfo.txt file was successfully loaded but the ModSummary.txt was not found
+
 Version 1.1.5122; January 9, 2014
 	- AutoDetermineBestInputFile now displays the list of filenames that were considered if a valid match cannot be found for a dataset
  

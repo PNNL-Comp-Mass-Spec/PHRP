@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "November 20, 2013"
+	Public Const PROGRAM_DATE As String = "February 6, 2014"
 
 	Private mInputFilePath As String
 	Private mOutputFolderPath As String							' Optional
@@ -41,9 +41,6 @@ Module modMain
 	Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
 
 	Private mInspectSynopsisFilePValueThreshold As Single		' Optional
-
-	Private mMSGFDBSynopsisFilePValueThreshold As Single
-	Private mMSGFDBSynopsisFileSpecProbThreshold As Single
 
 	Private mOutputFolderAlternatePath As String				' Optional
 	Private mRecreateFolderHierarchyInAlternatePath As Boolean	' Optional
@@ -109,9 +106,6 @@ Module modMain
 		mCreateInspectOrMSGFDBFirstHitsFile = True
 		mCreateInspectOrMSGFDBSynopsisFile = True
 		mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
-
-		mMSGFDBSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
-		mMSGFDBSynopsisFileSpecProbThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD
 
 		mRecurseFolders = False
 		mRecurseFoldersMaxLevels = 0

@@ -11,6 +11,8 @@
 ' -------------------------------------------------------------------------------
 
 Imports PHRPReader
+Imports System.IO
+Imports System.Text.RegularExpressions
 
 Public Class clsMSAlignResultsProcessor
 	Inherits clsPHRPBaseClass
@@ -37,7 +39,7 @@ Public Class clsMSAlignResultsProcessor
 
 	Private Const MSALIGN_MOD_MASS_REGEX As String = "\[([+-]*[0-9\.]+)\]"
 
-	Private Const REGEX_OPTIONS As Text.RegularExpressions.RegexOptions = Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.Singleline Or Text.RegularExpressions.RegexOptions.IgnoreCase
+	Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
 	' These columns correspond to the tab-delimited file created directly by MSAlign
 	Protected Const MSAlignResultsFileColCount As Integer = 23
@@ -440,14 +442,14 @@ Public Class clsMSAlignResultsProcessor
 	''' <remarks></remarks>
 	Protected Function ComputeTotalModMass(ByVal strPeptide As String) As Double
 
-		Static reModMassRegEx As New System.Text.RegularExpressions.Regex(MSALIGN_MOD_MASS_REGEX, REGEX_OPTIONS)
+		Static reModMassRegEx As New Regex(MSALIGN_MOD_MASS_REGEX, REGEX_OPTIONS)
 
 		Dim dblTotalModMass As Double
 		Dim dblModMassFound As Double
 
 		dblTotalModMass = 0
 
-		For Each reMatch As System.Text.RegularExpressions.Match In reModMassRegEx.Matches(strPeptide)
+		For Each reMatch As Match In reModMassRegEx.Matches(strPeptide)
 			If Double.TryParse(reMatch.Groups(1).Value, dblModMassFound) Then
 				dblTotalModMass += dblModMassFound
 			End If
@@ -460,7 +462,7 @@ Public Class clsMSAlignResultsProcessor
 	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
 		Dim strPepToProteinMapFilePath As String = String.Empty
 
-		strPepToProteinMapFilePath = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+		strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
 		If strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_fht") Then
 			' Remove _syn or _fht
 			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
@@ -512,12 +514,12 @@ Public Class clsMSAlignResultsProcessor
 			Try
 				' Open the input file and parse it
 				' Initialize the stream reader and the stream Text writer
-				Using srDataFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInputFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-					Using swResultFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(strOutputFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+					Using swResultFile As StreamWriter = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
-						Dim ioResultFile As System.IO.FileInfo
-						ioResultFile = New System.IO.FileInfo(strOutputFilePath)
+						Dim ioResultFile As FileInfo
+						ioResultFile = New FileInfo(strOutputFilePath)
 
 						strErrorLog = String.Empty
 						intResultsProcessed = 0
@@ -640,11 +642,11 @@ Public Class clsMSAlignResultsProcessor
 				Return False
 			End If
 
-			If Not System.IO.File.Exists(strMSAlignParamFilePath) Then
+			If Not File.Exists(strMSAlignParamFilePath) Then
 				SetErrorMessage("MSAlign param file not found: " & strMSAlignParamFilePath)
 			Else
 				' Read the contents of the parameter (or mods) file
-				Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strMSAlignParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strMSAlignParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 					Do While srInFile.Peek <> -1
 						strLineIn = srInFile.ReadLine().Trim()
@@ -684,7 +686,7 @@ Public Class clsMSAlignResultsProcessor
 
 			End If
 		Catch ex As Exception
-			SetErrorMessage("Error reading the MSAlign parameter file (" & System.IO.Path.GetFileName(strMSAlignParamFilePath) & "): " & ex.Message)
+			SetErrorMessage("Error reading the MSAlign parameter file (" & Path.GetFileName(strMSAlignParamFilePath) & "): " & ex.Message)
 			SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
 			blnSuccess = False
 		End Try
@@ -760,14 +762,14 @@ Public Class clsMSAlignResultsProcessor
 
 				' Open the input file and parse it
 				' Initialize the stream reader
-				Using srDataFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(strInputFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 					strErrorLog = String.Empty
 					intResultsProcessed = 0
 					blnHeaderParsed = False
 
 					' Create the output files
-					Dim strBaseOutputFilePath As String = System.IO.Path.Combine(strOutputFolderPath, System.IO.Path.GetFileName(strInputFilePath))
+					Dim strBaseOutputFilePath As String = Path.Combine(strOutputFolderPath, Path.GetFileName(strInputFilePath))
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
@@ -868,9 +870,9 @@ Public Class clsMSAlignResultsProcessor
 
 				If mCreateModificationSummaryFile Then
 					' Create the modification summary file
-					Dim fiInputFile As System.IO.FileInfo = New System.IO.FileInfo(strInputFilePath)
-					strModificationSummaryFilePath = System.IO.Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
-					strModificationSummaryFilePath = System.IO.Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
+					Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
+					strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+					strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
 
 					SaveModificationSummaryFile(strModificationSummaryFilePath)
 				End If
@@ -1306,9 +1308,9 @@ Public Class clsMSAlignResultsProcessor
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.Spectrum_ID), .Spectrum_ID)
 
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.PrecursorMZ), .Precursor_mz)
-					
+
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.MH), .ParentIonMH)
-					
+
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.Protein_Mass), .Protein_Mass)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.Unexpected_Mod_Count), .Unexpected_Mod_Count)
 					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignSynFileColumns.Peak_Count), .Peak_Count)
@@ -1351,7 +1353,7 @@ Public Class clsMSAlignResultsProcessor
 	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
 
-		Dim ioInputFile As System.IO.FileInfo
+		Dim ioInputFile As FileInfo
 
 		Dim strBaseName As String = String.Empty
 		Dim strSynOutputFilePath As String = String.Empty
@@ -1379,12 +1381,12 @@ Public Class clsMSAlignResultsProcessor
 					Exit Try
 				End If
 
-				MyBase.ResetProgress("Parsing " & System.IO.Path.GetFileName(strInputFilePath))
+				MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
 
 				If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
 					Try
 						' Obtain the full path to the input file
-						ioInputFile = New System.IO.FileInfo(strInputFilePath)
+						ioInputFile = New FileInfo(strInputFilePath)
 
 						lstMSAlignModInfo = New Generic.List(Of clsModificationDefinition)
 						lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
@@ -1396,7 +1398,7 @@ Public Class clsMSAlignResultsProcessor
 						ResolveMSAlignModsWithModDefinitions(lstMSAlignModInfo)
 
 						' Define the base output filename using strInputFilePath
-						strBaseName = System.IO.Path.GetFileNameWithoutExtension(strInputFilePath)
+						strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
 						' Auto-replace "_MSAlign_ResultTable" with "_msalign"
 						If strBaseName.ToLower().EndsWith("_MSAlign_ResultTable".ToLower()) Then
@@ -1411,12 +1413,12 @@ Public Class clsMSAlignResultsProcessor
 						Console.WriteLine()
 						Console.WriteLine(MyBase.ProgressStepDescription)
 
-						strSynOutputFilePath = System.IO.Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+						strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
 						blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath)
 
 						' Create the other PHRP-specific files
-						MyBase.ResetProgress("Creating the PHRP files for " & System.IO.Path.GetFileName(strSynOutputFilePath))
+						MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
 						Console.WriteLine()
 						Console.WriteLine()
 						Console.WriteLine(MyBase.ProgressStepDescription)
@@ -1440,7 +1442,7 @@ Public Class clsMSAlignResultsProcessor
 								SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
 								blnSuccess = False
 							Else
-								If System.IO.File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+								If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
 									blnSuccess = True
 								Else
 									' Auto-change mIgnorePeptideToProteinMapperErrors to True
@@ -1537,7 +1539,7 @@ Public Class clsMSAlignResultsProcessor
 
 	End Sub
 
-	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As System.IO.StreamWriter, _
+	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter, _
 	 ByVal intFilteredSearchResultCount As Integer, _
 	 ByRef udtFilteredSearchResults() As udtMSAlignSearchResultType, _
 	 ByRef strErrorLog As String)
@@ -1576,7 +1578,7 @@ Public Class clsMSAlignResultsProcessor
 
 	End Sub
 
-	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As System.IO.StreamWriter, _
+	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
 	  ByRef strErrorLog As String)
 
 		' Write out the header line for synopsis / first hits files
@@ -1624,7 +1626,7 @@ Public Class clsMSAlignResultsProcessor
 	''' <param name="strErrorLog"></param>
 	''' <remarks></remarks>
 	Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
-	   ByRef swResultFile As System.IO.StreamWriter, _
+	   ByRef swResultFile As StreamWriter, _
 	   ByRef udtSearchResult As udtMSAlignSearchResultType, _
 	   ByRef strErrorLog As String)
 

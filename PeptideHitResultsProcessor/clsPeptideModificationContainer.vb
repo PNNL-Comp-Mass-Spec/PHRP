@@ -29,6 +29,7 @@ Option Strict On
 
 Imports PHRPReader
 Imports PHRPReader.clsAminoAcidModInfo
+Imports System.IO
 
 Public Class clsPeptideModificationContainer
 
@@ -890,13 +891,13 @@ Public Class clsPeptideModificationContainer
 			If String.IsNullOrWhiteSpace(strFilePath) Then
 				SetDefaultMassCorrectionTags()
 				blnSuccess = True
-			ElseIf Not System.IO.File.Exists(strFilePath) Then
+			ElseIf Not File.Exists(strFilePath) Then
 				mErrorMessage = "Mass CorrectionTags File Not Found: " & strFilePath
 				SetDefaultMassCorrectionTags()
 				blnFileNotFound = True
 				blnSuccess = False
 			Else
-				Using srMassCorrectionTagsFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
+				Using srMassCorrectionTagsFile As StreamReader = New StreamReader(strFilePath)
 
 					If mMassCorrectionTags Is Nothing Then
 						mMassCorrectionTags = New Hashtable
@@ -964,13 +965,13 @@ Public Class clsPeptideModificationContainer
 			If String.IsNullOrWhiteSpace(strFilePath) Then
 				ClearModifications()
 				blnSuccess = True
-			ElseIf Not System.IO.File.Exists(strFilePath) Then
+			ElseIf Not File.Exists(strFilePath) Then
 				mErrorMessage = "Modification Definition File Not Found: " & strFilePath
 				ClearModifications()
 				blnFileNotFound = True
 				blnSuccess = False
 			Else
-				Using srModificationFile As System.IO.StreamReader = New System.IO.StreamReader(strFilePath)
+				Using srModificationFile As StreamReader = New StreamReader(strFilePath)
 
 					ClearModifications()
 
