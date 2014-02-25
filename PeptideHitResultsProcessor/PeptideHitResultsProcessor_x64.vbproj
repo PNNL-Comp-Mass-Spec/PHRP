@@ -146,6 +146,6 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\bin\"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\bin\x64"</PostBuildEvent>
   </PropertyGroup>
 </Project>
