@@ -22,7 +22,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "June 28, 2013"
+		MyBase.mFileDate = "February 24, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -583,26 +583,23 @@ Public Class clsMSGFDBResultsProcessor
 				' Step through the known modifications to find the closest match
 				For intIndex As Integer = 0 To lstMSGFDBModInfo.Count - 1
 
+					blnTestMod = True
+
 					If blnNterminalMod Then
 						' Only test N-terminal mods
-						If lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermPeptide OrElse _
-						 lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermProtein Then
-							blnTestMod = True
-						Else
+						If Not (
+						   lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermPeptide OrElse
+						   lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermProtein) Then
 							blnTestMod = False
 						End If
 
-					ElseIf blnPossibleCTerminalMod Then
-						' Only test C-terminal mods
-						If lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermPeptide OrElse _
-						 lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermProtein Then
-							blnTestMod = True
-						Else
+					ElseIf Not blnPossibleCTerminalMod Then
+						' Skip C-terminal mods since we're not at the C-terminus
+						If lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermPeptide OrElse
+						   lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermProtein Then
 							blnTestMod = False
 						End If
 
-					Else
-						blnTestMod = True
 					End If
 
 					If blnTestMod Then
@@ -623,10 +620,12 @@ Public Class clsMSGFDBResultsProcessor
 
 				Next
 
-				If Not blnMatchFound AndAlso (blnNterminalMod Or blnPossibleCTerminalMod) Then
-					' Set these to false, then search again
+				If Not blnMatchFound AndAlso blnNterminalMod Then
+					' Set this to false, then search again
 					blnNterminalMod = False
-					blnPossibleCTerminalMod = False
+				ElseIf Not blnMatchFound AndAlso Not blnPossibleCTerminalMod Then
+					' Set this to true, then search again
+					blnPossibleCTerminalMod = True
 				Else
 					Exit Do
 				End If

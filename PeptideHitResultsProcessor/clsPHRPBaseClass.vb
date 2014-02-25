@@ -32,7 +32,7 @@ Imports System.Text.RegularExpressions
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "January 29, 2014"
+		mFileDate = "February 24, 2014"
 		InitializeLocalVariables()
 	End Sub
 

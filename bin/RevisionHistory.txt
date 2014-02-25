@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5168; February 24, 2014
+	- New version of PeptideHitResultsProcessor.dll
+
 Version 1.5.5150; February 6, 2014
 	- New version of PHRPReader.dll
 

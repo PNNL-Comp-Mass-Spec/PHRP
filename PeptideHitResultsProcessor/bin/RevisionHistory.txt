@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.5168; February 24, 2014
+	- Altered logic used to match up numeric-based mod masses in MSGF+ peptides to modification definition information
+		- Fixes bug involving residues at the C-terminus of a peptide where a static mod applies, but a dynamic C-terminal peptide mod could also apply
+
 Version 1.5.4927; June 28, 2013
 	- Now using String.IsNullOrWhiteSpace
 
