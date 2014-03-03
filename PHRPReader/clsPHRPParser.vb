@@ -15,6 +15,14 @@ Imports System.IO
 
 Public MustInherit Class clsPHRPParser
 
+#Region "Structures"
+	Protected Structure udtAmbiguousModInfo
+		Public ResidueStart As Integer
+		Public ResidueEnd As Integer
+		Public ModMassString As String
+	End Structure
+#End Region
+
 #Region "Module variables"
 
 	Protected mDatasetName As String
@@ -392,6 +400,72 @@ Public MustInherit Class clsPHRPParser
 		Next
 
 		Return sbNewPeptide.ToString()
+
+	End Function
+
+	''' <summary>
+	''' Look for ambiguous mods in strSequenceWithMods
+	''' For example, -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
+	''' </summary>
+	''' <param name="strSequenceWithMods"></param>
+	''' <returns></returns>
+	''' <remarks>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</remarks>
+	Protected Function ExtractAmbiguousMods(ByVal strSequenceWithMods As String) As SortedList(Of Integer, udtAmbiguousModInfo)
+
+		Dim strPrimarySequence As String = String.Empty
+		Dim strPrefix As String = String.Empty
+		Dim strSuffix As String = String.Empty
+
+		If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
+			strPrimarySequence = String.Copy(strSequenceWithMods)
+		End If
+
+		Dim lstAmbiguousMods = New SortedList(Of Integer, udtAmbiguousModInfo)
+
+		Dim intResidueNumber As Integer = 0
+		Dim blnParsingAmbiguousMod As Boolean = False
+		Dim udtCurrentMod As udtAmbiguousModInfo
+
+		For intCharIndex = 0 To strPrimarySequence.Length - 1
+			If clsPHRPReader.IsLetterAtoZ(strPrimarySequence.Chars(intCharIndex)) Then
+				' Found a letter
+				intResidueNumber += 1
+
+				If intCharIndex > 0 AndAlso strPrimarySequence.Chars(intCharIndex - 1) = "("c Then
+					' Found an ambiguous mod
+					If Not blnParsingAmbiguousMod Then
+						blnParsingAmbiguousMod = True
+						udtCurrentMod.ResidueStart = intResidueNumber
+						udtCurrentMod.ResidueEnd = intResidueNumber
+						udtCurrentMod.ModMassString = String.Empty
+					End If
+				End If
+
+			ElseIf blnParsingAmbiguousMod Then
+				' Found a non-letter, and we are parsing an ambiguous mod
+
+				udtCurrentMod.ResidueEnd = intResidueNumber
+				blnParsingAmbiguousMod = False
+
+				' The mod mass should be next, in the form [-30.09]
+				' Parse out the mod mass
+				If intCharIndex < strPrimarySequence.Length - 2 Then
+					If strPrimarySequence.Chars(intCharIndex + 1) = "[" Then
+						Dim strModMassString = strPrimarySequence.Substring(intCharIndex + 2)
+						Dim bracketIndex = strModMassString.IndexOf("]"c)
+						If bracketIndex > 0 Then
+							' Valid ambiguous mod found; store it
+							strModMassString = strModMassString.Substring(0, bracketIndex)
+							udtCurrentMod.ModMassString = String.Copy(strModMassString)
+
+							lstAmbiguousMods.Add(udtCurrentMod.ResidueStart, udtCurrentMod)
+						End If
+					End If
+				End If
+			End If
+		Next
+
+		Return lstAmbiguousMods
 
 	End Function
 
@@ -793,6 +867,11 @@ Public MustInherit Class clsPHRPParser
 						strMods = objSeqInfo.ModDescription.Split(","c)
 
 						If Not strMods Is Nothing AndAlso strMods.Count > 0 Then
+
+							' Parse objPSM.Peptide to look for ambigous mods, for example -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
+
+							Dim lstAmbiguousMods = ExtractAmbiguousMods(objPSM.Peptide)
+
 							For intModIndex As Integer = 0 To strMods.Count - 1
 
 								' Split strMods on the colon characters
@@ -841,7 +920,16 @@ Public MustInherit Class clsPHRPParser
 										End If
 
 										If blnMatchFound Then
-											objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
+											Dim lstMatches = (From item In lstAmbiguousMods Where item.Key = intResidueLoc Select item.Value).ToList()
+
+											If lstMatches.Count > 0 Then
+												' Ambiguous modification
+												objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef, lstMatches.First.ResidueEnd)
+											Else
+												' Normal, non-ambiguous modified residue
+												objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
+											End If
+
 											If intResidueLoc = 1 Then
 												lstNTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag)
 											ElseIf intResidueLoc = intPeptideResidueCount Then
@@ -851,7 +939,7 @@ Public MustInherit Class clsPHRPParser
 											' Could not find a valid entry in mModInfo
 											ReportError("Unrecognized mass correction tag found in the SeqInfo file: " & strMassCorrectionTag)
 										End If
-								
+
 									End If
 								End If
 							Next intModIndex

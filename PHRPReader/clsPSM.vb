@@ -434,7 +434,7 @@ Public Class clsPSM
 		Me.Clear()
 	End Sub
 
-	Public Sub AddCombinedScan(intScanNumber As Integer)
+	Public Sub AddCombinedScan(ByVal intScanNumber As Integer)
 		If Not mScanList.Contains(intScanNumber) Then
 			mScanList.Add(intScanNumber)
 		End If
@@ -445,7 +445,7 @@ Public Class clsPSM
 	''' </summary>
 	''' <param name="objModInfo">Modification info class</param>
 	''' <remarks></remarks>
-	Public Sub AddModifiedResidue(objModInfo As clsAminoAcidModInfo)
+	Public Sub AddModifiedResidue(ByVal objModInfo As clsAminoAcidModInfo)
 		mModifiedPeptideResidues.Add(objModInfo)
 	End Sub
 
@@ -457,8 +457,21 @@ Public Class clsPSM
 	''' <param name="ResidueTerminusState">Terminus state of residue</param>
 	''' <param name="ModDefinition">Modification details</param>
 	''' <remarks></remarks>
-	Public Sub AddModifiedResidue(Residue As Char, ResidueLocInPeptide As Integer, ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ModDefinition As clsModificationDefinition)
+	Public Sub AddModifiedResidue(ByVal Residue As Char, ByVal ResidueLocInPeptide As Integer, ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ByVal ModDefinition As clsModificationDefinition)
 		mModifiedPeptideResidues.Add(New clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition))
+	End Sub
+
+	''' <summary>
+	''' Add the details for a modified residue
+	''' </summary>
+	''' <param name="Residue">Amino acid letter; use angle brackets or square brackes for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+	''' <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
+	''' <param name="ResidueTerminusState">Terminus state of residue</param>
+	''' <param name="ModDefinition">Modification details</param>
+	''' <param name="EndResidueLocInPeptide">For ambiguous mods, the residue number of the last residue that could have this modification</param>
+	''' <remarks></remarks>
+	Public Sub AddModifiedResidue(ByVal Residue As Char, ByVal ResidueLocInPeptide As Integer, ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ByVal ModDefinition As clsModificationDefinition, ByVal EndResidueLocInPeptide As Integer)
+		mModifiedPeptideResidues.Add(New clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition, EndResidueLocInPeptide))
 	End Sub
 
 	''' <summary>
@@ -466,7 +479,7 @@ Public Class clsPSM
 	''' </summary>
 	''' <param name="strProteinName"></param>
 	''' <remarks></remarks>
-	Public Sub AddProtein(strProteinName As String)
+	Public Sub AddProtein(ByVal strProteinName As String)
 		If Not String.IsNullOrWhiteSpace(strProteinName) AndAlso Not mProteins.Contains(strProteinName) Then
 			mProteins.Add(strProteinName)
 		End If

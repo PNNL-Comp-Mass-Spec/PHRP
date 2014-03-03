@@ -21,8 +21,25 @@ Public Class clsAminoAcidModInfo
 
 	Protected mModDefinition As clsModificationDefinition
 	Protected mResidue As Char
-	Protected mResidueLocInPeptide As Integer							   ' Indicates the residue number modified; the first residue is at position 1
+	Protected mResidueLocInPeptide As Integer								' Indicates the residue number modified; the first residue is at position 1.  For ambiguous mods, indicates the first residue on which the mod could appear
+	Protected mEndResidueLocInPeptide As Integer							' For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, whill be the same as mResidueLocInPeptide
 	Protected mResidueTerminusState As eResidueTerminusStateConstants
+
+	Public ReadOnly Property AmbiguousMod As Boolean
+		Get
+			If mEndResidueLocInPeptide > mResidueLocInPeptide Then
+				Return True
+			Else
+				Return False
+			End If
+		End Get
+	End Property
+
+	Public ReadOnly Property EndResidueLocInPeptide As Integer
+		Get
+			Return mEndResidueLocInPeptide
+		End Get
+	End Property
 
 	Public ReadOnly Property ModDefinition As clsModificationDefinition
 		Get
@@ -48,10 +65,32 @@ Public Class clsAminoAcidModInfo
 		End Get
 	End Property
 
-	Public Sub New(Residue As Char, ResidueLocInPeptide As Integer, ResidueTerminusState As eResidueTerminusStateConstants, ModDefinition As clsModificationDefinition)
-		mModDefinition = ModDefinition
-		mResidue = Residue
-		mResidueLocInPeptide = ResidueLocInPeptide
-		mResidueTerminusState = ResidueTerminusState
+	Public Sub New(
+	  ByVal chResidue As Char,
+	  ByVal intResidueLocInPeptide As Integer,
+	  ByVal eResidueTerminusState As eResidueTerminusStateConstants,
+	  ByVal objModDefinition As clsModificationDefinition)
+
+		mModDefinition = objModDefinition
+		mResidue = chResidue
+		mResidueLocInPeptide = intResidueLocInPeptide
+		mEndResidueLocInPeptide = mResidueLocInPeptide
+		mResidueTerminusState = eResidueTerminusState
+
+	End Sub
+
+	Public Sub New(
+	  ByVal chResidue As Char,
+	  ByVal intResidueLocInPeptide As Integer,
+	  ByVal eResidueTerminusState As eResidueTerminusStateConstants,
+	  ByVal objModDefinition As clsModificationDefinition,
+	  ByVal intEndResidueLocInPeptide As Integer)
+
+		mModDefinition = objModDefinition
+		mResidue = chResidue
+		mResidueLocInPeptide = intResidueLocInPeptide
+		mEndResidueLocInPeptide = intEndResidueLocInPeptide
+		mResidueTerminusState = eResidueTerminusState
+
 	End Sub
 End Class

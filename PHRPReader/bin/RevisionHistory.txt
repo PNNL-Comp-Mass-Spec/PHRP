@@ -1,9 +1,13 @@
 PHRPReader.dll Revision History
 
-Verison 1.5.5158; February 14, 2014
+Version 1.1.5175; March 3, 2014
+	- Added properties AmbiguousMod and EndREsidueLocInPeptide to clsAminoAcidModInfo.vb
+		- Allows users to see the Start and End residue locations of ambiguous mods reported by MSAlign
+
+Version 1.1.5158; February 14, 2014
 	- Added function ComputeSequenceMassNumericMods to clsPeptideMassCalculator
 
-Version 1.5.5150; February 6, 2014
+Version 1.1.5150; February 6, 2014
 	- Added properties CurrentPSMSeqInfo, ResultToSeqMap, and SeqInfo to clsPHRPReader
 	- clsPHRPParser now defines the modified residues if the _SeqInfo.txt file was successfully loaded but the ModSummary.txt was not found
 
