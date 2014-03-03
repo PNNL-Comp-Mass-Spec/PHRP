@@ -5,39 +5,43 @@
 	Public Sub Main()
 
 
-		'Dim strSequestSynFilePath As String = "Seq201304121552_Auto934225\Firestone_Soil_07_18_05APR13_Frodo_12-12-04_syn.txt"
-		'Dim strMSGFPlusSynFilePath As String = "MSG201304261714_Auto938181\FSFA-299b_25Apr13_Methow_13-02-13_msgfdb_syn.txt"
+		'Const strSequestSynFilePath As String = "Seq201304121552_Auto934225\Firestone_Soil_07_18_05APR13_Frodo_12-12-04_syn.txt"
+		'Const strMSGFPlusSynFilePath As String = "MSG201304261714_Auto938181\FSFA-299b_25Apr13_Methow_13-02-13_msgfdb_syn.txt"
 
-		Dim strSequestFolder As String = "\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225"
-		Dim strMSGFPlusFolder As String = "MSG201304261714_Auto938181"
+		Const strSequestFolder As String = "\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225"
+		Const strMSGFPlusFolder As String = "MSG201304261714_Auto938181"
 
-		Dim strXTandemFolder As String = "\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
+		Const strXTandemFolder As String = "\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
+
+		Const strMSAlignFolder As String = "\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
 
 		Dim strSynOrFHTFile As String
 		Dim eMatchedResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType
+
+		Console.WriteLine()
+		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSAlignFolder, eMatchedResultType)
+		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
+		End If
+
+		Console.WriteLine()
+		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
+		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
+		End If
+
+		Console.WriteLine()
+		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strXTandemFolder)
+		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
+		End If
+
 
 		Dim dtStartTimeNoSkipDup As DateTime
 		Dim dtEndTimeNoSkipDup As DateTime
 
 		Dim dtStartTimeSkipDup As DateTime
 		Dim dtEndTimeSkipDup As DateTime
-
-
-		Console.WriteLine()
-		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
-		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-			dtStartTimeNoSkipDup = System.DateTime.UtcNow()
-			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
-			dtEndTimeNoSkipDup = System.DateTime.UtcNow()
-		End If
-
-		Console.WriteLine()
-		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strXTandemFolder)
-		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-			dtStartTimeNoSkipDup = System.DateTime.UtcNow()
-			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
-			dtEndTimeNoSkipDup = System.DateTime.UtcNow()
-		End If
 
 		Console.WriteLine()
 		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder)
@@ -54,12 +58,12 @@
 			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
 			dtEndTimeSkipDup = System.DateTime.UtcNow()
 		End If
-	
-
+		
 		Console.WriteLine()
 
 		Console.WriteLine("Elapsed time (Keep Duplicates): " & dtEndTimeNoSkipDup.Subtract(dtStartTimeNoSkipDup).TotalSeconds.ToString("0.0") & " seconds")
 		Console.WriteLine("Elapsed time (Skip Duplicates): " & dtEndTimeSkipDup.Subtract(dtStartTimeSkipDup).TotalSeconds.ToString("0.0") & " seconds")
+
 
 	End Sub
 
@@ -134,7 +138,7 @@
 
 			If oPsm.ModifiedResidues.Count > 0 Then
 				Dim dblPeptideMassRecomputed = oMassCalculator.ComputeSequenceMassNumericMods(oPsm.PeptideWithNumericMods)
-				Console.WriteLine((oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"))
+				Console.WriteLine("  " & (oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"))
 			End If
 			
 
