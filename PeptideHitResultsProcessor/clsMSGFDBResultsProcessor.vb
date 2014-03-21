@@ -36,6 +36,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Private Const UNKNOWN_MSGFDB_MOD_SYMBOL As Char = "?"c
 
+	' Filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 	Public Const DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD As Single = 0.0001
 	Public Const DEFAULT_SYN_FILE_PVALUE_THRESHOLD As Single = 0.95
 
@@ -2747,6 +2748,7 @@ Public Class clsMSGFDBResultsProcessor
 		' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
 
 		' Now store or write out the matches that pass the filters
+		' By default, filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 		For intIndex = intStartIndex To intEndIndex
 			If udtSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse _
 			   udtSearchResults(intIndex).SpecProbNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
