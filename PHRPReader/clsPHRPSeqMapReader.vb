@@ -1,6 +1,5 @@
 ﻿Option Strict On
 
-Imports PHRPReader.clsPeptideCleavageStateCalculator
 Imports System.IO
 
 Public Class clsPHRPSeqMapReader
@@ -28,6 +27,7 @@ Public Class clsPHRPSeqMapReader
 	Protected mResultToSeqMapFilename As String
 	Protected mSeqToProteinMapFilename As String
 	Protected mSeqInfoFilename As String
+	Protected mPepToProteinMapFilename As String
 
 	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 
@@ -56,6 +56,12 @@ Public Class clsPHRPSeqMapReader
 	Public ReadOnly Property PeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 		Get
 			Return mPeptideHitResultType
+		End Get
+	End Property
+
+	Public ReadOnly Property PepToProteinMapFilename As String
+		Get
+			Return mPepToProteinMapFilename
 		End Get
 	End Property
 
@@ -131,6 +137,12 @@ Public Class clsPHRPSeqMapReader
 			mSeqInfoFilename = IO.Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqInfoFilename, strPHRPDataFileName))
 		End If
 
+		mPepToProteinMapFilename = clsPHRPReader.GetPHRPPepToProteinMapFileName(mPeptideHitResultType, mDatasetName)
+		If String.IsNullOrEmpty(mPepToProteinMapFilename) Then
+			mErrorMessage = "Unable to determine PepToProtMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
+			Throw New Exception(mErrorMessage)		
+		End If
+
 	End Sub
 
 	''' <summary>
@@ -173,10 +185,29 @@ Public Class clsPHRPSeqMapReader
 	''' <param name="lstSeqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
 	''' <returns>True if success, false if an error</returns>
 	''' <remarks></remarks>
-	Public Function GetProteinMapping( _
-	  ByRef lstResultToSeqMap As SortedList(Of Integer, Integer), _
-	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)), _
+	Public Function GetProteinMapping(
+	  ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
+	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
 	  ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
+
+		Dim lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
+
+		Return GetProteinMapping(lstResultToSeqMap, lstSeqToProteinMap, lstSeqInfo, lstPepToProteinMap)
+	End Function
+	''' <summary>
+	''' Load the mapping between ResultID and Protein Name
+	''' </summary>
+	''' <param name="lstResultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
+	''' <param name="lstSeqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
+	''' <param name="lstSeqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
+	''' <param name="lstPepToProteinMap">PepToProteinMap list (ouput); keys are clean peptide sequences (no mods), Values are Protein name and residue start/end locations for the peptide</param>
+	''' <returns>True if success, false if an error</returns>
+	''' <remarks></remarks>
+	Public Function GetProteinMapping(
+	  ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
+	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
+	  ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo),
+	  ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
 
 		Dim blnSuccess As Boolean
 		Dim strFilePath As String
@@ -200,6 +231,12 @@ Public Class clsPHRPSeqMapReader
 			lstSeqInfo = New SortedList(Of Integer, clsSeqInfo)
 		Else
 			lstSeqInfo.Clear()
+		End If
+
+		If lstPepToProteinMap Is Nothing Then
+			lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
+		Else
+			lstPepToProteinMap.Clear()
 		End If
 
 		If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
@@ -235,11 +272,81 @@ Public Class clsPHRPSeqMapReader
 				blnSuccess = False
 			End If
 
+			If blnSuccess AndAlso Not String.IsNullOrEmpty(mPepToProteinMapFilename) Then
+				strFilePath = Path.Combine(mInputFolderPath, mPepToProteinMapFilename)
+				If Not File.Exists(strFilePath) Then
+					Console.WriteLine("Warning: PepToProtMap file not found; protein residue start/end values will be zero")
+					Console.WriteLine("         " & strFilePath)
+				Else
+					blnSuccess = LoadPepToProtMapData(strFilePath, lstPepToProteinMap)
+				End If
+			End If
 		End If
 
 		Return blnSuccess
 
 	End Function
+	
+	''' <summary>
+	''' Load the Peptide to Protein mapping using the specified PHRP result file
+	''' </summary>
+	''' <param name="strFilePath"></param>
+	''' <param name="lstPepToProteinMap"></param>
+	''' <returns></returns>
+	''' <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
+	Protected Function LoadPepToProtMapData(ByVal strFilePath As String, ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
+
+		Try
+
+			' Read the data from the PepToProtMap file
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+				Do While srInFile.Peek > -1
+					Dim strLineIn = srInFile.ReadLine
+
+					If Not String.IsNullOrEmpty(strLineIn) Then
+						Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
+
+						If strSplitLine.Length >= 4 Then
+
+							Dim residueStart As Integer
+							Dim residueEnd As Integer
+
+							' Parse out the numbers from the last two columns 
+							' (the first line of the file is the header line, and it will get skipped)
+							If Integer.TryParse(strSplitLine(2), residueStart) Then
+								If Integer.TryParse(strSplitLine(3), residueEnd) Then
+
+									Dim strPeptide = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strSplitLine(0), True)
+
+									Dim oPepToProtMapInfo As clsPepToProteinMapInfo
+
+									If lstPepToProteinMap.TryGetValue(strPeptide, oPepToProtMapInfo) Then
+										oPepToProtMapInfo.AddProtein(strSplitLine(1), residueStart, residueEnd)
+									Else
+										oPepToProtMapInfo = New clsPepToProteinMapInfo(strSplitLine(1), residueStart, residueEnd)
+
+										lstPepToProteinMap.Add(strPeptide, oPepToProtMapInfo)
+									End If
+
+								End If
+							End If
+
+						End If
+					End If
+				Loop
+
+			End Using
+
+
+		Catch ex As Exception
+			Throw New Exception("Exception loading Pep to Prot Map data from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
+		End Try
+
+		Return True
+
+	End Function
+
 
 	''' <summary>
 	''' Load the Result to Seq mapping using the specified PHRP result file
@@ -379,7 +486,8 @@ Public Class clsPHRPSeqMapReader
 	''' <param name="lstSeqToProteinMap"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadSeqToProteinMapping(ByVal strFilePath As String, _
+	Protected Function LoadSeqToProteinMapping(
+	  ByVal strFilePath As String,
 	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
 
 		Dim lstProteins As List(Of clsProteinInfo) = Nothing
@@ -393,8 +501,8 @@ Public Class clsPHRPSeqMapReader
 
 		Dim strProteinName As String
 		Dim intSeqID As Integer
-		Dim eCleavageState As ePeptideCleavageStateConstants
-		Dim eTerminusState As ePeptideTerminusStateConstants
+		Dim eCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
+		Dim eTerminusState As clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants
 
 		Dim blnHeaderLineParsed As Boolean
 		Dim blnSkipLine As Boolean
@@ -420,49 +528,51 @@ Public Class clsPHRPSeqMapReader
 					strLineIn = srInFile.ReadLine
 					blnSkipLine = False
 
-					If Not String.IsNullOrEmpty(strLineIn) Then
-						strSplitLine = strLineIn.Split(ControlChars.Tab)
-
-						If Not blnHeaderLineParsed Then
-							If strSplitLine(0).ToLower() = SEQ_PROT_MAP_COLUMN_Unique_Seq_ID.ToLower() Then
-								' Parse the header line to confirm the column ordering
-								clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
-								blnSkipLine = True
-							End If
-
-							blnHeaderLineParsed = True
-						End If
-
-						If Not blnSkipLine AndAlso strSplitLine.Length >= 3 Then
-
-							If Integer.TryParse(strSplitLine(0), intSeqID) Then
-
-								strProteinName = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, objColumnHeaders, String.Empty)
-
-								If Not String.IsNullOrEmpty(strProteinName) Then
-
-									eCleavageState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, objColumnHeaders, 0), ePeptideCleavageStateConstants)
-									eTerminusState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, objColumnHeaders, 0), ePeptideTerminusStateConstants)
-
-									objProteinInfo = New clsProteinInfo(strProteinName, intSeqID, eCleavageState, eTerminusState)
-
-									If lstSeqToProteinMap.TryGetValue(intSeqID, lstProteins) Then
-										' Sequence already exists in lstSeqToProteinMap; add the new protein info
-										lstProteins.Add(objProteinInfo)
-									Else
-										' New Sequence ID
-										lstProteins = New List(Of clsProteinInfo)
-										lstProteins.Add(objProteinInfo)
-										lstSeqToProteinMap.Add(intSeqID, lstProteins)
-									End If
-
-								End If
-
-							End If
-
-						End If
-
+					If String.IsNullOrEmpty(strLineIn) Then
+						Continue Do
 					End If
+
+					strSplitLine = strLineIn.Split(ControlChars.Tab)
+
+					If Not blnHeaderLineParsed Then
+						If strSplitLine(0).ToLower() = SEQ_PROT_MAP_COLUMN_Unique_Seq_ID.ToLower() Then
+							' Parse the header line to confirm the column ordering
+							clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
+							blnSkipLine = True
+						End If
+
+						blnHeaderLineParsed = True
+					End If
+
+					If blnSkipLine OrElse strSplitLine.Length < 3 Then
+						Continue Do
+					End If
+
+					If Not Integer.TryParse(strSplitLine(0), intSeqID) Then
+						Continue Do
+					End If
+
+					strProteinName = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, objColumnHeaders, String.Empty)
+
+					If String.IsNullOrEmpty(strProteinName) Then
+						Continue Do
+					End If
+
+					eCleavageState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, objColumnHeaders, 0), clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants)
+					eTerminusState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, objColumnHeaders, 0), clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants)
+
+					objProteinInfo = New clsProteinInfo(strProteinName, intSeqID, eCleavageState, eTerminusState)
+
+					If lstSeqToProteinMap.TryGetValue(intSeqID, lstProteins) Then
+						' Sequence already exists in lstSeqToProteinMap; add the new protein info
+						lstProteins.Add(objProteinInfo)
+					Else
+						' New Sequence ID
+						lstProteins = New List(Of clsProteinInfo)
+						lstProteins.Add(objProteinInfo)
+						lstSeqToProteinMap.Add(intSeqID, lstProteins)
+					End If
+
 				Loop
 
 			End Using

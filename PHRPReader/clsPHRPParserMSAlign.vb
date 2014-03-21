@@ -122,6 +122,10 @@ Public Class clsPHRPParserMSAlign
 		Return strDatasetName & "_msalign_syn_ModSummary.txt"
 	End Function
 
+	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_msalign_PepToProtMapMTS.txt"
+	End Function
+
 	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_msalign_syn_ProteinMods.txt"
 	End Function

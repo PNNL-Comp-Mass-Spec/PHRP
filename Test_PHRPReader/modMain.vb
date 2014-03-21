@@ -18,11 +18,11 @@
 		Dim strSynOrFHTFile As String
 		Dim eMatchedResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType
 
-		Console.WriteLine()
-		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSAlignFolder, eMatchedResultType)
-		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
-		End If
+		'Console.WriteLine()
+		'strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSAlignFolder, eMatchedResultType)
+		'If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+		'	TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
+		'End If
 
 		Console.WriteLine()
 		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
@@ -31,10 +31,16 @@
 		End If
 
 		Console.WriteLine()
-		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strXTandemFolder)
+		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
 		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
+			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
 		End If
+
+		'Console.WriteLine()
+		'strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strXTandemFolder)
+		'If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+		'	TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
+		'End If
 
 
 		Dim dtStartTimeNoSkipDup As DateTime
@@ -112,7 +118,22 @@
 			lstValues.Add(oPsm.Charge.ToString())															' Charge
 			lstValues.Add(oPsm.NumTrypticTerminii.ToString())												' Tryptic state (0, 1, or 2)
 			lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods))										' Peptide
+
+			If oPsm.SeqID <= 0 Then
+				lstValues.Add("**" & oPsm.SeqID & "**")															' SeqID is undefined
+			Else
+				lstValues.Add(oPsm.SeqID.ToString())															' SeqID
+			End If
+
 			lstValues.Add(oPsm.ProteinFirst)																' Protein		
+
+			If oPsm.ProteinDetails.Count > 0 Then
+				If Not String.Equals(oPsm.ProteinFirst, oPsm.ProteinDetails(0).ProteinName) Then
+					lstValues.Add(oPsm.ProteinDetails(0).ProteinName)
+				End If
+				lstValues.Add(oPsm.ProteinDetails(0).ResidueStart.ToString())
+				lstValues.Add(oPsm.ProteinDetails(0).ResidueEnd.ToString())
+			End If
 
 			Dim strXCorr As String = GetScore(oPsm, PHRPReader.clsPHRPParserSequest.DATA_COLUMN_XCorr, "0")
 			lstValues.Add(strXCorr)																' XCorr
@@ -138,14 +159,17 @@
 
 			If oPsm.ModifiedResidues.Count > 0 Then
 				Dim dblPeptideMassRecomputed = oMassCalculator.ComputeSequenceMassNumericMods(oPsm.PeptideWithNumericMods)
-				Console.WriteLine("  " & (oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"))
+				If Math.Abs(oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed) > 0.1 Then
+					Console.WriteLine("  Peptide mass disagreement: " & (oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"))
+				End If
 			End If
-			
+
 
 			Dim strFlattened As String = FlattenList(lstValues)
 
 			If intPSMsRead Mod 10000 = 0 Then
-				Console.WriteLine(intPSMsRead.ToString().PadRight(8) & " " & oPsm.Peptide.PadRight(40) & "   " & strXCorr)
+				'Console.WriteLine(intPSMsRead.ToString().PadRight(8) & " " & oPsm.Peptide.PadRight(40) & "   " & strXCorr)
+				Console.WriteLine(strFlattened)
 			End If
 
 			dctCachedValues.Add(intPSMsRead, oPsm)

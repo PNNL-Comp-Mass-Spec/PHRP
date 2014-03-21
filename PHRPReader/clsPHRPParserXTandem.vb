@@ -144,6 +144,10 @@ Public Class clsPHRPParserXTandem
 		Return strDatasetName & "_xt_ModSummary.txt"
 	End Function
 
+	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
+		Return strDatasetName & "_xt_PepToProtMapMTS.txt"
+	End Function
+
 	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_xt_ProteinMods.txt"
 	End Function
@@ -470,8 +474,7 @@ Public Class clsPHRPParserXTandem
 	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
 
 		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
-		Dim strPeptide As String
-		Dim lstProteinsForResultID As List(Of String) = Nothing
+		Dim strPeptide As String		
 
 		Dim dblPeptideMH As Double
 		Dim dblMassErrorDa As Double
@@ -503,6 +506,7 @@ Public Class clsPHRPParserXTandem
 					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
 
 					' Lookup the protein name(s) using mResultIDToProteins
+					Dim lstProteinsForResultID As List(Of String)
 					If mResultIDToProteins.TryGetValue(.ResultID, lstProteinsForResultID) Then
 						For Each strProtein As String In lstProteinsForResultID
 							.AddProtein(strProtein)

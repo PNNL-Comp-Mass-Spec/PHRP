@@ -1489,6 +1489,37 @@ Public Class clsPHRPReader
 	End Function
 
 	''' <summary>
+	''' Returns the default PepToProtMap file name for the given PeptideHit result type
+	''' </summary>
+	''' <param name="eResultType"></param>
+	''' <param name="strDatasetName"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+		Dim strPHRPModSummaryFileName As String = String.Empty
+
+		Select Case eResultType
+			Case ePeptideHitResultType.Sequest
+				strPHRPModSummaryFileName = clsPHRPParserSequest.GetPHRPPepToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.XTandem
+				strPHRPModSummaryFileName = clsPHRPParserXTandem.GetPHRPPepToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.Inspect
+				strPHRPModSummaryFileName = clsPHRPParserInspect.GetPHRPPepToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSGFDB
+				strPHRPModSummaryFileName = clsPHRPParserMSGFDB.GetPHRPPepToProteinMapFileName(strDatasetName)
+
+			Case ePeptideHitResultType.MSAlign
+				strPHRPModSummaryFileName = clsPHRPParserMSAlign.GetPHRPPepToProteinMapFileName(strDatasetName)
+
+		End Select
+
+		Return strPHRPModSummaryFileName
+	End Function
+
+	''' <summary>
 	''' Returns the default ProteinMods file name for the given PeptideHit result type
 	''' </summary>
 	''' <param name="eResultType"></param>
@@ -2066,21 +2097,42 @@ Public Class clsPHRPReader
 									' Check for duplicate lines
 									' If this line is a duplicate of the previous line, then skip it
 									' This happens in Sequest _syn.txt files where the line is repeated for all protein matches
-									With mPSMCurrent
-										If .ScanNumber = objNewPSM.ScanNumber AndAlso _
-										   .Charge = objNewPSM.Charge AndAlso _
-										   .Peptide = objNewPSM.Peptide Then
+									' It can also happen in MSGF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
+									With mPSMCurrent										
 
-											' Yes, this is a duplicate
+										Dim isDuplicate As Boolean = False
+
+										If .ScanNumber = objNewPSM.ScanNumber AndAlso
+										   .Charge = objNewPSM.Charge Then
+
+											If String.Equals(.Peptide, objNewPSM.Peptide) Then
+												isDuplicate = True
+											Else
+												Dim strPeptide1 As String
+												Dim strPeptide2 As String
+
+												If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(.Peptide, strPeptide1, "", "") AndAlso
+												   clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objNewPSM.Peptide, strPeptide2, "", "") Then
+													If String.Equals(strPeptide1, strPeptide2) Then
+														isDuplicate = True
+													End If
+												End If
+											End If
+										End If
+
+										If isDuplicate Then
 											' Update the protein list
 											For Each strProtein As String In objNewPSM.Proteins
-												.AddProtein(strProtein)
+												If Not .Proteins.Contains(strProtein, StringComparer.CurrentCultureIgnoreCase) Then
+													.AddProtein(strProtein)
+												End If
 											Next
 										Else
 											blnReadNext = False
 											mCachedLine = String.Copy(strLineIn)
 											mCachedLineAvailable = True
 										End If
+
 									End With
 								End If
 							Loop

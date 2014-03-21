@@ -49,6 +49,9 @@ Public Class clsPSM
 	' Note that protein names are case-sensitive
 	Protected mProteins As List(Of String)
 
+	' Lists protein name, description, cleavage state, terminus state, residue start, and residue end
+	Protected mProteinDetails As List(Of clsProteinInfo)
+
 	' This dictionary tracks additional, tool-specific scores
 	Protected mAdditionalScores As Dictionary(Of String, String)
 
@@ -331,6 +334,12 @@ Public Class clsPSM
 		End Get
 	End Property
 
+	Public ReadOnly Property ProteinDetails() As List(Of clsProteinInfo)
+		Get
+			Return mProteinDetails
+		End Get
+	End Property
+
 	''' <summary>
 	''' ResultID of this peptide (typically assigned by the search engine)
 	''' </summary>
@@ -429,6 +438,7 @@ Public Class clsPSM
 	Public Sub New()
 		mScanList = New SortedSet(Of Integer)
 		mProteins = New List(Of String)
+		mProteinDetails = New List(Of clsProteinInfo)
 		mModifiedPeptideResidues = New List(Of clsAminoAcidModInfo)
 		mAdditionalScores = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
 		Me.Clear()
@@ -486,6 +496,23 @@ Public Class clsPSM
 	End Sub
 
 	''' <summary>
+	''' Add new detailed protein info for this peptide
+	''' </summary>
+	''' <param name="oProteinInfo"></param>
+	''' <remarks></remarks>
+	Public Sub AddProteinDetail(ByVal oProteinInfo As clsProteinInfo)
+
+		For i As Integer = 0 To mProteinDetails.Count - 1
+			If mProteinDetails(i).ProteinName = oProteinInfo.ProteinName Then
+				mProteinDetails(i) = oProteinInfo
+				Exit Sub
+			End If
+		Next
+
+		mProteinDetails.Add(oProteinInfo)
+	End Sub
+
+	''' <summary>
 	''' Reset the peptide to default values (and empty strings)
 	''' </summary>
 	''' <remarks></remarks>
@@ -517,6 +544,8 @@ Public Class clsPSM
 		mPeptideMonoisotopicMass = 0
 
 		mProteins.Clear()
+		mProteinDetails.Clear()
+
 		mModifiedPeptideResidues.Clear()
 		mAdditionalScores.Clear()
 	End Sub
@@ -561,6 +590,10 @@ Public Class clsPSM
 
 			For Each strProtein In mProteins
 				.AddProtein(strProtein)
+			Next
+
+			For Each item In mProteinDetails
+				.AddProteinDetail(item)
 			Next
 
 			For Each objItem In mModifiedPeptideResidues

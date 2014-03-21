@@ -72,6 +72,7 @@
     <Compile Include="clsMSGFResultsReader.vb" />
     <Compile Include="clsPeptideCleavageStateCalculator.vb" />
     <Compile Include="clsPeptideMassCalculator.vb" />
+    <Compile Include="clsPepToProteinMapInfo.vb" />
     <Compile Include="clsPHRPModSummaryReader.vb" />
     <Compile Include="clsPHRPParser.vb" />
     <Compile Include="clsPHRPParserMSAlign.vb" />

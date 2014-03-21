@@ -1,5 +1,9 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5192; March 20, 2014
+	- Now tracking Residue_Start and Residue_End values stored in the _PepToProtMapMTS.txt file; exposed via ProteinDetails property on clsPSM
+	- Now ignoring Prefix and Suffix residues when looking for duplicate peptides to skip (when SkipDuplicatePSMs=true)
+
 Version 1.1.5175; March 3, 2014
 	- Added properties AmbiguousMod and EndREsidueLocInPeptide to clsAminoAcidModInfo.vb
 		- Allows users to see the Start and End residue locations of ambiguous mods reported by MSAlign
