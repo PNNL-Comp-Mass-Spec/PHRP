@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5198; March 26, 2014
+	- New versions of dependent DLLs, including PHRPReader.dll
+	- Added MSGFPlus_Example_Data.zip to the installer
+
 Version 1.5.5168; February 24, 2014
 	- New version of PeptideHitResultsProcessor.dll
 

@@ -1,0 +1,1 @@
+"C:\Program Files\Java\jre7\bin\java.exe"  -Xmx4000M -cp C:\DMS_Programs\MSGFDB\MSGFPlus.jar edu.ucsd.msjava.msdbsearch.BuildSA -d Shewanella_oneidensis_MR1_2010-04-22_Tryp_Pig_Bov.fasta -tda 2
