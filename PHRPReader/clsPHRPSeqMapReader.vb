@@ -319,7 +319,7 @@ Public Class clsPHRPSeqMapReader
 
 									Dim strPeptide = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strSplitLine(0), True)
 
-									Dim oPepToProtMapInfo As clsPepToProteinMapInfo
+									Dim oPepToProtMapInfo As clsPepToProteinMapInfo = Nothing
 
 									If lstPepToProteinMap.TryGetValue(strPeptide, oPepToProtMapInfo) Then
 										oPepToProtMapInfo.AddProtein(strSplitLine(1), residueStart, residueEnd)

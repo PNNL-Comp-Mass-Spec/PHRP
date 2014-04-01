@@ -2108,8 +2108,8 @@ Public Class clsPHRPReader
 											If String.Equals(.Peptide, objNewPSM.Peptide) Then
 												isDuplicate = True
 											Else
-												Dim strPeptide1 As String
-												Dim strPeptide2 As String
+												Dim strPeptide1 As String = String.Empty
+												Dim strPeptide2 As String = String.Empty
 
 												If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(.Peptide, strPeptide1, "", "") AndAlso
 												   clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objNewPSM.Peptide, strPeptide2, "", "") Then

@@ -506,7 +506,7 @@ Public Class clsPHRPParserXTandem
 					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
 
 					' Lookup the protein name(s) using mResultIDToProteins
-					Dim lstProteinsForResultID As List(Of String)
+					Dim lstProteinsForResultID As SortedSet(Of String) = Nothing
 					If mResultIDToProteins.TryGetValue(.ResultID, lstProteinsForResultID) Then
 						For Each strProtein As String In lstProteinsForResultID
 							.AddProtein(strProtein)

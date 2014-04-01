@@ -49,7 +49,7 @@ Public MustInherit Class clsPHRPParser
 	Protected mPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
 
 	' This List tracks the Protein Names for each ResultID
-	Protected mResultIDToProteins As SortedList(Of Integer, List(Of String))
+	Protected mResultIDToProteins As SortedList(Of Integer, SortedSet(Of String))
 
 	Protected mErrorMessages As List(Of String)
 	Protected mWarningMessages As List(Of String)
@@ -210,7 +210,7 @@ Public MustInherit Class clsPHRPParser
 		mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
 		mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
 
-		mResultIDToProteins = New SortedList(Of Integer, List(Of String))
+		mResultIDToProteins = New SortedList(Of Integer, SortedSet(Of String))
 
 		If blnLoadModsAndSeqInfo Then
 			' Read the ModSummary file (if it exists)
@@ -558,18 +558,15 @@ Public MustInherit Class clsPHRPParser
 			If blnSuccess Then
 				' Populate mResultIDToProteins
 
-				Dim intResultID As Integer
-				Dim intSeqID As Integer
-
 				For Each objItem As KeyValuePair(Of Integer, Integer) In mResultToSeqMap
 
-					intResultID = objItem.Key
-					intSeqID = objItem.Value
+					'intResultID = objItem.Key
+					'intSeqID = objItem.Value
 
 					Dim lstProteinsForSeqID As List(Of clsProteinInfo) = Nothing
-					Dim lstProteinsForResultID = New List(Of String)
+					Dim lstProteinsForResultID = New SortedSet(Of String)
 
-					If mSeqToProteinMap.TryGetValue(intSeqID, lstProteinsForSeqID) Then
+					If mSeqToProteinMap.TryGetValue(objItem.Value, lstProteinsForSeqID) Then
 
 						For Each objProtein As clsProteinInfo In lstProteinsForSeqID
 							If Not lstProteinsForResultID.Contains(objProtein.ProteinName) Then
@@ -579,7 +576,7 @@ Public MustInherit Class clsPHRPParser
 
 					End If
 
-					mResultIDToProteins.Add(intResultID, lstProteinsForResultID)
+					mResultIDToProteins.Add(objItem.Key, lstProteinsForResultID)
 
 				Next
 
@@ -961,7 +958,7 @@ Public MustInherit Class clsPHRPParser
 				End If
 
 				' Lookup the protein details using mSeqToProteinMap
-				Dim lstProteinDetails As List(Of clsProteinInfo)
+				Dim lstProteinDetails As List(Of clsProteinInfo) = Nothing
 				If mSeqToProteinMap.TryGetValue(intSeqID, lstProteinDetails) Then
 					For Each oProtein In lstProteinDetails
 						objPSM.AddProteinDetail(oProtein)
@@ -992,7 +989,7 @@ Public MustInherit Class clsPHRPParser
 				Next
 
 				If mPepToProteinMap.Count > 0 Then
-					Dim oPepToProteinMapInfo As clsPepToProteinMapInfo
+					Dim oPepToProteinMapInfo As clsPepToProteinMapInfo = Nothing
 					If mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, oPepToProteinMapInfo) Then
 
 						For Each oProtein In objPSM.ProteinDetails
