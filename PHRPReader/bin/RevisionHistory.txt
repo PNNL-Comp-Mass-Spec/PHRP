@@ -1,5 +1,12 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5205; April 2, 2014
+	- Added support for MODa results
+	- Pared down duplicate code in clsPHRPReader by moving the GetPHRP shared functions to abstract base class clsPHRPParser
+
+Version 1.1.5204; April 1, 2014
+	- ResultIDToProteins mapping now uses a SortedSet instead of a List
+
 Version 1.1.5192; March 20, 2014
 	- Now tracking Residue_Start and Residue_End values stored in the _PepToProtMapMTS.txt file; exposed via ProteinDetails property on clsPSM
 	- Now ignoring Prefix and Suffix residues when looking for duplicate peptides to skip (when SkipDuplicatePSMs=true)

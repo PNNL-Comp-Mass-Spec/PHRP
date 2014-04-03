@@ -10,6 +10,7 @@
 
 Option Strict On
 
+Imports System.Runtime.InteropServices
 Imports PHRPReader.clsPHRPReader
 
 Public Class clsPHRPParserInspect
@@ -109,13 +110,20 @@ Public Class clsPHRPParserInspect
 
 	End Sub
 
-	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters) As Double
+	''' <summary>
+	''' Determines the precursor mass tolerance
+	''' </summary>
+	''' <param name="objSearchEngineParams"></param>
+	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
+	''' <returns>Precursor tolerance, in Da</returns>
+	''' <remarks></remarks>
+	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
 		Dim strTolerance As String = String.Empty
-		Dim strUnits As String = String.Empty
 
-		Dim dblTolerancePPM As Double = 0
 		Dim dblToleranceDa As Double = 0
 		Dim dblTolerance As Double = 0
+
+		dblTolerancePPM = 0
 
 		If objSearchEngineParams.Parameters.TryGetValue("ParentPPM", strTolerance) Then
 			' Parent mass tolerance, in ppm
@@ -127,6 +135,9 @@ Public Class clsPHRPParserInspect
 		If objSearchEngineParams.Parameters.TryGetValue("PMTolerance", strTolerance) Then
 			' Parent mass tolerance, in Da
 			Double.TryParse(strTolerance, dblToleranceDa)
+
+			' Convert from dalton to PPM (assuming a mass of 2000 m/z)
+			dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
 		End If
 
 		dblTolerance = Math.Max(dblTolerance, dblToleranceDa)
@@ -135,39 +146,39 @@ Public Class clsPHRPParserInspect
 
 	End Function
 
-	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_FHT
 	End Function
 
-	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_inspect_syn_ModSummary.txt"
 	End Function
 
-	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_inspect_PepToProtMapMTS.txt"
 	End Function
 
-	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_inspect_syn_ProteinMods.txt"
 	End Function
 
-	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_SYN
 	End Function
 
-	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_inspect_syn_ResultToSeqMap.txt"
 	End Function
 
-	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_inspect_syn_SeqInfo.txt"
 	End Function
 
-	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_inspect_syn_SeqToProteinMap.txt"
 	End Function
 
-	Public Shared Function GetSearchEngineName() As String
+	Public Overloads Shared Function GetSearchEngineName() As String
 		Return INS_SEARCH_ENGINE_NAME
 	End Function
 
@@ -198,7 +209,7 @@ Public Class clsPHRPParserInspect
 		Dim blnSuccess As Boolean
 
 		Try
-			blnSuccess = ReadKeyValuePairSearchEngineParamFile(INS_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, objSearchEngineParams)
+			blnSuccess = ReadKeyValuePairSearchEngineParamFile(INS_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.Inspect, objSearchEngineParams)
 
 			If blnSuccess Then
 
@@ -219,7 +230,9 @@ Public Class clsPHRPParserInspect
 				End If
 			
 				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
-				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
+				Dim dblTolerancePPM As Double
+				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+				objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
 			End If
 
 		Catch ex As Exception

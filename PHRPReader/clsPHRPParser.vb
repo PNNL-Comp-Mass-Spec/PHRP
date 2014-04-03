@@ -49,7 +49,7 @@ Public MustInherit Class clsPHRPParser
 	Protected mPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
 
 	' This List tracks the Protein Names for each ResultID
-	Protected mResultIDToProteins As SortedList(Of Integer, SortedSet(Of String))
+	Protected mResultIDToProteins As SortedList(Of Integer, List(Of String))
 
 	Protected mErrorMessages As List(Of String)
 	Protected mWarningMessages As List(Of String)
@@ -175,7 +175,7 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
 	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-	''' <remarks></remarks>
+	''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
 	Protected Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean)
 
 		mErrorMessages = New List(Of String)
@@ -184,18 +184,28 @@ Public MustInherit Class clsPHRPParser
 		mDatasetName = strDatasetName
 		mPeptideHitResultType = ePeptideHitResultType
 
-		Dim fiFileInfo As FileInfo = New FileInfo(strInputFilePath)
-		mInputFilePath = fiFileInfo.FullName
-		mInputFolderPath = fiFileInfo.DirectoryName
+		Dim fiFileInfo As FileInfo
+		Dim blnIsSynopsisFile As Boolean = False
+
+		If String.IsNullOrEmpty(strInputFilePath) Then
+			' User instantiated the class without a filename
+			' Functions that solely require a dataset name will be callable, but cannot call functions that read a data line
+			mInputFilePath = String.Empty
+			mInputFolderPath = String.Empty
+
+			blnLoadModsAndSeqInfo = False
+		Else
+			fiFileInfo = New FileInfo(strInputFilePath)
+			mInputFilePath = fiFileInfo.FullName
+			mInputFolderPath = fiFileInfo.DirectoryName
+
+			If String.Equals(fiFileInfo.Name, clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName), StringComparison.CurrentCultureIgnoreCase) Then
+				blnIsSynopsisFile = True
+			End If
+
+		End If
 
 		mErrorMessage = String.Empty
-
-		Dim blnIsSynopsisFile As Boolean
-		If fiFileInfo.Name.ToLower() = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName).ToLower() Then
-			blnIsSynopsisFile = True
-		Else
-			blnIsSynopsisFile = False
-		End If
 
 		' Initialize the column mapping object
 		' Using a case-insensitive comparer
@@ -210,7 +220,7 @@ Public MustInherit Class clsPHRPParser
 		mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
 		mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
 
-		mResultIDToProteins = New SortedList(Of Integer, SortedSet(Of String))
+		mResultIDToProteins = New SortedList(Of Integer, List(Of String))
 
 		If blnLoadModsAndSeqInfo Then
 			' Read the ModSummary file (if it exists)
@@ -332,6 +342,38 @@ Public MustInherit Class clsPHRPParser
 		End Select
 
 	End Function
+	
+	Public Function GetPHRPFirstHitsFileName() As String
+		Return GetPHRPFirstHitsFileName(mDatasetName)
+	End Function
+
+	Public Function GetPHRPModSummaryFileName() As String
+		Return GetPHRPModSummaryFileName(mDatasetName)
+	End Function
+
+	Public Function GetPHRPPepToProteinMapFileName() As String
+		Return GetPHRPPepToProteinMapFileName(mDatasetName)
+	End Function
+
+	Public Function GetPHRPProteinModsFileName() As String
+		Return GetPHRPProteinModsFileName(mDatasetName)
+	End Function
+
+	Public Function GetPHRPSynopsisFileName() As String
+		Return GetPHRPSynopsisFileName(mDatasetName)
+	End Function
+
+	Public Function GetPHRPResultToSeqMapFileName() As String
+		Return GetPHRPResultToSeqMapFileName(mDatasetName)
+	End Function
+
+	Public Function GetPHRPSeqInfoFileName() As String
+		Return GetPHRPSeqInfoFileName(mDatasetName)
+	End Function
+
+	Public Function GetPHRPSeqToProteinMapFileName() As String
+		Return GetPHRPSeqToProteinMapFileName(mDatasetName)
+	End Function
 
 #Region "Functions overridden by derived classes"
 	Protected MustOverride Sub DefineColumnHeaders()
@@ -354,6 +396,43 @@ Public MustInherit Class clsPHRPParser
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Public MustOverride Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+
+	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
+		Return "Undefined"
+	End Function
+
+	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
+		Return "Undefined"
+	End Function
+
+	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
+		Return "Undefined"
+	End Function
+
+	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
+		Return "Undefined"
+	End Function
+
+	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
+		Return "Undefined"
+	End Function
+
+	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
+		Return "Undefined"
+	End Function
+
+	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
+		Return "Undefined"
+	End Function
+
+	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
+		Return "Undefined"
+	End Function
+
+	Public Shared Function GetSearchEngineName() As String
+		Return "Undefined"
+	End Function
+
 #End Region
 
 	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
@@ -476,6 +555,26 @@ Public MustInherit Class clsPHRPParser
 		Return lstAmbiguousMods
 
 	End Function
+	
+	Private Function GetMODaStaticModSetting(ByVal kvSetting As KeyValuePair(Of String, String)) As KeyValuePair(Of String, String)
+
+		Dim strKey = kvSetting.Key
+		Dim strValue = kvSetting.Key
+		Dim commaIndex = strValue.IndexOf(","c)
+
+		If commaIndex > 0 Then
+			Dim strResidue = strValue.Substring(0, commaIndex).Trim()
+			strValue = strValue.Substring(commaIndex + 1).Trim()
+
+			' Update Key to look like ADD_A or ADD_NTerm
+			strKey = strKey & "_" & strResidue
+
+			kvSetting = New KeyValuePair(Of String, String)(strKey, strValue)
+		End If
+
+		Return kvSetting
+
+	End Function
 
 	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As Exception)
 		If String.IsNullOrEmpty(strBaseMessage) Then
@@ -564,7 +663,7 @@ Public MustInherit Class clsPHRPParser
 					'intSeqID = objItem.Value
 
 					Dim lstProteinsForSeqID As List(Of clsProteinInfo) = Nothing
-					Dim lstProteinsForResultID = New SortedSet(Of String)
+					Dim lstProteinsForResultID = New List(Of String)
 
 					If mSeqToProteinMap.TryGetValue(objItem.Value, lstProteinsForSeqID) Then
 
@@ -683,7 +782,12 @@ Public MustInherit Class clsPHRPParser
 
 	End Function
 
-	Protected Function ReadKeyValuePairSearchEngineParamFile(ByVal strSearchEngineName As String, ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+	Protected Function ReadKeyValuePairSearchEngineParamFile(
+	  ByVal strSearchEngineName As String,
+	  ByVal strSearchEngineParamFileName As String,
+	  ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
+	  ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+
 		Dim strParamFilePath As String
 		Dim blnSuccess As Boolean
 
@@ -710,6 +814,13 @@ Public MustInherit Class clsPHRPParser
 							kvSetting = ParseKeyValueSetting(strLineIn, "="c, "#")
 
 							If Not String.IsNullOrEmpty(kvSetting.Key) Then
+								If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MODa AndAlso
+								   String.Equals(kvSetting.Key, "add", StringComparison.CurrentCultureIgnoreCase) Then
+									' ModA defines all of its static modifications with the ADD keyword
+									' Split the value at the comma and create a new setting entry with the residue name
+									kvSetting = GetMODaStaticModSetting(kvSetting)
+								End If
+
 								objSearchEngineParams.AddUpdateParameter(kvSetting)
 							End If
 						End If
@@ -822,7 +933,7 @@ Public MustInherit Class clsPHRPParser
 	End Sub
 
 	Protected Sub StoreModInfo(ByRef objPSM As clsPSM, ByVal objSeqInfo As clsSeqInfo)
-		
+
 		Dim strMods() As String
 		Dim kvModDetails As KeyValuePair(Of String, String)
 

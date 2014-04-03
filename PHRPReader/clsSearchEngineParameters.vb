@@ -12,6 +12,7 @@ Public Class clsSearchEngineParameters
 	Protected mFastaFilePath As String
 
 	Protected mPrecursorMassToleranceDa As Double	' Precursor mass tolerance, in Da; 0 if unknown
+	Protected mPrecursorMassTolerancePpm As Double	' Precursor mass tolerance, in ppm; 0 if unknown
 
 	Protected mPrecursorMassType As String			' Typically "monoisotopic" or "average"
 	Protected mFragmentMassType As String
@@ -90,6 +91,15 @@ Public Class clsSearchEngineParameters
 		End Get
 		Set(value As Double)
 			mPrecursorMassToleranceDa = value
+		End Set
+	End Property
+
+	Public Property PrecursorMassTolerancePpm As Double
+		Get
+			Return mPrecursorMassTolerancePpm
+		End Get
+		Set(value As Double)
+			mPrecursorMassTolerancePpm = value
 		End Set
 	End Property
 
@@ -184,6 +194,8 @@ Public Class clsSearchEngineParameters
 		mFastaFilePath = String.Empty
 
 		mPrecursorMassToleranceDa = 0
+		mPrecursorMassTolerancePpm = 0
+
 		mPrecursorMassType = MASS_TYPE_MONOISOTOPIC
 		mFragmentMassType = MASS_TYPE_MONOISOTOPIC
 

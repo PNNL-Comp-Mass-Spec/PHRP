@@ -118,7 +118,7 @@ Public Class clsPHRPSeqMapReader
 			mErrorMessage = "Unable to determine ResultToSeqMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
 			Throw New Exception(mErrorMessage)
 		Else
-			mResultToSeqMapFilename = IO.Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mResultToSeqMapFilename, strPHRPDataFileName))
+			mResultToSeqMapFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mResultToSeqMapFilename, strPHRPDataFileName))
 		End If
 
 		mSeqToProteinMapFilename = clsPHRPReader.GetPHRPSeqToProteinMapFileName(mPeptideHitResultType, mDatasetName)
@@ -126,7 +126,7 @@ Public Class clsPHRPSeqMapReader
 			mErrorMessage = "Unable to determine SeqToProteinMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
 			Throw New Exception(mErrorMessage)
 		Else
-			mSeqToProteinMapFilename = IO.Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqToProteinMapFilename, strPHRPDataFileName))
+			mSeqToProteinMapFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqToProteinMapFilename, strPHRPDataFileName))
 		End If
 
 		mSeqInfoFilename = clsPHRPReader.GetPHRPSeqInfoFileName(mPeptideHitResultType, mDatasetName)
@@ -134,7 +134,7 @@ Public Class clsPHRPSeqMapReader
 			mErrorMessage = "Unable to determine SeqInfo filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
 			Throw New Exception(mErrorMessage)
 		Else
-			mSeqInfoFilename = IO.Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqInfoFilename, strPHRPDataFileName))
+			mSeqInfoFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqInfoFilename, strPHRPDataFileName))
 		End If
 
 		mPepToProteinMapFilename = clsPHRPReader.GetPHRPPepToProteinMapFileName(mPeptideHitResultType, mDatasetName)

@@ -10,6 +10,7 @@
 
 Option Strict On
 
+Imports System.Runtime.InteropServices
 Imports PHRPReader.clsPHRPReader
 Imports System.Text.RegularExpressions
 
@@ -122,7 +123,14 @@ Public Class clsPHRPParserMSGFDB
 
 	End Sub
 
-	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters) As Double
+	''' <summary>
+	''' Determines the precursor mass tolerance
+	''' </summary>
+	''' <param name="objSearchEngineParams"></param>
+	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
+	''' <returns>Precursor tolerance, in Da</returns>
+	''' <remarks></remarks>
+	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
 		Dim strTolerance As String = String.Empty
 		Dim strToleranceSplit As String()
 
@@ -165,39 +173,39 @@ Public Class clsPHRPParserMSGFDB
 
 	End Function
 
-	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_FHT
 	End Function
 
-	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_msgfdb_syn_ModSummary.txt"
 	End Function
 
-	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_msgfdb_PepToProtMapMTS.txt"
 	End Function
 
-	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_msgfdb_syn_ProteinMods.txt"
 	End Function
 
-	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_SYN
 	End Function
 
-	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_msgfdb_syn_ResultToSeqMap.txt"
 	End Function
 
-	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_msgfdb_syn_SeqInfo.txt"
 	End Function
 
-	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_msgfdb_syn_SeqToProteinMap.txt"
 	End Function
 
-	Public Shared Function GetSearchEngineName() As String
+	Public Overloads Shared Function GetSearchEngineName() As String
 		Return MSGFDB_SEARCH_ENGINE_NAME
 	End Function
 
@@ -228,7 +236,7 @@ Public Class clsPHRPParserMSGFDB
 		Dim blnSuccess As Boolean
 
 		Try
-			blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSGFDB_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, objSearchEngineParams)
+			blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSGFDB_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MSGFDB, objSearchEngineParams)
 
 			If blnSuccess Then
 
@@ -291,7 +299,9 @@ Public Class clsPHRPParserMSGFDB
 				End If
 
 				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
-				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
+				Dim dblTolerancePPM As Double
+				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+				objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
 			End If
 
 		Catch ex As Exception

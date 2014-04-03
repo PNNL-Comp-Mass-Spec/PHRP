@@ -2,9 +2,9 @@
 ' Written by Matthew Monroe for the US Department of Energy 
 ' Pacific Northwest National Laboratory, Richland, WA
 '
-' Created 11/28/2012
+' Created 04/02/2014
 '
-' This class parses data lines from MSAlign msalign_syn.txt files
+' This class parses data lines from moda_syn.txt files
 '
 '*********************************************************************************************************
 
@@ -13,14 +13,13 @@ Option Strict On
 Imports System.Runtime.InteropServices
 Imports PHRPReader.clsPHRPReader
 
-Public Class clsPHRPParserMSAlign
+Public Class clsPHRPParserMODa
 	Inherits clsPHRPParser
 
 #Region "Constants"
 	Public Const DATA_COLUMN_ResultID As String = "ResultID"
 	Public Const DATA_COLUMN_Scan As String = "Scan"
-	Public Const DATA_COLUMN_Prsm_ID As String = "Prsm_ID"
-	Public Const DATA_COLUMN_Spectrum_ID As String = "Spectrum_ID"
+	Public Const DATA_COLUMN_Spectrum_Index As String = "Spectrum_Index"
 	Public Const DATA_COLUMN_Charge As String = "Charge"
 	Public Const DATA_COLUMN_PrecursorMZ As String = "PrecursorMZ"
 	Public Const DATA_COLUMN_DelM As String = "DelM"
@@ -28,22 +27,14 @@ Public Class clsPHRPParserMSAlign
 	Public Const DATA_COLUMN_MH As String = "MH"
 	Public Const DATA_COLUMN_Peptide As String = "Peptide"
 	Public Const DATA_COLUMN_Protein As String = "Protein"
-	Public Const DATA_COLUMN_Protein_Mass As String = "Protein_Mass"
-	Public Const DATA_COLUMN_Unexpected_Mod_Count As String = "Unexpected_Mod_Count"
-	Public Const DATA_COLUMN_Peak_Count As String = "Peak_Count"
-	Public Const DATA_COLUMN_Matched_Peak_Count As String = "Matched_Peak_Count"
-	Public Const DATA_COLUMN_Matched_Fragment_Ion_Count As String = "Matched_Fragment_Ion_Count"
-	Public Const DATA_COLUMN_PValue As String = "PValue"
-	Public Const DATA_COLUMN_Rank_PValue As String = "Rank_PValue"
-	Public Const DATA_COLUMN_EValue As String = "EValue"
-	Public Const DATA_COLUMN_FDR As String = "FDR"
-	Public Const DATA_COLUMN_Species_ID As String = "Species_ID"
-	Public Const DATA_COLUMN_FragMethod As String = "FragMethod"
+	Public Const DATA_COLUMN_Score As String = "Score"
+	Public Const DATA_COLUMN_Probability As String = "Probability"
+	Public Const DATA_COLUMN_Rank_Probability As String = "Rank_Probability"
 
-	Public Const FILENAME_SUFFIX_SYN As String = "_msalign_syn.txt"
-	Public Const FILENAME_SUFFIX_FHT As String = "_msalign_fht.txt"
+	Public Const FILENAME_SUFFIX_SYN As String = "_moda_syn.txt"
+	Public Const FILENAME_SUFFIX_FHT As String = "_moda_fht.txt"
 
-	Protected Const MSAlign_SEARCH_ENGINE_NAME As String = "MSAlign"
+	Protected Const MODa_SEARCH_ENGINE_NAME As String = "MODa"
 #End Region
 
 	''' <summary>
@@ -64,7 +55,7 @@ Public Class clsPHRPParserMSAlign
 	''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
-		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSAlign, blnLoadModsAndSeqInfo)
+		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MODa, blnLoadModsAndSeqInfo)
 		mInitialized = True
 	End Sub
 
@@ -75,8 +66,7 @@ Public Class clsPHRPParserMSAlign
 		' Define the default column mapping	
 		AddHeaderColumn(DATA_COLUMN_ResultID)
 		AddHeaderColumn(DATA_COLUMN_Scan)
-		AddHeaderColumn(DATA_COLUMN_Prsm_ID)
-		AddHeaderColumn(DATA_COLUMN_Spectrum_ID)
+		AddHeaderColumn(DATA_COLUMN_Spectrum_Index)
 		AddHeaderColumn(DATA_COLUMN_Charge)
 		AddHeaderColumn(DATA_COLUMN_PrecursorMZ)
 		AddHeaderColumn(DATA_COLUMN_DelM)
@@ -84,17 +74,9 @@ Public Class clsPHRPParserMSAlign
 		AddHeaderColumn(DATA_COLUMN_MH)
 		AddHeaderColumn(DATA_COLUMN_Peptide)
 		AddHeaderColumn(DATA_COLUMN_Protein)
-		AddHeaderColumn(DATA_COLUMN_Protein_Mass)
-		AddHeaderColumn(DATA_COLUMN_Unexpected_Mod_Count)
-		AddHeaderColumn(DATA_COLUMN_Peak_Count)
-		AddHeaderColumn(DATA_COLUMN_Matched_Peak_Count)
-		AddHeaderColumn(DATA_COLUMN_Matched_Fragment_Ion_Count)
-		AddHeaderColumn(DATA_COLUMN_PValue)
-		AddHeaderColumn(DATA_COLUMN_Rank_PValue)
-		AddHeaderColumn(DATA_COLUMN_EValue)
-		AddHeaderColumn(DATA_COLUMN_FDR)
-		AddHeaderColumn(DATA_COLUMN_Species_ID)
-		AddHeaderColumn(DATA_COLUMN_FragMethod)
+		AddHeaderColumn(DATA_COLUMN_Score)
+		AddHeaderColumn(DATA_COLUMN_Probability)
+		AddHeaderColumn(DATA_COLUMN_Rank_Probability)
 
 	End Sub
 
@@ -109,14 +91,20 @@ Public Class clsPHRPParserMSAlign
 		Dim strTolerance As String = String.Empty
 
 		Dim dblToleranceDa As Double = 0
-
 		dblTolerancePPM = 0
 
-		If objSearchEngineParams.Parameters.TryGetValue("errorTolerance", strTolerance) Then
+		If objSearchEngineParams.Parameters.TryGetValue("PPMTolerance", strTolerance) Then
 			' Parent mass tolerance, in ppm
 			If Double.TryParse(strTolerance, dblTolerancePPM) Then
 				dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblTolerancePPM, 2000)
 			End If
+
+		ElseIf objSearchEngineParams.Parameters.TryGetValue("PeptTolerance", strTolerance) Then
+			' Parent mass tolerance, in Da
+			Double.TryParse(strTolerance, dblToleranceDa)
+
+			' Convert from dalton to PPM (assuming a mass of 2000 m/z)
+			dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
 		End If
 
 		Return dblToleranceDa
@@ -128,15 +116,15 @@ Public Class clsPHRPParserMSAlign
 	End Function
 
 	Public Overloads Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_ModSummary.txt"
+		Return strDatasetName & "_moda_syn_ModSummary.txt"
 	End Function
 
 	Public Overloads Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_PepToProtMapMTS.txt"
+		Return strDatasetName & "_moda_PepToProtMapMTS.txt"
 	End Function
 
 	Public Overloads Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_ProteinMods.txt"
+		Return strDatasetName & "_moda_syn_ProteinMods.txt"
 	End Function
 
 	Public Overloads Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
@@ -144,23 +132,23 @@ Public Class clsPHRPParserMSAlign
 	End Function
 
 	Public Overloads Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_ResultToSeqMap.txt"
+		Return strDatasetName & "_moda_syn_ResultToSeqMap.txt"
 	End Function
 
 	Public Overloads Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_SeqInfo.txt"
+		Return strDatasetName & "_moda_syn_SeqInfo.txt"
 	End Function
 
 	Public Overloads Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_SeqToProteinMap.txt"
+		Return strDatasetName & "_moda_syn_SeqToProteinMap.txt"
 	End Function
 
 	Public Overloads Shared Function GetSearchEngineName() As String
-		Return MSAlign_SEARCH_ENGINE_NAME
+		Return MODa_SEARCH_ENGINE_NAME
 	End Function
 
 	''' <summary>
-	''' Parses the specified MSAlign parameter file
+	''' Parses the specified MODa parameter file
 	''' </summary>
 	''' <param name="strSearchEngineParamFileName"></param>
 	''' <param name="objSearchEngineParams"></param>
@@ -170,7 +158,7 @@ Public Class clsPHRPParserMSAlign
 
 		Dim blnSuccess As Boolean
 
-		objSearchEngineParams = New clsSearchEngineParameters(MSAlign_SEARCH_ENGINE_NAME)
+		objSearchEngineParams = New clsSearchEngineParameters(MODa_SEARCH_ENGINE_NAME)
 
 		blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
 
@@ -186,26 +174,47 @@ Public Class clsPHRPParserMSAlign
 		Dim blnSuccess As Boolean
 
 		Try
-			blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MSAlign, objSearchEngineParams)
+			blnSuccess = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MODa, objSearchEngineParams)
 
 			If blnSuccess Then
-
 				' For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
-				' But MSAlign does not have a _ModDefs.txt file because it performs a blind search
-				' The user can define static mods on cysteine; check for these now
+				' But MODa does not have a _ModDefs.txt file because it performs a blind search
+				' The user can define static mods on any of the residues, plus the peptide terminii; check for these now
 
-				If objSearchEngineParams.Parameters.TryGetValue("cysteineProtection", strSettingValue) Then
+				Dim lstResiduesToFind = New List(Of String) From {"A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"}
 
-					Select Case strSettingValue
-						Case "C57"
-							objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 57.0215, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcet")
-							objSearchEngineParams.AddModification(objModDef)
-						Case "C58"
-							objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 58.0055, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcid")
-							objSearchEngineParams.AddModification(objModDef)
-					End Select
+				' This dictionary tracks the static mod names we will look for
+				' It is populated using the amino acid letters in lstResiduesToFind, plus also the N and T terminus tags
+				Dim dctResiduesAndSymbols = New Dictionary(Of String, String)
 
-				End If
+				For Each residueSymbol In lstResiduesToFind
+					dctResiduesAndSymbols.Add(residueSymbol, residueSymbol)
+				Next
+
+				dctResiduesAndSymbols.Add("ADD_NTerm", N_TERMINAL_PEPTIDE_SYMBOL_DMS)
+				dctResiduesAndSymbols.Add("ADD_CTerm", C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+
+				For Each residueSpec In dctResiduesAndSymbols
+					Dim strKey = "ADD_" & residueSpec.Key
+
+					If objSearchEngineParams.Parameters.TryGetValue(strKey, strSettingValue) Then
+						Dim modMassDa As Double
+
+						If Double.TryParse(strSettingValue, modMassDa) Then
+							If Math.Abs(modMassDa) > Single.Epsilon Then
+
+								Dim eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod
+								If residueSpec.Value = N_TERMINAL_PEPTIDE_SYMBOL_DMS OrElse residueSpec.Value = C_TERMINAL_PEPTIDE_SYMBOL_DMS Then
+									eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+								End If
+
+								objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residueSpec.Value, eModType, "Mod" & modMassDa.ToString("0"))
+								objSearchEngineParams.AddModification(objModDef)
+							End If
+						End If
+
+					End If
+				Next
 
 				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
 				Dim dblTolerancePPM As Double
@@ -254,7 +263,7 @@ Public Class clsPHRPParserMSAlign
 				Else
 
 					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
-					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1)
+					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_Probability, mColumnHeaders, 1)
 
 					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 					.SetPeptide(strPeptide, mCleavageStateCalculator)
@@ -278,28 +287,17 @@ Public Class clsPHRPParserMSAlign
 				UpdatePSMUsingSeqInfo(objPSM)
 
 				' Store the remaining scores
-				AddScore(objPSM, strColumns, DATA_COLUMN_Prsm_ID)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Spectrum_ID)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Spectrum_Index)
 
 				AddScore(objPSM, strColumns, DATA_COLUMN_MH)
 
-				AddScore(objPSM, strColumns, DATA_COLUMN_Protein_Mass)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Unexpected_Mod_Count)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Peak_Count)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Matched_Peak_Count)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Matched_Fragment_Ion_Count)
-
-				AddScore(objPSM, strColumns, DATA_COLUMN_PValue)
-				AddScore(objPSM, strColumns, DATA_COLUMN_EValue)
-				AddScore(objPSM, strColumns, DATA_COLUMN_FDR)
-
-				AddScore(objPSM, strColumns, DATA_COLUMN_Species_ID)
-				AddScore(objPSM, strColumns, DATA_COLUMN_FragMethod)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Score)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Probability)
 
 			End If
 
 		Catch ex As Exception
-			MyBase.ReportError("Error parsing line " & intLinesRead & " in the MSAlign data file: " & ex.Message)
+			MyBase.ReportError("Error parsing line " & intLinesRead & " in the MODa data file: " & ex.Message)
 		End Try
 
 		Return blnSuccess

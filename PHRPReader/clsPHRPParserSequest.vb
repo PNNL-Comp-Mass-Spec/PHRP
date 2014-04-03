@@ -10,6 +10,7 @@
 
 Option Strict On
 
+Imports System.Runtime.InteropServices
 Imports PHRPReader.clsPHRPReader
 Imports System.IO
 Imports System.Text.RegularExpressions
@@ -102,10 +103,18 @@ Public Class clsPHRPParserSequest
 
 	End Sub
 
-	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters) As Double
+	''' <summary>
+	''' Determines the precursor mass tolerance
+	''' </summary>
+	''' <param name="objSearchEngineParams"></param>
+	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
+	''' <returns>Precursor tolerance, in Da</returns>
+	''' <remarks></remarks>
+	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
 		Dim strPeptideMassTolerance As String = String.Empty
 		Dim strPeptideMassUnits As String = String.Empty
 
+		Dim dblToleranceDa As Double = 0
 		Dim dblValue As Double
 
 		If objSearchEngineParams.Parameters.TryGetValue("peptide_mass_tolerance", strPeptideMassTolerance) Then
@@ -123,58 +132,64 @@ Public Class clsPHRPParserSequest
 
 				If intUnits = 2 Then
 					' Tolerance is in ppm; convert to Da at 2000 m/z
-					Return clsPeptideMassCalculator.PPMToMass(dblValue, 2000)
+					dblTolerancePPM = dblValue
+
+					dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblValue, 2000)
 
 				ElseIf intUnits = 1 Then
 					' Tolerance is in milli mass units
-					Return dblValue / 1000.0
+					dblToleranceDa = dblValue / 1000.0
 
+					' Convert from dalton to PPM (assuming a mass of 2000 m/z)
+					dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
 				Else
 					' Tolerance is in daltons
-					Return dblValue
+					dblToleranceDa = dblValue
 
+					' Convert from dalton to PPM (assuming a mass of 2000 m/z)
+					dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
 				End If
 
 			End If
 		End If
 
-		Return 0
+		Return dblToleranceDa
 
 	End Function
 
-	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_FHT
 	End Function
 
-	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_syn_ModSummary.txt"
 	End Function
 
-	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_PepToProtMapMTS.txt"
 	End Function
 
-	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_syn_ProteinMods.txt"
 	End Function
 
-	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_SYN
 	End Function
 
-	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_syn_ResultToSeqMap.txt"
 	End Function
 
-	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_syn_SeqInfo.txt"
 	End Function
 
-	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
+	Public Overloads Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_syn_SeqToProteinMap.txt"
 	End Function
 
-	Public Shared Function GetSearchEngineName() As String
+	Public Overloads Shared Function GetSearchEngineName() As String
 		Return SEQ_SEARCH_ENGINE_NAME
 	End Function
 
@@ -225,7 +240,7 @@ Public Class clsPHRPParserSequest
 			If Not File.Exists(strParamFilePath) Then
 				ReportError("Sequest param file not found: " & strParamFilePath)
 			Else
-				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
@@ -340,7 +355,9 @@ Public Class clsPHRPParserSequest
 				End Using
 
 				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
-				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams)
+				Dim dblTolerancePPM As Double
+				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+				objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
 
 				blnSuccess = True
 
