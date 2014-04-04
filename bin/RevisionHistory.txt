@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5207; April 4, 2014
+	- Added support for results from MODa
+
 Version 1.5.5198; March 26, 2014
 	- New versions of dependent DLLs, including PHRPReader.dll
 	- Added MSGFPlus_Example_Data.zip to the installer

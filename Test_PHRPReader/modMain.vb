@@ -11,9 +11,9 @@
 		Const strSequestFolder As String = "\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225"
 		Const strMSGFPlusFolder As String = "MSG201304261714_Auto938181"
 
-		Const strXTandemFolder As String = "\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
+		'Const strXTandemFolder As String = "\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
 
-		Const strMSAlignFolder As String = "\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
+		'Const strMSAlignFolder As String = "\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
 
 		Dim strSynOrFHTFile As String
 		Dim eMatchedResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType

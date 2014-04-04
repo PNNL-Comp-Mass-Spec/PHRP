@@ -554,6 +554,9 @@ Public Class clsPeptideHitResultsProcRunner
 					Case PHRPReader.clsPHRPReader.ePeptideHitResultType.MSAlign
 						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMSAlignResultsProcessor
 
+					Case PHRPReader.clsPHRPReader.ePeptideHitResultType.MODa
+						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMODaResultsProcessor
+
 					Case Else
 						' Unknown format
 						strMessage = "Error: Unrecognized value for ePeptideHitResultType: " & ePeptideHitResultType.ToString()
@@ -602,7 +605,14 @@ Public Class clsPeptideHitResultsProcRunner
 				' If ePeptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
 				blnSuccess = False
 
-				strMessage = "Error: Could not determine the format of the input file.  It must end in " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " & PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, .xml (for X!Tandem), " & PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE & ".txt, " & PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE & ".tsv, or " & PeptideHitResultsProcessor.clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE & ".txt"
+				strMessage = "Error: Could not determine the format of the input file.  It must end in " &
+				  PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " &
+				  PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, .xml (for X!Tandem), " &
+				  PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE & ".txt, " &
+				  PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE & ".tsv, " &
+				  PeptideHitResultsProcessor.clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE & ".txt, or " &
+				  PeptideHitResultsProcessor.clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE & ".txt"
+
 				ShowErrorMessage(strMessage)
 			Else
 
@@ -630,6 +640,10 @@ Public Class clsPeptideHitResultsProcRunner
 					Case ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMSAlignResultsProcessor
 						LogMessage("Detected MSAlign results file")
+
+					Case ePeptideHitResultsFileFormatConstants.MODaTXTFile
+						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMODaResultsProcessor
+						LogMessage("Detected MODa results file")
 
 					Case Else
 						' Unknown format

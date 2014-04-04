@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "March 26, 2014"
+	Public Const PROGRAM_DATE As String = "April 4, 2014"
 
 	Private mInputFilePath As String
 	Private mOutputFolderPath As String							' Optional
@@ -56,6 +56,7 @@ Module modMain
 	Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
 	Private mLastProgressReportTime As DateTime
 	Private mLastProgressReportValue As Integer
+	Private mLastProgressReportValueTime As DateTime
 
 	Public Function Main() As Integer
 		' Returns 0 if no error, error code if an error
@@ -444,6 +445,7 @@ Module modMain
 	Private Sub mPeptideHitResultsProcRunner_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single) Handles mPeptideHitResultsProcRunner.ProgressChanged
 		Const PERCENT_REPORT_INTERVAL As Integer = 25
 		Const PROGRESS_DOT_INTERVAL_MSEC As Integer = 250
+		Const PROGRESS_VALUE_INTERVAL_SEC As Integer = 60
 
 		If percentComplete >= mLastProgressReportValue Then
 			If mLastProgressReportValue > 0 Then
@@ -455,13 +457,21 @@ Module modMain
 		Else
 			If DateTime.UtcNow.Subtract(mLastProgressReportTime).TotalMilliseconds > PROGRESS_DOT_INTERVAL_MSEC Then
 				mLastProgressReportTime = DateTime.UtcNow
-				Console.Write(".")
+				If DateTime.UtcNow.Subtract(mLastProgressReportValueTime).TotalSeconds > PROGRESS_VALUE_INTERVAL_SEC Then
+					mLastProgressReportValueTime = DateTime.UtcNow
+					Console.WriteLine()
+					Console.Write(percentComplete.ToString("0.00") & "% complete ")
+				Else
+					Console.Write(".")
+				End If
+
 			End If
 		End If
 	End Sub
 
 	Private Sub mPeptideHitResultsProcRunner_ProgressReset() Handles mPeptideHitResultsProcRunner.ProgressReset
 		mLastProgressReportTime = DateTime.UtcNow
+		mLastProgressReportValueTime = DateTime.UtcNow
 		mLastProgressReportValue = 0
 	End Sub
 
