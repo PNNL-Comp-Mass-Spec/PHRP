@@ -1,0 +1,1675 @@
+﻿Option Strict On
+
+' This class reads in an MODa results file (txt format) and creates 
+' a tab-delimited text file with the data. 
+'
+' -------------------------------------------------------------------------------
+' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+' Started 04/01/2014
+'
+' E-mail: matthew.monroe@pnnl.gov
+' -------------------------------------------------------------------------------
+
+Imports PHRPReader
+Imports System.IO
+Imports System.Text.RegularExpressions
+
+Public Class clsMODaResultsProcessor
+	Inherits clsPHRPBaseClass
+
+	Public Sub New()
+		MyBase.New()
+		MyBase.mFileDate = "April 1, 2014"
+		InitializeLocalVariables()
+	End Sub
+
+#Region "Constants and Enums"
+
+	Public Const FILENAME_SUFFIX_MODA_FILE As String = "_moda.id"
+
+	Public Const N_TERMINUS_SYMBOL_MODA As String = "-"
+	Public Const C_TERMINUS_SYMBOL_MODA As String = "-"
+
+	Public Const DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD As Single = 0.1
+
+	Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
+
+	' Note that as of April 2014, all mod masses reported by MODa are simply integers, meaning matching a trailing period is not necessary
+	Private Const MODA_MOD_MASS_REGEX As String = "([+-][0-9.]+)"
+
+	Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
+
+	' These columns correspond to the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
+	Protected Const MODaResultsFileColCount As Integer = 11
+	Public Enum eMODaResultsFileColumns As Integer
+		SpectrumFileName = 0
+		SpectrumIndex = 1
+		ObservedMonoMass = 2
+		Charge = 3
+		CalculatedMonoMass = 4
+		DeltaMass = 5
+		Score = 6
+		Probability = 7
+		Peptide = 8
+		Protein = 9
+		PeptidePosition = 10
+	End Enum
+
+	' These columns correspond to the Synopsis file created by this class
+	Protected Const MODaSynFileColCount As Integer = 14
+	Public Enum eMODaSynFileColumns As Integer
+		ResultID = 0
+		Scan = 1
+		Spectrum_Index = 2
+		Charge = 3
+		PrecursorMZ = 4
+		DelM = 5							' Precursor error, in Da
+		DelM_PPM = 6						' Precursor error, in ppm
+		MH = 7								' Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+		Peptide = 8							' This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
+		Protein = 9							' Protein Name
+		Score = 10
+		Probability = 11
+		Rank_Probability = 12
+		Peptide_Position = 13
+	End Enum
+
+#End Region
+
+#Region "Structures"
+	' This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
+	Protected Structure udtMODaSearchResultType
+
+		Public SpectrumFileName As String
+		Public SpectrumIndex As String
+		Public ScanNum As Integer				' Determined by looking for SpectrumIndex in the _mgf_IndexToScanMap.txt file
+		Public Precursor_mass As String			' Uncharged monoisotopic mass value of the observed precursor_mz, reported as ObservedMonoMass by MODa 
+		Public PrecursorMZ As String			' Computed from ObservedMonoMass
+		Public Charge As String
+		Public ChargeNum As Short
+		Public CalculatedMonoMass As String		' Theoretical monoisotopic mass of the peptide (including mods), as computed by MODa
+		Public DeltaMass As String				' Computed by MODa
+		Public MH As String						' Theoretical monoisotopic peptide MH (including mods), as computed by PHRP; note that this is (M+H)+
+		Public DelM As String					' Computed using Precursor_mass - CalculatedMonoMass
+		Public DelM_PPM As String				' Computed using DelM and CalculatedMonoMass	
+		Public Score As String
+		Public Probability As String
+		Public ProbabilityNum As Double
+		Public RankProbability As Integer
+		Public Peptide As String
+		Public Protein As String
+		Public PeptidePosition As String		' Protein start/stop residues of the peptide, e.g. 108~115
+
+		Public Sub Clear()
+			SpectrumFileName = String.Empty
+			SpectrumIndex = String.Empty
+			ScanNum = 0
+			Precursor_mass = String.Empty
+			PrecursorMZ = String.Empty
+			Charge = String.Empty
+			ChargeNum = 0
+			CalculatedMonoMass = String.Empty
+			DeltaMass = String.Empty
+			MH = String.Empty
+			DelM = String.Empty
+			DelM_PPM = String.Empty
+			Score = String.Empty
+			Probability = String.Empty
+			ProbabilityNum = 0
+			RankProbability = 0
+			Peptide = String.Empty
+			Protein = String.Empty
+			PeptidePosition = String.Empty
+
+		End Sub
+	End Structure
+
+#End Region
+
+
+#Region "Classwide Variables"
+	Protected mSpectrumIndexToScanMap As Dictionary(Of Integer, Integer)
+#End Region
+
+	''' <summary>
+	''' Step through .PeptideSequenceWithMods
+	''' For each residue, check if a static mod is defined that affects that residue
+	''' For each mod mass, determine the modification and add to objSearchResult
+	''' </summary>
+	''' <param name="objSearchResult"></param>
+	''' <param name="blnUpdateModOccurrenceCounts"></param>
+	''' <remarks></remarks>
+	Private Sub AddDynamicAndStaticResidueMods(ByRef objSearchResult As clsSearchResultsMODa, ByVal blnUpdateModOccurrenceCounts As Boolean)
+		Const NO_RESIDUE As Char = "-"c
+
+		Dim intIndex As Integer, intModIndex As Integer
+		Dim chChar As Char
+		Dim objModificationDefinition As clsModificationDefinition
+
+		Dim strSequence As String
+
+		Dim blnParsingModMass As Boolean
+		Dim strModMassDigits As String = String.Empty
+
+		Dim chMostRecentResidue As Char
+		Dim intResidueLocInPeptide As Integer
+
+		blnParsingModMass = False
+		strModMassDigits = String.Empty
+
+		chMostRecentResidue = NO_RESIDUE
+		intResidueLocInPeptide = 0
+
+		strSequence = objSearchResult.PeptideSequenceWithMods
+		For intIndex = 0 To strSequence.Length - 1
+			chChar = strSequence.Chars(intIndex)
+
+			If IsLetterAtoZ(chChar) Then
+
+				If blnParsingModMass Then
+					' Associate the mod mass in strModMassDigits with the previous residue
+					AssociateDynamicModWithResidue(objSearchResult, chMostRecentResidue, intResidueLocInPeptide, strModMassDigits, blnUpdateModOccurrenceCounts)
+					blnParsingModMass = False
+				End If
+
+				chMostRecentResidue = chChar
+				intResidueLocInPeptide += 1
+
+				' Look for static mods to associate with this residue
+				For intModIndex = 0 To mPeptideMods.ModificationCount - 1
+					If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+						objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+
+						If objModificationDefinition.TargetResiduesContain(chChar) Then
+							' Match found; add this modification
+							objSearchResult.SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, objSearchResult.DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+						End If
+					End If
+				Next intModIndex
+
+			Else
+				Dim blnIsNumberChar As Boolean = (chChar = "+"c OrElse chChar = "-"c OrElse Char.IsDigit(chChar))
+
+				If blnParsingModMass Then
+					If blnIsNumberChar OrElse chChar = "."c Then
+						strModMassDigits &= chChar
+					End If
+				ElseIf blnIsNumberChar Then
+					' Mod Mass Start
+					strModMassDigits = chChar
+					blnParsingModMass = True
+				Else
+					' Unrecognized symbol; ignore it
+				End If
+
+			End If
+
+		Next intIndex
+
+		If blnParsingModMass Then
+			' Associate the mod mass in strModMassDigits with the previous residue
+			AssociateDynamicModWithResidue(objSearchResult, chMostRecentResidue, intResidueLocInPeptide, strModMassDigits, blnUpdateModOccurrenceCounts)
+		End If
+
+	End Sub
+
+	Private Function AddModificationsAndComputeMass(ByRef objSearchResult As clsSearchResultsMODa, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+		Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
+
+		Dim blnSuccess As Boolean
+
+		Try
+			' If any modifications of type IsotopicMod are defined, add them to the Search Result Mods now
+			objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
+
+			' Parse .PeptideSequenceWithMods to determine the modified residues present
+			AddDynamicAndStaticResidueMods(objSearchResult, blnUpdateModOccurrenceCounts)
+
+			' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
+			' Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
+			'  even though, biologically, that's typically not possible
+			' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
+			'  (where two COOH groups are present)
+			objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
+
+			' Compute the monoisotopic mass for this peptide
+			objSearchResult.ComputeMonoisotopicMass()
+
+			' Populate .PeptideModDescription
+			objSearchResult.UpdateModDescription()
+
+			blnSuccess = True
+		Catch ex As Exception
+			blnSuccess = False
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Private Sub AssociateDynamicModWithResidue(
+	  ByVal objSearchResult As clsSearchResultsMODa,
+	  ByVal chMostRecentResidue As Char,
+	  ByVal intResidueLocInPeptide As Integer,
+	  ByVal strModMassDigits As String,
+	  ByVal blnUpdateModOccurrenceCounts As Boolean)
+
+		Dim blnSuccess As Boolean
+
+		Dim chResidueForMod As Char
+		Dim intResidueLocForMod As Integer
+		Dim dblModMass As Double
+
+		chResidueForMod = chMostRecentResidue
+		intResidueLocForMod = intResidueLocInPeptide
+
+		If Double.TryParse(strModMassDigits, dblModMass) Then
+			If intResidueLocForMod = 0 Then
+				' Modification is at the peptide N-terminus
+				intResidueLocForMod = 1
+			End If
+
+			blnSuccess = objSearchResult.SearchResultAddModification(dblModMass, chResidueForMod, intResidueLocForMod, objSearchResult.DetermineResidueTerminusState(intResidueLocForMod), blnUpdateModOccurrenceCounts)
+
+			If Not blnSuccess Then
+				Dim strErrorMessage As String = objSearchResult.ErrorMessage
+				If String.IsNullOrEmpty(strErrorMessage) Then
+					strErrorMessage = "SearchResultAddDynamicModification returned false for mod mass " & strModMassDigits
+				End If
+				SetErrorMessage(strErrorMessage & "; ResultID = " & objSearchResult.ResultID)
+			End If
+		End If
+
+	End Sub
+
+	''' <summary>
+	''' Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb)
+	''' </summary>
+	''' <param name="lstSearchResults"></param>
+	''' <param name="intStartIndex"></param>
+	''' <param name="intEndIndex"></param>
+	''' <remarks></remarks>
+	Private Sub AssignRankAndDeltaNormValues(ByRef lstSearchResults As List(Of udtMODaSearchResultType),
+	  ByVal intStartIndex As Integer,
+	  ByVal intEndIndex As Integer)
+
+		Dim intIndex As Integer
+
+		Dim intLastCharge As Integer
+		Dim dblLastValue As Double
+
+		Dim intCurrentRank As Integer
+
+		For intIndex = intStartIndex To intEndIndex
+			If intIndex = intStartIndex OrElse lstSearchResults(intIndex).ChargeNum <> intLastCharge Then
+				intLastCharge = lstSearchResults(intIndex).ChargeNum
+				dblLastValue = lstSearchResults(intIndex).ProbabilityNum
+				intCurrentRank = 1
+			Else
+				If Math.Abs(lstSearchResults(intIndex).ProbabilityNum - dblLastValue) > Double.Epsilon Then
+					dblLastValue = lstSearchResults(intIndex).ProbabilityNum
+					intCurrentRank += 1
+				End If
+			End If
+
+			Dim oResult = lstSearchResults(intIndex)
+			oResult.RankProbability = intCurrentRank
+			lstSearchResults(intIndex) = oResult
+
+		Next intIndex
+
+	End Sub
+
+	Protected Function AssureInteger(ByVal strInteger As String, ByVal intDefaultValue As Integer) As String
+
+		Dim intValue As Integer
+		Dim dblValue As Double
+
+		If strInteger.EndsWith(".0") Then strInteger = strInteger.Substring(0, strInteger.Length - 2)
+
+		If Integer.TryParse(strInteger, intValue) Then
+			Return intValue.ToString()
+		ElseIf Double.TryParse(strInteger, dblValue) Then
+			Return dblValue.ToString("0")
+		Else
+			Return intDefaultValue.ToString()
+		End If
+
+	End Function
+
+	Protected Function ComputePeptideMass(ByVal strPeptide As String, ByVal dblTotalModMass As Double) As Double
+
+		Dim strCleanSequence As String
+		Dim dblMass As Double
+
+		strCleanSequence = GetCleanSequence(strPeptide)
+
+		Dim objMassCalculator As clsPeptideMassCalculator = New clsPeptideMassCalculator()
+
+		dblMass = objMassCalculator.ComputeSequenceMass(strCleanSequence)
+
+		If Math.Abs(dblTotalModMass) > Double.Epsilon Then
+			dblMass += dblTotalModMass
+		End If
+
+		Return dblMass
+
+	End Function
+
+	''' <summary>
+	''' Computes the total of all modification masses defined for the peptide
+	''' </summary>
+	''' <param name="strPeptide">Peptide sequence, with mod masses in the form [23.5432]</param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function ComputeTotalModMass(ByVal strPeptide As String) As Double
+
+		Static reModMassRegEx As New Regex(MODA_MOD_MASS_REGEX, REGEX_OPTIONS)
+
+		Dim dblTotalModMass As Double = 0
+
+		For Each reMatch As Match In reModMassRegEx.Matches(strPeptide)
+			Dim dblModMassFound As Double
+			If Double.TryParse(reMatch.Groups(1).Value, dblModMassFound) Then
+				dblTotalModMass += dblModMassFound
+			End If
+		Next
+
+		Return dblTotalModMass
+
+	End Function
+
+	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+		Dim strPepToProteinMapFilePath As String = String.Empty
+
+		strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+		If strPepToProteinMapFilePath.ToLower().EndsWith("_MODa_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_MODa_fht") Then
+			' Remove _syn or _fht
+			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
+		End If
+
+		Return MyBase.ConstructPepToProteinMapFilePath(strPepToProteinMapFilePath, strOutputFolderPath, MTS)
+
+	End Function
+
+	''' <summary>
+	''' This routine creates a first hits file or synopsis file from the output from MODa
+	''' The synopsis file includes every result with a p-value below a set threshold or a SpecProb below a certain threshold
+	''' The first-hits file includes the results with the lowest SpecProb (for each scan and charge)
+	''' </summary>
+	''' <param name="strInputFilePath"></param>
+	''' <param name="strOutputFilePath"></param>
+	''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
+	''' <returns></returns>
+	''' <remarks></remarks>
+	Protected Function CreateSynResultsFile(ByVal strInputFilePath As String, _
+	   ByVal strOutputFilePath As String, _
+	   Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+
+		Dim strLineIn As String
+
+		Dim sngPercentComplete As Single
+
+		Dim intColumnMapping() As Integer = Nothing
+
+		Dim blnSuccess As Boolean
+		Dim blnValidSearchResult As Boolean
+
+		Dim strErrorLog As String = String.Empty
+
+		Try
+
+			Try
+				' Open the input file and parse it
+				' Initialize the stream reader and the stream Text writer
+				Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+					Using swResultFile As StreamWriter = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+
+						strErrorLog = String.Empty
+						Dim intResultsProcessed As Integer = 0
+
+						' Initialize the list that will hold all of the records in the MODa result file
+						Dim lstSearchResultsUnfiltered = New List(Of udtMODaSearchResultType)
+
+						' Initialize the list that will hold all of the records that will ultimately be written out to disk
+						Dim lstFilteredSearchResults = New List(Of udtMODaSearchResultType)
+
+						' Parse the input file
+						Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+							strLineIn = srDataFile.ReadLine()
+							Dim blnSkipLine = False
+
+							If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
+
+								If intResultsProcessed = 0 Then
+									' The first line might be a header line
+									' However, as of April 2014, MODa id.txt files do not have a header line
+
+									blnSkipLine = ParseMODaResultsFileHeaderLine(strLineIn, intColumnMapping)
+
+									' Write the header line to the output file
+									WriteSynFHTFileHeader(swResultFile, strErrorLog)
+								End If
+
+
+								If Not blnSkipLine Then
+
+									Dim udtSearchResult = New udtMODaSearchResultType
+
+									blnValidSearchResult = ParseMODaResultsFileEntry(strLineIn, udtSearchResult, strErrorLog, intColumnMapping)
+
+									If blnValidSearchResult Then
+										lstSearchResultsUnfiltered.Add(udtSearchResult)
+									End If
+
+									' Update the progress
+									sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+									If mCreateProteinModsFile Then
+										sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+									End If
+									UpdateProgress(sngPercentComplete)
+
+								End If
+								intResultsProcessed += 1
+							End If
+						Loop
+
+						' Sort the SearchResults by scan, charge, and ascending SpecProb
+						lstSearchResultsUnfiltered.Sort(New MODaSearchResultsComparerScanChargeProbabilityPeptide)
+
+						' Now filter the data
+
+						' Initialize variables
+						Dim intStartIndex As Integer = 0
+						Dim intEndIndex As Integer
+
+						intStartIndex = 0
+						intEndIndex = 0
+						Do While intStartIndex < lstSearchResultsUnfiltered.Count
+							intEndIndex = intStartIndex
+							Do While intEndIndex + 1 < lstSearchResultsUnfiltered.Count AndAlso lstSearchResultsUnfiltered(intEndIndex + 1).ScanNum = lstSearchResultsUnfiltered(intStartIndex).ScanNum
+								intEndIndex += 1
+							Loop
+
+							' Store the results for this scan
+							StoreSynMatches(lstSearchResultsUnfiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
+
+							intStartIndex = intEndIndex + 1
+						Loop
+
+						' Sort the data in udtFilteredSearchResults then write out to disk
+						SortAndWriteFilteredSearchResults(swResultFile, lstFilteredSearchResults, strErrorLog)
+					End Using
+				End Using
+
+				' Inform the user if any errors occurred
+				If strErrorLog.Length > 0 Then
+					SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+				End If
+
+				blnSuccess = True
+
+			Catch ex As Exception
+				SetErrorMessage(ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+				blnSuccess = False
+			End Try
+		Catch ex As Exception
+			SetErrorMessage(ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+			blnSuccess = False
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Function ExtractModInfoFromMODaParamFile(ByVal strMODaParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
+
+		Dim strLineIn As String
+		Dim kvSetting As KeyValuePair(Of String, String)
+
+		Dim objModDef As clsModificationDefinition
+
+		Dim blnSuccess As Boolean = False
+
+		Try
+			' Initialize the modification list
+			If lstModInfo Is Nothing Then
+				lstModInfo = New List(Of clsModificationDefinition)
+			Else
+				lstModInfo.Clear()
+			End If
+
+			If String.IsNullOrEmpty(strMODaParamFilePath) Then
+				SetErrorMessage("MODa Parameter File name not defined; unable to extract mod info")
+				SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+				Return False
+			End If
+
+			If Not File.Exists(strMODaParamFilePath) Then
+				SetErrorMessage("MODa param file not found: " & strMODaParamFilePath)
+			Else
+				' Read the contents of the parameter (or mods) file
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strMODaParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+					Do While srInFile.Peek <> -1
+						strLineIn = srInFile.ReadLine().Trim()
+
+						If strLineIn.Length > 0 Then
+
+							If strLineIn.StartsWith("#"c) Then
+								' Comment line; skip it
+							Else
+								' Split the line on the equals sign
+								kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
+
+								If kvSetting.Key.ToLower() = "cysteineProtection".ToLower() Then
+
+									Select Case kvSetting.Value.ToUpper()
+										Case "C57"
+											objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 57.0215, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcet")
+											lstModInfo.Add(objModDef)
+
+										Case "C58"
+											objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 58.0055, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcid")
+											lstModInfo.Add(objModDef)
+
+									End Select
+
+								End If
+
+							End If
+
+						End If
+					Loop
+				End Using
+
+				Console.WriteLine()
+
+				blnSuccess = True
+
+			End If
+		Catch ex As Exception
+			SetErrorMessage("Error reading the MODa parameter file (" & Path.GetFileName(strMODaParamFilePath) & "): " & ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+			blnSuccess = False
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Private Sub InitializeLocalVariables()
+		mSpectrumIndexToScanMap = New Dictionary(Of Integer, Integer)
+	End Sub
+
+	Protected Function LoadMGFIndexToScanMapFile(ByVal fiInputFile As FileInfo) As Boolean
+
+		Dim indexToScanMapFilePath As String = String.Empty
+
+		Try
+			mSpectrumIndexToScanMap.Clear()
+
+			' Look for the IndexToScanMap file that corresponds to fiInputFile
+			Dim lstScanMapFiles As List(Of FileInfo)
+			Dim matchIndex = fiInputFile.Name.LastIndexOf("_moda", System.StringComparison.Ordinal)			
+			Dim sourceFileDescription As String = ""
+
+			If matchIndex > 0 Then
+				Dim datasetName = fiInputFile.Name.Substring(0, matchIndex)
+				lstScanMapFiles = fiInputFile.Directory.GetFiles(datasetName & "*mgf_IndexToScanMap*").ToList()
+				sourceFileDescription = " dataset " & datasetName
+			Else
+				' Source file does not have "_moda" in the name
+				lstScanMapFiles = fiInputFile.Directory.GetFiles("*mgf_IndexToScanMap*").ToList()
+				sourceFileDescription = fiInputFile.Name
+			End If
+
+			If lstScanMapFiles.Count = 1 Then
+				indexToScanMapFilePath = lstScanMapFiles.First.FullName
+			ElseIf lstScanMapFiles.Count = 0 Then
+				ReportWarning("Did not find a mgf_IndexToScanMap file for " & sourceFileDescription & " in folder " & fiInputFile.Directory.FullName & "; scan numbers will be 0 in the synopsis file")
+				Return False
+			Else
+				ReportWarning("Found more than one potential mgf_IndexToScanMap file for " & sourceFileDescription & " in folder " & fiInputFile.Directory.FullName & " scan numbers will be 0 in the synopsis file")
+				Return False
+			End If
+
+
+			Dim fiSourceFile = New FileInfo(indexToScanMapFilePath)
+
+			If Not fiSourceFile.Exists Then
+				ReportWarning("MGF Index to Scan Map file not found; scan numbers will be 0 in the synopsis file: " & indexToScanMapFilePath)
+				Return False
+			End If
+
+			Using srMapFile = New StreamReader(New FileStream(fiSourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+				While srMapFile.Peek > -1
+					Dim strLineIn = srMapFile.ReadLine()
+					If String.IsNullOrEmpty(strLineIn) Then Continue While
+
+					Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
+					If strSplitLine.Length >= 3 Then
+						Dim spectrumIndex As Integer
+						Dim scanStart As Integer
+						Dim scanEnd As Integer
+
+						If Integer.TryParse(strSplitLine(0), spectrumIndex) Then
+							If Integer.TryParse(strSplitLine(1), scanStart) Then
+								Integer.TryParse(strSplitLine(2), scanEnd)
+
+								mSpectrumIndexToScanMap.Add(spectrumIndex, scanStart)
+
+							End If
+						End If
+					End If
+				End While
+			End Using
+
+		Catch ex As Exception
+			SetErrorMessage("Error reading the MGF Index to Scan Map file (" & Path.GetFileName(indexToScanMapFilePath) & "): " & ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+			Return False
+		End Try
+
+		Return True
+
+	End Function
+
+	Protected Function LookupScanBySpectrumIndex(ByVal spectrumIndex As Integer) As Integer
+
+		Dim scanNumber As Integer
+		If mSpectrumIndexToScanMap.TryGetValue(spectrumIndex, scanNumber) Then
+			Return scanNumber
+		End If
+
+		Return 0
+	End Function
+
+	Protected Function ParseMODaSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
+		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
+
+		Dim strPreviousProbability As String
+
+		' Note that MODa synopsis files are normally sorted on Probability value, ascending
+		' In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
+		'  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
+
+		Dim htPeptidesFoundForProbabilityLevel As Hashtable
+
+		Dim strKey As String
+
+		Dim strLineIn As String
+		Dim strModificationSummaryFilePath As String
+
+		Dim objSearchResult As clsSearchResultsMODa
+
+		Dim intResultsProcessed As Integer
+		Dim intPepToProteinMapIndex As Integer
+		Dim sngPercentComplete As Single
+
+		Dim blnHeaderParsed As Boolean
+		Dim intColumnMapping() As Integer = Nothing
+
+		Dim strCurrentPeptideWithMods As String = String.Empty
+		Dim strCurrentProtein As String
+
+		Dim blnSuccess As Boolean
+		Dim blnValidSearchResult As Boolean
+		Dim blnFirstMatchForGroup As Boolean
+
+		Dim strErrorLog As String = String.Empty
+
+		Try
+			' Possibly reset the mass correction tags and Mod Definitions
+			If blnResetMassCorrectionTagsAndModificationDefinitions Then
+				ResetMassCorrectionTagsAndModificationDefinitions()
+			End If
+
+			' Reset .OccurrenceCount
+			mPeptideMods.ResetOccurrenceCountStats()
+
+			' Initialize objSearchResult
+			objSearchResult = New clsSearchResultsMODa(mPeptideMods)
+
+			' Initialize htPeptidesFoundForProbabilityLevel
+			htPeptidesFoundForProbabilityLevel = New Hashtable
+			strPreviousProbability = String.Empty
+
+			' Assure that lstPepToProteinMapping is sorted on peptide
+			If lstPepToProteinMapping.Count > 1 Then
+				lstPepToProteinMapping.Sort(New PepToProteinMappingComparer)
+			End If
+
+			Try
+				objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+
+				' Open the input file and parse it
+				' Initialize the stream reader
+				Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+					strErrorLog = String.Empty
+					intResultsProcessed = 0
+					blnHeaderParsed = False
+
+					' Create the output files
+					Dim strBaseOutputFilePath As String = Path.Combine(strOutputFolderPath, Path.GetFileName(strInputFilePath))
+					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
+
+					' Parse the input file
+					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+
+						strLineIn = srDataFile.ReadLine()
+						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
+
+							If Not blnHeaderParsed Then
+								blnSuccess = ParseMODaSynFileHeaderLine(strLineIn, intColumnMapping)
+								If Not blnSuccess Then
+									' Error parsing header
+									SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+									Exit Try
+								End If
+								blnHeaderParsed = True
+							Else
+
+								blnValidSearchResult = ParseMODaSynFileEntry(strLineIn, objSearchResult, strErrorLog, _
+								  intResultsProcessed, intColumnMapping, _
+								  strCurrentPeptideWithMods)
+
+								If blnValidSearchResult Then
+									strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.Charge
+
+									If objSearchResult.Probability = strPreviousProbability Then
+										' New result has the same Probability as the previous result
+										' See if htPeptidesFoundForProbabilityLevel contains the peptide, scan and charge
+
+										If htPeptidesFoundForProbabilityLevel.ContainsKey(strKey) Then
+											blnFirstMatchForGroup = False
+										Else
+											htPeptidesFoundForProbabilityLevel.Add(strKey, 1)
+											blnFirstMatchForGroup = True
+										End If
+
+									Else
+										' New Probability
+										' Reset htPeptidesFoundForScan
+										htPeptidesFoundForProbabilityLevel.Clear()
+
+										' Update strPreviousProbability
+										strPreviousProbability = objSearchResult.Probability
+
+										' Append a new entry to htPeptidesFoundForScan
+										htPeptidesFoundForProbabilityLevel.Add(strKey, 1)
+										blnFirstMatchForGroup = True
+									End If
+
+									blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
+									If Not blnSuccess Then
+										If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+											strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'" & ControlChars.NewLine
+										End If
+									End If
+
+									MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
+
+									If lstPepToProteinMapping.Count > 0 Then
+										' Add the additional proteins for this peptide
+
+										' Use binary search to find this peptide in lstPepToProteinMapping
+										intPepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, strCurrentPeptideWithMods)
+
+										If intPepToProteinMapIndex >= 0 Then
+											' Call MyBase.SaveResultsFileEntrySeqInfo for each entry in lstPepToProteinMapping() for peptide , skipping objSearchResult.ProteinName
+											strCurrentProtein = String.Copy(objSearchResult.ProteinName)
+											Do
+												If lstPepToProteinMapping(intPepToProteinMapIndex).Protein <> strCurrentProtein Then
+													objSearchResult.ProteinName = String.Copy(lstPepToProteinMapping(intPepToProteinMapIndex).Protein)
+													MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), False)
+												End If
+
+												intPepToProteinMapIndex += 1
+											Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso strCurrentPeptideWithMods = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
+										Else
+											' Match not found; this is unexpected
+											ReportWarning("no match for '" & strCurrentPeptideWithMods & "' in lstPepToProteinMapping")
+										End If
+									End If
+
+								End If
+
+								' Update the progress
+								sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+								If mCreateProteinModsFile Then
+									sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+								End If
+								UpdateProgress(sngPercentComplete)
+
+								intResultsProcessed += 1
+							End If
+						End If
+
+					Loop
+
+				End Using
+
+				If mCreateModificationSummaryFile Then
+					' Create the modification summary file
+					Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
+					strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+					strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
+
+					SaveModificationSummaryFile(strModificationSummaryFilePath)
+				End If
+
+				' Inform the user if any errors occurred
+				If strErrorLog.Length > 0 Then
+					SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+				End If
+
+				blnSuccess = True
+
+			Catch ex As Exception
+				SetErrorMessage(ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+				blnSuccess = False
+			Finally
+				MyBase.CloseSequenceOutputFiles()
+			End Try
+		Catch ex As Exception
+			SetErrorMessage(ex.Message)
+			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+			blnSuccess = False
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Private Function ParseMODaResultsFileEntry(ByRef strLineIn As String,
+	  ByRef udtSearchResult As udtMODaSearchResultType,
+	  ByRef strErrorLog As String,
+	  ByRef intColumnMapping() As Integer) As Boolean
+
+		' Parses an entry from the MODa results file
+
+		Dim strSplitLine() As String = Nothing
+
+		Dim dblPrecursorMonoMass As Double			' Observed m/z, converted to monoisotopic mass
+		Dim dblPeptideMonoMassMODa As Double		' Theoretical peptide monoisotopic mass, including mods, as computed by MODa
+		Dim dblPeptideMonoMassPHRP As Double		' Theoretical peptide monoisotopic mass, including mods, as computed by PHRP
+
+		Dim dblPrecursorMZ As Double
+		Dim dblDelM As Double
+
+		Dim dblTotalModMass As Double
+
+		Dim blnValidSearchResult As Boolean
+
+		Try
+			' Set this to False for now
+			blnValidSearchResult = False
+
+			udtSearchResult.Clear()
+			strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
+
+			If strSplitLine.Length >= 11 Then
+
+				With udtSearchResult
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.SpectrumFileName), .SpectrumFileName)
+
+					If Not GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.SpectrumIndex), .SpectrumIndex) Then
+						Throw New EvaluateException("Index column is missing or invalid")
+					End If
+
+					Dim spectrumIndex As Integer
+					If Not Integer.TryParse(.SpectrumIndex, spectrumIndex) Then
+						Throw New EvaluateException("Index column is not numeric")
+					End If
+					.ScanNum = LookupScanBySpectrumIndex(spectrumIndex)
+					If .ScanNum = 0 Then
+						ReportWarning("Error, could not resolve spectrumIndex to Scan Number: " & spectrumIndex)
+					End If
+
+					' Monoisotopic mass value of the observed precursor_mz
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.ObservedMonoMass), .Precursor_mass)
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.Charge), .Charge)
+					.ChargeNum = CShort(CIntSafe(.Charge, 0))
+
+					If Double.TryParse(.Precursor_mass, dblPrecursorMonoMass) Then
+						If .ChargeNum > 0 Then
+							dblPrecursorMZ = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMonoMass, 0, .ChargeNum)
+							.PrecursorMZ = NumToString(dblPrecursorMZ, 6, True)
+						End If
+					End If
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.CalculatedMonoMass), .CalculatedMonoMass)
+					Double.TryParse(.CalculatedMonoMass, dblPeptideMonoMassMODa)
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.DeltaMass), .DeltaMass)
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.Score), .Score)
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.Probability), .Probability)
+					If Not Double.TryParse(.Probability, .ProbabilityNum) Then .ProbabilityNum = 0
+
+					If Not GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.Peptide), .Peptide) Then
+						Throw New EvaluateException("Peptide column is missing or invalid")
+					End If
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.Protein), .Protein)
+					.Protein = TruncateProteinName(.Protein)
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.PeptidePosition), .PeptidePosition)
+
+
+					' Add the standard terminus symbols to the peptide sequence
+					.Peptide = ReplaceTerminus(.Peptide)
+
+					' Parse the sequence to determine the total mod mass
+					' Note that we do not remove any of the mod symbols since MODa identifies mods by mass alone
+					dblTotalModMass = ComputeTotalModMass(.Peptide)
+
+					' Compute monoisotopic mass of the peptide
+					dblPeptideMonoMassPHRP = ComputePeptideMass(.Peptide, dblTotalModMass)
+
+					If Math.Abs(dblPeptideMonoMassMODa) < Double.Epsilon Then
+						dblPeptideMonoMassMODa = dblPeptideMonoMassPHRP
+					End If
+
+					Dim dblMassDiffThreshold As Double = dblPeptideMonoMassMODa / 50000
+					If dblMassDiffThreshold < 0.1 Then dblMassDiffThreshold = 0.1
+
+					If Math.Abs(dblPeptideMonoMassPHRP - dblPeptideMonoMassMODa) > dblMassDiffThreshold Then
+						' Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
+						Dim strFirst30Residues As String
+						If .Peptide.Length < 27 Then
+							strFirst30Residues = .Peptide
+						Else
+							strFirst30Residues = .Peptide.Substring(0, 27) & "..."
+						End If
+						ReportWarning("The monoisotopic mass computed by PHRP is more than " & dblMassDiffThreshold.ToString("0.00") & " Da away from the mass computed by MODa: " & dblPeptideMonoMassPHRP.ToString("0.0000") & " vs. " & dblPeptideMonoMassMODa.ToString("0.0000") & "; peptide " & strFirst30Residues)
+					End If
+
+					If dblPeptideMonoMassMODa > 0 Then
+						' Compute DelM and DelM_PPM
+						dblDelM = dblPrecursorMonoMass - dblPeptideMonoMassMODa
+						.DelM = NumToString(dblDelM, 6, True)
+
+						If dblPrecursorMZ > 0 Then
+							.DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, dblPrecursorMZ), 5, True)
+						Else
+							.DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, 1000), 5, True)
+						End If
+					End If
+
+					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
+					.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoMassPHRP, 0, 1), 6, True)
+
+					Dim dblFDR As Double
+
+					If .Probability.ToLower() = "infinity" Then
+						.Probability = "10"
+					ElseIf Not String.IsNullOrEmpty(.Probability) And Not Double.TryParse(.Probability, dblFDR) Then
+						.Probability = ""
+					End If
+
+				End With
+
+				blnValidSearchResult = True
+			End If
+
+		Catch ex As Exception
+			' Error parsing this row from the MODa results file
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+					strErrorLog &= "Error parsing MODa Results in ParseMODaResultsFileEntry for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+				Else
+					strErrorLog &= "Error parsing MODa Results in ParseMODaResultsFileEntry" & ControlChars.NewLine
+				End If
+			End If
+			blnValidSearchResult = False
+		End Try
+
+		Return blnValidSearchResult
+
+	End Function
+
+	''' <summary>
+	''' 
+	''' </summary>
+	''' <param name="strLineIn"></param>
+	''' <param name="intColumnMapping"></param>
+	''' <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
+	''' <remarks></remarks>
+	Private Function ParseMODaResultsFileHeaderLine(ByVal strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
+
+		' Parse the header line
+
+		' The expected header from MODa:
+		'   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                                           Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
+
+		Dim strSplitLine() As String
+		Dim blnUseDefaultHeaders As Boolean = True
+
+		Dim lstColumnNames As SortedDictionary(Of String, eMODaResultsFileColumns)
+		lstColumnNames = New SortedDictionary(Of String, eMODaResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+
+		ReDim intColumnMapping(MODaResultsFileColCount - 1)
+
+		lstColumnNames.Add("SpectrumFile", eMODaResultsFileColumns.SpectrumFileName)
+		lstColumnNames.Add("Index", eMODaResultsFileColumns.SpectrumIndex)
+		lstColumnNames.Add("ObservedMonoMass", eMODaResultsFileColumns.ObservedMonoMass)
+		lstColumnNames.Add("Charge", eMODaResultsFileColumns.Charge)
+		lstColumnNames.Add("CalculatedMonoMass", eMODaResultsFileColumns.CalculatedMonoMass)
+		lstColumnNames.Add("DeltaMass", eMODaResultsFileColumns.DeltaMass)
+		lstColumnNames.Add("Score", eMODaResultsFileColumns.Score)
+		lstColumnNames.Add("Probability", eMODaResultsFileColumns.Probability)
+		lstColumnNames.Add("Peptide", eMODaResultsFileColumns.Peptide)
+		lstColumnNames.Add("Protein", eMODaResultsFileColumns.Protein)
+		lstColumnNames.Add("PeptidePosition", eMODaResultsFileColumns.PeptidePosition)
+
+		Try
+			' Initialize each entry in intColumnMapping to -1
+			For intIndex As Integer = 0 To intColumnMapping.Length - 1
+				intColumnMapping(intIndex) = -1
+			Next
+
+			strSplitLine = strLineIn.Split(ControlChars.Tab)
+
+			Dim value As Integer
+			If strSplitLine.Length >= 2 Then
+				If Integer.TryParse(strSplitLine(1), value) Then
+					' Second column has a number; this is not a header line					
+					blnUseDefaultHeaders = True
+				Else
+
+					For intIndex As Integer = 0 To strSplitLine.Length - 1
+						Dim eResultFileColumn As eMODaResultsFileColumns
+
+						If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
+							' Recognized column name; update intColumnMapping
+							intColumnMapping(eResultFileColumn) = intIndex
+							blnUseDefaultHeaders = False
+						Else
+							' Unrecognized column name
+							Console.WriteLine("Warning: Unrecognized column header name '" & strSplitLine(intIndex) & "' in ParseMODaResultsFileHeaderLine")
+						End If
+					Next
+
+				End If
+
+			End If
+
+			If blnUseDefaultHeaders Then
+				' Use default column mappings
+				For intIndex As Integer = 0 To intColumnMapping.Length - 1
+					intColumnMapping(intIndex) = intIndex
+				Next
+
+				' This is not a header line; return false
+				Return False
+			End If
+
+		Catch ex As Exception
+			SetErrorMessage("Error parsing header in MODa results file: " & ex.Message)
+			Return False
+		End Try
+
+		' Header line found and parsed; return true
+		Return True
+
+	End Function
+
+	Private Function ParseMODaSynFileHeaderLine(ByVal strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
+
+		' Parse the header line
+
+		Dim strSplitLine() As String
+		Dim eResultFileColumn As eMODaSynFileColumns
+		Dim lstColumnNames As SortedDictionary(Of String, eMODaSynFileColumns)
+		lstColumnNames = New SortedDictionary(Of String, eMODaSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+
+		ReDim intColumnMapping(MODaSynFileColCount - 1)
+
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_ResultID, eMODaSynFileColumns.ResultID)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Scan, eMODaSynFileColumns.Scan)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Spectrum_Index, eMODaSynFileColumns.Spectrum_Index)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Charge, eMODaSynFileColumns.Charge)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_PrecursorMZ, eMODaSynFileColumns.PrecursorMZ)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_DelM, eMODaSynFileColumns.DelM)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_DelM_PPM, eMODaSynFileColumns.DelM_PPM)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_MH, eMODaSynFileColumns.MH)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide, eMODaSynFileColumns.Peptide)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Protein, eMODaSynFileColumns.Protein)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Score, eMODaSynFileColumns.Score)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Probability, eMODaSynFileColumns.Probability)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Rank_Probability, eMODaSynFileColumns.Rank_Probability)
+		lstColumnNames.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide_Position, eMODaSynFileColumns.Peptide_Position)
+
+		Try
+			' Initialize each entry in intColumnMapping to -1
+			For intIndex As Integer = 0 To intColumnMapping.Length - 1
+				intColumnMapping(intIndex) = -1
+			Next
+
+			strSplitLine = strLineIn.Split(ControlChars.Tab)
+			For intIndex As Integer = 0 To strSplitLine.Length - 1
+				If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
+					' Recognized column name; update intColumnMapping
+					intColumnMapping(eResultFileColumn) = intIndex
+				End If
+
+			Next
+
+		Catch ex As Exception
+			SetErrorMessage("Error parsing header in MODa synopsis file: " & ex.Message)
+			Return False
+		End Try
+
+		Return True
+
+	End Function
+
+	Private Function ParseMODaSynFileEntry(ByRef strLineIn As String, _
+	  ByRef objSearchResult As clsSearchResultsMODa, _
+	  ByRef strErrorLog As String, _
+	  ByVal intResultsProcessed As Integer, _
+	  ByRef intColumnMapping() As Integer, _
+	  ByRef strPeptideSequenceWithMods As String) As Boolean
+
+		' Parses an entry from the MODa Synopsis file
+
+		Dim strSplitLine() As String = Nothing
+		Dim strValue As String = String.Empty
+
+		Dim blnValidSearchResult As Boolean
+
+		Try
+			' Set this to False for now
+			blnValidSearchResult = False
+
+			' Reset objSearchResult
+			objSearchResult.Clear()
+			strPeptideSequenceWithMods = String.Empty
+
+			strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
+
+			If strSplitLine.Length >= 15 Then
+
+				With objSearchResult
+					If Not GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.ResultID), strValue) Then
+						If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+							strErrorLog &= "Error reading ResultID value from MODa Results line " & (intResultsProcessed + 1).ToString() & ControlChars.NewLine
+						End If
+						Exit Try
+					End If
+
+					.ResultID = Integer.Parse(strValue)
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.Scan), .Scan)
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.Charge), .Charge)
+
+					If Not GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.Peptide), strPeptideSequenceWithMods) Then
+						If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+							strErrorLog &= "Error reading Peptide sequence value from MODa Results line " & (intResultsProcessed + 1).ToString() & ControlChars.NewLine
+						End If
+						Exit Try
+					End If
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.Protein), .ProteinName)
+					.MultipleProteinCount = "0"
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.DelM), .MODaComputedDelM)
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.DelM_PPM), .MODaComputedDelMPPM)
+
+					.PeptideDeltaMass = .MODaComputedDelM
+
+					' Note: .PeptideDeltaMass is stored in the MODa results file as "Observed_Mass - Theoretical_Mass"
+					' However, in MTS .peptideDeltaMass is "Theoretical - Observed"
+					' Therefore, we will negate .peptideDeltaMass
+					Try
+						.PeptideDeltaMass = (-Double.Parse(.PeptideDeltaMass)).ToString
+					Catch ex As Exception
+						' Error; Leave .peptideDeltaMass unchanged
+					End Try
+
+					' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+					.SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
+
+				End With
+
+				Dim objSearchResultBase As clsSearchResultsBaseClass
+				objSearchResultBase = DirectCast(objSearchResult, clsSearchResultsBaseClass)
+
+				MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
+
+				With objSearchResult
+
+					' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+					' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
+					' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
+					.ComputePeptideCleavageStateInProtein()
+
+					' Read the remaining data values
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.Spectrum_Index), .Spectrum_Index)
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.PrecursorMZ), .Precursor_mz)
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.MH), .ParentIonMH)
+
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.Score), .MODaScore)
+					GetColumnValue(strSplitLine, intColumnMapping(eMODaSynFileColumns.Probability), .Probability)
+
+				End With
+
+				blnValidSearchResult = True
+			End If
+
+		Catch ex As Exception
+			' Error parsing this row from the synopsis or first hits file
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+					strErrorLog &= "Error parsing MODa Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+				Else
+					strErrorLog &= "Error parsing MODa Results in ParseMODaSynFileEntry" & ControlChars.NewLine
+				End If
+			End If
+			blnValidSearchResult = False
+		End Try
+
+		Return blnValidSearchResult
+
+	End Function
+
+	''' <summary>
+	''' Main processing function
+	''' </summary>
+	''' <param name="strInputFilePath">MODa results file (Dataset_moda.id.txt)</param>
+	''' <param name="strOutputFolderPath">Output folder</param>
+	''' <param name="strParameterFilePath">Parameter file</param>
+	''' <returns>True if success, False if failure</returns>
+	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
+
+		Dim strBaseName As String = String.Empty
+		Dim strSynOutputFilePath As String = String.Empty
+
+		Dim lstMODaModInfo As List(Of clsModificationDefinition)
+		Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType)
+		Dim strMTSPepToProteinMapFilePath As String = String.Empty
+
+
+		Dim blnSuccess As Boolean
+
+		If Not LoadParameterFileSettings(strParameterFilePath) Then
+			SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, True)
+			Return False
+		End If
+
+		Try
+			If String.IsNullOrWhiteSpace(strInputFilePath) Then
+				SetErrorMessage("Input file name is empty")
+				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
+			End If
+
+			blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
+			If Not blnSuccess Then
+				Return False
+			End If
+
+			MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
+
+			If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
+				Return False
+			End If
+
+			Try
+				' Obtain the full path to the input file
+				Dim fiInputFile = New FileInfo(strInputFilePath)
+
+				lstMODaModInfo = New List(Of clsModificationDefinition)
+				lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
+
+				' Load the MODa Parameter File so that we can determine whether Cysteine residues are statically modified
+				ExtractModInfoFromMODaParamFile(mSearchToolParameterFilePath, lstMODaModInfo)
+
+				' Resolve the mods in lstMODaModInfo with the ModDefs mods
+				ResolveMODaModsWithModDefinitions(lstMODaModInfo)
+
+				' Define the base output filename using strInputFilePath
+				strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
+
+				' Auto-replace "_moda.id" with "_moda"
+				If strBaseName.ToLower().EndsWith("_moda.id".ToLower()) Then
+					strBaseName = strBaseName.Substring(0, strBaseName.Length - "_moda.id".Length) & "_moda"
+				End If
+
+				' Load the MSG IndexToScanMap file (if it exists)
+				LoadMGFIndexToScanMapFile(fiInputFile)
+
+				' Do not create a first-hits file for MODa results
+
+				' Create the synopsis output file
+				MyBase.ResetProgress("Creating the SYN file")
+				Console.WriteLine()
+				Console.WriteLine()
+				Console.WriteLine(MyBase.ProgressStepDescription)
+
+				strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+
+				blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath)
+
+				' Create the other PHRP-specific files
+				MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
+				Console.WriteLine()
+				Console.WriteLine()
+				Console.WriteLine(MyBase.ProgressStepDescription)
+
+				' Now parse the _syn.txt file that we just created to next create the other PHRP files
+				blnSuccess = ParseMODaSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
+
+				If blnSuccess AndAlso mCreateProteinModsFile Then
+					' Create the MTSPepToProteinMap file
+
+					strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strBaseName, strOutputFolderPath, MTS:=True)
+
+					Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
+
+					If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
+						lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
+					End If
+
+					If lstSourcePHRPDataFiles.Count = 0 Then
+						SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
+						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+						blnSuccess = False
+					Else
+						If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+							blnSuccess = True
+						Else
+							' Auto-change mIgnorePeptideToProteinMapperErrors to True
+							' We only do this since a small number of peptides reported by MODa don't perfectly match the fasta file
+							mIgnorePeptideToProteinMapperErrors = True
+							blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+							If Not blnSuccess Then
+								ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+							End If
+						End If
+					End If
+
+					If blnSuccess Then
+						' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+						MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+
+						' Create the Protein Mods file
+						blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MODa)
+					End If
+
+					If Not blnSuccess Then
+						' Do not treat this as a fatal error
+						blnSuccess = True
+					End If
+
+				End If
+
+				If blnSuccess Then
+					MyBase.OperationComplete()
+				End If
+
+			Catch ex As Exception
+				SetErrorMessage("Error in clsMODaResultsProcessor.ProcessFile (2):  " & ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+			End Try
+
+		Catch ex As Exception
+			SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
+			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+		End Try
+
+		Return blnSuccess
+
+	End Function
+
+	Protected Function ReplaceTerminus(ByVal strPeptide As String) As String
+
+		If strPeptide.StartsWith(N_TERMINUS_SYMBOL_MODA) Then
+			strPeptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST & "." & strPeptide.Substring(N_TERMINUS_SYMBOL_MODA.Length)
+		End If
+
+		If strPeptide.EndsWith(C_TERMINUS_SYMBOL_MODA) Then
+			strPeptide = strPeptide.Substring(0, strPeptide.Length - C_TERMINUS_SYMBOL_MODA.Length) & "." & clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST
+		End If
+
+		Return strPeptide
+
+	End Function
+
+	Protected Sub ResolveMODaModsWithModDefinitions(ByRef lstMODaModInfo As List(Of clsModificationDefinition))
+
+		Dim blnExistingModFound As Boolean
+		Dim objModDef As clsModificationDefinition
+
+		If Not lstMODaModInfo Is Nothing Then
+
+			' Call .LookupModificationDefinitionByMass for each entry in lstMODaModInfo
+			For Each objModInfo As clsModificationDefinition In lstMODaModInfo
+				If String.IsNullOrEmpty(objModInfo.TargetResidues) Then
+					objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+				Else
+					For Each chTargetResidue As Char In objModInfo.TargetResidues
+						objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+					Next
+				End If
+			Next
+
+		End If
+
+	End Sub
+
+	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter,
+	  ByRef lstFilteredSearchResults As List(Of udtMODaSearchResultType),
+	  ByRef strErrorLog As String)
+
+		Dim intIndex As Integer
+
+		' Sort udtFilteredSearchResults by ascending PVAlue, ascending scan, ascending charge, ascending peptide, and ascending protein
+		lstFilteredSearchResults.Sort(New MODaSearchResultsComparerPValueScanChargePeptide)
+
+		For intIndex = 0 To lstFilteredSearchResults.Count - 1
+			WriteSearchResultToFile(intIndex + 1, swResultFile, lstFilteredSearchResults(intIndex), strErrorLog)
+		Next intIndex
+
+	End Sub
+
+	Private Sub StoreSynMatches(ByRef lstSearchResults As List(Of udtMODaSearchResultType), _
+	 ByVal intStartIndex As Integer, _
+	 ByVal intEndIndex As Integer, _
+	 ByRef lstFilteredSearchResults As List(Of udtMODaSearchResultType))
+
+		Dim intIndex As Integer
+
+		AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
+
+		' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
+
+		' Now store or write out the matches that pass the filters
+		For intIndex = intStartIndex To intEndIndex
+			If lstSearchResults(intIndex).ProbabilityNum <= mMODaSynopsisFileProbabilityThreshold Then
+				lstFilteredSearchResults.Add(lstSearchResults(intIndex))
+			End If
+		Next intIndex
+
+	End Sub
+
+
+	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
+	  ByRef strErrorLog As String)
+
+		' Write out the header line for synopsis / first hits files
+		Try
+			Dim lstData As New List(Of String)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_ResultID)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Scan)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Spectrum_Index)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Charge)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_PrecursorMZ)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_DelM)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_DelM_PPM)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_MH)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Protein)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Score)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Probability)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Rank_Probability)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide_Position)
+
+			swResultFile.WriteLine(CollapseList(lstData))
+
+		Catch ex As Exception
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
+			End If
+		End Try
+
+	End Sub
+
+	''' <summary>
+	''' Writes an entry to the synopsis file
+	''' </summary>
+	''' <param name="intResultID"></param>
+	''' <param name="swResultFile"></param>
+	''' <param name="udtSearchResult"></param>
+	''' <param name="strErrorLog"></param>
+	''' <remarks></remarks>
+	Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
+	   ByRef swResultFile As StreamWriter, _
+	   ByRef udtSearchResult As udtMODaSearchResultType, _
+	   ByRef strErrorLog As String)
+
+		Try
+
+			' Primary Columns
+			'
+			' MODa
+			' ResultID  Scan  Prsm_ID  Spectrum_ID  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  Protein_Mass  Unexpected_Mod_Count  Peak_Count  Matched_Peak_Count  Matched_Fragment_Ion_Count  PValue  Rank_PValue  EValue  FDR 
+
+			Dim lstData As New List(Of String)
+			lstData.Add(intResultID.ToString)
+			lstData.Add(udtSearchResult.ScanNum.ToString)
+			lstData.Add(udtSearchResult.SpectrumIndex)
+			lstData.Add(udtSearchResult.Charge)
+			lstData.Add(udtSearchResult.PrecursorMZ)
+			lstData.Add(udtSearchResult.DelM)
+			lstData.Add(udtSearchResult.DelM_PPM)
+			lstData.Add(udtSearchResult.MH)
+			lstData.Add(udtSearchResult.Peptide)
+			lstData.Add(udtSearchResult.Protein)
+			lstData.Add(udtSearchResult.Score)
+			lstData.Add(udtSearchResult.Probability)
+			lstData.Add(udtSearchResult.RankProbability.ToString())
+
+			swResultFile.WriteLine(CollapseList(lstData))
+
+		Catch ex As Exception
+			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+				strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
+			End If
+		End Try
+
+	End Sub
+
+#Region "IComparer Classes"
+
+	Protected Class MODaSearchResultsComparerScanChargeProbabilityPeptide
+		Implements IComparer(Of udtMODaSearchResultType)
+
+		Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare
+
+			If x.ScanNum > y.ScanNum Then
+				Return 1
+			ElseIf x.ScanNum < y.ScanNum Then
+				Return -1
+			Else
+				' Scan is the same, check charge
+				If x.ChargeNum > y.ChargeNum Then
+					Return 1
+				ElseIf x.ChargeNum < y.ChargeNum Then
+					Return -1
+				Else
+					' Charge is the same; check ProbabilityNum
+					If x.ProbabilityNum > y.ProbabilityNum Then
+						Return 1
+					ElseIf x.ProbabilityNum < y.ProbabilityNum Then
+						Return -1
+					Else
+						' Pvalue is the same; check peptide
+						If x.Peptide > y.Peptide Then
+							Return 1
+						ElseIf x.Peptide < y.Peptide Then
+							Return -1
+						Else
+							' Peptide is the same, check Protein
+							If x.Protein > y.Protein Then
+								Return 1
+							ElseIf x.Protein < y.Protein Then
+								Return -1
+							Else
+								Return 0
+							End If
+						End If
+					End If
+				End If
+			End If
+
+		End Function
+
+	End Class
+
+	Protected Class MODaSearchResultsComparerPValueScanChargePeptide
+		Implements IComparer(Of udtMODaSearchResultType)
+
+		Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare
+
+			If x.ProbabilityNum > y.ProbabilityNum Then
+				Return 1
+			ElseIf x.ProbabilityNum < y.ProbabilityNum Then
+				Return -1
+			Else
+				' Pvalue is the same; check scan number
+				If x.ScanNum > y.ScanNum Then
+					Return 1
+				ElseIf x.ScanNum < y.ScanNum Then
+					Return -1
+				Else
+					' Scan is the same, check charge
+					If x.ChargeNum > y.ChargeNum Then
+						Return 1
+					ElseIf x.ChargeNum < y.ChargeNum Then
+						Return -1
+					Else
+						' Charge is the same; check peptide
+						If x.Peptide > y.Peptide Then
+							Return 1
+						ElseIf x.Peptide < y.Peptide Then
+							Return -1
+						Else
+							' Peptide is the same, check Protein
+							If x.Protein > y.Protein Then
+								Return 1
+							ElseIf x.Protein < y.Protein Then
+								Return -1
+							Else
+								Return 0
+							End If
+						End If
+					End If
+				End If
+			End If
+
+		End Function
+
+	End Class
+
+#End Region
+
+End Class

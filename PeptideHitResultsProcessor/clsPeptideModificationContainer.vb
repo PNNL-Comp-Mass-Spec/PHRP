@@ -51,13 +51,13 @@ Public Class clsPeptideModificationContainer
 
 #Region "Classwide Variables"
 	' List of available modification symbols
-	Protected mDefaultModificationSymbols As System.Collections.Queue
+	Protected mDefaultModificationSymbols As Queue
 
 	' List of known mass correction tags
 	Protected mMassCorrectionTags As Hashtable
 
 	' List of known modifications
-	Protected mModifications As System.Collections.Generic.List(Of clsModificationDefinition)
+	Protected mModifications As List(Of clsModificationDefinition)
 
 	Protected mErrorMessage As String
 
@@ -81,7 +81,7 @@ Public Class clsPeptideModificationContainer
 		End Get
 	End Property
 
-	Public ReadOnly Property Modifications As System.Collections.Generic.List(Of clsModificationDefinition)
+	Public ReadOnly Property Modifications As List(Of clsModificationDefinition)
 		Get
 			Return mModifications
 		End Get
@@ -867,7 +867,7 @@ Public Class clsPeptideModificationContainer
 		mErrorMessage = String.Empty
 		SetDefaultMassCorrectionTags()
 
-		mModifications = New System.Collections.Generic.List(Of clsModificationDefinition)
+		mModifications = New List(Of clsModificationDefinition)
 
 		' Note that this sub will call UpdateDefaultModificationSymbols()
 		ClearModifications()

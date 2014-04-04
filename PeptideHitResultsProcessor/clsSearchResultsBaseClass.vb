@@ -51,7 +51,7 @@ Public MustInherit Class clsSearchResultsBaseClass
 #Region "Classwide Variables"
 	' Note: Many of these variables typically hold numbers but we're storing the numbers as strings
 	'       to prevent the numeric representation from changing when converting to a number then back to a string
-	Protected mResultID As Integer								' RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, and MSGFDB
+	Protected mResultID As Integer								' RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MSGFDB, and MODa
 	Protected mGroupID As Integer								' Group ID assigned by XTandem
 	Protected mScan As String
 	Protected mCharge As String
@@ -85,7 +85,7 @@ Public MustInherit Class clsSearchResultsBaseClass
 	Protected mPeptideMonoisotopicMass As Double				' Theoretical (computed) monoisotopic mass for a given peptide sequence, including any modified residues
 
 	' List of modifications present in the current peptide
-	Protected mSearchResultModifications As System.Collections.Generic.List(Of clsAminoAcidModInfo)
+	Protected mSearchResultModifications As List(Of clsAminoAcidModInfo)
 
 	' Possible modifications that the peptide could have
 	Protected mPeptideMods As clsPeptideModificationContainer
@@ -536,7 +536,7 @@ Public MustInherit Class clsSearchResultsBaseClass
 	End Function
 
 	Private Sub InitializeLocalVariables()
-		mSearchResultModifications = New System.Collections.Generic.List(Of clsAminoAcidModInfo)
+		mSearchResultModifications = New List(Of clsAminoAcidModInfo)
 
 		' Initialize mPeptideCleavageStateCalculator
 		If mPeptideCleavageStateCalculator Is Nothing Then
@@ -982,9 +982,9 @@ Public MustInherit Class clsSearchResultsBaseClass
 	End Sub
 
 	Protected Class IGenericResidueModificationInfoComparer
-		Implements System.Collections.Generic.IComparer(Of clsAminoAcidModInfo)
+		Implements IComparer(Of clsAminoAcidModInfo)
 
-		Public Function Compare(x As clsAminoAcidModInfo, y As clsAminoAcidModInfo) As Integer Implements System.Collections.Generic.IComparer(Of clsAminoAcidModInfo).Compare
+		Public Function Compare(x As clsAminoAcidModInfo, y As clsAminoAcidModInfo) As Integer Implements IComparer(Of clsAminoAcidModInfo).Compare
 			If x.ResidueLocInPeptide > y.ResidueLocInPeptide Then
 				Return 1
 			ElseIf x.ResidueLocInPeptide < y.ResidueLocInPeptide Then

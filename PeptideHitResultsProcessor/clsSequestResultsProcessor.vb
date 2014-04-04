@@ -493,8 +493,6 @@ Public Class clsSequestResultsProcessor
 	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
 
-		Dim ioInputFile As FileInfo
-
 		Dim blnSuccess As Boolean
 
 		If Not LoadParameterFileSettings(strParameterFilePath) Then
@@ -506,87 +504,89 @@ Public Class clsSequestResultsProcessor
 			If String.IsNullOrWhiteSpace(strInputFilePath) Then
 				SetErrorMessage("Input file name is empty")
 				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
-			Else
-
-				' Set this to true since Sequest param files can have the same mod mass on different residues, and those residues may use different symbols
-				mPeptideMods.ConsiderModSymbolWhenFindingIdenticalMods = True
-
-				blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
-				If Not blnSuccess Then
-					Exit Try
-				End If
-
-				MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
-
-				If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
-					' Obtain the full path to the input file
-					ioInputFile = New FileInfo(strInputFilePath)
-
-					Try
-						blnSuccess = ParseSynopsisOrFirstHitsFile(ioInputFile.FullName, strOutputFolderPath, False)
-					Catch ex As Exception
-						SetErrorMessage("Error calling ParseSynopsisOrFirstHitsFile" & ex.Message)
-						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-						blnSuccess = False
-					End Try
-
-					If blnSuccess AndAlso mCreateProteinModsFile Then
-						' First create the MTS PepToProteinMap file using ioInputFile
-						' Will also look for the first hits or synopsis file and use that too if it is present
-
-						Dim lstSourcePHRPDataFiles As Generic.List(Of String) = New Generic.List(Of String)
-						Dim strMTSPepToProteinMapFilePath As String = String.Empty
-
-						Dim strAdditionalFile As String
-						Dim strInputFileBaseName As String = IO.Path.GetFileNameWithoutExtension(ioInputFile.Name)
-
-						lstSourcePHRPDataFiles.Add(ioInputFile.FullName)
-						If strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE) Then
-							strAdditionalFile = MyBase.ReplaceFilenameSuffix(ioInputFile, FILENAME_SUFFIX_FIRST_HITS_FILE)
-							If File.Exists(strAdditionalFile) Then
-								lstSourcePHRPDataFiles.Add(strAdditionalFile)
-							End If
-
-						ElseIf strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE) Then
-							strAdditionalFile = MyBase.ReplaceFilenameSuffix(ioInputFile, FILENAME_SUFFIX_SYNOPSIS_FILE)
-							If File.Exists(strAdditionalFile) Then
-								lstSourcePHRPDataFiles.Add(strAdditionalFile)
-							End If
-						End If
-
-						strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(ioInputFile.FullName, strOutputFolderPath, MTS:=True)
-
-						If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
-							blnSuccess = True
-						Else
-							' Mapping file does not exist
-							blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
-							If Not blnSuccess Then
-								ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
-							End If
-						End If
-
-						If blnSuccess Then
-							' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-							MyBase.ValidatePHRPReaderSupportFiles(strInputFilePath, strOutputFolderPath)
-
-							' Now create the Protein Mods file
-							blnSuccess = MyBase.CreateProteinModDetailsFile(strInputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest)
-						End If
-
-						If Not blnSuccess Then
-							' Do not treat this as a fatal error
-							blnSuccess = True
-						End If
-
-					End If
-
-					If blnSuccess Then
-						MyBase.OperationComplete()
-					End If
-
-				End If
+				Return False
 			End If
+
+			' Set this to true since Sequest param files can have the same mod mass on different residues, and those residues may use different symbols
+			mPeptideMods.ConsiderModSymbolWhenFindingIdenticalMods = True
+
+			blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
+			If Not blnSuccess Then
+				Return False
+			End If
+
+			MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
+
+			If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
+				Return False
+			End If
+
+			' Obtain the full path to the input file
+			Dim fiInputFile = New FileInfo(strInputFilePath)
+
+			Try
+				blnSuccess = ParseSynopsisOrFirstHitsFile(fiInputFile.FullName, strOutputFolderPath, False)
+			Catch ex As Exception
+				SetErrorMessage("Error calling ParseSynopsisOrFirstHitsFile" & ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+				blnSuccess = False
+			End Try
+
+			If blnSuccess AndAlso mCreateProteinModsFile Then
+				' First create the MTS PepToProteinMap file using fiInputFile
+				' Will also look for the first hits or synopsis file and use that too if it is present
+
+				Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
+				Dim strMTSPepToProteinMapFilePath As String = String.Empty
+
+				Dim strAdditionalFile As String
+				Dim strInputFileBaseName As String = IO.Path.GetFileNameWithoutExtension(fiInputFile.Name)
+
+				lstSourcePHRPDataFiles.Add(fiInputFile.FullName)
+				If strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE) Then
+					strAdditionalFile = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_FIRST_HITS_FILE)
+					If File.Exists(strAdditionalFile) Then
+						lstSourcePHRPDataFiles.Add(strAdditionalFile)
+					End If
+
+				ElseIf strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE) Then
+					strAdditionalFile = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_SYNOPSIS_FILE)
+					If File.Exists(strAdditionalFile) Then
+						lstSourcePHRPDataFiles.Add(strAdditionalFile)
+					End If
+				End If
+
+				strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
+
+				If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+					blnSuccess = True
+				Else
+					' Mapping file does not exist
+					blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+					If Not blnSuccess Then
+						ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+					End If
+				End If
+
+				If blnSuccess Then
+					' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+					MyBase.ValidatePHRPReaderSupportFiles(strInputFilePath, strOutputFolderPath)
+
+					' Now create the Protein Mods file
+					blnSuccess = MyBase.CreateProteinModDetailsFile(strInputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest)
+				End If
+
+				If Not blnSuccess Then
+					' Do not treat this as a fatal error
+					blnSuccess = True
+				End If
+
+			End If
+
+			If blnSuccess Then
+				MyBase.OperationComplete()
+			End If
+
 		Catch ex As Exception
 			SetErrorMessage("Error in clsSequestResultsProcessor.ProcessFile:  " & ex.Message)
 			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
@@ -603,8 +603,8 @@ Public Class clsSequestResultsProcessor
 
 		Dim strSplitLine() As String
 		Dim eResultFileColumn As eSequestSynopsisFileColumns
-		Dim lstColumnNames As System.Collections.Generic.SortedDictionary(Of String, eSequestSynopsisFileColumns)
-		lstColumnNames = New System.Collections.Generic.SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+		Dim lstColumnNames As SortedDictionary(Of String, eSequestSynopsisFileColumns)
+		lstColumnNames = New SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.CurrentCultureIgnoreCase)
 
 		ReDim intColumnMapping(SequestSynopsisFileColCount - 1)
 

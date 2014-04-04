@@ -1363,8 +1363,6 @@ Public Class clsXTandemResultsProcessor
 	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
 
-		Dim ioInputFile As FileInfo
-
 		Dim strXtandemXTFilePath As String
 
 		Dim blnSuccess As Boolean
@@ -1378,66 +1376,72 @@ Public Class clsXTandemResultsProcessor
 			If String.IsNullOrWhiteSpace(strInputFilePath) Then
 				SetErrorMessage("Input file name is empty")
 				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
-			Else
-
-				blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
-				If Not blnSuccess Then
-					Exit Try
-				End If
-
-				MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
-
-				If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
-					Try
-						' Obtain the full path to the input file
-						ioInputFile = New FileInfo(strInputFilePath)
-
-						' Define the output file name based on strInputFilePath
-						' The name will be DatasetName_xt.txt
-
-						strXtandemXTFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(ioInputFile, ".txt"))
-						strXtandemXTFilePath = Path.Combine(strOutputFolderPath, strXtandemXTFilePath)
-						blnSuccess = ParseXTandemResultsFile(ioInputFile.FullName, strXtandemXTFilePath, False)
-
-						If blnSuccess AndAlso mCreateProteinModsFile Then
-
-							' First create the MTS PepToProteinMap file using ioInputFile
-							Dim lstSourcePHRPDataFiles As Generic.List(Of String) = New Generic.List(Of String)
-							Dim strMTSPepToProteinMapFilePath As String = String.Empty
-
-							lstSourcePHRPDataFiles.Add(strXtandemXTFilePath)
-
-							strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strInputFilePath, strOutputFolderPath, MTS:=True)
-
-							If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
-								blnSuccess = True
-							Else
-								blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
-								If Not blnSuccess Then
-									ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
-								End If
-							End If
-
-							If blnSuccess Then
-								' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-								MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(ioInputFile.DirectoryName, IO.Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath)
-
-								' Now create the Protein Mods file
-								blnSuccess = MyBase.CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem)
-							End If
-
-							If Not blnSuccess Then
-								' Do not treat this as a fatal error
-								blnSuccess = True
-							End If
-						End If
-
-					Catch ex As Exception
-						SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (2): " & ex.Message)
-						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-					End Try
-				End If
 			End If
+
+			blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
+			If Not blnSuccess Then
+				Return False
+			End If
+
+			MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
+
+			If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
+				Return False
+			End If
+
+			Try
+				' Obtain the full path to the input file
+				Dim fiInputFile = New FileInfo(strInputFilePath)
+
+				' Define the output file name based on strInputFilePath
+				' The name will be DatasetName_xt.txt
+
+				strXtandemXTFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, ".txt"))
+				strXtandemXTFilePath = Path.Combine(strOutputFolderPath, strXtandemXTFilePath)
+				blnSuccess = ParseXTandemResultsFile(fiInputFile.FullName, strXtandemXTFilePath, False)
+
+				If blnSuccess AndAlso mCreateProteinModsFile Then
+
+					' First create the MTS PepToProteinMap file using fiInputFile
+					Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
+					Dim strMTSPepToProteinMapFilePath As String = String.Empty
+
+					lstSourcePHRPDataFiles.Add(strXtandemXTFilePath)
+
+					strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strInputFilePath, strOutputFolderPath, MTS:=True)
+
+					If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+						blnSuccess = True
+					Else
+						blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+						If Not blnSuccess Then
+							ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+						End If
+					End If
+
+					If blnSuccess Then
+						' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+						MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath)
+
+						' Now create the Protein Mods file
+						blnSuccess = MyBase.CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem)
+					End If
+
+					If Not blnSuccess Then
+						' Do not treat this as a fatal error
+						blnSuccess = True
+					End If
+				End If
+
+				If blnSuccess Then
+					MyBase.OperationComplete()
+				End If
+
+			Catch ex As Exception
+				SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (2): " & ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+			End Try
+
 		Catch ex As Exception
 			SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (1):" & ex.Message)
 			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)

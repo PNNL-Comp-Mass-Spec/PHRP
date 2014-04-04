@@ -62,6 +62,8 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Public Const MSALIGN_RESULTS_FILE_SUFFIX As String = "_MSAlign_ResultTable.txt"
 
+	Public Const MODa_RESULTS_FILE_SUFFIX As String = "_moda.id.txt"
+
 	Public Const FILENAME_SUFFIX_RESULT_TO_SEQ_MAP As String = "_ResultToSeqMap.txt"
 	Public Const FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP As String = "_SeqToProteinMap.txt"
 
@@ -84,6 +86,7 @@ Public MustInherit Class clsPHRPBaseClass
 		InSpectTXTFile = 4
 		MSGFDbTXTFile = 5
 		MSAlignTXTFile = 6
+		MODaTXTFile = 7
 	End Enum
 
 	Public Enum ePHRPErrorCodes
@@ -154,6 +157,8 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected mSearchToolParameterFilePath As String			' Used by clsInSpecTResultsProcessor and clsMSGFDBResultsProcessor
 
 	Protected mInspectSynopsisFilePValueThreshold As Single		' Only used by clsInSpecTResultsProcessor; note that lower p-values are higher confidence results
+
+	Protected mMODaSynopsisFileProbabilityThreshold As Single	' Only used by clsMODaResultsProcessor; note that lower probability are higher confidence results
 
 	Protected mMSAlignSynopsisFilePValueThreshold As Single		' Only used by clsMSAlignResultsProcessor; note that lower p-values are higher confidence results
 
@@ -455,6 +460,9 @@ Public MustInherit Class clsPHRPBaseClass
 				Case ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 					Return Path.Combine(strSourceFolderPath, strBaseName & MSALIGN_RESULTS_FILE_SUFFIX)
 
+				Case ePeptideHitResultsFileFormatConstants.MODaTXTFile
+					Return Path.Combine(strSourceFolderPath, strBaseName & MODa_RESULTS_FILE_SUFFIX)
+
 				Case Else
 					' Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
 					' Call AutoDefinePeptideHitResultsFilePath below sending it only strSourceFolderPath
@@ -608,7 +616,7 @@ Public MustInherit Class clsPHRPBaseClass
 	''' <param name="lstFields"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function CollapseList(lstFields As System.Collections.Generic.List(Of String)) As String
+	Protected Function CollapseList(lstFields As List(Of String)) As String
 		Dim sbText As New System.Text.StringBuilder
 
 		For Each item As String In lstFields
@@ -649,6 +657,9 @@ Public MustInherit Class clsPHRPBaseClass
 
 		ElseIf strBaseFileNameLCase.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE.ToLower) Then
 			Return ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
+
+		ElseIf strBaseFileNameLCase.EndsWith(clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE.ToLower) Then
+			Return ePeptideHitResultsFileFormatConstants.MODaTXTFile
 
 		ElseIf strExtensionLCase = ".tsv" Then
 			' Assume this is an MSGF+ TSV file
@@ -754,8 +765,8 @@ Public MustInherit Class clsPHRPBaseClass
 		End If
 
 		If String.IsNullOrWhiteSpace(strOutputFolderPath) Then
-			Dim ioInputFile As FileInfo = New FileInfo(strInputFilePath)
-			strOutputFolderPath = ioInputFile.DirectoryName
+			Dim fiInputFile = New FileInfo(strInputFilePath)
+			strOutputFolderPath = fiInputFile.DirectoryName
 		End If
 
 		strPepToProteinMapFilePath = Path.Combine(strOutputFolderPath, strPepToProteinMapFilePath)
@@ -771,7 +782,7 @@ Public MustInherit Class clsPHRPBaseClass
 	''' <param name="strMTSPepToProteinMapFilePath"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function CreatePepToProteinMapFile(ByVal lstSourcePHRPDataFiles As Generic.List(Of String), ByVal strMTSPepToProteinMapFilePath As String) As Boolean
+	Protected Function CreatePepToProteinMapFile(ByVal lstSourcePHRPDataFiles As List(Of String), ByVal strMTSPepToProteinMapFilePath As String) As Boolean
 
 		Dim objPeptideToProteinMapper As PeptideToProteinMapEngine.clsPeptideToProteinMapEngine
 
@@ -946,18 +957,17 @@ Public MustInherit Class clsPHRPBaseClass
 	''' <remarks></remarks>
 	Public Function CreateProteinModDetailsFile(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String) As Boolean
 
-		Dim strMTSPepToProteinMapFilePath As String
-		Dim ioInputFile As FileInfo
+		Dim strMTSPepToProteinMapFilePath As String		
 
 		Dim blnSuccess As Boolean = False
 
 		Try
-			ioInputFile = New FileInfo(strPHRPDataFilePath)
+			Dim fiInputFile = New FileInfo(strPHRPDataFilePath)
 
-			Dim lstSourcePHRPDataFiles As Generic.List(Of String) = New Generic.List(Of String)
-			lstSourcePHRPDataFiles.Add(ioInputFile.FullName)
+			Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
+			lstSourcePHRPDataFiles.Add(fiInputFile.FullName)
 
-			strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(ioInputFile.FullName, strOutputFolderPath, MTS:=True)
+			strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
 
 			blnSuccess = CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
 
@@ -966,7 +976,7 @@ Public MustInherit Class clsPHRPBaseClass
 			End If
 
 		Catch ex As Exception
-
+			ReportWarning("Error in CreateProteinModDetailsFile: " & ex.Message)
 		End Try
 
 		Return blnSuccess
@@ -975,10 +985,9 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Public Function CreateProteinModDetailsFile(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String, ByVal strMTSPepToProteinMapFilePath As String, ByVal ePHRPResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType) As Boolean
 
-		Dim objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer
 		Dim intPepToProteinMapIndex As Integer
 
-		Dim lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType) = New Generic.List(Of udtPepToProteinMappingType)
+		Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType) = New List(Of udtPepToProteinMappingType)
 		Dim strHeaderLine As String = String.Empty
 
 		Dim fiPHRPDataFile As FileInfo
@@ -1021,9 +1030,6 @@ Public MustInherit Class clsPHRPBaseClass
 			If Not blnSuccess Then
 				Return False
 			End If
-
-			' Initialize objPeptideSearchComparer
-			objPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer
 
 			' Assure that lstPepToProteinMapping is sorted on peptide
 			If lstPepToProteinMapping.Count > 1 Then
@@ -1191,7 +1197,7 @@ Public MustInherit Class clsPHRPBaseClass
 		End Try
 	End Sub
 
-	Protected Function FindFirstMatchInPepToProteinMapping(ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByVal strPeptideToFind As String) As Integer
+	Protected Function FindFirstMatchInPepToProteinMapping(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal strPeptideToFind As String) As Integer
 
 		Static objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer()
 
@@ -1618,7 +1624,7 @@ Public MustInherit Class clsPHRPBaseClass
 	''' <param name="strHeaderLine">Output parameter: Header line text</param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadPeptideToProteinMapInfo(ByVal strPepToProteinMapFilePath As String, ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByRef strHeaderLine As String) As Boolean
+	Protected Function LoadPeptideToProteinMapInfo(ByVal strPepToProteinMapFilePath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByRef strHeaderLine As String) As Boolean
 
 		Dim strLineIn As String
 		Dim strSplitLine As String()
@@ -1632,7 +1638,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 			' Initialize the output parameters
 			If lstPepToProteinMapping Is Nothing Then
-				lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
+				lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 			Else
 				lstPepToProteinMapping.Clear()
 			End If
@@ -1958,7 +1964,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 	End Function
 
-	Protected Sub UpdatePepToProteinMapPeptide(ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByVal intIndex As Integer, ByVal strPeptide As String)
+	Protected Sub UpdatePepToProteinMapPeptide(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal intIndex As Integer, ByVal strPeptide As String)
 		Dim udtItem As udtPepToProteinMappingType
 		udtItem = lstPepToProteinMapping(intIndex)
 		udtItem.Peptide = strPeptide
@@ -2209,9 +2215,9 @@ Public MustInherit Class clsPHRPBaseClass
 #Region "IComparer classes"
 
 	Protected Class ISearchOptionModificationInfoComparer
-		Implements System.Collections.Generic.IComparer(Of udtSearchOptionModificationInfoType)
+		Implements IComparer(Of udtSearchOptionModificationInfoType)
 
-		Public Function Compare(x As udtSearchOptionModificationInfoType, y As udtSearchOptionModificationInfoType) As Integer Implements System.Collections.Generic.IComparer(Of udtSearchOptionModificationInfoType).Compare
+		Public Function Compare(x As udtSearchOptionModificationInfoType, y As udtSearchOptionModificationInfoType) As Integer Implements IComparer(Of udtSearchOptionModificationInfoType).Compare
 
 			If x.SortOrder > y.SortOrder Then
 				Return 1
@@ -2231,9 +2237,9 @@ Public MustInherit Class clsPHRPBaseClass
 	End Class
 
 	Friend Class IModNameAndResidueLocComparer
-		Implements System.Collections.Generic.IComparer(Of udtModNameAndResidueLocType)
+		Implements IComparer(Of udtModNameAndResidueLocType)
 
-		Public Function Compare(x As udtModNameAndResidueLocType, y As udtModNameAndResidueLocType) As Integer Implements System.Collections.Generic.IComparer(Of udtModNameAndResidueLocType).Compare
+		Public Function Compare(x As udtModNameAndResidueLocType, y As udtModNameAndResidueLocType) As Integer Implements IComparer(Of udtModNameAndResidueLocType).Compare
 
 			If x.ResidueLocInPeptide > y.ResidueLocInPeptide Then
 				Return 1
@@ -2256,9 +2262,9 @@ Public MustInherit Class clsPHRPBaseClass
 	End Class
 
 	Protected Class PepToProteinMappingComparer
-		Implements System.Collections.Generic.IComparer(Of udtPepToProteinMappingType)
+		Implements IComparer(Of udtPepToProteinMappingType)
 
-		Public Function Compare(x As udtPepToProteinMappingType, y As udtPepToProteinMappingType) As Integer Implements System.Collections.Generic.IComparer(Of udtPepToProteinMappingType).Compare
+		Public Function Compare(x As udtPepToProteinMappingType, y As udtPepToProteinMappingType) As Integer Implements IComparer(Of udtPepToProteinMappingType).Compare
 
 			If x.Peptide > y.Peptide Then
 				Return 1
@@ -2279,9 +2285,9 @@ Public MustInherit Class clsPHRPBaseClass
 	End Class
 
 	Protected Class PepToProteinMappingPeptideSearchComparer
-		Implements System.Collections.Generic.IComparer(Of udtPepToProteinMappingType)
+		Implements IComparer(Of udtPepToProteinMappingType)
 
-		Public Function Compare(x As clsPHRPBaseClass.udtPepToProteinMappingType, y As clsPHRPBaseClass.udtPepToProteinMappingType) As Integer Implements System.Collections.Generic.IComparer(Of clsPHRPBaseClass.udtPepToProteinMappingType).Compare
+		Public Function Compare(x As clsPHRPBaseClass.udtPepToProteinMappingType, y As clsPHRPBaseClass.udtPepToProteinMappingType) As Integer Implements IComparer(Of clsPHRPBaseClass.udtPepToProteinMappingType).Compare
 
 			If x.Peptide > y.Peptide Then
 				Return 1

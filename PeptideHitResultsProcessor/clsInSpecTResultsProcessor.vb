@@ -241,10 +241,9 @@ Public Class clsInSpecTResultsProcessor
 	End Property
 #End Region
 
-	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer, _
-	  ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-	  ByRef udtSearchResult As udtInspectSearchResultType, _
-	  ByRef strErrorLog As String)
+	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer,
+	  ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType,
+	  ByRef udtSearchResult As udtInspectSearchResultType)
 
 		If intCurrentScanResultsCount >= udtSearchResultsCurrentScan.Length Then
 			ReDim Preserve udtSearchResultsCurrentScan(udtSearchResultsCurrentScan.Length * 2 - 1)
@@ -440,7 +439,6 @@ Public Class clsInSpecTResultsProcessor
 		Dim intPreviousScan As Integer
 
 		Dim strLineIn As String
-		Dim protein As String = String.Empty
 
 		Dim udtSearchResult As udtInspectSearchResultType = New udtInspectSearchResultType
 
@@ -457,7 +455,7 @@ Public Class clsInSpecTResultsProcessor
 		Dim blnValidSearchResult As Boolean
 
 		Dim strErrorLog As String = String.Empty
-		Dim objSortComparer As Generic.IComparer(Of udtInspectSearchResultType)
+		Dim objSortComparer As IComparer(Of udtInspectSearchResultType)
 
 		Try
 			' Initialize variables
@@ -518,7 +516,7 @@ Public Class clsInSpecTResultsProcessor
 										intCurrentScanResultsCount = 0
 									End If
 
-									AddCurrentRecordToSearchResults(intCurrentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult, strErrorLog)
+									AddCurrentRecordToSearchResults(intCurrentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult)
 
 									intPreviousScan = udtSearchResult.ScanNum
 								End If
@@ -793,7 +791,7 @@ Public Class clsInSpecTResultsProcessor
 	Protected Function LoadPeptideToProteinMapInfoInspect(ByVal strPepToProteinMapFilePath As String, _
 	  ByVal strOutputFolderPath As String, _
 	  ByRef udtInspectModInfo() As udtModInfoType, _
-	  ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), _
+	  ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), _
 	  ByRef strMTSPepToProteinMapFilePath As String) As Boolean
 
 		Dim strHeaderLine As String = String.Empty
@@ -815,7 +813,7 @@ Public Class clsInSpecTResultsProcessor
 			End If
 
 			' Initialize lstPepToProteinMapping
-			lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
+			lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
 			' Read the data in strProteinToPeptideMappingFilePath
 			blnSuccess = LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
@@ -868,8 +866,8 @@ Public Class clsInSpecTResultsProcessor
 
 		Dim strSplitLine() As String
 		Dim eResultFileColumn As eInspectSynFileColumns
-		Dim lstColumnNames As System.Collections.Generic.SortedDictionary(Of String, eInspectSynFileColumns)
-		lstColumnNames = New System.Collections.Generic.SortedDictionary(Of String, eInspectSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+		Dim lstColumnNames As SortedDictionary(Of String, eInspectSynFileColumns)
+		lstColumnNames = New SortedDictionary(Of String, eInspectSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
 
 		ReDim intColumnMapping(InspectSynopsisFileColCount - 1)
 
@@ -924,7 +922,7 @@ Public Class clsInSpecTResultsProcessor
 
 	End Function
 
-	Protected Function ParseInSpectSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
+	Protected Function ParseInSpectSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
 		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
 		Dim strPreviousTotalPRMScore As String
@@ -1392,15 +1390,13 @@ Public Class clsInSpecTResultsProcessor
 	''' <param name="strParameterFilePath">Parameter file</param>
 	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
-
-		Dim ioInputFile As FileInfo
-
+		
 		Dim strOutputFilePath As String
 		Dim strSynOutputFilePath As String
 		Dim strPepToProteinMapFilePath As String
 
 		Dim udtInspectModInfo() As udtModInfoType
-		Dim lstPepToProteinMapping As Generic.List(Of udtPepToProteinMappingType)
+		Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType)
 		Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
 		Dim blnSuccess As Boolean
@@ -1414,120 +1410,122 @@ Public Class clsInSpecTResultsProcessor
 			If String.IsNullOrWhiteSpace(strInputFilePath) Then
 				SetErrorMessage("Input file name is empty")
 				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
-			Else
-
-				blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
-				If Not blnSuccess Then
-					Exit Try
-				End If
-
-				MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
-
-				If CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
-					Try
-						' Obtain the full path to the input file
-						ioInputFile = New FileInfo(strInputFilePath)
-
-						ReDim udtInspectModInfo(-1)
-						lstPepToProteinMapping = New Generic.List(Of udtPepToProteinMappingType)
-
-						' Load the Inspect Parameter File so that we can determine the modification names and masses
-						If Not ExtractModInfoFromInspectParamFile(mSearchToolParameterFilePath, udtInspectModInfo) Then
-							If udtInspectModInfo Is Nothing OrElse udtInspectModInfo.Length = 0 Then
-								ReDim udtInspectModInfo(0)
-								With udtInspectModInfo(0)
-									.ModName = PHOS_MOD_NAME.ToLower
-									.ModMass = PHOS_MOD_MASS
-									.Residues = PHOS_MOD_RESIDUES
-									.ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL
-								End With
-							End If
-						End If
-
-
-						' Resolve the mods in mInspectModInfo with the ModDefs mods
-						ResolveInspectModsWithModDefinitions(udtInspectModInfo)
-
-						If MyBase.mCreateInspectOrMSGFDbFirstHitsFile Then
-
-							' Create the first hits output file
-							MyBase.ResetProgress("Creating the FHT file (top TotalPRMScore)")
-							Console.WriteLine()
-							Console.WriteLine(MyBase.ProgressStepDescription)
-
-							strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-							strOutputFilePath = Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX)
-
-							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyTotalPRM)
-
-
-							' Create the first hits output file
-							MyBase.ResetProgress("Creating the FHT file (top FScore)")
-							Console.WriteLine()
-							Console.WriteLine()
-							Console.WriteLine(MyBase.ProgressStepDescription)
-
-							strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-							strOutputFilePath = Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX)
-
-							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyFScore)
-
-						End If
-
-						If MyBase.mCreateInspectOrMSGFDbSynopsisFile Then
-
-							' Create the synopsis output file
-							MyBase.ResetProgress("Creating the SYN file")
-							Console.WriteLine()
-							Console.WriteLine()
-							Console.WriteLine(MyBase.ProgressStepDescription)
-
-							'Define the synopsis output file name based on strInputFilePath
-							strSynOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-							strSynOutputFilePath = Path.Combine(strOutputFolderPath, strSynOutputFilePath & SEQUEST_SYNOPSIS_FILE_SUFFIX)
-
-							blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.SynFile)
-
-							' Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
-							' LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
-							strPepToProteinMapFilePath = Path.Combine(Path.GetDirectoryName(ioInputFile.FullName), Path.GetFileNameWithoutExtension(ioInputFile.FullName) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
-
-							MyBase.ResetProgress("Loading the PepToProtein map file: " & Path.GetFileName(strPepToProteinMapFilePath))
-							Console.WriteLine()
-							Console.WriteLine()
-							Console.WriteLine(MyBase.ProgressStepDescription)
-
-							LoadPeptideToProteinMapInfoInspect(strPepToProteinMapFilePath, strOutputFolderPath, udtInspectModInfo, lstPepToProteinMapping, strMTSPepToProteinMapFilePath)
-
-
-							' Create the other PHRP-specific files
-							MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
-							Console.WriteLine()
-							Console.WriteLine()
-							Console.WriteLine(MyBase.ProgressStepDescription)
-
-							blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
-
-							If blnSuccess AndAlso mCreateProteinModsFile Then
-								' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-								MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(ioInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
-
-								' Create the Protein Mods file
-								blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect)
-							End If
-
-						End If
-
-						If blnSuccess Then
-							MyBase.OperationComplete()
-						End If
-
-					Catch ex As Exception
-						SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " & ex.Message)
-						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-					End Try
-				End If
 			End If
+
+			blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
+			If Not blnSuccess Then
+				Return False
+			End If
+
+			MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
+
+			If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
+				Return False
+			End If
+
+			Try
+				' Obtain the full path to the input file
+				Dim fiInputFile = New FileInfo(strInputFilePath)
+
+				ReDim udtInspectModInfo(-1)
+				lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
+
+				' Load the Inspect Parameter File so that we can determine the modification names and masses
+				If Not ExtractModInfoFromInspectParamFile(mSearchToolParameterFilePath, udtInspectModInfo) Then
+					If udtInspectModInfo Is Nothing OrElse udtInspectModInfo.Length = 0 Then
+						ReDim udtInspectModInfo(0)
+						With udtInspectModInfo(0)
+							.ModName = PHOS_MOD_NAME.ToLower
+							.ModMass = PHOS_MOD_MASS
+							.Residues = PHOS_MOD_RESIDUES
+							.ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL
+						End With
+					End If
+				End If
+
+
+				' Resolve the mods in mInspectModInfo with the ModDefs mods
+				ResolveInspectModsWithModDefinitions(udtInspectModInfo)
+
+				If MyBase.mCreateInspectOrMSGFDbFirstHitsFile Then
+
+					' Create the first hits output file
+					MyBase.ResetProgress("Creating the FHT file (top TotalPRMScore)")
+					Console.WriteLine()
+					Console.WriteLine(MyBase.ProgressStepDescription)
+
+					strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+					strOutputFilePath = Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX)
+
+					blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyTotalPRM)
+
+
+					' Create the first hits output file
+					MyBase.ResetProgress("Creating the FHT file (top FScore)")
+					Console.WriteLine()
+					Console.WriteLine()
+					Console.WriteLine(MyBase.ProgressStepDescription)
+
+					strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+					strOutputFilePath = Path.Combine(strOutputFolderPath, strOutputFilePath & INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX)
+
+					blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyFScore)
+
+				End If
+
+				If MyBase.mCreateInspectOrMSGFDbSynopsisFile Then
+
+					' Create the synopsis output file
+					MyBase.ResetProgress("Creating the SYN file")
+					Console.WriteLine()
+					Console.WriteLine()
+					Console.WriteLine(MyBase.ProgressStepDescription)
+
+					'Define the synopsis output file name based on strInputFilePath
+					strSynOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+					strSynOutputFilePath = Path.Combine(strOutputFolderPath, strSynOutputFilePath & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+
+					blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, udtInspectModInfo, eFilteredOutputFileTypeConstants.SynFile)
+
+					' Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
+					' LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
+					strPepToProteinMapFilePath = Path.Combine(Path.GetDirectoryName(fiInputFile.FullName), Path.GetFileNameWithoutExtension(fiInputFile.FullName) & FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & ".txt")
+
+					MyBase.ResetProgress("Loading the PepToProtein map file: " & Path.GetFileName(strPepToProteinMapFilePath))
+					Console.WriteLine()
+					Console.WriteLine()
+					Console.WriteLine(MyBase.ProgressStepDescription)
+
+					LoadPeptideToProteinMapInfoInspect(strPepToProteinMapFilePath, strOutputFolderPath, udtInspectModInfo, lstPepToProteinMapping, strMTSPepToProteinMapFilePath)
+
+
+					' Create the other PHRP-specific files
+					MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
+					Console.WriteLine()
+					Console.WriteLine()
+					Console.WriteLine(MyBase.ProgressStepDescription)
+
+					blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
+
+					If blnSuccess AndAlso mCreateProteinModsFile Then
+						' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+						MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+
+						' Create the Protein Mods file
+						blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect)
+					End If
+
+				End If
+
+				If blnSuccess Then
+					MyBase.OperationComplete()
+				End If
+
+			Catch ex As Exception
+				SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " & ex.Message)
+				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+			End Try
+
 		Catch ex As Exception
 			SetErrorMessage("Error in ProcessFile:" & ex.Message)
 			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
@@ -1743,11 +1741,11 @@ Public Class clsInSpecTResultsProcessor
 	End Sub
 
 	Protected Sub StoreOrWriteSearchResult(ByRef swResultFile As StreamWriter, _
-										   ByRef intResultID As Integer, _
-										   ByRef udtSearchResult As udtInspectSearchResultType, _
-										   ByRef intFilteredSearchResultCount As Integer, _
-										   ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-										   ByRef strErrorLog As String)
+	   ByRef intResultID As Integer, _
+	   ByRef udtSearchResult As udtInspectSearchResultType, _
+	   ByRef intFilteredSearchResultCount As Integer, _
+	   ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+	   ByRef strErrorLog As String)
 		If mSortFHTandSynFiles Then
 			If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
 				ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
@@ -1762,9 +1760,9 @@ Public Class clsInSpecTResultsProcessor
 	End Sub
 
 	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter, _
-												  ByVal intFilteredSearchResultCount As Integer, _
-												  ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-												  ByRef strErrorLog As String)
+		ByVal intFilteredSearchResultCount As Integer, _
+		ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+		ByRef strErrorLog As String)
 
 		Dim intIndex As Integer
 
@@ -1778,13 +1776,13 @@ Public Class clsInSpecTResultsProcessor
 	End Sub
 
 	Private Sub StoreTopFHTMatch(ByRef swResultFile As StreamWriter, _
-			  ByRef intResultID As Integer, _
-			  ByVal intCurrentScanResultsCount As Integer, _
-			  ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-			  ByRef intFilteredSearchResultCount As Integer, _
-			  ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-			  ByRef strErrorLog As String, _
-			  ByRef objSortComparer As Generic.IComparer(Of udtInspectSearchResultType))
+	 ByRef intResultID As Integer, _
+	 ByVal intCurrentScanResultsCount As Integer, _
+	 ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
+	 ByRef intFilteredSearchResultCount As Integer, _
+	 ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+	 ByRef strErrorLog As String, _
+	 ByRef objSortComparer As IComparer(Of udtInspectSearchResultType))
 
 		Dim intIndex As Integer
 		Dim intCurrentCharge As Short = Short.MinValue
@@ -1806,13 +1804,13 @@ Public Class clsInSpecTResultsProcessor
 	End Sub
 
 	Private Sub StoreSynMatches(ByRef swResultFile As StreamWriter, _
-		   ByRef intResultID As Integer, _
-		   ByVal intCurrentScanResultsCount As Integer, _
-		   ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-		   ByRef intFilteredSearchResultCount As Integer, _
-		   ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-		   ByRef strErrorLog As String, _
-		   ByRef objSortComparer As Generic.IComparer(Of udtInspectSearchResultType))
+	 ByRef intResultID As Integer, _
+	 ByVal intCurrentScanResultsCount As Integer, _
+	 ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
+	 ByRef intFilteredSearchResultCount As Integer, _
+	 ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
+	 ByRef strErrorLog As String, _
+	 ByRef objSortComparer As IComparer(Of udtInspectSearchResultType))
 
 		Dim intIndex As Integer
 		Dim intCurrentCharge As Short = Short.MinValue
@@ -1835,11 +1833,11 @@ Public Class clsInSpecTResultsProcessor
 	End Sub
 
 	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
-									  ByRef strErrorLog As String)
+			  ByRef strErrorLog As String)
 
 		' Write out the header line for synopsis / first hits files
 		Try
-			Dim lstData As New System.Collections.Generic.List(Of String)
+			Dim lstData As New List(Of String)
 			lstData.Add(COLUMN_NAME_RESULTID)
 			lstData.Add("Scan")
 			lstData.Add(COLUMN_NAME_PEPTIDE)
@@ -1880,9 +1878,9 @@ Public Class clsInSpecTResultsProcessor
 	End Sub
 
 	Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
-										ByRef swResultFile As StreamWriter, _
-										ByRef udtSearchResult As udtInspectSearchResultType, _
-										ByRef strErrorLog As String)
+			 ByRef swResultFile As StreamWriter, _
+			 ByRef udtSearchResult As udtInspectSearchResultType, _
+			 ByRef strErrorLog As String)
 
 		' Writes an entry to a synopsis or first hits file
 		Try
@@ -1925,10 +1923,10 @@ Public Class clsInSpecTResultsProcessor
 
 #Region "IComparer Classes"
 
-    Protected Class InspectSearchResultsComparerTotalPRMDescScanChargePeptide
-		Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType)
+	Protected Class InspectSearchResultsComparerTotalPRMDescScanChargePeptide
+		Implements IComparer(Of udtInspectSearchResultType)
 
-		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType).Compare
+		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
 
 			If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
 				Return -1
@@ -1971,9 +1969,9 @@ Public Class clsInSpecTResultsProcessor
 	End Class
 
 	Protected Class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
-		Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType)
+		Implements IComparer(Of udtInspectSearchResultType)
 
-		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType).Compare
+		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
 
 			If x.ScanNum > y.ScanNum Then
 				Return 1
@@ -2008,9 +2006,9 @@ Public Class clsInSpecTResultsProcessor
 	End Class
 
 	Protected Class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
-		Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType)
+		Implements IComparer(Of udtInspectSearchResultType)
 
-		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType).Compare
+		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
 
 			If x.ScanNum > y.ScanNum Then
 				Return 1
@@ -2045,9 +2043,9 @@ Public Class clsInSpecTResultsProcessor
 	End Class
 
 	Protected Class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
-		Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType)
+		Implements IComparer(Of udtInspectSearchResultType)
 
-		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements System.Collections.Generic.IComparer(Of udtInspectSearchResultType).Compare
+		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
 
 			If x.ScanNum > y.ScanNum Then
 				Return 1

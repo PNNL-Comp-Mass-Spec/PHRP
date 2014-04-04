@@ -29,7 +29,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
     Protected m_MassCorrectionTagsFileName As String = String.Empty
     Protected m_ModificationDefinitionsFileName As String = String.Empty
 
-    Protected m_MiscParams As System.Collections.Generic.Dictionary(Of String, String)
+	Protected m_MiscParams As Dictionary(Of String, String)
     Protected m_DebugLevel As Integer = 0
 
     Protected m_AnalysisToolName As String = String.Empty
@@ -54,7 +54,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     Protected WithEvents m_PeptideHitResultsProcessor As clsPHRPBaseClass
 
-    Protected m_thThread As System.Threading.Thread
+	Protected m_thThread As Threading.Thread
 
 #End Region
 
@@ -128,20 +128,20 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End Set
     End Property
 
-    Public WriteOnly Property MiscParams() As System.Collections.Generic.Dictionary(Of String, String) Implements IPeptideHitResultsProcessor.MiscParams
-        Set(ByVal Value As System.Collections.Generic.Dictionary(Of String, String))
-            m_MiscParams = Value
-        End Set
-    End Property
+	Public WriteOnly Property MiscParams() As Dictionary(Of String, String) Implements IPeptideHitResultsProcessor.MiscParams
+		Set(ByVal Value As Dictionary(Of String, String))
+			m_MiscParams = Value
+		End Set
+	End Property
 
-    Public Property ModificationDefinitionsFileName() As String Implements IPeptideHitResultsProcessor.ModificationDefinitionsFileName
-        Get
-            Return m_ModificationDefinitionsFileName
-        End Get
-        Set(ByVal Value As String)
-            m_ModificationDefinitionsFileName = Value
-        End Set
-    End Property
+	Public Property ModificationDefinitionsFileName() As String Implements IPeptideHitResultsProcessor.ModificationDefinitionsFileName
+		Get
+			Return m_ModificationDefinitionsFileName
+		End Get
+		Set(ByVal Value As String)
+			m_ModificationDefinitionsFileName = Value
+		End Set
+	End Property
 
     Public Property OutputFolderPath() As String Implements IPeptideHitResultsProcessor.OutputFolderPath
         Get
@@ -289,6 +289,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 				Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 					m_PeptideHitResultsProcessor = New clsMSAlignResultsProcessor
 
+				Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile
+					m_PeptideHitResultsProcessor = New clsMODaResultsProcessor
+
                 Case Else
                     ' Unknown format; cannot continue
                     LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " & m_PeptideHitResultsFileFormat.ToString, Nothing)
@@ -404,22 +407,25 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 		m_SettingsFilePath = Path.Combine(m_SourceFolderPath, m_SettingsFileName)
 
 		'Define the peptide hit results format based on the analysis tool name
-		If m_AnalysisToolName.ToLower.IndexOf("xtandem") >= 0 Then
+		If m_AnalysisToolName.IndexOf("xtandem", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
 			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
 
-		ElseIf m_AnalysisToolName.ToLower.IndexOf("sequest") >= 0 Then
+		ElseIf m_AnalysisToolName.IndexOf("sequest", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
 			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
 
-		ElseIf m_AnalysisToolName.ToLower.IndexOf("inspect") >= 0 Then
+		ElseIf m_AnalysisToolName.IndexOf("inspect", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
 			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
-		ElseIf m_AnalysisToolName.ToLower.IndexOf("msgfdb") >= 0 Then
+		ElseIf m_AnalysisToolName.IndexOf("msgfdb", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
 			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
-		ElseIf m_AnalysisToolName.ToLower.IndexOf("msalign") >= 0 Then
+		ElseIf m_AnalysisToolName.IndexOf("msalign", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
 			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 
-		ElseIf m_AnalysisToolName.ToLower.IndexOf("dataextractor") >= 0 Then
+		ElseIf m_AnalysisToolName.IndexOf("moda", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile
+
+		ElseIf m_AnalysisToolName.IndexOf("dataextractor", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
 			' Data Extractor step-tool; we'll need to auto-determine the results format
 			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
 
