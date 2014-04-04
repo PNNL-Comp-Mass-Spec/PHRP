@@ -30,11 +30,70 @@ Public Class clsPHRPParserMODa
 	Public Const DATA_COLUMN_Score As String = "Score"
 	Public Const DATA_COLUMN_Probability As String = "Probability"
 	Public Const DATA_COLUMN_Rank_Probability As String = "Rank_Probability"
+	Public Const DATA_COLUMN_Peptide_Position As String = "Peptide_Position"
 
 	Public Const FILENAME_SUFFIX_SYN As String = "_moda_syn.txt"
 	Public Const FILENAME_SUFFIX_FHT As String = "_moda_fht.txt"
 
 	Protected Const MODa_SEARCH_ENGINE_NAME As String = "MODa"
+#End Region
+
+#Region "Properties"
+
+	Public Overrides ReadOnly Property PHRPFirstHitsFileName() As String
+		Get
+			Return GetPHRPFirstHitsFileName(mDatasetName)
+		End Get
+	End Property
+
+	Public Overrides ReadOnly Property PHRPModSummaryFileName() As String
+		Get
+			Return GetPHRPModSummaryFileName(mDatasetName)
+		End Get
+	End Property
+
+	Public Overrides ReadOnly Property PHRPPepToProteinMapFileName() As String
+		Get
+			Return GetPHRPPepToProteinMapFileName(mDatasetName)
+		End Get
+	End Property
+
+	Public Overrides ReadOnly Property PHRPProteinModsFileName() As String
+		Get
+			Return GetPHRPProteinModsFileName(mDatasetName)
+		End Get
+	End Property
+
+	Public Overrides ReadOnly Property PHRPSynopsisFileName() As String
+		Get
+			Return GetPHRPSynopsisFileName(mDatasetName)
+		End Get
+	End Property
+
+	Public Overrides ReadOnly Property PHRPResultToSeqMapFileName() As String
+		Get
+			Return GetPHRPResultToSeqMapFileName(mDatasetName)
+		End Get
+	End Property
+
+	Public Overrides ReadOnly Property PHRPSeqInfoFileName() As String
+		Get
+			Return GetPHRPSeqInfoFileName(mDatasetName)
+		End Get
+	End Property
+
+	Public Overrides ReadOnly Property PHRPSeqToProteinMapFileName() As String
+		Get
+			Return GetPHRPSeqToProteinMapFileName(mDatasetName)
+		End Get
+	End Property
+
+	Public Overrides ReadOnly Property SearchEngineName() As String
+		Get
+			Return GetSearchEngineName()
+		End Get
+	End Property
+
 #End Region
 
 	''' <summary>
@@ -77,6 +136,7 @@ Public Class clsPHRPParserMODa
 		AddHeaderColumn(DATA_COLUMN_Score)
 		AddHeaderColumn(DATA_COLUMN_Probability)
 		AddHeaderColumn(DATA_COLUMN_Rank_Probability)
+		AddHeaderColumn(DATA_COLUMN_Peptide_Position)
 
 	End Sub
 
@@ -111,39 +171,39 @@ Public Class clsPHRPParserMODa
 
 	End Function
 
-	Public Overloads Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_FHT
 	End Function
 
-	Public Overloads Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_moda_syn_ModSummary.txt"
 	End Function
 
-	Public Overloads Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_moda_PepToProtMapMTS.txt"
 	End Function
 
-	Public Overloads Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_moda_syn_ProteinMods.txt"
 	End Function
 
-	Public Overloads Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_SYN
 	End Function
 
-	Public Overloads Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_moda_syn_ResultToSeqMap.txt"
 	End Function
 
-	Public Overloads Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_moda_syn_SeqInfo.txt"
 	End Function
 
-	Public Overloads Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
+	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & "_moda_syn_SeqToProteinMap.txt"
 	End Function
 
-	Public Overloads Shared Function GetSearchEngineName() As String
+	Public Shared Function GetSearchEngineName() As String
 		Return MODa_SEARCH_ENGINE_NAME
 	End Function
 
@@ -293,6 +353,7 @@ Public Class clsPHRPParserMODa
 
 				AddScore(objPSM, strColumns, DATA_COLUMN_Score)
 				AddScore(objPSM, strColumns, DATA_COLUMN_Probability)
+				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Position)
 
 			End If
 

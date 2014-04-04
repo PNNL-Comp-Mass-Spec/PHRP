@@ -1438,28 +1438,44 @@ Public Class clsPHRPReader
 
 	Protected Shared Function GetPHRPFileFreeParser(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As clsPHRPParser
 
+		Static oCachedParser As clsPHRPParser
+		Static eCachedResultType As ePeptideHitResultType = ePeptideHitResultType.Unknown
+		Static strCachedDataset As String = String.Empty
+
+		If eCachedResultType <> ePeptideHitResultType.Unknown AndAlso
+		   eCachedResultType = eResultType AndAlso
+		   strCachedDataset = strDatasetName Then
+
+			Return oCachedParser
+		End If
+
 		Select Case eResultType
 			Case ePeptideHitResultType.Sequest
-				Return New clsPHRPParserSequest(strDatasetName, String.Empty)
+				oCachedParser = New clsPHRPParserSequest(strDatasetName, String.Empty)
 
 			Case ePeptideHitResultType.XTandem
-				Return New clsPHRPParserXTandem(strDatasetName, String.Empty)
+				oCachedParser = New clsPHRPParserXTandem(strDatasetName, String.Empty)
 
 			Case ePeptideHitResultType.Inspect
-				Return New clsPHRPParserInspect(strDatasetName, String.Empty)
+				oCachedParser = New clsPHRPParserInspect(strDatasetName, String.Empty)
 
 			Case ePeptideHitResultType.MSGFDB
-				Return New clsPHRPParserMSGFDB(strDatasetName, String.Empty)
+				oCachedParser = New clsPHRPParserMSGFDB(strDatasetName, String.Empty)
 
 			Case ePeptideHitResultType.MSAlign
-				Return New clsPHRPParserMSAlign(strDatasetName, String.Empty)
+				oCachedParser = New clsPHRPParserMSAlign(strDatasetName, String.Empty)
 
 			Case ePeptideHitResultType.MODa
-				Return New clsPHRPParserMODa(strDatasetName, String.Empty)
+				oCachedParser = New clsPHRPParserMODa(strDatasetName, String.Empty)
 
 			Case Else
 				Throw New Exception("Unsupported ePeptideHitResultType value: " & eResultType)
 		End Select
+
+		eCachedResultType = eResultType
+		strCachedDataset = String.Copy(strDatasetName)
+
+		Return oCachedParser
 
 	End Function
 	
@@ -1473,7 +1489,7 @@ Public Class clsPHRPReader
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
-		Dim strPHRPResultsFileName = oParser.GetPHRPFirstHitsFileName()
+		Dim strPHRPResultsFileName = oParser.PHRPFirstHitsFileName()
 
 		Return strPHRPResultsFileName
 
@@ -1489,7 +1505,7 @@ Public Class clsPHRPReader
 	Public Shared Function GetPHRPModSummaryFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
-		Dim strPHRPModSummaryFileName = oParser.GetPHRPModSummaryFileName()
+		Dim strPHRPModSummaryFileName = oParser.PHRPModSummaryFileName()
 
 		Return strPHRPModSummaryFileName
 
@@ -1505,7 +1521,7 @@ Public Class clsPHRPReader
 	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
-		Dim strPepToProteinMapFileName = oParser.GetPHRPPepToProteinMapFileName()
+		Dim strPepToProteinMapFileName = oParser.PHRPPepToProteinMapFileName()
 
 		Return strPepToProteinMapFileName
 
@@ -1521,7 +1537,7 @@ Public Class clsPHRPReader
 	Public Shared Function GetPHRPProteinModsFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 	
 		Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
-		Dim strProteinModsFileName = oParser.GetPHRPProteinModsFileName()
+		Dim strProteinModsFileName = oParser.PHRPProteinModsFileName()
 
 		Return strProteinModsFileName
 
@@ -1537,7 +1553,7 @@ Public Class clsPHRPReader
 	Public Shared Function GetPHRPSynopsisFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
-		Dim strPHRPResultsFileName = oParser.GetPHRPSynopsisFileName()
+		Dim strPHRPResultsFileName = oParser.PHRPSynopsisFileName()
 
 		Return strPHRPResultsFileName
 
@@ -1553,7 +1569,7 @@ Public Class clsPHRPReader
 	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
-		Dim strResultToSeqMapFilename = oParser.GetPHRPResultToSeqMapFileName()
+		Dim strResultToSeqMapFilename = oParser.PHRPResultToSeqMapFileName()
 
 		Return strResultToSeqMapFilename
 
@@ -1569,7 +1585,7 @@ Public Class clsPHRPReader
 	Public Shared Function GetPHRPSeqInfoFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
-		Dim strSeqInfoFilename = oParser.GetPHRPSeqInfoFileName()
+		Dim strSeqInfoFilename = oParser.PHRPSeqInfoFileName()
 
 		Return strSeqInfoFilename
 
@@ -1585,7 +1601,7 @@ Public Class clsPHRPReader
 	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
 
 		Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
-		Dim strSeqToProteinMapFileName = oParser.GetPHRPSeqToProteinMapFileName()
+		Dim strSeqToProteinMapFileName = oParser.PHRPSeqToProteinMapFileName()
 
 		Return strSeqToProteinMapFileName
 

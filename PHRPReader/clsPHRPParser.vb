@@ -168,6 +168,28 @@ Public MustInherit Class clsPHRPParser
 
 #End Region
 
+#Region "Properties overridden by derived classes"
+
+	Public MustOverride ReadOnly Property PHRPFirstHitsFileName() As String
+
+	Public MustOverride ReadOnly Property PHRPModSummaryFileName() As String
+
+	Public MustOverride ReadOnly Property PHRPPepToProteinMapFileName() As String
+
+	Public MustOverride ReadOnly Property PHRPProteinModsFileName() As String
+
+	Public MustOverride ReadOnly Property PHRPSynopsisFileName() As String
+
+	Public MustOverride ReadOnly Property PHRPResultToSeqMapFileName() As String
+
+	Public MustOverride ReadOnly Property PHRPSeqInfoFileName() As String
+
+	Public MustOverride ReadOnly Property PHRPSeqToProteinMapFileName() As String
+
+	Public MustOverride ReadOnly Property SearchEngineName() As String
+
+#End Region
+
 	''' <summary>
 	''' Initialize the parser for the given dataset and input file
 	''' </summary>
@@ -181,7 +203,9 @@ Public MustInherit Class clsPHRPParser
 		mErrorMessages = New List(Of String)
 		mWarningMessages = New List(Of String)
 
+		If String.IsNullOrWhiteSpace(strDatasetName) Then strDatasetName = "Undefined"
 		mDatasetName = strDatasetName
+
 		mPeptideHitResultType = ePeptideHitResultType
 
 		Dim fiFileInfo As FileInfo
@@ -341,39 +365,7 @@ Public MustInherit Class clsPHRPParser
 				Throw New Exception("Unrecognized value for PeptideHitResultType: " & ePeptideHitResultType.ToString())
 		End Select
 
-	End Function
-	
-	Public Function GetPHRPFirstHitsFileName() As String
-		Return GetPHRPFirstHitsFileName(mDatasetName)
-	End Function
-
-	Public Function GetPHRPModSummaryFileName() As String
-		Return GetPHRPModSummaryFileName(mDatasetName)
-	End Function
-
-	Public Function GetPHRPPepToProteinMapFileName() As String
-		Return GetPHRPPepToProteinMapFileName(mDatasetName)
-	End Function
-
-	Public Function GetPHRPProteinModsFileName() As String
-		Return GetPHRPProteinModsFileName(mDatasetName)
-	End Function
-
-	Public Function GetPHRPSynopsisFileName() As String
-		Return GetPHRPSynopsisFileName(mDatasetName)
-	End Function
-
-	Public Function GetPHRPResultToSeqMapFileName() As String
-		Return GetPHRPResultToSeqMapFileName(mDatasetName)
-	End Function
-
-	Public Function GetPHRPSeqInfoFileName() As String
-		Return GetPHRPSeqInfoFileName(mDatasetName)
-	End Function
-
-	Public Function GetPHRPSeqToProteinMapFileName() As String
-		Return GetPHRPSeqToProteinMapFileName(mDatasetName)
-	End Function
+	End Function	
 
 #Region "Functions overridden by derived classes"
 	Protected MustOverride Sub DefineColumnHeaders()
@@ -396,42 +388,6 @@ Public MustInherit Class clsPHRPParser
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Public MustOverride Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
-
-	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
-		Return "Undefined"
-	End Function
-
-	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
-		Return "Undefined"
-	End Function
-
-	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return "Undefined"
-	End Function
-
-	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
-		Return "Undefined"
-	End Function
-
-	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
-		Return "Undefined"
-	End Function
-
-	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
-		Return "Undefined"
-	End Function
-
-	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
-		Return "Undefined"
-	End Function
-
-	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return "Undefined"
-	End Function
-
-	Public Shared Function GetSearchEngineName() As String
-		Return "Undefined"
-	End Function
 
 #End Region
 
@@ -555,7 +511,7 @@ Public MustInherit Class clsPHRPParser
 		Return lstAmbiguousMods
 
 	End Function
-	
+
 	Private Function GetMODaStaticModSetting(ByVal kvSetting As KeyValuePair(Of String, String)) As KeyValuePair(Of String, String)
 
 		Dim strKey = kvSetting.Key
