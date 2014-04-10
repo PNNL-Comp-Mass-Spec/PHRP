@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<bioml>
+	<note>This block of parameters are automatically added by the analysis manager</note>
+	<note type="input" label="output, path hashing">no</note>
+	<note type="input" label="list path, default parameters">default_input.xml</note>
+	<note type="input" label="protein, taxon">Shewanella_oneidensis_MR-1</note>
+	<note type="input" label="list path, taxonomy information">C:\DMS_WorkDir1\taxonomy.xml</note>
+	<note type="input" label="spectrum, path">C:\DMS_WorkDir1\QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_dta.txt</note>
+	<note type="input" label="output, path">C:\DMS_WorkDir1\QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt.xml</note>
+	<note>This parameter file contains parameter definitions that override the defaults</note>
+
+	<note>Use partially-tryptic search in round 1 searching</note>
+	<note type="input" label="protein, cleavage site">[RK]|{P}</note>
+	<note type="input" label="protein, cleavage semi">yes</note>
+
+	<note>Potential (dynamic) modifications during round 2 searching</note>
+	<note type="input" label="refine, potential modification mass">15.9949@M</note>
+		<note>Oxidized Methionine</note>
+
+</bioml>
