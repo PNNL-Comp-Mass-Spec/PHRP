@@ -615,13 +615,38 @@ Public MustInherit Class clsSearchResultsBaseClass
 	''' <param name="intResidueLocInPeptide"></param>
 	''' <param name="eResidueTerminusState"></param>
 	''' <param name="blnUpdateModOccurrenceCounts"></param>
-	''' <returns></returns>
+	''' <returns>True if mod successfully added</returns>
 	''' <remarks></remarks>
-	Public Function SearchResultAddModification(ByVal dblModificationMass As Double, _
-			   ByVal chTargetResidue As Char, _
-			   ByVal intResidueLocInPeptide As Integer, _
-			   ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
-			   ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+	Public Function SearchResultAddModification(
+	  ByVal dblModificationMass As Double,
+	  ByVal chTargetResidue As Char,
+	  ByVal intResidueLocInPeptide As Integer,
+	  ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
+	  ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+
+		Return SearchResultAddModification(dblModificationMass, chTargetResidue, intResidueLocInPeptide, eResidueTerminusState, blnUpdateModOccurrenceCounts, MASS_DIGITS_OF_PRECISION)
+
+	End Function
+
+	''' <summary>
+	''' Associates the given modification mass with the given residue
+	''' If the modification mass is unknown, then will auto-add it to the list of known modifications
+	''' </summary>
+	''' <param name="dblModificationMass"></param>
+	''' <param name="chTargetResidue"></param>
+	''' <param name="intResidueLocInPeptide"></param>
+	''' <param name="eResidueTerminusState"></param>
+	''' <param name="blnUpdateModOccurrenceCounts"></param>
+	''' <param name="modMassDigitsOfPrecision">Digits of precision to use when comparinig dblModificationMass to the masses of known mods</param>
+	''' <returns>True if mod successfully added</returns>
+	''' <remarks></remarks>
+	Public Function SearchResultAddModification(
+	  ByVal dblModificationMass As Double,
+	  ByVal chTargetResidue As Char,
+	  ByVal intResidueLocInPeptide As Integer,
+	  ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
+	  ByVal blnUpdateModOccurrenceCounts As Boolean,
+	  ByVal modMassDigitsOfPrecision As Byte) As Boolean
 
 		Dim objModificationDefinition As clsModificationDefinition
 		Dim blnExistingModFound As Boolean
@@ -638,7 +663,7 @@ Public MustInherit Class clsSearchResultsBaseClass
 			  chTargetResidue, _
 			  eResidueTerminusState, _
 			  blnExistingModFound, _
-			  True, MASS_DIGITS_OF_PRECISION)
+			  True, modMassDigitsOfPrecision)
 
 			blnSuccess = SearchResultAddModification( _
 			  objModificationDefinition, _

@@ -617,14 +617,8 @@ Public MustInherit Class clsPHRPBaseClass
 	''' <returns></returns>
 	''' <remarks></remarks>
 	Protected Function CollapseList(lstFields As List(Of String)) As String
-		Dim sbText As New System.Text.StringBuilder
 
-		For Each item As String In lstFields
-			If sbText.Length > 0 Then sbText.Append(ControlChars.Tab)
-			sbText.Append(item)
-		Next
-
-		Return sbText.ToString()
+		Return String.Join(ControlChars.Tab, lstFields)
 
 	End Function
 
@@ -1059,10 +1053,7 @@ Public MustInherit Class clsPHRPBaseClass
 				   COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER & ControlChars.Tab & _
 				   COLUMN_NAME_MSGF_SPECPROB)
 
-				Dim blnLoadMSGFResults As Boolean = False
-				If ePHRPResultType <> clsPHRPReader.ePeptideHitResultType.MSGFDB Then
-					blnLoadMSGFResults = True
-				End If
+				Dim blnLoadMSGFResults = ePHRPResultType <> clsPHRPReader.ePeptideHitResultType.MSGFDB
 
 				Using objReader As New clsPHRPReader(strPHRPDataFilePath, ePHRPResultType, blnLoadModsAndSeqInfo:=True, blnLoadMSGFResults:=blnLoadMSGFResults, blnLoadScanStats:=False)
 					objReader.EchoMessagesToConsole = True
@@ -1392,6 +1383,8 @@ Public MustInherit Class clsPHRPBaseClass
 
 		mInspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
+		mMODaSynopsisFileProbabilityThreshold = clsMODaResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+
 		mMSAlignSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
 		mMSGFDBSynopsisFilePValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
@@ -1714,7 +1707,7 @@ Public MustInherit Class clsPHRPBaseClass
 		Static strFormatString As String = "0"
 		Static intFormatStringPrecision As Integer = 0
 
-		If blnRemoveDecimalsWhenZero AndAlso dblNumber = 0 Then
+		If blnRemoveDecimalsWhenZero AndAlso Math.Abs(dblNumber - 0) < Double.Epsilon Then
 			Return "0"
 		Else
 			If intFormatStringPrecision <> intDigitsOfPrecision Then
@@ -2190,11 +2183,11 @@ Public MustInherit Class clsPHRPBaseClass
 
 #Region "PHRPReader Event Handlers"
 
-	Private Sub PHRPReader_ErrorEvent(strErrorMessage As String)
+	Protected Sub PHRPReader_ErrorEvent(strErrorMessage As String)
 		RaiseEvent ErrorOccurred(strErrorMessage)
 	End Sub
 
-	Private Sub PHRPReader_WarningEvent(strWarningMessage As String)
+	Protected Sub PHRPReader_WarningEvent(strWarningMessage As String)
 		ReportWarning(strWarningMessage)
 	End Sub
 #End Region

@@ -199,7 +199,7 @@ Public Class clsSearchResultsXTandem
 				dblPrecursorMonoMass = mPeptideMonoisotopicMass + dblDelM
 			End If
 
-			Dim blnAdjustPrecursorMassForC13 As Boolean = True
+			Const blnAdjustPrecursorMassForC13 As Boolean = True
 			mPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, mPeptideMonoisotopicMass)
 
 		Else

@@ -515,7 +515,12 @@ Public MustInherit Class clsPHRPParser
 	Private Function GetMODaStaticModSetting(ByVal kvSetting As KeyValuePair(Of String, String)) As KeyValuePair(Of String, String)
 
 		Dim strKey = kvSetting.Key
-		Dim strValue = kvSetting.Key
+		Dim strValue = kvSetting.Value
+
+		If Not String.Equals(strKey, "ADD", StringComparison.CurrentCultureIgnoreCase) Then
+			Throw New Exception("Key name is not ADD; this is not a MODa Static Mod Setting")
+		End If
+
 		Dim commaIndex = strValue.IndexOf(","c)
 
 		If commaIndex > 0 Then
@@ -526,6 +531,8 @@ Public MustInherit Class clsPHRPParser
 			strKey = strKey & "_" & strResidue
 
 			kvSetting = New KeyValuePair(Of String, String)(strKey, strValue)
+		Else
+			ReportWarning("Value for MODa keyword ADD does not contain a comma")
 		End If
 
 		Return kvSetting

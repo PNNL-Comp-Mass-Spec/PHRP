@@ -202,7 +202,7 @@ Public Class clsPeptideModificationContainer
 				Case eResidueTerminusStateConstants.PeptideNTerminus, eResidueTerminusStateConstants.PeptideCTerminus
 					strTargetResidues = C_TERMINAL_PEPTIDE_SYMBOL_DMS
 				Case Else
-					' This shouldn't occur
+					Throw New Exception("Unrecognized eResidueTerminusStateConstants enum: " & eResidueTerminusState)
 			End Select
 		End If
 
@@ -275,7 +275,7 @@ Public Class clsPeptideModificationContainer
 		Dim intFormatDigits As Integer
 		Dim intMaxLength As Integer
 
-		If dblModificationMass = 0 Then
+		If Math.Abs(dblModificationMass) < Single.Epsilon Then
 			Return "+0.00000"
 		ElseIf dblModificationMass < -9999999 Then
 			' Modification mass is too negative; always return -9999999
@@ -287,7 +287,7 @@ Public Class clsPeptideModificationContainer
 
 		' Determine the number of digits that we will display to the left of the decimal point
 		dblFormatDigits = Math.Log10(Math.Abs(dblModificationMass))
-		If dblFormatDigits = CInt(dblFormatDigits) Then
+		If Math.Abs(dblFormatDigits - CInt(dblFormatDigits)) < Single.Epsilon Then
 			' ModMass is a power of 10
 			intFormatDigits = CInt(dblFormatDigits) + 1
 		Else
@@ -353,32 +353,31 @@ Public Class clsPeptideModificationContainer
 	End Function
 
 	Public Function LookupMassCorrectionTagByMass(ByVal dblModificationMass As Double) As String
-		Dim MassDigitsOfPrecision As Byte = MASS_DIGITS_OF_PRECISION
-		Dim blnAddToModificationListIfUnknown As Boolean = True
+		Const MassDigitsOfPrecision As Byte = MASS_DIGITS_OF_PRECISION
+		Const blnAddToModificationListIfUnknown As Boolean = True
 
 		Return LookupMassCorrectionTagByMass(dblModificationMass, MassDigitsOfPrecision, blnAddToModificationListIfUnknown)
 	End Function
 
 	Public Function LookupMassCorrectionTagByMass(ByVal dblModificationMass As Double, ByVal MassDigitsOfPrecision As Byte) As String
-		Dim blnAddToModificationListIfUnknown As Boolean = True
+		Const blnAddToModificationListIfUnknown As Boolean = True
 
 		Return LookupMassCorrectionTagByMass(dblModificationMass, MassDigitsOfPrecision, blnAddToModificationListIfUnknown)
 	End Function
 
 	Public Function LookupMassCorrectionTagByMass(ByVal dblModificationMass As Double, ByVal MassDigitsOfPrecision As Byte, ByVal blnAddToModificationListIfUnknown As Boolean) As String
-		Dim MassDigitsOfPrecisionLoose As Byte = 1
+		Const MassDigitsOfPrecisionLoose As Byte = 1
 
 		Return LookupMassCorrectionTagByMass(dblModificationMass, MassDigitsOfPrecision, blnAddToModificationListIfUnknown, MassDigitsOfPrecisionLoose)
 	End Function
 
 	Public Function LookupMassCorrectionTagByMass(ByVal dblModificationMass As Double, ByVal MassDigitsOfPrecision As Byte, ByVal blnAddToModificationListIfUnknown As Boolean, ByVal MassDigitsOfPrecisionLoose As Byte) As String
 
-		Dim objEnum As System.Collections.IDictionaryEnumerator
+		Dim objEnum As IDictionaryEnumerator
 
 		Dim intMassDigitsOfPrecisionCurrent As Integer
 		Dim intMassDigitsOfPrecisionStop As Integer
 
-		Dim strMassCorrectionTag As String
 		Dim dblMassDiff As Double
 
 		Dim strClosestMassCorrectionTag As String
@@ -402,7 +401,7 @@ Public Class clsPeptideModificationContainer
 				' First look for an exact match in mMassCorrectionTags
 				objEnum = mMassCorrectionTags.GetEnumerator
 				Do While objEnum.MoveNext
-					strMassCorrectionTag = CStr(objEnum.Key)
+					' strMassCorrectionTag = CStr(objEnum.Key)
 					dblMassDiff = Math.Abs(dblModificationMass - CDbl(objEnum.Value))
 					If dblMassDiff < dblClosestMassCorrectionTagMassDiff Then
 						strClosestMassCorrectionTag = CStr(objEnum.Key)
@@ -413,7 +412,7 @@ Public Class clsPeptideModificationContainer
 				' Error enumerating through mMassCorrectionTags
 			End Try
 
-			If Math.Round(dblClosestMassCorrectionTagMassDiff, intMassDigitsOfPrecisionCurrent) = 0 Then
+			If Math.Abs(Math.Round(dblClosestMassCorrectionTagMassDiff, intMassDigitsOfPrecisionCurrent)) < Single.Epsilon Then
 				' Match found
 				Return strClosestMassCorrectionTag
 			Else
@@ -592,7 +591,7 @@ Public Class clsPeptideModificationContainer
 				 mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod OrElse _
 				 mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
 				 mModifications(intIndex).TargetResidues.Length > 0 Then
-					If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+					If Math.Abs(Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 						' Matching mass found
 						' Now see if .TargetResidues contains chTargetResidue
 						If mModifications(intIndex).TargetResiduesContain(chTargetResidue) Then
@@ -629,7 +628,7 @@ Public Class clsPeptideModificationContainer
 			 mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso _
 			 String.IsNullOrWhiteSpace(mModifications(intIndex).TargetResidues) Then
 
-				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+				If Math.Abs(Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 					' Matching mass found
 					Return mModifications(intIndex)
 				End If
@@ -641,7 +640,7 @@ Public Class clsPeptideModificationContainer
 		' Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing
 		If Not chTargetResidue = Nothing Then
 			For intIndex = 0 To mStandardRefinementModifications.Length - 1
-				If Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+				If Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 					' Matching mass found
 					' Now see if .TargetResidues contains chTargetResidue
 					If mStandardRefinementModifications(intIndex).TargetResiduesContain(chTargetResidue) Then
@@ -674,7 +673,7 @@ Public Class clsPeptideModificationContainer
 			If (mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
 			 mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) Then
 
-				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+				If Math.Abs(Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 					' Matching mass found
 					' Assure that the target residues contain chTargetResidue
 					If Not chTargetResidue = Nothing AndAlso Not mModifications(intIndex).TargetResiduesContain(chTargetResidue) Then
@@ -688,9 +687,9 @@ Public Class clsPeptideModificationContainer
 		Next intIndex
 
 		' Still no match; define a new custom modification
-		Dim eModType As clsModificationDefinition.eModificationTypeConstants = clsModificationDefinition.eModificationTypeConstants.DynamicMod
-		Dim chModSymbol As Char = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL
-		Dim blnUseNextAvailableModificationSymbol As Boolean = True
+		Const eModType As clsModificationDefinition.eModificationTypeConstants = clsModificationDefinition.eModificationTypeConstants.DynamicMod
+		Const chModSymbol As Char = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL
+		Const blnUseNextAvailableModificationSymbol As Boolean = True
 
 		objModificationDefinition = AddUnknownModification(dblModificationMass, eModType, chTargetResidue, eResidueTerminusState, blnAddToModificationListIfUnknown, blnUseNextAvailableModificationSymbol, chModSymbol, MassDigitsOfPrecision)
 
@@ -756,7 +755,7 @@ Public Class clsPeptideModificationContainer
 				  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso
 				  mModifications(intIndex).TargetResidues.Length > 0 Then
 
-					If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+					If Math.Abs(Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 						' Matching mass found
 						' Now see if .TargetResidues contains chTargetResidue
 						If Not chTargetResidue = Nothing AndAlso mModifications(intIndex).TargetResiduesContain(chTargetResidue) Then
@@ -796,7 +795,7 @@ Public Class clsPeptideModificationContainer
 			  mModifications(intIndex).ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType) AndAlso
 			  String.IsNullOrWhiteSpace(mModifications(intIndex).TargetResidues) Then
 
-				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+				If Math.Abs(Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 					' Matching mass found
 					Return mModifications(intIndex)
 				End If
@@ -808,7 +807,7 @@ Public Class clsPeptideModificationContainer
 		' Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing or chTargetResidue = '<' or chTargetResidue = '>'
 		If Not chTargetResidue = Nothing Then
 			For intIndex = 0 To mStandardRefinementModifications.Length - 1
-				If Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+				If Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 					' Matching mass found
 					' Now see if .TargetResidues contains chTargetResidue
 					If mStandardRefinementModifications(intIndex).TargetResiduesContain(chTargetResidue) Then
@@ -843,7 +842,7 @@ Public Class clsPeptideModificationContainer
 		For intIndex = 0 To mModifications.Count - 1
 			If mModifications(intIndex).ModificationType = eModType Then
 
-				If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+				If Math.Abs(Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 					' Matching mass found
 					' Assure that the target residues contain chTargetResidue
 					If Not chTargetResidue = Nothing AndAlso Not mModifications(intIndex).TargetResiduesContain(chTargetResidue) Then
@@ -1212,7 +1211,7 @@ Public Class clsPeptideModificationContainer
 		Try
 			If Not strModificationChars Is Nothing AndAlso strModificationChars.Length > 0 Then
 				If mDefaultModificationSymbols Is Nothing Then
-					mDefaultModificationSymbols = New System.Collections.Queue
+					mDefaultModificationSymbols = New Queue
 				Else
 					mDefaultModificationSymbols.Clear()
 				End If
@@ -1325,7 +1324,7 @@ Public Class clsPeptideModificationContainer
 			For intIndex = 0 To mModifications.Count - 1
 				If mModifications(intIndex).ModificationType = eModificationType Then
 					' Matching modification type
-					If Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision) = 0 Then
+					If Math.Abs(Math.Round(Math.Abs(mModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 						' Matching mass
 						' Compare .TargetResidues
 						blnMatchFound = clsModificationDefinition.EquivalentTargetResidues(mModifications(intIndex).TargetResidues, strTargetResidues, True)

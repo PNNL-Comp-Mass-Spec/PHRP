@@ -537,7 +537,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 		sngProgressPercentComplete = sngPercentComplete
 
 		If blnDescriptionChanged And Me.DebugLevel >= 2 Then
-			If sngProgressPercentComplete = 0 Then
+			If Math.Abs(sngProgressPercentComplete) < Single.Epsilon Then
 				RaiseEvent DebugEvent(strProgressStepDescriptionSaved)
 			Else
 				RaiseEvent DebugEvent(strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)")
