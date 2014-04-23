@@ -63,9 +63,12 @@ Public Class clsPeptideModificationContainer
 
 	' This array holds modifications that Sequest or XTandem will often use but for 
 	' which the auto-addition method sometimes incorrectly notes
-	Protected mStandardRefinementModifications() As clsModificationDefinition
+	Protected mStandardRefinementModifications As List(Of clsModificationDefinition)
 
 	Protected mConsiderModSymbolWhenFindingIdenticalMods As Boolean
+
+	Protected mIntegerMassCorrectionTagLookup As Dictionary(Of Integer, String)
+
 #End Region
 
 #Region "Properties"
@@ -248,7 +251,7 @@ Public Class clsPeptideModificationContainer
 	Public Sub AppendStandardRefinmentModifications()
 		Dim intIndex As Integer
 
-		For intIndex = 0 To mStandardRefinementModifications.Length - 1
+		For intIndex = 0 To mStandardRefinementModifications.Count - 1
 			With mStandardRefinementModifications(intIndex)
 				VerifyModificationPresent(.ModificationMass, .TargetResidues, .ModificationType)
 			End With
@@ -336,6 +339,27 @@ Public Class clsPeptideModificationContainer
 
 	End Function
 
+	''' <summary>
+	''' Looks for the best match in mIntegerMassCorrectionTagLookup for dblModificationMass (which should be close to a integer value)
+	''' </summary>
+	''' <param name="dblModificationMass"></param>
+	''' <returns>The mass correction tag name if a match, otherwise nothing</returns>
+	''' <remarks></remarks>
+	Protected Function GetBestIntegerBasedMassCorrectionTag(ByVal dblModificationMass As Double) As String
+
+		Dim strClosestMassCorrectionTag As String = String.Empty
+
+		For Each tagOverride In mIntegerMassCorrectionTagLookup
+			If Math.Abs(dblModificationMass - tagOverride.Key) < 0.0001 Then
+				strClosestMassCorrectionTag = tagOverride.Value
+				Exit For
+			End If
+		Next
+
+		Return strClosestMassCorrectionTag
+
+	End Function
+
 	Public Function GetModificationByIndex(ByVal intIndex As Integer) As clsModificationDefinition
 		If intIndex >= 0 And intIndex < mModifications.Count Then
 			Return mModifications(intIndex)
@@ -398,6 +422,15 @@ Public Class clsPeptideModificationContainer
 			dblClosestMassCorrectionTagMassDiff = Double.MaxValue
 
 			Try
+
+				If intMassDigitsOfPrecisionStop = 0 Then
+					strClosestMassCorrectionTag = GetBestIntegerBasedMassCorrectionTag(dblModificationMass)
+					If Not String.IsNullOrEmpty(strClosestMassCorrectionTag) Then
+						dblClosestMassCorrectionTagMassDiff = 0
+						Exit Try
+					End If
+				End If
+
 				' First look for an exact match in mMassCorrectionTags
 				objEnum = mMassCorrectionTags.GetEnumerator
 				Do While objEnum.MoveNext
@@ -639,7 +672,7 @@ Public Class clsPeptideModificationContainer
 		' Still no match; look for the modification mass and residue in mStandardRefinementModifications
 		' Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing
 		If Not chTargetResidue = Nothing Then
-			For intIndex = 0 To mStandardRefinementModifications.Length - 1
+			For intIndex = 0 To mStandardRefinementModifications.Count - 1
 				If Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 					' Matching mass found
 					' Now see if .TargetResidues contains chTargetResidue
@@ -806,7 +839,7 @@ Public Class clsPeptideModificationContainer
 		' Still no match; look for the modification mass and residue in mStandardRefinementModifications
 		' Note that N-Terminal or C-Terminal mods will have chTargetResidue = Nothing or chTargetResidue = '<' or chTargetResidue = '>'
 		If Not chTargetResidue = Nothing Then
-			For intIndex = 0 To mStandardRefinementModifications.Length - 1
+			For intIndex = 0 To mStandardRefinementModifications.Count - 1
 				If Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications(intIndex).ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < Single.Epsilon Then
 					' Matching mass found
 					' Now see if .TargetResidues contains chTargetResidue
@@ -872,6 +905,8 @@ Public Class clsPeptideModificationContainer
 		ClearModifications()
 
 		UpdateStandardRefinementModifications()
+
+		UpdateIntegerBasedModificationMap()
 
 	End Sub
 
@@ -1119,9 +1154,9 @@ Public Class clsPeptideModificationContainer
 				mMassCorrectionTags.Clear()
 			End If
 
-			' Note: If the mass correction tag names in this list contain spaces at the 
-			'       beginning or end, then function StoreMassCorrectionTag will remove them
-
+			' Note: Function StoreMassCorrectionTag will remove spaces 
+			' from the beginning or end of the mass correction tag names
+			StoreMassCorrectionTag("4xDeut  ", 4.025107)
 			StoreMassCorrectionTag("6C134N15", 10.008269)
 			StoreMassCorrectionTag("6xC13N15", 7.017164)
 			StoreMassCorrectionTag("AcetAmid", 41.02655)
@@ -1131,13 +1166,16 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("AlkSulf ", -25.0316)
 			StoreMassCorrectionTag("Aminaton", 15.010899)
 			StoreMassCorrectionTag("AmOxButa", -2.01565)
+			StoreMassCorrectionTag("Bromo   ", 77.910507)
 			StoreMassCorrectionTag("BS3Olnk ", 156.078644)
 			StoreMassCorrectionTag("C13DtFrm", 36.07567)
 			StoreMassCorrectionTag("Carbamyl", 43.005814)
 			StoreMassCorrectionTag("Cyano   ", 24.995249)
 			StoreMassCorrectionTag("Cys-Dha ", -33.98772)
+			StoreMassCorrectionTag("Cystnyl ", 119.004097)
 			StoreMassCorrectionTag("Deamide ", 0.984016)
 			StoreMassCorrectionTag("DeutForm", 32.056407)
+			StoreMassCorrectionTag("DeutMeth", 17.034479)
 			StoreMassCorrectionTag("Dimethyl", 28.0313)
 			StoreMassCorrectionTag("DTBP_Alk", 144.03573)
 			StoreMassCorrectionTag("Formyl  ", 27.994915)
@@ -1145,17 +1183,22 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("GalNAMan", 664.2551)
 			StoreMassCorrectionTag("Gluthone", 305.068146)
 			StoreMassCorrectionTag("Guanid  ", 42.021797)
-			StoreMassCorrectionTag("Heme_615", 615.1694)
+			StoreMassCorrectionTag("Heme_615", 615.169458)
 			StoreMassCorrectionTag("Hexosam ", 203.079376)
 			StoreMassCorrectionTag("Hexose  ", 162.052826)
+			StoreMassCorrectionTag("ICAT_D0 ", 442.225006)
+			StoreMassCorrectionTag("ICAT_D8 ", 450.275208)
 			StoreMassCorrectionTag("IodoAcet", 57.021465)
 			StoreMassCorrectionTag("IodoAcid", 58.005478)
 			StoreMassCorrectionTag("Iso_N15 ", 0.997035)
 			StoreMassCorrectionTag("itrac   ", 144.102066)
 			StoreMassCorrectionTag("iTRAQ8  ", 304.205353)
+			StoreMassCorrectionTag("LeuToMet", 17.956421)
+			StoreMassCorrectionTag("Lipid2  ", 576.51178)
 			StoreMassCorrectionTag("Mercury ", 199.9549)
 			StoreMassCorrectionTag("Met_O18 ", 16.028204)
 			StoreMassCorrectionTag("Methyl  ", 14.01565)
+			StoreMassCorrectionTag("Methylmn", 13.031634)
 			StoreMassCorrectionTag("MinusH2O", -18.010565)
 			StoreMassCorrectionTag("NEM     ", 125.047676)
 			StoreMassCorrectionTag("NH3_Loss", -17.026548)
@@ -1168,11 +1211,13 @@ Public Class clsPeptideModificationContainer
 			StoreMassCorrectionTag("OxoAla  ", -17.992805)
 			StoreMassCorrectionTag("palmtlic", 236.21402)
 			StoreMassCorrectionTag("PCGalNAz", 502.202332)
+			StoreMassCorrectionTag("PEO     ", 414.193695)
 			StoreMassCorrectionTag("PhosAden", 329.052521)
 			StoreMassCorrectionTag("Phosph  ", 79.966331)
 			StoreMassCorrectionTag("PhosUrid", 306.025299)
 			StoreMassCorrectionTag("Plus1Oxy", 15.994915)
 			StoreMassCorrectionTag("Plus2Oxy", 31.989828)
+			StoreMassCorrectionTag("Plus3Oxy", 47.984745)
 			StoreMassCorrectionTag("Propnyl ", 56.026215)
 			StoreMassCorrectionTag("Pyro-cmC", 39.994915)
 			StoreMassCorrectionTag("SATA_Alk", 131.0041)
@@ -1234,26 +1279,70 @@ Public Class clsPeptideModificationContainer
 
 	End Sub
 
+	Private Sub UpdateIntegerBasedModificationMap()
+		mIntegerMassCorrectionTagLookup = New Dictionary(Of Integer, String)
+
+		mIntegerMassCorrectionTagLookup.Add(-18, "MinusH2O")
+		mIntegerMassCorrectionTagLookup.Add(-17, "NH3_Loss")
+		mIntegerMassCorrectionTagLookup.Add(-11, "AsnToCys")
+		mIntegerMassCorrectionTagLookup.Add(-8, "HisToGlu")
+		mIntegerMassCorrectionTagLookup.Add(-7, "TyrToArg")
+		mIntegerMassCorrectionTagLookup.Add(-4, "ThrToPro")
+		mIntegerMassCorrectionTagLookup.Add(-3, "MetToLys")
+		mIntegerMassCorrectionTagLookup.Add(-1, "Dehydro")
+		mIntegerMassCorrectionTagLookup.Add(1, "Deamide")
+		mIntegerMassCorrectionTagLookup.Add(2, "GluToMet")
+		mIntegerMassCorrectionTagLookup.Add(4, "TrypOxy")
+		mIntegerMassCorrectionTagLookup.Add(5, "5C13")
+		mIntegerMassCorrectionTagLookup.Add(6, "6C13")
+		mIntegerMassCorrectionTagLookup.Add(10, "D10-Leu")
+		mIntegerMassCorrectionTagLookup.Add(13, "Methylmn")
+		mIntegerMassCorrectionTagLookup.Add(14, "Methyl")
+		mIntegerMassCorrectionTagLookup.Add(16, "Plus1Oxy")
+		mIntegerMassCorrectionTagLookup.Add(18, "LeuToMet")
+		mIntegerMassCorrectionTagLookup.Add(25, "Cyano")
+		mIntegerMassCorrectionTagLookup.Add(28, "Dimethyl")
+		mIntegerMassCorrectionTagLookup.Add(32, "Plus2Oxy")
+		mIntegerMassCorrectionTagLookup.Add(42, "Acetyl")
+		mIntegerMassCorrectionTagLookup.Add(43, "Carbamyl")
+		mIntegerMassCorrectionTagLookup.Add(45, "NO2_Addn")
+		mIntegerMassCorrectionTagLookup.Add(48, "Plus3Oxy")
+		mIntegerMassCorrectionTagLookup.Add(56, "Propnyl")
+		mIntegerMassCorrectionTagLookup.Add(58, "IodoAcid")
+		mIntegerMassCorrectionTagLookup.Add(80, "Phosph")
+		mIntegerMassCorrectionTagLookup.Add(89, "Biotinyl")
+		mIntegerMassCorrectionTagLookup.Add(96, "PhosphH")
+		mIntegerMassCorrectionTagLookup.Add(104, "Ubiq_H")
+		mIntegerMassCorrectionTagLookup.Add(116, "Sucinate")
+		mIntegerMassCorrectionTagLookup.Add(119, "Cystnyl")
+		mIntegerMassCorrectionTagLookup.Add(125, "NEM")
+		mIntegerMassCorrectionTagLookup.Add(144, "itrac")
+		mIntegerMassCorrectionTagLookup.Add(215, "MethylHg")
+		mIntegerMassCorrectionTagLookup.Add(236, "ICAT_C13")
+		mIntegerMassCorrectionTagLookup.Add(442, "ICAT_D0")
+
+	End Sub
+
 	Private Sub UpdateStandardRefinementModifications()
 		Dim dblModificationMass As Double
 
-		ReDim mStandardRefinementModifications(1)
+		mStandardRefinementModifications = New List(Of clsModificationDefinition)
 
 		dblModificationMass = -17.026549
-		mStandardRefinementModifications(0) = New clsModificationDefinition( _
-		  clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL, _
-		  dblModificationMass, _
-		  "Q", _
-		  clsModificationDefinition.eModificationTypeConstants.DynamicMod, _
-		  LookupMassCorrectionTagByMass(dblModificationMass))
+		mStandardRefinementModifications.Add(New clsModificationDefinition(
+		  clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL,
+		  dblModificationMass,
+		  "Q",
+		  clsModificationDefinition.eModificationTypeConstants.DynamicMod,
+		  LookupMassCorrectionTagByMass(dblModificationMass)))
 
 		dblModificationMass = -18.0106
-		mStandardRefinementModifications(1) = New clsModificationDefinition( _
-		  clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL, _
-		  dblModificationMass, _
-		  "E", _
-		  clsModificationDefinition.eModificationTypeConstants.DynamicMod, _
-		  LookupMassCorrectionTagByMass(dblModificationMass))
+		mStandardRefinementModifications.Add(New clsModificationDefinition(
+		  clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL,
+		  dblModificationMass,
+		  "E",
+		  clsModificationDefinition.eModificationTypeConstants.DynamicMod,
+		  LookupMassCorrectionTagByMass(dblModificationMass)))
 
 	End Sub
 

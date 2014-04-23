@@ -31,6 +31,7 @@ AlkSulf2	-9.0367	-
 AmAdipic	-1.031634	-
 Aminaton	15.010899	-
 AmOxButa	-2.01565	-
+AsnToCys	-11.033743	-
 ATW8BtnS	604.3645	-
 ATW8TEV 	564.3748	-
 Benzam  	103.0422	-
@@ -125,6 +126,7 @@ GamGluAl	-43.053432	-
 GEEster 	85.0528	-
 GluCPD4 	550.1953	-
 Gluthone	305.068146	-
+GluToMet	1.997892	-
 Gly1024 	1024.3594	-
 Gly1170 	1170.4174	-
 Guanid  	42.021797	-
@@ -134,8 +136,10 @@ Heme_Sas	614.1819	-
 HemeAddn	616.177307	-
 Hexosam 	203.079376	-
 Hexose  	162.052826	-
+HHN     	656.2276	-
 HisOxyD 	-22.031969	-
 HisOxyN 	-23.015984	-
+HisToGlu	-8.016319	-
 HMOSERLC	-48.003372	-
 holoACP 	340.3341	-
 IAAABP  	568.3207	-
@@ -170,7 +174,9 @@ Met_O18 	16.028204	-
 Meththio	45.98772	-
 Methyl  	14.01565	-
 MethylHg	214.9784	-
+Methylmn	13.031634	-
 MetLossA	-89.029922	-
+MetToLys	-2.945522	-
 MinusH2O	-18.010565	-
 MPITC   	186.0827	-
 MTSLAddn	184.079605	-
@@ -257,6 +263,7 @@ Sulfydrl	73.9826362	-
 SumoEstr	498.2417	-
 Sumoylat	484.228149	-
 Taxol   	1206.4685	-
+ThrToPro	-3.994915	-
 TMPPAc  	572.181152	-
 TMT0Tag 	224.152481	-
 TMT6Tag 	229.162933	-
@@ -266,6 +273,7 @@ TrypOxy 	3.994915	-
 TrypPD4 	494.74	-
 Two_C12 	24	-
 Two_O18 	4.008491	-
+TyrToArg	-6.962218	-
 Ubiq_02 	114.042931	-
 Ubiq_H  	104.041153	-
 Ubiq_H02	233.1583	-

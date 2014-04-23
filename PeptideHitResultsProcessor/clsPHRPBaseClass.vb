@@ -32,7 +32,7 @@ Imports System.Text.RegularExpressions
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "February 24, 2014"
+		mFileDate = "April 23, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -1815,15 +1815,16 @@ Public MustInherit Class clsPHRPBaseClass
 
 				' Write the header line
 				swOutFile.WriteLine( _
-				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol & SEP_CHAR & _
-				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass & SEP_CHAR & _
-				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues & SEP_CHAR & _
-				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type & SEP_CHAR & _
-				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag & SEP_CHAR & _
-				  PHRPReader.clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count)
+				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol & SEP_CHAR & _
+				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass & SEP_CHAR & _
+				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues & SEP_CHAR & _
+				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type & SEP_CHAR & _
+				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag & SEP_CHAR & _
+				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count)
 
 				For intIndex = 0 To mPeptideMods.ModificationCount - 1
-					With mPeptideMods.GetModificationByIndex(intIndex)
+					Dim oModInfo = mPeptideMods.GetModificationByIndex(intIndex)
+					With oModInfo
 						If .OccurrenceCount > 0 OrElse Not .UnknownModAutoDefined Then
 							swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR & _
 							  .ModificationMass.ToString & SEP_CHAR & _
