@@ -400,9 +400,7 @@ Public Class clsMSAlignResultsProcessor
 
 		strCleanSequence = GetCleanSequence(strPeptide)
 
-		Dim objMassCalculator As clsPeptideMassCalculator = New clsPeptideMassCalculator()
-
-		dblMass = objMassCalculator.ComputeSequenceMass(strCleanSequence)
+		dblMass = mPeptideSeqMassCalculator.ComputeSequenceMass(strCleanSequence)
 
 		If Math.Abs(dblTotalModMass) > Double.Epsilon Then
 			dblMass += dblTotalModMass
@@ -499,7 +497,7 @@ Public Class clsMSAlignResultsProcessor
 						Dim lstFilteredSearchResults = New List(Of udtMSAlignSearchResultType)
 
 						' Parse the input file
-						Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+						Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 							strLineIn = srDataFile.ReadLine()
 							If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
@@ -610,7 +608,7 @@ Public Class clsMSAlignResultsProcessor
 				' Read the contents of the parameter (or mods) file
 				Using srInFile As StreamReader = New StreamReader(New FileStream(strMSAlignParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-					Do While srInFile.Peek <> -1
+					Do While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().Trim()
 
 						If strLineIn.Length > 0 Then
@@ -735,7 +733,7 @@ Public Class clsMSAlignResultsProcessor
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
-					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+					Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 
 						strLineIn = srDataFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then

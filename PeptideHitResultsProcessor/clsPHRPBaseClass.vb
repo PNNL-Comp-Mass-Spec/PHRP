@@ -169,6 +169,8 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected mPeptideNTerminusMassChange As Double				' This is ignored if equal to 0; typical non-zero value is 1.0078246
 	Protected mPeptideCTerminusMassChange As Double				' This is ignored if equal to 0; typical non-zero value is 17.0027387
 
+	Protected mPeptideSeqMassCalculator As clsPeptideMassCalculator
+
 	Protected mPeptideMods As clsPeptideModificationContainer
 	Protected mUniqueSequences As clsUniqueSequencesContainer
 	Protected mSeqToProteinMap As Hashtable
@@ -1395,6 +1397,8 @@ Public MustInherit Class clsPHRPBaseClass
 		mPeptideNTerminusMassChange = clsPeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE
 		mPeptideCTerminusMassChange = clsPeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE
 
+		mPeptideSeqMassCalculator = New clsPeptideMassCalculator()
+
 		' Initialize mPeptideMods
 		mPeptideMods = New clsPeptideModificationContainer
 
@@ -1651,7 +1655,7 @@ Public MustInherit Class clsPHRPBaseClass
 			Using srInFile As StreamReader = New StreamReader(New FileStream(strPepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
 				intLinesRead = 0
-				Do While srInFile.Peek <> -1
+				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine().Trim()
 
 					If strLineIn.Length > 0 Then

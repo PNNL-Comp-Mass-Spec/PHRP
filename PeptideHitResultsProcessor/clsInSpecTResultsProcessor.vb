@@ -497,7 +497,7 @@ Public Class clsInSpecTResultsProcessor
 						ReDim udtFilteredSearchResults(999)
 
 						' Parse the input file
-						Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+						Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 							strLineIn = srDataFile.ReadLine()
 							If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 								' Initialize udtSearchResult
@@ -663,7 +663,7 @@ Public Class clsInSpecTResultsProcessor
 			' Read the contents of the inspect parameter file
 			Using srInFile As StreamReader = New StreamReader(New FileStream(strInspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-				Do While srInFile.Peek <> -1
+				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine().Trim()
 
 					If strLineIn.Length > 0 Then
@@ -999,7 +999,7 @@ Public Class clsInSpecTResultsProcessor
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
-					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+					Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 
 						strLineIn = srDataFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then

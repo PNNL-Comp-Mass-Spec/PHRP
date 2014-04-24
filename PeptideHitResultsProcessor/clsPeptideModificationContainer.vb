@@ -202,7 +202,7 @@ Public Class clsPeptideModificationContainer
 			Select Case eResidueTerminusState
 				Case eResidueTerminusStateConstants.PeptideNTerminus, eResidueTerminusStateConstants.ProteinNTerminus, eResidueTerminusStateConstants.ProteinNandCCTerminus
 					strTargetResidues = N_TERMINAL_PEPTIDE_SYMBOL_DMS
-				Case eResidueTerminusStateConstants.PeptideNTerminus, eResidueTerminusStateConstants.PeptideCTerminus
+				Case eResidueTerminusStateConstants.PeptideCTerminus, eResidueTerminusStateConstants.ProteinCTerminus
 					strTargetResidues = C_TERMINAL_PEPTIDE_SYMBOL_DMS
 				Case Else
 					Throw New Exception("Unrecognized eResidueTerminusStateConstants enum: " & eResidueTerminusState)

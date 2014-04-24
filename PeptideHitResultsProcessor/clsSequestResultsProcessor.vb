@@ -280,7 +280,7 @@ Public Class clsSequestResultsProcessor
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
-					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+					Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 
 						strLineIn = srDataFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then

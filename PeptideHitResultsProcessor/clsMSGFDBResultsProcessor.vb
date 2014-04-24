@@ -512,9 +512,7 @@ Public Class clsMSGFDBResultsProcessor
 
 		strCleanSequence = GetCleanSequence(strPeptide)
 
-		Dim objMassCalculator As clsPeptideMassCalculator = New clsPeptideMassCalculator()
-
-		dblMass = objMassCalculator.ComputeSequenceMass(strCleanSequence)
+		dblMass = mPeptideSeqMassCalculator.ComputeSequenceMass(strCleanSequence)
 		dblMass += dblTotalModMass
 
 		Return dblMass
@@ -737,7 +735,7 @@ Public Class clsMSGFDBResultsProcessor
 						ReDim udtFilteredSearchResults(999)
 
 						' Parse the input file
-						Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+						Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 							strLineIn = srDataFile.ReadLine()
 							If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
@@ -937,7 +935,7 @@ Public Class clsMSGFDBResultsProcessor
 			' Read the contents of the parameter (or mods) file
 			Using srInFile As StreamReader = New StreamReader(New FileStream(strMSGFDBParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-				Do While srInFile.Peek <> -1
+				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine().Trim()
 
 					If String.IsNullOrWhiteSpace(strLineIn) Then Continue Do
@@ -1073,7 +1071,7 @@ Public Class clsMSGFDBResultsProcessor
 			' Read the contents of the parameter file
 			Using srInFile As StreamReader = New StreamReader(New FileStream(strMSGFDBParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-				Do While srInFile.Peek <> -1
+				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine().Trim()
 
 					If String.IsNullOrWhiteSpace(strLineIn) Then Continue Do
@@ -1306,7 +1304,7 @@ Public Class clsMSGFDBResultsProcessor
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
-					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+					Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 
 						strLineIn = srDataFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then

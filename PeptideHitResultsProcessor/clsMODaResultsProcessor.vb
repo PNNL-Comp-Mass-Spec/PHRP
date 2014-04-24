@@ -474,9 +474,7 @@ Public Class clsMODaResultsProcessor
 
 		Dim strCleanSequence = GetCleanSequence(strPeptide)
 
-		Dim objMassCalculator As clsPeptideMassCalculator = New clsPeptideMassCalculator()
-
-		Dim dblMass = objMassCalculator.ComputeSequenceMass(strCleanSequence)
+		Dim dblMass = mPeptideSeqMassCalculator.ComputeSequenceMass(strCleanSequence)
 
 		If Math.Abs(dblTotalModMass) > Double.Epsilon Then
 			dblMass += dblTotalModMass
@@ -504,11 +502,34 @@ Public Class clsMODaResultsProcessor
 
 		clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strPeptide, strPrimarySequence, strPrefix, strSuffix)
 
+		' Parse the dynamic mods reported by MODa
 		For Each reMatch As Match In reModMassRegEx.Matches(strPrimarySequence)
 			Dim dblModMassFound As Double
 			If Double.TryParse(reMatch.Groups(1).Value, dblModMassFound) Then
 				dblTotalModMass += dblModMassFound
 			End If
+		Next
+
+		' Now look for static mods 
+		For intIndex = 0 To strPrimarySequence.Length - 1
+			Dim chChar = strPrimarySequence.Chars(intIndex)
+
+			If IsLetterAtoZ(chChar) Then
+
+				' Look for static mods to associate with this residue
+				For intModIndex = 0 To mPeptideMods.ModificationCount - 1
+					If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+						Dim objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+
+						If objModificationDefinition.TargetResiduesContain(chChar) Then
+							' Match found
+							dblTotalModMass += objModificationDefinition.ModificationMass
+						End If
+
+					End If
+				Next intModIndex
+			End If
+
 		Next
 
 		Return dblTotalModMass
@@ -572,7 +593,7 @@ Public Class clsMODaResultsProcessor
 						Dim lstFilteredSearchResults = New List(Of udtMODaSearchResultType)
 
 						' Parse the input file
-						Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+						Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 							strLineIn = srDataFile.ReadLine()
 							Dim blnSkipLine = False
 
@@ -688,7 +709,7 @@ Public Class clsMODaResultsProcessor
 				' Read the contents of the parameter (or mods) file
 				Using srInFile As StreamReader = New StreamReader(New FileStream(strMODaParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-					Do While srInFile.Peek <> -1
+					Do While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().Trim()
 
 						If strLineIn.Length = 0 Then
@@ -761,7 +782,7 @@ Public Class clsMODaResultsProcessor
 
 			' Look for the IndexToScanMap file that corresponds to fiInputFile
 			Dim lstScanMapFiles As List(Of FileInfo)
-			Dim matchIndex = fiInputFile.Name.LastIndexOf("_moda", System.StringComparison.Ordinal)			
+			Dim matchIndex = fiInputFile.Name.LastIndexOf("_moda", System.StringComparison.Ordinal)
 			Dim sourceFileDescription As String = ""
 
 			If matchIndex > 0 Then
@@ -908,7 +929,7 @@ Public Class clsMODaResultsProcessor
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
-					Do While srDataFile.Peek >= 0 And Not MyBase.AbortProcessing
+					Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
 
 						strLineIn = srDataFile.ReadLine()
 						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
@@ -1112,6 +1133,7 @@ Public Class clsMODaResultsProcessor
 
 					' Parse the sequence to determine the total mod mass
 					' Note that we do not remove any of the mod symbols since MODa identifies mods by mass alone
+					' Note that static mods are implied (thus are not explicitly displayed by MODa)
 					dblTotalModMass = ComputeTotalModMass(.Peptide)
 
 					' Compute monoisotopic mass of the peptide
@@ -1202,9 +1224,9 @@ Public Class clsMODaResultsProcessor
 
 		lstColumnNames.Add("SpectrumFile", eMODaResultsFileColumns.SpectrumFileName)
 		lstColumnNames.Add("Index", eMODaResultsFileColumns.SpectrumIndex)
-		lstColumnNames.Add("ObservedMonoMass", eMODaResultsFileColumns.ObservedMonoMass)
+		lstColumnNames.Add("ObservedMW", eMODaResultsFileColumns.ObservedMonoMass)
 		lstColumnNames.Add("Charge", eMODaResultsFileColumns.Charge)
-		lstColumnNames.Add("CalculatedMonoMass", eMODaResultsFileColumns.CalculatedMonoMass)
+		lstColumnNames.Add("CalculatedMW", eMODaResultsFileColumns.CalculatedMonoMass)
 		lstColumnNames.Add("DeltaMass", eMODaResultsFileColumns.DeltaMass)
 		lstColumnNames.Add("Score", eMODaResultsFileColumns.Score)
 		lstColumnNames.Add("Probability", eMODaResultsFileColumns.Probability)
