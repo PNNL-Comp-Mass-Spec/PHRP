@@ -172,7 +172,8 @@ Public Class clsPHRPParserMODa
 	End Function
 
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & FILENAME_SUFFIX_FHT
+		' MODa does not have a first-hits file; just the _syn.txt file
+		Return String.Empty
 	End Function
 
 	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String

@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.15226; April 23, 2014
+	- GetPHRPFirstHitsFileName now returns an empty string for MODa
+
 Version 1.1.5207; April 4, 2014
 	- Replaced the newly added shared functions with MustOverride properties in clsPHRPParser (and its derived classes)
 
