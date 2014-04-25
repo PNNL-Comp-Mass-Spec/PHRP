@@ -1063,7 +1063,7 @@ Public MustInherit Class clsPHRPParser
 				End If
 
                 ' Make sure all of the proteins in objPSM.Proteins are defined in objPSM.ProteinDetails
-                Dim addnlProteins1 = objPSM.Proteins.Except(objPSM.ProteinDetails.Keys)
+				Dim addnlProteins1 = objPSM.Proteins.Except(objPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase)
 
                 For Each proteinName In addnlProteins1
                     Dim oProtein = New clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None)
