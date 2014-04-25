@@ -2045,12 +2045,11 @@ Public Class clsPHRPReader
 										End If
 
 										If isDuplicate Then
-											' Update the protein list
-											For Each strProtein As String In objNewPSM.Proteins
-												If Not .Proteins.Contains(strProtein, StringComparer.CurrentCultureIgnoreCase) Then
-													.AddProtein(strProtein)
-												End If
-											Next
+                                            ' Update the protein list
+                                            Dim addnlProteins = objNewPSM.Proteins.Except(.Proteins, StringComparer.CurrentCultureIgnoreCase)
+                                            If addnlProteins.Count > 0 Then
+                                                .Proteins.AddRange(addnlProteins)
+                                            End If
 										Else
 											blnReadNext = False
 											mCachedLine = String.Copy(strLineIn)

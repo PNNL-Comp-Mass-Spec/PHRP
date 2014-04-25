@@ -601,6 +601,10 @@ Public MustInherit Class clsPHRPParser
 		Dim blnSuccess As Boolean
 		Dim objReader As clsPHRPSeqMapReader
 
+        Dim entriesParsed As Integer
+        Dim dtLastProgress As DateTime = DateTime.UtcNow()
+        Dim blnNotifyComplete As Boolean
+
 		Try
 
 			ShowMessage("Reading the PHRP SeqInfo file")
@@ -626,21 +630,40 @@ Public MustInherit Class clsPHRPParser
 					'intSeqID = objItem.Value
 
 					Dim lstProteinsForSeqID As List(Of clsProteinInfo) = Nothing
-					Dim lstProteinsForResultID = New List(Of String)
+                    Dim lstProteinsForResultID As List(Of String)
 
-					If mSeqToProteinMap.TryGetValue(objItem.Value, lstProteinsForSeqID) Then
+                    If mSeqToProteinMap.TryGetValue(objItem.Value, lstProteinsForSeqID) Then
+                        Const USE_LINQ = True
+                        If USE_LINQ Then
+                            lstProteinsForResultID = (From objProtein In lstProteinsForSeqID Select objProtein.ProteinName Distinct).ToList()
+                        Else
 
-						For Each objProtein As clsProteinInfo In lstProteinsForSeqID
-							If Not lstProteinsForResultID.Contains(objProtein.ProteinName) Then
-								lstProteinsForResultID.Add(objProtein.ProteinName)
-							End If
-						Next
-
-					End If
+                            lstProteinsForResultID = New List(Of String)(lstProteinsForSeqID.Count)
+                            For Each objProtein As clsProteinInfo In lstProteinsForSeqID
+                                If Not lstProteinsForResultID.Contains(objProtein.ProteinName) Then
+                                    lstProteinsForResultID.Add(objProtein.ProteinName)
+                                End If
+                            Next
+                        End If
+                    Else
+                        lstProteinsForResultID = New List(Of String)
+                    End If
 
 					mResultIDToProteins.Add(objItem.Key, lstProteinsForResultID)
 
+                    entriesParsed += 1
+                    If DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 5 Then
+                        Dim pctComplete = entriesParsed / CDbl(mResultToSeqMap.Count) * 100
+                        Console.WriteLine(" ... associating proteins with sequences: " & pctComplete.ToString("0.0") & "% complete")
+                        dtLastProgress = DateTime.UtcNow
+                        blnNotifyComplete = True
+                    End If
+
 				Next
+
+                If blnNotifyComplete Then
+                    Console.WriteLine(" ... associating proteins with sequences: 100% complete")
+                End If
 
 			End If
 
@@ -1039,63 +1062,55 @@ Public MustInherit Class clsPHRPParser
 					Next
 				End If
 
-				' Make sure all of the proteins in objPSM.Proteins are defined in objPSM.ProteinDetails
-				For Each proteinName In objPSM.Proteins
-					Dim blnMatchFound As Boolean = False
-					For Each oProtein In objPSM.ProteinDetails
-						If String.Equals(oProtein.ProteinName, proteinName, StringComparison.CurrentCultureIgnoreCase) Then
-							blnMatchFound = True
-							Exit For
-						End If
-					Next
+                ' Make sure all of the proteins in objPSM.Proteins are defined in objPSM.ProteinDetails
+                Dim addnlProteins1 = objPSM.Proteins.Except(objPSM.ProteinDetails.Keys)
 
-					If Not blnMatchFound Then
-						Dim oProtein = New clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None)
-						objPSM.ProteinDetails.Add(oProtein)
-					End If
-				Next
+                For Each proteinName In addnlProteins1
+                    Dim oProtein = New clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None)
+                    objPSM.ProteinDetails.Add(proteinName, oProtein)
+                Next
 
-				' Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
-				For Each oProtein In objPSM.ProteinDetails
-					If Not objPSM.Proteins.Contains(oProtein.ProteinName, StringComparer.CurrentCultureIgnoreCase) Then
-						objPSM.Proteins.Add(oProtein.ProteinName)
-					End If
-				Next
+                ' Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
+                Dim addnlProteins2 = (From item In objPSM.ProteinDetails Select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase)
+                objPSM.Proteins.AddRange(addnlProteins2)
 
-				If mPepToProteinMap.Count > 0 Then
-					Dim oPepToProteinMapInfo As clsPepToProteinMapInfo = Nothing
-					If mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, oPepToProteinMapInfo) Then
+                If mPepToProteinMap.Count > 0 Then
+                    ' Make sure the residue start/end locations are up-to-date in objPSM.ProteinDetails
 
-						For Each oProtein In objPSM.ProteinDetails
+                    Dim oPepToProteinMapInfo As clsPepToProteinMapInfo = Nothing
+                    If mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, oPepToProteinMapInfo) Then
 
-							' Find the matching protein in oPepToProteinMapInfo
-							For Each udtProteinMapInfo In oPepToProteinMapInfo.ProteinMapInfo
-								If String.Equals(udtProteinMapInfo.Protein, oProtein.ProteinName, StringComparison.CurrentCulture) Then
-									oProtein.UpdateLocationInProtein(udtProteinMapInfo.ResidueStart, udtProteinMapInfo.ResidueEnd)
-								End If
-							Next
-						Next
+                        For Each oProtein In objPSM.ProteinDetails
 
-					End If
-				End If
+                            ' Find the matching protein in oPepToProteinMapInfo
+                            Dim lstLocations As List(Of clsPepToProteinMapInfo.udtProteinLocationInfo) = Nothing
 
-			End If
-		End If
+                            If oPepToProteinMapInfo.ProteinMapInfo.TryGetValue(oProtein.Key, lstLocations) Then
+                                Dim udtFirstLocation = lstLocations.First
+                                oProtein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd)
+                            End If
+                        Next
 
-		If blnSuccess Then
-			Dim strPrimarySequence As String = String.Empty
-			Dim strPrefix As String = String.Empty
-			Dim strSuffix As String = String.Empty
+                    End If
+                End If
 
-			If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, strPrimarySequence, strPrefix, strSuffix) Then
-				objPSM.PeptideWithNumericMods = strPrefix & "." & ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues) & "." & strSuffix
-			Else
-				objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
-			End If
+            End If
+        End If
 
-		End If
+        If blnSuccess Then
+            Dim strPrimarySequence As String = String.Empty
+            Dim strPrefix As String = String.Empty
+            Dim strSuffix As String = String.Empty
 
-		Return blnSuccess
+            If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, strPrimarySequence, strPrefix, strSuffix) Then
+                objPSM.PeptideWithNumericMods = strPrefix & "." & ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues) & "." & strSuffix
+            Else
+                objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
+            End If
+
+        End If
+
+        Return blnSuccess
 	End Function
 
 	Protected Function UpdatePSMFindMatchingModInfo( _

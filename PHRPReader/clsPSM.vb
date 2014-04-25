@@ -50,7 +50,7 @@ Public Class clsPSM
 	Protected mProteins As List(Of String)
 
 	' Lists protein name, description, cleavage state, terminus state, residue start, and residue end
-	Protected mProteinDetails As List(Of clsProteinInfo)
+    Protected mProteinDetails As Dictionary(Of String, clsProteinInfo)
 
 	' This dictionary tracks additional, tool-specific scores
 	Protected mAdditionalScores As Dictionary(Of String, String)
@@ -334,11 +334,11 @@ Public Class clsPSM
 		End Get
 	End Property
 
-	Public ReadOnly Property ProteinDetails() As List(Of clsProteinInfo)
-		Get
-			Return mProteinDetails
-		End Get
-	End Property
+    Public ReadOnly Property ProteinDetails() As Dictionary(Of String, clsProteinInfo)
+        Get
+            Return mProteinDetails
+        End Get
+    End Property
 
 	''' <summary>
 	''' ResultID of this peptide (typically assigned by the search engine)
@@ -438,7 +438,7 @@ Public Class clsPSM
 	Public Sub New()
 		mScanList = New SortedSet(Of Integer)
 		mProteins = New List(Of String)
-		mProteinDetails = New List(Of clsProteinInfo)
+        mProteinDetails = New Dictionary(Of String, clsProteinInfo)(StringComparer.CurrentCultureIgnoreCase)
 		mModifiedPeptideResidues = New List(Of clsAminoAcidModInfo)
 		mAdditionalScores = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
 		Me.Clear()
@@ -502,14 +502,13 @@ Public Class clsPSM
 	''' <remarks></remarks>
 	Public Sub AddProteinDetail(ByVal oProteinInfo As clsProteinInfo)
 
-		For i As Integer = 0 To mProteinDetails.Count - 1
-			If mProteinDetails(i).ProteinName = oProteinInfo.ProteinName Then
-				mProteinDetails(i) = oProteinInfo
-				Exit Sub
-			End If
-		Next
+        Dim oCachedInfo As clsProteinInfo = Nothing
+        If mProteinDetails.TryGetValue(oProteinInfo.ProteinName, oCachedInfo) Then
+            mProteinDetails(oProteinInfo.ProteinName) = oProteinInfo
+        Else
+            mProteinDetails.Add(oProteinInfo.ProteinName, oProteinInfo)
+        End If
 
-		mProteinDetails.Add(oProteinInfo)
 	End Sub
 
 	''' <summary>
@@ -592,9 +591,9 @@ Public Class clsPSM
 				.AddProtein(strProtein)
 			Next
 
-			For Each item In mProteinDetails
-				.AddProteinDetail(item)
-			Next
+            For Each item In mProteinDetails.Values
+                .AddProteinDetail(item)
+            Next
 
 			For Each objItem In mModifiedPeptideResidues
 				.AddModifiedResidue(objItem.Residue, objItem.ResidueLocInPeptide, objItem.ResidueTerminusState, objItem.ModDefinition)

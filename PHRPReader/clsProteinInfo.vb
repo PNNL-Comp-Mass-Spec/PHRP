@@ -96,5 +96,10 @@ Public Class clsProteinInfo
 		mResidueStart = ProteinResidueStart
 		mResidueEnd = ProteinResidueEnd
 
-	End Sub
+    End Sub
+
+    Public Overloads Function ToString() As String
+        Return mProteinName
+    End Function
+
 End Class

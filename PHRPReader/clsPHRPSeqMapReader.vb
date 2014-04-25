@@ -190,7 +190,7 @@ Public Class clsPHRPSeqMapReader
 	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
 	  ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
-		Dim lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
+        Dim lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
 
 		Return GetProteinMapping(lstResultToSeqMap, lstSeqToProteinMap, lstSeqInfo, lstPepToProteinMap)
 	End Function
@@ -296,6 +296,10 @@ Public Class clsPHRPSeqMapReader
 	''' <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
 	Protected Function LoadPepToProtMapData(ByVal strFilePath As String, ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
 
+        Dim linesRead As Integer = 0
+        Dim dtLastProgress As DateTime = DateTime.UtcNow()
+        Dim blnNotifyComplete As Boolean
+
 		Try
 
 			' Read the data from the PepToProtMap file
@@ -303,6 +307,7 @@ Public Class clsPHRPSeqMapReader
 
 				Do While srInFile.Peek > -1
 					Dim strLineIn = srInFile.ReadLine
+                    linesRead += 1
 
 					If Not String.IsNullOrEmpty(strLineIn) Then
 						Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
@@ -332,12 +337,24 @@ Public Class clsPHRPSeqMapReader
 								End If
 							End If
 
-						End If
-					End If
-				Loop
+                        End If
+
+                        If linesRead Mod 100 = 0 Then
+                            If DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 5 Then
+                                Dim pctComplete = srInFile.BaseStream.Position / CDbl(srInFile.BaseStream.Length) * 100
+                                Console.WriteLine(" ... caching PepToProtMapData: " & pctComplete.ToString("0.0") & "% complete")
+                                dtLastProgress = DateTime.UtcNow
+                                blnNotifyComplete = True
+                            End If
+                        End If
+                    End If
+                Loop
 
 			End Using
 
+            If blnNotifyComplete Then
+                Console.WriteLine(" ... caching PepToProtMapData: 100% complete")
+            End If
 
 		Catch ex As Exception
 			Throw New Exception("Exception loading Pep to Prot Map data from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
