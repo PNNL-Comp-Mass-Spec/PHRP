@@ -57,8 +57,8 @@ echo.
 echo 6) Creating Zipped Installer file
 If Exist %ZippedInstallerFile% (Del %ZippedInstallerFile%)
 "c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\%InstallerFolder%\*.msi
-"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\ReadMe.txt
-"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\bin\RevisionHistory.txt
+"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\ReadMe.txt
+"c:\program files\winrar\winRar.exe" a -ep %ZippedInstallerFile% ..\RevisionHistory.txt
 
 echo.
 echo 7) Copying %ZippedInstallerFile% to %DistributionFolderFinal%
