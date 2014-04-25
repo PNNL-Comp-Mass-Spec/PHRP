@@ -46,19 +46,7 @@
         "Entry"
         {
         "MsmKey" = "8:_34B84A4D82FB4A557993213C9CE80C6A"
-        "OwnerKey" = "8:_94AAF6D5AA434431281C59984FB0C438"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_34B84A4D82FB4A557993213C9CE80C6A"
         "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_34B84A4D82FB4A557993213C9CE80C6A"
-        "OwnerKey" = "8:_781D9FF3397AD945A3147A43B56489EF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -76,25 +64,25 @@
         "Entry"
         {
         "MsmKey" = "8:_52FA745269CC3E11FF274D72D8D37BD4"
-        "OwnerKey" = "8:_781D9FF3397AD945A3147A43B56489EF"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_52FA745269CC3E11FF274D72D8D37BD4"
         "OwnerKey" = "8:_B98DE38250D536BD6E51037EF3C554AC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_52FA745269CC3E11FF274D72D8D37BD4"
-        "OwnerKey" = "8:_94AAF6D5AA434431281C59984FB0C438"
+        "OwnerKey" = "8:_781D9FF3397AD945A3147A43B56489EF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_6207407265014AA282F24DF92A98D2FD"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_781D9FF3397AD945A3147A43B56489EF"
+        "OwnerKey" = "8:_B98DE38250D536BD6E51037EF3C554AC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -111,8 +99,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_94AAF6D5AA434431281C59984FB0C438"
-        "OwnerKey" = "8:_B98DE38250D536BD6E51037EF3C554AC"
+        "MsmKey" = "8:_862787EA50BE4C00A250311B8F9023DB"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -129,7 +117,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_ADA297E1FC1D43E1ADE28011C2437192"
+        "MsmKey" = "8:_A73267BFFFC1428687CAA68B7B81E909"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -142,19 +130,13 @@
         "Entry"
         {
         "MsmKey" = "8:_CA95D7BB460E375BEF2D0C5FF3B8CB86"
-        "OwnerKey" = "8:_94AAF6D5AA434431281C59984FB0C438"
+        "OwnerKey" = "8:_781D9FF3397AD945A3147A43B56489EF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_CA95D7BB460E375BEF2D0C5FF3B8CB86"
         "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_CA95D7BB460E375BEF2D0C5FF3B8CB86"
-        "OwnerKey" = "8:_781D9FF3397AD945A3147A43B56489EF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -166,7 +148,7 @@
         "Entry"
         {
         "MsmKey" = "8:_E694EBD8EE01439AE13FC85864F10590"
-        "OwnerKey" = "8:_34B84A4D82FB4A557993213C9CE80C6A"
+        "OwnerKey" = "8:_97D88C1C66E31EDEFE5922634F3ED8F3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -178,7 +160,7 @@
         "Entry"
         {
         "MsmKey" = "8:_E694EBD8EE01439AE13FC85864F10590"
-        "OwnerKey" = "8:_97D88C1C66E31EDEFE5922634F3ED8F3"
+        "OwnerKey" = "8:_34B84A4D82FB4A557993213C9CE80C6A"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -196,7 +178,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_781D9FF3397AD945A3147A43B56489EF"
+        "OwnerKey" = "8:_34B84A4D82FB4A557993213C9CE80C6A"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -208,25 +190,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_97D88C1C66E31EDEFE5922634F3ED8F3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_94AAF6D5AA434431281C59984FB0C438"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_34B84A4D82FB4A557993213C9CE80C6A"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_E694EBD8EE01439AE13FC85864F10590"
+        "OwnerKey" = "8:_781D9FF3397AD945A3147A43B56489EF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -245,6 +209,18 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_52FA745269CC3E11FF274D72D8D37BD4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_97D88C1C66E31EDEFE5922634F3ED8F3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_E694EBD8EE01439AE13FC85864F10590"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -380,6 +356,11 @@
             "AssemblyAsmDisplayName" = "8:System.Data.SQLite, Version=1.0.66.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
+                    "_17A404BA20BD2A5643C0C4B50A9371B9"
+                    {
+                    "Name" = "8:System.Data.SQLite.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:System.Data.SQLite.dll"
             "TargetName" = "8:"
@@ -423,9 +404,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PHRPReader, Version=1.1.5192.25933, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:PHRPReader, Version=1.1.5228.20482, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_34B84A4D82FB4A557993213C9CE80C6A"
+                    {
+                    "Name" = "8:PHRPReader.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:PHRPReader.dll"
             "TargetName" = "8:"
@@ -452,6 +438,11 @@
             "AssemblyAsmDisplayName" = "8:ProteinFileReader, Version=1.2.4834.35436, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_52FA745269CC3E11FF274D72D8D37BD4"
+                    {
+                    "Name" = "8:ProteinFileReader.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:ProteinFileReader.dll"
             "TargetName" = "8:"
@@ -495,9 +486,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PeptideToProteinMapEngine, Version=1.1.5198.23515, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:PeptideToProteinMapEngine, Version=1.1.5207.19152, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
+                    "_781D9FF3397AD945A3147A43B56489EF"
+                    {
+                    "Name" = "8:PeptideToProteinMapEngine.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:PeptideToProteinMapEngine.dll"
             "TargetName" = "8:"
@@ -537,16 +533,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_94AAF6D5AA434431281C59984FB0C438"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_862787EA50BE4C00A250311B8F9023DB"
             {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PeptideToProteinMapEngine, Version=1.1.5198.23515, Culture=neutral, processorArchitecture=x86"
-                "ScatterAssemblies"
-                {
-                }
-            "SourcePath" = "8:PeptideToProteinMapEngine.DLL"
-            "TargetName" = "8:"
+            "SourcePath" = "8:..\\RevisionHistory.txt"
+            "TargetName" = "8:RevisionHistory.txt"
             "Tag" = "8:"
             "Folder" = "8:_5AB1A6DB5284425792AD22627243D745"
             "Condition" = "8:"
@@ -560,7 +550,7 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_971467F477AB481080BAB3E87916B2D3"
@@ -587,9 +577,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PHRPReader, Version=1.1.5192.25933, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:PHRPReader, Version=1.1.5228.20482, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_97D88C1C66E31EDEFE5922634F3ED8F3"
+                    {
+                    "Name" = "8:PHRPReader.DLL"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:PHRPReader.DLL"
             "TargetName" = "8:"
@@ -609,10 +604,10 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_ADA297E1FC1D43E1ADE28011C2437192"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A73267BFFFC1428687CAA68B7B81E909"
             {
-            "SourcePath" = "8:..\\bin\\RevisionHistory.txt"
-            "TargetName" = "8:RevisionHistory.txt"
+            "SourcePath" = "8:..\\Readme.txt"
+            "TargetName" = "8:Readme.txt"
             "Tag" = "8:"
             "Folder" = "8:_5AB1A6DB5284425792AD22627243D745"
             "Condition" = "8:"
@@ -633,9 +628,14 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PeptideHitResultsProcessor, Version=1.5.5168.28005, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:PeptideHitResultsProcessor, Version=1.5.5226.31121, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
+                    "_B98DE38250D536BD6E51037EF3C554AC"
+                    {
+                    "Name" = "8:PeptideHitResultsProcessor.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:PeptideHitResultsProcessor.dll"
             "TargetName" = "8:"
@@ -662,6 +662,11 @@
             "AssemblyAsmDisplayName" = "8:ProteinCoverageSummarizer, Version=1.1.5142.27189, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
+                    "_CA95D7BB460E375BEF2D0C5FF3B8CB86"
+                    {
+                    "Name" = "8:ProteinCoverageSummarizer.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:ProteinCoverageSummarizer.dll"
             "TargetName" = "8:"
@@ -708,6 +713,11 @@
             "AssemblyAsmDisplayName" = "8:ThermoRawFileReaderDLL, Version=1.1.5049.29983, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_E694EBD8EE01439AE13FC85864F10590"
+                    {
+                    "Name" = "8:ThermoRawFileReaderDLL.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:ThermoRawFileReaderDLL.dll"
             "TargetName" = "8:"
