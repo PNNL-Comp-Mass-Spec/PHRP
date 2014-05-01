@@ -138,7 +138,17 @@ Public Class clsPHRPParserMSGFDB
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
 		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSGFDB, blnLoadModsAndSeqInfo)
-		mInitialized = True
+	End Sub
+
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+	''' <remarks></remarks>
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal startupOptions As clsPHRPStartupOptions)
+		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSGFDB, startupOptions)
 	End Sub
 
 	Protected Overrides Sub DefineColumnHeaders()

@@ -11,7 +11,13 @@ Public Class clsPepToProteinMapInfo
     ''' Dictionary of protein names and residue start/end positions
     ''' </summary>
     ''' <remarks></remarks>
-    Protected mProteinMapInfo As Dictionary(Of String, List(Of udtProteinLocationInfo))
+	Protected ReadOnly mProteinMapInfo As Dictionary(Of String, List(Of udtProteinLocationInfo))
+
+	Public ReadOnly Property ProteinCount As Integer
+		Get
+			Return mProteinMapInfo.Count
+		End Get
+	End Property
 
     Public ReadOnly Property ProteinMapInfo As Dictionary(Of String, List(Of udtProteinLocationInfo))
         Get

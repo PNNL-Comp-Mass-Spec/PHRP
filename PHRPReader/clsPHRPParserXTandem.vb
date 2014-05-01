@@ -115,7 +115,6 @@ Public Class clsPHRPParserXTandem
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
 		Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
 	End Sub
-
 	''' <summary>
 	''' Constructor
 	''' </summary>
@@ -125,7 +124,17 @@ Public Class clsPHRPParserXTandem
 	''' <remarks></remarks>
 	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
 		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.XTandem, blnLoadModsAndSeqInfo)
-		mInitialized = True
+	End Sub
+
+	''' <summary>
+	''' Constructor
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+	''' <remarks></remarks>
+	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal startupOptions As clsPHRPStartupOptions)
+		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.XTandem, startupOptions)
 	End Sub
 
 	Protected Shared Function AppendToString(ByVal strText As String, ByVal strAppend As String) As String

@@ -11,6 +11,8 @@
 		Const strSequestFolder As String = "\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225"
 		Const strMSGFPlusFolder As String = "MSG201304261714_Auto938181"
 
+		' Const strHugeResultsFolder As String = "E:\DMS_WorkDir"
+
 		'Const strXTandemFolder As String = "\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
 
 		'Const strMSAlignFolder As String = "\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
@@ -18,11 +20,11 @@
 		Dim strSynOrFHTFile As String
 		Dim eMatchedResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType
 
-		'Console.WriteLine()
-		'strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSAlignFolder, eMatchedResultType)
-		'If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-		'	TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
-		'End If
+		Console.WriteLine()
+		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, eMatchedResultType)
+		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
+		End If
 
 		Console.WriteLine()
 		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
@@ -79,7 +81,15 @@
 		fiInputFile = New IO.FileInfo(strSequestSynFilePath)
 
 		Console.WriteLine("Instantiating reader")
-		mPHRPReader = New PHRPReader.clsPHRPReader(fiInputFile.FullName, PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown, True, True, False)
+		Dim oStartupOptions = New PHRPReader.clsPHRPStartupOptions()
+		With oStartupOptions
+			.LoadModsAndSeqInfo = True
+			.LoadMSGFResults = True
+			.LoadScanStatsData = False
+			.MaxProteinsPerPSM = 100
+		End With
+
+		mPHRPReader = New PHRPReader.clsPHRPReader(fiInputFile.FullName, PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown, oStartupOptions)
 		mPHRPReader.EchoMessagesToConsole = False
 		mPHRPReader.SkipDuplicatePSMs = blnSkipDuplicates
 
@@ -125,14 +135,18 @@
 				lstValues.Add(oPsm.SeqID.ToString())															' SeqID
 			End If
 
-			lstValues.Add(oPsm.ProteinFirst)																' Protein		
+			lstValues.Add(oPsm.ProteinFirst)																' Protein First
 
 			If oPsm.ProteinDetails.Count > 0 Then
-				If Not String.Equals(oPsm.ProteinFirst, oPsm.ProteinDetails(0).ProteinName) Then
-					lstValues.Add(oPsm.ProteinDetails(0).ProteinName)
+				Dim oFirstProteinDetail = oPsm.ProteinDetails.First											' Protein Details first
+
+				If Not String.Equals(oPsm.ProteinFirst, oFirstProteinDetail.Key) Then
+					lstValues.Add(oFirstProteinDetail.Key)
+				Else
+					lstValues.Add("<Match>")
 				End If
-				lstValues.Add(oPsm.ProteinDetails(0).ResidueStart.ToString())
-				lstValues.Add(oPsm.ProteinDetails(0).ResidueEnd.ToString())
+				lstValues.Add(oFirstProteinDetail.Value.ResidueStart.ToString())
+				lstValues.Add(oFirstProteinDetail.Value.ResidueEnd.ToString())
 			End If
 
 			Dim strXCorr As String = GetScore(oPsm, PHRPReader.clsPHRPParserSequest.DATA_COLUMN_XCorr, "0")

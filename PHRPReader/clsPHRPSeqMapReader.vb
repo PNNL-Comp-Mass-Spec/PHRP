@@ -21,15 +21,17 @@ Public Class clsPHRPSeqMapReader
 #End Region
 
 #Region "Module-wide variables"
-	Protected mDatasetName As String
-	Protected mInputFolderPath As String
+	Protected ReadOnly mDatasetName As String
+	Protected ReadOnly mInputFolderPath As String
 
-	Protected mResultToSeqMapFilename As String
-	Protected mSeqToProteinMapFilename As String
-	Protected mSeqInfoFilename As String
-	Protected mPepToProteinMapFilename As String
+	Protected ReadOnly mResultToSeqMapFilename As String
+	Protected ReadOnly mSeqToProteinMapFilename As String
+	Protected ReadOnly mSeqInfoFilename As String
+	Protected ReadOnly mPepToProteinMapFilename As String
 
-	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
+	Protected ReadOnly mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
+
+	Protected mMaxProteinsPerSeqID As Integer
 
 	Protected mErrorMessage As String = String.Empty
 #End Region
@@ -47,10 +49,20 @@ Public Class clsPHRPSeqMapReader
 			Return mErrorMessage
 		End Get
 	End Property
+
 	Public ReadOnly Property InputFolderPath As String
 		Get
 			Return mInputFolderPath
 		End Get
+	End Property
+
+	Public Property MaxProteinsPerSeqID As Integer
+		Get
+			Return mMaxProteinsPerSeqID
+		End Get
+		Set(value As Integer)
+			mMaxProteinsPerSeqID = value
+		End Set
 	End Property
 
 	Public ReadOnly Property PeptideHitResultType As clsPHRPReader.ePeptideHitResultType
@@ -143,6 +155,7 @@ Public Class clsPHRPSeqMapReader
 			Throw New Exception(mErrorMessage)		
 		End If
 
+		mMaxProteinsPerSeqID = 0
 	End Sub
 
 	''' <summary>
@@ -175,6 +188,7 @@ Public Class clsPHRPSeqMapReader
 		mSeqToProteinMapFilename = strSeqToProteinMapFilename
 		mSeqInfoFilename = strSeqInfoFilename
 
+		mMaxProteinsPerSeqID = 0
 	End Sub
 
 	''' <summary>
@@ -327,7 +341,9 @@ Public Class clsPHRPSeqMapReader
 									Dim oPepToProtMapInfo As clsPepToProteinMapInfo = Nothing
 
 									If lstPepToProteinMap.TryGetValue(strPeptide, oPepToProtMapInfo) Then
-										oPepToProtMapInfo.AddProtein(strSplitLine(1), residueStart, residueEnd)
+										If mMaxProteinsPerSeqID = 0 OrElse oPepToProtMapInfo.ProteinCount < mMaxProteinsPerSeqID Then
+											oPepToProtMapInfo.AddProtein(strSplitLine(1), residueStart, residueEnd)
+										End If
 									Else
 										oPepToProtMapInfo = New clsPepToProteinMapInfo(strSplitLine(1), residueStart, residueEnd)
 
@@ -582,7 +598,9 @@ Public Class clsPHRPSeqMapReader
 
 					If lstSeqToProteinMap.TryGetValue(intSeqID, lstProteins) Then
 						' Sequence already exists in lstSeqToProteinMap; add the new protein info
-						lstProteins.Add(objProteinInfo)
+						If mMaxProteinsPerSeqID = 0 OrElse lstProteins.Count < mMaxProteinsPerSeqID Then
+							lstProteins.Add(objProteinInfo)
+						End If
 					Else
 						' New Sequence ID
 						lstProteins = New List(Of clsProteinInfo)

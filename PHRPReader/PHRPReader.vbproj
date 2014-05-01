@@ -83,6 +83,7 @@
     <Compile Include="clsPHRPParserSequest.vb" />
     <Compile Include="clsPHRPParserXTandem.vb" />
     <Compile Include="clsPHRPSeqMapReader.vb" />
+    <Compile Include="clsPHRPStartupOptions.vb" />
     <Compile Include="clsProteinInfo.vb" />
     <Compile Include="clsPSM.vb" />
     <Compile Include="clsScanStatsExInfo.vb" />

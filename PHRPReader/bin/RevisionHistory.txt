@@ -1,5 +1,10 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5234; May 1, 2014
+	- Added option MaxProteinsPerPSM
+		- Useful when parsing results with thousands of mapped proteins for each peptide
+	- Added clsPHRPStartupOptions
+
 Version 1.1.5227; April 24, 2014
 	- Switched from list objects to Dictionary objects for tracking proteins
 

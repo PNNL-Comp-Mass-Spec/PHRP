@@ -30,6 +30,8 @@ Public MustInherit Class clsPHRPParser
 	Protected mInputFolderPath As String
 	Protected mInitialized As Boolean
 
+	Protected mMaxProteinsPerPSM As Integer
+
 	' Column headers in the synopsis file and first hits file
 	Protected mColumnHeaders As SortedDictionary(Of String, Integer)
 
@@ -41,7 +43,6 @@ Public MustInherit Class clsPHRPParser
 	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 
 	Protected mModInfo As List(Of clsModificationDefinition)
-	Protected mModInfoLoaded As Boolean
 
 	Protected mResultToSeqMap As SortedList(Of Integer, Integer)
 	Protected mSeqInfo As SortedList(Of Integer, clsSeqInfo)
@@ -98,6 +99,21 @@ Public MustInherit Class clsPHRPParser
 		Get
 			Return mInputFolderPath
 		End Get
+	End Property
+
+	''' <summary>
+	''' Maximum number of proteins to associate with each PSM
+	''' </summary>
+	''' <value></value>
+	''' <returns></returns>
+	''' <remarks>0 means to load all proteins</remarks>
+	Public Property MaxProteinsPerPSM() As Integer
+		Get
+			Return mMaxProteinsPerPSM
+		End Get
+		Set(value As Integer)
+			mMaxProteinsPerPSM = value
+		End Set
 	End Property
 
 	''' <summary>
@@ -191,7 +207,7 @@ Public MustInherit Class clsPHRPParser
 #End Region
 
 	''' <summary>
-	''' Initialize the parser for the given dataset and input file
+	''' Initialize the parser for the given dataset, input file, and result type
 	''' </summary>
 	''' <param name="strDatasetName">Dataset Name</param>
 	''' <param name="strInputFilePath">Input file path</param>
@@ -199,6 +215,34 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
 	''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
 	Protected Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean)
+		Dim startupOptions = New clsPHRPStartupOptions
+		startupOptions.LoadModsAndSeqInfo = blnLoadModsAndSeqInfo
+		InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions)
+	End Sub
+
+	''' <summary>
+	''' Initialize the parser for the given dataset, input file, and result type
+	''' </summary>
+	''' <param name="strDatasetName">Dataset name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+	''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
+	Protected Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal startupOptions As clsPHRPStartupOptions)
+		InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions)
+	End Sub
+
+	''' <summary>
+	''' Initialize the parser for the given dataset and input file
+	''' </summary>
+	''' <param name="strDatasetName">Dataset Name</param>
+	''' <param name="strInputFilePath">Input file path</param>
+	''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
+	''' <param name="startupOptions">Startup options</param>
+	''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable
+	''' startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
+	''' Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
+	''' </remarks>
+	Protected Sub InitializeParser(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal startupOptions As clsPHRPStartupOptions)
 
 		mErrorMessages = New List(Of String)
 		mWarningMessages = New List(Of String)
@@ -207,6 +251,8 @@ Public MustInherit Class clsPHRPParser
 		mDatasetName = strDatasetName
 
 		mPeptideHitResultType = ePeptideHitResultType
+
+		mMaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM
 
 		Dim fiFileInfo As FileInfo
 		Dim blnIsSynopsisFile As Boolean = False
@@ -217,7 +263,7 @@ Public MustInherit Class clsPHRPParser
 			mInputFilePath = String.Empty
 			mInputFolderPath = String.Empty
 
-			blnLoadModsAndSeqInfo = False
+			startupOptions.LoadModsAndSeqInfo = False
 		Else
 			fiFileInfo = New FileInfo(strInputFilePath)
 			mInputFilePath = fiFileInfo.FullName
@@ -246,14 +292,12 @@ Public MustInherit Class clsPHRPParser
 
 		mResultIDToProteins = New SortedList(Of Integer, List(Of String))
 
-		If blnLoadModsAndSeqInfo Then
+		If startupOptions.LoadModsAndSeqInfo Then
 			' Read the ModSummary file (if it exists)
-			mModInfoLoaded = LoadModSummary()
-		Else
-			mModInfoLoaded = False
+			LoadModSummary()
 		End If
 
-		If blnLoadModsAndSeqInfo Then
+		If startupOptions.LoadModsAndSeqInfo Then
 			' Read the ResultToSeqMapInfo (if the files exist)			
 			If blnIsSynopsisFile Then
 				' Assume the files exist
@@ -286,6 +330,8 @@ Public MustInherit Class clsPHRPParser
 
 		' The following will be overridden by a derived form of this class
 		DefineColumnHeaders()
+
+		mInitialized = True
 
 	End Sub
 
@@ -612,6 +658,8 @@ Public MustInherit Class clsPHRPParser
 			' Instantiate the reader
 			objReader = New clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType, mInputFilePath)
 
+			objReader.MaxProteinsPerSeqID = mMaxProteinsPerPSM
+
 			' Read the files
 			blnSuccess = objReader.GetProteinMapping(mResultToSeqMap, mSeqToProteinMap, mSeqInfo, mPepToProteinMap)
 
@@ -625,9 +673,6 @@ Public MustInherit Class clsPHRPParser
 				' Populate mResultIDToProteins
 
 				For Each objItem As KeyValuePair(Of Integer, Integer) In mResultToSeqMap
-
-					'intResultID = objItem.Key
-					'intSeqID = objItem.Value
 
 					Dim lstProteinsForSeqID As List(Of clsProteinInfo) = Nothing
                     Dim lstProteinsForResultID As List(Of String)
@@ -649,7 +694,13 @@ Public MustInherit Class clsPHRPParser
                         lstProteinsForResultID = New List(Of String)
                     End If
 
-					mResultIDToProteins.Add(objItem.Key, lstProteinsForResultID)
+					If mMaxProteinsPerPSM > 0 AndAlso lstProteinsForResultID.Count > mMaxProteinsPerPSM Then
+						' Only add a subset of the proteins in lstProteinsForResultID
+						Dim lstProteinSubset = (From item In lstProteinsForResultID Take mMaxProteinsPerPSM Order By item Select item).ToList()
+						mResultIDToProteins.Add(objItem.Key, lstProteinSubset)
+					Else
+						mResultIDToProteins.Add(objItem.Key, lstProteinsForResultID)
+					End If
 
                     entriesParsed += 1
                     If DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 5 Then
@@ -1063,17 +1114,36 @@ Public MustInherit Class clsPHRPParser
 				End If
 
                 ' Make sure all of the proteins in objPSM.Proteins are defined in objPSM.ProteinDetails
-				Dim addnlProteins1 = objPSM.Proteins.Except(objPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase)
+				Dim addnlProteins1 = objPSM.Proteins.Except(objPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase).ToList()
 
-                For Each proteinName In addnlProteins1
-                    Dim oProtein = New clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None)
-                    objPSM.ProteinDetails.Add(proteinName, oProtein)
-                Next
+				For Each proteinName In addnlProteins1
+					If mMaxProteinsPerPSM > 0 AndAlso objPSM.ProteinDetails.Count > mMaxProteinsPerPSM Then
+						' Maximum number of proteins reached (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
+						Exit For
+					End If
+
+					Dim oProtein = New clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None)
+					objPSM.ProteinDetails.Add(proteinName, oProtein)
+				Next
 
                 ' Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
-                Dim addnlProteins2 = (From item In objPSM.ProteinDetails Select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase)
-                objPSM.Proteins.AddRange(addnlProteins2)
+				Dim addnlProteins2 = (From item In objPSM.ProteinDetails Select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase)
 
+				If mMaxProteinsPerPSM > 0 AndAlso objPSM.Proteins.Count + addnlProteins2.Count > mMaxProteinsPerPSM + 1 Then
+					' Maximum number of proteins will be reached; only add a subset of the proteins in addnlProteins2
+					' (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
+
+					For Each oProtein In addnlProteins2
+						If mMaxProteinsPerPSM > 0 AndAlso objPSM.Proteins.Count >= mMaxProteinsPerPSM Then
+							' Maximum number of proteins reached
+							Exit For
+						End If
+						objPSM.Proteins.Add(oProtein)
+					Next
+				Else
+					objPSM.Proteins.AddRange(addnlProteins2)
+				End If
+				
                 If mPepToProteinMap.Count > 0 Then
                     ' Make sure the residue start/end locations are up-to-date in objPSM.ProteinDetails
 
