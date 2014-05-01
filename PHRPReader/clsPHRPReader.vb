@@ -445,6 +445,16 @@ Public Class clsPHRPReader
 	End Sub
 
 	''' <summary>
+	''' Constructor that auto-determines the PeptideHit result type based on the filename
+	''' </summary>
+	''' <param name="strInputFilePath">Input file to read</param>
+	''' <param name="oStartupOptions">Startup options</param>
+	''' <remarks></remarks>
+	Public Sub New(ByVal strInputFilePath As String, ByVal oStartupOptions As clsPHRPStartupOptions)
+		Me.New(strInputFilePath, ePeptideHitResultType.Unknown, oStartupOptions)
+	End Sub
+
+	''' <summary>
 	''' Constructor where the PeptideHit result type is explicitly set
 	''' </summary>
 	''' <param name="strInputFilePath">Input file to read</param>
@@ -576,6 +586,13 @@ Public Class clsPHRPReader
 		End If
 	End Sub
 
+	''' <summary>
+	''' Initialize the class
+	''' </summary>
+	''' <param name="strInputFilePath">Input file to read</param>
+	''' <param name="eResultType">Source file PeptideHit result type</param>
+	''' <param name="oStartupOptions">Startup options</param>
+	''' <remarks></remarks>
 	Private Sub InitializeClass(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal oStartupOptions As clsPHRPStartupOptions)
 
 		mInitialized = False
