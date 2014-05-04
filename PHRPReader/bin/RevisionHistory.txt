@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5237; May 4, 2014
+	- Fix overflow bug involving MaxProteinsPerPSM
+
 Version 1.1.5234; May 1, 2014
 	- Added option MaxProteinsPerPSM
 		- Useful when parsing results with thousands of mapped proteins for each peptide

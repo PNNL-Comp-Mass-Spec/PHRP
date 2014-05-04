@@ -1129,7 +1129,12 @@ Public MustInherit Class clsPHRPParser
                 ' Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
 				Dim addnlProteins2 = (From item In objPSM.ProteinDetails Select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase)
 
-				If mMaxProteinsPerPSM > 0 AndAlso objPSM.Proteins.Count + addnlProteins2.Count > mMaxProteinsPerPSM + 1 Then
+				Dim additionThresholdCheck As Integer = mMaxProteinsPerPSM
+				If additionThresholdCheck < Integer.MaxValue Then
+					additionThresholdCheck += 1
+				End If
+
+				If mMaxProteinsPerPSM > 0 AndAlso objPSM.Proteins.Count + addnlProteins2.Count > additionThresholdCheck Then
 					' Maximum number of proteins will be reached; only add a subset of the proteins in addnlProteins2
 					' (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
 
@@ -1143,44 +1148,44 @@ Public MustInherit Class clsPHRPParser
 				Else
 					objPSM.Proteins.AddRange(addnlProteins2)
 				End If
-				
-                If mPepToProteinMap.Count > 0 Then
-                    ' Make sure the residue start/end locations are up-to-date in objPSM.ProteinDetails
 
-                    Dim oPepToProteinMapInfo As clsPepToProteinMapInfo = Nothing
-                    If mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, oPepToProteinMapInfo) Then
+				If mPepToProteinMap.Count > 0 Then
+					' Make sure the residue start/end locations are up-to-date in objPSM.ProteinDetails
 
-                        For Each oProtein In objPSM.ProteinDetails
+					Dim oPepToProteinMapInfo As clsPepToProteinMapInfo = Nothing
+					If mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, oPepToProteinMapInfo) Then
 
-                            ' Find the matching protein in oPepToProteinMapInfo
-                            Dim lstLocations As List(Of clsPepToProteinMapInfo.udtProteinLocationInfo) = Nothing
+						For Each oProtein In objPSM.ProteinDetails
 
-                            If oPepToProteinMapInfo.ProteinMapInfo.TryGetValue(oProtein.Key, lstLocations) Then
-                                Dim udtFirstLocation = lstLocations.First
-                                oProtein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd)
-                            End If
-                        Next
+							' Find the matching protein in oPepToProteinMapInfo
+							Dim lstLocations As List(Of clsPepToProteinMapInfo.udtProteinLocationInfo) = Nothing
 
-                    End If
-                End If
+							If oPepToProteinMapInfo.ProteinMapInfo.TryGetValue(oProtein.Key, lstLocations) Then
+								Dim udtFirstLocation = lstLocations.First
+								oProtein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd)
+							End If
+						Next
 
-            End If
-        End If
+					End If
+				End If
 
-        If blnSuccess Then
-            Dim strPrimarySequence As String = String.Empty
-            Dim strPrefix As String = String.Empty
-            Dim strSuffix As String = String.Empty
+			End If
+		End If
 
-            If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, strPrimarySequence, strPrefix, strSuffix) Then
-                objPSM.PeptideWithNumericMods = strPrefix & "." & ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues) & "." & strSuffix
-            Else
-                objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
-            End If
+		If blnSuccess Then
+			Dim strPrimarySequence As String = String.Empty
+			Dim strPrefix As String = String.Empty
+			Dim strSuffix As String = String.Empty
 
-        End If
+			If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, strPrimarySequence, strPrefix, strSuffix) Then
+				objPSM.PeptideWithNumericMods = strPrefix & "." & ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues) & "." & strSuffix
+			Else
+				objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
+			End If
 
-        Return blnSuccess
+		End If
+
+		Return blnSuccess
 	End Function
 
 	Protected Function UpdatePSMFindMatchingModInfo( _
