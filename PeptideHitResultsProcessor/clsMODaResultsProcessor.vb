@@ -19,7 +19,7 @@ Public Class clsMODaResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "April 9, 2014"
+		MyBase.mFileDate = "May 22, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -511,6 +511,16 @@ Public Class clsMODaResultsProcessor
 		Next
 
 		' Now look for static mods 
+		' First determine the index of the last residue in strPrimarySequence
+		Dim intIndexLastChar As Integer = strPrimarySequence.Length
+
+		For intIndex = strPrimarySequence.Length - 1 To 0 Step -1
+			If IsLetterAtoZ(strPrimarySequence.Chars(intIndex)) Then
+				intIndexLastChar = intIndex
+				Exit For
+			End If
+		Next
+
 		For intIndex = 0 To strPrimarySequence.Length - 1
 			Dim chChar = strPrimarySequence.Chars(intIndex)
 
@@ -520,12 +530,19 @@ Public Class clsMODaResultsProcessor
 				For intModIndex = 0 To mPeptideMods.ModificationCount - 1
 					If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
 						Dim objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+						Dim blnMatchFound = objModificationDefinition.TargetResiduesContain(chChar)
 
-						If objModificationDefinition.TargetResiduesContain(chChar) Then
-							' Match found
-							dblTotalModMass += objModificationDefinition.ModificationMass
+						If Not blnMatchFound AndAlso intIndex = 0 Then
+							blnMatchFound = objModificationDefinition.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS)
 						End If
 
+						If Not blnMatchFound AndAlso intIndex = intIndexLastChar Then
+							blnMatchFound = objModificationDefinition.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+						End If
+
+						If blnMatchFound Then
+							dblTotalModMass += objModificationDefinition.ModificationMass
+						End If
 					End If
 				Next intModIndex
 			End If
@@ -736,6 +753,10 @@ Public Class clsMODaResultsProcessor
 
 							Dim strResidue = strValue.Substring(0, commaIndex).Trim()
 							strValue = strValue.Substring(commaIndex + 1).Trim()
+
+							' Replace NTerm or CTerm with < or >
+							If strResidue.ToLower() = "nterm" Then strResidue = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
+							If strResidue.ToLower() = "cterm" Then strResidue = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
 
 							Dim modMass As Double = 0
 							If Double.TryParse(strValue, modMass) Then
@@ -1165,7 +1186,6 @@ Public Class clsMODaResultsProcessor
 						Dim dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, True, dblPeptideMonoMassMODa)
 
 						.DelM_PPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 5, True)
-
 					End If
 
 					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
