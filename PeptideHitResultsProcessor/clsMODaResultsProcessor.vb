@@ -30,7 +30,7 @@ Public Class clsMODaResultsProcessor
 	Public Const N_TERMINUS_SYMBOL_MODA As String = "-"
 	Public Const C_TERMINUS_SYMBOL_MODA As String = "-"
 
-	Public Const DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD As Single = 0.1
+	Public Const DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD As Single = 0.2
 
 	Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
