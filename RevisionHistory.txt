@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5276; June 12, 2014
+	- Now computing QValues for MODa results
+
 Version 1.5.5255; May 22, 2014
 	- Fixed bug tracking NTerm and CTerm mod masses from MODa parameter files
 

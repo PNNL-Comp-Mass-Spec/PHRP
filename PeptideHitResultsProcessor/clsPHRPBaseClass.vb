@@ -32,7 +32,7 @@ Imports System.Text.RegularExpressions
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "April 23, 2014"
+		mFileDate = "June 12, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -158,7 +158,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 	Protected mInspectSynopsisFilePValueThreshold As Single		' Only used by clsInSpecTResultsProcessor; note that lower p-values are higher confidence results
 
-	Protected mMODaSynopsisFileProbabilityThreshold As Single	' Only used by clsMODaResultsProcessor; note that lower probability are higher confidence results
+	Protected mMODaSynopsisFileProbabilityThreshold As Single	' Only used by clsMODaResultsProcessor; note that higher probability are higher confidence results
 
 	Protected mMSAlignSynopsisFilePValueThreshold As Single		' Only used by clsMSAlignResultsProcessor; note that lower p-values are higher confidence results
 

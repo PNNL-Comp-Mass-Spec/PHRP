@@ -19,7 +19,7 @@ Public Class clsMODaResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "May 22, 2014"
+		MyBase.mFileDate = "June 12, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -95,12 +95,14 @@ Public Class clsMODaResultsProcessor
 		Public DelM As String					' Computed using Precursor_mass - CalculatedMonoMass
 		Public DelM_PPM As String				' Computed using DelM and CalculatedMonoMass	
 		Public Score As String
-		Public Probability As String
-		Public ProbabilityNum As Double
+		Public Probability As String			' Higher values are better
+		Public ProbabilityNum As Double			' Higher values are better
 		Public RankProbability As Integer
 		Public Peptide As String
 		Public Protein As String
 		Public PeptidePosition As String		' Protein start/stop residues of the peptide, e.g. 108~115
+		Public FDR As Double					' Computed by this class
+		Public QValue As Double					' Computed by this class
 
 		Public Sub Clear()
 			SpectrumFileName = String.Empty
@@ -648,7 +650,7 @@ Public Class clsMODaResultsProcessor
 							End If
 						Loop
 
-						' Sort the SearchResults by scan, charge, and ascending SpecProb
+						' Sort the SearchResults by scan, charge, and Descending probability
 						lstSearchResultsUnfiltered.Sort(New MODaSearchResultsComparerScanChargeProbabilityPeptide)
 
 						' Now filter the data
@@ -1191,11 +1193,11 @@ Public Class clsMODaResultsProcessor
 					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
 					.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoMassPHRP, 0, 1), 6, True)
 
-					Dim dblFDR As Double
+					Dim dblProbability As Double
 
 					If .Probability.ToLower() = "infinity" Then
-						.Probability = "10"
-					ElseIf Not String.IsNullOrEmpty(.Probability) And Not Double.TryParse(.Probability, dblFDR) Then
+						.Probability = "0"
+					ElseIf Not String.IsNullOrEmpty(.Probability) And Not Double.TryParse(.Probability, dblProbability) Then
 						.Probability = ""
 					End If
 
@@ -1648,12 +1650,92 @@ Public Class clsMODaResultsProcessor
 
 		Dim intIndex As Integer
 
-		' Sort udtFilteredSearchResults by ascending PVAlue, ascending scan, ascending charge, ascending peptide, and ascending protein
-		lstFilteredSearchResults.Sort(New MODaSearchResultsComparerPValueScanChargePeptide)
+		' Sort udtFilteredSearchResults by descending probability, ascending scan, ascending charge, ascending peptide, and ascending protein
+		lstFilteredSearchResults.Sort(New MODaSearchResultsComparerProbabilityScanChargePeptide)
+
+		' Compute FDR values then assign QValues
+		ComputeQValues(lstFilteredSearchResults)
 
 		For intIndex = 0 To lstFilteredSearchResults.Count - 1
 			WriteSearchResultToFile(intIndex + 1, swResultFile, lstFilteredSearchResults(intIndex), strErrorLog)
 		Next intIndex
+
+	End Sub
+
+	''' <summary>
+	''' Compute FDR values then assign QValues
+	''' </summary>
+	''' <param name="lstSearchResults"></param>
+	''' <remarks>Assumes the data is sorted by descending probability using MODaSearchResultsComparerProbabilityScanChargePeptide</remarks>
+	Private Sub ComputeQValues(ByVal lstSearchResults As List(Of udtMODaSearchResultType))
+
+		Dim forwardPeptideCount As Integer = 0
+		Dim reversePeptideCount As Integer = 0
+		Dim intIndex As Integer = 0
+
+		While intIndex < lstSearchResults.Count
+
+			' Check for entries with multiple proteins listed
+			Dim intIndexEnd = intIndex
+			Do While intIndexEnd + 1 < lstSearchResults.Count
+				If lstSearchResults(intIndex).ScanNum = lstSearchResults(intIndexEnd + 1).ScanNum AndAlso
+				   lstSearchResults(intIndex).ChargeNum = lstSearchResults(intIndexEnd + 1).ChargeNum AndAlso
+				   lstSearchResults(intIndex).Peptide = lstSearchResults(intIndexEnd + 1).Peptide Then
+					intIndexEnd += 1
+				Else
+					Exit Do
+				End If
+			Loop
+
+			Dim isReverse = True
+
+			' Look for non-reverse proteins
+			For intIndexCheck = intIndex To intIndexEnd
+				If Not IsReversedProtein(lstSearchResults(intIndexCheck).Protein) Then
+					isReverse = False
+					Exit For
+				End If
+			Next
+
+			If isReverse Then
+				reversePeptideCount += 1
+			Else
+				forwardPeptideCount += 1
+			End If
+
+			Dim dblFDR As Double = 1
+
+			If forwardPeptideCount > 0 Then
+				dblFDR = reversePeptideCount / CDbl(forwardPeptideCount)
+			End If
+
+			' Store the FDR values
+			For intIndexStore = intIndex To intIndexEnd
+				Dim udtResult = lstSearchResults(intIndexStore)
+				udtResult.FDR = dblFDR
+
+				lstSearchResults(intIndexStore) = udtResult
+			Next
+
+			intIndex = intIndexEnd + 1
+		End While
+
+		' Now compute QValues
+		' We step through the list, from the worst scoring result to the best result
+		' The first QValue is the FDR of the final entry
+		' The next QValue is the minimum of (QValue, CurrentFDR)
+
+		Dim dblQValue = lstSearchResults.Last().FDR
+		If dblQValue > 1 Then dblQValue = 1
+
+		For intIndex = lstSearchResults.Count - 1 To 0 Step -1
+			Dim udtResult = lstSearchResults(intIndex)
+
+			dblQValue = Math.Min(dblQValue, udtResult.FDR)
+			udtResult.QValue = dblQValue
+
+			lstSearchResults(intIndex) = udtResult
+		Next
 
 	End Sub
 
@@ -1670,7 +1752,7 @@ Public Class clsMODaResultsProcessor
 
 		' Now store or write out the matches that pass the filters
 		For intIndex = intStartIndex To intEndIndex
-			If lstSearchResults(intIndex).ProbabilityNum <= mMODaSynopsisFileProbabilityThreshold Then
+			If lstSearchResults(intIndex).ProbabilityNum >= mMODaSynopsisFileProbabilityThreshold Then
 				lstFilteredSearchResults.Add(lstSearchResults(intIndex))
 			End If
 		Next intIndex
@@ -1697,6 +1779,7 @@ Public Class clsMODaResultsProcessor
 			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Probability)
 			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Rank_Probability)
 			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide_Position)
+			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_QValue)
 
 			swResultFile.WriteLine(CollapseList(lstData))
 
@@ -1726,7 +1809,7 @@ Public Class clsMODaResultsProcessor
 			' Primary Columns
 			'
 			' MODa
-			' ResultID	Scan	Spectrum_Index	Charge	PrecursorMZ	DelM	DelM_PPM	MH	Peptide	Protein	Score	Probability	Rank_Probability	PeptidePosition
+			' ResultID	Scan	Spectrum_Index	Charge	PrecursorMZ	DelM	DelM_PPM	MH	Peptide	Protein	Score	Probability	Rank_Probability	PeptidePosition	QValue
 
 			Dim lstData As New List(Of String)
 			lstData.Add(intResultID.ToString)
@@ -1743,6 +1826,7 @@ Public Class clsMODaResultsProcessor
 			lstData.Add(udtSearchResult.Probability)
 			lstData.Add(udtSearchResult.RankProbability.ToString())
 			lstData.Add(udtSearchResult.PeptidePosition)
+			lstData.Add(udtSearchResult.QValue.ToString("0.000000"))
 
 			swResultFile.WriteLine(CollapseList(lstData))
 
@@ -1773,12 +1857,12 @@ Public Class clsMODaResultsProcessor
 					Return -1
 				Else
 					' Charge is the same; check ProbabilityNum
-					If x.ProbabilityNum > y.ProbabilityNum Then
+					If x.ProbabilityNum < y.ProbabilityNum Then
 						Return 1
-					ElseIf x.ProbabilityNum < y.ProbabilityNum Then
+					ElseIf x.ProbabilityNum > y.ProbabilityNum Then
 						Return -1
 					Else
-						' Pvalue is the same; check peptide
+						' Probability is the same; check peptide
 						If x.Peptide > y.Peptide Then
 							Return 1
 						ElseIf x.Peptide < y.Peptide Then
@@ -1801,14 +1885,14 @@ Public Class clsMODaResultsProcessor
 
 	End Class
 
-	Protected Class MODaSearchResultsComparerPValueScanChargePeptide
+	Protected Class MODaSearchResultsComparerProbabilityScanChargePeptide
 		Implements IComparer(Of udtMODaSearchResultType)
 
 		Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare
 
-			If x.ProbabilityNum > y.ProbabilityNum Then
+			If x.ProbabilityNum < y.ProbabilityNum Then
 				Return 1
-			ElseIf x.ProbabilityNum < y.ProbabilityNum Then
+			ElseIf x.ProbabilityNum > y.ProbabilityNum Then
 				Return -1
 			Else
 				' Pvalue is the same; check scan number
