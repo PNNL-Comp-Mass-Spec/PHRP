@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5276; June 12, 2014
+	- Now supports column QValue for MODa results
+
 Version 1.1.5237; May 4, 2014
 	- Fix overflow bug involving MaxProteinsPerPSM
 
