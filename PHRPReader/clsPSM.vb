@@ -10,6 +10,8 @@
 
 Option Strict On
 
+Imports System.Runtime.InteropServices
+
 Public Class clsPSM
 
 	Public Const UNKNOWN_COLLISION_MODE As String = "n/a"
@@ -50,7 +52,7 @@ Public Class clsPSM
 	Protected mProteins As List(Of String)
 
 	' Lists protein name, description, cleavage state, terminus state, residue start, and residue end
-    Protected mProteinDetails As Dictionary(Of String, clsProteinInfo)
+	Protected mProteinDetails As Dictionary(Of String, clsProteinInfo)
 
 	' This dictionary tracks additional, tool-specific scores
 	Protected mAdditionalScores As Dictionary(Of String, String)
@@ -334,11 +336,11 @@ Public Class clsPSM
 		End Get
 	End Property
 
-    Public ReadOnly Property ProteinDetails() As Dictionary(Of String, clsProteinInfo)
-        Get
-            Return mProteinDetails
-        End Get
-    End Property
+	Public ReadOnly Property ProteinDetails() As Dictionary(Of String, clsProteinInfo)
+		Get
+			Return mProteinDetails
+		End Get
+	End Property
 
 	''' <summary>
 	''' ResultID of this peptide (typically assigned by the search engine)
@@ -438,7 +440,7 @@ Public Class clsPSM
 	Public Sub New()
 		mScanList = New SortedSet(Of Integer)
 		mProteins = New List(Of String)
-        mProteinDetails = New Dictionary(Of String, clsProteinInfo)(StringComparer.CurrentCultureIgnoreCase)
+		mProteinDetails = New Dictionary(Of String, clsProteinInfo)(StringComparer.CurrentCultureIgnoreCase)
 		mModifiedPeptideResidues = New List(Of clsAminoAcidModInfo)
 		mAdditionalScores = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
 		Me.Clear()
@@ -502,12 +504,12 @@ Public Class clsPSM
 	''' <remarks></remarks>
 	Public Sub AddProteinDetail(ByVal oProteinInfo As clsProteinInfo)
 
-        Dim oCachedInfo As clsProteinInfo = Nothing
-        If mProteinDetails.TryGetValue(oProteinInfo.ProteinName, oCachedInfo) Then
-            mProteinDetails(oProteinInfo.ProteinName) = oProteinInfo
-        Else
-            mProteinDetails.Add(oProteinInfo.ProteinName, oProteinInfo)
-        End If
+		Dim oCachedInfo As clsProteinInfo = Nothing
+		If mProteinDetails.TryGetValue(oProteinInfo.ProteinName, oCachedInfo) Then
+			mProteinDetails(oProteinInfo.ProteinName) = oProteinInfo
+		Else
+			mProteinDetails.Add(oProteinInfo.ProteinName, oProteinInfo)
+		End If
 
 	End Sub
 
@@ -532,7 +534,7 @@ Public Class clsPSM
 		mCollisionMode = UNKNOWN_COLLISION_MODE
 		mMSGFSpecProb = String.Empty
 
-		mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific
+		mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Unknown
 		mNumMissedCleavages = 0
 		mNumTrypticTerminii = 0
 
@@ -591,9 +593,9 @@ Public Class clsPSM
 				.AddProtein(strProtein)
 			Next
 
-            For Each item In mProteinDetails.Values
-                .AddProteinDetail(item)
-            Next
+			For Each item In mProteinDetails.Values
+				.AddProteinDetail(item)
+			Next
 
 			For Each objItem In mModifiedPeptideResidues
 				.AddModifiedResidue(objItem.Residue, objItem.ResidueLocInPeptide, objItem.ResidueTerminusState, objItem.ModDefinition)
@@ -607,6 +609,10 @@ Public Class clsPSM
 
 		Return objNew
 	End Function
+
+	Public Sub UpdateCleanSequence()
+		UpdateCleanSequence(mPeptide)
+	End Sub
 
 	Protected Sub UpdateCleanSequence(strPeptide As String)
 		If String.IsNullOrEmpty(strPeptide) Then
@@ -690,18 +696,26 @@ Public Class clsPSM
 
 	End Function
 
+	Public Sub SetPeptide(ByVal strPeptide As String)
+		SetPeptide(strPeptide, blnUpdateCleanSequence:=True)
+	End Sub
+
 	''' <summary>
-	''' Update the peptide sequence (auto-determines the clean sequence)
+	''' Update the peptide sequence, auto-determining the clean sequence if blnUpdateCleanSequence is true
 	''' </summary>
 	''' <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
-	''' <remarks>Does not update the cleavage state info</remarks>
-	Public Sub SetPeptide(ByVal strPeptide As String)
+	''' <remarks>Does not update the cleavage state info.  If blnUpdateCleanSequence is false, then call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
+	Public Sub SetPeptide(ByVal strPeptide As String, ByVal blnUpdateCleanSequence As Boolean)
 		If String.IsNullOrEmpty(strPeptide) Then
-			mPeptide = strPeptide
+			mPeptide = String.Empty
 		Else
 			mPeptide = strPeptide
 		End If
-		UpdateCleanSequence(mPeptide)
+
+		If blnUpdateCleanSequence Then
+			UpdateCleanSequence(mPeptide)
+		End If
+
 	End Sub
 
 	''' <summary>
@@ -728,7 +742,7 @@ Public Class clsPSM
 			mAdditionalScores.Add(strScoreName, strScoreValue)
 		End If
 	End Sub
-	
+
 	''' <summary>
 	''' Returns the value stored for the specified score
 	''' </summary>
@@ -736,7 +750,7 @@ Public Class clsPSM
 	''' <param name="strScoreValue"></param>
 	''' <returns>True if the score is defined, otherwise false</returns>
 	''' <remarks></remarks>
-	Public Function TryGetScore(ByVal strScoreName As String, ByRef strScoreValue As String) As Boolean
+	Public Function TryGetScore(ByVal strScoreName As String, <Out()> ByRef strScoreValue As String) As Boolean
 
 		strScoreValue = String.Empty
 		If mAdditionalScores.TryGetValue(strScoreName, strScoreValue) Then

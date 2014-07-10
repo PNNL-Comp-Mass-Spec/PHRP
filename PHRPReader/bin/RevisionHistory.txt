@@ -1,5 +1,27 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5303; July 9, 2014
+	- Updated ExtractCleanSequenceFromSequenceWithMods to use a RegEx to remove non-letter characters
+
+Version 1.1.5282; June 18, 2014
+	- Updated StreamReaders to use FileShare.ReadWrite
+
+Version 1.1.5281; June 17, 2014
+	- PSMs loaded with FastReadMode enabled now have CleavageState initially set to ePeptideCleavageStateConstants.Unknown
+		- Cleavage state is updated during the call to mPHRPParser.FinalizePSM
+
+Version 1.1.5280; June 16, 2014
+	- Added FastReadMode option
+		- Useful when reading large files and filtering peptides
+		- First call MoveNext() to read the next peptide
+		- If it passes filter thresholds, call FinalizeCurrentPSM to populate the remaining fields
+		- Note that Cleavage State will be listed as non-specifc until after the call to FinalizeCurrentPSM() or PHRPParser.FinalizePSM()
+
+Version 1.1.5277; June 13, 2014
+	- Updated PeptideCleavageCalculator to not use a RegEx if testing standard trypsin rules
+	- TryGetScore now marks the second parameter as an output parameter
+	- Now caching the PSM information when examining the next line to look for duplicate entries
+
 Version 1.1.5276; June 12, 2014
 	- Now supports column QValue for MODa results
 

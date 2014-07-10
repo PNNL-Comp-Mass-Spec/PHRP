@@ -111,7 +111,7 @@ Public Class clsPHRPModSummaryReader
 		' The first line is typically a header line:
 		' Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
 
-		Using srModSummaryFile As StreamReader = New StreamReader(New FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+		Using srModSummaryFile As StreamReader = New StreamReader(New FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
 			blnHeaderLineParsed = False
 

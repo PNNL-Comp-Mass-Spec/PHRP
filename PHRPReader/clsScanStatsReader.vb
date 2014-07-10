@@ -104,7 +104,7 @@ Public Class clsScanStatsReader
 			intLinesRead = 0
 			mErrorMessage = String.Empty
 
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 				Do While srInFile.Peek() > -1
 					strLineIn = srInFile.ReadLine()
 					intLinesRead += 1

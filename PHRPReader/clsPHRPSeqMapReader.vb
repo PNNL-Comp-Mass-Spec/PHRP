@@ -317,11 +317,11 @@ Public Class clsPHRPSeqMapReader
 		Try
 
 			' Read the data from the PepToProtMap file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
 				Do While srInFile.Peek > -1
 					Dim strLineIn = srInFile.ReadLine
-                    linesRead += 1
+					linesRead += 1
 
 					If Not String.IsNullOrEmpty(strLineIn) Then
 						Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
@@ -353,18 +353,18 @@ Public Class clsPHRPSeqMapReader
 								End If
 							End If
 
-                        End If
+						End If
 
-                        If linesRead Mod 100 = 0 Then
-                            If DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 5 Then
-                                Dim pctComplete = srInFile.BaseStream.Position / CDbl(srInFile.BaseStream.Length) * 100
-                                Console.WriteLine(" ... caching PepToProtMapData: " & pctComplete.ToString("0.0") & "% complete")
-                                dtLastProgress = DateTime.UtcNow
-                                blnNotifyComplete = True
-                            End If
-                        End If
-                    End If
-                Loop
+						If linesRead Mod 100 = 0 Then
+							If DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 5 Then
+								Dim pctComplete = srInFile.BaseStream.Position / CDbl(srInFile.BaseStream.Length) * 100
+								Console.WriteLine(" ... caching PepToProtMapData: " & pctComplete.ToString("0.0") & "% complete")
+								dtLastProgress = DateTime.UtcNow
+								blnNotifyComplete = True
+							End If
+						End If
+					End If
+				Loop
 
 			End Using
 
@@ -399,7 +399,7 @@ Public Class clsPHRPSeqMapReader
 		Try
 
 			' Read the data from the result to sequence map file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
 				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine
@@ -463,7 +463,7 @@ Public Class clsPHRPSeqMapReader
 			objColumnHeaders.Add(SEQ_INFO_COLUMN_Monoisotopic_Mass, 3)
 
 			' Read the data from the sequence info file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
 				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine
@@ -555,7 +555,7 @@ Public Class clsPHRPSeqMapReader
 			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_Intensity, 5)
 
 			' Read the data from the sequence to protein map file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
 				Do While srInFile.Peek > -1
 					strLineIn = srInFile.ReadLine

@@ -24,6 +24,7 @@ call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MASICResults
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MASICResultsMerger\Lib"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MSGF_Runner\bin"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MSGF_Runner\Lib"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\x64"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PeptideHitResultsProcessor\bin"

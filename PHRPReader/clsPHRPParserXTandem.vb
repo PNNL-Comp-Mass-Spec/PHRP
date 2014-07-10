@@ -552,11 +552,13 @@ Public Class clsPHRPParserXTandem
 	''' <param name="strLine">Data line</param>
 	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
 	''' <param name="objPSM">clsPSM object (output)</param>
+	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
 	''' <returns>True if success, false if an error</returns>
-	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
+	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
+	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
 
 		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
-		Dim strPeptide As String		
+		Dim strPeptide As String
 
 		Dim dblPeptideMH As Double
 		Dim dblMassErrorDa As Double
@@ -582,8 +584,13 @@ Public Class clsPHRPParserXTandem
 					' X!Tandem only tracks the top-ranked peptide for each spectrum
 					.ScoreRank = 1
 
-					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders)
-					.SetPeptide(strPeptide, mCleavageStateCalculator)
+					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders)					
+
+					If fastReadMode Then
+						.SetPeptide(strPeptide, blnUpdateCleanSequence:=False)
+					Else
+						.SetPeptide(strPeptide, mCleavageStateCalculator)
+					End If
 
 					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
 
@@ -614,7 +621,9 @@ Public Class clsPHRPParserXTandem
 			End With
 
 			If blnSuccess Then
-				UpdatePSMUsingSeqInfo(objPSM)
+				If Not fastReadMode Then
+					UpdatePSMUsingSeqInfo(objPSM)
+				End If
 
 				' Store the remaining scores
 				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Hyperscore)

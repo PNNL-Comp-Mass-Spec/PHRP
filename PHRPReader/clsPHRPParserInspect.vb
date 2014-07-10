@@ -317,8 +317,10 @@ Public Class clsPHRPParserInspect
 	''' <param name="strLine">Data line</param>
 	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
 	''' <param name="objPSM">clsPSM object (output)</param>
+	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
 	''' <returns>True if success, false if an error</returns>
-	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
+	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
+	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
 
 		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
 		Dim strPeptide As String
@@ -345,7 +347,12 @@ Public Class clsPHRPParserInspect
 					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_RankTotalPRMScore, mColumnHeaders, 0)
 
 					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
-					.SetPeptide(strPeptide, mCleavageStateCalculator)
+
+					If fastReadMode Then
+						.SetPeptide(strPeptide, blnUpdateCleanSequence:=False)
+					Else
+						.SetPeptide(strPeptide, mCleavageStateCalculator)
+					End If
 
 					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
 
@@ -364,7 +371,9 @@ Public Class clsPHRPParserInspect
 
 
 			If blnSuccess Then
-				UpdatePSMUsingSeqInfo(objPSM)
+				If Not fastReadMode Then
+					UpdatePSMUsingSeqInfo(objPSM)
+				End If
 
 				' Store the remaining scores
 				AddScore(objPSM, strColumns, DATA_COLUMN_MQScore)

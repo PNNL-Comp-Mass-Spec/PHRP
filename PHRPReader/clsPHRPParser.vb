@@ -423,7 +423,20 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
 	''' <param name="objPSM">clsPSM object (output)</param>
 	''' <returns>True if success, false if an error</returns>
-	Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
+	Public Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
+		Return ParsePHRPDataLine(strLine, intLinesRead, objPSM, fastReadMode:=False)
+	End Function
+
+	''' <summary>
+	''' Parse the data line read from a PHRP results file
+	''' </summary>
+	''' <param name="strLine">Data line</param>
+	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
+	''' <param name="objPSM">clsPSM object (output)</param>
+	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
+	''' <returns>True if success, false if an error</returns>
+	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
+	Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
 
 	''' <summary>
 	''' Parses the specified parameter file
@@ -557,6 +570,20 @@ Public MustInherit Class clsPHRPParser
 		Return lstAmbiguousMods
 
 	End Function
+
+	Public Sub FinalizePSM(ByRef objPSM As clsPSM)
+
+		If mCleavageStateCalculator Is Nothing Then
+			mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
+		End If
+
+		objPSM.UpdateCleanSequence()
+
+		objPSM.UpdateCleavageInfo(mCleavageStateCalculator)
+
+		UpdatePSMUsingSeqInfo(objPSM)
+
+	End Sub
 
 	Private Function GetMODaStaticModSetting(ByVal kvSetting As KeyValuePair(Of String, String)) As KeyValuePair(Of String, String)
 
@@ -840,7 +867,7 @@ Public MustInherit Class clsPHRPParser
 			If Not File.Exists(strParamFilePath) Then
 				ReportError(strSearchEngineName & " param file not found: " & strParamFilePath)
 			Else
-				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
@@ -900,7 +927,7 @@ Public MustInherit Class clsPHRPParser
 				strSearchEngineVersion = "Unknown"
 				dtSearchDate = New DateTime(1980, 1, 1)
 
-				Using srInFile As StreamReader = New StreamReader(New FileStream(strToolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+				Using srInFile As StreamReader = New StreamReader(New FileStream(strToolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
 					While srInFile.Peek > -1
 						strLineIn = srInFile.ReadLine().TrimStart()
@@ -1113,7 +1140,7 @@ Public MustInherit Class clsPHRPParser
 					Next
 				End If
 
-                ' Make sure all of the proteins in objPSM.Proteins are defined in objPSM.ProteinDetails
+				' Make sure all of the proteins in objPSM.Proteins are defined in objPSM.ProteinDetails
 				Dim addnlProteins1 = objPSM.Proteins.Except(objPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase).ToList()
 
 				For Each proteinName In addnlProteins1
@@ -1126,7 +1153,7 @@ Public MustInherit Class clsPHRPParser
 					objPSM.ProteinDetails.Add(proteinName, oProtein)
 				Next
 
-                ' Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
+				' Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
 				Dim addnlProteins2 = (From item In objPSM.ProteinDetails Select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase)
 
 				Dim additionThresholdCheck As Integer = mMaxProteinsPerPSM

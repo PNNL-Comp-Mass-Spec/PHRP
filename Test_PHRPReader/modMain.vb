@@ -93,6 +93,9 @@
 		mPHRPReader.EchoMessagesToConsole = False
 		mPHRPReader.SkipDuplicatePSMs = blnSkipDuplicates
 
+		Const fastReadEnabled = True
+		mPHRPReader.FastReadMode = fastReadEnabled
+
 		Dim oMassCalculator = New PHRPReader.clsPeptideMassCalculator()
 
 		If Not mPHRPReader.CanRead Then
@@ -108,12 +111,15 @@
 		Dim dctCachedValues As Generic.Dictionary(Of Integer, PHRPReader.clsPSM) = New Generic.Dictionary(Of Integer, PHRPReader.clsPSM)
 
 		Console.WriteLine("Reading data")
+
 		Do While mPHRPReader.MoveNext()
 
 			Dim oPsm As PHRPReader.clsPSM = mPHRPReader.CurrentPSM
 
 			intPSMsRead += 1
 			lstValues.Clear()
+
+			mPHRPReader.FinalizeCurrentPSM()
 
 			intIsotopeErrorComputed = 0
 			strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, intIsotopeErrorComputed)
