@@ -153,7 +153,7 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>xcopy "$(SolutionDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)" /D
+    <PostBuildEvent>xcopy "$(ProjectDir)Lib\x64\SQLite.Interop.dll" "$(TargetDir)" /D
 copy "$(TargetPath)" "$(ProjectDir)\..\bin\x64"</PostBuildEvent>
   </PropertyGroup>
 </Project>
