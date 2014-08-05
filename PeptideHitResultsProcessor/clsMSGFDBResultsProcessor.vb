@@ -22,7 +22,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "February 24, 2014"
+		MyBase.mFileDate = "August 4, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -999,19 +999,39 @@ Public Class clsMSGFDBResultsProcessor
 									Case "any"
 										' Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
 									Case "nterm"
+										If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+											' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+											.ModType = eMSGFDBModType.DynamicMod
+										End If
 										.Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
 										If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermPeptide
+
 									Case "cterm"
+										If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+											' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+											.ModType = eMSGFDBModType.DynamicMod
+										End If
 										.Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
 										If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermPeptide
+
 									Case "protnterm"
 										' Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
+										If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+											' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+											.ModType = eMSGFDBModType.DynamicMod
+										End If
 										.Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
 										If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermProtein
+
 									Case "protcterm"
 										' Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
+										If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+											' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+											.ModType = eMSGFDBModType.DynamicMod
+										End If
 										.Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
 										If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
+
 									Case Else
 										ReportWarning("Unrecognized Mod Type in the MSGFDB parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
 								End Select

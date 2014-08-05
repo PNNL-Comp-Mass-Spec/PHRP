@@ -1792,6 +1792,7 @@ Public MustInherit Class clsPHRPBaseClass
 		If Not blnSuccess Then
 			If blnFileNotFound Then
 				SetErrorCode(ePHRPErrorCodes.ModificationDefinitionFileNotFound)
+				ReportWarning("File not found: " & mModificationDefinitionsFilePath)
 			Else
 				SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
 			End If

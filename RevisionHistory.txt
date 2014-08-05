@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5329; August 4, 2014
+	- When parsing MSGF+ results, now treating static N- and C-terminal mods that only target certain residues as dynamic mods
+
 Version 1.5.5303; July 9, 2014
 	- Updated to System.Data.SQLite v1.0.93 (used by PeptideToProteinMapEngine.dll)
 
