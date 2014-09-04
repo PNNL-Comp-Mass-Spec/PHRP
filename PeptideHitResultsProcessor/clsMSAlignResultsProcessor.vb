@@ -19,7 +19,7 @@ Public Class clsMSAlignResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "April 3, 2013"
+		MyBase.mFileDate = "September 3, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -339,40 +339,48 @@ Public Class clsMSAlignResultsProcessor
 	End Function
 
 	''' <summary>
-	''' Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb)
+	''' Ranks each entry (assumes all of the data is from the same scan)
 	''' </summary>
 	''' <param name="lstSearchResults"></param>
 	''' <param name="intStartIndex"></param>
 	''' <param name="intEndIndex"></param>
 	''' <remarks></remarks>
-	Private Sub AssignRankAndDeltaNormValues(ByRef lstSearchResults As List(Of udtMSAlignSearchResultType), _
-	  ByVal intStartIndex As Integer, _
+	Private Sub AssignRankAndDeltaNormValues(
+	  ByRef lstSearchResults As List(Of udtMSAlignSearchResultType),
+	  ByVal intStartIndex As Integer,
 	  ByVal intEndIndex As Integer)
 
-		Dim intIndex As Integer
+		' Prior to September 2014 ranks were assign per charge state per scan; 
+		' Ranks are now assigned per scan (across all charge states)
 
-		Dim intLastCharge As Integer
-		Dim dblLastValue As Double
+		' Duplicate a portion of lstSearchResults so that we can sort by PValue
 
-		Dim intCurrentRank As Integer
-
+		Dim dctResultsSubset = New Dictionary(Of Integer, udtMSAlignSearchResultType)
 		For intIndex = intStartIndex To intEndIndex
-			If intIndex = intStartIndex OrElse lstSearchResults(intIndex).ChargeNum <> intLastCharge Then
-				intLastCharge = lstSearchResults(intIndex).ChargeNum
-				dblLastValue = lstSearchResults(intIndex).PValueNum
+			dctResultsSubset.Add(intIndex, lstSearchResults(intIndex))
+		Next
+
+		Dim lstResultsByProbability = (From item In dctResultsSubset Select item Order By item.Value.PValueNum).ToList()
+
+		Dim dblLastValue As Double
+		Dim intCurrentRank As Integer = -1
+
+		For Each entry In lstResultsByProbability
+			Dim oResult = lstSearchResults(entry.Key)
+
+			If intCurrentRank < 0 Then
+				dblLastValue = oResult.PValueNum
 				intCurrentRank = 1
 			Else
-				If Math.Abs(lstSearchResults(intIndex).PValueNum - dblLastValue) > Double.Epsilon Then
-					dblLastValue = lstSearchResults(intIndex).PValueNum
+				If Math.Abs(oResult.PValueNum - dblLastValue) > Double.Epsilon Then
+					dblLastValue = oResult.PValueNum
 					intCurrentRank += 1
 				End If
 			End If
 
-			Dim oResult = lstSearchResults(intIndex)
 			oResult.RankPValue = intCurrentRank
-			lstSearchResults(intIndex) = oResult
-
-		Next intIndex
+			lstSearchResults(entry.Key) = oResult
+		Next
 
 	End Sub
 
@@ -532,7 +540,7 @@ Public Class clsMSAlignResultsProcessor
 							End If
 						Loop
 
-						' Sort the SearchResults by scan, charge, and ascending SpecProb
+						' Sort the SearchResults by scan, charge, and ascending PValue
 						lstSearchResultsUnfiltered.Sort(New MSAlignSearchResultsComparerScanChargePValuePeptide)
 
 						' Now filter the data
@@ -1497,7 +1505,7 @@ Public Class clsMSAlignResultsProcessor
 
 		AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
 
-		' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
+		' The calling procedure already sorted by scan, charge, and PValue; no need to re-sort
 
 		' Now store or write out the matches that pass the filters
 		For intIndex = intStartIndex To intEndIndex

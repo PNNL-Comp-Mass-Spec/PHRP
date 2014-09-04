@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.5359; September 3, 2014
+	- Now ignoring charge state when ranking peptides in a scan by score
+		- Applies to MSGF+, MSAlign, and MODa
+
 Version 1.5.5225; April 23, 2014
 	- Added support for results from MODa
 

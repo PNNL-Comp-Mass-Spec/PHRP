@@ -22,7 +22,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "August 4, 2014"
+		MyBase.mFileDate = "September 3, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -393,37 +393,45 @@ Public Class clsMSGFDBResultsProcessor
 	End Sub
 
 	''' <summary>
-	''' Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb)
+	''' Ranks each entry (assumes all of the data is from the same scan)
 	''' </summary>
-	''' <param name="udtSearchResults"></param>
-	''' <param name="intStartIndex"></param>
-	''' <param name="intEndIndex"></param>
+	''' <param name="udtSearchResults">Search results</param>
+	''' <param name="intStartIndex">Start index for data in this scan</param>
+	''' <param name="intEndIndex">End index for data in this scan</param>
 	''' <remarks></remarks>
-	Private Sub AssignRankAndDeltaNormValues(ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
-	  ByVal intStartIndex As Integer, _
+	Private Sub AssignRankAndDeltaNormValues(
+	  ByRef udtSearchResults() As udtMSGFDBSearchResultType,
+	  ByVal intStartIndex As Integer,
 	  ByVal intEndIndex As Integer)
 
-		Dim intIndex As Integer
+		' Prior to September 2014 ranks were assign per charge state per scan; 
+		' Ranks are now assigned per scan (across all charge states)
 
-		Dim intLastCharge As Integer
-		Dim dblLastValue As Double
+		' Duplicate a portion of udtSearchResults so that we can sort by ascending Spectral Probability
 
-		Dim intCurrentRank As Integer
-
+		Dim dctResultsSubset = New Dictionary(Of Integer, udtMSGFDBSearchResultType)
 		For intIndex = intStartIndex To intEndIndex
-			If intIndex = intStartIndex OrElse udtSearchResults(intIndex).ChargeNum <> intLastCharge Then
-				intLastCharge = udtSearchResults(intIndex).ChargeNum
-				dblLastValue = udtSearchResults(intIndex).SpecProbNum
+			dctResultsSubset.Add(intIndex, udtSearchResults(intIndex))
+		Next
+
+		Dim lstResultsBySpecProb = (From item In dctResultsSubset Select item Order By item.Value.SpecProbNum).ToList()
+
+		Dim dblLastValue As Double
+		Dim intCurrentRank As Integer = -1
+
+		For Each entry In lstResultsBySpecProb
+			If intCurrentRank < 0 Then
+				dblLastValue = udtSearchResults(entry.Key).SpecProbNum
 				intCurrentRank = 1
 			Else
-				If Math.Abs(udtSearchResults(intIndex).SpecProbNum - dblLastValue) > Double.Epsilon Then
-					dblLastValue = udtSearchResults(intIndex).SpecProbNum
+				If Math.Abs(udtSearchResults(entry.Key).SpecProbNum - dblLastValue) > Double.Epsilon Then
+					dblLastValue = udtSearchResults(entry.Key).SpecProbNum
 					intCurrentRank += 1
 				End If
 			End If
 
-			udtSearchResults(intIndex).RankSpecProb = intCurrentRank
-		Next intIndex
+			udtSearchResults(entry.Key).RankSpecProb = intCurrentRank
+		Next
 
 	End Sub
 
@@ -806,9 +814,9 @@ Public Class clsMSGFDBResultsProcessor
 
 							' Store the results for this scan
 							If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-								StoreSynMatches(udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+								StoreSynMatches(udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults)
 							Else
-								StoreTopFHTMatch(udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+								StoreTopFHTMatch(udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults)
 							End If
 
 							intStartIndex = intEndIndex + 1
@@ -2096,7 +2104,7 @@ Public Class clsMSGFDBResultsProcessor
 	''' <param name="strParameterFilePath">Parameter file</param>
 	''' <returns>True if success, False if failure</returns>
 	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
-		
+
 		Dim strBaseName As String = String.Empty
 		Dim strFhtOutputFilePath As String = String.Empty
 		Dim strSynOutputFilePath As String = String.Empty
@@ -2655,10 +2663,10 @@ Public Class clsMSGFDBResultsProcessor
 
 
 	End Function
+
 	Protected Sub StoreSearchResult(ByRef udtSearchResult As udtMSGFDBSearchResultType, _
 	  ByRef intFilteredSearchResultCount As Integer, _
-	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
-	  ByRef strErrorLog As String)
+	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType)
 
 		If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
 			ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
@@ -2728,12 +2736,21 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Sub
 
-	Private Sub StoreTopFHTMatch(ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
-	  ByVal intStartIndex As Integer, _
-	  ByVal intEndIndex As Integer, _
-	  ByRef intFilteredSearchResultCount As Integer, _
-	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
-	  ByRef strErrorLog As String)
+	''' <summary>
+	''' Stores the first hits file matches for a single scan
+	''' </summary>
+	''' <param name="udtSearchResults">Search results</param>
+	''' <param name="intStartIndex">Start index for data in this scan</param>
+	''' <param name="intEndIndex">End index for data in this scan</param>
+	''' <param name="intFilteredSearchResultCount">Output parameter: number of results passing the filter</param>
+	''' <param name="udtFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
+	''' <remarks></remarks>
+	Private Sub StoreTopFHTMatch(
+	  ByRef udtSearchResults() As udtMSGFDBSearchResultType,
+	  ByVal intStartIndex As Integer,
+	  ByVal intEndIndex As Integer,
+	  ByRef intFilteredSearchResultCount As Integer,
+	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType)
 
 		Dim intIndex As Integer
 		Dim intCurrentCharge As Short = Short.MinValue
@@ -2745,19 +2762,28 @@ Public Class clsMSGFDBResultsProcessor
 		' Now store or write out the first match for each charge for this scan
 		For intIndex = intStartIndex To intEndIndex
 			If intIndex = intStartIndex OrElse intCurrentCharge <> udtSearchResults(intIndex).ChargeNum Then
-				StoreSearchResult(udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+				StoreSearchResult(udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults)
 				intCurrentCharge = udtSearchResults(intIndex).ChargeNum
 			End If
 		Next intIndex
 
 	End Sub
 
-	Private Sub StoreSynMatches(ByRef udtSearchResults() As udtMSGFDBSearchResultType, _
-	 ByVal intStartIndex As Integer, _
-	 ByVal intEndIndex As Integer, _
-	 ByRef intFilteredSearchResultCount As Integer, _
-	 ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
-	 ByRef strErrorLog As String)
+	''' <summary>
+	''' Stores the synopsis file matches for a single scan
+	''' </summary>
+	''' <param name="udtSearchResults">Search results</param>
+	''' <param name="intStartIndex">Start index for data in this scan</param>
+	''' <param name="intEndIndex">End index for data in this scan</param>
+	''' <param name="intFilteredSearchResultCount">Output parameter: number of results passing the filter</param>
+	''' <param name="udtFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
+	''' <remarks></remarks>
+	Private Sub StoreSynMatches(
+	  ByRef udtSearchResults() As udtMSGFDBSearchResultType,
+	  ByVal intStartIndex As Integer,
+	  ByVal intEndIndex As Integer,
+	  ByRef intFilteredSearchResultCount As Integer,
+	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType)
 
 		Dim intIndex As Integer
 
@@ -2768,9 +2794,9 @@ Public Class clsMSGFDBResultsProcessor
 		' Now store or write out the matches that pass the filters
 		' By default, filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 		For intIndex = intStartIndex To intEndIndex
-			If udtSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse _
+			If udtSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse
 			   udtSearchResults(intIndex).SpecProbNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
-				StoreSearchResult(udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+				StoreSearchResult(udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults)
 			End If
 		Next intIndex
 

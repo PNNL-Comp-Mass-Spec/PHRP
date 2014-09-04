@@ -11,7 +11,6 @@
 		Const strSequestFolder As String = "\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225"
 		Const strMSGFPlusFolder As String = "MSG201304261714_Auto938181"
 
-		' Const strHugeResultsFolder As String = "E:\DMS_WorkDir"
 
 		'Const strXTandemFolder As String = "\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
 
@@ -20,29 +19,29 @@
 		Dim strSynOrFHTFile As String
 		Dim eMatchedResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType
 
-		Console.WriteLine()
-		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, eMatchedResultType)
-		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
+		If True Then
+			Console.WriteLine()
+			strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, eMatchedResultType)
+			If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+				TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
+			End If
 		End If
 
-		Console.WriteLine()
-		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
-		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
+		If True Then
+			Console.WriteLine()
+			strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
+			If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+				TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
+			End If
 		End If
 
-		Console.WriteLine()
-		strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
-		If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
+		If True Then
+			Console.WriteLine()
+			strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
+			If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
+				TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
+			End If
 		End If
-
-		'Console.WriteLine()
-		'strSynOrFHTFile = PHRPReader.clsPHRPReader.AutoDetermineBestInputFile(strXTandemFolder)
-		'If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> PHRPReader.clsPHRPReader.ePeptideHitResultType.Unknown Then
-		'	TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
-		'End If
 
 
 		Dim dtStartTimeNoSkipDup As DateTime
@@ -66,7 +65,7 @@
 			TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
 			dtEndTimeSkipDup = System.DateTime.UtcNow()
 		End If
-		
+
 		Console.WriteLine()
 
 		Console.WriteLine("Elapsed time (Keep Duplicates): " & dtEndTimeNoSkipDup.Subtract(dtStartTimeNoSkipDup).TotalSeconds.ToString("0.0") & " seconds")
@@ -75,10 +74,10 @@
 
 	End Sub
 
-	Private Sub TestPHRPReader(ByVal strSequestSynFilePath As String, ByVal blnSkipDuplicates As Boolean)
+	Private Sub TestPHRPReader(ByVal strSynOrFHTFile As String, ByVal blnSkipDuplicates As Boolean)
 
 		Dim fiInputFile As IO.FileInfo
-		fiInputFile = New IO.FileInfo(strSequestSynFilePath)
+		fiInputFile = New IO.FileInfo(strSynOrFHTFile)
 
 		Console.WriteLine("Instantiating reader")
 		Dim oStartupOptions = New PHRPReader.clsPHRPStartupOptions()
@@ -103,12 +102,12 @@
 			Return
 		End If
 
-		Dim lstValues As Generic.List(Of String) = New Generic.List(Of String)
+		Dim lstValues As List(Of String) = New List(Of String)
 		Dim intIsotopeErrorComputed As Integer
 		Dim strMassErrorPPM As String
 		Dim intPSMsRead As Integer = 0
 
-		Dim dctCachedValues As Generic.Dictionary(Of Integer, PHRPReader.clsPSM) = New Generic.Dictionary(Of Integer, PHRPReader.clsPSM)
+		Dim dctCachedValues As Dictionary(Of Integer, PHRPReader.clsPSM) = New Dictionary(Of Integer, PHRPReader.clsPSM)
 
 		Console.WriteLine("Reading data")
 
@@ -187,7 +186,7 @@
 
 			Dim strFlattened As String = FlattenList(lstValues)
 
-			If intPSMsRead Mod 10000 = 0 Then
+			If intPSMsRead Mod 5000 = 0 Then
 				'Console.WriteLine(intPSMsRead.ToString().PadRight(8) & " " & oPsm.Peptide.PadRight(40) & "   " & strXCorr)
 				Console.WriteLine(strFlattened)
 			End If
@@ -220,11 +219,11 @@
 		Return strPeptide
 	End Function
 
-	Private Function FlattenList(ByVal lstValues As Generic.List(Of String)) As String
+	Private Function FlattenList(ByVal lstValues As List(Of String)) As String
 		Return FlattenList(lstValues, ControlChars.Tab)
 	End Function
 
-	Private Function FlattenList(ByVal lstValues As Generic.List(Of String), ByVal chSepChar As Char) As String
+	Private Function FlattenList(ByVal lstValues As List(Of String), ByVal chSepChar As Char) As String
 		Dim sbOutline As System.Text.StringBuilder = New System.Text.StringBuilder()
 
 		For intIndex As Integer = 0 To lstValues.Count - 1

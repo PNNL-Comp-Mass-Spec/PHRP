@@ -19,7 +19,7 @@ Public Class clsMODaResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "June 12, 2014"
+		MyBase.mFileDate = "September 3, 2014"
 		InitializeLocalVariables()
 	End Sub
 
@@ -418,40 +418,48 @@ Public Class clsMODaResultsProcessor
 	End Sub
 
 	''' <summary>
-	''' Ranks each entry (calling procedure should have already sorted the data by Scan, Charge, and SpecProb)
+	''' Ranks each entry  assumes all of the data is from the same scan)
 	''' </summary>
 	''' <param name="lstSearchResults"></param>
 	''' <param name="intStartIndex"></param>
 	''' <param name="intEndIndex"></param>
 	''' <remarks></remarks>
-	Private Sub AssignRankAndDeltaNormValues(ByRef lstSearchResults As List(Of udtMODaSearchResultType),
+	Private Sub AssignRankAndDeltaNormValues(
+	  ByRef lstSearchResults As List(Of udtMODaSearchResultType),
 	  ByVal intStartIndex As Integer,
 	  ByVal intEndIndex As Integer)
 
-		Dim intIndex As Integer
+		' Prior to September 2014 ranks were assign per charge state per scan; 
+		' Ranks are now assigned per scan (across all charge states)
 
-		Dim intLastCharge As Integer
-		Dim dblLastValue As Double
+		' Duplicate a portion of lstSearchResults so that we can sort by descending Probability
 
-		Dim intCurrentRank As Integer
-
+		Dim dctResultsSubset = New Dictionary(Of Integer, udtMODaSearchResultType)
 		For intIndex = intStartIndex To intEndIndex
-			If intIndex = intStartIndex OrElse lstSearchResults(intIndex).ChargeNum <> intLastCharge Then
-				intLastCharge = lstSearchResults(intIndex).ChargeNum
-				dblLastValue = lstSearchResults(intIndex).ProbabilityNum
+			dctResultsSubset.Add(intIndex, lstSearchResults(intIndex))
+		Next
+
+		Dim lstResultsByProbability = (From item In dctResultsSubset Select item Order By item.Value.ProbabilityNum Descending).ToList()
+
+		Dim dblLastValue As Double
+		Dim intCurrentRank As Integer = -1
+
+		For Each entry In lstResultsByProbability
+			Dim oResult = lstSearchResults(entry.Key)
+
+			If intCurrentRank < 0 Then
+				dblLastValue = oResult.ProbabilityNum
 				intCurrentRank = 1
 			Else
-				If Math.Abs(lstSearchResults(intIndex).ProbabilityNum - dblLastValue) > Double.Epsilon Then
-					dblLastValue = lstSearchResults(intIndex).ProbabilityNum
+				If Math.Abs(oResult.ProbabilityNum - dblLastValue) > Double.Epsilon Then
+					dblLastValue = oResult.ProbabilityNum
 					intCurrentRank += 1
 				End If
 			End If
 
-			Dim oResult = lstSearchResults(intIndex)
 			oResult.RankProbability = intCurrentRank
-			lstSearchResults(intIndex) = oResult
-
-		Next intIndex
+			lstSearchResults(entry.Key) = oResult
+		Next
 
 	End Sub
 
