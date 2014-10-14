@@ -16,14 +16,8 @@ call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_Converter_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_MzXML_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestMagePlugIn\bin\Debug"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\IDPExtractor\bin"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\IDPExtractor\Lib"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\Lipid_Results_Merger\bin"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\Lipid_Results_Merger\Lib"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MASICResultsMerger\bin"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MASICResultsMerger\Lib"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MSGF_Runner\bin"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MSGF_Runner\Lib"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\x64"
@@ -43,8 +37,8 @@ call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\
 
 :Aldrich
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\Release"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\Debug"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Release"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Debug"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug_IgnoreMe"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release"
 

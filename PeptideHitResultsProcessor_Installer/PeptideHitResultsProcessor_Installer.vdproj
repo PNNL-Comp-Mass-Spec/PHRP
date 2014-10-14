@@ -52,13 +52,13 @@
         "Entry"
         {
         "MsmKey" = "8:_52FA745269CC3E11FF274D72D8D37BD4"
-        "OwnerKey" = "8:_CA95D7BB460E375BEF2D0C5FF3B8CB86"
+        "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_52FA745269CC3E11FF274D72D8D37BD4"
-        "OwnerKey" = "8:_143896B4B2674148A9CA18F46E344A91"
+        "OwnerKey" = "8:_CA95D7BB460E375BEF2D0C5FF3B8CB86"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -178,6 +178,12 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_52FA745269CC3E11FF274D72D8D37BD4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_B98DE38250D536BD6E51037EF3C554AC"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -209,12 +215,6 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_8E4D62DBBE2C71233A77A0FDF3ACF358"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_52FA745269CC3E11FF274D72D8D37BD4"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -367,7 +367,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PHRPReader, Version=1.1.5303.30734, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:PHRPReader, Version=1.1.5359.29363, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_34B84A4D82FB4A557993213C9CE80C6A"
@@ -418,7 +418,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:ProteinFileReader, Version=1.2.4834.35436, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:ProteinFileReader, Version=1.2.5371.24645, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_52FA745269CC3E11FF274D72D8D37BD4"
@@ -469,7 +469,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PeptideToProteinMapEngine, Version=1.1.5303.29600, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:PeptideToProteinMapEngine, Version=1.1.5303.32563, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_781D9FF3397AD945A3147A43B56489EF"
@@ -611,7 +611,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PeptideHitResultsProcessor, Version=1.5.5303.32324, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:PeptideHitResultsProcessor, Version=1.5.5359.30275, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_B98DE38250D536BD6E51037EF3C554AC"
@@ -693,7 +693,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:ThermoRawFileReaderDLL, Version=1.1.5049.29983, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:ThermoRawFileReaderDLL, Version=1.1.5323.35808, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_E694EBD8EE01439AE13FC85864F10590"
@@ -808,7 +808,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PeptideHitResultsProcessor"
         "ProductCode" = "8:{CDDE40E3-9932-4B9D-8C6E-34E88580D130}"
-        "PackageCode" = "8:{38B48E9F-3BC0-4A90-B63C-65D3D5BB498D}"
+        "PackageCode" = "8:{3B258A5A-65C6-4193-9434-F0E8D1DE7C76}"
         "UpgradeCode" = "8:{36FC1927-8EED-476F-8562-582B0F670156}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"

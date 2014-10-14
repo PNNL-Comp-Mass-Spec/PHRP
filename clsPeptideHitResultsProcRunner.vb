@@ -37,8 +37,6 @@ Public Class clsPeptideHitResultsProcRunner
 
 #Region "Constants and Enums"
 
-    Protected Const DMS_CONNECTION_STRING_DEFAULT As String = "Data Source=gigasax;Initial Catalog=DMS5_T3;User=dmsreader;Password=dms4fun"
-
     ' Error codes specialized for this class
     Public Enum eResultsProcessorErrorCodes As Integer
         NoError = 0
@@ -55,7 +53,6 @@ Public Class clsPeptideHitResultsProcRunner
     Protected mPeptideHitResultsFileFormat As ePeptideHitResultsFileFormatConstants
 
     Protected mObtainModificationDefinitionsFromDMS As Boolean
-    Protected mDMSConnectionString As String
 
     Protected mMassCorrectionTagsFilePath As String
     Protected mModificationDefinitionsFilePath As String
@@ -378,7 +375,6 @@ Public Class clsPeptideHitResultsProcRunner
 					MyBase.SetBaseClassErrorCode(clsProcessFilesBaseClass.eProcessFilesErrorCodes.InvalidParameterFile)
 					Return False
 				Else
-					mDMSConnectionString = objSettingsFile.GetParam(OPTIONS_SECTION, "DMSConnectionString", DMS_CONNECTION_STRING_DEFAULT)
 					mObtainModificationDefinitionsFromDMS = objSettingsFile.GetParam(OPTIONS_SECTION, "ObtainModificationDefinitionsFromDMS", mObtainModificationDefinitionsFromDMS)
 
 					intValue = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideHitResultsFileFormat", CInt(mPeptideHitResultsFileFormat))
