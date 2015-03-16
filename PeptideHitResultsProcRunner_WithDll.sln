@@ -49,6 +49,7 @@ Global
 		{81A15D6E-10C3-4F2C-BF71-6642B76753ED}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{81A15D6E-10C3-4F2C-BF71-6642B76753ED}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{81A15D6E-10C3-4F2C-BF71-6642B76753ED}.Release|x86.ActiveCfg = Release|Any CPU
+		{81A15D6E-10C3-4F2C-BF71-6642B76753ED}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
