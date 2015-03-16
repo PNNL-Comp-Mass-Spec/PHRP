@@ -14,6 +14,7 @@
 
 Option Strict On
 
+Imports System.Runtime.InteropServices
 Imports PHRPReader.clsModificationDefinition
 Imports System.Collections.Generic
 Imports System.IO
@@ -855,7 +856,10 @@ Public Class clsPHRPReader
     ''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByRef eMatchedResultType As ePeptideHitResultType) As String
+    Public Shared Function AutoDetermineBestInputFile(
+       ByVal strInputFolderPath As String,
+       <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
+
         ' Find candidate dataset names in strInputFolderPath
 
         Dim fiInputFolder As DirectoryInfo
@@ -937,7 +941,7 @@ Public Class clsPHRPReader
     ''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal strDatasetName As String, ByRef eMatchedResultType As ePeptideHitResultType) As String
+    Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal strDatasetName As String, <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
         Dim lstDatasetNames As List(Of String) = New List(Of String)
         lstDatasetNames.Add(strDatasetName)
 
@@ -953,7 +957,10 @@ Public Class clsPHRPReader
     ''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal lstDatasetNames As List(Of String), ByRef eMatchedResultType As ePeptideHitResultType) As String
+    Public Shared Function AutoDetermineBestInputFile(
+       ByVal strInputFolderPath As String,
+       ByVal lstDatasetNames As List(Of String),
+       <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
 
         Dim fiInputFolder As DirectoryInfo
 
@@ -1249,7 +1256,10 @@ Public Class clsPHRPReader
     ''' <param name="lstPeptideMods">List of modified amino acids (output)</param>
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks>strPeptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
-    Protected Function ConvertModsToNumericMods(ByVal strPeptide As String, ByRef strPeptideWithNumericMods As String, ByRef lstPeptideMods As List(Of clsAminoAcidModInfo)) As Boolean
+    Protected Function ConvertModsToNumericMods(
+      ByVal strPeptide As String,
+      <Out()> ByRef strPeptideWithNumericMods As String,
+      <Out()> ByRef lstPeptideMods As List(Of clsAminoAcidModInfo)) As Boolean
 
         Static sbNewPeptide As New Text.StringBuilder
 
@@ -1262,8 +1272,11 @@ Public Class clsPHRPReader
         Dim intIndexStart As Integer
         Dim intIndexEnd As Integer
 
+        lstPeptideMods = New List(Of clsAminoAcidModInfo)
+        strPeptideWithNumericMods = String.Empty
+
         Try
-            lstPeptideMods.Clear()
+
 
             If mDynamicMods.Count = 0 AndAlso mStaticMods.Count = 0 Then
                 ' No mods are defined; simply update strPeptideWithNumericMods to be strPeptide
@@ -1271,7 +1284,6 @@ Public Class clsPHRPReader
                 Return True
             End If
 
-            strPeptideWithNumericMods = String.Empty
             sbNewPeptide.Length = 0
             intPeptideLength = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, True).Length
 
@@ -1364,13 +1376,14 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Sub AddDynamicModIfPresent(ByRef objMods As SortedDictionary(Of Char, clsModificationDefinition), _
-      ByVal chResidue As Char, _
-      ByVal chModSymbol As Char, _
-      ByVal ResidueLocInPeptide As Integer, _
-      ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
-      ByRef sbNewPeptide As Text.StringBuilder, _
-      ByRef lstPeptideMods As List(Of clsAminoAcidModInfo))
+    Protected Sub AddDynamicModIfPresent(
+      ByVal objMods As SortedDictionary(Of Char, clsModificationDefinition),
+      ByVal chResidue As Char,
+      ByVal chModSymbol As Char,
+      ByVal ResidueLocInPeptide As Integer,
+      ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
+      ByVal sbNewPeptide As Text.StringBuilder,
+      ByVal lstPeptideMods As List(Of clsAminoAcidModInfo))
 
         Dim objModDef As clsModificationDefinition = Nothing
 
@@ -1382,12 +1395,13 @@ Public Class clsPHRPReader
 
     End Sub
 
-    Protected Sub AddStaticModIfPresent(ByRef objMods As SortedDictionary(Of String, List(Of clsModificationDefinition)), _
-       ByVal chResidue As Char, _
-       ByVal ResidueLocInPeptide As Integer, _
-       ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
-       ByRef sbNewPeptide As Text.StringBuilder, _
-       ByRef lstPeptideMods As List(Of clsAminoAcidModInfo))
+    Protected Sub AddStaticModIfPresent(
+       ByVal objMods As SortedDictionary(Of String, List(Of clsModificationDefinition)),
+       ByVal chResidue As Char,
+       ByVal ResidueLocInPeptide As Integer,
+       ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
+       ByVal sbNewPeptide As Text.StringBuilder,
+       ByVal lstPeptideMods As List(Of clsAminoAcidModInfo))
 
         Dim lstModDefs As List(Of clsModificationDefinition) = Nothing
 
@@ -1787,7 +1801,7 @@ Public Class clsPHRPReader
     ''' <param name="objColumnHeaders"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function LookupColumnIndex(ByVal strColumnName As String, ByRef objColumnHeaders As SortedDictionary(Of String, Integer)) As Integer
+    Public Shared Function LookupColumnIndex(ByVal strColumnName As String, ByVal objColumnHeaders As SortedDictionary(Of String, Integer)) As Integer
 
         Dim intColIndex As Integer
 
@@ -1806,9 +1820,10 @@ Public Class clsPHRPReader
     ''' </summary>
     ''' <returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
     ''' <remarks></remarks>
-    Public Shared Function LookupColumnValue(ByRef strColumns() As String, _
+    Public Shared Function LookupColumnValue(
+      ByVal strColumns() As String, _
       ByVal strColumnName As String, _
-      ByRef objColumnHeaders As SortedDictionary(Of String, Integer)) As String
+      ByVal objColumnHeaders As SortedDictionary(Of String, Integer)) As String
 
         Return LookupColumnValue(strColumns, strColumnName, objColumnHeaders, String.Empty)
     End Function
@@ -1818,9 +1833,10 @@ Public Class clsPHRPReader
     ''' </summary>
     ''' <returns>The text in the specified column; strValueIfMissing if the specific column name is not recognized</returns>
     ''' <remarks></remarks>
-    Public Shared Function LookupColumnValue(ByRef strColumns() As String, _
+    Public Shared Function LookupColumnValue(
+      ByVal strColumns() As String, _
       ByVal strColumnName As String, _
-      ByRef objColumnHeaders As SortedDictionary(Of String, Integer), _
+      ByVal objColumnHeaders As SortedDictionary(Of String, Integer), _
       ByVal strValueIfMissing As String) As String
 
         Dim intColIndex As Integer
@@ -1847,9 +1863,10 @@ Public Class clsPHRPReader
     ''' </summary>
     ''' <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
     ''' <remarks></remarks>
-    Public Shared Function LookupColumnValue(ByRef strColumns() As String, _
-      ByVal strColumnName As String, _
-      ByRef objColumnHeaders As SortedDictionary(Of String, Integer), _
+    Public Shared Function LookupColumnValue(
+      ByVal strColumns() As String,
+      ByVal strColumnName As String,
+      ByVal objColumnHeaders As SortedDictionary(Of String, Integer),
       ByVal ValueIfMissing As Integer) As Integer
 
         Dim strValue As String
@@ -1868,9 +1885,10 @@ Public Class clsPHRPReader
     ''' </summary>
     ''' <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
     ''' <remarks></remarks>
-    Public Shared Function LookupColumnValue(ByRef strColumns() As String, _
-      ByVal strColumnName As String, _
-      ByRef objColumnHeaders As SortedDictionary(Of String, Integer), _
+    Public Shared Function LookupColumnValue(
+      ByVal strColumns() As String,
+      ByVal strColumnName As String,
+      ByVal objColumnHeaders As SortedDictionary(Of String, Integer),
       ByVal ValueIfMissing As Double) As Double
 
         Dim strValue As String
@@ -1890,7 +1908,7 @@ Public Class clsPHRPReader
     ''' <param name="strColumns">Column names read from the input file</param>
     ''' <param name="objColumnHeaders">Column mapping dictionary object to update</param>
     ''' <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.CurrentCultureIgnoreCase)</remarks>
-    Public Shared Sub ParseColumnHeaders(ByVal strColumns() As String, ByRef objColumnHeaders As SortedDictionary(Of String, Integer))
+    Public Shared Sub ParseColumnHeaders(ByVal strColumns() As String, ByVal objColumnHeaders As SortedDictionary(Of String, Integer))
 
         Dim intIndex As Integer
 
@@ -2130,9 +2148,8 @@ Public Class clsPHRPReader
 		Dim blnSuccess As Boolean
 
 		' Markup the peptide with the dynamic and static mods
-		Dim strPeptideWithMods As String = String.Empty
-		Dim lstPeptideMods As List(Of clsAminoAcidModInfo)
-		lstPeptideMods = New List(Of clsAminoAcidModInfo)
+        Dim strPeptideWithMods As String = String.Empty
+        Dim lstPeptideMods As List(Of clsAminoAcidModInfo) = Nothing
 
 		blnSuccess = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim, strPeptideWithMods, lstPeptideMods)
 		If blnSuccess Then
@@ -2225,112 +2242,112 @@ Public Class clsPHRPReader
 	''' <param name="objDynamicMods">List with mod symbols as the key and the corresponding mod mass</param>
 	''' <param name="objStaticMods">List with amino acid names as the key and the corresponding mod mass</param>
 	''' <returns>True if success; false if an error</returns>
-	Protected Function ReadModSummaryFile(ByVal strModSummaryFilePath As String, _
-	  ByRef objDynamicMods As SortedDictionary(Of Char, clsModificationDefinition), _
-	  ByRef objStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))) As Boolean
+    Protected Function ReadModSummaryFile(
+      ByVal strModSummaryFilePath As String,
+      ByVal objDynamicMods As SortedDictionary(Of Char, clsModificationDefinition),
+      ByVal objStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))) As Boolean
 
-		Dim objModSummaryReader As clsPHRPModSummaryReader
+        Dim objModSummaryReader As clsPHRPModSummaryReader
 
-		Dim lstModDefs As List(Of clsModificationDefinition) = Nothing
+        Dim lstModDefs As List(Of clsModificationDefinition) = Nothing
 
-		Dim strModMass As String
-		Dim blnSuccess As Boolean
+        Dim strModMass As String
+        Dim blnSuccess As Boolean
 
-		Try
-			If String.IsNullOrEmpty(strModSummaryFilePath) Then
-				ReportError("ModSummaryFile path is empty; unable to continue")
-				Return False
-			ElseIf Not File.Exists(strModSummaryFilePath) Then
-				ReportError("ModSummary file not found: " & strModSummaryFilePath)
-				Return False
-			End If
+        Try
+            ' Clear objDynamicMods and objStaticMods (should have been instantiated by the calling function)
+            objDynamicMods.Clear()
+            objStaticMods.Clear()
+
+            If String.IsNullOrEmpty(strModSummaryFilePath) Then
+                ReportError("ModSummaryFile path is empty; unable to continue")
+                Return False
+            ElseIf Not File.Exists(strModSummaryFilePath) Then
+                ReportError("ModSummary file not found: " & strModSummaryFilePath)
+                Return False
+            End If
+
+            ShowMessage("Reading the PHRP ModSummary file")
+
+            objModSummaryReader = New clsPHRPModSummaryReader(strModSummaryFilePath)
+            blnSuccess = objModSummaryReader.Success
+
+            If blnSuccess AndAlso objModSummaryReader.ModificationDefs.Count > 0 Then
+
+                For Each objModDef In objModSummaryReader.ModificationDefs
+
+                    strModMass = objModSummaryReader.GetModificationMassAsText(objModDef.MassCorrectionTag)
+
+                    Select Case objModDef.ModificationType
+                        Case eModificationTypeConstants.StaticMod, eModificationTypeConstants.TerminalPeptideStaticMod, eModificationTypeConstants.ProteinTerminusStaticMod
+
+                            ' "S", "T", or "P"
+                            ' Static residue mod, peptide terminus static mod, or protein terminus static mod
+                            ' Note that < and > mean peptide N and C terminus (N_TERMINAL_PEPTIDE_SYMBOL_DMS and C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                            ' Note that [ and ] mean protein N and C terminus (N_TERMINAL_PROTEIN_SYMBOL_DMS and C_TERMINAL_PROTEIN_SYMBOL_DMS)
+
+                            ' This mod could apply to multiple residues, so need to process each character in strTargetResidues
+                            For Each chChar In objModDef.TargetResidues
+                                Try
+
+                                    If objStaticMods.TryGetValue(chChar, lstModDefs) Then
+                                        If Not lstModDefs.Contains(objModDef) Then
+                                            ' Residue is already present in objStaticMods; this is unusual, but we'll allow it
+                                            ' We'll log a warning, but continue
+                                            ShowMessage("Warning: Residue '" & chChar & "' has more than one static mod defined; this is not typically used, but will be allowed")
+                                            lstModDefs.Add(objModDef)
+                                        End If
+                                    Else
+                                        lstModDefs = New List(Of clsModificationDefinition)
+                                        lstModDefs.Add(objModDef)
+                                        objStaticMods.Add(chChar, lstModDefs)
+                                    End If
+
+                                Catch ex As Exception
+                                    HandleException("Exception adding static mod for " & chChar & " with ModMass=" & strModMass, ex)
+                                End Try
+                            Next
+                        Case eModificationTypeConstants.DynamicMod
+                            ' Dynamic residue mod (Includes mod type "D")
+                            ' Note that < and > mean peptide N and C terminus (N_TERMINAL_PEPTIDE_SYMBOL_DMS and C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+
+                            Try
+                                If objDynamicMods.ContainsKey(objModDef.ModificationSymbol) Then
+                                    ' Mod symbol already present in objDynamicMods; this is unexpected
+                                    ' We'll log a warning, but continue
+                                    ShowMessage("Warning: Dynamic mod symbol '" & objModDef.ModificationSymbol & "' is already defined; it cannot have more than one associated mod mass (duplicate has ModMass=" & strModMass & ")")
+                                Else
+                                    objDynamicMods.Add(objModDef.ModificationSymbol, objModDef)
+                                End If
+
+                            Catch ex As Exception
+                                HandleException("Exception adding dynamic mod for " & objModDef.ModificationSymbol & " with ModMass=" & strModMass, ex)
+                            End Try
 
 
-			ShowMessage("Reading the PHRP ModSummary file")
+                        Case eModificationTypeConstants.IsotopicMod
+                            ' Isotopic mods are not supported by this class
+                            ' However, do not log a warning since these are rarely used
 
-			' Clear objDynamicMods and objStaticMods (should have been instantiated by the calling function)
-			objDynamicMods.Clear()
-			objStaticMods.Clear()
+                        Case eModificationTypeConstants.UnknownType
+                            ' Unknown type; just ignore it
 
-			objModSummaryReader = New clsPHRPModSummaryReader(strModSummaryFilePath)
-			blnSuccess = objModSummaryReader.Success
+                        Case Else
+                            ' Unknown type; just ignore it
 
-			If blnSuccess AndAlso objModSummaryReader.ModificationDefs.Count > 0 Then
+                    End Select
+                Next
 
-				For Each objModDef In objModSummaryReader.ModificationDefs
+            End If
 
-					strModMass = objModSummaryReader.GetModificationMassAsText(objModDef.MassCorrectionTag)
+        Catch ex As Exception
+            HandleException("Exception reading PHRP Mod Summary file", ex)
+            Return False
+        End Try
 
-					Select Case objModDef.ModificationType
-						Case eModificationTypeConstants.StaticMod, eModificationTypeConstants.TerminalPeptideStaticMod, eModificationTypeConstants.ProteinTerminusStaticMod
+        Return True
 
-							' "S", "T", or "P"
-							' Static residue mod, peptide terminus static mod, or protein terminus static mod
-							' Note that < and > mean peptide N and C terminus (N_TERMINAL_PEPTIDE_SYMBOL_DMS and C_TERMINAL_PEPTIDE_SYMBOL_DMS)
-							' Note that [ and ] mean protein N and C terminus (N_TERMINAL_PROTEIN_SYMBOL_DMS and C_TERMINAL_PROTEIN_SYMBOL_DMS)
-
-							' This mod could apply to multiple residues, so need to process each character in strTargetResidues
-							For Each chChar In objModDef.TargetResidues
-								Try
-
-									If objStaticMods.TryGetValue(chChar, lstModDefs) Then
-										If Not lstModDefs.Contains(objModDef) Then
-											' Residue is already present in objStaticMods; this is unusual, but we'll allow it
-											' We'll log a warning, but continue
-											ShowMessage("Warning: Residue '" & chChar & "' has more than one static mod defined; this is not typically used, but will be allowed")
-											lstModDefs.Add(objModDef)
-										End If
-									Else
-										lstModDefs = New List(Of clsModificationDefinition)
-										lstModDefs.Add(objModDef)
-										objStaticMods.Add(chChar, lstModDefs)
-									End If
-
-								Catch ex As Exception
-									HandleException("Exception adding static mod for " & chChar & " with ModMass=" & strModMass, ex)
-								End Try
-							Next
-						Case eModificationTypeConstants.DynamicMod
-							' Dynamic residue mod (Includes mod type "D")
-							' Note that < and > mean peptide N and C terminus (N_TERMINAL_PEPTIDE_SYMBOL_DMS and C_TERMINAL_PEPTIDE_SYMBOL_DMS)
-
-							Try
-								If objDynamicMods.ContainsKey(objModDef.ModificationSymbol) Then
-									' Mod symbol already present in objDynamicMods; this is unexpected
-									' We'll log a warning, but continue
-									ShowMessage("Warning: Dynamic mod symbol '" & objModDef.ModificationSymbol & "' is already defined; it cannot have more than one associated mod mass (duplicate has ModMass=" & strModMass & ")")
-								Else
-									objDynamicMods.Add(objModDef.ModificationSymbol, objModDef)
-								End If
-
-							Catch ex As Exception
-								HandleException("Exception adding dynamic mod for " & objModDef.ModificationSymbol & " with ModMass=" & strModMass, ex)
-							End Try
-
-
-						Case eModificationTypeConstants.IsotopicMod
-							' Isotopic mods are not supported by this class
-							' However, do not log a warning since these are rarely used
-
-						Case eModificationTypeConstants.UnknownType
-							' Unknown type; just ignore it
-
-						Case Else
-							' Unknown type; just ignore it
-
-					End Select
-				Next
-
-			End If
-
-		Catch ex As Exception
-			HandleException("Exception reading PHRP Mod Summary file", ex)
-			Return False
-		End Try
-
-		Return True
-
-	End Function
+    End Function
 
 	Protected Function ReadScanStatsData() As Boolean
 
@@ -2461,81 +2478,84 @@ Public Class clsPHRPReader
 		RaiseEvent MessageEvent(strMessage)
 	End Sub
 
-	Protected Function TryGetScanStats(ByVal intScanNumber As Integer, ByRef objScanStatsInfo As clsScanStatsInfo) As Boolean
-		If Not mScanStats Is Nothing AndAlso mScanStats.Count > 0 Then
-			If mScanStats.TryGetValue(intScanNumber, objScanStatsInfo) Then
-				Return True
-			End If
-		End If
-		Return False
-	End Function
+    Protected Function TryGetScanStats(ByVal intScanNumber As Integer, <Out()> ByRef objScanStatsInfo As clsScanStatsInfo) As Boolean
+        If Not mScanStats Is Nothing AndAlso mScanStats.Count > 0 Then
+            If mScanStats.TryGetValue(intScanNumber, objScanStatsInfo) Then
+                Return True
+            End If
+        End If
+        objScanStatsInfo = Nothing
+        Return False
+    End Function
 
-	Protected Function TryGetExtendedScanStats(ByVal intScanNumber As Integer, ByRef objExtendedScanStatsInfo As clsScanStatsExInfo) As Boolean
-		If Not mScanStatsEx Is Nothing AndAlso mScanStats.Count > 0 Then
-			If mScanStatsEx.TryGetValue(intScanNumber, objExtendedScanStatsInfo) Then
-				Return True
-			End If
-		End If
-		Return False
-	End Function
+    Protected Function TryGetExtendedScanStats(ByVal intScanNumber As Integer, <Out()> ByRef objExtendedScanStatsInfo As clsScanStatsExInfo) As Boolean
+        If Not mScanStatsEx Is Nothing AndAlso mScanStats.Count > 0 Then
+            If mScanStatsEx.TryGetValue(intScanNumber, objExtendedScanStatsInfo) Then
+                Return True
+            End If
+        End If
+        objExtendedScanStatsInfo = Nothing
+        Return False
+    End Function
 
-	Private Function ValidateInputFiles(ByVal strInputFilePath As String, _
-	  ByRef eResultType As ePeptideHitResultType, _
-	  ByRef strModSummaryFilePath As String) As Boolean
+    Private Function ValidateInputFiles(
+      ByVal strInputFilePath As String,
+      ByRef eResultType As ePeptideHitResultType,
+      ByRef strModSummaryFilePath As String) As Boolean
 
-		Dim fiFileInfo As FileInfo
+        Dim fiFileInfo As FileInfo
 
-		fiFileInfo = New FileInfo(strInputFilePath)
-		If Not fiFileInfo.Exists Then
-			SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath)
-			ReportError("Input file not found: " & strInputFilePath)
-			Return False
-		End If
+        fiFileInfo = New FileInfo(strInputFilePath)
+        If Not fiFileInfo.Exists Then
+            SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath)
+            ReportError("Input file not found: " & strInputFilePath)
+            Return False
+        End If
 
-		' Try to auto-determine the result type if it is not specified
-		If eResultType = ePeptideHitResultType.Unknown Then
-			eResultType = AutoDetermineResultType(strInputFilePath)
-		End If
+        ' Try to auto-determine the result type if it is not specified
+        If eResultType = ePeptideHitResultType.Unknown Then
+            eResultType = AutoDetermineResultType(strInputFilePath)
+        End If
 
-		If eResultType = ePeptideHitResultType.Unknown Then
-			SetLocalErrorCode(ePHRPReaderErrorCodes.InputFileFormatNotRecognized)
-			ReportError("Error: Unable to auto-determine file format for " & strInputFilePath)
-			Return False
-		End If
+        If eResultType = ePeptideHitResultType.Unknown Then
+            SetLocalErrorCode(ePHRPReaderErrorCodes.InputFileFormatNotRecognized)
+            ReportError("Error: Unable to auto-determine file format for " & strInputFilePath)
+            Return False
+        End If
 
-		' Extract the dataset name from the input file path
-		mDatasetName = AutoDetermineDatasetName(strInputFilePath, eResultType)
-		If mDatasetName Is Nothing OrElse mDatasetName.Length = 0 Then
-			If mStartupOptions.LoadModsAndSeqInfo OrElse mStartupOptions.LoadMSGFResults OrElse mStartupOptions.LoadScanStatsData Then
-				ReportError("Error: Unable to auto-determine the dataset name from the input file name: " & strInputFilePath)
-				SetLocalErrorCode(ePHRPReaderErrorCodes.InputFileFormatNotRecognized)
-				Return False
-			Else
-				ReportWarning("Unable to auto-determine the dataset name from the input file name; this is not a critical error since not reading related files: " & strInputFilePath)
-			End If
-		End If
+        ' Extract the dataset name from the input file path
+        mDatasetName = AutoDetermineDatasetName(strInputFilePath, eResultType)
+        If mDatasetName Is Nothing OrElse mDatasetName.Length = 0 Then
+            If mStartupOptions.LoadModsAndSeqInfo OrElse mStartupOptions.LoadMSGFResults OrElse mStartupOptions.LoadScanStatsData Then
+                ReportError("Error: Unable to auto-determine the dataset name from the input file name: " & strInputFilePath)
+                SetLocalErrorCode(ePHRPReaderErrorCodes.InputFileFormatNotRecognized)
+                Return False
+            Else
+                ReportWarning("Unable to auto-determine the dataset name from the input file name; this is not a critical error since not reading related files: " & strInputFilePath)
+            End If
+        End If
 
-		If mStartupOptions.LoadModsAndSeqInfo Then
-			strModSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName)
-			strModSummaryFilePath = Path.Combine(fiFileInfo.DirectoryName, strModSummaryFilePath)
+        If mStartupOptions.LoadModsAndSeqInfo Then
+            strModSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName)
+            strModSummaryFilePath = Path.Combine(fiFileInfo.DirectoryName, strModSummaryFilePath)
 
-			Dim strModSummaryFilePathPreferred As String
-			strModSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(strModSummaryFilePath, fiFileInfo.Name)
-			If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso File.Exists(strModSummaryFilePathPreferred) Then
-				strModSummaryFilePath = strModSummaryFilePathPreferred
-			End If
+            Dim strModSummaryFilePathPreferred As String
+            strModSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(strModSummaryFilePath, fiFileInfo.Name)
+            If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso File.Exists(strModSummaryFilePathPreferred) Then
+                strModSummaryFilePath = strModSummaryFilePathPreferred
+            End If
 
-			If Not ValidateRequiredFileExists("ModSummary file", strModSummaryFilePath) AndAlso fiFileInfo.Name.ToLower().Contains("_fht") Then
-				SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound)
-				Return False
-			End If
-		Else
-			strModSummaryFilePath = String.Empty
-		End If
+            If Not ValidateRequiredFileExists("ModSummary file", strModSummaryFilePath) AndAlso fiFileInfo.Name.ToLower().Contains("_fht") Then
+                SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound)
+                Return False
+            End If
+        Else
+            strModSummaryFilePath = String.Empty
+        End If
 
-		Return True
+        Return True
 
-	End Function
+    End Function
 
 	Private Function ValidateRequiredFileExists(ByVal strFileDescription As String, ByVal strFilePath As String) As Boolean
 		Return ValidateRequiredFileExists(strFileDescription, strFilePath, True)

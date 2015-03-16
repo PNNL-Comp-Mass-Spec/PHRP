@@ -173,23 +173,23 @@ Public Class clsPHRPParserMSAlign
 	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
 	''' <returns>Precursor tolerance, in Da</returns>
 	''' <remarks></remarks>
-	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
-		Dim strTolerance As String = String.Empty
+    Protected Function DeterminePrecursorMassTolerance(ByVal objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+        Dim strTolerance As String = String.Empty
 
-		Dim dblToleranceDa As Double = 0
+        Dim dblToleranceDa As Double = 0
 
-		dblTolerancePPM = 0
+        dblTolerancePPM = 0
 
-		If objSearchEngineParams.Parameters.TryGetValue("errorTolerance", strTolerance) Then
-			' Parent mass tolerance, in ppm
-			If Double.TryParse(strTolerance, dblTolerancePPM) Then
-				dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblTolerancePPM, 2000)
-			End If
-		End If
+        If objSearchEngineParams.Parameters.TryGetValue("errorTolerance", strTolerance) Then
+            ' Parent mass tolerance, in ppm
+            If Double.TryParse(strTolerance, dblTolerancePPM) Then
+                dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblTolerancePPM, 2000)
+            End If
+        End If
 
-		Return dblToleranceDa
+        Return dblToleranceDa
 
-	End Function
+    End Function
 
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_FHT
@@ -234,60 +234,60 @@ Public Class clsPHRPParserMSAlign
 	''' <param name="objSearchEngineParams"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		objSearchEngineParams = New clsSearchEngineParameters(MSAlign_SEARCH_ENGINE_NAME)
+        objSearchEngineParams = New clsSearchEngineParameters(MSAlign_SEARCH_ENGINE_NAME)
 
-		blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
+        blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
 
-		ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+        ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
-		Dim strSettingValue As String = String.Empty
-		Dim objModDef As clsModificationDefinition
-		Dim blnSuccess As Boolean
+    Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
+        Dim strSettingValue As String = String.Empty
+        Dim objModDef As clsModificationDefinition
+        Dim blnSuccess As Boolean
 
-		Try
-			blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MSAlign, objSearchEngineParams)
+        Try
+            blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MSAlign, objSearchEngineParams)
 
-			If blnSuccess Then
+            If blnSuccess Then
 
-				' For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
-				' But MSAlign does not have a _ModDefs.txt file because it performs a blind search
-				' The user can define static mods on cysteine; check for these now
+                ' For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
+                ' But MSAlign does not have a _ModDefs.txt file because it performs a blind search
+                ' The user can define static mods on cysteine; check for these now
 
-				If objSearchEngineParams.Parameters.TryGetValue("cysteineProtection", strSettingValue) Then
+                If objSearchEngineParams.Parameters.TryGetValue("cysteineProtection", strSettingValue) Then
 
-					Select Case strSettingValue
-						Case "C57"
-							objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 57.0215, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcet")
-							objSearchEngineParams.AddModification(objModDef)
-						Case "C58"
-							objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 58.0055, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcid")
-							objSearchEngineParams.AddModification(objModDef)
-					End Select
+                    Select Case strSettingValue
+                        Case "C57"
+                            objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 57.0215, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcet")
+                            objSearchEngineParams.AddModification(objModDef)
+                        Case "C58"
+                            objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 58.0055, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcid")
+                            objSearchEngineParams.AddModification(objModDef)
+                    End Select
 
-				End If
+                End If
 
-				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
-				Dim dblTolerancePPM As Double
-				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
-				objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
-			End If
+                ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+                Dim dblTolerancePPM As Double
+                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+                objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
+            End If
 
-		Catch ex As Exception
-			ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 	''' <summary>
 	''' Parse the data line read from a PHRP results file
@@ -298,89 +298,85 @@ Public Class clsPHRPParserMSAlign
 	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
 	''' <returns>True if success, false if an error</returns>
 	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
+    Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
 
-		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
-		Dim strPeptide As String
-		Dim strProtein As String
+        Dim strColumns() As String = strLine.Split(ControlChars.Tab)
+        Dim strPeptide As String
+        Dim strProtein As String
 
-		Dim dblPrecursorMZ As Double
+        Dim dblPrecursorMZ As Double
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
+        objPSM = New clsPSM()
 
-			If objPSM Is Nothing Then
-				objPSM = New clsPSM
-			Else
-				objPSM.Clear()
-			End If
+        Try
 
-			With objPSM
-				.DataLineText = strLine
-				.ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100)
-				If .ScanNumber = -100 Then
-					' Data line is not valid
-				Else
+            With objPSM
+                .DataLineText = strLine
+                .ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100)
+                If .ScanNumber = -100 Then
+                    ' Data line is not valid
+                Else
 
-					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
-					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1)
+                    .ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
+                    .ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1)
 
-					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
+                    strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 
-					If fastReadMode Then
-						.SetPeptide(strPeptide, blnUpdateCleanSequence:=False)
-					Else
-						.SetPeptide(strPeptide, mCleavageStateCalculator)
-					End If
+                    If fastReadMode Then
+                        .SetPeptide(strPeptide, blnUpdateCleanSequence:=False)
+                    Else
+                        .SetPeptide(strPeptide, mCleavageStateCalculator)
+                    End If
 
-					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
+                    .Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
 
-					strProtein = LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders)
-					.AddProtein(strProtein)
+                    strProtein = LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders)
+                    .AddProtein(strProtein)
 
-					dblPrecursorMZ = LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0#)
-					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .Charge, 0)
+                    dblPrecursorMZ = LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0#)
+                    .PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .Charge, 0)
 
-					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
-					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
+                    .MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
+                    .MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
-					blnSuccess = True
-				End If
-			End With
+                    blnSuccess = True
+                End If
+            End With
 
-			If blnSuccess Then
-				If Not fastReadMode Then
-					UpdatePSMUsingSeqInfo(objPSM)
-				End If
+            If blnSuccess Then
+                If Not fastReadMode Then
+                    UpdatePSMUsingSeqInfo(objPSM)
+                End If
 
-				' Store the remaining scores
-				AddScore(objPSM, strColumns, DATA_COLUMN_Prsm_ID)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Spectrum_ID)
+                ' Store the remaining scores
+                AddScore(objPSM, strColumns, DATA_COLUMN_Prsm_ID)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Spectrum_ID)
 
-				AddScore(objPSM, strColumns, DATA_COLUMN_MH)
+                AddScore(objPSM, strColumns, DATA_COLUMN_MH)
 
-				AddScore(objPSM, strColumns, DATA_COLUMN_Protein_Mass)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Unexpected_Mod_Count)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Peak_Count)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Matched_Peak_Count)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Matched_Fragment_Ion_Count)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Protein_Mass)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Unexpected_Mod_Count)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Peak_Count)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Matched_Peak_Count)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Matched_Fragment_Ion_Count)
 
-				AddScore(objPSM, strColumns, DATA_COLUMN_PValue)
-				AddScore(objPSM, strColumns, DATA_COLUMN_EValue)
-				AddScore(objPSM, strColumns, DATA_COLUMN_FDR)
+                AddScore(objPSM, strColumns, DATA_COLUMN_PValue)
+                AddScore(objPSM, strColumns, DATA_COLUMN_EValue)
+                AddScore(objPSM, strColumns, DATA_COLUMN_FDR)
 
-				AddScore(objPSM, strColumns, DATA_COLUMN_Species_ID)
-				AddScore(objPSM, strColumns, DATA_COLUMN_FragMethod)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Species_ID)
+                AddScore(objPSM, strColumns, DATA_COLUMN_FragMethod)
 
-			End If
+            End If
 
-		Catch ex As Exception
-			MyBase.ReportError("Error parsing line " & intLinesRead & " in the MSAlign data file: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            MyBase.ReportError("Error parsing line " & intLinesRead & " in the MSAlign data file: " & ex.Message)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 End Class

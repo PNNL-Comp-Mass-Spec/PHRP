@@ -162,14 +162,16 @@ Public Class clsModificationDefinition
 
 		Me.ModificationSymbol = chModificationSymbol
 		Me.ModificationMass = dblModificationMass
-	End Sub
+    End Sub
+
 	Public Sub New(ByVal dblModificationMass As Double, ByVal strTargetResidues As String, ByVal eModificationType As eModificationTypeConstants)
 		Me.Clear()
 
 		Me.ModificationMass = dblModificationMass
 		Me.TargetResidues = strTargetResidues
 		Me.ModificationType = eModificationType
-	End Sub
+    End Sub
+
 	Public Sub New(ByVal chModificationSymbol As Char, ByVal dblModificationMass As Double, ByVal strTargetResidues As String, ByVal eModificationType As eModificationTypeConstants, ByVal strMassCorrectionTag As String)
 		Me.Clear()
 
@@ -178,7 +180,8 @@ Public Class clsModificationDefinition
 		Me.TargetResidues = strTargetResidues
 		Me.ModificationType = eModificationType
 		Me.MassCorrectionTag = strMassCorrectionTag
-	End Sub
+    End Sub
+
 	Public Sub New(ByVal chModificationSymbol As Char, ByVal dblModificationMass As Double, ByVal strTargetResidues As String, ByVal eModificationType As eModificationTypeConstants, ByVal strMassCorrectionTag As String, ByVal chAffectedAtom As Char, ByVal blnUnknownModAutoDefined As Boolean)
 		Me.Clear()
 

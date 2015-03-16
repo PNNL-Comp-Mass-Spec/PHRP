@@ -159,29 +159,29 @@ Public Class clsPHRPParserMODa
 	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
 	''' <returns>Precursor tolerance, in Da</returns>
 	''' <remarks></remarks>
-	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
-		Dim strTolerance As String = String.Empty
+    Protected Function DeterminePrecursorMassTolerance(ByVal objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+        Dim strTolerance As String = String.Empty
 
-		Dim dblToleranceDa As Double = 0
-		dblTolerancePPM = 0
+        Dim dblToleranceDa As Double = 0
+        dblTolerancePPM = 0
 
-		If objSearchEngineParams.Parameters.TryGetValue("PPMTolerance", strTolerance) Then
-			' Parent mass tolerance, in ppm
-			If Double.TryParse(strTolerance, dblTolerancePPM) Then
-				dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblTolerancePPM, 2000)
-			End If
+        If objSearchEngineParams.Parameters.TryGetValue("PPMTolerance", strTolerance) Then
+            ' Parent mass tolerance, in ppm
+            If Double.TryParse(strTolerance, dblTolerancePPM) Then
+                dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblTolerancePPM, 2000)
+            End If
 
-		ElseIf objSearchEngineParams.Parameters.TryGetValue("PeptTolerance", strTolerance) Then
-			' Parent mass tolerance, in Da
-			Double.TryParse(strTolerance, dblToleranceDa)
+        ElseIf objSearchEngineParams.Parameters.TryGetValue("PeptTolerance", strTolerance) Then
+            ' Parent mass tolerance, in Da
+            Double.TryParse(strTolerance, dblToleranceDa)
 
-			' Convert from dalton to PPM (assuming a mass of 2000 m/z)
-			dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
-		End If
+            ' Convert from dalton to PPM (assuming a mass of 2000 m/z)
+            dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
+        End If
 
-		Return dblToleranceDa
+        Return dblToleranceDa
 
-	End Function
+    End Function
 
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		' MODa does not have a first-hits file; just the _syn.txt file
@@ -227,81 +227,81 @@ Public Class clsPHRPParserMODa
 	''' <param name="objSearchEngineParams"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		objSearchEngineParams = New clsSearchEngineParameters(MODa_SEARCH_ENGINE_NAME)
+        objSearchEngineParams = New clsSearchEngineParameters(MODa_SEARCH_ENGINE_NAME)
 
-		blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
+        blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
 
-		ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+        ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
-		Dim strSettingValue As String = String.Empty
-		Dim objModDef As clsModificationDefinition
-		Dim blnSuccess As Boolean
+    Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
+        Dim strSettingValue As String = String.Empty
+        Dim objModDef As clsModificationDefinition
+        Dim blnSuccess As Boolean
 
-		Try
-			blnSuccess = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MODa, objSearchEngineParams)
+        Try
+            blnSuccess = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MODa, objSearchEngineParams)
 
-			If blnSuccess Then
-				' For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
-				' But MODa does not have a _ModDefs.txt file because it performs a blind search
-				' The user can define static mods on any of the residues, plus the peptide terminii; check for these now
+            If blnSuccess Then
+                ' For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
+                ' But MODa does not have a _ModDefs.txt file because it performs a blind search
+                ' The user can define static mods on any of the residues, plus the peptide terminii; check for these now
 
-				Dim lstResiduesToFind = New List(Of String) From {"A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"}
+                Dim lstResiduesToFind = New List(Of String) From {"A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"}
 
-				' This dictionary tracks the static mod names we will look for
-				' It is populated using the amino acid letters in lstResiduesToFind, plus also the N and T terminus tags
-				Dim dctResiduesAndSymbols = New Dictionary(Of String, String)
+                ' This dictionary tracks the static mod names we will look for
+                ' It is populated using the amino acid letters in lstResiduesToFind, plus also the N and T terminus tags
+                Dim dctResiduesAndSymbols = New Dictionary(Of String, String)
 
-				For Each residueSymbol In lstResiduesToFind
-					dctResiduesAndSymbols.Add(residueSymbol, residueSymbol)
-				Next
+                For Each residueSymbol In lstResiduesToFind
+                    dctResiduesAndSymbols.Add(residueSymbol, residueSymbol)
+                Next
 
-				dctResiduesAndSymbols.Add("ADD_NTerm", N_TERMINAL_PEPTIDE_SYMBOL_DMS)
-				dctResiduesAndSymbols.Add("ADD_CTerm", C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                dctResiduesAndSymbols.Add("ADD_NTerm", N_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                dctResiduesAndSymbols.Add("ADD_CTerm", C_TERMINAL_PEPTIDE_SYMBOL_DMS)
 
-				For Each residueSpec In dctResiduesAndSymbols
-					Dim strKey = "ADD_" & residueSpec.Key
+                For Each residueSpec In dctResiduesAndSymbols
+                    Dim strKey = "ADD_" & residueSpec.Key
 
-					If objSearchEngineParams.Parameters.TryGetValue(strKey, strSettingValue) Then
-						Dim modMassDa As Double
+                    If objSearchEngineParams.Parameters.TryGetValue(strKey, strSettingValue) Then
+                        Dim modMassDa As Double
 
-						If Double.TryParse(strSettingValue, modMassDa) Then
-							If Math.Abs(modMassDa) > Single.Epsilon Then
+                        If Double.TryParse(strSettingValue, modMassDa) Then
+                            If Math.Abs(modMassDa) > Single.Epsilon Then
 
-								Dim eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod
-								If residueSpec.Value = N_TERMINAL_PEPTIDE_SYMBOL_DMS OrElse residueSpec.Value = C_TERMINAL_PEPTIDE_SYMBOL_DMS Then
-									eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-								End If
+                                Dim eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod
+                                If residueSpec.Value = N_TERMINAL_PEPTIDE_SYMBOL_DMS OrElse residueSpec.Value = C_TERMINAL_PEPTIDE_SYMBOL_DMS Then
+                                    eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+                                End If
 
-								objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residueSpec.Value, eModType, "Mod" & modMassDa.ToString("0"))
-								objSearchEngineParams.AddModification(objModDef)
-							End If
-						End If
+                                objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residueSpec.Value, eModType, "Mod" & modMassDa.ToString("0"))
+                                objSearchEngineParams.AddModification(objModDef)
+                            End If
+                        End If
 
-					End If
-				Next
+                    End If
+                Next
 
-				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
-				Dim dblTolerancePPM As Double
-				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
-				objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
-			End If
+                ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+                Dim dblTolerancePPM As Double
+                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+                objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
+            End If
 
-		Catch ex As Exception
-			ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 	''' <summary>
 	''' Parse the data line read from a PHRP results file
@@ -312,80 +312,76 @@ Public Class clsPHRPParserMODa
 	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
 	''' <returns>True if success, false if an error</returns>
 	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
+    Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
 
-		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
-		Dim strPeptide As String
-		Dim strProtein As String
+        Dim strColumns() As String = strLine.Split(ControlChars.Tab)
+        Dim strPeptide As String
+        Dim strProtein As String
 
-		Dim dblPrecursorMZ As Double
+        Dim dblPrecursorMZ As Double
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
+        objPSM = New clsPSM()
 
-			If objPSM Is Nothing Then
-				objPSM = New clsPSM
-			Else
-				objPSM.Clear()
-			End If
+        Try
 
-			With objPSM
-				.DataLineText = strLine
-				.ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100)
-				If .ScanNumber = -100 Then
-					' Data line is not valid
-				Else
+            With objPSM
+                .DataLineText = strLine
+                .ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100)
+                If .ScanNumber = -100 Then
+                    ' Data line is not valid
+                Else
 
-					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
-					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_Probability, mColumnHeaders, 1)
+                    .ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
+                    .ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_Probability, mColumnHeaders, 1)
 
-					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
+                    strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 
-					If fastReadMode Then
-						.SetPeptide(strPeptide, blnUpdateCleanSequence:=False)
-					Else
-						.SetPeptide(strPeptide, mCleavageStateCalculator)
-					End If
+                    If fastReadMode Then
+                        .SetPeptide(strPeptide, blnUpdateCleanSequence:=False)
+                    Else
+                        .SetPeptide(strPeptide, mCleavageStateCalculator)
+                    End If
 
-					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
+                    .Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0), Short)
 
-					strProtein = LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders)
-					.AddProtein(strProtein)
+                    strProtein = LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders)
+                    .AddProtein(strProtein)
 
-					dblPrecursorMZ = LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0#)
-					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .Charge, 0)
+                    dblPrecursorMZ = LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0#)
+                    .PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .Charge, 0)
 
-					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
-					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
+                    .MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
+                    .MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
-					blnSuccess = True
-				End If
-			End With
+                    blnSuccess = True
+                End If
+            End With
 
-			If blnSuccess Then
-				If Not fastReadMode Then
-					UpdatePSMUsingSeqInfo(objPSM)
-				End If
+            If blnSuccess Then
+                If Not fastReadMode Then
+                    UpdatePSMUsingSeqInfo(objPSM)
+                End If
 
-				' Store the remaining scores
-				AddScore(objPSM, strColumns, DATA_COLUMN_Spectrum_Index)
+                ' Store the remaining scores
+                AddScore(objPSM, strColumns, DATA_COLUMN_Spectrum_Index)
 
-				AddScore(objPSM, strColumns, DATA_COLUMN_MH)
+                AddScore(objPSM, strColumns, DATA_COLUMN_MH)
 
-				AddScore(objPSM, strColumns, DATA_COLUMN_Score)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Probability)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Position)
-				AddScore(objPSM, strColumns, DATA_COLUMN_QValue)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Score)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Probability)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Position)
+                AddScore(objPSM, strColumns, DATA_COLUMN_QValue)
 
-			End If
+            End If
 
-		Catch ex As Exception
-			MyBase.ReportError("Error parsing line " & intLinesRead & " in the MODa data file: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            MyBase.ReportError("Error parsing line " & intLinesRead & " in the MODa data file: " & ex.Message)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 End Class

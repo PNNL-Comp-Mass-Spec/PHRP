@@ -39,7 +39,7 @@ call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Release"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Debug"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug_IgnoreMe"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release"
 
 

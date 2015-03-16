@@ -178,54 +178,54 @@ Public Class clsPHRPParserSequest
 	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
 	''' <returns>Precursor tolerance, in Da</returns>
 	''' <remarks></remarks>
-	Protected Function DeterminePrecursorMassTolerance(ByRef objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
-		Dim strPeptideMassTolerance As String = String.Empty
-		Dim strPeptideMassUnits As String = String.Empty
+    Protected Function DeterminePrecursorMassTolerance(ByVal objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+        Dim strPeptideMassTolerance As String = String.Empty
+        Dim strPeptideMassUnits As String = String.Empty
 
-		Dim dblToleranceDa As Double = 0
-		Dim dblValue As Double
+        Dim dblToleranceDa As Double = 0
+        Dim dblValue As Double
 
-		dblTolerancePPM = 0
+        dblTolerancePPM = 0
 
-		If objSearchEngineParams.Parameters.TryGetValue("peptide_mass_tolerance", strPeptideMassTolerance) Then
-			If Double.TryParse(strPeptideMassTolerance, dblValue) Then
+        If objSearchEngineParams.Parameters.TryGetValue("peptide_mass_tolerance", strPeptideMassTolerance) Then
+            If Double.TryParse(strPeptideMassTolerance, dblValue) Then
 
-				' Determine the mass units
-				' 0 means Da, 1 means mmu, 2 means ppm
-				Dim intUnits As Integer = 0
+                ' Determine the mass units
+                ' 0 means Da, 1 means mmu, 2 means ppm
+                Dim intUnits As Integer = 0
 
-				If objSearchEngineParams.Parameters.TryGetValue("peptide_mass_units", strPeptideMassUnits) Then
-					If Not String.IsNullOrEmpty(strPeptideMassUnits) Then
-						Integer.TryParse(strPeptideMassUnits, intUnits)
-					End If
-				End If
+                If objSearchEngineParams.Parameters.TryGetValue("peptide_mass_units", strPeptideMassUnits) Then
+                    If Not String.IsNullOrEmpty(strPeptideMassUnits) Then
+                        Integer.TryParse(strPeptideMassUnits, intUnits)
+                    End If
+                End If
 
-				If intUnits = 2 Then
-					' Tolerance is in ppm; convert to Da at 2000 m/z
-					dblTolerancePPM = dblValue
+                If intUnits = 2 Then
+                    ' Tolerance is in ppm; convert to Da at 2000 m/z
+                    dblTolerancePPM = dblValue
 
-					dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblValue, 2000)
+                    dblToleranceDa = clsPeptideMassCalculator.PPMToMass(dblValue, 2000)
 
-				ElseIf intUnits = 1 Then
-					' Tolerance is in milli mass units
-					dblToleranceDa = dblValue / 1000.0
+                ElseIf intUnits = 1 Then
+                    ' Tolerance is in milli mass units
+                    dblToleranceDa = dblValue / 1000.0
 
-					' Convert from dalton to PPM (assuming a mass of 2000 m/z)
-					dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
-				Else
-					' Tolerance is in daltons
-					dblToleranceDa = dblValue
+                    ' Convert from dalton to PPM (assuming a mass of 2000 m/z)
+                    dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
+                Else
+                    ' Tolerance is in daltons
+                    dblToleranceDa = dblValue
 
-					' Convert from dalton to PPM (assuming a mass of 2000 m/z)
-					dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
-				End If
+                    ' Convert from dalton to PPM (assuming a mass of 2000 m/z)
+                    dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
+                End If
 
-			End If
-		End If
+            End If
+        End If
 
-		Return dblToleranceDa
+        Return dblToleranceDa
 
-	End Function
+    End Function
 
 	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
 		Return strDatasetName & FILENAME_SUFFIX_FHT
@@ -270,176 +270,176 @@ Public Class clsPHRPParserSequest
 	''' <param name="objSearchEngineParams"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		objSearchEngineParams = New clsSearchEngineParameters(SEQ_SEARCH_ENGINE_NAME, mModInfo)
-		objSearchEngineParams.Enzyme = "trypsin"
+        objSearchEngineParams = New clsSearchEngineParameters(SEQ_SEARCH_ENGINE_NAME, mModInfo)
+        objSearchEngineParams.Enzyme = "trypsin"
 
-		blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
+        blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
 
-		ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+        ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
-		Dim strParamFilePath As String
-		Dim strLineIn As String
+        Dim strParamFilePath As String
+        Dim strLineIn As String
 
-		Dim strFastaFilePath As String
-		Dim strSettingValue As String
+        Dim strFastaFilePath As String
+        Dim strSettingValue As String
 
-		Dim intCharIndex As Integer
-		Dim intValue As Integer
+        Dim intCharIndex As Integer
+        Dim intValue As Integer
 
-		Dim kvSetting As KeyValuePair(Of String, String)
+        Dim kvSetting As KeyValuePair(Of String, String)
 
-		Dim reEnzymeSpecificity As Regex = New Regex("^\S+\s(\d)\s\d\s.+", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
-		Dim reMatch As Match
+        Dim reEnzymeSpecificity As Regex = New Regex("^\S+\s(\d)\s\d\s.+", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+        Dim reMatch As Match
 
-		Dim blnSuccess As Boolean = False
+        Dim blnSuccess As Boolean = False
 
-		Try
+        Try
 
-			strParamFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+            strParamFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
-			If Not File.Exists(strParamFilePath) Then
-				ReportError("Sequest param file not found: " & strParamFilePath)
-			Else
-				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            If Not File.Exists(strParamFilePath) Then
+                ReportError("Sequest param file not found: " & strParamFilePath)
+            Else
+                Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-					While srInFile.Peek > -1
-						strLineIn = srInFile.ReadLine().TrimStart()
+                    While srInFile.Peek > -1
+                        strLineIn = srInFile.ReadLine().TrimStart()
 
-						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith(";") AndAlso Not strLineIn.StartsWith("[") AndAlso strLineIn.Contains("="c) Then
+                        If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith(";") AndAlso Not strLineIn.StartsWith("[") AndAlso strLineIn.Contains("="c) Then
 
-							' Split the line on the equals sign
-							kvSetting = ParseKeyValueSetting(strLineIn, "="c)
+                            ' Split the line on the equals sign
+                            kvSetting = ParseKeyValueSetting(strLineIn, "="c)
 
-							If Not String.IsNullOrEmpty(kvSetting.Key) Then
+                            If Not String.IsNullOrEmpty(kvSetting.Key) Then
 
-								' Trim off any text that occurs after a semicolon in kvSetting.Value
-								strSettingValue = kvSetting.Value
-								intCharIndex = strSettingValue.IndexOf(";"c)
-								If intCharIndex > 0 Then
-									strSettingValue = strSettingValue.Substring(intCharIndex).Trim()
-								End If
+                                ' Trim off any text that occurs after a semicolon in kvSetting.Value
+                                strSettingValue = kvSetting.Value
+                                intCharIndex = strSettingValue.IndexOf(";"c)
+                                If intCharIndex > 0 Then
+                                    strSettingValue = strSettingValue.Substring(intCharIndex).Trim()
+                                End If
 
-								objSearchEngineParams.AddUpdateParameter(kvSetting.Key, strSettingValue)
+                                objSearchEngineParams.AddUpdateParameter(kvSetting.Key, strSettingValue)
 
-								Select Case kvSetting.Key.ToLower()
-									Case "first_database_name", "database_name"
-										Try
-											strFastaFilePath = Path.Combine("C:\Database", Path.GetFileName(strSettingValue))
-										Catch ex As Exception
-											strFastaFilePath = strSettingValue
-										End Try
-										objSearchEngineParams.FastaFilePath = strFastaFilePath
+                                Select Case kvSetting.Key.ToLower()
+                                    Case "first_database_name", "database_name"
+                                        Try
+                                            strFastaFilePath = Path.Combine("C:\Database", Path.GetFileName(strSettingValue))
+                                        Catch ex As Exception
+                                            strFastaFilePath = strSettingValue
+                                        End Try
+                                        objSearchEngineParams.FastaFilePath = strFastaFilePath
 
-									Case "mass_type_parent"
-										If strSettingValue = "0" Then
-											' Average mass
-											objSearchEngineParams.PrecursorMassType = clsSearchEngineParameters.MASS_TYPE_AVERAGE
-										Else
-											' Monoisotopic mass
-											objSearchEngineParams.PrecursorMassType = clsSearchEngineParameters.MASS_TYPE_MONOISOTOPIC
-										End If
+                                    Case "mass_type_parent"
+                                        If strSettingValue = "0" Then
+                                            ' Average mass
+                                            objSearchEngineParams.PrecursorMassType = clsSearchEngineParameters.MASS_TYPE_AVERAGE
+                                        Else
+                                            ' Monoisotopic mass
+                                            objSearchEngineParams.PrecursorMassType = clsSearchEngineParameters.MASS_TYPE_MONOISOTOPIC
+                                        End If
 
-									Case "mass_type_fragment"
-										If strSettingValue = "0" Then
-											' Average mass
-											objSearchEngineParams.PrecursorMassType = clsSearchEngineParameters.MASS_TYPE_AVERAGE
-										Else
-											' Monoisotopic mass
-											objSearchEngineParams.PrecursorMassType = clsSearchEngineParameters.MASS_TYPE_MONOISOTOPIC
-										End If
+                                    Case "mass_type_fragment"
+                                        If strSettingValue = "0" Then
+                                            ' Average mass
+                                            objSearchEngineParams.PrecursorMassType = clsSearchEngineParameters.MASS_TYPE_AVERAGE
+                                        Else
+                                            ' Monoisotopic mass
+                                            objSearchEngineParams.PrecursorMassType = clsSearchEngineParameters.MASS_TYPE_MONOISOTOPIC
+                                        End If
 
-									Case "max_num_internal_cleavage_sites"
-										If Integer.TryParse(strSettingValue, intValue) Then
-											objSearchEngineParams.MaxNumberInternalCleavages = intValue
-										End If
+                                    Case "max_num_internal_cleavage_sites"
+                                        If Integer.TryParse(strSettingValue, intValue) Then
+                                            objSearchEngineParams.MaxNumberInternalCleavages = intValue
+                                        End If
 
-									Case "enzyme_info"
-										' Used in new-style sequest parameter files
+                                    Case "enzyme_info"
+                                        ' Used in new-style sequest parameter files
 
-										' Examples include:
-										' Fully-tryptic:     Trypsin(KR) 1 1 KR -
-										' Partially-tryptic: Trypsin(KR) 2 1 KR -
-										' No-enzyme:         No_Enzyme(-) 0 0 - -
-										' 
-										objSearchEngineParams.Enzyme = "trypsin"
+                                        ' Examples include:
+                                        ' Fully-tryptic:     Trypsin(KR) 1 1 KR -
+                                        ' Partially-tryptic: Trypsin(KR) 2 1 KR -
+                                        ' No-enzyme:         No_Enzyme(-) 0 0 - -
+                                        ' 
+                                        objSearchEngineParams.Enzyme = "trypsin"
 
-										If strSettingValue.ToLower().StartsWith("no_enzyme") Then
-											objSearchEngineParams.MinNumberTermini = 0
-										Else
-											' Parse out the cleavage specificity number
-											' This is the first number after the closing parenthesis in the above examples
-											reMatch = reEnzymeSpecificity.Match(strSettingValue)
-											If Not reMatch Is Nothing AndAlso reMatch.Success Then
-												If Integer.TryParse(reMatch.Groups(1).Value, intValue) Then
-													objSearchEngineParams.MinNumberTermini = intValue
-												End If
-											End If
-										End If
+                                        If strSettingValue.ToLower().StartsWith("no_enzyme") Then
+                                            objSearchEngineParams.MinNumberTermini = 0
+                                        Else
+                                            ' Parse out the cleavage specificity number
+                                            ' This is the first number after the closing parenthesis in the above examples
+                                            reMatch = reEnzymeSpecificity.Match(strSettingValue)
+                                            If Not reMatch Is Nothing AndAlso reMatch.Success Then
+                                                If Integer.TryParse(reMatch.Groups(1).Value, intValue) Then
+                                                    objSearchEngineParams.MinNumberTermini = intValue
+                                                End If
+                                            End If
+                                        End If
 
-									Case "enzyme_number"
-										' Used in old-style sequest parameter files
-										If Integer.TryParse(strSettingValue, intValue) Then
-											If intValue = 0 Then
-												' No-enzyme
-												objSearchEngineParams.Enzyme = "trypsin"
-												objSearchEngineParams.MinNumberTermini = 0
-											Else
-												Select Case intValue
-													Case 1 : objSearchEngineParams.Enzyme = "trypsin"
-													Case 2 : objSearchEngineParams.Enzyme = "trypsin_modified"
-													Case 3 : objSearchEngineParams.Enzyme = "Chymotrypsin"
-													Case 4 : objSearchEngineParams.Enzyme = "Chymotrypsin__modified"
-													Case 5 : objSearchEngineParams.Enzyme = "Clostripain"
-													Case 6 : objSearchEngineParams.Enzyme = "Cyanogen_Bromide"
-													Case 7 : objSearchEngineParams.Enzyme = "IodosoBenzoate"
-													Case 8 : objSearchEngineParams.Enzyme = "Proline_Endopept"
-													Case 9 : objSearchEngineParams.Enzyme = "Staph_Protease"
-													Case 10 : objSearchEngineParams.Enzyme = "Trypsin_K"
-													Case 11 : objSearchEngineParams.Enzyme = "Trypsin_R"
-													Case 12 : objSearchEngineParams.Enzyme = "GluC"
-													Case 13 : objSearchEngineParams.Enzyme = "LysC"
-													Case 14 : objSearchEngineParams.Enzyme = "AspN"
-													Case 15 : objSearchEngineParams.Enzyme = "Elastase"
-													Case 16 : objSearchEngineParams.Enzyme = "Elastase/Tryp/Chymo"
-													Case Else : objSearchEngineParams.Enzyme = "Unknown"
-												End Select
-												objSearchEngineParams.MinNumberTermini = 2
-											End If
+                                    Case "enzyme_number"
+                                        ' Used in old-style sequest parameter files
+                                        If Integer.TryParse(strSettingValue, intValue) Then
+                                            If intValue = 0 Then
+                                                ' No-enzyme
+                                                objSearchEngineParams.Enzyme = "trypsin"
+                                                objSearchEngineParams.MinNumberTermini = 0
+                                            Else
+                                                Select Case intValue
+                                                    Case 1 : objSearchEngineParams.Enzyme = "trypsin"
+                                                    Case 2 : objSearchEngineParams.Enzyme = "trypsin_modified"
+                                                    Case 3 : objSearchEngineParams.Enzyme = "Chymotrypsin"
+                                                    Case 4 : objSearchEngineParams.Enzyme = "Chymotrypsin__modified"
+                                                    Case 5 : objSearchEngineParams.Enzyme = "Clostripain"
+                                                    Case 6 : objSearchEngineParams.Enzyme = "Cyanogen_Bromide"
+                                                    Case 7 : objSearchEngineParams.Enzyme = "IodosoBenzoate"
+                                                    Case 8 : objSearchEngineParams.Enzyme = "Proline_Endopept"
+                                                    Case 9 : objSearchEngineParams.Enzyme = "Staph_Protease"
+                                                    Case 10 : objSearchEngineParams.Enzyme = "Trypsin_K"
+                                                    Case 11 : objSearchEngineParams.Enzyme = "Trypsin_R"
+                                                    Case 12 : objSearchEngineParams.Enzyme = "GluC"
+                                                    Case 13 : objSearchEngineParams.Enzyme = "LysC"
+                                                    Case 14 : objSearchEngineParams.Enzyme = "AspN"
+                                                    Case 15 : objSearchEngineParams.Enzyme = "Elastase"
+                                                    Case 16 : objSearchEngineParams.Enzyme = "Elastase/Tryp/Chymo"
+                                                    Case Else : objSearchEngineParams.Enzyme = "Unknown"
+                                                End Select
+                                                objSearchEngineParams.MinNumberTermini = 2
+                                            End If
 
-										End If
-								End Select
-							End If
-						End If
+                                        End If
+                                End Select
+                            End If
+                        End If
 
-					End While
-				End Using
+                    End While
+                End Using
 
-				' Determine the precursor mass tolerance (will store 0 if a problem or not found)
-				Dim dblTolerancePPM As Double
-				objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
-				objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
+                ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+                Dim dblTolerancePPM As Double
+                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+                objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
 
-				blnSuccess = True
+                blnSuccess = True
 
-			End If
+            End If
 
-		Catch ex As Exception
-			ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 	''' <summary>
 	''' Parse the data line read from a PHRP results file
@@ -450,90 +450,86 @@ Public Class clsPHRPParserSequest
 	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
 	''' <returns>True if success, false if an error</returns>
 	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-	Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
+    Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
 
-		Dim strColumns() As String = strLine.Split(ControlChars.Tab)
-		Dim strPeptide As String
-		Dim strProtein As String
+        Dim strColumns() As String = strLine.Split(ControlChars.Tab)
+        Dim strPeptide As String
+        Dim strProtein As String
 
-		Dim dblPrecursorMH As Double
-		Dim dblMassErrorDa As Double
+        Dim dblPrecursorMH As Double
+        Dim dblMassErrorDa As Double
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
+        objPSM = New clsPSM()
 
-			If objPSM Is Nothing Then
-				objPSM = New clsPSM
-			Else
-				objPSM.Clear()
-			End If
+        Try
 
-			With objPSM
-				.DataLineText = strLine
-				.ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_ScanNum, mColumnHeaders, -100)
-				If .ScanNumber = -100 Then
-					' Data line is not valid
-				Else
-					.ResultID = LookupColumnValue(strColumns, DATA_COLUMN_HitNum, mColumnHeaders, 0)
-					.ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_RankXc, mColumnHeaders, 1)
+            With objPSM
+                .DataLineText = strLine
+                .ScanNumber = LookupColumnValue(strColumns, DATA_COLUMN_ScanNum, mColumnHeaders, -100)
+                If .ScanNumber = -100 Then
+                    ' Data line is not valid
+                Else
+                    .ResultID = LookupColumnValue(strColumns, DATA_COLUMN_HitNum, mColumnHeaders, 0)
+                    .ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_RankXc, mColumnHeaders, 1)
 
-					strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
+                    strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 
-					If fastReadMode Then
-						.SetPeptide(strPeptide, blnUpdateCleanSequence:=False)
-					Else
-						.SetPeptide(strPeptide, mCleavageStateCalculator)
-					End If
+                    If fastReadMode Then
+                        .SetPeptide(strPeptide, blnUpdateCleanSequence:=False)
+                    Else
+                        .SetPeptide(strPeptide, mCleavageStateCalculator)
+                    End If
 
-					.Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_ChargeState, mColumnHeaders, 0), Short)
+                    .Charge = CType(LookupColumnValue(strColumns, DATA_COLUMN_ChargeState, mColumnHeaders, 0), Short)
 
-					strProtein = LookupColumnValue(strColumns, DATA_COLUMN_Reference, mColumnHeaders)
-					.AddProtein(strProtein)
+                    strProtein = LookupColumnValue(strColumns, DATA_COLUMN_Reference, mColumnHeaders)
+                    .AddProtein(strProtein)
 
-					' Note that the MH value listed in Sequest files is not the precursor MH but is instead the theoretical (computed) MH of the peptide
-					' We'll update this value below using dblMassErrorDa
-					' We'll further update this value using the ScanStatsEx data
-					dblPrecursorMH = LookupColumnValue(strColumns, DATA_COLUMN_MH, mColumnHeaders, 0.0#)
-					.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH, 1, 0)
+                    ' Note that the MH value listed in Sequest files is not the precursor MH but is instead the theoretical (computed) MH of the peptide
+                    ' We'll update this value below using dblMassErrorDa
+                    ' We'll further update this value using the ScanStatsEx data
+                    dblPrecursorMH = LookupColumnValue(strColumns, DATA_COLUMN_MH, mColumnHeaders, 0.0#)
+                    .PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH, 1, 0)
 
-					.MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
-					If Double.TryParse(.MassErrorDa, dblMassErrorDa) Then
-						' Adjust the precursor mass
-						.PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH - dblMassErrorDa, 1, 0)
-					End If
+                    .MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
+                    If Double.TryParse(.MassErrorDa, dblMassErrorDa) Then
+                        ' Adjust the precursor mass
+                        .PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMH - dblMassErrorDa, 1, 0)
+                    End If
 
-					.MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
+                    .MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
-					blnSuccess = True
-				End If
-			End With
+                    blnSuccess = True
+                End If
+            End With
 
-			If blnSuccess Then
-				If Not fastReadMode Then
-					UpdatePSMUsingSeqInfo(objPSM)
-				End If
+            If blnSuccess Then
+                If Not fastReadMode Then
+                    UpdatePSMUsingSeqInfo(objPSM)
+                End If
 
-				' Store the remaining scores
-				AddScore(objPSM, strColumns, DATA_COLUMN_XCorr)
-				AddScore(objPSM, strColumns, DATA_COLUMN_DelCn)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Sp)
-				AddScore(objPSM, strColumns, DATA_COLUMN_DelCn2)
-				AddScore(objPSM, strColumns, DATA_COLUMN_RankSp)
-				AddScore(objPSM, strColumns, DATA_COLUMN_RankXc)
-				AddScore(objPSM, strColumns, DATA_COLUMN_XcRatio)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Ions_Observed)
-				AddScore(objPSM, strColumns, DATA_COLUMN_Ions_Expected)
-				AddScore(objPSM, strColumns, DATA_COLUMN_NumTrypticEnds)
-			End If
+                ' Store the remaining scores
+                AddScore(objPSM, strColumns, DATA_COLUMN_XCorr)
+                AddScore(objPSM, strColumns, DATA_COLUMN_DelCn)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Sp)
+                AddScore(objPSM, strColumns, DATA_COLUMN_DelCn2)
+                AddScore(objPSM, strColumns, DATA_COLUMN_RankSp)
+                AddScore(objPSM, strColumns, DATA_COLUMN_RankXc)
+                AddScore(objPSM, strColumns, DATA_COLUMN_XcRatio)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Ions_Observed)
+                AddScore(objPSM, strColumns, DATA_COLUMN_Ions_Expected)
+                AddScore(objPSM, strColumns, DATA_COLUMN_NumTrypticEnds)
+            End If
 
 
-		Catch ex As Exception
-			MyBase.ReportError("Error parsing line " & intLinesRead & " in the Sequest data file: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            MyBase.ReportError("Error parsing line " & intLinesRead & " in the Sequest data file: " & ex.Message)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 End Class

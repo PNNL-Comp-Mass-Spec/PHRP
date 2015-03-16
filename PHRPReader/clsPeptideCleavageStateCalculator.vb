@@ -37,6 +37,7 @@
 Option Strict On
 
 Imports System.Text.RegularExpressions
+Imports System.Runtime.InteropServices
 
 Public Class clsPeptideCleavageStateCalculator
 
@@ -545,7 +546,11 @@ Public Class clsPeptideCleavageStateCalculator
     ''' If the peptide starts with ".." then it is auto-changed to start with "."
     ''' If the peptide ends with ".." then it is auto-changed to end with "."
     ''' </remarks>
-    Public Shared Function SplitPrefixAndSuffixFromSequence(ByVal strSequenceIn As String, ByRef strPrimarySequence As String, ByRef strPrefix As String, ByRef strSuffix As String) As Boolean
+    Public Shared Function SplitPrefixAndSuffixFromSequence(
+      ByVal strSequenceIn As String,
+      <Out()> ByRef strPrimarySequence As String,
+      <Out()> ByRef strPrefix As String,
+      <Out()> ByRef strSuffix As String) As Boolean
 
         Dim intPeriodLoc1 As Integer
         Dim intPeriodLoc2 As Integer

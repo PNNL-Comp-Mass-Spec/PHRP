@@ -21,10 +21,16 @@ Public Class clsAminoAcidModInfo
 
 	Protected mModDefinition As clsModificationDefinition
 	Protected mResidue As Char
-	Protected mResidueLocInPeptide As Integer								' Indicates the residue number modified; the first residue is at position 1.  For ambiguous mods, indicates the first residue on which the mod could appear
-	Protected mEndResidueLocInPeptide As Integer							' For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, whill be the same as mResidueLocInPeptide
+    Protected mResidueLocInPeptide As Integer
+    Protected mEndResidueLocInPeptide As Integer
 	Protected mResidueTerminusState As eResidueTerminusStateConstants
 
+    ''' <summary>
+    ''' True if the location of the modification is ambiguous
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
 	Public ReadOnly Property AmbiguousMod As Boolean
 		Get
 			If mEndResidueLocInPeptide > mResidueLocInPeptide Then
@@ -35,6 +41,12 @@ Public Class clsAminoAcidModInfo
 		End Get
 	End Property
 
+    ''' <summary>
+    ''' For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, whill be the same as ResidueLocInPeptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
 	Public ReadOnly Property EndResidueLocInPeptide As Integer
 		Get
 			Return mEndResidueLocInPeptide
@@ -53,6 +65,12 @@ Public Class clsAminoAcidModInfo
 		End Get
 	End Property
 
+    ''' <summary>
+    ''' Indicates the residue number modified; the first residue is at position 1
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>For ambiguous mods, indicates the first residue on which the mod could appear</remarks>
 	Public ReadOnly Property ResidueLocInPeptide As Integer
 		Get
 			Return mResidueLocInPeptide

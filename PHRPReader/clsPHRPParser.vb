@@ -12,6 +12,7 @@
 Option Strict On
 
 Imports System.IO
+Imports System.Runtime.InteropServices
 
 Public MustInherit Class clsPHRPParser
 
@@ -423,9 +424,9 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
 	''' <param name="objPSM">clsPSM object (output)</param>
 	''' <returns>True if success, false if an error</returns>
-	Public Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM) As Boolean
-		Return ParsePHRPDataLine(strLine, intLinesRead, objPSM, fastReadMode:=False)
-	End Function
+    Public Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM) As Boolean
+        Return ParsePHRPDataLine(strLine, intLinesRead, objPSM, fastReadMode:=False)
+    End Function
 
 	''' <summary>
 	''' Parse the data line read from a PHRP results file
@@ -436,7 +437,7 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
 	''' <returns>True if success, false if an error</returns>
 	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
-	Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
+    Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
 
 	''' <summary>
 	''' Parses the specified parameter file
@@ -446,7 +447,7 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="objSearchEngineParams">Search engine parameters class (output)</param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Public MustOverride Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Public MustOverride Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
 #End Region
 
@@ -454,17 +455,17 @@ Public MustInherit Class clsPHRPParser
 		mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
 	End Sub
 
-	Protected Sub AddScore(ByRef objPSM As clsPSM, ByRef strColumns() As String, ByVal strScoreColumnName As String)
-		Const NOT_FOUND As String = "==SCORE_NOT_FOUND=="
+    Protected Sub AddScore(ByVal objPSM As clsPSM, ByVal strColumns() As String, ByVal strScoreColumnName As String)
+        Const NOT_FOUND As String = "==SCORE_NOT_FOUND=="
 
-		Dim strValue As String
-		strValue = clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders, NOT_FOUND)
+        Dim strValue As String
+        strValue = clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders, NOT_FOUND)
 
-		If strValue <> NOT_FOUND Then
-			objPSM.SetScore(strScoreColumnName, strValue)
-		End If
+        If strValue <> NOT_FOUND Then
+            objPSM.SetScore(strScoreColumnName, strValue)
+        End If
 
-	End Sub
+    End Sub
 
 	''' <summary>
 	''' Clear any cached error messages
@@ -482,28 +483,28 @@ Public MustInherit Class clsPHRPParser
 		mWarningMessages.Clear()
 	End Sub
 
-	Protected Function ConvertModsToNumericMods(ByVal strCleanSequence As String, ByRef lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
-		Static sbNewPeptide As New Text.StringBuilder
+    Protected Function ConvertModsToNumericMods(ByVal strCleanSequence As String, ByVal lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
+        Static sbNewPeptide As New Text.StringBuilder
 
-		sbNewPeptide.Length = 0
+        sbNewPeptide.Length = 0
 
-		If lstModifiedResidues Is Nothing OrElse lstModifiedResidues.Count = 0 Then
-			Return strCleanSequence
-		End If
+        If lstModifiedResidues Is Nothing OrElse lstModifiedResidues.Count = 0 Then
+            Return strCleanSequence
+        End If
 
-		For intIndex = 0 To strCleanSequence.Length - 1
-			sbNewPeptide.Append(strCleanSequence.Chars(intIndex))
+        For intIndex = 0 To strCleanSequence.Length - 1
+            sbNewPeptide.Append(strCleanSequence.Chars(intIndex))
 
-			For Each objModInfo In lstModifiedResidues
-				If objModInfo.ResidueLocInPeptide = intIndex + 1 Then
-					sbNewPeptide.Append(NumToStringPlusMinus(objModInfo.ModDefinition.ModificationMass, 4))
-				End If
-			Next
-		Next
+            For Each objModInfo In lstModifiedResidues
+                If objModInfo.ResidueLocInPeptide = intIndex + 1 Then
+                    sbNewPeptide.Append(NumToStringPlusMinus(objModInfo.ModDefinition.ModificationMass, 4))
+                End If
+            Next
+        Next
 
-		Return sbNewPeptide.ToString()
+        Return sbNewPeptide.ToString()
 
-	End Function
+    End Function
 
 	''' <summary>
 	''' Look for ambiguous mods in strSequenceWithMods
@@ -571,19 +572,19 @@ Public MustInherit Class clsPHRPParser
 
 	End Function
 
-	Public Sub FinalizePSM(ByRef objPSM As clsPSM)
+    Public Sub FinalizePSM(ByVal objPSM As clsPSM)
 
-		If mCleavageStateCalculator Is Nothing Then
-			mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
-		End If
+        If mCleavageStateCalculator Is Nothing Then
+            mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
+        End If
 
-		objPSM.UpdateCleanSequence()
+        objPSM.UpdateCleanSequence()
 
-		objPSM.UpdateCleavageInfo(mCleavageStateCalculator)
+        objPSM.UpdateCleavageInfo(mCleavageStateCalculator)
 
-		UpdatePSMUsingSeqInfo(objPSM)
+        UpdatePSMUsingSeqInfo(objPSM)
 
-	End Sub
+    End Sub
 
 	Private Function GetMODaStaticModSetting(ByVal kvSetting As KeyValuePair(Of String, String)) As KeyValuePair(Of String, String)
 
@@ -787,9 +788,9 @@ Public MustInherit Class clsPHRPParser
 	''' </summary>
 	''' <param name="strSplitLine"></param>
 	''' <remarks></remarks>
-	Public Sub ParseColumnHeaders(ByRef strSplitLine() As String)
-		clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
-	End Sub
+    Public Sub ParseColumnHeaders(ByVal strSplitLine() As String)
+        clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
+    End Sub
 
 	''' <summary>
 	''' Splits strText on strText, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
@@ -846,140 +847,143 @@ Public MustInherit Class clsPHRPParser
 
 	End Function
 
-	Protected Function ReadKeyValuePairSearchEngineParamFile(
-	  ByVal strSearchEngineName As String,
-	  ByVal strSearchEngineParamFileName As String,
-	  ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
-	  ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Protected Function ReadKeyValuePairSearchEngineParamFile(
+      ByVal strSearchEngineName As String,
+      ByVal strSearchEngineParamFileName As String,
+      ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
+      ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
-		Dim strParamFilePath As String
-		Dim blnSuccess As Boolean
+        Dim strParamFilePath As String
+        Dim blnSuccess As Boolean
 
-		Dim strLineIn As String
+        Dim strLineIn As String
 
-		Dim kvSetting As KeyValuePair(Of String, String)
+        Dim kvSetting As KeyValuePair(Of String, String)
 
-		Try
-			If String.IsNullOrWhiteSpace(strSearchEngineName) Then strSearchEngineName = "?? Unknown tool ??"
+        Try
+            If String.IsNullOrWhiteSpace(strSearchEngineName) Then strSearchEngineName = "?? Unknown tool ??"
 
-			strParamFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+            strParamFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
-			If Not File.Exists(strParamFilePath) Then
-				ReportError(strSearchEngineName & " param file not found: " & strParamFilePath)
-			Else
-				Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            If Not File.Exists(strParamFilePath) Then
+                ReportError(strSearchEngineName & " param file not found: " & strParamFilePath)
+            Else
+                Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-					While srInFile.Peek > -1
-						strLineIn = srInFile.ReadLine().TrimStart()
+                    While srInFile.Peek > -1
+                        strLineIn = srInFile.ReadLine().TrimStart()
 
-						If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso strLineIn.Contains("="c) Then
+                        If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso strLineIn.Contains("="c) Then
 
-							' Split the line on the equals sign
-							kvSetting = ParseKeyValueSetting(strLineIn, "="c, "#")
+                            ' Split the line on the equals sign
+                            kvSetting = ParseKeyValueSetting(strLineIn, "="c, "#")
 
-							If Not String.IsNullOrEmpty(kvSetting.Key) Then
-								If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MODa AndAlso
-								   String.Equals(kvSetting.Key, "add", StringComparison.CurrentCultureIgnoreCase) Then
-									' ModA defines all of its static modifications with the ADD keyword
-									' Split the value at the comma and create a new setting entry with the residue name
-									kvSetting = GetMODaStaticModSetting(kvSetting)
-								End If
+                            If Not String.IsNullOrEmpty(kvSetting.Key) Then
+                                If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MODa AndAlso
+                                   String.Equals(kvSetting.Key, "add", StringComparison.CurrentCultureIgnoreCase) Then
+                                    ' ModA defines all of its static modifications with the ADD keyword
+                                    ' Split the value at the comma and create a new setting entry with the residue name
+                                    kvSetting = GetMODaStaticModSetting(kvSetting)
+                                End If
 
-								objSearchEngineParams.AddUpdateParameter(kvSetting)
-							End If
-						End If
+                                objSearchEngineParams.AddUpdateParameter(kvSetting)
+                            End If
+                        End If
 
-					End While
-				End Using
+                    End While
+                End Using
 
-				blnSuccess = True
+                blnSuccess = True
 
-			End If
-		Catch ex As Exception
-			ReportError("Error in ReadKeyValuePairSearchEngineParamFile for " & strSearchEngineName & ": " & ex.Message)
-		End Try
+            End If
+        Catch ex As Exception
+            ReportError("Error in ReadKeyValuePairSearchEngineParamFile for " & strSearchEngineName & ": " & ex.Message)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ReadSearchEngineVersion(ByVal strFolderPath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Protected Function ReadSearchEngineVersion(
+      ByVal strFolderPath As String,
+      ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
+      ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
-		Dim strToolVersionInfoFilePath As String
-		Dim strLineIn As String
+        Dim strToolVersionInfoFilePath As String
+        Dim strLineIn As String
 
-		Dim strSearchEngineVersion As String
-		Dim dtSearchDate As DateTime
+        Dim strSearchEngineVersion As String
+        Dim dtSearchDate As DateTime
 
-		Dim kvSetting As KeyValuePair(Of String, String)
+        Dim kvSetting As KeyValuePair(Of String, String)
 
-		Dim blnValidDate As Boolean
-		Dim blnValidVersion As Boolean
-		Dim blnSuccess As Boolean = False
+        Dim blnValidDate As Boolean
+        Dim blnValidVersion As Boolean
+        Dim blnSuccess As Boolean = False
 
-		Try
-			' Read the Tool_Version_Info file to determine the analysis time and the tool version
-			strToolVersionInfoFilePath = Path.Combine(mInputFolderPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType))
+        Try
+            ' Read the Tool_Version_Info file to determine the analysis time and the tool version
+            strToolVersionInfoFilePath = Path.Combine(mInputFolderPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType))
 
-			If Not File.Exists(strToolVersionInfoFilePath) Then
-				ReportWarning("Tool version info file not found: " & strToolVersionInfoFilePath)
-			Else
-				strSearchEngineVersion = "Unknown"
-				dtSearchDate = New DateTime(1980, 1, 1)
+            If Not File.Exists(strToolVersionInfoFilePath) Then
+                ReportWarning("Tool version info file not found: " & strToolVersionInfoFilePath)
+            Else
+                strSearchEngineVersion = "Unknown"
+                dtSearchDate = New DateTime(1980, 1, 1)
 
-				Using srInFile As StreamReader = New StreamReader(New FileStream(strToolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Using srInFile As StreamReader = New StreamReader(New FileStream(strToolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-					While srInFile.Peek > -1
-						strLineIn = srInFile.ReadLine().TrimStart()
+                    While srInFile.Peek > -1
+                        strLineIn = srInFile.ReadLine().TrimStart()
 
-						' Split the line on a colon
-						kvSetting = ParseKeyValueSetting(strLineIn, ":"c)
+                        ' Split the line on a colon
+                        kvSetting = ParseKeyValueSetting(strLineIn, ":"c)
 
-						Select Case kvSetting.Key.ToLower()
-							Case "date"
-								blnValidDate = DateTime.TryParse(kvSetting.Value, dtSearchDate)
+                        Select Case kvSetting.Key.ToLower()
+                            Case "date"
+                                blnValidDate = DateTime.TryParse(kvSetting.Value, dtSearchDate)
 
-							Case "toolversioninfo"
-								If Not String.IsNullOrEmpty(kvSetting.Value) Then
-									strSearchEngineVersion = String.Copy(kvSetting.Value)
-									blnValidVersion = True
-								Else
-									' The next line contains the search engine version
-									If srInFile.Peek > -1 Then
-										strLineIn = srInFile.ReadLine().TrimStart()
-										strSearchEngineVersion = String.Copy(strLineIn)
-										blnValidVersion = True
-									End If
-								End If
-							Case Else
-								' Ignore the line
-						End Select
-					End While
+                            Case "toolversioninfo"
+                                If Not String.IsNullOrEmpty(kvSetting.Value) Then
+                                    strSearchEngineVersion = String.Copy(kvSetting.Value)
+                                    blnValidVersion = True
+                                Else
+                                    ' The next line contains the search engine version
+                                    If srInFile.Peek > -1 Then
+                                        strLineIn = srInFile.ReadLine().TrimStart()
+                                        strSearchEngineVersion = String.Copy(strLineIn)
+                                        blnValidVersion = True
+                                    End If
+                                End If
+                            Case Else
+                                ' Ignore the line
+                        End Select
+                    End While
 
-				End Using
+                End Using
 
-				If Not blnValidDate Then
-					ReportError("Date line not found in the ToolVersionInfo file")
-					blnSuccess = False
-				ElseIf Not blnValidVersion Then
-					ReportError("ToolVersionInfo line not found in the ToolVersionInfo file")
-					blnSuccess = False
-				Else
-					blnSuccess = True
-				End If
+                If Not blnValidDate Then
+                    ReportError("Date line not found in the ToolVersionInfo file")
+                    blnSuccess = False
+                ElseIf Not blnValidVersion Then
+                    ReportError("ToolVersionInfo line not found in the ToolVersionInfo file")
+                    blnSuccess = False
+                Else
+                    blnSuccess = True
+                End If
 
-				objSearchEngineParams.UpdateSearchEngineVersion(strSearchEngineVersion)
-				objSearchEngineParams.UpdateSearchDate(dtSearchDate)
+                objSearchEngineParams.UpdateSearchEngineVersion(strSearchEngineVersion)
+                objSearchEngineParams.UpdateSearchDate(dtSearchDate)
 
-			End If
+            End If
 
-		Catch ex As Exception
-			ReportError("Error in ReadSearchEngineVersion: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            ReportError("Error in ReadSearchEngineVersion: " & ex.Message)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 	Protected Sub ReportError(ByVal strErrorMessage As String)
 		mErrorMessage = strErrorMessage
@@ -996,114 +1000,114 @@ Public MustInherit Class clsPHRPParser
 		RaiseEvent MessageEvent(strMessage)
 	End Sub
 
-	Protected Sub StoreModInfo(ByRef objPSM As clsPSM, ByVal objSeqInfo As clsSeqInfo)
+    Protected Sub StoreModInfo(ByVal objPSM As clsPSM, ByVal objSeqInfo As clsSeqInfo)
 
-		Dim strMods() As String
-		Dim kvModDetails As KeyValuePair(Of String, String)
+        Dim strMods() As String
+        Dim kvModDetails As KeyValuePair(Of String, String)
 
-		Dim strMassCorrectionTag As String
-		Dim intResidueLoc As Integer
+        Dim strMassCorrectionTag As String
+        Dim intResidueLoc As Integer
 
-		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
+        Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
 
-		Dim blnMatchFound As Boolean
+        Dim blnMatchFound As Boolean
 
-		Dim blnFavorTerminalMods As Boolean
+        Dim blnFavorTerminalMods As Boolean
 
-		Dim lstNTerminalModsAdded = New List(Of String)
-		Dim lstCTerminalModsAdded = New List(Of String)
-		Dim intPeptideResidueCount = objPSM.PeptideCleanSequence.Length
+        Dim lstNTerminalModsAdded = New List(Of String)
+        Dim lstCTerminalModsAdded = New List(Of String)
+        Dim intPeptideResidueCount = objPSM.PeptideCleanSequence.Length
 
-		objPSM.PeptideMonoisotopicMass = objSeqInfo.MonoisotopicMass
+        objPSM.PeptideMonoisotopicMass = objSeqInfo.MonoisotopicMass
 
-		objPSM.ClearModifiedResidues()
+        objPSM.ClearModifiedResidues()
 
-		If objSeqInfo.ModCount > 0 Then
-			' Split objSeqInfo.ModDescription on the comma character
-			strMods = objSeqInfo.ModDescription.Split(","c)
+        If objSeqInfo.ModCount > 0 Then
+            ' Split objSeqInfo.ModDescription on the comma character
+            strMods = objSeqInfo.ModDescription.Split(","c)
 
-			If Not strMods Is Nothing AndAlso strMods.Count > 0 Then
+            If Not strMods Is Nothing AndAlso strMods.Count > 0 Then
 
-				' Parse objPSM.Peptide to look for ambiguous mods, for example -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
+                ' Parse objPSM.Peptide to look for ambiguous mods, for example -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
 
-				Dim lstAmbiguousMods = ExtractAmbiguousMods(objPSM.Peptide)
+                Dim lstAmbiguousMods = ExtractAmbiguousMods(objPSM.Peptide)
 
-				For intModIndex As Integer = 0 To strMods.Count - 1
+                For intModIndex As Integer = 0 To strMods.Count - 1
 
-					' Split strMods on the colon characters
-					kvModDetails = ParseKeyValueSetting(strMods(intModIndex), ":"c)
+                    ' Split strMods on the colon characters
+                    kvModDetails = ParseKeyValueSetting(strMods(intModIndex), ":"c)
 
-					If Not String.IsNullOrEmpty(kvModDetails.Key) AndAlso Not String.IsNullOrEmpty(kvModDetails.Value) Then
-						strMassCorrectionTag = kvModDetails.Key
-						If Integer.TryParse(kvModDetails.Value, intResidueLoc) Then
-							' Find the modification definition in mModInfo
-							' Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
-							' Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
+                    If Not String.IsNullOrEmpty(kvModDetails.Key) AndAlso Not String.IsNullOrEmpty(kvModDetails.Value) Then
+                        strMassCorrectionTag = kvModDetails.Key
+                        If Integer.TryParse(kvModDetails.Value, intResidueLoc) Then
+                            ' Find the modification definition in mModInfo
+                            ' Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
+                            ' Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
 
-							If intResidueLoc = 1 Then
-								eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
-								If lstNTerminalModsAdded.Contains(strMassCorrectionTag) Then
-									' We have likely already added this modification as an N-terminal mod, thus, don't favor terminal mods this time
-									' An example is an iTraq peptide where there is a K at the N-terminus
-									' It gets modified with iTraq twice: once because of the N-terminus and once because of Lysine
-									' For example, R.K+144.102063+144.102063TGSY+79.9663GALAEITASK+144.102063.E
-									blnFavorTerminalMods = False
-								Else
-									blnFavorTerminalMods = True
-								End If
+                            If intResidueLoc = 1 Then
+                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
+                                If lstNTerminalModsAdded.Contains(strMassCorrectionTag) Then
+                                    ' We have likely already added this modification as an N-terminal mod, thus, don't favor terminal mods this time
+                                    ' An example is an iTraq peptide where there is a K at the N-terminus
+                                    ' It gets modified with iTraq twice: once because of the N-terminus and once because of Lysine
+                                    ' For example, R.K+144.102063+144.102063TGSY+79.9663GALAEITASK+144.102063.E
+                                    blnFavorTerminalMods = False
+                                Else
+                                    blnFavorTerminalMods = True
+                                End If
 
-							ElseIf intResidueLoc = intPeptideResidueCount Then
-								eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
-								If lstCTerminalModsAdded.Contains(strMassCorrectionTag) Then
-									blnFavorTerminalMods = False
-								Else
-									blnFavorTerminalMods = True
-								End If
+                            ElseIf intResidueLoc = intPeptideResidueCount Then
+                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
+                                If lstCTerminalModsAdded.Contains(strMassCorrectionTag) Then
+                                    blnFavorTerminalMods = False
+                                Else
+                                    blnFavorTerminalMods = True
+                                End If
 
-							Else
-								eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
-								blnFavorTerminalMods = False
-							End If
+                            Else
+                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
+                                blnFavorTerminalMods = False
+                            End If
 
-							Dim objMatchedModDef As clsModificationDefinition = Nothing
+                            Dim objMatchedModDef As clsModificationDefinition = Nothing
 
-							If mModInfo Is Nothing Then
-								objMatchedModDef = New clsModificationDefinition()
-								objMatchedModDef.MassCorrectionTag = strMassCorrectionTag
-								blnMatchFound = True
-							Else
-								blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState, objMatchedModDef)
-							End If
+                            If mModInfo Is Nothing Then
+                                objMatchedModDef = New clsModificationDefinition()
+                                objMatchedModDef.MassCorrectionTag = strMassCorrectionTag
+                                blnMatchFound = True
+                            Else
+                                blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState, objMatchedModDef)
+                            End If
 
-							If blnMatchFound Then
-								Dim lstMatches = (From item In lstAmbiguousMods Where item.Key = intResidueLoc Select item.Value).ToList()
+                            If blnMatchFound Then
+                                Dim lstMatches = (From item In lstAmbiguousMods Where item.Key = intResidueLoc Select item.Value).ToList()
 
-								If lstMatches.Count > 0 Then
-									' Ambiguous modification
-									objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef, lstMatches.First.ResidueEnd)
-								Else
-									' Normal, non-ambiguous modified residue
-									objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
-								End If
+                                If lstMatches.Count > 0 Then
+                                    ' Ambiguous modification
+                                    objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef, lstMatches.First.ResidueEnd)
+                                Else
+                                    ' Normal, non-ambiguous modified residue
+                                    objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence.Chars(intResidueLoc - 1), intResidueLoc, eResidueTerminusState, objMatchedModDef)
+                                End If
 
-								If intResidueLoc = 1 Then
-									lstNTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag)
-								ElseIf intResidueLoc = intPeptideResidueCount Then
-									lstCTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag)
-								End If
-							Else
-								' Could not find a valid entry in mModInfo
-								ReportError("Unrecognized mass correction tag found in the SeqInfo file: " & strMassCorrectionTag)
-							End If
+                                If intResidueLoc = 1 Then
+                                    lstNTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag)
+                                ElseIf intResidueLoc = intPeptideResidueCount Then
+                                    lstCTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag)
+                                End If
+                            Else
+                                ' Could not find a valid entry in mModInfo
+                                ReportError("Unrecognized mass correction tag found in the SeqInfo file: " & strMassCorrectionTag)
+                            End If
 
-						End If
-					End If
-				Next intModIndex
-			End If
+                        End If
+                    End If
+                Next intModIndex
+            End If
 
-		End If
+        End If
 
-	End Sub
+    End Sub
 
 	''' <summary>
 	''' Updates the theoretical (computed) monoisotopic mass of objPSM using mResultToSeqMap and mSeqInfo
@@ -1113,181 +1117,184 @@ Public MustInherit Class clsPHRPParser
 	''' <param name="objPSM"></param>
 	''' <returns>True if success, False if objPSM.ResultID is not found in mResultToSeqMap</returns>
 	''' <remarks></remarks>
-	Protected Function UpdatePSMUsingSeqInfo(ByRef objPSM As clsPSM) As Boolean
-		Dim intSeqID As Integer
-		Dim objSeqInfo As clsSeqInfo = Nothing
+    Protected Function UpdatePSMUsingSeqInfo(ByVal objPSM As clsPSM) As Boolean
+        Dim intSeqID As Integer
+        Dim objSeqInfo As clsSeqInfo = Nothing
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		blnSuccess = False
+        blnSuccess = False
 
-		' First determine the modified residues present in this peptide
-		If Not mResultToSeqMap Is Nothing AndAlso mResultToSeqMap.Count > 0 Then
-			If mResultToSeqMap.TryGetValue(objPSM.ResultID, intSeqID) Then
+        ' First determine the modified residues present in this peptide
+        If Not mResultToSeqMap Is Nothing AndAlso mResultToSeqMap.Count > 0 Then
+            If mResultToSeqMap.TryGetValue(objPSM.ResultID, intSeqID) Then
 
-				objPSM.SeqID = intSeqID
+                objPSM.SeqID = intSeqID
 
-				If mSeqInfo.TryGetValue(intSeqID, objSeqInfo) Then
-					StoreModInfo(objPSM, objSeqInfo)
-					blnSuccess = True
-				End If
+                If mSeqInfo.TryGetValue(intSeqID, objSeqInfo) Then
+                    StoreModInfo(objPSM, objSeqInfo)
+                    blnSuccess = True
+                End If
 
-				' Lookup the protein details using mSeqToProteinMap
-				Dim lstProteinDetails As List(Of clsProteinInfo) = Nothing
-				If mSeqToProteinMap.TryGetValue(intSeqID, lstProteinDetails) Then
-					For Each oProtein In lstProteinDetails
-						objPSM.AddProteinDetail(oProtein)
-					Next
-				End If
+                ' Lookup the protein details using mSeqToProteinMap
+                Dim lstProteinDetails As List(Of clsProteinInfo) = Nothing
+                If mSeqToProteinMap.TryGetValue(intSeqID, lstProteinDetails) Then
+                    For Each oProtein In lstProteinDetails
+                        objPSM.AddProteinDetail(oProtein)
+                    Next
+                End If
 
-				' Make sure all of the proteins in objPSM.Proteins are defined in objPSM.ProteinDetails
-				Dim addnlProteins1 = objPSM.Proteins.Except(objPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase).ToList()
+                ' Make sure all of the proteins in objPSM.Proteins are defined in objPSM.ProteinDetails
+                Dim addnlProteins1 = objPSM.Proteins.Except(objPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase).ToList()
 
-				For Each proteinName In addnlProteins1
-					If mMaxProteinsPerPSM > 0 AndAlso objPSM.ProteinDetails.Count > mMaxProteinsPerPSM Then
-						' Maximum number of proteins reached (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
-						Exit For
-					End If
+                For Each proteinName In addnlProteins1
+                    If mMaxProteinsPerPSM > 0 AndAlso objPSM.ProteinDetails.Count > mMaxProteinsPerPSM Then
+                        ' Maximum number of proteins reached (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
+                        Exit For
+                    End If
 
-					Dim oProtein = New clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None)
-					objPSM.ProteinDetails.Add(proteinName, oProtein)
-				Next
+                    Dim oProtein = New clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None)
+                    objPSM.ProteinDetails.Add(proteinName, oProtein)
+                Next
 
-				' Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
-				Dim addnlProteins2 = (From item In objPSM.ProteinDetails Select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase)
+                ' Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
+                Dim addnlProteins2 = (From item In objPSM.ProteinDetails Select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase)
 
-				Dim additionThresholdCheck As Integer = mMaxProteinsPerPSM
-				If additionThresholdCheck < Integer.MaxValue Then
-					additionThresholdCheck += 1
-				End If
+                Dim additionThresholdCheck As Integer = mMaxProteinsPerPSM
+                If additionThresholdCheck < Integer.MaxValue Then
+                    additionThresholdCheck += 1
+                End If
 
-				If mMaxProteinsPerPSM > 0 AndAlso objPSM.Proteins.Count + addnlProteins2.Count > additionThresholdCheck Then
-					' Maximum number of proteins will be reached; only add a subset of the proteins in addnlProteins2
-					' (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
+                If mMaxProteinsPerPSM > 0 AndAlso objPSM.Proteins.Count + addnlProteins2.Count > additionThresholdCheck Then
+                    ' Maximum number of proteins will be reached; only add a subset of the proteins in addnlProteins2
+                    ' (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
 
-					For Each oProtein In addnlProteins2
-						If mMaxProteinsPerPSM > 0 AndAlso objPSM.Proteins.Count >= mMaxProteinsPerPSM Then
-							' Maximum number of proteins reached
-							Exit For
-						End If
-						objPSM.Proteins.Add(oProtein)
-					Next
-				Else
-					objPSM.Proteins.AddRange(addnlProteins2)
-				End If
+                    For Each oProtein In addnlProteins2
+                        If mMaxProteinsPerPSM > 0 AndAlso objPSM.Proteins.Count >= mMaxProteinsPerPSM Then
+                            ' Maximum number of proteins reached
+                            Exit For
+                        End If
+                        objPSM.Proteins.Add(oProtein)
+                    Next
+                Else
+                    objPSM.Proteins.AddRange(addnlProteins2)
+                End If
 
-				If mPepToProteinMap.Count > 0 Then
-					' Make sure the residue start/end locations are up-to-date in objPSM.ProteinDetails
+                If mPepToProteinMap.Count > 0 Then
+                    ' Make sure the residue start/end locations are up-to-date in objPSM.ProteinDetails
 
-					Dim oPepToProteinMapInfo As clsPepToProteinMapInfo = Nothing
-					If mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, oPepToProteinMapInfo) Then
+                    Dim oPepToProteinMapInfo As clsPepToProteinMapInfo = Nothing
+                    If mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, oPepToProteinMapInfo) Then
 
-						For Each oProtein In objPSM.ProteinDetails
+                        For Each oProtein In objPSM.ProteinDetails
 
-							' Find the matching protein in oPepToProteinMapInfo
-							Dim lstLocations As List(Of clsPepToProteinMapInfo.udtProteinLocationInfo) = Nothing
+                            ' Find the matching protein in oPepToProteinMapInfo
+                            Dim lstLocations As List(Of clsPepToProteinMapInfo.udtProteinLocationInfo) = Nothing
 
-							If oPepToProteinMapInfo.ProteinMapInfo.TryGetValue(oProtein.Key, lstLocations) Then
-								Dim udtFirstLocation = lstLocations.First
-								oProtein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd)
-							End If
-						Next
+                            If oPepToProteinMapInfo.ProteinMapInfo.TryGetValue(oProtein.Key, lstLocations) Then
+                                Dim udtFirstLocation = lstLocations.First
+                                oProtein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd)
+                            End If
+                        Next
 
-					End If
-				End If
+                    End If
+                End If
 
-			End If
-		End If
+            End If
+        End If
 
-		If blnSuccess Then
-			Dim strPrimarySequence As String = String.Empty
-			Dim strPrefix As String = String.Empty
-			Dim strSuffix As String = String.Empty
+        If blnSuccess Then
+            Dim strPrimarySequence As String = String.Empty
+            Dim strPrefix As String = String.Empty
+            Dim strSuffix As String = String.Empty
 
-			If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, strPrimarySequence, strPrefix, strSuffix) Then
-				objPSM.PeptideWithNumericMods = strPrefix & "." & ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues) & "." & strSuffix
-			Else
-				objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
-			End If
+            If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, strPrimarySequence, strPrefix, strSuffix) Then
+                objPSM.PeptideWithNumericMods = strPrefix & "." & ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues) & "." & strSuffix
+            Else
+                objPSM.PeptideWithNumericMods = ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues)
+            End If
 
-		End If
+        End If
 
-		Return blnSuccess
-	End Function
+        Return blnSuccess
+    End Function
 
-	Protected Function UpdatePSMFindMatchingModInfo( _
-	  ByVal strMassCorrectionTag As String, _
-	  ByVal blnFavorTerminalMods As Boolean, _
-	  ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
-	  ByRef objMatchedModDef As clsModificationDefinition) As Boolean
+    Protected Function UpdatePSMFindMatchingModInfo( _
+      ByVal strMassCorrectionTag As String, _
+      ByVal blnFavorTerminalMods As Boolean, _
+      ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
+      <Out()> ByRef objMatchedModDef As clsModificationDefinition) As Boolean
 
-		If mModInfo Is Nothing Then Return False
+        objMatchedModDef = New clsModificationDefinition()
 
-		Dim blnMatchFound As Boolean
+        If mModInfo Is Nothing Then
+            Return False
+        End If
 
-		Dim lstMatchedDefs As List(Of clsModificationDefinition)
-		lstMatchedDefs = New List(Of clsModificationDefinition)
+        Dim blnMatchFound As Boolean
 
-		For Each objMod In mModInfo
-			If strMassCorrectionTag.ToLower() = objMod.MassCorrectionTag.ToLower() Then
-				lstMatchedDefs.Add(objMod)
-			End If
-		Next
+        Dim lstMatchedDefs = New List(Of clsModificationDefinition)
 
-		blnMatchFound = False
-		If lstMatchedDefs.Count > 0 Then
+        For Each objMod In mModInfo
+            If strMassCorrectionTag.ToLower() = objMod.MassCorrectionTag.ToLower() Then
+                lstMatchedDefs.Add(objMod)
+            End If
+        Next
 
-			Do
+        blnMatchFound = False
+        If lstMatchedDefs.Count > 0 Then
 
-				If blnFavorTerminalMods Then
-					' Look for an entry in lstMatchedDefs that is a terminal mod
-					For Each objMod In lstMatchedDefs
-						If objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
-						   objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
+            Do
 
-							If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus AndAlso _
-							  (objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
-								blnMatchFound = True
-								objMatchedModDef = objMod
-								Exit For
-							End If
+                If blnFavorTerminalMods Then
+                    ' Look for an entry in lstMatchedDefs that is a terminal mod
+                    For Each objMod In lstMatchedDefs
+                        If objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
+                           objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
 
-							If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus AndAlso _
-							  (objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
-								blnMatchFound = True
-								objMatchedModDef = objMod
-								Exit For
-							End If
-						End If
-					Next
-				Else
-					' Look for an entry in lstMatchedDefs that is not a terminal mod
-					For Each objMod In lstMatchedDefs
-						If Not (objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
-						  objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod) Then
-							blnMatchFound = True
-							objMatchedModDef = objMod
-							Exit For
-						End If
-					Next
-				End If
+                            If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus AndAlso _
+                              (objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
+                                blnMatchFound = True
+                                objMatchedModDef = objMod
+                                Exit For
+                            End If
 
-				If Not blnMatchFound Then
-					If blnFavorTerminalMods Then
-						blnFavorTerminalMods = False
-					Else
-						' Still no match found (this shouldn't happen); use the first entry in lstMatchedDefs
-						objMatchedModDef = lstMatchedDefs(0)
-						blnMatchFound = True
-					End If
-				End If
+                            If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus AndAlso _
+                              (objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
+                                blnMatchFound = True
+                                objMatchedModDef = objMod
+                                Exit For
+                            End If
+                        End If
+                    Next
+                Else
+                    ' Look for an entry in lstMatchedDefs that is not a terminal mod
+                    For Each objMod In lstMatchedDefs
+                        If Not (objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
+                          objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod) Then
+                            blnMatchFound = True
+                            objMatchedModDef = objMod
+                            Exit For
+                        End If
+                    Next
+                End If
 
-			Loop While Not blnMatchFound
+                If Not blnMatchFound Then
+                    If blnFavorTerminalMods Then
+                        blnFavorTerminalMods = False
+                    Else
+                        ' Still no match found (this shouldn't happen); use the first entry in lstMatchedDefs
+                        objMatchedModDef = lstMatchedDefs(0)
+                        blnMatchFound = True
+                    End If
+                End If
 
-		End If
+            Loop While Not blnMatchFound
 
-		Return blnMatchFound
+        End If
 
-	End Function
+        Return blnMatchFound
+
+    End Function
 
 End Class

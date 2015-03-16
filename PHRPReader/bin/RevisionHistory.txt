@@ -1,5 +1,9 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5553; March 16, 2015
+	- Updated numerous methods to use ByVal or <Out()> ByRef, as appropriate
+		- This could be a breaking change for C# projects using PHRPReader 
+
 Version 1.1.5303; July 9, 2014
 	- Updated ExtractCleanSequenceFromSequenceWithMods to use a RegEx to remove non-letter characters
 
