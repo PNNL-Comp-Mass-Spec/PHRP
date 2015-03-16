@@ -66,9 +66,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\x64\PeptideToProteinMapEngine.dll</HintPath>
     </Reference>
-    <Reference Include="PHRPReader">
-      <HintPath>..\PHRPReader\bin\PHRPReader.dll</HintPath>
-    </Reference>
     <Reference Include="ProteinCoverageSummarizer, Version=1.1.5142.26700, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\x64\ProteinCoverageSummarizer.dll</HintPath>
@@ -148,6 +145,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="My Project\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PHRPReader\PHRPReader.vbproj">
+      <Project>{81a15d6e-10c3-4f2c-bf71-6642b76753ed}</Project>
+      <Name>PHRPReader</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>

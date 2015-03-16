@@ -2523,98 +2523,98 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	Protected Sub ResolveMSGFDBModsWithModDefinitions(ByRef lstMSGFDBModInfo As List(Of udtModInfoType))
+    Protected Sub ResolveMSGFDBModsWithModDefinitions(ByVal lstMSGFDBModInfo As List(Of udtModInfoType))
 
-		Dim intResidueIndex As Integer
-		Dim intResIndexStart As Integer
-		Dim intResIndexEnd As Integer
+        Dim intResidueIndex As Integer
+        Dim intResIndexStart As Integer
+        Dim intResIndexEnd As Integer
 
-		Dim chTargetResidue As Char
-		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
-		Dim eModType As clsModificationDefinition.eModificationTypeConstants
-		Dim blnExistingModFound As Boolean
+        Dim chTargetResidue As Char
+        Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
+        Dim eModType As clsModificationDefinition.eModificationTypeConstants
+        Dim blnExistingModFound As Boolean
 
-		Dim objModificationDefinition As clsModificationDefinition
+        Dim objModificationDefinition As clsModificationDefinition
 
-		If Not lstMSGFDBModInfo Is Nothing Then
+        If Not lstMSGFDBModInfo Is Nothing Then
 
-			' Call .LookupModificationDefinitionByMass for each entry in lstMSGFDBModInfo
-			For intIndex As Integer = 0 To lstMSGFDBModInfo.Count - 1
+            ' Call .LookupModificationDefinitionByMass for each entry in lstMSGFDBModInfo
+            For intIndex As Integer = 0 To lstMSGFDBModInfo.Count - 1
 
-				Dim udtModInfo As udtModInfoType
-				udtModInfo = lstMSGFDBModInfo(intIndex)
+                Dim udtModInfo As udtModInfoType
+                udtModInfo = lstMSGFDBModInfo(intIndex)
 
-				With udtModInfo
+                With udtModInfo
 
-					If .Residues.Length > 0 Then
-						intResIndexStart = 0
-						intResIndexEnd = .Residues.Length - 1
-					Else
-						intResIndexStart = -1
-						intResIndexEnd = -1
-					End If
+                    If .Residues.Length > 0 Then
+                        intResIndexStart = 0
+                        intResIndexEnd = .Residues.Length - 1
+                    Else
+                        intResIndexStart = -1
+                        intResIndexEnd = -1
+                    End If
 
-					For intResidueIndex = intResIndexStart To intResIndexEnd
-						If intResidueIndex >= 0 Then
-							chTargetResidue = .Residues.Chars(intResidueIndex)
-							If chTargetResidue = "*"c Then
-								' This is a terminal mod, and MSGFDB lists the target residue as * for terminal mods
-								' This program requires that chTargetResidue be Nothing
-								chTargetResidue = Nothing
-							End If
-						Else
-							chTargetResidue = Nothing
-						End If
+                    For intResidueIndex = intResIndexStart To intResIndexEnd
+                        If intResidueIndex >= 0 Then
+                            chTargetResidue = .Residues.Chars(intResidueIndex)
+                            If chTargetResidue = "*"c Then
+                                ' This is a terminal mod, and MSGFDB lists the target residue as * for terminal mods
+                                ' This program requires that chTargetResidue be Nothing
+                                chTargetResidue = Nothing
+                            End If
+                        Else
+                            chTargetResidue = Nothing
+                        End If
 
-						eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod
+                        eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod
 
-						If .ModType = eMSGFDBModType.DynNTermPeptide Then
-							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
-						ElseIf .ModType = eMSGFDBModType.DynCTermPeptide Then
-							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
-						ElseIf .ModType = eMSGFDBModType.DynNTermProtein Then
-							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus
-						ElseIf .ModType = eMSGFDBModType.DynCTermProtein Then
-							eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
-						Else
-							Select Case chTargetResidue
-								Case clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
-									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
-									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-								Case clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
-									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
-									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-								Case clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
-									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus
-									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
-								Case clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
-									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
-									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
-								Case Else
-									eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
-									If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod
-							End Select
+                        If .ModType = eMSGFDBModType.DynNTermPeptide Then
+                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
+                        ElseIf .ModType = eMSGFDBModType.DynCTermPeptide Then
+                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
+                        ElseIf .ModType = eMSGFDBModType.DynNTermProtein Then
+                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus
+                        ElseIf .ModType = eMSGFDBModType.DynCTermProtein Then
+                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
+                        Else
+                            Select Case chTargetResidue
+                                Case clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
+                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
+                                    If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+                                Case clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
+                                    If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+                                Case clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
+                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus
+                                    If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+                                Case clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
+                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
+                                    If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+                                Case Else
+                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
+                                    If .ModType = eMSGFDBModType.StaticMod Then eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod
+                            End Select
 
-						End If
+                        End If
 
-						blnExistingModFound = False
+                        blnExistingModFound = False
 
-						objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMassAndModType(.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+                        objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMassAndModType(.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
 
-						If intResidueIndex = intResIndexStart Then
-							' Update the Mod Symbol
-							.ModSymbol = objModificationDefinition.ModificationSymbol
-						End If
+                        If intResidueIndex = intResIndexStart Then
+                            ' Update the Mod Symbol
+                            .ModSymbol = objModificationDefinition.ModificationSymbol
+                        End If
 
-					Next intResidueIndex
+                    Next intResidueIndex
 
-				End With
+                End With
 
-				lstMSGFDBModInfo(intIndex) = udtModInfo
-			Next
-		End If
+                lstMSGFDBModInfo(intIndex) = udtModInfo
+            Next
+        End If
 
-	End Sub
+    End Sub
 
 	''' <summary>
 	''' Examines strProteinList to look for a semi-colon separated list of proteins and terminus symbols, for example
