@@ -319,305 +319,305 @@ Public Class clsPHRPSeqMapReader
 			' Read the data from the PepToProtMap file
 			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-				Do While srInFile.Peek > -1
-					Dim strLineIn = srInFile.ReadLine
-					linesRead += 1
+                Do While Not srInFile.EndOfStream
+                    Dim strLineIn = srInFile.ReadLine
+                    linesRead += 1
 
-					If Not String.IsNullOrEmpty(strLineIn) Then
-						Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
+                    If Not String.IsNullOrEmpty(strLineIn) Then
+                        Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
 
-						If strSplitLine.Length >= 4 Then
+                        If strSplitLine.Length >= 4 Then
 
-							Dim residueStart As Integer
-							Dim residueEnd As Integer
+                            Dim residueStart As Integer
+                            Dim residueEnd As Integer
 
-							' Parse out the numbers from the last two columns 
-							' (the first line of the file is the header line, and it will get skipped)
-							If Integer.TryParse(strSplitLine(2), residueStart) Then
-								If Integer.TryParse(strSplitLine(3), residueEnd) Then
+                            ' Parse out the numbers from the last two columns 
+                            ' (the first line of the file is the header line, and it will get skipped)
+                            If Integer.TryParse(strSplitLine(2), residueStart) Then
+                                If Integer.TryParse(strSplitLine(3), residueEnd) Then
 
-									Dim strPeptide = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strSplitLine(0), True)
+                                    Dim strPeptide = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strSplitLine(0), True)
 
-									Dim oPepToProtMapInfo As clsPepToProteinMapInfo = Nothing
+                                    Dim oPepToProtMapInfo As clsPepToProteinMapInfo = Nothing
 
-									If lstPepToProteinMap.TryGetValue(strPeptide, oPepToProtMapInfo) Then
-										If mMaxProteinsPerSeqID = 0 OrElse oPepToProtMapInfo.ProteinCount < mMaxProteinsPerSeqID Then
-											oPepToProtMapInfo.AddProtein(strSplitLine(1), residueStart, residueEnd)
-										End If
-									Else
-										oPepToProtMapInfo = New clsPepToProteinMapInfo(strSplitLine(1), residueStart, residueEnd)
+                                    If lstPepToProteinMap.TryGetValue(strPeptide, oPepToProtMapInfo) Then
+                                        If mMaxProteinsPerSeqID = 0 OrElse oPepToProtMapInfo.ProteinCount < mMaxProteinsPerSeqID Then
+                                            oPepToProtMapInfo.AddProtein(strSplitLine(1), residueStart, residueEnd)
+                                        End If
+                                    Else
+                                        oPepToProtMapInfo = New clsPepToProteinMapInfo(strSplitLine(1), residueStart, residueEnd)
 
-										lstPepToProteinMap.Add(strPeptide, oPepToProtMapInfo)
-									End If
+                                        lstPepToProteinMap.Add(strPeptide, oPepToProtMapInfo)
+                                    End If
 
-								End If
-							End If
+                                End If
+                            End If
 
-						End If
+                        End If
 
-						If linesRead Mod 100 = 0 Then
-							If DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 5 Then
-								Dim pctComplete = srInFile.BaseStream.Position / CDbl(srInFile.BaseStream.Length) * 100
-								Console.WriteLine(" ... caching PepToProtMapData: " & pctComplete.ToString("0.0") & "% complete")
-								dtLastProgress = DateTime.UtcNow
-								blnNotifyComplete = True
-							End If
-						End If
-					End If
-				Loop
+                        If linesRead Mod 100 = 0 Then
+                            If DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 5 Then
+                                Dim pctComplete = srInFile.BaseStream.Position / CDbl(srInFile.BaseStream.Length) * 100
+                                Console.WriteLine(" ... caching PepToProtMapData: " & pctComplete.ToString("0.0") & "% complete")
+                                dtLastProgress = DateTime.UtcNow
+                                blnNotifyComplete = True
+                            End If
+                        End If
+                    End If
+                Loop
 
-			End Using
+            End Using
 
             If blnNotifyComplete Then
                 Console.WriteLine(" ... caching PepToProtMapData: 100% complete")
             End If
 
-		Catch ex As Exception
-			Throw New Exception("Exception loading Pep to Prot Map data from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
-		End Try
+        Catch ex As Exception
+            Throw New Exception("Exception loading Pep to Prot Map data from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
+        End Try
 
-		Return True
+        Return True
 
-	End Function
+    End Function
 
 
-	''' <summary>
-	''' Load the Result to Seq mapping using the specified PHRP result file
-	''' </summary>
-	''' <param name="strFilePath"></param>
-	''' <param name="lstResultToSeqMap"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Function LoadResultToSeqMapping(ByVal strFilePath As String, ByRef lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
+    ''' <summary>
+    ''' Load the Result to Seq mapping using the specified PHRP result file
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <param name="lstResultToSeqMap"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function LoadResultToSeqMapping(ByVal strFilePath As String, ByRef lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
+        Dim strLineIn As String
+        Dim strSplitLine() As String
 
-		Dim intResultID As Integer
-		Dim intSeqID As Integer
+        Dim intResultID As Integer
+        Dim intSeqID As Integer
 
-		Try
+        Try
 
-			' Read the data from the result to sequence map file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            ' Read the data from the result to sequence map file
+            Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-				Do While srInFile.Peek > -1
-					strLineIn = srInFile.ReadLine
+                Do While Not srInFile.EndOfStream
+                    strLineIn = srInFile.ReadLine
 
-					If Not String.IsNullOrEmpty(strLineIn) Then
-						strSplitLine = strLineIn.Split(ControlChars.Tab)
+                    If Not String.IsNullOrEmpty(strLineIn) Then
+                        strSplitLine = strLineIn.Split(ControlChars.Tab)
 
-						If strSplitLine.Length >= 2 Then
+                        If strSplitLine.Length >= 2 Then
 
-							' Parse out the numbers from the first two columns 
-							' (the first line of the file is the header line, and it will get skipped)
-							If Integer.TryParse(strSplitLine(0), intResultID) Then
-								If Integer.TryParse(strSplitLine(1), intSeqID) Then
+                            ' Parse out the numbers from the first two columns 
+                            ' (the first line of the file is the header line, and it will get skipped)
+                            If Integer.TryParse(strSplitLine(0), intResultID) Then
+                                If Integer.TryParse(strSplitLine(1), intSeqID) Then
 
-									If Not lstResultToSeqMap.ContainsKey(intResultID) Then
-										lstResultToSeqMap.Add(intResultID, intSeqID)
-									End If
-								End If
-							End If
+                                    If Not lstResultToSeqMap.ContainsKey(intResultID) Then
+                                        lstResultToSeqMap.Add(intResultID, intSeqID)
+                                    End If
+                                End If
+                            End If
 
-						End If
-					End If
-				Loop
+                        End If
+                    End If
+                Loop
 
-			End Using
+            End Using
 
 
-		Catch ex As Exception
-			Throw New Exception("Exception loading Result to Seq Mapping from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
-		End Try
+        Catch ex As Exception
+            Throw New Exception("Exception loading Result to Seq Mapping from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
+        End Try
 
-		Return True
+        Return True
 
-	End Function
+    End Function
 
-	Protected Function LoadSeqInfo(ByVal strFilePath As String, ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
+    Protected Function LoadSeqInfo(ByVal strFilePath As String, ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
-		Dim objColumnHeaders As SortedDictionary(Of String, Integer)
+        Dim objColumnHeaders As SortedDictionary(Of String, Integer)
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
+        Dim strLineIn As String
+        Dim strSplitLine() As String
 
-		Dim intSeqID As Integer
-		Dim intModCount As Integer
-		Dim strModDescription As String
-		Dim dblMonoisotopicMass As Double
+        Dim intSeqID As Integer
+        Dim intModCount As Integer
+        Dim strModDescription As String
+        Dim dblMonoisotopicMass As Double
 
-		Dim blnHeaderLineParsed As Boolean
-		Dim blnSkipLine As Boolean
+        Dim blnHeaderLineParsed As Boolean
+        Dim blnSkipLine As Boolean
 
-		Try
+        Try
 
-			' Initialize the column mapping
-			' Using a case-insensitive comparer
-			objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+            ' Initialize the column mapping
+            ' Using a case-insensitive comparer
+            objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
 
-			' Define the default column mapping
-			objColumnHeaders.Add(SEQ_INFO_COLUMN_Unique_Seq_ID, 0)
-			objColumnHeaders.Add(SEQ_INFO_COLUMN_Mod_Count, 1)
-			objColumnHeaders.Add(SEQ_INFO_COLUMN_Mod_Description, 2)
-			objColumnHeaders.Add(SEQ_INFO_COLUMN_Monoisotopic_Mass, 3)
+            ' Define the default column mapping
+            objColumnHeaders.Add(SEQ_INFO_COLUMN_Unique_Seq_ID, 0)
+            objColumnHeaders.Add(SEQ_INFO_COLUMN_Mod_Count, 1)
+            objColumnHeaders.Add(SEQ_INFO_COLUMN_Mod_Description, 2)
+            objColumnHeaders.Add(SEQ_INFO_COLUMN_Monoisotopic_Mass, 3)
 
-			' Read the data from the sequence info file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            ' Read the data from the sequence info file
+            Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-				Do While srInFile.Peek > -1
-					strLineIn = srInFile.ReadLine
-					blnSkipLine = False
+                Do While Not srInFile.EndOfStream
+                    strLineIn = srInFile.ReadLine
+                    blnSkipLine = False
 
-					If Not String.IsNullOrEmpty(strLineIn) Then
-						strSplitLine = strLineIn.Split(ControlChars.Tab)
+                    If Not String.IsNullOrEmpty(strLineIn) Then
+                        strSplitLine = strLineIn.Split(ControlChars.Tab)
 
-						If Not blnHeaderLineParsed Then
-							If strSplitLine(0).ToLower() = SEQ_INFO_COLUMN_Unique_Seq_ID.ToLower() Then
-								' Parse the header line to confirm the column ordering
-								clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
-								blnSkipLine = True
-							End If
+                        If Not blnHeaderLineParsed Then
+                            If strSplitLine(0).ToLower() = SEQ_INFO_COLUMN_Unique_Seq_ID.ToLower() Then
+                                ' Parse the header line to confirm the column ordering
+                                clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
+                                blnSkipLine = True
+                            End If
 
-							blnHeaderLineParsed = True
-						End If
+                            blnHeaderLineParsed = True
+                        End If
 
-						If Not blnSkipLine AndAlso strSplitLine.Length >= 3 Then
+                        If Not blnSkipLine AndAlso strSplitLine.Length >= 3 Then
 
-							If Integer.TryParse(strSplitLine(0), intSeqID) Then
+                            If Integer.TryParse(strSplitLine(0), intSeqID) Then
 
-								intModCount = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Mod_Count, objColumnHeaders, 0)
-								strModDescription = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Mod_Description, objColumnHeaders, String.Empty)
-								dblMonoisotopicMass = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Monoisotopic_Mass, objColumnHeaders, 0.0#)
+                                intModCount = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Mod_Count, objColumnHeaders, 0)
+                                strModDescription = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Mod_Description, objColumnHeaders, String.Empty)
+                                dblMonoisotopicMass = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_INFO_COLUMN_Monoisotopic_Mass, objColumnHeaders, 0.0#)
 
-								If Not lstSeqInfo.ContainsKey(intSeqID) Then
-									lstSeqInfo.Add(intSeqID, New clsSeqInfo(intSeqID, dblMonoisotopicMass, intModCount, strModDescription))
-								End If
+                                If Not lstSeqInfo.ContainsKey(intSeqID) Then
+                                    lstSeqInfo.Add(intSeqID, New clsSeqInfo(intSeqID, dblMonoisotopicMass, intModCount, strModDescription))
+                                End If
 
-							End If
+                            End If
 
-						End If
+                        End If
 
-					End If
-				Loop
+                    End If
+                Loop
 
-			End Using
+            End Using
 
-		Catch ex As Exception
-			Throw New Exception("Exception loading Seq Info from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
-		End Try
+        Catch ex As Exception
+            Throw New Exception("Exception loading Seq Info from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
+        End Try
 
-		Return True
+        Return True
 
 
-	End Function
+    End Function
 
-	''' <summary>
-	''' Load the Sequence to Protein mapping using the specified PHRP result file
-	''' </summary>
-	''' <param name="strFilePath"></param>
-	''' <param name="lstSeqToProteinMap"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Function LoadSeqToProteinMapping(
-	  ByVal strFilePath As String,
-	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
+    ''' <summary>
+    ''' Load the Sequence to Protein mapping using the specified PHRP result file
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <param name="lstSeqToProteinMap"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function LoadSeqToProteinMapping(
+      ByVal strFilePath As String,
+      ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
 
-		Dim lstProteins As List(Of clsProteinInfo) = Nothing
+        Dim lstProteins As List(Of clsProteinInfo) = Nothing
 
-		Dim objColumnHeaders As SortedDictionary(Of String, Integer)
+        Dim objColumnHeaders As SortedDictionary(Of String, Integer)
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
+        Dim strLineIn As String
+        Dim strSplitLine() As String
 
-		Dim objProteinInfo As clsProteinInfo
+        Dim objProteinInfo As clsProteinInfo
 
-		Dim strProteinName As String
-		Dim intSeqID As Integer
-		Dim eCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
-		Dim eTerminusState As clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants
+        Dim strProteinName As String
+        Dim intSeqID As Integer
+        Dim eCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
+        Dim eTerminusState As clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants
 
-		Dim blnHeaderLineParsed As Boolean
-		Dim blnSkipLine As Boolean
+        Dim blnHeaderLineParsed As Boolean
+        Dim blnSkipLine As Boolean
 
-		Try
+        Try
 
-			' Initialize the column mapping
-			' Using a case-insensitive comparer
-			objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+            ' Initialize the column mapping
+            ' Using a case-insensitive comparer
+            objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
 
-			' Define the default column mapping
-			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Unique_Seq_ID, 0)
-			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Cleavage_State, 1)
-			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Terminus_State, 2)
-			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_Name, 3)
-			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_EValue, 4)
-			objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_Intensity, 5)
+            ' Define the default column mapping
+            objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Unique_Seq_ID, 0)
+            objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Cleavage_State, 1)
+            objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Terminus_State, 2)
+            objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_Name, 3)
+            objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_EValue, 4)
+            objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_Intensity, 5)
 
-			' Read the data from the sequence to protein map file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            ' Read the data from the sequence to protein map file
+            Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-				Do While srInFile.Peek > -1
-					strLineIn = srInFile.ReadLine
-					blnSkipLine = False
+                Do While Not srInFile.EndOfStream
+                    strLineIn = srInFile.ReadLine
+                    blnSkipLine = False
 
-					If String.IsNullOrEmpty(strLineIn) Then
-						Continue Do
-					End If
+                    If String.IsNullOrEmpty(strLineIn) Then
+                        Continue Do
+                    End If
 
-					strSplitLine = strLineIn.Split(ControlChars.Tab)
+                    strSplitLine = strLineIn.Split(ControlChars.Tab)
 
-					If Not blnHeaderLineParsed Then
-						If strSplitLine(0).ToLower() = SEQ_PROT_MAP_COLUMN_Unique_Seq_ID.ToLower() Then
-							' Parse the header line to confirm the column ordering
-							clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
-							blnSkipLine = True
-						End If
+                    If Not blnHeaderLineParsed Then
+                        If strSplitLine(0).ToLower() = SEQ_PROT_MAP_COLUMN_Unique_Seq_ID.ToLower() Then
+                            ' Parse the header line to confirm the column ordering
+                            clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
+                            blnSkipLine = True
+                        End If
 
-						blnHeaderLineParsed = True
-					End If
+                        blnHeaderLineParsed = True
+                    End If
 
-					If blnSkipLine OrElse strSplitLine.Length < 3 Then
-						Continue Do
-					End If
+                    If blnSkipLine OrElse strSplitLine.Length < 3 Then
+                        Continue Do
+                    End If
 
-					If Not Integer.TryParse(strSplitLine(0), intSeqID) Then
-						Continue Do
-					End If
+                    If Not Integer.TryParse(strSplitLine(0), intSeqID) Then
+                        Continue Do
+                    End If
 
-					strProteinName = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, objColumnHeaders, String.Empty)
+                    strProteinName = clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, objColumnHeaders, String.Empty)
 
-					If String.IsNullOrEmpty(strProteinName) Then
-						Continue Do
-					End If
+                    If String.IsNullOrEmpty(strProteinName) Then
+                        Continue Do
+                    End If
 
-					eCleavageState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, objColumnHeaders, 0), clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants)
-					eTerminusState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, objColumnHeaders, 0), clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants)
+                    eCleavageState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, objColumnHeaders, 0), clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants)
+                    eTerminusState = CType(clsPHRPReader.LookupColumnValue(strSplitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, objColumnHeaders, 0), clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants)
 
-					objProteinInfo = New clsProteinInfo(strProteinName, intSeqID, eCleavageState, eTerminusState)
+                    objProteinInfo = New clsProteinInfo(strProteinName, intSeqID, eCleavageState, eTerminusState)
 
-					If lstSeqToProteinMap.TryGetValue(intSeqID, lstProteins) Then
-						' Sequence already exists in lstSeqToProteinMap; add the new protein info
-						If mMaxProteinsPerSeqID = 0 OrElse lstProteins.Count < mMaxProteinsPerSeqID Then
-							lstProteins.Add(objProteinInfo)
-						End If
-					Else
-						' New Sequence ID
-						lstProteins = New List(Of clsProteinInfo)
-						lstProteins.Add(objProteinInfo)
-						lstSeqToProteinMap.Add(intSeqID, lstProteins)
-					End If
+                    If lstSeqToProteinMap.TryGetValue(intSeqID, lstProteins) Then
+                        ' Sequence already exists in lstSeqToProteinMap; add the new protein info
+                        If mMaxProteinsPerSeqID = 0 OrElse lstProteins.Count < mMaxProteinsPerSeqID Then
+                            lstProteins.Add(objProteinInfo)
+                        End If
+                    Else
+                        ' New Sequence ID
+                        lstProteins = New List(Of clsProteinInfo)
+                        lstProteins.Add(objProteinInfo)
+                        lstSeqToProteinMap.Add(intSeqID, lstProteins)
+                    End If
 
-				Loop
+                Loop
 
-			End Using
+            End Using
 
-		Catch ex As Exception
-			Throw New Exception("Exception loading Seq to Protein Mapping from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
-		End Try
+        Catch ex As Exception
+            Throw New Exception("Exception loading Seq to Protein Mapping from " & Path.GetFileName(strFilePath) & ": " & ex.Message)
+        End Try
 
-		Return True
+        Return True
 
-	End Function
+    End Function
 
 End Class

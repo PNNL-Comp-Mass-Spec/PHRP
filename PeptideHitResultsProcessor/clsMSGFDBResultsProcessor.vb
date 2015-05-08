@@ -22,7 +22,7 @@ Public Class clsMSGFDBResultsProcessor
 
 	Public Sub New()
 		MyBase.New()
-		MyBase.mFileDate = "September 3, 2014"
+        MyBase.mFileDate = "May 7, 2015"
 		InitializeLocalVariables()
 	End Sub
 
@@ -230,24 +230,7 @@ Public Class clsMSGFDBResultsProcessor
 
 #End Region
 
-	Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer,
-	  ByRef udtSearchResultsCurrentScan() As udtMSGFDBSearchResultType,
-	  ByRef lstSearchResults As List(Of udtMSGFDBSearchResultType))
-
-		For Each udtSearchResult As udtMSGFDBSearchResultType In lstSearchResults
-
-			If intCurrentScanResultsCount >= udtSearchResultsCurrentScan.Length Then
-				ReDim Preserve udtSearchResultsCurrentScan(udtSearchResultsCurrentScan.Length * 2 - 1)
-			End If
-
-			udtSearchResultsCurrentScan(intCurrentScanResultsCount) = udtSearchResult
-			intCurrentScanResultsCount += 1
-
-		Next
-
-	End Sub
-
-	''' <summary>
+    ''' <summary>
 	''' Step through .PeptideSequenceWithMods
 	''' For each residue, check if a static mod is defined that affects that residue
 	''' For each mod symbol, determine the modification and add to objSearchResult
@@ -353,87 +336,102 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	Protected Sub AppendToScanGroupDetails(lstScanGroupDetails As List(Of udtScanGroupInfoType), _
-	   ByRef htScanGroupCombo As Dictionary(Of String, Boolean), _
-	   ByVal udtScanGroupInfo As udtScanGroupInfoType, _
-	   ByRef intCurrentScanGroupID As Integer, _
-	   ByRef intNextScanGroupID As Integer)
+    Protected Sub AppendToScanGroupDetails(lstScanGroupDetails As List(Of udtScanGroupInfoType), _
+       ByVal htScanGroupCombo As Dictionary(Of String, Boolean), _
+       ByVal udtScanGroupInfo As udtScanGroupInfoType, _
+       ByRef intCurrentScanGroupID As Integer, _
+       ByRef intNextScanGroupID As Integer)
 
-		Dim strChargeScanComboText As String
+        Dim strChargeScanComboText As String
 
-		strChargeScanComboText = udtScanGroupInfo.Charge.ToString & "_" & udtScanGroupInfo.Scan.ToString()
+        strChargeScanComboText = udtScanGroupInfo.Charge.ToString & "_" & udtScanGroupInfo.Scan.ToString()
 
-		If Not htScanGroupCombo.ContainsKey(strChargeScanComboText) Then
-			If intCurrentScanGroupID < 0 Then
-				intCurrentScanGroupID = intNextScanGroupID
-				intNextScanGroupID += 1
-			End If
+        If Not htScanGroupCombo.ContainsKey(strChargeScanComboText) Then
+            If intCurrentScanGroupID < 0 Then
+                intCurrentScanGroupID = intNextScanGroupID
+                intNextScanGroupID += 1
+            End If
 
-			udtScanGroupInfo.ScanGroupID = intCurrentScanGroupID
+            udtScanGroupInfo.ScanGroupID = intCurrentScanGroupID
 
-			lstScanGroupDetails.Add(udtScanGroupInfo)
-			htScanGroupCombo.Add(strChargeScanComboText, True)
-		End If
+            lstScanGroupDetails.Add(udtScanGroupInfo)
+            htScanGroupCombo.Add(strChargeScanComboText, True)
+        End If
 
-	End Sub
+    End Sub
 
-	Private Sub AppendToSearchResults(ByRef lstSearchResults As List(Of udtMSGFDBSearchResultType), ByVal udtSearchResult As udtMSGFDBSearchResultType, ByVal lstProteinInfo As Dictionary(Of String, udtTerminusCharsType))
+    Private Sub AppendToSearchResults(
+       ByVal lstSearchResults As List(Of udtMSGFDBSearchResultType),
+       ByVal udtSearchResult As udtMSGFDBSearchResultType,
+       ByVal lstProteinInfo As Dictionary(Of String, udtTerminusCharsType))
 
-		If lstProteinInfo.Count = 0 Then
-			lstSearchResults.Add(udtSearchResult)
-		Else
-			For Each kvEntry As KeyValuePair(Of String, udtTerminusCharsType) In lstProteinInfo
-				udtSearchResult.Protein = kvEntry.Key
-				udtSearchResult.Peptide = AddUpdatePrefixAndSuffixResidues(udtSearchResult.Peptide, kvEntry)
+        If lstProteinInfo.Count = 0 Then
+            lstSearchResults.Add(udtSearchResult)
+        Else
+            For Each kvEntry As KeyValuePair(Of String, udtTerminusCharsType) In lstProteinInfo
+                udtSearchResult.Protein = kvEntry.Key
+                udtSearchResult.Peptide = AddUpdatePrefixAndSuffixResidues(udtSearchResult.Peptide, kvEntry)
 
-				lstSearchResults.Add(udtSearchResult)
-			Next
-		End If
+                lstSearchResults.Add(udtSearchResult)
+            Next
+        End If
 
-	End Sub
+    End Sub
 
 	''' <summary>
 	''' Ranks each entry (assumes all of the data is from the same scan)
 	''' </summary>
-	''' <param name="udtSearchResults">Search results</param>
+    ''' <param name="lstSearchResults">Search results</param>
 	''' <param name="intStartIndex">Start index for data in this scan</param>
 	''' <param name="intEndIndex">End index for data in this scan</param>
 	''' <remarks></remarks>
-	Private Sub AssignRankAndDeltaNormValues(
-	  ByRef udtSearchResults() As udtMSGFDBSearchResultType,
-	  ByVal intStartIndex As Integer,
-	  ByVal intEndIndex As Integer)
+    Private Sub AssignRankAndDeltaNormValues(
+      ByVal lstSearchResults As IList(Of udtMSGFDBSearchResultType),
+      ByVal intStartIndex As Integer,
+      ByVal intEndIndex As Integer)
 
-		' Prior to September 2014 ranks were assign per charge state per scan; 
-		' Ranks are now assigned per scan (across all charge states)
+        ' Prior to September 2014 ranks were assign per charge state per scan; 
+        ' Ranks are now assigned per scan (across all charge states)
 
-		' Duplicate a portion of udtSearchResults so that we can sort by ascending Spectral Probability
+        If intStartIndex = intEndIndex Then
+            Dim currentResult = lstSearchResults(intStartIndex)
+            currentResult.RankSpecProb = 1
+            lstSearchResults(intStartIndex) = currentResult
+            Return
+        End If
 
-		Dim dctResultsSubset = New Dictionary(Of Integer, udtMSGFDBSearchResultType)
-		For intIndex = intStartIndex To intEndIndex
-			dctResultsSubset.Add(intIndex, udtSearchResults(intIndex))
-		Next
+        ' Duplicate a portion of udtSearchResults so that we can sort by ascending Spectral Probability
 
-		Dim lstResultsBySpecProb = (From item In dctResultsSubset Select item Order By item.Value.SpecProbNum).ToList()
+        Dim dctResultsSubset = New Dictionary(Of Integer, udtMSGFDBSearchResultType)
+        For intIndex = intStartIndex To intEndIndex
+            dctResultsSubset.Add(intIndex, lstSearchResults(intIndex))
+        Next
 
-		Dim dblLastValue As Double
-		Dim intCurrentRank As Integer = -1
+        Dim lstResultsBySpecProb = (From item In dctResultsSubset Select item Order By item.Value.SpecProbNum).ToList()
 
-		For Each entry In lstResultsBySpecProb
-			If intCurrentRank < 0 Then
-				dblLastValue = udtSearchResults(entry.Key).SpecProbNum
-				intCurrentRank = 1
-			Else
-				If Math.Abs(udtSearchResults(entry.Key).SpecProbNum - dblLastValue) > Double.Epsilon Then
-					dblLastValue = udtSearchResults(entry.Key).SpecProbNum
-					intCurrentRank += 1
-				End If
-			End If
+        Dim dblLastValue As Double
+        Dim intCurrentRank As Integer = -1
 
-			udtSearchResults(entry.Key).RankSpecProb = intCurrentRank
-		Next
+        For Each entry In lstResultsBySpecProb
+            Dim currentResult = lstSearchResults(entry.Key)
 
-	End Sub
+            If intCurrentRank < 0 Then
+                dblLastValue = currentResult.SpecProbNum
+                intCurrentRank = 1
+            Else
+                If Math.Abs(currentResult.SpecProbNum - dblLastValue) > Double.Epsilon Then
+                    dblLastValue = currentResult.SpecProbNum
+                    intCurrentRank += 1
+                End If
+            End If
+
+            currentResult.RankSpecProb = intCurrentRank
+
+            ' Because this is a list of structs, we have to copy currentResult back into the current position in lstSearchResults
+            lstSearchResults(entry.Key) = currentResult
+        Next
+
+    End Sub
 
 	Private Function AddModificationsAndComputeMass(ByRef objSearchResult As clsSearchResultsMSGFDB, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
 		Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
@@ -547,121 +545,121 @@ Public Class clsMSGFDBResultsProcessor
 	''' <param name="strModSymbols"></param>
 	''' <returns>True if success; false if a problem</returns>
 	''' <remarks></remarks>
-	Protected Function ConvertMGSFModMassesToSymbols(ByVal strModDigits As String, _
-	 ByRef strModSymbols As String, _
-	 ByRef lstMSGFDBModInfo As List(Of udtModInfoType), _
-	 ByVal blnNterminalMod As Boolean, _
-	 ByVal blnPossibleCTerminalMod As Boolean, _
-	 ByRef dblModMassFound As Double, _
-	 ByRef blnIsStaticMod As Boolean) As Boolean
+    Protected Function ConvertMGSFModMassesToSymbols(ByVal strModDigits As String, _
+     ByRef strModSymbols As String, _
+     ByVal lstMSGFDBModInfo As List(Of udtModInfoType), _
+     ByVal blnNterminalMod As Boolean, _
+     ByVal blnPossibleCTerminalMod As Boolean, _
+     ByRef dblModMassFound As Double, _
+     ByRef blnIsStaticMod As Boolean) As Boolean
 
-		Static reModMassRegEx As New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
+        Static reModMassRegEx As New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
-		Dim reMatches As MatchCollection
+        Dim reMatches As MatchCollection
 
-		Dim blnMatchFound As Boolean
-		Dim blnTestMod As Boolean
+        Dim blnMatchFound As Boolean
+        Dim blnTestMod As Boolean
 
-		Dim intBestMatchIndex As Integer
-		Dim dblBestMassDiff As Double
-		Dim intModSymbolsFound As Integer = 0
-		Dim chSymbolBestMatch As Char = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL
+        Dim intBestMatchIndex As Integer
+        Dim dblBestMassDiff As Double
+        Dim intModSymbolsFound As Integer = 0
+        Dim chSymbolBestMatch As Char = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL
 
-		strModSymbols = String.Empty
-		dblModMassFound = 0
-		blnIsStaticMod = False
+        strModSymbols = String.Empty
+        dblModMassFound = 0
+        blnIsStaticMod = False
 
-		reMatches = reModMassRegEx.Matches(strModDigits)
+        reMatches = reModMassRegEx.Matches(strModDigits)
 
-		For Each reMatch As Match In reMatches
-			Dim strModMass As String
-			strModMass = reMatch.Value
+        For Each reMatch As Match In reMatches
+            Dim strModMass As String
+            strModMass = reMatch.Value
 
-			' Convert strModMass to a mass value
-			Dim dblModMass As Double
-			dblModMass = Double.Parse(strModMass)
-			dblModMassFound += dblModMass
+            ' Convert strModMass to a mass value
+            Dim dblModMass As Double
+            dblModMass = Double.Parse(strModMass)
+            dblModMassFound += dblModMass
 
-			blnMatchFound = False
-			Do
-				intBestMatchIndex = -1
-				Dim dblCandidateMassDiff As Double = Double.MaxValue
+            blnMatchFound = False
+            Do
+                intBestMatchIndex = -1
+                Dim dblCandidateMassDiff As Double = Double.MaxValue
 
-				' Step through the known modifications to find the closest match
-				For intIndex As Integer = 0 To lstMSGFDBModInfo.Count - 1
+                ' Step through the known modifications to find the closest match
+                For intIndex As Integer = 0 To lstMSGFDBModInfo.Count - 1
 
-					blnTestMod = True
+                    blnTestMod = True
 
-					If blnNterminalMod Then
-						' Only test N-terminal mods
-						If Not (
-						   lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermPeptide OrElse
-						   lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermProtein) Then
-							blnTestMod = False
-						End If
+                    If blnNterminalMod Then
+                        ' Only test N-terminal mods
+                        If Not (
+                           lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermPeptide OrElse
+                           lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynNTermProtein) Then
+                            blnTestMod = False
+                        End If
 
-					ElseIf Not blnPossibleCTerminalMod Then
-						' Skip C-terminal mods since we're not at the C-terminus
-						If lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermPeptide OrElse
-						   lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermProtein Then
-							blnTestMod = False
-						End If
+                    ElseIf Not blnPossibleCTerminalMod Then
+                        ' Skip C-terminal mods since we're not at the C-terminus
+                        If lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermPeptide OrElse
+                           lstMSGFDBModInfo(intIndex).ModType = eMSGFDBModType.DynCTermProtein Then
+                            blnTestMod = False
+                        End If
 
-					End If
+                    End If
 
-					If blnTestMod Then
-						dblCandidateMassDiff = Math.Abs(lstMSGFDBModInfo(intIndex).ModMassVal - dblModMass)
-						If dblCandidateMassDiff < 0.25 Then
-							' Possible match found
-							If intBestMatchIndex < 0 OrElse
-							   dblCandidateMassDiff < dblBestMassDiff OrElse
-							   (Math.Abs(dblCandidateMassDiff - dblBestMassDiff) < Double.Epsilon AndAlso chSymbolBestMatch = "-"c) Then
-								intBestMatchIndex = intIndex
-								dblBestMassDiff = dblCandidateMassDiff
-								chSymbolBestMatch = lstMSGFDBModInfo(intIndex).ModSymbol
-								blnMatchFound = True
-							End If
-						End If
+                    If blnTestMod Then
+                        dblCandidateMassDiff = Math.Abs(lstMSGFDBModInfo(intIndex).ModMassVal - dblModMass)
+                        If dblCandidateMassDiff < 0.25 Then
+                            ' Possible match found
+                            If intBestMatchIndex < 0 OrElse
+                               dblCandidateMassDiff < dblBestMassDiff OrElse
+                               (Math.Abs(dblCandidateMassDiff - dblBestMassDiff) < Double.Epsilon AndAlso chSymbolBestMatch = "-"c) Then
+                                intBestMatchIndex = intIndex
+                                dblBestMassDiff = dblCandidateMassDiff
+                                chSymbolBestMatch = lstMSGFDBModInfo(intIndex).ModSymbol
+                                blnMatchFound = True
+                            End If
+                        End If
 
-					End If
+                    End If
 
-				Next
+                Next
 
-				If Not blnMatchFound AndAlso blnNterminalMod Then
-					' Set this to false, then search again
-					blnNterminalMod = False
-				ElseIf Not blnMatchFound AndAlso Not blnPossibleCTerminalMod Then
-					' Set this to true, then search again
-					blnPossibleCTerminalMod = True
-				Else
-					Exit Do
-				End If
+                If Not blnMatchFound AndAlso blnNterminalMod Then
+                    ' Set this to false, then search again
+                    blnNterminalMod = False
+                ElseIf Not blnMatchFound AndAlso Not blnPossibleCTerminalMod Then
+                    ' Set this to true, then search again
+                    blnPossibleCTerminalMod = True
+                Else
+                    Exit Do
+                End If
 
-			Loop While Not blnMatchFound
+            Loop While Not blnMatchFound
 
-			If blnMatchFound Then
-				' Match found; use the mod symbol
-				strModSymbols &= lstMSGFDBModInfo(intBestMatchIndex).ModSymbol
-				intModSymbolsFound += 1
+            If blnMatchFound Then
+                ' Match found; use the mod symbol
+                strModSymbols &= lstMSGFDBModInfo(intBestMatchIndex).ModSymbol
+                intModSymbolsFound += 1
 
-				If lstMSGFDBModInfo(intBestMatchIndex).ModType = eMSGFDBModType.StaticMod Then
-					blnIsStaticMod = True
-				End If
-			Else
-				' Match not found; use the mass value
-				strModSymbols &= strModMass
-			End If
+                If lstMSGFDBModInfo(intBestMatchIndex).ModType = eMSGFDBModType.StaticMod Then
+                    blnIsStaticMod = True
+                End If
+            Else
+                ' Match not found; use the mass value
+                strModSymbols &= strModMass
+            End If
 
-		Next reMatch
+        Next reMatch
 
-		If intModSymbolsFound > 0 Then
-			Return True
-		Else
-			Return False
-		End If
+        If intModSymbolsFound > 0 Then
+            Return True
+        Else
+            Return False
+        End If
 
 
-	End Function
+    End Function
 
 	''' <summary>
 	''' This routine creates a first hits file or synopsis file from the output from MSGF-DB
@@ -688,14 +686,13 @@ Public Class clsMSGFDBResultsProcessor
 
 		Dim strLineIn As String
 
-		Dim lstSearchResults As New List(Of udtMSGFDBSearchResultType)
+        Dim lstSearchResultsCurrentScan As New List(Of udtMSGFDBSearchResultType)
 
-		Dim intSearchResultsCount As Integer
-		Dim udtSearchResults() As udtMSGFDBSearchResultType
+        'Dim intSearchResultsCount As Integer
+        'Dim udtSearchResults() As udtMSGFDBSearchResultType
+        Dim lstSearchResultsUnfiltered As New List(Of udtMSGFDBSearchResultType)
+
 		Dim sngPercentComplete As Single
-
-		Dim intFilteredSearchResultCount As Integer
-		Dim udtFilteredSearchResults() As udtMSGFDBSearchResultType
 
 		Dim blnHeaderParsed As Boolean
 		Dim blnIncludeFDRandPepFDR As Boolean = False
@@ -723,136 +720,134 @@ Public Class clsMSGFDBResultsProcessor
 			Try
 				' Open the input file and parse it
 				' Initialize the stream reader and the stream Text writer
-				Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)),
+                      swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
-					Using swResultFile As StreamWriter = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    strErrorLog = String.Empty
+                    blnHeaderParsed = False
 
-						strErrorLog = String.Empty
-						blnHeaderParsed = False
+                    intNextScanGroupID = 1
+                    lstScanGroupDetails.Clear()
+                    htScanGroupCombo.Clear()
 
-						intNextScanGroupID = 1
-						lstScanGroupDetails.Clear()
-						htScanGroupCombo.Clear()
+                    ' Initialize the array that will hold all of the records that will ultimately be written out to disk
+                    Dim lstFilteredSearchResults = New List(Of udtMSGFDBSearchResultType)
 
-						' Initialize array that will hold all of the records in the MSGFDB result file
-						intSearchResultsCount = 0
-						ReDim udtSearchResults(999)
+                    ' Parse the input file
+                    Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
+                        strLineIn = srDataFile.ReadLine()
+                        If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
 
-						' Initialize the array that will hold all of the records that will ultimately be written out to disk
-						intFilteredSearchResultCount = 0
-						ReDim udtFilteredSearchResults(999)
+                            If Not blnHeaderParsed Then
+                                blnSuccess = ParseMSGFDBResultsFileHeaderLine(strLineIn, intColumnMapping)
+                                If Not blnSuccess Then
+                                    ' Error parsing header
+                                    SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+                                    Exit Try
+                                End If
+                                blnHeaderParsed = True
 
-						' Parse the input file
-						Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
-							strLineIn = srDataFile.ReadLine()
-							If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
+                                blnIncludeFDRandPepFDR = False
+                                blnIncludeEFDR = False
 
-								If Not blnHeaderParsed Then
-									blnSuccess = ParseMSGFDBResultsFileHeaderLine(strLineIn, intColumnMapping)
-									If Not blnSuccess Then
-										' Error parsing header
-										SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-										Exit Try
-									End If
-									blnHeaderParsed = True
+                                If intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue) >= 0 OrElse intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue) >= 0 Then
+                                    blnIncludeFDRandPepFDR = True
+                                ElseIf intColumnMapping(eMSGFDBResultsFileColumns.EFDR) >= 0 Then
+                                    blnIncludeEFDR = True
+                                End If
 
-									blnIncludeFDRandPepFDR = False
-									blnIncludeEFDR = False
+                                If intColumnMapping(eMSGFDBResultsFileColumns.IMSDriftTime) >= 0 Then
+                                    blnIncludeIMSFields = True
+                                End If
 
-									If intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue) >= 0 OrElse intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue) >= 0 Then
-										blnIncludeFDRandPepFDR = True
-									ElseIf intColumnMapping(eMSGFDBResultsFileColumns.EFDR) >= 0 Then
-										blnIncludeEFDR = True
-									End If
+                                If intColumnMapping(eMSGFDBResultsFileColumns.IsotopeError) >= 0 Then
+                                    blnMSGFPlus = True
+                                End If
 
-									If intColumnMapping(eMSGFDBResultsFileColumns.IMSDriftTime) >= 0 Then
-										blnIncludeIMSFields = True
-									End If
+                                ' Write the header line
+                                WriteSynFHTFileHeader(swResultFile, strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
+                            Else
 
-									If intColumnMapping(eMSGFDBResultsFileColumns.IsotopeError) >= 0 Then
-										blnMSGFPlus = True
-									End If
+                                blnValidSearchResult = ParseMSGFDBResultsFileEntry(
+                                    strLineIn, blnMSGFPlus, lstMSGFDBModInfo,
+                                    lstSearchResultsCurrentScan, strErrorLog,
+                                    intColumnMapping, intNextScanGroupID, lstScanGroupDetails, htScanGroupCombo, lstSpecIdToIndex)
 
-									' Write the header line
-									WriteSynFHTFileHeader(swResultFile, strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
-								Else
+                                If blnValidSearchResult Then
+                                    ExpandListIfRequired(lstSearchResultsUnfiltered, lstSearchResultsCurrentScan.Count)
+                                    lstSearchResultsUnfiltered.AddRange(lstSearchResultsCurrentScan)
+                                End If
 
-									blnValidSearchResult = ParseMSGFDBResultsFileEntry(strLineIn, blnMSGFPlus, lstMSGFDBModInfo, lstSearchResults, _
-									  strErrorLog, _
-									  intColumnMapping, intNextScanGroupID, lstScanGroupDetails, htScanGroupCombo, lstSpecIdToIndex)
-
-									If blnValidSearchResult Then
-										AddCurrentRecordToSearchResults(intSearchResultsCount, udtSearchResults, lstSearchResults)
-									End If
-
-									' Update the progress
-									sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-									If mCreateProteinModsFile Then
-										sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
-									End If
-									UpdateProgress(sngPercentComplete)
+                                ' Update the progress
+                                sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+                                If mCreateProteinModsFile Then
+                                    sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+                                End If
+                                UpdateProgress(sngPercentComplete)
 
 
-								End If
-							End If
-						Loop
+                            End If
+                        End If
+                    Loop
 
-						' Sort the SearchResults by scan, charge, and ascending SpecProb
-						Array.Sort(udtSearchResults, 0, intSearchResultsCount, New MSGFDBSearchResultsComparerScanChargeSpecProbPeptide)
+                    lstSearchResultsUnfiltered.TrimExcess()
 
-						' Now filter the data
+                    ' Sort the SearchResults by scan, charge, and ascending SpecProb
+                    lstSearchResultsUnfiltered.Sort(New MSGFDBSearchResultsComparerScanChargeSpecProbPeptide)
 
-						' Initialize variables
-						Dim intStartIndex As Integer = 0
-						Dim intEndIndex As Integer = 0
+                    ' Now filter the data
 
-						Do While intStartIndex < intSearchResultsCount
-							intEndIndex = intStartIndex
-							Do While intEndIndex + 1 < intSearchResultsCount AndAlso udtSearchResults(intEndIndex + 1).ScanNum = udtSearchResults(intStartIndex).ScanNum
-								intEndIndex += 1
-							Loop
+                    ' Initialize variables
+                    Dim intStartIndex = 0
+                    Dim intEndIndex = 0
 
-							' Store the results for this scan
-							If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-								StoreSynMatches(udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults)
-							Else
-								StoreTopFHTMatch(udtSearchResults, intStartIndex, intEndIndex, intFilteredSearchResultCount, udtFilteredSearchResults)
-							End If
+                    Do While intStartIndex < lstSearchResultsUnfiltered.Count
+                        intEndIndex = intStartIndex
+                        Do While intEndIndex + 1 < lstSearchResultsUnfiltered.Count AndAlso
+                            lstSearchResultsUnfiltered(intEndIndex + 1).ScanNum = lstSearchResultsUnfiltered(intStartIndex).ScanNum
+                            intEndIndex += 1
+                        Loop
 
-							intStartIndex = intEndIndex + 1
-						Loop
+                        ' Store the results for this scan
+                        If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
+                            StoreSynMatches(lstSearchResultsUnfiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
+                        Else
+                            StoreTopFHTMatch(lstSearchResultsUnfiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
+                        End If
 
-						' Sort the data in udtFilteredSearchResults then write out to disk
-						SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
-					End Using
-				End Using
+                        intStartIndex = intEndIndex + 1
+                    Loop
 
-				' Write out the scan group info
-				If Not String.IsNullOrEmpty(strScanGroupFilePath) Then
-					StoreScanGroupInfo(strScanGroupFilePath, lstScanGroupDetails)
-				End If
+                    ' Sort the data in udtFilteredSearchResults then write out to disk
+                    SortAndWriteFilteredSearchResults(swResultFile, lstFilteredSearchResults, strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
+                End Using
 
-				' Inform the user if any errors occurred
-				If strErrorLog.Length > 0 Then
-					SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
-				End If
+                ' Write out the scan group info
+                If Not String.IsNullOrEmpty(strScanGroupFilePath) Then
+                    StoreScanGroupInfo(strScanGroupFilePath, lstScanGroupDetails)
+                End If
 
-				blnSuccess = True
+                ' Inform the user if any errors occurred
+                If strErrorLog.Length > 0 Then
+                    SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+                End If
 
-			Catch ex As Exception
-				SetErrorMessage(ex.Message)
-				SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
-				blnSuccess = False
-			End Try
-		Catch ex As Exception
-			SetErrorMessage(ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-			blnSuccess = False
-		End Try
+                blnSuccess = True
 
-		Return blnSuccess
+            Catch ex As Exception
+                SetErrorMessage(ex.Message)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
+                blnSuccess = False
+            End Try
+        Catch ex As Exception
+            SetErrorMessage(ex.Message)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        End Try
 
-	End Function
+        Return blnSuccess
+
+    End Function
 
 	Private Function ComputeMass(ByVal strEmpiricalformula As String) As Double
 		' CompositionStr (C[Num]H[Num]N[Num]O[Num]S[Num]P[Num])
@@ -1185,79 +1180,80 @@ Public Class clsMSGFDBResultsProcessor
 	''' <param name="strMTSPepToProteinMapFilePath"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadPeptideToProteinMapInfoMSGFDB(ByVal strPepToProteinMapFilePath As String, _
-	  ByVal strOutputFolderPath As String, _
-	  ByRef lstMSGFDBModInfo As List(Of udtModInfoType), _
-	  ByVal blnMSGFPlus As Boolean, _
-	  ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), _
-	  ByRef strMTSPepToProteinMapFilePath As String) As Boolean
+    Protected Function LoadPeptideToProteinMapInfoMSGFDB(
+      ByVal strPepToProteinMapFilePath As String, _
+      ByVal strOutputFolderPath As String, _
+      ByRef lstMSGFDBModInfo As List(Of udtModInfoType), _
+      ByVal blnMSGFPlus As Boolean, _
+      ByVal lstPepToProteinMapping As List(Of udtPepToProteinMappingType), _
+      ByRef strMTSPepToProteinMapFilePath As String) As Boolean
 
-		Dim strHeaderLine As String = String.Empty
-		Dim strMTSCompatiblePeptide As String
+        Dim strHeaderLine As String = String.Empty
+        Dim strMTSCompatiblePeptide As String
 
-		' Not used by this function but required for the call to ReplaceMSGFModTextWithSymbol
-		Dim dblTotalModMass As Double = 0
+        ' Not used by this function but required for the call to ReplaceMSGFModTextWithSymbol
+        Dim dblTotalModMass As Double = 0
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			strMTSPepToProteinMapFilePath = String.Empty
+        Try
+            strMTSPepToProteinMapFilePath = String.Empty
 
-			If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
-				Console.WriteLine()
-				ReportWarning("PepToProteinMap file is not defined")
-				Return False
-			ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
-				Console.WriteLine()
-				ReportWarning("PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
-				Return False
-			End If
+            If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
+                Console.WriteLine()
+                ReportWarning("PepToProteinMap file is not defined")
+                Return False
+            ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
+                Console.WriteLine()
+                ReportWarning("PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
+                Return False
+            End If
 
-			' Initialize lstPepToProteinMapping
-			lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
+            ' Initialize lstPepToProteinMapping
+            lstPepToProteinMapping.Clear()
 
-			' Read the data in strProteinToPeptideMappingFilePath
-			blnSuccess = LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
+            ' Read the data in strProteinToPeptideMappingFilePath
+            blnSuccess = LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
 
-			If blnSuccess Then
-				strMTSPepToProteinMapFilePath = Path.Combine(strOutputFolderPath, Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
+            If blnSuccess Then
+                strMTSPepToProteinMapFilePath = Path.Combine(strOutputFolderPath, Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
 
-				Using swOutFile As StreamWriter = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
-					If Not String.IsNullOrEmpty(strHeaderLine) Then
-						' Header line
-						swOutFile.WriteLine(strHeaderLine)
-					End If
+                Using swOutFile As StreamWriter = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    If Not String.IsNullOrEmpty(strHeaderLine) Then
+                        ' Header line
+                        swOutFile.WriteLine(strHeaderLine)
+                    End If
 
-					For intIndex As Integer = 0 To lstPepToProteinMapping.Count - 1
-						' Replace any mod text names in the peptide sequence with the appropriate mod symbols
-						' In addition, replace the * terminus symbols with dashes
-						strMTSCompatiblePeptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
+                    For intIndex As Integer = 0 To lstPepToProteinMapping.Count - 1
+                        ' Replace any mod text names in the peptide sequence with the appropriate mod symbols
+                        ' In addition, replace the * terminus symbols with dashes
+                        strMTSCompatiblePeptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
 
-						If lstPepToProteinMapping(intIndex).Peptide <> strMTSCompatiblePeptide Then
-							UpdatePepToProteinMapPeptide(lstPepToProteinMapping, intIndex, strMTSCompatiblePeptide)
-						End If
+                        If lstPepToProteinMapping(intIndex).Peptide <> strMTSCompatiblePeptide Then
+                            UpdatePepToProteinMapPeptide(lstPepToProteinMapping, intIndex, strMTSCompatiblePeptide)
+                        End If
 
-						swOutFile.WriteLine( _
-						  lstPepToProteinMapping(intIndex).Peptide & ControlChars.Tab & _
-						  lstPepToProteinMapping(intIndex).Protein & ControlChars.Tab & _
-						  lstPepToProteinMapping(intIndex).ResidueStart & ControlChars.Tab & _
-						  lstPepToProteinMapping(intIndex).ResidueEnd)
+                        swOutFile.WriteLine( _
+                          lstPepToProteinMapping(intIndex).Peptide & ControlChars.Tab & _
+                          lstPepToProteinMapping(intIndex).Protein & ControlChars.Tab & _
+                          lstPepToProteinMapping(intIndex).ResidueStart & ControlChars.Tab & _
+                          lstPepToProteinMapping(intIndex).ResidueEnd)
 
-					Next
+                    Next
 
-				End Using
+                End Using
 
-			End If
+            End If
 
-		Catch ex As Exception
-			SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" & Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" & Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 	Protected Function ParseMSGFDBSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
 		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
@@ -1461,320 +1457,317 @@ Public Class clsMSGFDBResultsProcessor
 
 	End Function
 
-	Private Function ParseMSGFDBResultsFileEntry(ByRef strLineIn As String, _
-	   ByVal blnMSGFPlus As Boolean, _
-	   ByRef lstMSGFDBModInfo As List(Of udtModInfoType), _
-	   ByRef lstSearchResults As List(Of udtMSGFDBSearchResultType), _
-	   ByRef strErrorLog As String, _
-	   ByRef intColumnMapping() As Integer, _
-	   ByRef intNextScanGroupID As Integer, _
-	   ByRef lstScanGroupDetails As List(Of udtScanGroupInfoType), _
-	   ByRef htScanGroupCombo As Dictionary(Of String, Boolean), _
-	   ByRef lstSpecIdToIndex As Dictionary(Of String, Integer)) As Boolean
-
-		' Parses an entry from the MSGF-DB results file
-
-		Dim udtSearchResult As udtMSGFDBSearchResultType = New udtMSGFDBSearchResultType
-		Dim strSplitLine() As String = Nothing
-
-		Dim intScanCount As Integer = 1
-		Dim strSplitResult() As String = Nothing
-
-		Dim udtMergedScanInfo() As udtMSGFDBSearchResultType = Nothing
-
-		Dim lstProteinInfo As Dictionary(Of String, udtTerminusCharsType)
-
-		Dim blnValidSearchResult As Boolean
-		Dim intSlashIndex As Integer
-		Dim blnTargetDecoyFDRValid As Boolean
-
-		Try
-			' Set this to False for now
-			blnValidSearchResult = False
-
-			lstProteinInfo = New Dictionary(Of String, udtTerminusCharsType)
-
-			' Reset lstSearchResults
-			If lstSearchResults Is Nothing Then
-				lstSearchResults = New List(Of udtMSGFDBSearchResultType)
-			Else
-				lstSearchResults.Clear()
-			End If
-
-			udtSearchResult.Clear()
-			strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
-
-			If strSplitLine.Length >= 13 Then
-
-				With udtSearchResult
-					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpectrumFile), .SpectrumFile) Then
-						Throw New EvaluateException("SpectrumFile column is missing or invalid")
-					End If
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecIndex), .SpecIndex)
-
-					If blnMSGFPlus Then
-						Dim intSpecIndex As Integer
-						Dim blnGenerateSpecIndex As Boolean = True
-
-						If Not Integer.TryParse(.SpecIndex, intSpecIndex) Then
-							' MSGF+ includes text in the SpecID column, for example: "controllerType=0 controllerNumber=1 scan=6390" or "index=4323"
-							' Need to convert these to an integer
-
-							If .SpecIndex.StartsWith("index=") Then
-								.SpecIndex = .SpecIndex.Substring("index=".Length)
-								If Integer.TryParse(.SpecIndex, intSpecIndex) Then
-									blnGenerateSpecIndex = False
-								End If
-							End If
-
-							If blnGenerateSpecIndex Then
-								If Not lstSpecIdToIndex.TryGetValue(.SpecIndex, intSpecIndex) Then
-									intSpecIndex = lstSpecIdToIndex.Count + 1
-									lstSpecIdToIndex.Add(.SpecIndex, intSpecIndex)
-								End If
-
-								.SpecIndex = intSpecIndex.ToString()
-							End If
-
-						End If
-					End If
-
-					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Scan), .Scan) Then
-						Throw New EvaluateException("Scan column is missing or invalid")
-					End If
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FragMethod), .FragMethod)
-
-					intSlashIndex = .Scan.IndexOf("/"c)
-					If intSlashIndex > 0 Then
-						' This is a merged spectrum and thus scan number looks like: 3010/3011/3012
-						' Split the Scan list on the slash
-						' Later in this function, we'll append lstSearchResults with this scan plus the other scans
-
-						strSplitResult = .Scan.Split("/"c)
-						intScanCount = strSplitResult.Length
-						ReDim udtMergedScanInfo(intScanCount - 1)
+    Private Function ParseMSGFDBResultsFileEntry(
+       ByRef strLineIn As String, _
+       ByVal blnMSGFPlus As Boolean, _
+       ByVal lstMSGFDBModInfo As List(Of udtModInfoType), _
+       ByVal lstSearchResultsCurrentScan As List(Of udtMSGFDBSearchResultType), _
+       ByRef strErrorLog As String, _
+       ByVal intColumnMapping() As Integer, _
+       ByRef intNextScanGroupID As Integer, _
+       ByVal lstScanGroupDetails As List(Of udtScanGroupInfoType), _
+       ByVal htScanGroupCombo As Dictionary(Of String, Boolean), _
+       ByVal lstSpecIdToIndex As Dictionary(Of String, Integer)) As Boolean
+
+        ' Parses an entry from the MSGF-DB results file
+
+        Dim udtSearchResult = New udtMSGFDBSearchResultType
+        Dim strSplitLine() As String = Nothing
+
+        Dim intScanCount As Integer = 1
+        Dim strSplitResult() As String = Nothing
+
+        Dim udtMergedScanInfo() As udtMSGFDBSearchResultType = Nothing
+
+        Dim lstProteinInfo As Dictionary(Of String, udtTerminusCharsType)
+
+        Dim blnValidSearchResult As Boolean
+        Dim intSlashIndex As Integer
+        Dim blnTargetDecoyFDRValid As Boolean
+
+        Try
+            ' Set this to False for now
+            blnValidSearchResult = False
+
+            lstProteinInfo = New Dictionary(Of String, udtTerminusCharsType)
+
+            ' Reset lstSearchResults
+            lstSearchResultsCurrentScan.Clear()
+
+            udtSearchResult.Clear()
+            strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
+
+            If strSplitLine.Length >= 13 Then
+
+                With udtSearchResult
+                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpectrumFile), .SpectrumFile) Then
+                        Throw New EvaluateException("SpectrumFile column is missing or invalid")
+                    End If
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecIndex), .SpecIndex)
+
+                    If blnMSGFPlus Then
+                        Dim intSpecIndex As Integer
+                        Dim blnGenerateSpecIndex As Boolean = True
+
+                        If Not Integer.TryParse(.SpecIndex, intSpecIndex) Then
+                            ' MSGF+ includes text in the SpecID column, for example: "controllerType=0 controllerNumber=1 scan=6390" or "index=4323"
+                            ' Need to convert these to an integer
+
+                            If .SpecIndex.StartsWith("index=") Then
+                                .SpecIndex = .SpecIndex.Substring("index=".Length)
+                                If Integer.TryParse(.SpecIndex, intSpecIndex) Then
+                                    blnGenerateSpecIndex = False
+                                End If
+                            End If
+
+                            If blnGenerateSpecIndex Then
+                                If Not lstSpecIdToIndex.TryGetValue(.SpecIndex, intSpecIndex) Then
+                                    intSpecIndex = lstSpecIdToIndex.Count + 1
+                                    lstSpecIdToIndex.Add(.SpecIndex, intSpecIndex)
+                                End If
+
+                                .SpecIndex = intSpecIndex.ToString()
+                            End If
+
+                        End If
+                    End If
+
+                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Scan), .Scan) Then
+                        Throw New EvaluateException("Scan column is missing or invalid")
+                    End If
 
-						For intIndex As Integer = 0 To intScanCount - 1
-							udtMergedScanInfo(intIndex) = New udtMSGFDBSearchResultType
-							udtMergedScanInfo(intIndex).Clear()
-							udtMergedScanInfo(intIndex).Scan = strSplitResult(intIndex)
-							udtMergedScanInfo(intIndex).ScanNum = CIntSafe(strSplitResult(intIndex), 0)
-						Next
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FragMethod), .FragMethod)
 
-						' Now split SpecIndex and store in udtMergedScanInfo
-						strSplitResult = .SpecIndex.Split("/"c)
+                    intSlashIndex = .Scan.IndexOf("/"c)
+                    If intSlashIndex > 0 Then
+                        ' This is a merged spectrum and thus scan number looks like: 3010/3011/3012
+                        ' Split the Scan list on the slash
+                        ' Later in this function, we'll append lstSearchResults with this scan plus the other scans
 
-						For intIndex As Integer = 0 To strSplitResult.Length - 1
-							If intIndex >= udtMergedScanInfo.Length Then
-								' There are more entries for SpecIndex than there are for Scan#; this is unexpected
-								Exit For
-							End If
-							udtMergedScanInfo(intIndex).SpecIndex = strSplitResult(intIndex)
-						Next
+                        strSplitResult = .Scan.Split("/"c)
+                        intScanCount = strSplitResult.Length
+                        ReDim udtMergedScanInfo(intScanCount - 1)
 
-						' Now split FragMethod and store in udtMergedScanInfo
-						strSplitResult = .FragMethod.Split("/"c)
+                        For intIndex As Integer = 0 To intScanCount - 1
+                            udtMergedScanInfo(intIndex) = New udtMSGFDBSearchResultType
+                            udtMergedScanInfo(intIndex).Clear()
+                            udtMergedScanInfo(intIndex).Scan = strSplitResult(intIndex)
+                            udtMergedScanInfo(intIndex).ScanNum = CIntSafe(strSplitResult(intIndex), 0)
+                        Next
 
-						For intIndex As Integer = 0 To strSplitResult.Length - 1
-							If intIndex >= udtMergedScanInfo.Length Then
-								' There are more entries for FragMethod than there are for Scan#; this is unexpected
-								Exit For
-							End If
-							udtMergedScanInfo(intIndex).FragMethod = strSplitResult(intIndex)
-						Next
+                        ' Now split SpecIndex and store in udtMergedScanInfo
+                        strSplitResult = .SpecIndex.Split("/"c)
 
-					Else
-						.ScanNum = CIntSafe(.Scan, 0)
-						intScanCount = 1
-					End If
+                        For intIndex As Integer = 0 To strSplitResult.Length - 1
+                            If intIndex >= udtMergedScanInfo.Length Then
+                                ' There are more entries for SpecIndex than there are for Scan#; this is unexpected
+                                Exit For
+                            End If
+                            udtMergedScanInfo(intIndex).SpecIndex = strSplitResult(intIndex)
+                        Next
 
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PrecursorMZ), .PrecursorMZ)
+                        ' Now split FragMethod and store in udtMergedScanInfo
+                        strSplitResult = .FragMethod.Split("/"c)
 
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Charge), .Charge)
-					.ChargeNum = CShort(CIntSafe(.Charge, 0))
+                        For intIndex As Integer = 0 To strSplitResult.Length - 1
+                            If intIndex >= udtMergedScanInfo.Length Then
+                                ' There are more entries for FragMethod than there are for Scan#; this is unexpected
+                                Exit For
+                            End If
+                            udtMergedScanInfo(intIndex).FragMethod = strSplitResult(intIndex)
+                        Next
 
-					' Precursor mass error could be in PPM or Da
-					'   In MSGFDB, the header line will have PMError(ppm)        or PMError(Da)
-					'   In MSGF+,  the header line will have PrecursorError(ppm) or PrecursorError(Da)
-					Dim dblPrecursorErrorDa As Double
+                    Else
+                        .ScanNum = CIntSafe(.Scan, 0)
+                        intScanCount = 1
+                    End If
 
-					If intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM) >= 0 Then
-						GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM), .PMErrorPPM)
-					Else
-						GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorDa), .PMErrorDa)
-						dblPrecursorErrorDa = CDblSafe(.PMErrorDa, 0)
-						.PMErrorPPM = String.Empty				' We'll populate this column later in this function
-					End If
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PrecursorMZ), .PrecursorMZ)
 
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Charge), .Charge)
+                    .ChargeNum = CShort(CIntSafe(.Charge, 0))
 
-					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Peptide), .Peptide) Then
-						Throw New EvaluateException("Peptide column is missing or invalid")
-					End If
+                    ' Precursor mass error could be in PPM or Da
+                    '   In MSGFDB, the header line will have PMError(ppm)        or PMError(Da)
+                    '   In MSGF+,  the header line will have PrecursorError(ppm) or PrecursorError(Da)
+                    Dim dblPrecursorErrorDa As Double
 
+                    If intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM) >= 0 Then
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM), .PMErrorPPM)
+                    Else
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorDa), .PMErrorDa)
+                        dblPrecursorErrorDa = CDblSafe(.PMErrorDa, 0)
+                        .PMErrorPPM = String.Empty              ' We'll populate this column later in this function
+                    End If
 
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Protein), .Protein)
 
-					' MSGF+ .tsv files may have a semicolon separated list of protein names; check for this
-					.Protein = SplitProteinList(.Protein, lstProteinInfo)
+                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Peptide), .Peptide) Then
+                        Throw New EvaluateException("Peptide column is missing or invalid")
+                    End If
 
-					If lstProteinInfo.Count > 0 Then
-						' Need to add the prefix and suffix residues
-						.Peptide = AddUpdatePrefixAndSuffixResidues(.Peptide, lstProteinInfo.First)
-					End If
 
-					' Replace any mod text values in the peptide sequence with the appropriate mod symbols
-					' In addition, replace the _ terminus symbols with dashes
-					Dim dblTotalModMass As Double
-					.Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Protein), .Protein)
 
-					' Compute monoisotopic mass of the peptide
-					Dim dblPeptideMonoisotopicMass As Double
-					dblPeptideMonoisotopicMass = ComputePeptideMass(.Peptide, dblTotalModMass)
+                    ' MSGF+ .tsv files may have a semicolon separated list of protein names; check for this
+                    .Protein = SplitProteinList(.Protein, lstProteinInfo)
 
-					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
-					.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
+                    If lstProteinInfo.Count > 0 Then
+                        ' Need to add the prefix and suffix residues
+                        .Peptide = AddUpdatePrefixAndSuffixResidues(.Peptide, lstProteinInfo.First)
+                    End If
 
-					If Not String.IsNullOrEmpty(.PMErrorPPM) Then
+                    ' Replace any mod text values in the peptide sequence with the appropriate mod symbols
+                    ' In addition, replace the _ terminus symbols with dashes
+                    Dim dblTotalModMass As Double
+                    .Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
 
-						' Convert the ppm-based PM Error to Da-based
+                    ' Compute monoisotopic mass of the peptide
+                    Dim dblPeptideMonoisotopicMass As Double
+                    dblPeptideMonoisotopicMass = ComputePeptideMass(.Peptide, dblTotalModMass)
 
-						Dim dblPMErrorPPM As Double
-						Dim dblPrecursorMZ As Double
+                    ' Store the monoisotopic MH value in .MH; note that this is (M+H)+
+                    .MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
 
-						If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
-							' Note that since .PMErrorPPM is present, the Precursor m/z is a C13-corrected m/z value
-							' In other words, it may not be the actual m/z selected for fragmentation.
+                    If Not String.IsNullOrEmpty(.PMErrorPPM) Then
 
-							If Double.TryParse(.PMErrorPPM, dblPMErrorPPM) Then
+                        ' Convert the ppm-based PM Error to Da-based
 
-								If mParentMassToleranceInfo.IsPPM AndAlso
-								  (dblPMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 OrElse dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
+                        Dim dblPMErrorPPM As Double
+                        Dim dblPrecursorMZ As Double
 
-									' PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
+                        If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
+                            ' Note that since .PMErrorPPM is present, the Precursor m/z is a C13-corrected m/z value
+                            ' In other words, it may not be the actual m/z selected for fragmentation.
 
-									mPrecursorMassErrorWarningCount += 1
-									If mPrecursorMassErrorWarningCount <= 10 Then
-										ReportWarning("Precursor mass error computed by MSGF+ is 1.5-fold larger than search tolerance: " & .PMErrorPPM & " vs. " & mParentMassToleranceInfo.ToleranceLeft.ToString("0") & "ppm," & mParentMassToleranceInfo.ToleranceRight.ToString("0") & "ppm")
-										If mPrecursorMassErrorWarningCount = 10 Then
-											ReportWarning("Additional mass errors will not be reported")
-										End If
-									End If
+                            If Double.TryParse(.PMErrorPPM, dblPMErrorPPM) Then
 
+                                If mParentMassToleranceInfo.IsPPM AndAlso
+                                  (dblPMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 OrElse dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
 
-									Dim dblPrecursorMonoMass As Double
-									dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .ChargeNum, 0)
+                                    ' PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
 
-									dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
+                                    mPrecursorMassErrorWarningCount += 1
+                                    If mPrecursorMassErrorWarningCount <= 10 Then
+                                        ReportWarning("Precursor mass error computed by MSGF+ is 1.5-fold larger than search tolerance: " & .PMErrorPPM & " vs. " & mParentMassToleranceInfo.ToleranceLeft.ToString("0") & "ppm," & mParentMassToleranceInfo.ToleranceRight.ToString("0") & "ppm")
+                                        If mPrecursorMassErrorWarningCount = 10 Then
+                                            ReportWarning("Additional mass errors will not be reported")
+                                        End If
+                                    End If
 
-									.PMErrorPPM = String.Empty
 
-								Else
+                                    Dim dblPrecursorMonoMass As Double
+                                    dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .ChargeNum, 0)
 
-									dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
+                                    dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
 
-									' Note that this will be a C13-corrected precursor error; not the true precursor error
-									.PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
-								End If
+                                    .PMErrorPPM = String.Empty
 
-							End If
-						End If
-					End If
+                                Else
 
-					If String.IsNullOrEmpty(.PMErrorPPM) Then
+                                    dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
 
-						Dim dblPrecursorMZ As Double
-						If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
-							Dim dblPeptideDeltaMassCorrectedPpm As Double
+                                    ' Note that this will be a C13-corrected precursor error; not the true precursor error
+                                    .PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
+                                End If
 
-							dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMZ, _
-							 .ChargeNum, dblPeptideMonoisotopicMass, True)
+                            End If
+                        End If
+                    End If
 
-							.PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 5, True)
+                    If String.IsNullOrEmpty(.PMErrorPPM) Then
 
-							If String.IsNullOrEmpty(.PMErrorDa) Then
-								dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPeptideDeltaMassCorrectedPpm, dblPeptideMonoisotopicMass)
+                        Dim dblPrecursorMZ As Double
+                        If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
+                            Dim dblPeptideDeltaMassCorrectedPpm As Double
 
-								' Note that this will be a C13-corrected precursor error; not the true precursor error
-								.PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
-							End If
+                            dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMZ, _
+                             .ChargeNum, dblPeptideMonoisotopicMass, True)
 
-						End If
+                            .PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 5, True)
 
-					End If
+                            If String.IsNullOrEmpty(.PMErrorDa) Then
+                                dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPeptideDeltaMassCorrectedPpm, dblPeptideMonoisotopicMass)
 
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.DeNovoScore), .DeNovoScore)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.MSGFScore), .MSGFScore)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecProb_EValue), .SpecProb)
-					If Not Double.TryParse(.SpecProb, .SpecProbNum) Then .SpecProbNum = 0
+                                ' Note that this will be a C13-corrected precursor error; not the true precursor error
+                                .PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
+                            End If
 
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue_EValue), .PValue)
-					If Not Double.TryParse(.PValue, .PValueNum) Then .PValueNum = 0
+                        End If
 
-					blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue), .FDR)
-					If blnTargetDecoyFDRValid Then
-						GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue), .PepFDR)
-					Else
-						GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.EFDR), .FDR)
-					End If
+                    End If
 
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IsotopeError), .IsotopeError)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.DeNovoScore), .DeNovoScore)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.MSGFScore), .MSGFScore)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecProb_EValue), .SpecProb)
+                    If Not Double.TryParse(.SpecProb, .SpecProbNum) Then .SpecProbNum = 0
 
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IMSScan), .IMSScan)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IMSDriftTime), .IMSDriftTime)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue_EValue), .PValue)
+                    If Not Double.TryParse(.PValue, .PValueNum) Then .PValueNum = 0
 
-					.NTT = ComputeCleaveageState(.Peptide).ToString()
-				End With
+                    blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue), .FDR)
+                    If blnTargetDecoyFDRValid Then
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue), .PepFDR)
+                    Else
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.EFDR), .FDR)
+                    End If
 
-				Dim udtScanGroupInfo As udtScanGroupInfoType
-				Dim intCurrentScanGroupID As Integer = -1
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IsotopeError), .IsotopeError)
 
-				udtScanGroupInfo.Charge = udtSearchResult.ChargeNum
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IMSScan), .IMSScan)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IMSDriftTime), .IMSDriftTime)
 
-				If intScanCount > 1 Then
-					' Append one entry to lstSearchResults for each item in udtMergedScanInfo()
+                    .NTT = ComputeCleaveageState(.Peptide).ToString()
+                End With
 
-					For intIndex As Integer = 0 To intScanCount - 1
-						udtSearchResult.Scan = udtMergedScanInfo(intIndex).Scan
-						udtSearchResult.ScanNum = udtMergedScanInfo(intIndex).ScanNum
+                Dim udtScanGroupInfo As udtScanGroupInfoType
+                Dim intCurrentScanGroupID As Integer = -1
 
-						udtSearchResult.SpecIndex = udtMergedScanInfo(intIndex).SpecIndex
-						udtSearchResult.FragMethod = udtMergedScanInfo(intIndex).FragMethod
+                udtScanGroupInfo.Charge = udtSearchResult.ChargeNum
 
-						AppendToSearchResults(lstSearchResults, udtSearchResult, lstProteinInfo)
+                If intScanCount > 1 Then
+                    ' Append one entry to lstSearchResults for each item in udtMergedScanInfo()
 
-						' Append an entry to lstScanGroupDetails
-						udtScanGroupInfo.Scan = udtSearchResult.ScanNum
-						AppendToScanGroupDetails(lstScanGroupDetails, htScanGroupCombo, udtScanGroupInfo, intCurrentScanGroupID, intNextScanGroupID)
-					Next
-				Else
-					' This is not a merged result; simply append udtSearchResult to lstSearchResults
-					AppendToSearchResults(lstSearchResults, udtSearchResult, lstProteinInfo)
+                    For intIndex As Integer = 0 To intScanCount - 1
+                        udtSearchResult.Scan = udtMergedScanInfo(intIndex).Scan
+                        udtSearchResult.ScanNum = udtMergedScanInfo(intIndex).ScanNum
 
-					' Also append an entry to lstScanGroupDetails
-					udtScanGroupInfo.Scan = udtSearchResult.ScanNum
-					AppendToScanGroupDetails(lstScanGroupDetails, htScanGroupCombo, udtScanGroupInfo, intCurrentScanGroupID, intNextScanGroupID)
+                        udtSearchResult.SpecIndex = udtMergedScanInfo(intIndex).SpecIndex
+                        udtSearchResult.FragMethod = udtMergedScanInfo(intIndex).FragMethod
 
-				End If
+                        AppendToSearchResults(lstSearchResultsCurrentScan, udtSearchResult, lstProteinInfo)
 
-				blnValidSearchResult = True
-			End If
+                        ' Append an entry to lstScanGroupDetails
+                        udtScanGroupInfo.Scan = udtSearchResult.ScanNum
+                        AppendToScanGroupDetails(lstScanGroupDetails, htScanGroupCombo, udtScanGroupInfo, intCurrentScanGroupID, intNextScanGroupID)
+                    Next
+                Else
+                    ' This is not a merged result; simply append udtSearchResult to lstSearchResults
+                    AppendToSearchResults(lstSearchResultsCurrentScan, udtSearchResult, lstProteinInfo)
 
-		Catch ex As Exception
-			' Error parsing this row from the MSGF-DB results file
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
-					strErrorLog &= "Error parsing MSGF-DB Results in ParseMSGFDBResultsFileEntry for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
-				Else
-					strErrorLog &= "Error parsing MSGF-DB Results in ParseMSGFDBResultsFileEntry" & ControlChars.NewLine
-				End If
-			End If
-			blnValidSearchResult = False
-		End Try
+                    ' Also append an entry to lstScanGroupDetails
+                    udtScanGroupInfo.Scan = udtSearchResult.ScanNum
+                    AppendToScanGroupDetails(lstScanGroupDetails, htScanGroupCombo, udtScanGroupInfo, intCurrentScanGroupID, intNextScanGroupID)
 
-		Return blnValidSearchResult
+                End If
 
-	End Function
+                blnValidSearchResult = True
+            End If
+
+        Catch ex As Exception
+            ' Error parsing this row from the MSGF-DB results file
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+                    strErrorLog &= "Error parsing MSGF-DB Results in ParseMSGFDBResultsFileEntry for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+                Else
+                    strErrorLog &= "Error parsing MSGF-DB Results in ParseMSGFDBResultsFileEntry" & ControlChars.NewLine
+                End If
+            End If
+            blnValidSearchResult = False
+        End Try
+
+        Return blnValidSearchResult
+
+    End Function
 
 	Private Function ParseMSGFDBResultsFileHeaderLine(ByVal strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
 
@@ -2218,310 +2211,331 @@ Public Class clsMSGFDBResultsProcessor
 					' Now parse the _syn.txt file that we just created to next create the other PHRP files
 					blnSuccess = ParseMSGFDBSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
 
-					If blnSuccess AndAlso mCreateProteinModsFile Then
-						If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) OrElse Not File.Exists(strMTSPepToProteinMapFilePath) Then
-							' MTSPepToProteinMap file not found; auto-create it
-
-							If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) Then
-								strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strBaseName, strOutputFolderPath, MTS:=True)
-							End If
-
-							Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
-
-							If Not String.IsNullOrEmpty(strFhtOutputFilePath) Then
-								lstSourcePHRPDataFiles.Add(strFhtOutputFilePath)
-							End If
-
-							If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
-								lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
-							End If
-
-							If lstSourcePHRPDataFiles.Count = 0 Then
-								SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
-								SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-								blnSuccess = False
-							Else
-								If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
-									blnSuccess = True
-								Else
-									' Auto-change mIgnorePeptideToProteinMapperErrors to True
-									' We only do this for MSGFDB since it often includes reverse protein peptides in the results even though the FASTA file often does not have reverse proteins
-									mIgnorePeptideToProteinMapperErrors = True
-									blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
-									If Not blnSuccess Then
-										ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
-									End If
-								End If
-							End If
-
-						End If
-
-						If blnSuccess Then
-							' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-							MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
-
-							' Create the Protein Mods file
-							blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB)
-						End If
-
-						If Not blnSuccess Then
-							' Do not treat this as a fatal error
-							blnSuccess = True
-						End If
-					End If
-
-				End If
-
-				If blnSuccess Then
-					MyBase.OperationComplete()
-				End If
-
-			Catch ex As Exception
-				SetErrorMessage("Error in clsMSGFDBResultsProcessor.ProcessFile (2):  " & ex.Message)
-				SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
-			End Try
-
-		Catch ex As Exception
-			SetErrorMessage("Error in clsMSGFDBResultsProcessor.ProcessFile (1):" & ex.Message)
-			SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
-		End Try
-
-		Return blnSuccess
-
-	End Function
-
-	''' <summary>
-	''' Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
-	''' </summary>
-	''' <param name="strPeptide"></param>
-	''' <param name="lstMSGFDBModInfo">This function assumes that each entry in lstMSGFDBModInfo has both .ModName and .ModSymbol defined</param>
-	''' <param name="blnMSGFPlus">Should be set to True if processing MSGF+ results</param>
-	''' <param name="dblTotalModMass">Output parameter: total mass of all modifications</param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Function ReplaceMSGFModTextWithSymbol(ByVal strPeptide As String, _
-	   ByRef lstMSGFDBModInfo As List(Of udtModInfoType), _
-	   ByVal blnMSGFPlus As Boolean, _
-	   ByRef dblTotalModMass As Double) As String
-
-		Dim intIndex As Integer
-		Dim intIndexFirstResidue As Integer
-		Dim intIndexLastResidue As Integer
-
-		Dim strPrefix As String = String.Empty
-		Dim strSuffix As String = String.Empty
-
-		Dim strModSymbols As String = String.Empty
-
-		Dim blnNterminalMod As Boolean
-		Dim blnPossibleCTerminalMod As Boolean
-		Dim blnIsStaticMod As Boolean
-
-		Static reNTerminalModMassRegEx As New Regex(MSGFDB_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
-		Static reModMassRegEx As New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
+                    ' Remove all items from lstPepToProteinMapping to reduce memory overhead
+                    lstPepToProteinMapping.Clear()
+                    lstPepToProteinMapping.TrimExcess()
+
+                    If blnSuccess AndAlso mCreateProteinModsFile Then
+                        blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strFhtOutputFilePath, strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath)
+                    End If
+
+                End If
+
+                If blnSuccess Then
+                    MyBase.OperationComplete()
+                End If
+
+            Catch ex As Exception
+                SetErrorMessage("Error in clsMSGFDBResultsProcessor.ProcessFile (2):  " & ex.Message)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
+            End Try
+
+        Catch ex As Exception
+            SetErrorMessage("Error in clsMSGFDBResultsProcessor.ProcessFile (1):" & ex.Message)
+            SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
+        End Try
+
+        Return blnSuccess
+
+    End Function
+
+    Private Function CreateProteinModsFileWork(
+       strBaseName As String,
+       fiInputFile As FileInfo,
+       strFhtOutputFilePath As String,
+       strSynOutputFilePath As String,
+       strOutputFolderPath As String,
+       strMTSPepToProteinMapFilePath As String
+       ) As Boolean
+
+        Dim blnSuccess = True
+
+        If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) OrElse Not File.Exists(strMTSPepToProteinMapFilePath) Then
+            ' MTSPepToProteinMap file not found; auto-create it
+
+            If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) Then
+                strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strBaseName, strOutputFolderPath, MTS:=True)
+            End If
+
+            Dim lstSourcePHRPDataFiles = New List(Of String)
+
+            If Not String.IsNullOrEmpty(strFhtOutputFilePath) Then
+                lstSourcePHRPDataFiles.Add(strFhtOutputFilePath)
+            End If
+
+            If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
+                lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
+            End If
+
+            If lstSourcePHRPDataFiles.Count = 0 Then
+                SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
+                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+                blnSuccess = False
+            Else
+                If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+                    blnSuccess = True
+                Else
+                    ' Auto-change mIgnorePeptideToProteinMapperErrors to True
+                    ' We only do this for MSGFDB since it often includes reverse protein peptides in the results even though the FASTA file often does not have reverse proteins
+                    mIgnorePeptideToProteinMapperErrors = True
+                    blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+                    If Not blnSuccess Then
+                        ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+                    End If
+                End If
+            End If
+
+        End If
+
+        If blnSuccess Then
+            ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+            MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+
+            ' Create the Protein Mods file
+            blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB)
+        End If
+
+        If Not blnSuccess Then
+            ' Do not treat this as a fatal error
+            blnSuccess = True
+        End If
+
+        Return blnSuccess
+
+    End Function
+
+    ''' <summary>
+    ''' Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
+    ''' </summary>
+    ''' <param name="strPeptide"></param>
+    ''' <param name="lstMSGFDBModInfo">This function assumes that each entry in lstMSGFDBModInfo has both .ModName and .ModSymbol defined</param>
+    ''' <param name="blnMSGFPlus">Should be set to True if processing MSGF+ results</param>
+    ''' <param name="dblTotalModMass">Output parameter: total mass of all modifications</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function ReplaceMSGFModTextWithSymbol(ByVal strPeptide As String, _
+       ByVal lstMSGFDBModInfo As List(Of udtModInfoType), _
+       ByVal blnMSGFPlus As Boolean, _
+       ByRef dblTotalModMass As Double) As String
 
-		Dim reMatch As Match
+        Dim intIndex As Integer
+        Dim intIndexFirstResidue As Integer
+        Dim intIndexLastResidue As Integer
 
-		Dim dblModMassFound As Double
+        Dim strPrefix As String = String.Empty
+        Dim strSuffix As String = String.Empty
 
-		' Reset the total mod mass
-		dblTotalModMass = 0
+        Dim strModSymbols As String = String.Empty
 
-		' Remove the prefix and suffix residues
-		If strPeptide.Length >= 4 Then
-			If strPeptide.Chars(1) = "."c AndAlso _
-			   strPeptide.Chars(strPeptide.Length - 2) = "."c Then
-				strPrefix = strPeptide.Substring(0, 2)
-				strSuffix = strPeptide.Substring(strPeptide.Length - 2, 2)
+        Dim blnNterminalMod As Boolean
+        Dim blnPossibleCTerminalMod As Boolean
+        Dim blnIsStaticMod As Boolean
 
-				strPeptide = strPeptide.Substring(2, strPeptide.Length - 4)
-			End If
-		End If
+        Static reNTerminalModMassRegEx As New Regex(MSGFDB_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
+        Static reModMassRegEx As New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
-		' strPeptide should now be the primary peptide sequence, without the prefix or suffix residues
+        Dim reMatch As Match
 
-		' First look for dynamic N-terminal mods (NTermPeptide or NTermProtein)
-		' This RegEx will match one or more mods, all at the N-terminus
-		reMatch = reNTerminalModMassRegEx.Match(strPeptide)
-		If reMatch IsNot Nothing AndAlso reMatch.Success Then
+        Dim dblModMassFound As Double
 
-			blnNterminalMod = True
-			blnPossibleCTerminalMod = False
-			blnIsStaticMod = False
+        ' Reset the total mod mass
+        dblTotalModMass = 0
 
-			' Convert the mod mass (or masses) to one or more mod symbols
-			If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, lstMSGFDBModInfo, blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
+        ' Remove the prefix and suffix residues
+        If strPeptide.Length >= 4 Then
+            If strPeptide.Chars(1) = "."c AndAlso _
+               strPeptide.Chars(strPeptide.Length - 2) = "."c Then
+                strPrefix = strPeptide.Substring(0, 2)
+                strSuffix = strPeptide.Substring(strPeptide.Length - 2, 2)
 
-				' Replace the mod digits with the mod symbols
+                strPeptide = strPeptide.Substring(2, strPeptide.Length - 4)
+            End If
+        End If
 
-				strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, blnMSGFPlus, blnIsStaticMod)
-				dblTotalModMass += dblModMassFound
+        ' strPeptide should now be the primary peptide sequence, without the prefix or suffix residues
 
-			End If
-		End If
+        ' First look for dynamic N-terminal mods (NTermPeptide or NTermProtein)
+        ' This RegEx will match one or more mods, all at the N-terminus
+        reMatch = reNTerminalModMassRegEx.Match(strPeptide)
+        If reMatch IsNot Nothing AndAlso reMatch.Success Then
 
-		' Next, step through the peptide and parse each mod mass that follows a residue
-		' Any mod mass at the end must be considered a C-terminal mod 
+            blnNterminalMod = True
+            blnPossibleCTerminalMod = False
+            blnIsStaticMod = False
 
-		' Need to start at the first letter
-		' If we had N-terminal mods, they're currently notated like this: _.+42.011MDHTPQSQLK.L or _.+42.011+57.021MNDR.Q
-		' We want things to look like this: -.#MDHTPQSQLK.L or -.#*MNDRQLNHR.S
+            ' Convert the mod mass (or masses) to one or more mod symbols
+            If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, lstMSGFDBModInfo, blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
 
-		' In MSGFDB, static mods do not have a mod mass listed
-		' In MSGF+,  static mods do have a mod mass listed
-		' Regardless, we do not add mod symbols for static mods, but we do increment dblTotalModMass
+                ' Replace the mod digits with the mod symbols
 
-		' Find the index of the last residue
-		intIndex = strPeptide.Length - 1
-		Do While intIndex > 0 AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndex))
-			intIndex -= 1
-		Loop
-		intIndexLastResidue = intIndex
+                strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, blnMSGFPlus, blnIsStaticMod)
+                dblTotalModMass += dblModMassFound
 
-		' Find the index of the first residue
-		intIndex = 0
-		Do While intIndex < strPeptide.Length AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndex))
-			intIndex += 1
-		Loop
-		intIndexFirstResidue = intIndex
+            End If
+        End If
 
-		Do While intIndex < strPeptide.Length
+        ' Next, step through the peptide and parse each mod mass that follows a residue
+        ' Any mod mass at the end must be considered a C-terminal mod 
 
-			If IsLetterAtoZ(strPeptide.Chars(intIndex)) Then
+        ' Need to start at the first letter
+        ' If we had N-terminal mods, they're currently notated like this: _.+42.011MDHTPQSQLK.L or _.+42.011+57.021MNDR.Q
+        ' We want things to look like this: -.#MDHTPQSQLK.L or -.#*MNDRQLNHR.S
 
-				Dim objModificationDefinition As clsModificationDefinition
+        ' In MSGFDB, static mods do not have a mod mass listed
+        ' In MSGF+,  static mods do have a mod mass listed
+        ' Regardless, we do not add mod symbols for static mods, but we do increment dblTotalModMass
 
-				If Not blnMSGFPlus Then
+        ' Find the index of the last residue
+        intIndex = strPeptide.Length - 1
+        Do While intIndex > 0 AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndex))
+            intIndex -= 1
+        Loop
+        intIndexLastResidue = intIndex
 
-					' Look for static mods that should be applied to this residue (only applies to MSGFDB, not MSGF+)
-					For intModIndex As Integer = 0 To mPeptideMods.ModificationCount - 1
-						Dim eModificationType As clsModificationDefinition.eModificationTypeConstants
-						eModificationType = mPeptideMods.GetModificationTypeByIndex(intModIndex)
+        ' Find the index of the first residue
+        intIndex = 0
+        Do While intIndex < strPeptide.Length AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndex))
+            intIndex += 1
+        Loop
+        intIndexFirstResidue = intIndex
 
-						If eModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
-							objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+        Do While intIndex < strPeptide.Length
 
-							If objModificationDefinition.TargetResiduesContain(strPeptide.Chars(intIndex)) Then
-								' Match found; update dblTotalModMass but do not add a static mod symbol
-								dblTotalModMass += objModificationDefinition.ModificationMass
-							End If
+            If IsLetterAtoZ(strPeptide.Chars(intIndex)) Then
 
-						ElseIf intIndex = intIndexFirstResidue Then
-							If eModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod AndAlso strPrefix = "_" Then
-								' N-terminal protein static mod
-								objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
-								dblTotalModMass += objModificationDefinition.ModificationMass
-							ElseIf eModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod Then
-								' N-terminal peptide static mod
-								objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
-								dblTotalModMass += objModificationDefinition.ModificationMass
-							End If
-						End If
-					Next intModIndex
+                Dim objModificationDefinition As clsModificationDefinition
 
-				End If
+                If Not blnMSGFPlus Then
 
-				intIndex += 1
+                    ' Look for static mods that should be applied to this residue (only applies to MSGFDB, not MSGF+)
+                    For intModIndex As Integer = 0 To mPeptideMods.ModificationCount - 1
+                        Dim eModificationType As clsModificationDefinition.eModificationTypeConstants
+                        eModificationType = mPeptideMods.GetModificationTypeByIndex(intModIndex)
 
-				If intIndex = intIndexLastResidue Then blnPossibleCTerminalMod = True
+                        If eModificationType = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+                            objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
 
-			Else
-				' Found a mod; find the extent of the mod digits
-				reMatch = reModMassRegEx.Match(strPeptide, intIndex)
+                            If objModificationDefinition.TargetResiduesContain(strPeptide.Chars(intIndex)) Then
+                                ' Match found; update dblTotalModMass but do not add a static mod symbol
+                                dblTotalModMass += objModificationDefinition.ModificationMass
+                            End If
 
-				' Note that blnPossibleCTerminalMod will be set to True once we hit the last residue
-				' Assure blnNterminalMod is false
-				blnNterminalMod = False
+                        ElseIf intIndex = intIndexFirstResidue Then
+                            If eModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod AndAlso strPrefix = "_" Then
+                                ' N-terminal protein static mod
+                                objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+                                dblTotalModMass += objModificationDefinition.ModificationMass
+                            ElseIf eModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod Then
+                                ' N-terminal peptide static mod
+                                objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+                                dblTotalModMass += objModificationDefinition.ModificationMass
+                            End If
+                        End If
+                    Next intModIndex
 
-				' Convert the mod mass (or masses) to one or more mod symbols
-				If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, lstMSGFDBModInfo, _
-				  blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
+                End If
 
-					strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, blnMSGFPlus, blnIsStaticMod)
-					dblTotalModMass += dblModMassFound
+                intIndex += 1
 
-					If blnMSGFPlus AndAlso blnIsStaticMod Then
-						' MSGF+ shows mod masses for static mods
-						' Thus, we have removed the static mod mass and did not add a mod symbol
-						' Therefore, leave intIndex unchanged
-					Else
-						intIndex += strModSymbols.Length
-					End If
+                If intIndex = intIndexLastResidue Then blnPossibleCTerminalMod = True
 
-				Else
-					intIndex += reMatch.Groups(1).Value.Length
-				End If
+            Else
+                ' Found a mod; find the extent of the mod digits
+                reMatch = reModMassRegEx.Match(strPeptide, intIndex)
 
-			End If
+                ' Note that blnPossibleCTerminalMod will be set to True once we hit the last residue
+                ' Assure blnNterminalMod is false
+                blnNterminalMod = False
 
-		Loop
+                ' Convert the mod mass (or masses) to one or more mod symbols
+                If ConvertMGSFModMassesToSymbols(reMatch.Groups(1).Value, strModSymbols, lstMSGFDBModInfo, _
+                  blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
 
-		' If any N-terminal mods were present, we need to move them to after the first residue
-		' in other words, switch from #MDHTPQSQLK to M#DHTPQSQLK
-		'                          or #*MNDRQLNHR to M#*NDRQLNHR
+                    strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, blnMSGFPlus, blnIsStaticMod)
+                    dblTotalModMass += dblModMassFound
 
-		' Update intIndexFirstResidue
-		intIndexFirstResidue = 0
-		Do While intIndexFirstResidue < strPeptide.Length AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndexFirstResidue))
-			intIndexFirstResidue += 1
-		Loop
+                    If blnMSGFPlus AndAlso blnIsStaticMod Then
+                        ' MSGF+ shows mod masses for static mods
+                        ' Thus, we have removed the static mod mass and did not add a mod symbol
+                        ' Therefore, leave intIndex unchanged
+                    Else
+                        intIndex += strModSymbols.Length
+                    End If
 
-		If intIndexFirstResidue > 0 AndAlso intIndexFirstResidue < strPeptide.Length Then
-			Dim strPeptideNew As String
-			strPeptideNew = strPeptide.Chars(intIndexFirstResidue) & strPeptide.Substring(0, intIndexFirstResidue)
-			If intIndexFirstResidue < strPeptide.Length - 1 Then
-				strPeptideNew &= strPeptide.Substring(intIndexFirstResidue + 1)
-			End If
-			strPeptide = String.Copy(strPeptideNew)
-		End If
+                Else
+                    intIndex += reMatch.Groups(1).Value.Length
+                End If
 
-		Return strPrefix & strPeptide & strSuffix
+            End If
 
-	End Function
+        Loop
 
+        ' If any N-terminal mods were present, we need to move them to after the first residue
+        ' in other words, switch from #MDHTPQSQLK to M#DHTPQSQLK
+        '                          or #*MNDRQLNHR to M#*NDRQLNHR
 
-	Protected Function ReplaceMSGFModTextWithMatchedSymbol(ByVal strPeptide As String, _
-	 ByRef reGroup As Group, _
-	 ByVal strModSymbols As String, _
-	 ByVal blnMSGFPlus As Boolean, _
-	 ByVal blnIsStaticMod As Boolean) As String
+        ' Update intIndexFirstResidue
+        intIndexFirstResidue = 0
+        Do While intIndexFirstResidue < strPeptide.Length AndAlso Not IsLetterAtoZ(strPeptide.Chars(intIndexFirstResidue))
+            intIndexFirstResidue += 1
+        Loop
 
-		Dim strPeptideNew As String
+        If intIndexFirstResidue > 0 AndAlso intIndexFirstResidue < strPeptide.Length Then
+            Dim strPeptideNew As String
+            strPeptideNew = strPeptide.Chars(intIndexFirstResidue) & strPeptide.Substring(0, intIndexFirstResidue)
+            If intIndexFirstResidue < strPeptide.Length - 1 Then
+                strPeptideNew &= strPeptide.Substring(intIndexFirstResidue + 1)
+            End If
+            strPeptide = String.Copy(strPeptideNew)
+        End If
 
-		If reGroup.Index > 0 Then
-			strPeptideNew = strPeptide.Substring(0, reGroup.Index)
-		Else
-			strPeptideNew = String.Empty
-		End If
+        Return strPrefix & strPeptide & strSuffix
 
-		If blnMSGFPlus AndAlso blnIsStaticMod Then
-			' MSGF+ shows mod masses for static mods
-			' However, for consistency with other PHRP results, we do not add a symbol to the peptide for this static mod
-		Else
-			strPeptideNew &= strModSymbols
-		End If
+    End Function
 
-		If reGroup.Index + reGroup.Length < strPeptide.Length Then
-			strPeptideNew &= strPeptide.Substring(reGroup.Index + reGroup.Length)
-		End If
 
-		Return strPeptideNew
+    Protected Function ReplaceMSGFModTextWithMatchedSymbol(ByVal strPeptide As String, _
+     ByRef reGroup As Group, _
+     ByVal strModSymbols As String, _
+     ByVal blnMSGFPlus As Boolean, _
+     ByVal blnIsStaticMod As Boolean) As String
 
-	End Function
+        Dim strPeptideNew As String
 
-	Protected Function ReplaceTerminus(ByVal strPeptide As String) As String
+        If reGroup.Index > 0 Then
+            strPeptideNew = strPeptide.Substring(0, reGroup.Index)
+        Else
+            strPeptideNew = String.Empty
+        End If
 
-		If strPeptide.StartsWith(N_TERMINUS_SYMBOL_MSGFDB) Then
-			strPeptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST & "." & strPeptide.Substring(N_TERMINUS_SYMBOL_MSGFDB.Length)
-		End If
+        If blnMSGFPlus AndAlso blnIsStaticMod Then
+            ' MSGF+ shows mod masses for static mods
+            ' However, for consistency with other PHRP results, we do not add a symbol to the peptide for this static mod
+        Else
+            strPeptideNew &= strModSymbols
+        End If
 
-		If strPeptide.EndsWith(C_TERMINUS_SYMBOL_MSGFDB) Then
-			strPeptide = strPeptide.Substring(0, strPeptide.Length - C_TERMINUS_SYMBOL_MSGFDB.Length) & "." & clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST
-		End If
+        If reGroup.Index + reGroup.Length < strPeptide.Length Then
+            strPeptideNew &= strPeptide.Substring(reGroup.Index + reGroup.Length)
+        End If
 
-		Return strPeptide
+        Return strPeptideNew
 
-	End Function
+    End Function
+
+    Protected Function ReplaceTerminus(ByVal strPeptide As String) As String
+
+        If strPeptide.StartsWith(N_TERMINUS_SYMBOL_MSGFDB) Then
+            strPeptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST & "." & strPeptide.Substring(N_TERMINUS_SYMBOL_MSGFDB.Length)
+        End If
+
+        If strPeptide.EndsWith(C_TERMINUS_SYMBOL_MSGFDB) Then
+            strPeptide = strPeptide.Substring(0, strPeptide.Length - C_TERMINUS_SYMBOL_MSGFDB.Length) & "." & clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST
+        End If
+
+        Return strPeptide
+
+    End Function
 
     Protected Sub ResolveMSGFDBModsWithModDefinitions(ByVal lstMSGFDBModInfo As List(Of udtModInfoType))
 
@@ -2616,453 +2630,436 @@ Public Class clsMSGFDBResultsProcessor
 
     End Sub
 
-	''' <summary>
-	''' Examines strProteinList to look for a semi-colon separated list of proteins and terminus symbols, for example
-	''' AT1G26570.1(pre=K,post=N);AT3G29360.1(pre=K,post=N);AT3G29360.2(pre=K,post=N)
-	''' </summary>
-	''' <param name="strProteinList">Protein list to examine</param>
-	''' <param name="lstProteinInfo">Protein information, if it is of the form ProteinName(pre=X,post=Y)</param>
-	''' <returns>The name of the first protein</returns>
-	''' <remarks></remarks>
-	Protected Function SplitProteinList(ByVal strProteinList As String, ByRef lstProteinInfo As Dictionary(Of String, udtTerminusCharsType)) As String
-
-		Static reProteinInfo As New Regex(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS)
-
-		Dim reMatches As MatchCollection
-
-		If lstProteinInfo Is Nothing Then
-			lstProteinInfo = New Dictionary(Of String, udtTerminusCharsType)
-		Else
-			lstProteinInfo.Clear()
-		End If
-
-		reMatches = reProteinInfo.Matches(strProteinList)
-
-		If reMatches.Count = 0 Then
-			' No match; likely just one protein
-			Return TruncateProteinName(strProteinList)
-		Else
-			For Each reMatch As Match In reMatches
-				Dim strProteinName As String
-				Dim udtTerminusChars As udtTerminusCharsType
-
-				strProteinName = TruncateProteinName(reMatch.Groups(1).Value)
-				udtTerminusChars.NTerm = reMatch.Groups(2).Value.Chars(0)
-				udtTerminusChars.CTerm = reMatch.Groups(3).Value.Chars(0)
-
-				If lstProteinInfo.ContainsKey(strProteinName) Then
-					' Skip this protein since it's already present
-				Else
-					lstProteinInfo.Add(strProteinName, udtTerminusChars)
-				End If
-
-			Next
-
-			Return lstProteinInfo.First.Key
-		End If
-
-
-	End Function
-
-	Protected Sub StoreSearchResult(ByRef udtSearchResult As udtMSGFDBSearchResultType, _
-	  ByRef intFilteredSearchResultCount As Integer, _
-	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType)
-
-		If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
-			ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
-		End If
-
-		udtFilteredSearchResults(intFilteredSearchResultCount) = udtSearchResult
-		intFilteredSearchResultCount += 1
-
-	End Sub
-
-	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter, _
-	 ByVal intFilteredSearchResultCount As Integer, _
-	 ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType, _
-	 ByRef strErrorLog As String, _
-	 ByVal blnIncludeFDRandPepFDR As Boolean, _
-	 ByVal blnIncludeEFDR As Boolean, _
-	 ByVal blnIncludeIMSFields As Boolean, _
-	 ByVal blnMSGFPlus As Boolean)
-
-		Dim intIndex As Integer
-
-		' Sort udtFilteredSearchResults by ascending SpecProb, ascending scan, ascending charge, ascending peptide, and ascending protein
-		Array.Sort(udtFilteredSearchResults, 0, intFilteredSearchResultCount, New MSGFDBSearchResultsComparerSpecProbScanChargePeptide)
-
-		For intIndex = 0 To intFilteredSearchResultCount - 1
-			WriteSearchResultToFile(intIndex + 1, swResultFile, udtFilteredSearchResults(intIndex), strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
-		Next intIndex
-
-	End Sub
-
-	Private Sub StoreScanGroupInfo(ByVal strScanGroupFilePath As String, ByRef lstScanGroupDetails As List(Of udtScanGroupInfoType))
-
-		Dim intScanGroupIDPrevious As Integer
-		Dim blnCreateFile As Boolean
-
-		Try
-
-			' Only create the ScanGroup file if one or more scan groups exist
-			' Step through lstScanGroupDetails to check for this
-			intScanGroupIDPrevious = -1
-			blnCreateFile = False
-			For Each udtScanGroupInfo As udtScanGroupInfoType In lstScanGroupDetails
-				If udtScanGroupInfo.ScanGroupID = intScanGroupIDPrevious Then
-					blnCreateFile = True
-					Exit For
-				End If
-				intScanGroupIDPrevious = udtScanGroupInfo.ScanGroupID
-			Next
-
-			If blnCreateFile Then
-				Using swScanGroupFile As StreamWriter = New StreamWriter(New FileStream(strScanGroupFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
-
-					swScanGroupFile.WriteLine("Scan_Group_ID" & ControlChars.Tab & "Charge" & ControlChars.Tab & "Scan")
-
-					For Each udtScanGroupInfo As udtScanGroupInfoType In lstScanGroupDetails
-						With udtScanGroupInfo
-							swScanGroupFile.WriteLine(.ScanGroupID & ControlChars.Tab & .Charge & ControlChars.Tab & .Scan)
-						End With
-					Next
-
-				End Using
-			End If
-
-		Catch ex As Exception
-			SetErrorMessage("Error creating ScanGroupInfo file: " & ex.Message)
-		End Try
-
-	End Sub
-
-	''' <summary>
-	''' Stores the first hits file matches for a single scan
-	''' </summary>
-	''' <param name="udtSearchResults">Search results</param>
-	''' <param name="intStartIndex">Start index for data in this scan</param>
-	''' <param name="intEndIndex">End index for data in this scan</param>
-	''' <param name="intFilteredSearchResultCount">Output parameter: number of results passing the filter</param>
-	''' <param name="udtFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
-	''' <remarks></remarks>
-	Private Sub StoreTopFHTMatch(
-	  ByRef udtSearchResults() As udtMSGFDBSearchResultType,
-	  ByVal intStartIndex As Integer,
-	  ByVal intEndIndex As Integer,
-	  ByRef intFilteredSearchResultCount As Integer,
-	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType)
-
-		Dim intIndex As Integer
-		Dim intCurrentCharge As Short = Short.MinValue
-
-		AssignRankAndDeltaNormValues(udtSearchResults, intStartIndex, intEndIndex)
-
-		' The calling procedure should have already sorted by scan, charge, and SpecProb; no need to re-sort
-
-		' Now store or write out the first match for each charge for this scan
-		For intIndex = intStartIndex To intEndIndex
-			If intIndex = intStartIndex OrElse intCurrentCharge <> udtSearchResults(intIndex).ChargeNum Then
-				StoreSearchResult(udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults)
-				intCurrentCharge = udtSearchResults(intIndex).ChargeNum
-			End If
-		Next intIndex
-
-	End Sub
-
-	''' <summary>
-	''' Stores the synopsis file matches for a single scan
-	''' </summary>
-	''' <param name="udtSearchResults">Search results</param>
-	''' <param name="intStartIndex">Start index for data in this scan</param>
-	''' <param name="intEndIndex">End index for data in this scan</param>
-	''' <param name="intFilteredSearchResultCount">Output parameter: number of results passing the filter</param>
-	''' <param name="udtFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
-	''' <remarks></remarks>
-	Private Sub StoreSynMatches(
-	  ByRef udtSearchResults() As udtMSGFDBSearchResultType,
-	  ByVal intStartIndex As Integer,
-	  ByVal intEndIndex As Integer,
-	  ByRef intFilteredSearchResultCount As Integer,
-	  ByRef udtFilteredSearchResults() As udtMSGFDBSearchResultType)
-
-		Dim intIndex As Integer
-
-		AssignRankAndDeltaNormValues(udtSearchResults, intStartIndex, intEndIndex)
-
-		' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
-
-		' Now store or write out the matches that pass the filters
-		' By default, filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_PVALUE_THRESHOLD
-		For intIndex = intStartIndex To intEndIndex
-			If udtSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse
-			   udtSearchResults(intIndex).SpecProbNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
-				StoreSearchResult(udtSearchResults(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults)
-			End If
-		Next intIndex
-
-	End Sub
-
-	Private Function ValidateIsValidModSpec(ByVal strLineIn As String, ByVal strModTag As String) As String
-
-		Dim kvSetting As KeyValuePair(Of String, String)
-		Dim strModSpec As String = String.Empty
-
-		If strLineIn.ToLower.StartsWith(strModTag.ToLower()) Then
-
-			kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
-
-			If String.IsNullOrEmpty(kvSetting.Value) OrElse kvSetting.Value.ToLower() = "none" Then
-				' Not a valid mod spec
-				strModSpec = String.Empty
-			Else
-				' Mod spec found
-				strModSpec = kvSetting.Value
-			End If
-
-		End If
-
-		Return strModSpec
-
-	End Function
-
-	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
-	  ByRef strErrorLog As String, _
-	  ByVal blnIncludeFDRandPepFDR As Boolean, _
-	  ByVal blnIncludeEFDR As Boolean, _
-	  ByVal blnIncludeIMSFields As Boolean, _
-	  ByVal blnMSGFPlus As Boolean)
-
-		' Write out the header line for synopsis / first hits files
-		Try
-			Dim lstData As New List(Of String)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_ResultID)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Scan)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_FragMethod)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_SpecIndex)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Charge)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PrecursorMZ)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_DelM)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_DelM_PPM)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MH)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Peptide)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Protein)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_NTT)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore)
-			lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore)
-
-			If blnMSGFPlus Then
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue)
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecEValue)
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_EValue)
-			Else
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb)
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecProb)
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PValue)
-			End If
-
-			If blnIncludeFDRandPepFDR Then
-
-				If blnMSGFPlus Then
-					lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_QValue)
-					lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PepQValue)
-				Else
-					lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_FDR)
-					lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PepFDR)
-				End If
-
-			ElseIf blnIncludeEFDR Then
-				' Note that we'll write out a "1" for "PepFDR" for every result
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_EFDR)
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PepFDR)
-			End If
-
-			If blnMSGFPlus Then
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Isotope_Error)
-			End If
-
-			If blnIncludeIMSFields Then
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Scan)
-				lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time)
-			End If
-
-			swResultFile.WriteLine(CollapseList(lstData))
-
-		Catch ex As Exception
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
-			End If
-		End Try
-
-	End Sub
-
-	''' <summary>
-	''' Writes an entry to a synopsis or first hits file
-	''' </summary>
-	''' <param name="intResultID"></param>
-	''' <param name="swResultFile"></param>
-	''' <param name="udtSearchResult"></param>
-	''' <param name="strErrorLog"></param>
-	''' <param name="blnIncludeFDRandPepFDR"></param>
-	''' <param name="blnIncludeEFDR"></param>
-	''' <param name="blnIncludeIMSFields"></param>
-	''' <param name="blnMSGFPlus"></param>
-	''' <remarks></remarks>
-	Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
-	   ByRef swResultFile As StreamWriter, _
-	   ByRef udtSearchResult As udtMSGFDBSearchResultType, _
-	   ByRef strErrorLog As String, _
-	   ByVal blnIncludeFDRandPepFDR As Boolean, _
-	   ByVal blnIncludeEFDR As Boolean, _
-	   ByVal blnIncludeIMSFields As Boolean, _
-	   ByVal blnMSGFPlus As Boolean)
-
-		Try
-
-			' Primary Columns (other columns are added in certain circumstances):
-			'
-			' MSGFDB
-			' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb    Rank_MSGFDB_SpecProb    PValue  FDR     PepFDR
-
-			' MSGF+
-			' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecEValue  Rank_MSGFDB_SpecEValue  EValue  QValue  PepQValue  IsotopeError
-
-			Dim lstData As New List(Of String)
-			lstData.Add(intResultID.ToString)
-			lstData.Add(udtSearchResult.Scan)
-			lstData.Add(udtSearchResult.FragMethod)
-			lstData.Add(udtSearchResult.SpecIndex)
-			lstData.Add(udtSearchResult.Charge)
-			lstData.Add(udtSearchResult.PrecursorMZ)
-			lstData.Add(udtSearchResult.PMErrorDa)
-			lstData.Add(udtSearchResult.PMErrorPPM)
-			lstData.Add(udtSearchResult.MH)
-			lstData.Add(udtSearchResult.Peptide)
-			lstData.Add(udtSearchResult.Protein)
-			lstData.Add(udtSearchResult.NTT)
-			lstData.Add(udtSearchResult.DeNovoScore)
-			lstData.Add(udtSearchResult.MSGFScore)
-			lstData.Add(udtSearchResult.SpecProb)
-			lstData.Add(udtSearchResult.RankSpecProb.ToString)
-			lstData.Add(udtSearchResult.PValue)
-
-			If blnIncludeFDRandPepFDR Then
-				lstData.Add(udtSearchResult.FDR)
-				lstData.Add(udtSearchResult.PepFDR)
-			ElseIf blnIncludeEFDR Then
-				lstData.Add(udtSearchResult.FDR)
-				lstData.Add("1")
-			End If
-
-			If blnMSGFPlus Then
-				lstData.Add(udtSearchResult.IsotopeError.ToString)
-			End If
-
-			If blnIncludeIMSFields Then
-				lstData.Add(udtSearchResult.IMSScan.ToString)
-				lstData.Add(udtSearchResult.IMSDriftTime)
-			End If
-
-			swResultFile.WriteLine(CollapseList(lstData))
-
-		Catch ex As Exception
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
-			End If
-		End Try
-
-	End Sub
+    ''' <summary>
+    ''' Examines strProteinList to look for a semi-colon separated list of proteins and terminus symbols, for example
+    ''' AT1G26570.1(pre=K,post=N);AT3G29360.1(pre=K,post=N);AT3G29360.2(pre=K,post=N)
+    ''' </summary>
+    ''' <param name="strProteinList">Protein list to examine</param>
+    ''' <param name="lstProteinInfo">Protein information, if it is of the form ProteinName(pre=X,post=Y)</param>
+    ''' <returns>The name of the first protein</returns>
+    ''' <remarks></remarks>
+    Protected Function SplitProteinList(ByVal strProteinList As String, ByRef lstProteinInfo As Dictionary(Of String, udtTerminusCharsType)) As String
+
+        Static reProteinInfo As New Regex(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS)
+
+        Dim reMatches As MatchCollection
+
+        If lstProteinInfo Is Nothing Then
+            lstProteinInfo = New Dictionary(Of String, udtTerminusCharsType)
+        Else
+            lstProteinInfo.Clear()
+        End If
+
+        reMatches = reProteinInfo.Matches(strProteinList)
+
+        If reMatches.Count = 0 Then
+            ' No match; likely just one protein
+            Return TruncateProteinName(strProteinList)
+        Else
+            For Each reMatch As Match In reMatches
+                Dim strProteinName As String
+                Dim udtTerminusChars As udtTerminusCharsType
+
+                strProteinName = TruncateProteinName(reMatch.Groups(1).Value)
+                udtTerminusChars.NTerm = reMatch.Groups(2).Value.Chars(0)
+                udtTerminusChars.CTerm = reMatch.Groups(3).Value.Chars(0)
+
+                If lstProteinInfo.ContainsKey(strProteinName) Then
+                    ' Skip this protein since it's already present
+                Else
+                    lstProteinInfo.Add(strProteinName, udtTerminusChars)
+                End If
+
+            Next
+
+            Return lstProteinInfo.First.Key
+        End If
+
+
+    End Function
+
+    Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter, _
+     ByVal lstFilteredSearchResults As List(Of udtMSGFDBSearchResultType), _
+     ByRef strErrorLog As String, _
+     ByVal blnIncludeFDRandPepFDR As Boolean, _
+     ByVal blnIncludeEFDR As Boolean, _
+     ByVal blnIncludeIMSFields As Boolean, _
+     ByVal blnMSGFPlus As Boolean)
+
+        ' Sort udtFilteredSearchResults by ascending SpecProb, ascending scan, ascending charge, ascending peptide, and ascending protein
+        lstFilteredSearchResults.Sort(New MSGFDBSearchResultsComparerSpecProbScanChargePeptide)
+
+        For intIndex = 0 To lstFilteredSearchResults.Count - 1
+            WriteSearchResultToFile(intIndex + 1, swResultFile, lstFilteredSearchResults(intIndex), strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
+        Next intIndex
+
+    End Sub
+
+    Private Sub StoreScanGroupInfo(ByVal strScanGroupFilePath As String, ByRef lstScanGroupDetails As List(Of udtScanGroupInfoType))
+
+        Dim intScanGroupIDPrevious As Integer
+        Dim blnCreateFile As Boolean
+
+        Try
+
+            ' Only create the ScanGroup file if one or more scan groups exist
+            ' Step through lstScanGroupDetails to check for this
+            intScanGroupIDPrevious = -1
+            blnCreateFile = False
+            For Each udtScanGroupInfo As udtScanGroupInfoType In lstScanGroupDetails
+                If udtScanGroupInfo.ScanGroupID = intScanGroupIDPrevious Then
+                    blnCreateFile = True
+                    Exit For
+                End If
+                intScanGroupIDPrevious = udtScanGroupInfo.ScanGroupID
+            Next
+
+            If blnCreateFile Then
+                Using swScanGroupFile As StreamWriter = New StreamWriter(New FileStream(strScanGroupFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+
+                    swScanGroupFile.WriteLine("Scan_Group_ID" & ControlChars.Tab & "Charge" & ControlChars.Tab & "Scan")
+
+                    For Each udtScanGroupInfo As udtScanGroupInfoType In lstScanGroupDetails
+                        With udtScanGroupInfo
+                            swScanGroupFile.WriteLine(.ScanGroupID & ControlChars.Tab & .Charge & ControlChars.Tab & .Scan)
+                        End With
+                    Next
+
+                End Using
+            End If
+
+        Catch ex As Exception
+            SetErrorMessage("Error creating ScanGroupInfo file: " & ex.Message)
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Stores the first hits file matches for a single scan
+    ''' </summary>
+    ''' <param name="lstSearchResults">Search results</param>
+    ''' <param name="intStartIndex">Start index for data in this scan</param>
+    ''' <param name="intEndIndex">End index for data in this scan</param>
+    ''' <param name="lstFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
+    ''' <remarks></remarks>
+    Private Sub StoreTopFHTMatch(
+      ByVal lstSearchResults As List(Of udtMSGFDBSearchResultType),
+      ByVal intStartIndex As Integer,
+      ByVal intEndIndex As Integer,
+      ByVal lstFilteredSearchResults As List(Of udtMSGFDBSearchResultType))
+
+        Dim intCurrentCharge As Short = Short.MinValue
+
+        AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
+
+        ' The calling procedure should have already sorted by scan, charge, and SpecProb; no need to re-sort
+
+        ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
+
+        ' Now store or write out the first match for each charge for this scan
+        For intIndex = intStartIndex To intEndIndex
+            If intIndex = intStartIndex OrElse intCurrentCharge <> lstSearchResults(intIndex).ChargeNum Then
+                lstFilteredSearchResults.Add(lstSearchResults(intIndex))
+                intCurrentCharge = lstSearchResults(intIndex).ChargeNum
+            End If
+        Next intIndex
+
+    End Sub
+
+    ''' <summary>
+    ''' Stores the synopsis file matches for a single scan
+    ''' </summary>
+    ''' <param name="lstSearchResults">Search results</param>
+    ''' <param name="intStartIndex">Start index for data in this scan</param>
+    ''' <param name="intEndIndex">End index for data in this scan</param>
+    ''' <param name="lstFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
+    ''' <remarks></remarks>
+    Private Sub StoreSynMatches(
+      ByVal lstSearchResults As List(Of udtMSGFDBSearchResultType),
+      ByVal intStartIndex As Integer,
+      ByVal intEndIndex As Integer,
+      ByVal lstFilteredSearchResults As List(Of udtMSGFDBSearchResultType))
+
+        Dim intIndex As Integer
+
+        AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
+
+        ' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
+
+        ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
+
+        ' Now store or write out the matches that pass the filters
+        ' By default, filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+        For intIndex = intStartIndex To intEndIndex
+            If lstSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse
+               lstSearchResults(intIndex).SpecProbNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
+                lstFilteredSearchResults.Add(lstSearchResults(intIndex))
+            End If
+        Next intIndex
+
+    End Sub
+
+    Private Function ValidateIsValidModSpec(ByVal strLineIn As String, ByVal strModTag As String) As String
+
+        Dim kvSetting As KeyValuePair(Of String, String)
+        Dim strModSpec As String = String.Empty
+
+        If strLineIn.ToLower.StartsWith(strModTag.ToLower()) Then
+
+            kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
+
+            If String.IsNullOrEmpty(kvSetting.Value) OrElse kvSetting.Value.ToLower() = "none" Then
+                ' Not a valid mod spec
+                strModSpec = String.Empty
+            Else
+                ' Mod spec found
+                strModSpec = kvSetting.Value
+            End If
+
+        End If
+
+        Return strModSpec
+
+    End Function
+
+    Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
+      ByRef strErrorLog As String, _
+      ByVal blnIncludeFDRandPepFDR As Boolean, _
+      ByVal blnIncludeEFDR As Boolean, _
+      ByVal blnIncludeIMSFields As Boolean, _
+      ByVal blnMSGFPlus As Boolean)
+
+        ' Write out the header line for synopsis / first hits files
+        Try
+            Dim lstData As New List(Of String)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_ResultID)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Scan)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_FragMethod)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_SpecIndex)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Charge)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PrecursorMZ)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_DelM)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_DelM_PPM)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MH)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Peptide)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Protein)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_NTT)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore)
+            lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore)
+
+            If blnMSGFPlus Then
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue)
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecEValue)
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_EValue)
+            Else
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb)
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecProb)
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PValue)
+            End If
+
+            If blnIncludeFDRandPepFDR Then
+
+                If blnMSGFPlus Then
+                    lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_QValue)
+                    lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PepQValue)
+                Else
+                    lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_FDR)
+                    lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PepFDR)
+                End If
+
+            ElseIf blnIncludeEFDR Then
+                ' Note that we'll write out a "1" for "PepFDR" for every result
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_EFDR)
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PepFDR)
+            End If
+
+            If blnMSGFPlus Then
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Isotope_Error)
+            End If
+
+            If blnIncludeIMSFields Then
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Scan)
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time)
+            End If
+
+            swResultFile.WriteLine(CollapseList(lstData))
+
+        Catch ex As Exception
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
+            End If
+        End Try
+
+    End Sub
+
+    ''' <summary>
+    ''' Writes an entry to a synopsis or first hits file
+    ''' </summary>
+    ''' <param name="intResultID"></param>
+    ''' <param name="swResultFile"></param>
+    ''' <param name="udtSearchResult"></param>
+    ''' <param name="strErrorLog"></param>
+    ''' <param name="blnIncludeFDRandPepFDR"></param>
+    ''' <param name="blnIncludeEFDR"></param>
+    ''' <param name="blnIncludeIMSFields"></param>
+    ''' <param name="blnMSGFPlus"></param>
+    ''' <remarks></remarks>
+    Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
+       ByVal swResultFile As StreamWriter, _
+       ByRef udtSearchResult As udtMSGFDBSearchResultType, _
+       ByRef strErrorLog As String, _
+       ByVal blnIncludeFDRandPepFDR As Boolean, _
+       ByVal blnIncludeEFDR As Boolean, _
+       ByVal blnIncludeIMSFields As Boolean, _
+       ByVal blnMSGFPlus As Boolean)
+
+        Try
+
+            ' Primary Columns (other columns are added in certain circumstances):
+            '
+            ' MSGFDB
+            ' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb    Rank_MSGFDB_SpecProb    PValue  FDR     PepFDR
+
+            ' MSGF+
+            ' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecEValue  Rank_MSGFDB_SpecEValue  EValue  QValue  PepQValue  IsotopeError
+
+            Dim lstData As New List(Of String)
+            lstData.Add(intResultID.ToString)
+            lstData.Add(udtSearchResult.Scan)
+            lstData.Add(udtSearchResult.FragMethod)
+            lstData.Add(udtSearchResult.SpecIndex)
+            lstData.Add(udtSearchResult.Charge)
+            lstData.Add(udtSearchResult.PrecursorMZ)
+            lstData.Add(udtSearchResult.PMErrorDa)
+            lstData.Add(udtSearchResult.PMErrorPPM)
+            lstData.Add(udtSearchResult.MH)
+            lstData.Add(udtSearchResult.Peptide)
+            lstData.Add(udtSearchResult.Protein)
+            lstData.Add(udtSearchResult.NTT)
+            lstData.Add(udtSearchResult.DeNovoScore)
+            lstData.Add(udtSearchResult.MSGFScore)
+            lstData.Add(udtSearchResult.SpecProb)
+            lstData.Add(udtSearchResult.RankSpecProb.ToString)
+            lstData.Add(udtSearchResult.PValue)
+
+            If blnIncludeFDRandPepFDR Then
+                lstData.Add(udtSearchResult.FDR)
+                lstData.Add(udtSearchResult.PepFDR)
+            ElseIf blnIncludeEFDR Then
+                lstData.Add(udtSearchResult.FDR)
+                lstData.Add("1")
+            End If
+
+            If blnMSGFPlus Then
+                lstData.Add(udtSearchResult.IsotopeError.ToString)
+            End If
+
+            If blnIncludeIMSFields Then
+                lstData.Add(udtSearchResult.IMSScan.ToString)
+                lstData.Add(udtSearchResult.IMSDriftTime)
+            End If
+
+            swResultFile.WriteLine(CollapseList(lstData))
+
+        Catch ex As Exception
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
+            End If
+        End Try
+
+    End Sub
 
 #Region "IComparer Classes"
 
-	Protected Class MSGFDBSearchResultsComparerScanChargeSpecProbPeptide
-		Implements IComparer(Of udtMSGFDBSearchResultType)
+    Protected Class MSGFDBSearchResultsComparerScanChargeSpecProbPeptide
+        Implements IComparer(Of udtMSGFDBSearchResultType)
 
-		Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
+        Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
 
-			If x.ScanNum > y.ScanNum Then
-				Return 1
-			ElseIf x.ScanNum < y.ScanNum Then
-				Return -1
-			Else
-				' Scan is the same, check charge
-				If x.ChargeNum > y.ChargeNum Then
-					Return 1
-				ElseIf x.ChargeNum < y.ChargeNum Then
-					Return -1
-				Else
-					' Charge is the same; check SpecProb
-					If x.SpecProbNum > y.SpecProbNum Then
-						Return 1
-					ElseIf x.SpecProbNum < y.SpecProbNum Then
-						Return -1
-					Else
-						' SpecProb is the same; check peptide
-						If x.Peptide > y.Peptide Then
-							Return 1
-						ElseIf x.Peptide < y.Peptide Then
-							Return -1
-						Else
-							' Peptide is the same, check Protein
-							If x.Protein > y.Protein Then
-								Return 1
-							ElseIf x.Protein < y.Protein Then
-								Return -1
-							Else
-								Return 0
-							End If
-						End If
-					End If
-				End If
-			End If
+            If x.ScanNum > y.ScanNum Then
+                Return 1
+            ElseIf x.ScanNum < y.ScanNum Then
+                Return -1
+            Else
+                ' Scan is the same, check charge
+                If x.ChargeNum > y.ChargeNum Then
+                    Return 1
+                ElseIf x.ChargeNum < y.ChargeNum Then
+                    Return -1
+                Else
+                    ' Charge is the same; check SpecProb
+                    If x.SpecProbNum > y.SpecProbNum Then
+                        Return 1
+                    ElseIf x.SpecProbNum < y.SpecProbNum Then
+                        Return -1
+                    Else
+                        ' SpecProb is the same; check peptide
+                        If x.Peptide > y.Peptide Then
+                            Return 1
+                        ElseIf x.Peptide < y.Peptide Then
+                            Return -1
+                        Else
+                            ' Peptide is the same, check Protein
+                            If x.Protein > y.Protein Then
+                                Return 1
+                            ElseIf x.Protein < y.Protein Then
+                                Return -1
+                            Else
+                                Return 0
+                            End If
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
-	Protected Class MSGFDBSearchResultsComparerSpecProbScanChargePeptide
-		Implements IComparer(Of udtMSGFDBSearchResultType)
+    Protected Class MSGFDBSearchResultsComparerSpecProbScanChargePeptide
+        Implements IComparer(Of udtMSGFDBSearchResultType)
 
-		Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
+        Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
 
-			If x.SpecProbNum > y.SpecProbNum Then
-				Return 1
-			ElseIf x.SpecProbNum < y.SpecProbNum Then
-				Return -1
-			Else
-				' SpecProbNum is the same; check scan number
-				If x.ScanNum > y.ScanNum Then
-					Return 1
-				ElseIf x.ScanNum < y.ScanNum Then
-					Return -1
-				Else
-					' Scan is the same, check charge
-					If x.ChargeNum > y.ChargeNum Then
-						Return 1
-					ElseIf x.ChargeNum < y.ChargeNum Then
-						Return -1
-					Else
-						' Charge is the same; check peptide
-						If x.Peptide > y.Peptide Then
-							Return 1
-						ElseIf x.Peptide < y.Peptide Then
-							Return -1
-						Else
-							' Peptide is the same, check Protein
-							If x.Protein > y.Protein Then
-								Return 1
-							ElseIf x.Protein < y.Protein Then
-								Return -1
-							Else
-								Return 0
-							End If
-						End If
-					End If
-				End If
-			End If
+            If x.SpecProbNum > y.SpecProbNum Then
+                Return 1
+            ElseIf x.SpecProbNum < y.SpecProbNum Then
+                Return -1
+            Else
+                ' SpecProbNum is the same; check scan number
+                If x.ScanNum > y.ScanNum Then
+                    Return 1
+                ElseIf x.ScanNum < y.ScanNum Then
+                    Return -1
+                Else
+                    ' Scan is the same, check charge
+                    If x.ChargeNum > y.ChargeNum Then
+                        Return 1
+                    ElseIf x.ChargeNum < y.ChargeNum Then
+                        Return -1
+                    Else
+                        ' Charge is the same; check peptide
+                        If x.Peptide > y.Peptide Then
+                            Return 1
+                        ElseIf x.Peptide < y.Peptide Then
+                            Return -1
+                        Else
+                            ' Peptide is the same, check Protein
+                            If x.Protein > y.Protein Then
+                                Return 1
+                            ElseIf x.Protein < y.Protein Then
+                                Return -1
+                            Else
+                                Return 0
+                            End If
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
 #End Region
 

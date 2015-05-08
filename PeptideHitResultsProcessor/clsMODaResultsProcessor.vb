@@ -1568,375 +1568,391 @@ Public Class clsMODaResultsProcessor
 				'	blnSuccess = AppendDelMPPMRefinedToSynFile(strSynOutputFilePath)
 				'End If
 
-				If blnSuccess AndAlso mCreateProteinModsFile Then
-					' Create the MTSPepToProteinMap file
+                ' Remove all items from lstPepToProteinMapping to reduce memory overhead
+                lstPepToProteinMapping.Clear()
+                lstPepToProteinMapping.TrimExcess()
 
-					strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strBaseName, strOutputFolderPath, MTS:=True)
+                If blnSuccess AndAlso mCreateProteinModsFile Then                
+                    blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strSynOutputFilePath, strOutputFolderPath)
+                End If
 
-					Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
+                If blnSuccess Then
+                    MyBase.OperationComplete()
+                End If
 
-					If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
-						lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
-					End If
+            Catch ex As Exception
+                SetErrorMessage("Error in clsMODaResultsProcessor.ProcessFile (2):  " & ex.Message)
+                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+            End Try
 
-					If lstSourcePHRPDataFiles.Count = 0 Then
-						SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
-						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
-						blnSuccess = False
-					Else
-						If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
-							blnSuccess = True
-						Else
-							' Auto-change mIgnorePeptideToProteinMapperErrors to True
-							' We only do this since a small number of peptides reported by MODa don't perfectly match the fasta file
-							mIgnorePeptideToProteinMapperErrors = True
-							blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
-							If Not blnSuccess Then
-								ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
-							End If
-						End If
-					End If
+        Catch ex As Exception
+            SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+        End Try
 
-					If blnSuccess Then
-						' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-						MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+        Return blnSuccess
 
-						' Create the Protein Mods file
-						blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MODa)
-					End If
+    End Function
 
-					If Not blnSuccess Then
-						' Do not treat this as a fatal error
-						blnSuccess = True
-					End If
+    Private Function CreateProteinModsFileWork(
+       strBaseName As String,
+       fiInputFile As FileInfo,
+       strSynOutputFilePath As String,
+       strOutputFolderPath As String) As Boolean
 
-				End If
+        Dim blnSuccess As Boolean
+        Dim strMTSPepToProteinMapFilePath As String
 
-				If blnSuccess Then
-					MyBase.OperationComplete()
-				End If
+        ' Create the MTSPepToProteinMap file
 
-			Catch ex As Exception
-				SetErrorMessage("Error in clsMODaResultsProcessor.ProcessFile (2):  " & ex.Message)
-				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-			End Try
+        strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strBaseName, strOutputFolderPath, MTS:=True)
 
-		Catch ex As Exception
-			SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
-			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
-		End Try
+        Dim lstSourcePHRPDataFiles = New List(Of String)
 
-		Return blnSuccess
+        If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
+            lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
+        End If
 
-	End Function
+        If lstSourcePHRPDataFiles.Count = 0 Then
+            SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        Else
+            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+                blnSuccess = True
+            Else
+                ' Auto-change mIgnorePeptideToProteinMapperErrors to True
+                ' We only do this since a small number of peptides reported by MODa don't perfectly match the fasta file
+                mIgnorePeptideToProteinMapperErrors = True
+                blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+                If Not blnSuccess Then
+                    ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+                End If
+            End If
+        End If
 
-	Protected Sub ResolveMODaModsWithModDefinitions(ByRef lstMODaModInfo As List(Of clsModificationDefinition))
+        If blnSuccess Then
+            ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
-		Dim blnExistingModFound As Boolean
-		Dim objModDef As clsModificationDefinition
+            ' Create the Protein Mods file
+            blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MODa)
+        End If
 
-		If Not lstMODaModInfo Is Nothing Then
+        If Not blnSuccess Then
+            ' Do not treat this as a fatal error
+            blnSuccess = True
+        End If
+        Return blnSuccess
+    End Function
 
-			' Call .LookupModificationDefinitionByMass for each entry in lstMODaModInfo
-			For Each objModInfo As clsModificationDefinition In lstMODaModInfo
-				If String.IsNullOrEmpty(objModInfo.TargetResidues) Then
-					objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, MODA_MASS_DIGITS_OF_PRECISION)
-				Else
-					For Each chTargetResidue As Char In objModInfo.TargetResidues
-						objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, MODA_MASS_DIGITS_OF_PRECISION)
-					Next
-				End If
-			Next
+    Protected Sub ResolveMODaModsWithModDefinitions(ByRef lstMODaModInfo As List(Of clsModificationDefinition))
 
-		End If
+        Dim blnExistingModFound As Boolean
+        Dim objModDef As clsModificationDefinition
 
-	End Sub
+        If Not lstMODaModInfo Is Nothing Then
 
-	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter,
-	  ByRef lstFilteredSearchResults As List(Of udtMODaSearchResultType),
-	  ByRef strErrorLog As String)
+            ' Call .LookupModificationDefinitionByMass for each entry in lstMODaModInfo
+            For Each objModInfo As clsModificationDefinition In lstMODaModInfo
+                If String.IsNullOrEmpty(objModInfo.TargetResidues) Then
+                    objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, MODA_MASS_DIGITS_OF_PRECISION)
+                Else
+                    For Each chTargetResidue As Char In objModInfo.TargetResidues
+                        objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, MODA_MASS_DIGITS_OF_PRECISION)
+                    Next
+                End If
+            Next
 
-		Dim intIndex As Integer
+        End If
 
-		' Sort udtFilteredSearchResults by descending probability, ascending scan, ascending charge, ascending peptide, and ascending protein
-		lstFilteredSearchResults.Sort(New MODaSearchResultsComparerProbabilityScanChargePeptide)
+    End Sub
 
-		' Compute FDR values then assign QValues
-		ComputeQValues(lstFilteredSearchResults)
+    Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter,
+      ByRef lstFilteredSearchResults As List(Of udtMODaSearchResultType),
+      ByRef strErrorLog As String)
 
-		For intIndex = 0 To lstFilteredSearchResults.Count - 1
-			WriteSearchResultToFile(intIndex + 1, swResultFile, lstFilteredSearchResults(intIndex), strErrorLog)
-		Next intIndex
+        Dim intIndex As Integer
 
-	End Sub
+        ' Sort udtFilteredSearchResults by descending probability, ascending scan, ascending charge, ascending peptide, and ascending protein
+        lstFilteredSearchResults.Sort(New MODaSearchResultsComparerProbabilityScanChargePeptide)
 
-	''' <summary>
-	''' Compute FDR values then assign QValues
-	''' </summary>
-	''' <param name="lstSearchResults"></param>
-	''' <remarks>Assumes the data is sorted by descending probability using MODaSearchResultsComparerProbabilityScanChargePeptide</remarks>
-	Private Sub ComputeQValues(ByVal lstSearchResults As List(Of udtMODaSearchResultType))
+        ' Compute FDR values then assign QValues
+        ComputeQValues(lstFilteredSearchResults)
 
-		Dim forwardPeptideCount As Integer = 0
-		Dim reversePeptideCount As Integer = 0
-		Dim intIndex As Integer = 0
+        For intIndex = 0 To lstFilteredSearchResults.Count - 1
+            WriteSearchResultToFile(intIndex + 1, swResultFile, lstFilteredSearchResults(intIndex), strErrorLog)
+        Next intIndex
 
-		While intIndex < lstSearchResults.Count
+    End Sub
 
-			' Check for entries with multiple proteins listed
-			Dim intIndexEnd = intIndex
-			Do While intIndexEnd + 1 < lstSearchResults.Count
-				If lstSearchResults(intIndex).ScanNum = lstSearchResults(intIndexEnd + 1).ScanNum AndAlso
-				   lstSearchResults(intIndex).ChargeNum = lstSearchResults(intIndexEnd + 1).ChargeNum AndAlso
-				   lstSearchResults(intIndex).Peptide = lstSearchResults(intIndexEnd + 1).Peptide Then
-					intIndexEnd += 1
-				Else
-					Exit Do
-				End If
-			Loop
+    ''' <summary>
+    ''' Compute FDR values then assign QValues
+    ''' </summary>
+    ''' <param name="lstSearchResults"></param>
+    ''' <remarks>Assumes the data is sorted by descending probability using MODaSearchResultsComparerProbabilityScanChargePeptide</remarks>
+    Private Sub ComputeQValues(ByVal lstSearchResults As List(Of udtMODaSearchResultType))
 
-			Dim isReverse = True
+        Dim forwardPeptideCount As Integer = 0
+        Dim reversePeptideCount As Integer = 0
+        Dim intIndex As Integer = 0
 
-			' Look for non-reverse proteins
-			For intIndexCheck = intIndex To intIndexEnd
-				If Not IsReversedProtein(lstSearchResults(intIndexCheck).Protein) Then
-					isReverse = False
-					Exit For
-				End If
-			Next
+        While intIndex < lstSearchResults.Count
 
-			If isReverse Then
-				reversePeptideCount += 1
-			Else
-				forwardPeptideCount += 1
-			End If
+            ' Check for entries with multiple proteins listed
+            Dim intIndexEnd = intIndex
+            Do While intIndexEnd + 1 < lstSearchResults.Count
+                If lstSearchResults(intIndex).ScanNum = lstSearchResults(intIndexEnd + 1).ScanNum AndAlso
+                   lstSearchResults(intIndex).ChargeNum = lstSearchResults(intIndexEnd + 1).ChargeNum AndAlso
+                   lstSearchResults(intIndex).Peptide = lstSearchResults(intIndexEnd + 1).Peptide Then
+                    intIndexEnd += 1
+                Else
+                    Exit Do
+                End If
+            Loop
 
-			Dim dblFDR As Double = 1
+            Dim isReverse = True
 
-			If forwardPeptideCount > 0 Then
-				dblFDR = reversePeptideCount / CDbl(forwardPeptideCount)
-			End If
+            ' Look for non-reverse proteins
+            For intIndexCheck = intIndex To intIndexEnd
+                If Not IsReversedProtein(lstSearchResults(intIndexCheck).Protein) Then
+                    isReverse = False
+                    Exit For
+                End If
+            Next
 
-			' Store the FDR values
-			For intIndexStore = intIndex To intIndexEnd
-				Dim udtResult = lstSearchResults(intIndexStore)
-				udtResult.FDR = dblFDR
+            If isReverse Then
+                reversePeptideCount += 1
+            Else
+                forwardPeptideCount += 1
+            End If
 
-				lstSearchResults(intIndexStore) = udtResult
-			Next
+            Dim dblFDR As Double = 1
 
-			intIndex = intIndexEnd + 1
-		End While
+            If forwardPeptideCount > 0 Then
+                dblFDR = reversePeptideCount / CDbl(forwardPeptideCount)
+            End If
 
-		' Now compute QValues
-		' We step through the list, from the worst scoring result to the best result
-		' The first QValue is the FDR of the final entry
-		' The next QValue is the minimum of (QValue, CurrentFDR)
+            ' Store the FDR values
+            For intIndexStore = intIndex To intIndexEnd
+                Dim udtResult = lstSearchResults(intIndexStore)
+                udtResult.FDR = dblFDR
 
-		Dim dblQValue = lstSearchResults.Last().FDR
-		If dblQValue > 1 Then dblQValue = 1
+                lstSearchResults(intIndexStore) = udtResult
+            Next
 
-		For intIndex = lstSearchResults.Count - 1 To 0 Step -1
-			Dim udtResult = lstSearchResults(intIndex)
+            intIndex = intIndexEnd + 1
+        End While
 
-			dblQValue = Math.Min(dblQValue, udtResult.FDR)
-			udtResult.QValue = dblQValue
+        ' Now compute QValues
+        ' We step through the list, from the worst scoring result to the best result
+        ' The first QValue is the FDR of the final entry
+        ' The next QValue is the minimum of (QValue, CurrentFDR)
 
-			lstSearchResults(intIndex) = udtResult
-		Next
+        Dim dblQValue = lstSearchResults.Last().FDR
+        If dblQValue > 1 Then dblQValue = 1
 
-	End Sub
+        For intIndex = lstSearchResults.Count - 1 To 0 Step -1
+            Dim udtResult = lstSearchResults(intIndex)
 
-	Private Sub StoreSynMatches(ByRef lstSearchResults As List(Of udtMODaSearchResultType), _
-	 ByVal intStartIndex As Integer, _
-	 ByVal intEndIndex As Integer, _
-	 ByRef lstFilteredSearchResults As List(Of udtMODaSearchResultType))
+            dblQValue = Math.Min(dblQValue, udtResult.FDR)
+            udtResult.QValue = dblQValue
 
-		Dim intIndex As Integer
+            lstSearchResults(intIndex) = udtResult
+        Next
 
-		AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
+    End Sub
 
-		' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
+    Private Sub StoreSynMatches(ByRef lstSearchResults As List(Of udtMODaSearchResultType), _
+     ByVal intStartIndex As Integer, _
+     ByVal intEndIndex As Integer, _
+     ByRef lstFilteredSearchResults As List(Of udtMODaSearchResultType))
 
-		' Now store or write out the matches that pass the filters
-		For intIndex = intStartIndex To intEndIndex
-			If lstSearchResults(intIndex).ProbabilityNum >= mMODaSynopsisFileProbabilityThreshold Then
-				lstFilteredSearchResults.Add(lstSearchResults(intIndex))
-			End If
-		Next intIndex
+        Dim intIndex As Integer
 
-	End Sub
+        AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
 
-	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
-	  ByRef strErrorLog As String)
+        ' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
 
-		' Write out the header line for synopsis / first hits files
-		Try
-			Dim lstData As New List(Of String)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_ResultID)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Scan)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Spectrum_Index)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Charge)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_PrecursorMZ)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_DelM)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_DelM_PPM)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_MH)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Protein)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Score)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Probability)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Rank_Probability)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide_Position)
-			lstData.Add(clsPHRPParserMODa.DATA_COLUMN_QValue)
+        ' Now store or write out the matches that pass the filters
+        For intIndex = intStartIndex To intEndIndex
+            If lstSearchResults(intIndex).ProbabilityNum >= mMODaSynopsisFileProbabilityThreshold Then
+                lstFilteredSearchResults.Add(lstSearchResults(intIndex))
+            End If
+        Next intIndex
 
-			swResultFile.WriteLine(CollapseList(lstData))
+    End Sub
 
-		Catch ex As Exception
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
-			End If
-		End Try
+    Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
+      ByRef strErrorLog As String)
 
-	End Sub
+        ' Write out the header line for synopsis / first hits files
+        Try
+            Dim lstData As New List(Of String)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_ResultID)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Scan)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Spectrum_Index)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Charge)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_PrecursorMZ)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_DelM)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_DelM_PPM)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_MH)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Protein)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Score)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Probability)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Rank_Probability)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide_Position)
+            lstData.Add(clsPHRPParserMODa.DATA_COLUMN_QValue)
 
-	''' <summary>
-	''' Writes an entry to the synopsis file
-	''' </summary>
-	''' <param name="intResultID"></param>
-	''' <param name="swResultFile"></param>
-	''' <param name="udtSearchResult"></param>
-	''' <param name="strErrorLog"></param>
-	''' <remarks></remarks>
-	Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
-	   ByRef swResultFile As StreamWriter, _
-	   ByRef udtSearchResult As udtMODaSearchResultType, _
-	   ByRef strErrorLog As String)
+            swResultFile.WriteLine(CollapseList(lstData))
 
-		Try
+        Catch ex As Exception
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
+            End If
+        End Try
 
-			' Primary Columns
-			'
-			' MODa
-			' ResultID	Scan	Spectrum_Index	Charge	PrecursorMZ	DelM	DelM_PPM	MH	Peptide	Protein	Score	Probability	Rank_Probability	PeptidePosition	QValue
+    End Sub
 
-			Dim lstData As New List(Of String)
-			lstData.Add(intResultID.ToString)
-			lstData.Add(udtSearchResult.ScanNum.ToString)
-			lstData.Add(udtSearchResult.SpectrumIndex)
-			lstData.Add(udtSearchResult.Charge)
-			lstData.Add(udtSearchResult.PrecursorMZ)
-			lstData.Add(udtSearchResult.DelM)
-			lstData.Add(udtSearchResult.DelM_PPM)
-			lstData.Add(udtSearchResult.MH)
-			lstData.Add(udtSearchResult.Peptide)
-			lstData.Add(udtSearchResult.Protein)
-			lstData.Add(udtSearchResult.Score)
-			lstData.Add(udtSearchResult.Probability)
-			lstData.Add(udtSearchResult.RankProbability.ToString())
-			lstData.Add(udtSearchResult.PeptidePosition)
-			lstData.Add(udtSearchResult.QValue.ToString("0.000000"))
+    ''' <summary>
+    ''' Writes an entry to the synopsis file
+    ''' </summary>
+    ''' <param name="intResultID"></param>
+    ''' <param name="swResultFile"></param>
+    ''' <param name="udtSearchResult"></param>
+    ''' <param name="strErrorLog"></param>
+    ''' <remarks></remarks>
+    Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
+       ByRef swResultFile As StreamWriter, _
+       ByRef udtSearchResult As udtMODaSearchResultType, _
+       ByRef strErrorLog As String)
 
-			swResultFile.WriteLine(CollapseList(lstData))
+        Try
 
-		Catch ex As Exception
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
-			End If
-		End Try
+            ' Primary Columns
+            '
+            ' MODa
+            ' ResultID	Scan	Spectrum_Index	Charge	PrecursorMZ	DelM	DelM_PPM	MH	Peptide	Protein	Score	Probability	Rank_Probability	PeptidePosition	QValue
 
-	End Sub
+            Dim lstData As New List(Of String)
+            lstData.Add(intResultID.ToString)
+            lstData.Add(udtSearchResult.ScanNum.ToString)
+            lstData.Add(udtSearchResult.SpectrumIndex)
+            lstData.Add(udtSearchResult.Charge)
+            lstData.Add(udtSearchResult.PrecursorMZ)
+            lstData.Add(udtSearchResult.DelM)
+            lstData.Add(udtSearchResult.DelM_PPM)
+            lstData.Add(udtSearchResult.MH)
+            lstData.Add(udtSearchResult.Peptide)
+            lstData.Add(udtSearchResult.Protein)
+            lstData.Add(udtSearchResult.Score)
+            lstData.Add(udtSearchResult.Probability)
+            lstData.Add(udtSearchResult.RankProbability.ToString())
+            lstData.Add(udtSearchResult.PeptidePosition)
+            lstData.Add(udtSearchResult.QValue.ToString("0.000000"))
+
+            swResultFile.WriteLine(CollapseList(lstData))
+
+        Catch ex As Exception
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
+            End If
+        End Try
+
+    End Sub
 
 #Region "IComparer Classes"
 
-	Protected Class MODaSearchResultsComparerScanChargeProbabilityPeptide
-		Implements IComparer(Of udtMODaSearchResultType)
+    Protected Class MODaSearchResultsComparerScanChargeProbabilityPeptide
+        Implements IComparer(Of udtMODaSearchResultType)
 
-		Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare
+        Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare
 
-			If x.ScanNum > y.ScanNum Then
-				Return 1
-			ElseIf x.ScanNum < y.ScanNum Then
-				Return -1
-			Else
-				' Scan is the same, check charge
-				If x.ChargeNum > y.ChargeNum Then
-					Return 1
-				ElseIf x.ChargeNum < y.ChargeNum Then
-					Return -1
-				Else
-					' Charge is the same; check ProbabilityNum
-					If x.ProbabilityNum < y.ProbabilityNum Then
-						Return 1
-					ElseIf x.ProbabilityNum > y.ProbabilityNum Then
-						Return -1
-					Else
-						' Probability is the same; check peptide
-						If x.Peptide > y.Peptide Then
-							Return 1
-						ElseIf x.Peptide < y.Peptide Then
-							Return -1
-						Else
-							' Peptide is the same, check Protein
-							If x.Protein > y.Protein Then
-								Return 1
-							ElseIf x.Protein < y.Protein Then
-								Return -1
-							Else
-								Return 0
-							End If
-						End If
-					End If
-				End If
-			End If
+            If x.ScanNum > y.ScanNum Then
+                Return 1
+            ElseIf x.ScanNum < y.ScanNum Then
+                Return -1
+            Else
+                ' Scan is the same, check charge
+                If x.ChargeNum > y.ChargeNum Then
+                    Return 1
+                ElseIf x.ChargeNum < y.ChargeNum Then
+                    Return -1
+                Else
+                    ' Charge is the same; check ProbabilityNum
+                    If x.ProbabilityNum < y.ProbabilityNum Then
+                        Return 1
+                    ElseIf x.ProbabilityNum > y.ProbabilityNum Then
+                        Return -1
+                    Else
+                        ' Probability is the same; check peptide
+                        If x.Peptide > y.Peptide Then
+                            Return 1
+                        ElseIf x.Peptide < y.Peptide Then
+                            Return -1
+                        Else
+                            ' Peptide is the same, check Protein
+                            If x.Protein > y.Protein Then
+                                Return 1
+                            ElseIf x.Protein < y.Protein Then
+                                Return -1
+                            Else
+                                Return 0
+                            End If
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
-	Protected Class MODaSearchResultsComparerProbabilityScanChargePeptide
-		Implements IComparer(Of udtMODaSearchResultType)
+    Protected Class MODaSearchResultsComparerProbabilityScanChargePeptide
+        Implements IComparer(Of udtMODaSearchResultType)
 
-		Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare
+        Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare
 
-			If x.ProbabilityNum < y.ProbabilityNum Then
-				Return 1
-			ElseIf x.ProbabilityNum > y.ProbabilityNum Then
-				Return -1
-			Else
-				' Pvalue is the same; check scan number
-				If x.ScanNum > y.ScanNum Then
-					Return 1
-				ElseIf x.ScanNum < y.ScanNum Then
-					Return -1
-				Else
-					' Scan is the same, check charge
-					If x.ChargeNum > y.ChargeNum Then
-						Return 1
-					ElseIf x.ChargeNum < y.ChargeNum Then
-						Return -1
-					Else
-						' Charge is the same; check peptide
-						If x.Peptide > y.Peptide Then
-							Return 1
-						ElseIf x.Peptide < y.Peptide Then
-							Return -1
-						Else
-							' Peptide is the same, check Protein
-							If x.Protein > y.Protein Then
-								Return 1
-							ElseIf x.Protein < y.Protein Then
-								Return -1
-							Else
-								Return 0
-							End If
-						End If
-					End If
-				End If
-			End If
+            If x.ProbabilityNum < y.ProbabilityNum Then
+                Return 1
+            ElseIf x.ProbabilityNum > y.ProbabilityNum Then
+                Return -1
+            Else
+                ' Pvalue is the same; check scan number
+                If x.ScanNum > y.ScanNum Then
+                    Return 1
+                ElseIf x.ScanNum < y.ScanNum Then
+                    Return -1
+                Else
+                    ' Scan is the same, check charge
+                    If x.ChargeNum > y.ChargeNum Then
+                        Return 1
+                    ElseIf x.ChargeNum < y.ChargeNum Then
+                        Return -1
+                    Else
+                        ' Charge is the same; check peptide
+                        If x.Peptide > y.Peptide Then
+                            Return 1
+                        ElseIf x.Peptide < y.Peptide Then
+                            Return -1
+                        Else
+                            ' Peptide is the same, check Protein
+                            If x.Protein > y.Protein Then
+                                Return 1
+                            ElseIf x.Protein < y.Protein Then
+                                Return -1
+                            Else
+                                Return 0
+                            End If
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
 #End Region
 

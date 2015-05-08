@@ -1383,67 +1383,78 @@ Public Class clsMSAlignResultsProcessor
 				' Now parse the _syn.txt file that we just created to next create the other PHRP files
 				blnSuccess = ParseMSAlignSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
 
-				If blnSuccess AndAlso mCreateProteinModsFile Then
-					' Create the MTSPepToProteinMap file
+                ' Remove all items from lstPepToProteinMapping to reduce memory overhead
+                lstPepToProteinMapping.Clear()
+                lstPepToProteinMapping.TrimExcess()
 
-					strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strBaseName, strOutputFolderPath, MTS:=True)
+                If blnSuccess AndAlso mCreateProteinModsFile Then
+                    blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strSynOutputFilePath, strOutputFolderPath)
+                End If
 
-					Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
+                If blnSuccess Then
+                    MyBase.OperationComplete()
+                End If
 
-					If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
-						lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
-					End If
+            Catch ex As Exception
+                SetErrorMessage("Error in clsMSAlignResultsProcessor.ProcessFile (2):  " & ex.Message)
+                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+            End Try
 
-					If lstSourcePHRPDataFiles.Count = 0 Then
-						SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
-						SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
-						blnSuccess = False
-					Else
-						If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
-							blnSuccess = True
-						Else
-							' Auto-change mIgnorePeptideToProteinMapperErrors to True
-							' We only do this since a small number of peptides reported by MSAlign don't perfectly match the fasta file
-							mIgnorePeptideToProteinMapperErrors = True
-							blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
-							If Not blnSuccess Then
-								ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
-							End If
-						End If
-					End If
+        Catch ex As Exception
+            SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+        End Try
 
-					If blnSuccess Then
-						' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-						MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+        Return blnSuccess
 
-						' Create the Protein Mods file
-						blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSAlign)
-					End If
+    End Function
 
-					If Not blnSuccess Then
-						' Do not treat this as a fatal error
-						blnSuccess = True
-					End If
+    Private Function CreateProteinModsFileWork(strBaseName As String, fiInputFile As FileInfo, strSynOutputFilePath As String, strOutputFolderPath As String) As Boolean
+        Dim blnSuccess As Boolean
+        Dim strMTSPepToProteinMapFilePath As String
 
-				End If
+        ' Create the MTSPepToProteinMap file
 
-				If blnSuccess Then
-					MyBase.OperationComplete()
-				End If
-			
-			Catch ex As Exception
-				SetErrorMessage("Error in clsMSAlignResultsProcessor.ProcessFile (2):  " & ex.Message)
-				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-			End Try
+        strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strBaseName, strOutputFolderPath, MTS:=True)
 
-		Catch ex As Exception
-			SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
-			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
-		End Try
+        Dim lstSourcePHRPDataFiles = New List(Of String)
 
-		Return blnSuccess
+        If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
+            lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
+        End If
 
-	End Function
+        If lstSourcePHRPDataFiles.Count = 0 Then
+            SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        Else
+            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+                blnSuccess = True
+            Else
+                ' Auto-change mIgnorePeptideToProteinMapperErrors to True
+                ' We only do this since a small number of peptides reported by MSAlign don't perfectly match the fasta file
+                mIgnorePeptideToProteinMapperErrors = True
+                blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+                If Not blnSuccess Then
+                    ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+                End If
+            End If
+        End If
+
+        If blnSuccess Then
+            ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+            MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+
+            ' Create the Protein Mods file
+            blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSAlign)
+        End If
+
+        If Not blnSuccess Then
+            ' Do not treat this as a fatal error
+            blnSuccess = True
+        End If
+        Return blnSuccess
+    End Function
 
 	Protected Function ReplaceTerminus(ByVal strPeptide As String) As String
 

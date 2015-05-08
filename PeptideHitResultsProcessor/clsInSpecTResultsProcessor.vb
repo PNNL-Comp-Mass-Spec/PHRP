@@ -788,76 +788,77 @@ Public Class clsInSpecTResultsProcessor
 	''' <param name="lstPepToProteinMapping"></param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadPeptideToProteinMapInfoInspect(ByVal strPepToProteinMapFilePath As String, _
-	  ByVal strOutputFolderPath As String, _
-	  ByRef udtInspectModInfo() As udtModInfoType, _
-	  ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), _
-	  ByRef strMTSPepToProteinMapFilePath As String) As Boolean
+    Protected Function LoadPeptideToProteinMapInfoInspect(
+      ByVal strPepToProteinMapFilePath As String, _
+      ByVal strOutputFolderPath As String, _
+      ByRef udtInspectModInfo() As udtModInfoType, _
+      ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), _
+      ByRef strMTSPepToProteinMapFilePath As String) As Boolean
 
-		Dim strHeaderLine As String = String.Empty
-		Dim strMTSCompatiblePeptide As String
+        Dim strHeaderLine As String = String.Empty
+        Dim strMTSCompatiblePeptide As String
 
-		Dim blnSuccess As Boolean = False
+        Dim blnSuccess As Boolean = False
 
-		Try
-			strMTSPepToProteinMapFilePath = String.Empty
+        Try
+            strMTSPepToProteinMapFilePath = String.Empty
 
-			If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
-				Console.WriteLine()
-				ReportWarning("PepToProteinMap file is not defined")
-				Return False
-			ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
-				Console.WriteLine()
-				ReportWarning("PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
-				Return False
-			End If
+            If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
+                Console.WriteLine()
+                ReportWarning("PepToProteinMap file is not defined")
+                Return False
+            ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
+                Console.WriteLine()
+                ReportWarning("PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
+                Return False
+            End If
 
-			' Initialize lstPepToProteinMapping
-			lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
+            ' Initialize lstPepToProteinMapping
+            lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
-			' Read the data in strProteinToPeptideMappingFilePath
-			blnSuccess = LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
+            ' Read the data in strProteinToPeptideMappingFilePath
+            blnSuccess = LoadPeptideToProteinMapInfo(strPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
 
-			If blnSuccess Then
-				strMTSPepToProteinMapFilePath = Path.Combine(strOutputFolderPath, Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
+            If blnSuccess Then
+                strMTSPepToProteinMapFilePath = Path.Combine(strOutputFolderPath, Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
 
-				Using swOutFile As StreamWriter = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
-					If Not String.IsNullOrEmpty(strHeaderLine) Then
-						' Header line
-						swOutFile.WriteLine(strHeaderLine)
-					End If
+                Using swOutFile As StreamWriter = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    If Not String.IsNullOrEmpty(strHeaderLine) Then
+                        ' Header line
+                        swOutFile.WriteLine(strHeaderLine)
+                    End If
 
-					For intIndex As Integer = 0 To lstPepToProteinMapping.Count - 1
-						' Replace any mod text names in the peptide sequence with the appropriate mod symbols
-						' In addition, replace the * terminus symbols with dashes
-						strMTSCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), udtInspectModInfo)
+                    For intIndex As Integer = 0 To lstPepToProteinMapping.Count - 1
+                        ' Replace any mod text names in the peptide sequence with the appropriate mod symbols
+                        ' In addition, replace the * terminus symbols with dashes
+                        strMTSCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), udtInspectModInfo)
 
-						If lstPepToProteinMapping(intIndex).Peptide <> strMTSCompatiblePeptide Then
-							UpdatePepToProteinMapPeptide(lstPepToProteinMapping, intIndex, strMTSCompatiblePeptide)
-						End If
+                        If lstPepToProteinMapping(intIndex).Peptide <> strMTSCompatiblePeptide Then
+                            UpdatePepToProteinMapPeptide(lstPepToProteinMapping, intIndex, strMTSCompatiblePeptide)
+                        End If
 
-						swOutFile.WriteLine( _
-						  lstPepToProteinMapping(intIndex).Peptide & ControlChars.Tab & _
-						  lstPepToProteinMapping(intIndex).Protein & ControlChars.Tab & _
-						  lstPepToProteinMapping(intIndex).ResidueStart & ControlChars.Tab & _
-						  lstPepToProteinMapping(intIndex).ResidueEnd)
+                        swOutFile.WriteLine( _
+                          lstPepToProteinMapping(intIndex).Peptide & ControlChars.Tab & _
+                          lstPepToProteinMapping(intIndex).Protein & ControlChars.Tab & _
+                          lstPepToProteinMapping(intIndex).ResidueStart & ControlChars.Tab & _
+                          lstPepToProteinMapping(intIndex).ResidueEnd)
 
-					Next
+                    Next
 
 
-				End Using
+                End Using
 
-			End If
+            End If
 
-		Catch ex As Exception
-			SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" & Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" & Path.GetFileName(strMTSPepToProteinMapFilePath) & "): " & ex.Message)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 	Private Function ParseInspectSynFileHeaderLine(ByVal strLineIn As String, _
 	  ByRef intColumnMapping() As Integer) As Boolean
@@ -1506,6 +1507,10 @@ Public Class clsInSpecTResultsProcessor
 					Console.WriteLine(MyBase.ProgressStepDescription)
 
 					blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
+
+                    ' Remove all items from lstPepToProteinMapping to reduce memory overhead
+                    lstPepToProteinMapping.Clear()
+                    lstPepToProteinMapping.TrimExcess()
 
 					If blnSuccess AndAlso mCreateProteinModsFile Then
 						' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder

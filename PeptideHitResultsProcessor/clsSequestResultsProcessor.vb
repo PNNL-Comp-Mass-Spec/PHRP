@@ -531,135 +531,143 @@ Public Class clsSequestResultsProcessor
 				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
 				blnSuccess = False
 			End Try
+          
+            If blnSuccess AndAlso mCreateProteinModsFile Then
+                blnSuccess = CreateProteinModsFileWork(fiInputFile, strOutputFolderPath)
+            End If
 
-			If blnSuccess AndAlso mCreateProteinModsFile Then
-				' First create the MTS PepToProteinMap file using fiInputFile
-				' Will also look for the first hits or synopsis file and use that too if it is present
+            If blnSuccess Then
+                MyBase.OperationComplete()
+            End If
 
-				Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
-				Dim strMTSPepToProteinMapFilePath As String = String.Empty
+        Catch ex As Exception
+            SetErrorMessage("Error in clsSequestResultsProcessor.ProcessFile:  " & ex.Message)
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+        End Try
 
-				Dim strAdditionalFile As String
-				Dim strInputFileBaseName As String = IO.Path.GetFileNameWithoutExtension(fiInputFile.Name)
+        Return blnSuccess
 
-				lstSourcePHRPDataFiles.Add(fiInputFile.FullName)
-				If strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE) Then
-					strAdditionalFile = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_FIRST_HITS_FILE)
-					If File.Exists(strAdditionalFile) Then
-						lstSourcePHRPDataFiles.Add(strAdditionalFile)
-					End If
+    End Function
 
-				ElseIf strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE) Then
-					strAdditionalFile = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_SYNOPSIS_FILE)
-					If File.Exists(strAdditionalFile) Then
-						lstSourcePHRPDataFiles.Add(strAdditionalFile)
-					End If
-				End If
+    Private Function CreateProteinModsFileWork(fiInputFile As FileInfo, strOutputFolderPath As String) As Boolean
+        Dim blnSuccess As Boolean
 
-				strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
+        ' First create the MTS PepToProteinMap file using fiInputFile
+        ' Will also look for the first hits or synopsis file and use that too if it is present
 
-				If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
-					blnSuccess = True
-				Else
-					' Mapping file does not exist
-					blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
-					If Not blnSuccess Then
-						ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
-					End If
-				End If
+        Dim lstSourcePHRPDataFiles = New List(Of String)
+        Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
-				If blnSuccess Then
-					' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-					MyBase.ValidatePHRPReaderSupportFiles(strInputFilePath, strOutputFolderPath)
+        Dim strAdditionalFile As String
+        Dim strInputFileBaseName As String = IO.Path.GetFileNameWithoutExtension(fiInputFile.Name)
 
-					' Now create the Protein Mods file
-					blnSuccess = MyBase.CreateProteinModDetailsFile(strInputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest)
-				End If
+        lstSourcePHRPDataFiles.Add(fiInputFile.FullName)
+        If strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE) Then
+            strAdditionalFile = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_FIRST_HITS_FILE)
+            If File.Exists(strAdditionalFile) Then
+                lstSourcePHRPDataFiles.Add(strAdditionalFile)
+            End If
 
-				If Not blnSuccess Then
-					' Do not treat this as a fatal error
-					blnSuccess = True
-				End If
+        ElseIf strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE) Then
+            strAdditionalFile = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_SYNOPSIS_FILE)
+            If File.Exists(strAdditionalFile) Then
+                lstSourcePHRPDataFiles.Add(strAdditionalFile)
+            End If
+        End If
 
-			End If
+        strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
 
-			If blnSuccess Then
-				MyBase.OperationComplete()
-			End If
+        If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+            blnSuccess = True
+        Else
+            ' Mapping file does not exist
+            blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+            If Not blnSuccess Then
+                ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+            End If
+        End If
 
-		Catch ex As Exception
-			SetErrorMessage("Error in clsSequestResultsProcessor.ProcessFile:  " & ex.Message)
-			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
-		End Try
+        If blnSuccess Then
+            ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+            MyBase.ValidatePHRPReaderSupportFiles(fiInputFile.FullName, strOutputFolderPath)
 
-		Return blnSuccess
+            ' Now create the Protein Mods file
+            blnSuccess = MyBase.CreateProteinModDetailsFile(fiInputFile.FullName, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest)
+        End If
 
-	End Function
+        If Not blnSuccess Then
+            ' Do not treat this as a fatal error
+            blnSuccess = True
+        End If
 
-	Private Function ParseSequestSynFileHeaderLine(ByVal strLineIn As String, _
-												   ByRef intColumnMapping() As Integer) As Boolean
+        Return blnSuccess
 
-		' Parse the header line
+    End Function
 
-		Dim strSplitLine() As String
-		Dim eResultFileColumn As eSequestSynopsisFileColumns
-		Dim lstColumnNames As SortedDictionary(Of String, eSequestSynopsisFileColumns)
-		lstColumnNames = New SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+    Private Function ParseSequestSynFileHeaderLine(ByVal strLineIn As String, _
+                                                   ByRef intColumnMapping() As Integer) As Boolean
 
-		ReDim intColumnMapping(SequestSynopsisFileColCount - 1)
+        ' Parse the header line
 
-		lstColumnNames.Add("HitNum", eSequestSynopsisFileColumns.RowIndex)
-		lstColumnNames.Add("ScanNum", eSequestSynopsisFileColumns.Scan)
-		lstColumnNames.Add("ScanCount", eSequestSynopsisFileColumns.NumScans)
-		lstColumnNames.Add("ChargeState", eSequestSynopsisFileColumns.Charge)
-		lstColumnNames.Add("MH", eSequestSynopsisFileColumns.PeptideMH)
-		lstColumnNames.Add("XCorr", eSequestSynopsisFileColumns.XCorr)
-		lstColumnNames.Add("DelCn", eSequestSynopsisFileColumns.DeltaCn)
-		lstColumnNames.Add("Sp", eSequestSynopsisFileColumns.Sp)
-		lstColumnNames.Add("Reference", eSequestSynopsisFileColumns.ProteinName)
-		lstColumnNames.Add("MultiProtein", eSequestSynopsisFileColumns.MultipleProteinCount)					 ' Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
-		lstColumnNames.Add("Peptide", eSequestSynopsisFileColumns.PeptideSequence)
-		lstColumnNames.Add("DelCn2", eSequestSynopsisFileColumns.DeltaCn2)
-		lstColumnNames.Add("RankSP", eSequestSynopsisFileColumns.RankSP)
-		lstColumnNames.Add("RankXC", eSequestSynopsisFileColumns.RankXC)
-		lstColumnNames.Add("DelM", eSequestSynopsisFileColumns.DelM)
-		lstColumnNames.Add("XcRatio", eSequestSynopsisFileColumns.XcRatio)
-		lstColumnNames.Add("PassFilt", eSequestSynopsisFileColumns.PassFilt)				' Legacy/unused
-		lstColumnNames.Add("MScore", eSequestSynopsisFileColumns.MScore)					' Legacy/unused
-		lstColumnNames.Add("NumTrypticEnds", eSequestSynopsisFileColumns.NTT)
-		lstColumnNames.Add("Ions_Observed", eSequestSynopsisFileColumns.IonsObserved)
-		lstColumnNames.Add("Ions_Expected", eSequestSynopsisFileColumns.IonsExpected)
-		lstColumnNames.Add("DelM_PPM", eSequestSynopsisFileColumns.DelMPPM)
+        Dim strSplitLine() As String
+        Dim eResultFileColumn As eSequestSynopsisFileColumns
+        Dim lstColumnNames As SortedDictionary(Of String, eSequestSynopsisFileColumns)
+        lstColumnNames = New SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.CurrentCultureIgnoreCase)
 
-		' The following columns are computed by this program and appended to the input file or saved in a new file
-		lstColumnNames.Add("Cleavage_State", eSequestSynopsisFileColumns.Cleavage_State)
-		lstColumnNames.Add("Terminus_State", eSequestSynopsisFileColumns.Terminus_State)
-		lstColumnNames.Add("Mod_Count", eSequestSynopsisFileColumns.Mod_Count)
-		lstColumnNames.Add("Mod_Description", eSequestSynopsisFileColumns.Mod_Description)
-		lstColumnNames.Add("Monoisotopic_Mass", eSequestSynopsisFileColumns.Monoisotopic_Mass)
+        ReDim intColumnMapping(SequestSynopsisFileColCount - 1)
 
-		Try
-			' Initialize each entry in intColumnMapping to -1
-			For intIndex As Integer = 0 To intColumnMapping.Length - 1
-				intColumnMapping(intIndex) = -1
-			Next
+        lstColumnNames.Add("HitNum", eSequestSynopsisFileColumns.RowIndex)
+        lstColumnNames.Add("ScanNum", eSequestSynopsisFileColumns.Scan)
+        lstColumnNames.Add("ScanCount", eSequestSynopsisFileColumns.NumScans)
+        lstColumnNames.Add("ChargeState", eSequestSynopsisFileColumns.Charge)
+        lstColumnNames.Add("MH", eSequestSynopsisFileColumns.PeptideMH)
+        lstColumnNames.Add("XCorr", eSequestSynopsisFileColumns.XCorr)
+        lstColumnNames.Add("DelCn", eSequestSynopsisFileColumns.DeltaCn)
+        lstColumnNames.Add("Sp", eSequestSynopsisFileColumns.Sp)
+        lstColumnNames.Add("Reference", eSequestSynopsisFileColumns.ProteinName)
+        lstColumnNames.Add("MultiProtein", eSequestSynopsisFileColumns.MultipleProteinCount)                     ' Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
+        lstColumnNames.Add("Peptide", eSequestSynopsisFileColumns.PeptideSequence)
+        lstColumnNames.Add("DelCn2", eSequestSynopsisFileColumns.DeltaCn2)
+        lstColumnNames.Add("RankSP", eSequestSynopsisFileColumns.RankSP)
+        lstColumnNames.Add("RankXC", eSequestSynopsisFileColumns.RankXC)
+        lstColumnNames.Add("DelM", eSequestSynopsisFileColumns.DelM)
+        lstColumnNames.Add("XcRatio", eSequestSynopsisFileColumns.XcRatio)
+        lstColumnNames.Add("PassFilt", eSequestSynopsisFileColumns.PassFilt)                ' Legacy/unused
+        lstColumnNames.Add("MScore", eSequestSynopsisFileColumns.MScore)                    ' Legacy/unused
+        lstColumnNames.Add("NumTrypticEnds", eSequestSynopsisFileColumns.NTT)
+        lstColumnNames.Add("Ions_Observed", eSequestSynopsisFileColumns.IonsObserved)
+        lstColumnNames.Add("Ions_Expected", eSequestSynopsisFileColumns.IonsExpected)
+        lstColumnNames.Add("DelM_PPM", eSequestSynopsisFileColumns.DelMPPM)
 
-			strSplitLine = strLineIn.Split(ControlChars.Tab)
-			For intIndex As Integer = 0 To strSplitLine.Length - 1
-				If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
-					' Recognized column name; update intColumnMapping
-					intColumnMapping(eResultFileColumn) = intIndex
-				End If
-			Next
+        ' The following columns are computed by this program and appended to the input file or saved in a new file
+        lstColumnNames.Add("Cleavage_State", eSequestSynopsisFileColumns.Cleavage_State)
+        lstColumnNames.Add("Terminus_State", eSequestSynopsisFileColumns.Terminus_State)
+        lstColumnNames.Add("Mod_Count", eSequestSynopsisFileColumns.Mod_Count)
+        lstColumnNames.Add("Mod_Description", eSequestSynopsisFileColumns.Mod_Description)
+        lstColumnNames.Add("Monoisotopic_Mass", eSequestSynopsisFileColumns.Monoisotopic_Mass)
 
-		Catch ex As Exception
-			SetErrorMessage("Error parsing header in Sequest synopsis file: " & ex.Message)
-			Return False
-		End Try
+        Try
+            ' Initialize each entry in intColumnMapping to -1
+            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+                intColumnMapping(intIndex) = -1
+            Next
 
-		Return True
+            strSplitLine = strLineIn.Split(ControlChars.Tab)
+            For intIndex As Integer = 0 To strSplitLine.Length - 1
+                If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
+                    ' Recognized column name; update intColumnMapping
+                    intColumnMapping(eResultFileColumn) = intIndex
+                End If
+            Next
 
-	End Function
+        Catch ex As Exception
+            SetErrorMessage("Error parsing header in Sequest synopsis file: " & ex.Message)
+            Return False
+        End Try
+
+        Return True
+
+    End Function
 
 	''Private Sub SaveSequestResultsFileEntry(ByRef objSearchResult As clsSearchResultsSequest, ByRef swSynopsisOutputFile As StreamWriter)
 

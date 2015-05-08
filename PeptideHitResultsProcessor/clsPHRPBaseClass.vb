@@ -32,7 +32,7 @@ Imports System.Text.RegularExpressions
 Public MustInherit Class clsPHRPBaseClass
 
 	Public Sub New()
-		mFileDate = "June 12, 2014"
+        mFileDate = "May 7, 2015"
 		InitializeLocalVariables()
 	End Sub
 
@@ -983,8 +983,7 @@ Public MustInherit Class clsPHRPBaseClass
 
 		Dim intPepToProteinMapIndex As Integer
 
-		Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType) = New List(Of udtPepToProteinMappingType)
-		Dim strHeaderLine As String = String.Empty
+        Dim strHeaderLine As String = String.Empty
 
 		Dim fiPHRPDataFile As FileInfo
 		Dim strProteinModsFilePath As String
@@ -1020,6 +1019,9 @@ Public MustInherit Class clsPHRPBaseClass
 				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
 				Return False
 			End If
+
+            ' Initialize lstPepToProteinMapping
+            Dim lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
 			' Read the _PepToProtMapMTS file
 			blnSuccess = LoadPeptideToProteinMapInfo(strMTSPepToProteinMapFilePath, lstPepToProteinMapping, strHeaderLine)
@@ -1189,6 +1191,15 @@ Public MustInherit Class clsPHRPBaseClass
 			' Ignore errors here
 		End Try
 	End Sub
+
+    Protected Sub ExpandListIfRequired(Of T)(lstItems As List(Of T), countToAdd As Integer, Optional ByVal largeListThreshold As Integer = 1000000)
+
+        If lstItems.Count > largeListThreshold AndAlso lstItems.Count + countToAdd > lstItems.Capacity Then
+            ' .NET by default will double the size of the list to accomodate these new items
+            ' Instead, expand the list by 20% of the current size
+            lstItems.Capacity = lstItems.Capacity + CInt(lstItems.Count / 5)
+        End If
+    End Sub
 
 	Protected Function FindFirstMatchInPepToProteinMapping(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal strPeptideToFind As String) As Integer
 
@@ -1617,87 +1628,88 @@ Public MustInherit Class clsPHRPBaseClass
 	''' Load the PeptideToProteinMap information
 	''' </summary>
 	''' <param name="strPepToProteinMapFilePath">File to read</param>
-	''' <param name="lstPepToProteinMapping">Output parameter: peptide to protein mapping</param>
+    ''' <param name="lstPepToProteinMapping">Output parameter: peptide to protein mapping (calling function must pre-initialize the list)</param>
 	''' <param name="strHeaderLine">Output parameter: Header line text</param>
 	''' <returns></returns>
 	''' <remarks></remarks>
-	Protected Function LoadPeptideToProteinMapInfo(ByVal strPepToProteinMapFilePath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByRef strHeaderLine As String) As Boolean
+    Protected Function LoadPeptideToProteinMapInfo(
+       ByVal strPepToProteinMapFilePath As String,
+       ByVal lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
+       ByRef strHeaderLine As String) As Boolean
 
-		Dim strLineIn As String
-		Dim strSplitLine As String()
+        Dim strLineIn As String
+        Dim strSplitLine As String()
 
-		Dim intLinesRead As Integer
-		Dim intValue As Integer
+        Dim intLinesRead As Integer
+        Dim intValue As Integer
 
-		Dim blnSuccess As Boolean = False
+        Dim blnSuccess As Boolean = False
 
-		Try
+        Try
 
-			' Initialize the output parameters
-			If lstPepToProteinMapping Is Nothing Then
-				lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
-			Else
-				lstPepToProteinMapping.Clear()
-			End If
-			strHeaderLine = String.Empty
+            ' Initialize the output parameters
+            lstPepToProteinMapping.Clear()
+            strHeaderLine = String.Empty
 
-			If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
-				SetErrorMessage("Warning: PepToProteinMap file is not defined")
-				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
-				Return False
-			ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
-				SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
-				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
-				Return False
-			End If
+            If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
+                SetErrorMessage("Warning: PepToProteinMap file is not defined")
+                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
+                Return False
+            ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
+                SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
+                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
+                Return False
+            End If
 
-			' Open strProteinToPeptideMappingFilePath for reading
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strPepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            ' Open strProteinToPeptideMappingFilePath for reading
+            Using srInFile = New StreamReader(New FileStream(strPepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-				intLinesRead = 0
-				Do While srInFile.Peek > -1
-					strLineIn = srInFile.ReadLine().Trim()
+                intLinesRead = 0
+                Do While srInFile.Peek > -1
+                    strLineIn = srInFile.ReadLine().Trim()
 
-					If strLineIn.Length > 0 Then
+                    If strLineIn.Length > 0 Then
 
-						' Split the line on tabs
-						strSplitLine = strLineIn.Split(ControlChars.Tab)
+                        ' Split the line on tabs
+                        strSplitLine = strLineIn.Split(ControlChars.Tab)
 
-						If strSplitLine.Length >= 4 Then
+                        If strSplitLine.Length >= 4 Then
 
-							If intLinesRead = 0 AndAlso Not Integer.TryParse(strSplitLine(2), intValue) Then
-								' Header line; cache it
-								strHeaderLine = String.Copy(strLineIn)
-							Else
-								Dim udtPepToProteinMappingEntry As udtPepToProteinMappingType
-								With udtPepToProteinMappingEntry
-									.Peptide = String.Copy(strSplitLine(0))
-									.Protein = String.Copy(strSplitLine(1))
-									Integer.TryParse(strSplitLine(2), .ResidueStart)
-									Integer.TryParse(strSplitLine(3), .ResidueEnd)
-								End With
+                            If intLinesRead = 0 AndAlso Not Integer.TryParse(strSplitLine(2), intValue) Then
+                                ' Header line; cache it
+                                strHeaderLine = String.Copy(strLineIn)
+                            Else
+                                Dim udtPepToProteinMappingEntry As udtPepToProteinMappingType
+                                With udtPepToProteinMappingEntry
+                                    .Peptide = String.Copy(strSplitLine(0))
+                                    .Protein = String.Copy(strSplitLine(1))
+                                    Integer.TryParse(strSplitLine(2), .ResidueStart)
+                                    Integer.TryParse(strSplitLine(3), .ResidueEnd)
+                                End With
 
-								lstPepToProteinMapping.Add(udtPepToProteinMappingEntry)
+                                ExpandListIfRequired(lstPepToProteinMapping, 1)
 
-							End If
-						End If
-					End If
+                                lstPepToProteinMapping.Add(udtPepToProteinMappingEntry)
 
-				Loop
+                            End If
+                        End If
+                    End If
 
-			End Using
+                Loop
 
-			blnSuccess = True
+            End Using
 
-		Catch ex As Exception
-			SetErrorMessage("Error reading the Peptide to Protein Map File (" & Path.GetFileName(strPepToProteinMapFilePath) & "): " & ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
-			blnSuccess = False
-		End Try
+            blnSuccess = True
 
-		Return blnSuccess
+        Catch ex As Exception
+            SetErrorMessage("Error reading the Peptide to Protein Map File (" & Path.GetFileName(strPepToProteinMapFilePath) & "): " & ex.Message)
+            SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
+            blnSuccess = False
+        End Try
 
-	End Function
+        Return blnSuccess
+
+    End Function
 
 	Protected Function NumToString(ByVal intNumber As Integer, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
 		Return intNumber.ToString()

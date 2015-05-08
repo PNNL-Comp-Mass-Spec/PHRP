@@ -1400,86 +1400,93 @@ Public Class clsXTandemResultsProcessor
 				strXtandemXTFilePath = Path.Combine(strOutputFolderPath, strXtandemXTFilePath)
 				blnSuccess = ParseXTandemResultsFile(fiInputFile.FullName, strXtandemXTFilePath, False)
 
-				If blnSuccess AndAlso mCreateProteinModsFile Then
+                If blnSuccess AndAlso mCreateProteinModsFile Then
+                    blnSuccess = CreateProteinModsFileWork(fiInputFile, strOutputFolderPath, strXtandemXTFilePath)
+                End If
 
-					' First create the MTS PepToProteinMap file using fiInputFile
-					Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
-					Dim strMTSPepToProteinMapFilePath As String = String.Empty
+                If blnSuccess Then
+                    MyBase.OperationComplete()
+                End If
 
-					lstSourcePHRPDataFiles.Add(strXtandemXTFilePath)
+            Catch ex As Exception
+                SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (2): " & ex.Message)
+                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+            End Try
 
-					strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strInputFilePath, strOutputFolderPath, MTS:=True)
+        Catch ex As Exception
+            SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (1):" & ex.Message)
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+        End Try
 
-					If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
-						blnSuccess = True
-					Else
-						blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
-						If Not blnSuccess Then
-							ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
-						End If
-					End If
+        Return blnSuccess
 
-					If blnSuccess Then
-						' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-						MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath)
+    End Function
 
-						' Now create the Protein Mods file
-						blnSuccess = MyBase.CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem)
-					End If
+    Private Function CreateProteinModsFileWork(fiInputFile As FileInfo, strOutputFolderPath As String, strXtandemXTFilePath As String) As Boolean
+        Dim blnSuccess As Boolean
 
-					If Not blnSuccess Then
-						' Do not treat this as a fatal error
-						blnSuccess = True
-					End If
-				End If
 
-				If blnSuccess Then
-					MyBase.OperationComplete()
-				End If
+        ' First create the MTS PepToProteinMap file using fiInputFile
+        Dim lstSourcePHRPDataFiles = New List(Of String)
+        Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
-			Catch ex As Exception
-				SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (2): " & ex.Message)
-				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-			End Try
+        lstSourcePHRPDataFiles.Add(strXtandemXTFilePath)
 
-		Catch ex As Exception
-			SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (1):" & ex.Message)
-			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
-		End Try
+        strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
 
-		Return blnSuccess
+        If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+            blnSuccess = True
+        Else
+            blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+            If Not blnSuccess Then
+                ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+            End If
+        End If
 
-	End Function
+        If blnSuccess Then
+            ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath)
 
-	Private Sub SaveXTandemResultsFileEntry(ByRef objSearchResult As clsSearchResultsXTandem, ByRef swPeptideResultsFile As StreamWriter)
+            ' Now create the Protein Mods file
+            blnSuccess = MyBase.CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem)
+        End If
 
-		With objSearchResult
-			' Update .ResultID to the next available number
-			.ResultID = mNextResultID
-			mNextResultID += 1
+        If Not blnSuccess Then
+            ' Do not treat this as a fatal error
+            blnSuccess = True
+        End If
+        Return blnSuccess
+    End Function
 
-			' Write the results to the output file
-			swPeptideResultsFile.WriteLine( _
-			  .ResultID & SEP_CHAR & _
-			  .GroupID & SEP_CHAR & _
-			  .Scan & SEP_CHAR & _
-			  .Charge & SEP_CHAR & _
-			  .PeptideMH & SEP_CHAR & _
-			  .PeptideHyperscore & SEP_CHAR & _
-			  .PeptideExpectationValue & SEP_CHAR & _
-			  .MultipleProteinCount & SEP_CHAR & _
-			  .SequenceWithPrefixAndSuffix(True) & SEP_CHAR & _
-			  Math.Round(.PeptideDeltaCn2, 4).ToString & SEP_CHAR & _
-			  .PeptideYScore & SEP_CHAR & _
-			  .PeptideYIons & SEP_CHAR & _
-			  .PeptideBScore & SEP_CHAR & _
-			  .PeptideBIons & SEP_CHAR & _
-			  .PeptideDeltaMass & SEP_CHAR & _
-			  .PeptideIntensity & SEP_CHAR & _
-			  MyBase.NumToString(.PeptideDeltaMassCorrectedPpm, 4, True))
-		End With
+    Private Sub SaveXTandemResultsFileEntry(ByRef objSearchResult As clsSearchResultsXTandem, ByRef swPeptideResultsFile As StreamWriter)
 
-	End Sub
+        With objSearchResult
+            ' Update .ResultID to the next available number
+            .ResultID = mNextResultID
+            mNextResultID += 1
+
+            ' Write the results to the output file
+            swPeptideResultsFile.WriteLine( _
+              .ResultID & SEP_CHAR & _
+              .GroupID & SEP_CHAR & _
+              .Scan & SEP_CHAR & _
+              .Charge & SEP_CHAR & _
+              .PeptideMH & SEP_CHAR & _
+              .PeptideHyperscore & SEP_CHAR & _
+              .PeptideExpectationValue & SEP_CHAR & _
+              .MultipleProteinCount & SEP_CHAR & _
+              .SequenceWithPrefixAndSuffix(True) & SEP_CHAR & _
+              Math.Round(.PeptideDeltaCn2, 4).ToString & SEP_CHAR & _
+              .PeptideYScore & SEP_CHAR & _
+              .PeptideYIons & SEP_CHAR & _
+              .PeptideBScore & SEP_CHAR & _
+              .PeptideBIons & SEP_CHAR & _
+              .PeptideDeltaMass & SEP_CHAR & _
+              .PeptideIntensity & SEP_CHAR & _
+              MyBase.NumToString(.PeptideDeltaMassCorrectedPpm, 4, True))
+        End With
+
+    End Sub
 
 	Protected Overrides Function TruncateProteinName(ByVal strProteinNameAndDescription As String) As String
 
