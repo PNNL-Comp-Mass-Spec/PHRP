@@ -19,6 +19,11 @@ Imports System.Xml
 Public Class clsMODPlusResultsProcessor
     Inherits clsPHRPBaseClass
 
+    Public Sub New()
+        MyBase.New()
+        MyBase.mFileDate = "May 19, 2015"
+    End Sub
+
 #Region "Constants and Enums"
 
     Public Const FILENAME_SUFFIX_MODPlus_FILE As String = "_modp.id"
@@ -26,7 +31,8 @@ Public Class clsMODPlusResultsProcessor
     Public Const N_TERMINUS_SYMBOL_MODPlus As String = "-"
     Public Const C_TERMINUS_SYMBOL_MODPlus As String = "-"
 
-    Public Const DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD As Single = 0.2
+    ' This is used for filtering both MODa and MODPlus results
+    Public Const DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD As Single = 0.05
 
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
@@ -55,7 +61,7 @@ Public Class clsMODPlusResultsProcessor
     End Enum
 
     ' These columns correspond to the Synopsis file created by this class
-    Protected Const MODPlusSynFileColCount As Integer = 16
+    Protected Const MODPlusSynFileColCount As Integer = 17
     Public Enum eMODPlusSynFileColumns As Integer
         ResultID = 0
         Scan = 1
@@ -73,6 +79,7 @@ Public Class clsMODPlusResultsProcessor
         Score = 13
         Probability = 14
         Rank_Probability = 15
+        QValue = 16
     End Enum
 
 #End Region
@@ -100,6 +107,8 @@ Public Class clsMODPlusResultsProcessor
         Public NTT As String                    ' Number of Tryptic Terminii
         Public ProteinList As String            ' One or more protein entries of the form ref|YP_003651515.1[K.196~206.Q(2)] where the text in brackets is the start/stop residues of the peptide; Multiple entries will be separated by semicolons, e.g. ref|YP_003651515.1[K.196~206.Q(2)];ref|YP_003201491.1[K.223~233.Q(2)];ref|YP_003313784.1[K.266~276.Q(2)]
         Public ModificationAnnotation As String
+        Public FDR As Double                    ' Computed by this class
+        Public QValue As Double                 ' Computed by this class
 
         Public Sub Clear()
             SpectrumFileName = String.Empty
@@ -121,8 +130,15 @@ Public Class clsMODPlusResultsProcessor
             Peptide = String.Empty
             NTT = String.Empty
             ProteinList = String.Empty
-            ModificationAnnotation = String.Empty        
+            ModificationAnnotation = String.Empty
+            FDR = 0
+            QValue = 0
         End Sub
+
+        Public Overrides Function ToString() As String
+            Return Probability & ": " & Peptide
+        End Function
+
     End Structure
 
 #End Region
@@ -589,7 +605,7 @@ Public Class clsMODPlusResultsProcessor
             ' Read the contents of the parameter file
             Dim doc = New XmlDocument()
             doc.Load(fiParamFile.FullName)
-            
+
             Dim nodeList = doc.SelectNodes("/search/modifications/fixed/mod")
             If nodeList.Count > 0 Then
                 ' Store the fixed mods
@@ -625,7 +641,7 @@ Public Class clsMODPlusResultsProcessor
                 Next
 
             End If
-            
+
             Console.WriteLine()
 
             Return True
@@ -719,8 +735,8 @@ Public Class clsMODPlusResultsProcessor
                         Dim strCurrentPeptideWithMods As String = String.Empty
 
                         Dim blnValidSearchResult = ParseMODPlusSynFileEntry(
-                          strLineIn, objSearchResult, strErrorLog, _
-                          intResultsProcessed, intColumnMapping, _
+                          strLineIn, objSearchResult, strErrorLog,
+                          intResultsProcessed, intColumnMapping,
                           strCurrentPeptideWithMods)
 
                         If Not blnValidSearchResult Then
@@ -761,7 +777,7 @@ Public Class clsMODPlusResultsProcessor
                         End If
 
                         MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
-                        
+
                         ' Update the progress
                         Dim sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
                         If mCreateProteinModsFile Then
@@ -769,7 +785,7 @@ Public Class clsMODPlusResultsProcessor
                         End If
                         UpdateProgress(sngPercentComplete)
 
-                        intResultsProcessed += 1                    
+                        intResultsProcessed += 1
 
                     Loop
 
@@ -1090,7 +1106,8 @@ Public Class clsMODPlusResultsProcessor
         lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_Score, eMODPlusSynFileColumns.Score)
         lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_Probability, eMODPlusSynFileColumns.Probability)
         lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_Rank_Probability, eMODPlusSynFileColumns.Rank_Probability)
-        
+        lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_QValue, eMODPlusSynFileColumns.QValue)
+
         Try
             ' Initialize each entry in intColumnMapping to -1
             For intIndex As Integer = 0 To intColumnMapping.Length - 1
@@ -1218,12 +1235,12 @@ Public Class clsMODPlusResultsProcessor
                 Else
                     strErrorLog &= "Error parsing MODPlus Results in ParseMODPlusSynFileEntry" & ControlChars.NewLine
                 End If
-            End If            
+            End If
         End Try
 
         Return False
 
-      End Function
+    End Function
 
     ''' <summary>
     ''' Main processing function
@@ -1403,11 +1420,14 @@ Public Class clsMODPlusResultsProcessor
 
     Private Sub SortAndWriteFilteredSearchResults(
       ByVal swResultFile As StreamWriter,
-      ByRef lstFilteredSearchResults As List(Of udtMODPlusSearchResultType),
+      ByVal lstFilteredSearchResults As List(Of udtMODPlusSearchResultType),
       ByRef strErrorLog As String)
 
         ' Sort udtFilteredSearchResults by descending probability, ascending scan, ascending charge, ascending peptide, and ascending protein
         lstFilteredSearchResults.Sort(New MODPlusSearchResultsComparerProbabilityScanChargePeptide)
+
+        ' Compute FDR values then assign QValues
+        ComputeQValues(lstFilteredSearchResults)
 
         If mProteinNamePositionSplit Is Nothing Then
             mProteinNamePositionSplit = New Regex("(.+)\[([^\]]+)\]", RegexOptions.Compiled)
@@ -1415,7 +1435,7 @@ Public Class clsMODPlusResultsProcessor
 
         Dim resultID = 1
         For Each result In lstFilteredSearchResults
-            
+
             Dim proteinList = result.ProteinList.Split(";"c)
 
             If proteinList.Length = 0 Then
@@ -1442,6 +1462,87 @@ Public Class clsMODPlusResultsProcessor
 
             Next
 
+        Next
+
+    End Sub
+
+    ''' <summary>
+    ''' Compute FDR values then assign QValues
+    ''' </summary>
+    ''' <param name="lstSearchResults"></param>
+    ''' <remarks>Assumes the data is sorted by descending probability using MODPlusSearchResultsComparerProbabilityScanChargePeptide</remarks>
+    Private Sub ComputeQValues(ByVal lstSearchResults As List(Of udtMODPlusSearchResultType))
+
+        Dim forwardPeptideCount = 0
+        Dim reversePeptideCount = 0
+        Dim intIndex = 0
+
+        While intIndex < lstSearchResults.Count
+
+            ' Check for entries with multiple proteins listed
+            Dim intIndexEnd = intIndex
+            Do While intIndexEnd + 1 < lstSearchResults.Count
+                If lstSearchResults(intIndex).ScanNum = lstSearchResults(intIndexEnd + 1).ScanNum AndAlso
+                   lstSearchResults(intIndex).ChargeNum = lstSearchResults(intIndexEnd + 1).ChargeNum AndAlso
+                   lstSearchResults(intIndex).Peptide = lstSearchResults(intIndexEnd + 1).Peptide Then
+                    intIndexEnd += 1
+                Else
+                    Exit Do
+                End If
+            Loop
+
+            Dim isReverse = True
+
+            ' Look for non-reverse proteins
+            For intIndexCheck = intIndex To intIndexEnd
+                Dim proteinList = lstSearchResults(intIndexCheck).ProteinList.Split(";"c)
+
+                For Each proteinEntry In proteinList
+                    If Not IsReversedProtein(proteinEntry) Then
+                        isReverse = False
+                        Exit For
+                    End If
+                Next                
+            Next
+
+            If isReverse Then
+                reversePeptideCount += 1
+            Else
+                forwardPeptideCount += 1
+            End If
+
+            Dim dblFDR As Double = 1
+
+            If forwardPeptideCount > 0 Then
+                dblFDR = reversePeptideCount / CDbl(forwardPeptideCount)
+            End If
+
+            ' Store the FDR values
+            For intIndexStore = intIndex To intIndexEnd
+                Dim udtResult = lstSearchResults(intIndexStore)
+                udtResult.FDR = dblFDR
+
+                lstSearchResults(intIndexStore) = udtResult
+            Next
+
+            intIndex = intIndexEnd + 1
+        End While
+
+        ' Now compute QValues
+        ' We step through the list, from the worst scoring result to the best result
+        ' The first QValue is the FDR of the final entry
+        ' The next QValue is the minimum of (QValue, CurrentFDR)
+
+        Dim dblQValue = lstSearchResults.Last().FDR
+        If dblQValue > 1 Then dblQValue = 1
+
+        For intIndex = lstSearchResults.Count - 1 To 0 Step -1
+            Dim udtResult = lstSearchResults(intIndex)
+
+            dblQValue = Math.Min(dblQValue, udtResult.FDR)
+            udtResult.QValue = dblQValue
+
+            lstSearchResults(intIndex) = udtResult
         Next
 
     End Sub
@@ -1490,6 +1591,7 @@ Public Class clsMODPlusResultsProcessor
             lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_Score)
             lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_Probability)
             lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_Rank_Probability)
+            lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_QValue)
 
             swResultFile.WriteLine(CollapseList(lstData))
 
@@ -1522,7 +1624,7 @@ Public Class clsMODPlusResultsProcessor
             ' Primary Columns
             '
             ' MODPlus
-            ' ResultID	Scan	Spectrum_Index	Charge	PrecursorMZ	DelM	DelM_PPM	MH	Peptide	NTT	ModificationAnnotation	Protein	Peptide_Position	Score	Probability	Rank_Probability
+            ' ResultID	Scan	Spectrum_Index	Charge	PrecursorMZ	DelM	DelM_PPM	MH	Peptide	NTT	ModificationAnnotation	Protein	Peptide_Position	Score	Probability	Rank_Probability   QValue
 
             Dim lstData As New List(Of String)
             lstData.Add(intResultID.ToString)
@@ -1541,6 +1643,7 @@ Public Class clsMODPlusResultsProcessor
             lstData.Add(udtSearchResult.Score)
             lstData.Add(udtSearchResult.Probability)
             lstData.Add(udtSearchResult.RankProbability.ToString())
+            lstData.Add(udtSearchResult.QValue.ToString("0.000000"))
 
             swResultFile.WriteLine(CollapseList(lstData))
 

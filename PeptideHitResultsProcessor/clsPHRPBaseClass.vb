@@ -36,7 +36,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
-        mFileDate = "May 18, 2015"
+        mFileDate = "May 19, 2015"
         InitializeLocalVariables()
     End Sub
 
@@ -342,6 +342,15 @@ Public MustInherit Class clsPHRPBaseClass
         End Get
         Set(ByVal Value As String)
             mModificationDefinitionsFilePath = Value
+        End Set
+    End Property
+
+    Public Property MODaMODPlusSynopsisFileProbabilityThreshold As Single
+        Get
+            Return mMODaMODPlusSynopsisFileProbabilityThreshold
+        End Get
+        Set(value As Single)
+            mMODaMODPlusSynopsisFileProbabilityThreshold = value
         End Set
     End Property
 
@@ -1408,7 +1417,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         mInspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
-        mMODaMODPlusSynopsisFileProbabilityThreshold = clsMODaResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+        mMODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
 
         mMSAlignSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 

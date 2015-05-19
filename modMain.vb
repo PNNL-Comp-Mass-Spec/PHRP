@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "March 16, 2015"
+    Public Const PROGRAM_DATE As String = "May 19, 2015"
 
 	Private mInputFilePath As String
 	Private mOutputFolderPath As String							' Optional
@@ -41,6 +41,8 @@ Module modMain
 	Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
 
 	Private mInspectSynopsisFilePValueThreshold As Single		' Optional
+
+    Private mMODaMODPlusSynopsisFileProbabilityThreshold As Single
 
 	Private mOutputFolderAlternatePath As String				' Optional
 	Private mRecreateFolderHierarchyInAlternatePath As Boolean	' Optional
@@ -108,7 +110,8 @@ Module modMain
 		mCreateInspectOrMSGFDBSynopsisFile = True
 		mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
-		mRecurseFolders = False
+        mMODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+
 		mRecurseFoldersMaxLevels = 0
 
 		mQuietMode = False
@@ -154,7 +157,10 @@ Module modMain
 
 					.CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
 					.CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
-					.InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
+                    .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
+
+                    .MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
+
 				End With
 
 				If mRecurseFolders Then
@@ -240,7 +246,11 @@ Module modMain
 		Dim sngValue As Single
 		Dim intValue As Integer
 		Dim blnValue As Boolean
-		Dim lstValidParameters As List(Of String) = New List(Of String) From {"I", "O", "P", "M", "T", "N", "ProteinMods", "F", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed", "SynPvalue", "InsFHT", "InsSyn", "S", "A", "R", "L", "Q"}
+        Dim lstValidParameters As List(Of String) = New List(Of String) From {
+            "I", "O", "P", "M", "T", "N", "ProteinMods", "F",
+            "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
+            "SynPvalue", "InsFHT", "InsSyn", "SynProb",
+            "S", "A", "R", "L", "Q"}
 
 		Try
 			' Make sure no invalid parameters are present
@@ -290,9 +300,15 @@ Module modMain
 
 					If .RetrieveValueForParameter("SynPvalue", strValue) Then
 						If Single.TryParse(strValue, sngValue) Then
-							mInspectSynopsisFilePValueThreshold = sngValue
+                            mInspectSynopsisFilePValueThreshold = sngValue
 						End If
-					End If
+                    End If
+
+                    If .RetrieveValueForParameter("SynProb", strValue) Then
+                        If Single.TryParse(strValue, sngValue) Then
+                            mMODaMODPlusSynopsisFileProbabilityThreshold = sngValue
+                        End If
+                    End If
 
 					If .RetrieveValueForParameter("S", strValue) Then
 						mRecurseFolders = True
@@ -375,8 +391,9 @@ Module modMain
 			Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
 			Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]")
 			Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]")
-			Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] [/SynPvalue:0.2]")
-			Console.WriteLine(" [/InsFHT:True|False] [/InsSyn:True|False]")
+            Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]")
+            Console.WriteLine(" [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]")
+            Console.WriteLine(" [/SynProb:0.05]")
 			Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
 			Console.WriteLine()
 			Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)")
@@ -398,7 +415,9 @@ Module modMain
 			Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when processing Inspect or MSGF-DB results (default is /InsFHT:True)")
 			Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when processing Inspect or MSGF-DB results (default is /InsSyn:True)")
 			Console.WriteLine()
-			Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
+            Console.WriteLine("When processing a MODPlus or MODa results file, use /SynProb to customize the Probability threshold used to determine which peptides are written to the the synopsis file.  The default is /Synprob:0.05")
+            Console.WriteLine()
+            Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
 			Console.WriteLine("When using /S, you can redirect the output of the results using /A.")
 			Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).")
 			Console.WriteLine()

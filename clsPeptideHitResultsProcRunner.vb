@@ -75,6 +75,8 @@ Public Class clsPeptideHitResultsProcRunner
     Protected mCreateInspectOrMSGFDBSynopsisFile As Boolean = True
     Protected mInspectSynopsisFilePValueThreshold As Single
 
+    Protected mMODaMODPlusSynopsisFileProbabilityThreshold As Single
+
     Protected WithEvents mPeptideHitResultsProcessor As PeptideHitResultsProcessor.clsPHRPBaseClass
 
     Protected mWarnMissingParameterFileSection As Boolean
@@ -167,6 +169,15 @@ Public Class clsPeptideHitResultsProcRunner
         End Get
         Set(ByVal Value As String)
             mModificationDefinitionsFilePath = Value
+        End Set
+    End Property
+
+    Public Property MODaMODPlusSynopsisFileProbabilityThreshold As Single
+        Get
+            Return mMODaMODPlusSynopsisFileProbabilityThreshold
+        End Get
+        Set(value As Single)
+            mMODaMODPlusSynopsisFileProbabilityThreshold = value
         End Set
     End Property
 
@@ -273,6 +284,8 @@ Public Class clsPeptideHitResultsProcRunner
         mCreateInspectOrMSGFDBSynopsisFile = False
         mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
+        mMODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+
         mWarnMissingParameterFileSection = True
 
         mLocalErrorCode = eResultsProcessorErrorCodes.NoError
@@ -301,7 +314,9 @@ Public Class clsPeptideHitResultsProcRunner
 
 			.CreateInspectFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
 			.CreateInspectSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
-			.InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
+            .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
+
+            .MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
 
 			.CreateMSGFDBFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
 			.CreateMSGFDBSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile

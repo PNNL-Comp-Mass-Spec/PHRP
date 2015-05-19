@@ -35,6 +35,7 @@ Public Class clsPHRPParserMODPlus
     Public Const DATA_COLUMN_Score As String = "Score"
     Public Const DATA_COLUMN_Probability As String = "Probability"
     Public Const DATA_COLUMN_Rank_Probability As String = "Rank_Probability"
+    Public Const DATA_COLUMN_QValue As String = "QValue"
 
     Public Const FILENAME_SUFFIX_SYN As String = "_modp_syn.txt"
     Public Const FILENAME_SUFFIX_FHT As String = "_modp_fht.txt"
@@ -156,6 +157,7 @@ Public Class clsPHRPParserMODPlus
         AddHeaderColumn(DATA_COLUMN_Score)
         AddHeaderColumn(DATA_COLUMN_Probability)
         AddHeaderColumn(DATA_COLUMN_Rank_Probability)        
+        AddHeaderColumn(DATA_COLUMN_QValue)
 
     End Sub
 
@@ -423,6 +425,7 @@ Public Class clsPHRPParserMODPlus
 
                 AddScore(objPSM, strColumns, DATA_COLUMN_Score)
                 AddScore(objPSM, strColumns, DATA_COLUMN_Probability)
+                AddScore(objPSM, strColumns, DATA_COLUMN_QValue)
 
             End If
 

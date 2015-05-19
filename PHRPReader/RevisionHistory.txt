@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5617; May 19, 2015
+	- Added QValue column to MODPlus result files
+
 Version 1.1.5616; May 18, 2015
 	- Added support for MODPlus
 
