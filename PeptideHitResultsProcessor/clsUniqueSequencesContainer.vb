@@ -1,6 +1,6 @@
 Option Strict On
 
-' This class can be used to track peptide sequences and their modification descriptors
+' This class is used to track peptide sequences and their modification descriptors
 ' It assigns a unique integer ID to each combination of sequence and modification description
 '
 ' -------------------------------------------------------------------------------

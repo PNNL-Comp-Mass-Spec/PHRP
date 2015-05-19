@@ -112,41 +112,41 @@ Public Class clsXTandemResultsProcessor
 #Region "Properties"
 #End Region
 
-	Private Function AddModificationsAndComputeMass(ByRef objSearchResult As clsSearchResultsXTandem, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
-		Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = False
-		Dim blnSuccess As Boolean
+    Private Function AddModificationsAndComputeMass(ByVal objSearchResult As clsSearchResultsXTandem, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = False
+        Dim blnSuccess As Boolean
 
-		Try
-			' If any modifications of type IsotopicMod are defined we would add them to the Search Result Mods now
-			' However, since X!Tandem doesn't support Isotopic Mods, this step is currently skipped
-			If XTANDEM_SUPPORTS_ISOTOPIC_MODS Then
-				objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
-			End If
+        Try
+            ' If any modifications of type IsotopicMod are defined we would add them to the Search Result Mods now
+            ' However, since X!Tandem doesn't support Isotopic Mods, this step is currently skipped
+            If XTANDEM_SUPPORTS_ISOTOPIC_MODS Then
+                objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
+            End If
 
-			' Add the protein terminus static mods (if defined and if the peptide is at a protein terminus)
-			' Function .SearchResultAddStaticTerminusMods() will only add the terminus mod if the terminus
-			'  is not already modified by the given terminus mod mass
-			' This function will also add peptide terminus static mods, if defined, though those are not supported by X!Tandem and therefore should not be defined
-			objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
+            ' Add the protein terminus static mods (if defined and if the peptide is at a protein terminus)
+            ' Function .SearchResultAddStaticTerminusMods() will only add the terminus mod if the terminus
+            '  is not already modified by the given terminus mod mass
+            ' This function will also add peptide terminus static mods, if defined, though those are not supported by X!Tandem and therefore should not be defined
+            objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
 
-			' Compute the monoisotopic mass for this peptide
-			objSearchResult.ComputeMonoisotopicMass()
+            ' Compute the monoisotopic mass for this peptide
+            objSearchResult.ComputeMonoisotopicMass()
 
-			' Update PeptideDeltaMassCorrectedPpm
-			objSearchResult.ComputeDelMCorrectedXT()
+            ' Update PeptideDeltaMassCorrectedPpm
+            objSearchResult.ComputeDelMCorrectedXT()
 
-			' Populate .PeptideSequenceWithMods and .PeptideModDescription
-			' Note that this function will call .AddSearchResultModificationsToCleanSequence() then .UpdateModDescription()
-			objSearchResult.ApplyModificationInformation()
+            ' Populate .PeptideSequenceWithMods and .PeptideModDescription
+            ' Note that this function will call .AddSearchResultModificationsToCleanSequence() then .UpdateModDescription()
+            objSearchResult.ApplyModificationInformation()
 
-			blnSuccess = True
-		Catch ex As Exception
-			blnSuccess = False
-		End Try
+            blnSuccess = True
+        Catch ex As Exception
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 	Private Function ConvertEValueToBase10Log(ByVal strExpectationValue As String) As String
 		Dim dblEValue As Double
@@ -1298,61 +1298,61 @@ Public Class clsXTandemResultsProcessor
 
 	End Sub
 
-	Private Sub ParseXTandemResultsFileReadDomainMods(ByRef objXMLReader As System.Xml.XmlTextReader, ByRef objSearchResult As clsSearchResultsXTandem, ByVal intDomainElementReaderDepth As Integer, ByVal blnUpdateModOccurrenceCounts As Boolean)
+    Private Sub ParseXTandemResultsFileReadDomainMods(ByRef objXMLReader As System.Xml.XmlTextReader, ByVal objSearchResult As clsSearchResultsXTandem, ByVal intDomainElementReaderDepth As Integer, ByVal blnUpdateModOccurrenceCounts As Boolean)
 
-		Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
-		Dim chTargetResidue As Char
-		Dim strValue As String
+        Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
+        Dim chTargetResidue As Char
+        Dim strValue As String
 
-		Dim intResidueLocInPeptide As Integer
+        Dim intResidueLocInPeptide As Integer
 
-		Dim intModifiedResiduePosInProtein As Integer
-		Dim dblModificationMass As Double
+        Dim intModifiedResiduePosInProtein As Integer
+        Dim dblModificationMass As Double
 
-		' Continue reading the XML file, loading the information 
-		Do While objXMLReader.Read() AndAlso objXMLReader.Depth >= intDomainElementReaderDepth
+        ' Continue reading the XML file, loading the information 
+        Do While objXMLReader.Read() AndAlso objXMLReader.Depth >= intDomainElementReaderDepth
 
-			If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
+            If Not objXMLReader.ReadState = Xml.ReadState.Interactive Then Exit Do
 
-			If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
-				Select Case objXMLReader.Name.ToLower
-					Case XTANDEM_XML_ELEMENT_NAME_AMINOACID
-						strValue = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty).Trim
-						If String.IsNullOrWhiteSpace(strValue) Then
-							chTargetResidue = Nothing
-						Else
-							chTargetResidue = strValue.Chars(0)
-						End If
+            If objXMLReader.NodeType = Xml.XmlNodeType.Element Then
+                Select Case objXMLReader.Name.ToLower
+                    Case XTANDEM_XML_ELEMENT_NAME_AMINOACID
+                        strValue = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty).Trim
+                        If String.IsNullOrWhiteSpace(strValue) Then
+                            chTargetResidue = Nothing
+                        Else
+                            chTargetResidue = strValue.Chars(0)
+                        End If
 
-						intModifiedResiduePosInProtein = XMLTextReaderGetAttributeValue(objXMLReader, "at", 0)
+                        intModifiedResiduePosInProtein = XMLTextReaderGetAttributeValue(objXMLReader, "at", 0)
 
-						If intModifiedResiduePosInProtein > 0 Then
-							dblModificationMass = XMLTextReaderGetAttributeValueDbl(objXMLReader, "modified", 0)
+                        If intModifiedResiduePosInProtein > 0 Then
+                            dblModificationMass = XMLTextReaderGetAttributeValueDbl(objXMLReader, "modified", 0)
 
-							If dblModificationMass <> 0 Then
-								With objSearchResult
-									intResidueLocInPeptide = intModifiedResiduePosInProtein - .PeptideLocInProteinStart + 1
-									eResidueTerminusState = .DetermineResidueTerminusState(intResidueLocInPeptide)
+                            If Math.Abs(dblModificationMass - 0) > Single.Epsilon Then
+                                With objSearchResult
+                                    intResidueLocInPeptide = intModifiedResiduePosInProtein - .PeptideLocInProteinStart + 1
+                                    eResidueTerminusState = .DetermineResidueTerminusState(intResidueLocInPeptide)
 
-									.SearchResultAddModification( _
-														dblModificationMass, _
-														chTargetResidue, _
-														intResidueLocInPeptide, _
-														eResidueTerminusState, _
-														blnUpdateModOccurrenceCounts)
-								End With
-							End If
-						End If
-				End Select
-			ElseIf objXMLReader.NodeType = Xml.XmlNodeType.EndElement Then
-				If objXMLReader.Name = XTANDEM_XML_ELEMENT_NAME_DOMAIN Then
-					Exit Do
-				End If
-			End If
-		Loop
+                                    .SearchResultAddModification( _
+                                                        dblModificationMass, _
+                                                        chTargetResidue, _
+                                                        intResidueLocInPeptide, _
+                                                        eResidueTerminusState, _
+                                                        blnUpdateModOccurrenceCounts)
+                                End With
+                            End If
+                        End If
+                End Select
+            ElseIf objXMLReader.NodeType = Xml.XmlNodeType.EndElement Then
+                If objXMLReader.Name = XTANDEM_XML_ELEMENT_NAME_DOMAIN Then
+                    Exit Do
+                End If
+            End If
+        Loop
 
 
-	End Sub
+    End Sub
 
 	''' <summary>
 	''' Main processing function
@@ -1458,7 +1458,7 @@ Public Class clsXTandemResultsProcessor
         Return blnSuccess
     End Function
 
-    Private Sub SaveXTandemResultsFileEntry(ByRef objSearchResult As clsSearchResultsXTandem, ByRef swPeptideResultsFile As StreamWriter)
+    Private Sub SaveXTandemResultsFileEntry(ByVal objSearchResult As clsSearchResultsXTandem, ByRef swPeptideResultsFile As StreamWriter)
 
         With objSearchResult
             ' Update .ResultID to the next available number

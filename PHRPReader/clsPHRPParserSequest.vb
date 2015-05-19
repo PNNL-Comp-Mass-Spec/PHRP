@@ -310,9 +310,9 @@ Public Class clsPHRPParserSequest
             If Not File.Exists(strParamFilePath) Then
                 ReportError("Sequest param file not found: " & strParamFilePath)
             Else
-                Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Using srInFile = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                    While srInFile.Peek > -1
+                    While Not srInFile.EndOfStream
                         strLineIn = srInFile.ReadLine().TrimStart()
 
                         If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith(";") AndAlso Not strLineIn.StartsWith("[") AndAlso strLineIn.Contains("="c) Then

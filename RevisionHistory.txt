@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.1.5616; May 18, 2015
+	- Added support for MODPlus
+
 Version 1.5.5553; March 16, 2015
 	- New version of PHRPReader.dll
 

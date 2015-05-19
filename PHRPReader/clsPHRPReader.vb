@@ -52,7 +52,8 @@ Public Class clsPHRPReader
 		Inspect = 3
 		MSGFDB = 4		' Aka MSGF+
 		MSAlign = 5
-		MODa = 6
+        MODa = 6
+        MODPlus = 7
 	End Enum
 
 	Public Enum ePHRPReaderErrorCodes As Integer
@@ -590,8 +591,8 @@ Public Class clsPHRPReader
 
         Try
             intTotalLines = 0
-            Using srReader As StreamReader = New StreamReader(New FileStream(strTextFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                While srReader.Peek > -1
+            Using srReader = New StreamReader(New FileStream(strTextFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                While Not srReader.EndOfStream
                     srReader.ReadLine()
                     intTotalLines += 1
                 End While
@@ -797,6 +798,9 @@ Public Class clsPHRPReader
                 Case ePeptideHitResultType.MODa
                     mPHRPParser = New clsPHRPParserMODa(strDatasetName, mInputFilePath, mStartupOptions)
 
+                Case ePeptideHitResultType.MODPlus
+                    mPHRPParser = New clsPHRPParserMODPlus(strDatasetName, mInputFilePath, mStartupOptions)
+
                 Case Else
                     'Should never get here; invalid result type specified
                     ReportError("Invalid PeptideHit ResultType specified: " & eResultType)
@@ -844,7 +848,7 @@ Public Class clsPHRPReader
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
     Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String) As String
-        Dim eMatchedResultType As ePeptideHitResultType = ePeptideHitResultType.Unknown
+        Dim eMatchedResultType = ePeptideHitResultType.Unknown
         Return AutoDetermineBestInputFile(strInputFolderPath, eMatchedResultType)
     End Function
 
@@ -893,7 +897,18 @@ Public Class clsPHRPReader
         lstFileSpec.Add(clsPHRPParserInspect.FILENAME_SUFFIX_SYN)
         lstFileSpec.Add(clsPHRPParserInspect.FILENAME_SUFFIX_FHT)
 
-        ' Sequest (needs to be added last since files simply end in _syn.txt or _fht.txt)
+        ' MODa
+        lstFileSpec.Add(clsPHRPParserMODa.FILENAME_SUFFIX_SYN)
+        lstFileSpec.Add(clsPHRPParserMODa.FILENAME_SUFFIX_FHT)
+
+        ' MODPlus
+        lstFileSpec.Add(clsPHRPParserMODPlus.FILENAME_SUFFIX_SYN)
+        lstFileSpec.Add(clsPHRPParserMODPlus.FILENAME_SUFFIX_FHT)
+
+        ' *****************
+        ' ** Important: Sequest needs to be added last since files simply end in _syn.txt or _fht.txt)
+        ' *****************
+        ' Sequest
         lstFileSpec.Add(clsPHRPParserSequest.FILENAME_SUFFIX_SYN)
         lstFileSpec.Add(clsPHRPParserSequest.FILENAME_SUFFIX_FHT)
 
@@ -928,7 +943,7 @@ Public Class clsPHRPReader
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
     Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal strDatasetName As String) As String
-        Dim eMatchedResultType As ePeptideHitResultType = ePeptideHitResultType.Unknown
+        Dim eMatchedResultType = ePeptideHitResultType.Unknown
         Return AutoDetermineBestInputFile(strInputFolderPath, strDatasetName, eMatchedResultType)
     End Function
 
@@ -1009,6 +1024,10 @@ Public Class clsPHRPReader
             ' MODa
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMODa.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MODa))
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMODa.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MODa))
+
+            ' MODPlus
+            lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMODPlus.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MODplus))
+            lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMODPlus.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MODplus))
 
             ' Inspect
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.Inspect))
@@ -1094,7 +1113,7 @@ Public Class clsPHRPReader
         strInputFileName = Path.GetFileNameWithoutExtension(strFilePath)
 
         Select Case eResultType
-            Case ePeptideHitResultType.Sequest, ePeptideHitResultType.Inspect, ePeptideHitResultType.MSGFDB, ePeptideHitResultType.MSAlign, ePeptideHitResultType.MODa
+            Case ePeptideHitResultType.Sequest, ePeptideHitResultType.Inspect, ePeptideHitResultType.MSGFDB, ePeptideHitResultType.MSAlign, ePeptideHitResultType.MODa, ePeptideHitResultType.MODPlus
                 If strInputFileName.ToLower.EndsWith("_fht") OrElse strInputFileName.ToLower.EndsWith("_syn") Then
                     strDatasetName = strInputFileName.Substring(0, strInputFileName.Length - 4)
 
@@ -1116,6 +1135,11 @@ Public Class clsPHRPReader
                     ElseIf eResultType = ePeptideHitResultType.MODa Then
                         If strDatasetName.ToLower.EndsWith("_moda") Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_moda".Length)
+                        End If
+
+                    ElseIf eResultType = ePeptideHitResultType.MODplus Then
+                        If strDatasetName.ToLower.EndsWith("_modp") Then
+                            strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_modp".Length)
                         End If
 
                     End If
@@ -1172,6 +1196,9 @@ Public Class clsPHRPReader
                 ElseIf strFilePathLCase.EndsWith(clsPHRPParserMODa.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserMODa.FILENAME_SUFFIX_FHT) Then
                     eResultType = ePeptideHitResultType.MODa
 
+                ElseIf strFilePathLCase.EndsWith(clsPHRPParserMODplus.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserMODplus.FILENAME_SUFFIX_FHT) Then
+                    eResultType = ePeptideHitResultType.MODplus
+
                 ElseIf strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_FHT) Then
                     eResultType = ePeptideHitResultType.Inspect
 
@@ -1183,9 +1210,9 @@ Public Class clsPHRPReader
                         eResultType = ePeptideHitResultType.Sequest
                     Else
 
-                        Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                            If srInFile.Peek() >= 0 Then
+                            If Not srInFile.EndOfStream Then
                                 strHeaderLine = srInFile.ReadLine()
 
                                 If LineContainsValues(strHeaderLine, clsPHRPParserInspect.DATA_COLUMN_MQScore, clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore) Then
@@ -1503,6 +1530,9 @@ Public Class clsPHRPReader
             Case "MODa_Peptide_Hit".ToLower
                 Return ePeptideHitResultType.MODa
 
+            Case "MODPlus_Peptide_Hit".ToLower
+                Return ePeptideHitResultType.MODplus
+
             Case Else
                 Return ePeptideHitResultType.Unknown
         End Select
@@ -1555,6 +1585,9 @@ Public Class clsPHRPReader
 
             Case ePeptideHitResultType.MODa
                 oCachedParser = New clsPHRPParserMODa(strDatasetName, String.Empty)
+
+            Case ePeptideHitResultType.MODPlus
+                oCachedParser = New clsPHRPParserMODPlus(strDatasetName, String.Empty)
 
             Case Else
                 Throw New Exception("Unsupported ePeptideHitResultType value: " & eResultType)
@@ -1725,6 +1758,9 @@ Public Class clsPHRPReader
 
             Case ePeptideHitResultType.MODa
                 strToolVersionInfoFilename = "Tool_Version_Info_MODa.txt"
+
+            Case ePeptideHitResultType.MODPlus
+                strToolVersionInfoFilename = "Tool_Version_Info_MODPlus.txt"
 
         End Select
 
@@ -1955,10 +1991,10 @@ Public Class clsPHRPReader
 			blnSuccess = True
 			mPSMCurrentFinalized = False
 			mExtendedScanStatsValid = False
-		ElseIf mSourceFile.Peek > -1 Then
-			strLineIn = mSourceFile.ReadLine()
-			mSourceFileLinesRead += 1
-			blnSuccess = True
+        ElseIf Not mSourceFile.EndOfStream Then
+            strLineIn = mSourceFile.ReadLine()
+            mSourceFileLinesRead += 1
+            blnSuccess = True
 		Else
 			mCanRead = False
 		End If
@@ -2054,57 +2090,57 @@ Public Class clsPHRPReader
 
 			' Read the next line and check whether it's the same hit, but a different protein
 			Dim blnReadNext As Boolean = True
-			Do While blnReadNext AndAlso mSourceFile.Peek > -1
-				strLineIn = mSourceFile.ReadLine()
-				mSourceFileLinesRead += 1
+            Do While blnReadNext AndAlso Not mSourceFile.EndOfStream
+                strLineIn = mSourceFile.ReadLine()
+                mSourceFileLinesRead += 1
 
-				If Not String.IsNullOrEmpty(strLineIn) Then
+                If Not String.IsNullOrEmpty(strLineIn) Then
 
-					Dim objNewPSM As New clsPSM()
-					blnSuccess = mPHRPParser.ParsePHRPDataLine(strLineIn, mSourceFileLinesRead, objNewPSM, mFastReadMode)
+                    Dim objNewPSM As New clsPSM()
+                    blnSuccess = mPHRPParser.ParsePHRPDataLine(strLineIn, mSourceFileLinesRead, objNewPSM, mFastReadMode)
 
-					' Check for duplicate lines
-					' If this line is a duplicate of the previous line, then skip it
-					' This happens in Sequest _syn.txt files where the line is repeated for all protein matches
-					' It can also happen in MSGF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
-					With mPSMCurrent
+                    ' Check for duplicate lines
+                    ' If this line is a duplicate of the previous line, then skip it
+                    ' This happens in Sequest _syn.txt files where the line is repeated for all protein matches
+                    ' It can also happen in MSGF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
+                    With mPSMCurrent
 
-						Dim isDuplicate As Boolean = False
+                        Dim isDuplicate = False
 
-						If .ScanNumber = objNewPSM.ScanNumber AndAlso
-						   .Charge = objNewPSM.Charge Then
+                        If .ScanNumber = objNewPSM.ScanNumber AndAlso
+                           .Charge = objNewPSM.Charge Then
 
-							If String.Equals(.Peptide, objNewPSM.Peptide) Then
-								isDuplicate = True
-							Else
-								Dim strPeptide1 As String = String.Empty
-								Dim strPeptide2 As String = String.Empty
+                            If String.Equals(.Peptide, objNewPSM.Peptide) Then
+                                isDuplicate = True
+                            Else
+                                Dim strPeptide1 As String = String.Empty
+                                Dim strPeptide2 As String = String.Empty
 
-								If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(.Peptide, strPeptide1, "", "") AndAlso
-								   clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objNewPSM.Peptide, strPeptide2, "", "") Then
-									If String.Equals(strPeptide1, strPeptide2) Then
-										isDuplicate = True
-									End If
-								End If
-							End If
-						End If
+                                If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(.Peptide, strPeptide1, "", "") AndAlso
+                                   clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objNewPSM.Peptide, strPeptide2, "", "") Then
+                                    If String.Equals(strPeptide1, strPeptide2) Then
+                                        isDuplicate = True
+                                    End If
+                                End If
+                            End If
+                        End If
 
-						If isDuplicate Then
-							' Update the protein list
-							Dim addnlProteins = objNewPSM.Proteins.Except(.Proteins, StringComparer.CurrentCultureIgnoreCase)
-							If addnlProteins.Count > 0 Then
-								.Proteins.AddRange(addnlProteins)
-							End If
-						Else
-							blnReadNext = False
-							mCachedLine = String.Copy(strLineIn)
-							mCachedLineAvailable = True
-							mCachedPSM = objNewPSM
-						End If
+                        If isDuplicate Then
+                            ' Update the protein list
+                            Dim addnlProteins = objNewPSM.Proteins.Except(.Proteins, StringComparer.CurrentCultureIgnoreCase)
+                            If addnlProteins.Count > 0 Then
+                                .Proteins.AddRange(addnlProteins)
+                            End If
+                        Else
+                            blnReadNext = False
+                            mCachedLine = String.Copy(strLineIn)
+                            mCachedLineAvailable = True
+                            mCachedPSM = objNewPSM
+                        End If
 
-					End With
-				End If
-			Loop
+                    End With
+                End If
+            Loop
 
 		End If
 

@@ -1,6 +1,6 @@
 Option Strict On
 
-' This class can be used to track the peptide details for a Sequest search result
+' This class is used to track the peptide details for a Sequest search result
 ' See clsSearchResultsBaseClass for additional information
 '
 ' -------------------------------------------------------------------------------

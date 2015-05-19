@@ -115,63 +115,63 @@ Public Class clsPHRPModSummaryReader
 
 			blnHeaderLineParsed = False
 
-			Do While srModSummaryFile.Peek > -1
-				strLineIn = srModSummaryFile.ReadLine
-				blnSkipLine = False
+            Do While Not srModSummaryFile.EndOfStream
+                strLineIn = srModSummaryFile.ReadLine
+                blnSkipLine = False
 
-				If Not String.IsNullOrEmpty(strLineIn) Then
-					strSplitLine = strLineIn.Split(ControlChars.Tab)
+                If Not String.IsNullOrEmpty(strLineIn) Then
+                    strSplitLine = strLineIn.Split(ControlChars.Tab)
 
-					If Not blnHeaderLineParsed Then
-						If strSplitLine(0).ToLower() = MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower() Then
-							' Parse the header line to confirm the column ordering
-							' The Occurrence_Count column was mispelled prior to December 2012; need to check for this
-							For intIndex As Integer = 0 To strSplitLine.Length - 1
-								If strSplitLine(intIndex) = "Occurence_Count" Then strSplitLine(intIndex) = MOD_SUMMARY_COLUMN_Occurrence_Count
-							Next
-							clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
-							blnSkipLine = True
-						End If
+                    If Not blnHeaderLineParsed Then
+                        If strSplitLine(0).ToLower() = MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower() Then
+                            ' Parse the header line to confirm the column ordering
+                            ' The Occurrence_Count column was mispelled prior to December 2012; need to check for this
+                            For intIndex As Integer = 0 To strSplitLine.Length - 1
+                                If strSplitLine(intIndex) = "Occurence_Count" Then strSplitLine(intIndex) = MOD_SUMMARY_COLUMN_Occurrence_Count
+                            Next
+                            clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
+                            blnSkipLine = True
+                        End If
 
-						blnHeaderLineParsed = True
-					End If
+                        blnHeaderLineParsed = True
+                    End If
 
-					If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
-						strModSymbol = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, objColumnHeaders)
-						strModMass = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Mass, objColumnHeaders)
-						strTargetResidues = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Target_Residues, objColumnHeaders)
-						strModType = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Type, objColumnHeaders)
-						strMassCorrectionTag = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, objColumnHeaders)
+                    If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
+                        strModSymbol = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, objColumnHeaders)
+                        strModMass = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Mass, objColumnHeaders)
+                        strTargetResidues = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Target_Residues, objColumnHeaders)
+                        strModType = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Type, objColumnHeaders)
+                        strMassCorrectionTag = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, objColumnHeaders)
 
-						If String.IsNullOrWhiteSpace(strModSymbol) Then
-							strModSymbol = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL
-						End If
-						chModSymbol = strModSymbol.Chars(0)
+                        If String.IsNullOrWhiteSpace(strModSymbol) Then
+                            strModSymbol = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL
+                        End If
+                        chModSymbol = strModSymbol.Chars(0)
 
-						If Not Double.TryParse(strModMass, dblModificationMass) Then
-							Throw New Exception("Modification mass is not numeric for MassCorrectionTag: " & strMassCorrectionTag & ": " & strModMass)
-						End If
+                        If Not Double.TryParse(strModMass, dblModificationMass) Then
+                            Throw New Exception("Modification mass is not numeric for MassCorrectionTag: " & strMassCorrectionTag & ": " & strModMass)
+                        End If
 
-						If String.IsNullOrWhiteSpace(strModType) Then
-							eModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType
-						Else
-							eModificationType = clsModificationDefinition.ModificationSymbolToModificationType(strModType.Chars(0))
-						End If
+                        If String.IsNullOrWhiteSpace(strModType) Then
+                            eModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType
+                        Else
+                            eModificationType = clsModificationDefinition.ModificationSymbolToModificationType(strModType.Chars(0))
+                        End If
 
-						Dim objModDef As clsModificationDefinition
-						objModDef = New clsModificationDefinition(chModSymbol, dblModificationMass, strTargetResidues, eModificationType, strMassCorrectionTag)
-						objModDef.ModificationMassAsText = strModMass
+                        Dim objModDef As clsModificationDefinition
+                        objModDef = New clsModificationDefinition(chModSymbol, dblModificationMass, strTargetResidues, eModificationType, strMassCorrectionTag)
+                        objModDef.ModificationMassAsText = strModMass
 
-						lstModInfo.Add(objModDef)
+                        lstModInfo.Add(objModDef)
 
-						If Not mModDefMassesAsText.ContainsKey(strMassCorrectionTag) Then
-							mModDefMassesAsText.Add(strMassCorrectionTag, strModMass)
-						End If
+                        If Not mModDefMassesAsText.ContainsKey(strMassCorrectionTag) Then
+                            mModDefMassesAsText.Add(strMassCorrectionTag, strModMass)
+                        End If
 
-					End If
-				End If
+                    End If
+                End If
 
-			Loop
+            Loop
 
 		End Using
 

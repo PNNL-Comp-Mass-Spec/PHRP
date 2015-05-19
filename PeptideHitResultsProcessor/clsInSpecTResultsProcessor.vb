@@ -254,51 +254,51 @@ Public Class clsInSpecTResultsProcessor
 
 	End Sub
 
-	Private Sub AddDynamicAndStaticResidueMods(ByRef objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean)
-		' Step through .PeptideSequenceWithMods
-		' For each residue, check if a static mod is defined that affects that residue
-		' For each mod symbol, determine the modification and add to objSearchResult
+    Private Sub AddDynamicAndStaticResidueMods(ByVal objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean)
+        ' Step through .PeptideSequenceWithMods
+        ' For each residue, check if a static mod is defined that affects that residue
+        ' For each mod symbol, determine the modification and add to objSearchResult
 
-		Dim intIndex As Integer, intModIndex As Integer
-		Dim chChar As Char
-		Dim objModificationDefinition As clsModificationDefinition
+        Dim intIndex As Integer, intModIndex As Integer
+        Dim chChar As Char
+        Dim objModificationDefinition As clsModificationDefinition
 
-		Dim strSequence As String
-		Dim chMostRecentLetter As Char
-		Dim intResidueLocInPeptide As Integer
+        Dim strSequence As String
+        Dim chMostRecentLetter As Char
+        Dim intResidueLocInPeptide As Integer
 
-		chMostRecentLetter = "-"c
-		intResidueLocInPeptide = 0
+        chMostRecentLetter = "-"c
+        intResidueLocInPeptide = 0
 
-		With objSearchResult
-			strSequence = .PeptideSequenceWithMods
-			For intIndex = 0 To strSequence.Length - 1
-				chChar = strSequence.Chars(intIndex)
+        With objSearchResult
+            strSequence = .PeptideSequenceWithMods
+            For intIndex = 0 To strSequence.Length - 1
+                chChar = strSequence.Chars(intIndex)
 
-				If IsLetterAtoZ(chChar) Then
-					chMostRecentLetter = chChar
-					intResidueLocInPeptide += 1
+                If IsLetterAtoZ(chChar) Then
+                    chMostRecentLetter = chChar
+                    intResidueLocInPeptide += 1
 
-					For intModIndex = 0 To mPeptideMods.ModificationCount - 1
-						If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
-							objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+                    For intModIndex = 0 To mPeptideMods.ModificationCount - 1
+                        If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+                            objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
 
-							If objModificationDefinition.TargetResiduesContain(chChar) Then
-								' Match found; add this modification
-								.SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
-							End If
-						End If
-					Next intModIndex
-				ElseIf IsLetterAtoZ(chMostRecentLetter) Then
-					.SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
-				Else
-					' We found a modification symbol but chMostRecentLetter is not a letter
-					' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
-				End If
+                            If objModificationDefinition.TargetResiduesContain(chChar) Then
+                                ' Match found; add this modification
+                                .SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+                            End If
+                        End If
+                    Next intModIndex
+                ElseIf IsLetterAtoZ(chMostRecentLetter) Then
+                    .SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+                Else
+                    ' We found a modification symbol but chMostRecentLetter is not a letter
+                    ' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
+                End If
 
-			Next intIndex
-		End With
-	End Sub
+            Next intIndex
+        End With
+    End Sub
 
 	''' <summary>
 	''' Sorts the data by descending TotalPRMScore, than ranks each entry; in addition, computes normalized delta score (DeltaNorm) values
@@ -386,39 +386,39 @@ Public Class clsInSpecTResultsProcessor
 
 	End Sub
 
-	Private Function AddModificationsAndComputeMass(ByRef objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
-		Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
+    Private Function AddModificationsAndComputeMass(ByVal objSearchResult As clsSearchResultsInSpecT, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			' If any modifications of type IsotopicMod are defined, add them to the Search Result Mods now
-			objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
+        Try
+            ' If any modifications of type IsotopicMod are defined, add them to the Search Result Mods now
+            objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
 
-			' Parse .PeptideSequenceWithMods to determine the modified residues present
-			AddDynamicAndStaticResidueMods(objSearchResult, blnUpdateModOccurrenceCounts)
+            ' Parse .PeptideSequenceWithMods to determine the modified residues present
+            AddDynamicAndStaticResidueMods(objSearchResult, blnUpdateModOccurrenceCounts)
 
-			' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
-			' Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
-			'  even though, biologically, that's typically not possible
-			' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
-			'  (where two COOH groups are present)
-			objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
+            ' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
+            ' Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
+            '  even though, biologically, that's typically not possible
+            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
+            '  (where two COOH groups are present)
+            objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
 
-			' Compute the monoisotopic mass for this peptide
-			objSearchResult.ComputeMonoisotopicMass()
+            ' Compute the monoisotopic mass for this peptide
+            objSearchResult.ComputeMonoisotopicMass()
 
-			' Populate .PeptideModDescription
-			objSearchResult.UpdateModDescription()
+            ' Populate .PeptideModDescription
+            objSearchResult.UpdateModDescription()
 
-			blnSuccess = True
-		Catch ex As Exception
-			blnSuccess = False
-		End Try
+            blnSuccess = True
+        Catch ex As Exception
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
 	''' <summary>
 	''' This routine creates a first hits file or synopsis file from the output from InSpecT
@@ -497,297 +497,302 @@ Public Class clsInSpecTResultsProcessor
 						ReDim udtFilteredSearchResults(999)
 
 						' Parse the input file
-						Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
-							strLineIn = srDataFile.ReadLine()
-							If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
-								' Initialize udtSearchResult
-								udtSearchResult.Clear()
-
-								blnValidSearchResult = ParseInspectResultsFileEntry(strLineIn, udtInspectModInfo, udtSearchResult, strErrorLog, intResultsProcessed)
-
-								If blnValidSearchResult Then
-									If intPreviousScan <> Int32.MinValue AndAlso intPreviousScan <> udtSearchResult.ScanNum Then
-										' New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
-										If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-											StoreSynMatches(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
-										Else
-											StoreTopFHTMatch(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
-										End If
-										intCurrentScanResultsCount = 0
-									End If
-
-									AddCurrentRecordToSearchResults(intCurrentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult)
-
-									intPreviousScan = udtSearchResult.ScanNum
-								End If
-
-								' Update the progress
-								UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
-								intResultsProcessed += 1
-							End If
-						Loop
-
-
-						' Store the last record
-						If intCurrentScanResultsCount > 0 Then
-							If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-								StoreSynMatches(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
-							Else
-								StoreTopFHTMatch(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
-							End If
-							intCurrentScanResultsCount = 0
-						End If
-
-						If mSortFHTandSynFiles Then
-							' Sort the data in udtFilteredSearchResults then write out to disk
-							SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-						End If
-
-					End Using
-				End Using
-
-				' Inform the user if any errors occurred
-				If strErrorLog.Length > 0 Then
-					SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
-				End If
-
-				blnSuccess = True
-
-			Catch ex As Exception
-				SetErrorMessage(ex.Message)
-				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-				blnSuccess = False
-			End Try
-		Catch ex As Exception
-			SetErrorMessage(ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-			blnSuccess = False
-		End Try
-
-		Return blnSuccess
-
-	End Function
-
-	Protected Function ComputeDelMCorrectedPPM(ByVal dblPrecursorErrorDa As Double, ByVal dblPrecursorMonoMass As Double, _
-	 ByVal dblPeptideMonoisotopicMass As Double, _
-	 ByVal blnAdjustPrecursorMassForC13 As Boolean) As Double
-
-		Dim dblPeptideDeltaMassCorrectedPpm As Double
-
-		dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
-
-		Return dblPeptideDeltaMassCorrectedPpm
-
-	End Function
-
-	Private Function ComputeDeltaNormScore(ByVal sngCurrentScore As Single, ByVal sngNextScore As Single, ByVal sngValueIfCurrentScoreZero As Single) As Single
-		Try
-			If sngCurrentScore <> 0 Then
-				Return Math.Abs((sngCurrentScore - sngNextScore) / sngCurrentScore)
-			Else
-				Return sngValueIfCurrentScoreZero
-			End If
-		Catch ex As Exception
-			Return sngValueIfCurrentScoreZero
-		End Try
-	End Function
-
-	Private Function ComputePeptideMHFromPrecursorInfo(ByVal strPrecursorMZ As String, ByVal strPrecursorError As String, ByVal strCharge As String) As Double
-		' Compute the theoretical peptide MH using the precursor m/z value and the precursor error values
-
-		Dim dblPrecursorMZ As Double
-		Dim dblPrecursorError As Double
-		Dim intCharge As Integer
-		Dim dblPeptideMH As Double = 0
-
-		If String.IsNullOrWhiteSpace(strPrecursorMZ) OrElse strPrecursorMZ = "0" Then
-			' Precursor m/z is undefined; cannot continue
-			dblPeptideMH = 0
-		ElseIf String.IsNullOrWhiteSpace(strPrecursorError) Then
-			' Precursor error is undefined; cannot continue
-			dblPeptideMH = 0
-		Else
-			intCharge = CIntSafe(strCharge, -1)
-
-			If intCharge >= 1 Then
-				If Double.TryParse(strPrecursorMZ, dblPrecursorMZ) Then
-					If Double.TryParse(strPrecursorError, dblPrecursorError) Then
-						' Note: the October 2008 version of Inspect uses an Absolute Value function when computing the PrecursorError; the version used by PNNL does not use Absolute Value
-						' Note: switched to compute (M+H)+ in August 2011; prior to this, we were computing uncharged monoisotopic mass
-						dblPeptideMH = (dblPrecursorMZ - dblPrecursorError) * intCharge - (intCharge - 1) * clsPeptideMassCalculator.MASS_PROTON
-					End If
-				End If
-			End If
-		End If
-
-		Return dblPeptideMH
-
-	End Function
-
-	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
-		Dim strPepToProteinMapFilePath As String = String.Empty
-
-		strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-		If strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_fht") Then
-			' Remove _syn or _fht
-			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
-		End If
-
-		Return MyBase.ConstructPepToProteinMapFilePath(strPepToProteinMapFilePath, strOutputFolderPath, MTS)
-
-	End Function
-
-	Private Function ExtractModInfoFromInspectParamFile(ByVal strInspectParameterFilePath As String, ByRef udtModList() As udtModInfoType) As Boolean
-
-		Dim strLineIn As String
-		Dim strSplitLine As String()
-
-		Dim intModCount As Integer
-		Dim intUnnamedModID As Integer
-
-		Dim blnSuccess As Boolean = False
-
-		Try
-			' Initialize udtModList and intUnnamedModID
-			intModCount = 0
-			ReDim udtModList(-1)
-
-			intUnnamedModID = 0
-
-			If String.IsNullOrWhiteSpace(strInspectParameterFilePath) Then
-				SetErrorMessage("Inspect Parameter File name not defined; unable to extract mod info")
-				SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
-				Return False
-			End If
-
-			' Read the contents of the inspect parameter file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strInspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-
-				Do While srInFile.Peek > -1
-					strLineIn = srInFile.ReadLine().Trim()
-
-					If strLineIn.Length > 0 Then
-
-						If strLineIn.Chars(0) = "#"c Then
-							' Comment line; skip it
-						ElseIf strLineIn.ToLower.StartsWith("mod") Then
-							' Modification definition line
-
-							' Split the line on commas
-							strSplitLine = strLineIn.Split(","c)
-
-							If strSplitLine.Length >= 3 AndAlso strSplitLine(0).ToLower.Trim = "mod" Then
-								If udtModList Is Nothing OrElse udtModList.Length = 0 Then
-									ReDim udtModList(0)
-								ElseIf intModCount >= udtModList.Length Then
-									ReDim Preserve udtModList(udtModList.Length * 2 - 1)
-								End If
-
-								With udtModList(intModCount)
-									.ModMass = strSplitLine(1)
-									.Residues = strSplitLine(2)
-									.ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL
-
-									If strSplitLine.Length >= 4 Then
-										Select Case strSplitLine(3).ToLower
-											Case "opt"
-												.ModType = eInspectModType.DynamicMod
-											Case "fix"
-												.ModType = eInspectModType.StaticMod
-											Case "nterminal"
-												.ModType = eInspectModType.DynNTermPeptide
-											Case "cterminal"
-												.ModType = eInspectModType.DynCTermPeptide
-											Case Else
-												ReportWarning("Unrecognized Mod Type in the Inspect parameter file")
-												.ModType = eInspectModType.DynamicMod
-										End Select
-									Else
-										' Assume dynamic if not specifed
-										.ModType = eInspectModType.DynamicMod
-									End If
-
-									If strSplitLine.Length >= 5 Then
-										.ModName = strSplitLine(4).ToLower
-										If .ModName.Length > 4 Then
-											' Only keep the first 4 characters of the modification name
-											.ModName = .ModName.Substring(0, 4)
-										End If
-									Else
-										intUnnamedModID += 1
-										.ModName = "UnnamedMod" & intUnnamedModID.ToString
-									End If
-
-									' Check for phosphorylation
-									' Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
-									'  However, we want to use the more precise mass of 79.9663
-									If .ModName = PHOS_MOD_NAME.ToLower And .ModMass = "80" Then
-										.ModMass = PHOS_MOD_MASS
-									End If
-
-								End With
-
-								intModCount += 1
-							End If
-						End If
-					End If
-				Loop
-
-			End Using
-
-			' Shrink udtModList to the appropriate length
-			ReDim Preserve udtModList(intModCount - 1)
-
-			Console.WriteLine()
-
-			blnSuccess = True
-
-		Catch ex As Exception
-			SetErrorMessage("Error reading the Inspect parameter file (" & Path.GetFileName(strInspectParameterFilePath) & "): " & ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
-			blnSuccess = False
-		End Try
-
-		Return blnSuccess
-
-	End Function
-
-	Private Function ExtractScanNumFromDTAName(ByVal spectrumFile As String) As String
-		Static reScanNumberRegEx As New Regex(DTA_FILENAME_SCAN_NUMBER_REGEX, REGEX_OPTIONS)
-
-		Dim scanNum As String = String.Empty
-
-		' See if strValue resembles a .Dta file name
-		' For example, "MyDataset.300.300.2.dta"
-
-		Try
-			With reScanNumberRegEx.Match(spectrumFile)
-				If .Success AndAlso .Groups.Count > 1 Then
-					scanNum = .Groups(1).Value
-				End If
-			End With
-		Catch ex As Exception
-			' Ignore errors here
-			scanNum = "0"
-		End Try
-
-		Return scanNum
-
-	End Function
-
-	Private Sub InitializeLocalVariables()
-		mSortFHTandSynFiles = True
-	End Sub
-
-	''' <summary>
-	''' Load the PeptideToProteinMap information; in addition, creates the _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
-	''' </summary>
-	''' <param name="strPepToProteinMapFilePath"></param>
-	''' <param name="strOutputFolderPath"></param>
-	''' <param name="udtInspectModInfo"></param>
-	''' <param name="lstPepToProteinMapping"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
+                        Do While Not srDataFile.EndOfStream And Not MyBase.AbortProcessing
+                            strLineIn = srDataFile.ReadLine()
+
+                            If String.IsNullOrWhiteSpace(strLineIn) Then
+                                Continue Do
+                            End If
+
+                            ' Initialize udtSearchResult
+                            udtSearchResult.Clear()
+
+                            blnValidSearchResult = ParseInspectResultsFileEntry(strLineIn, udtInspectModInfo, udtSearchResult, strErrorLog, intResultsProcessed)
+
+                            If blnValidSearchResult Then
+                                If intPreviousScan <> Int32.MinValue AndAlso intPreviousScan <> udtSearchResult.ScanNum Then
+                                    ' New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
+                                    If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
+                                        StoreSynMatches(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
+                                    Else
+                                        StoreTopFHTMatch(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
+                                    End If
+                                    intCurrentScanResultsCount = 0
+                                End If
+
+                                AddCurrentRecordToSearchResults(intCurrentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult)
+
+                                intPreviousScan = udtSearchResult.ScanNum
+                            End If
+
+                            ' Update the progress
+                            UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+
+                            intResultsProcessed += 1
+
+                        Loop
+
+
+                        ' Store the last record
+                        If intCurrentScanResultsCount > 0 Then
+                            If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
+                                StoreSynMatches(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
+                            Else
+                                StoreTopFHTMatch(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
+                            End If
+                            intCurrentScanResultsCount = 0
+                        End If
+
+                        If mSortFHTandSynFiles Then
+                            ' Sort the data in udtFilteredSearchResults then write out to disk
+                            SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+                        End If
+
+                    End Using
+                End Using
+
+                ' Inform the user if any errors occurred
+                If strErrorLog.Length > 0 Then
+                    SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+                End If
+
+                blnSuccess = True
+
+            Catch ex As Exception
+                SetErrorMessage(ex.Message)
+                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                blnSuccess = False
+            End Try
+        Catch ex As Exception
+            SetErrorMessage(ex.Message)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        End Try
+
+        Return blnSuccess
+
+    End Function
+
+    Protected Function ComputeDelMCorrectedPPM(ByVal dblPrecursorErrorDa As Double, ByVal dblPrecursorMonoMass As Double, _
+     ByVal dblPeptideMonoisotopicMass As Double, _
+     ByVal blnAdjustPrecursorMassForC13 As Boolean) As Double
+
+        Dim dblPeptideDeltaMassCorrectedPpm As Double
+
+        dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
+
+        Return dblPeptideDeltaMassCorrectedPpm
+
+    End Function
+
+    Private Function ComputeDeltaNormScore(ByVal sngCurrentScore As Single, ByVal sngNextScore As Single, ByVal sngValueIfCurrentScoreZero As Single) As Single
+        Try
+            If sngCurrentScore <> 0 Then
+                Return Math.Abs((sngCurrentScore - sngNextScore) / sngCurrentScore)
+            Else
+                Return sngValueIfCurrentScoreZero
+            End If
+        Catch ex As Exception
+            Return sngValueIfCurrentScoreZero
+        End Try
+    End Function
+
+    Private Function ComputePeptideMHFromPrecursorInfo(ByVal strPrecursorMZ As String, ByVal strPrecursorError As String, ByVal strCharge As String) As Double
+        ' Compute the theoretical peptide MH using the precursor m/z value and the precursor error values
+
+        Dim dblPrecursorMZ As Double
+        Dim dblPrecursorError As Double
+        Dim intCharge As Integer
+        Dim dblPeptideMH As Double = 0
+
+        If String.IsNullOrWhiteSpace(strPrecursorMZ) OrElse strPrecursorMZ = "0" Then
+            ' Precursor m/z is undefined; cannot continue
+            dblPeptideMH = 0
+        ElseIf String.IsNullOrWhiteSpace(strPrecursorError) Then
+            ' Precursor error is undefined; cannot continue
+            dblPeptideMH = 0
+        Else
+            intCharge = CIntSafe(strCharge, -1)
+
+            If intCharge >= 1 Then
+                If Double.TryParse(strPrecursorMZ, dblPrecursorMZ) Then
+                    If Double.TryParse(strPrecursorError, dblPrecursorError) Then
+                        ' Note: the October 2008 version of Inspect uses an Absolute Value function when computing the PrecursorError; the version used by PNNL does not use Absolute Value
+                        ' Note: switched to compute (M+H)+ in August 2011; prior to this, we were computing uncharged monoisotopic mass
+                        dblPeptideMH = (dblPrecursorMZ - dblPrecursorError) * intCharge - (intCharge - 1) * clsPeptideMassCalculator.MASS_PROTON
+                    End If
+                End If
+            End If
+        End If
+
+        Return dblPeptideMH
+
+    End Function
+
+    Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+        Dim strPepToProteinMapFilePath As String = String.Empty
+
+        strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+        If strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_fht") Then
+            ' Remove _syn or _fht
+            strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
+        End If
+
+        Return MyBase.ConstructPepToProteinMapFilePath(strPepToProteinMapFilePath, strOutputFolderPath, MTS)
+
+    End Function
+
+    Private Function ExtractModInfoFromInspectParamFile(ByVal strInspectParameterFilePath As String, ByRef udtModList() As udtModInfoType) As Boolean
+
+        Dim strLineIn As String
+        Dim strSplitLine As String()
+
+        Dim intModCount As Integer
+        Dim intUnnamedModID As Integer
+
+        Dim blnSuccess As Boolean = False
+
+        Try
+            ' Initialize udtModList and intUnnamedModID
+            intModCount = 0
+            ReDim udtModList(-1)
+
+            intUnnamedModID = 0
+
+            If String.IsNullOrWhiteSpace(strInspectParameterFilePath) Then
+                SetErrorMessage("Inspect Parameter File name not defined; unable to extract mod info")
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+                Return False
+            End If
+
+            ' Read the contents of the inspect parameter file
+            Using srInFile = New StreamReader(New FileStream(strInspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+                Do While Not srInFile.EndOfStream
+                    strLineIn = srInFile.ReadLine().Trim()
+
+                    If strLineIn.Length > 0 Then
+
+                        If strLineIn.Chars(0) = "#"c Then
+                            ' Comment line; skip it
+                        ElseIf strLineIn.ToLower.StartsWith("mod") Then
+                            ' Modification definition line
+
+                            ' Split the line on commas
+                            strSplitLine = strLineIn.Split(","c)
+
+                            If strSplitLine.Length >= 3 AndAlso strSplitLine(0).ToLower.Trim = "mod" Then
+                                If udtModList Is Nothing OrElse udtModList.Length = 0 Then
+                                    ReDim udtModList(0)
+                                ElseIf intModCount >= udtModList.Length Then
+                                    ReDim Preserve udtModList(udtModList.Length * 2 - 1)
+                                End If
+
+                                With udtModList(intModCount)
+                                    .ModMass = strSplitLine(1)
+                                    .Residues = strSplitLine(2)
+                                    .ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL
+
+                                    If strSplitLine.Length >= 4 Then
+                                        Select Case strSplitLine(3).ToLower
+                                            Case "opt"
+                                                .ModType = eInspectModType.DynamicMod
+                                            Case "fix"
+                                                .ModType = eInspectModType.StaticMod
+                                            Case "nterminal"
+                                                .ModType = eInspectModType.DynNTermPeptide
+                                            Case "cterminal"
+                                                .ModType = eInspectModType.DynCTermPeptide
+                                            Case Else
+                                                ReportWarning("Unrecognized Mod Type in the Inspect parameter file")
+                                                .ModType = eInspectModType.DynamicMod
+                                        End Select
+                                    Else
+                                        ' Assume dynamic if not specifed
+                                        .ModType = eInspectModType.DynamicMod
+                                    End If
+
+                                    If strSplitLine.Length >= 5 Then
+                                        .ModName = strSplitLine(4).ToLower
+                                        If .ModName.Length > 4 Then
+                                            ' Only keep the first 4 characters of the modification name
+                                            .ModName = .ModName.Substring(0, 4)
+                                        End If
+                                    Else
+                                        intUnnamedModID += 1
+                                        .ModName = "UnnamedMod" & intUnnamedModID.ToString
+                                    End If
+
+                                    ' Check for phosphorylation
+                                    ' Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
+                                    '  However, we want to use the more precise mass of 79.9663
+                                    If .ModName = PHOS_MOD_NAME.ToLower And .ModMass = "80" Then
+                                        .ModMass = PHOS_MOD_MASS
+                                    End If
+
+                                End With
+
+                                intModCount += 1
+                            End If
+                        End If
+                    End If
+                Loop
+
+            End Using
+
+            ' Shrink udtModList to the appropriate length
+            ReDim Preserve udtModList(intModCount - 1)
+
+            Console.WriteLine()
+
+            blnSuccess = True
+
+        Catch ex As Exception
+            SetErrorMessage("Error reading the Inspect parameter file (" & Path.GetFileName(strInspectParameterFilePath) & "): " & ex.Message)
+            SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+            blnSuccess = False
+        End Try
+
+        Return blnSuccess
+
+    End Function
+
+    Private Function ExtractScanNumFromDTAName(ByVal spectrumFile As String) As String
+        Static reScanNumberRegEx As New Regex(DTA_FILENAME_SCAN_NUMBER_REGEX, REGEX_OPTIONS)
+
+        Dim scanNum As String = String.Empty
+
+        ' See if strValue resembles a .Dta file name
+        ' For example, "MyDataset.300.300.2.dta"
+
+        Try
+            With reScanNumberRegEx.Match(spectrumFile)
+                If .Success AndAlso .Groups.Count > 1 Then
+                    scanNum = .Groups(1).Value
+                End If
+            End With
+        Catch ex As Exception
+            ' Ignore errors here
+            scanNum = "0"
+        End Try
+
+        Return scanNum
+
+    End Function
+
+    Private Sub InitializeLocalVariables()
+        mSortFHTandSynFiles = True
+    End Sub
+
+    ''' <summary>
+    ''' Load the PeptideToProteinMap information; in addition, creates the _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
+    ''' </summary>
+    ''' <param name="strPepToProteinMapFilePath"></param>
+    ''' <param name="strOutputFolderPath"></param>
+    ''' <param name="udtInspectModInfo"></param>
+    ''' <param name="lstPepToProteinMapping"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Protected Function LoadPeptideToProteinMapInfoInspect(
       ByVal strPepToProteinMapFilePath As String, _
       ByVal strOutputFolderPath As String, _
@@ -860,277 +865,279 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
-	Private Function ParseInspectSynFileHeaderLine(ByVal strLineIn As String, _
-	  ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseInspectSynFileHeaderLine(ByVal strLineIn As String, _
+      ByRef intColumnMapping() As Integer) As Boolean
 
-		' Parse the header line
+        ' Parse the header line
 
-		Dim strSplitLine() As String
-		Dim eResultFileColumn As eInspectSynFileColumns
-		Dim lstColumnNames As SortedDictionary(Of String, eInspectSynFileColumns)
-		lstColumnNames = New SortedDictionary(Of String, eInspectSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        Dim strSplitLine() As String
+        Dim eResultFileColumn As eInspectSynFileColumns
+        Dim lstColumnNames As SortedDictionary(Of String, eInspectSynFileColumns)
+        lstColumnNames = New SortedDictionary(Of String, eInspectSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
 
-		ReDim intColumnMapping(InspectSynopsisFileColCount - 1)
+        ReDim intColumnMapping(InspectSynopsisFileColCount - 1)
 
-		lstColumnNames.Add("ResultID", eInspectSynFileColumns.ResultID)
-		lstColumnNames.Add("Scan", eInspectSynFileColumns.Scan)
-		lstColumnNames.Add("Peptide", eInspectSynFileColumns.Peptide)
-		lstColumnNames.Add("Protein", eInspectSynFileColumns.Protein)
-		lstColumnNames.Add("Charge", eInspectSynFileColumns.Charge)
-		lstColumnNames.Add("MQScore", eInspectSynFileColumns.MQScore)
-		lstColumnNames.Add("Length", eInspectSynFileColumns.Length)
-		lstColumnNames.Add("TotalPRMScore", eInspectSynFileColumns.TotalPRMScore)
-		lstColumnNames.Add("MedianPRMScore", eInspectSynFileColumns.MedianPRMScore)
-		lstColumnNames.Add("FractionY", eInspectSynFileColumns.FractionY)
-		lstColumnNames.Add("FractionB", eInspectSynFileColumns.FractionB)
-		lstColumnNames.Add("Intensity", eInspectSynFileColumns.Intensity)
-		lstColumnNames.Add("NTT", eInspectSynFileColumns.NTT)
-		lstColumnNames.Add("PValue", eInspectSynFileColumns.PValue)
-		lstColumnNames.Add("FScore", eInspectSynFileColumns.FScore)
-		lstColumnNames.Add("DeltaScore", eInspectSynFileColumns.DeltaScore)
-		lstColumnNames.Add("DeltaScoreOther", eInspectSynFileColumns.DeltaScoreOther)
-		lstColumnNames.Add("DeltaNormMQScore", eInspectSynFileColumns.DeltaNormMQScore)
-		lstColumnNames.Add("DeltaNormTotalPRMScore", eInspectSynFileColumns.DeltaNormTotalPRMScore)
-		lstColumnNames.Add("RankTotalPRMScore", eInspectSynFileColumns.RankTotalPRMScore)
-		lstColumnNames.Add("RankFScore", eInspectSynFileColumns.RankFScore)
-		lstColumnNames.Add("MH", eInspectSynFileColumns.MH)
-		lstColumnNames.Add("RecordNumber", eInspectSynFileColumns.RecordNumber)
-		lstColumnNames.Add("DBFilePos", eInspectSynFileColumns.DBFilePos)
-		lstColumnNames.Add("SpecFilePos", eInspectSynFileColumns.SpecFilePos)
-		lstColumnNames.Add("PrecursorMZ", eInspectSynFileColumns.PrecursorMZ)
-		lstColumnNames.Add("PrecursorError", eInspectSynFileColumns.PrecursorError)
+        lstColumnNames.Add("ResultID", eInspectSynFileColumns.ResultID)
+        lstColumnNames.Add("Scan", eInspectSynFileColumns.Scan)
+        lstColumnNames.Add("Peptide", eInspectSynFileColumns.Peptide)
+        lstColumnNames.Add("Protein", eInspectSynFileColumns.Protein)
+        lstColumnNames.Add("Charge", eInspectSynFileColumns.Charge)
+        lstColumnNames.Add("MQScore", eInspectSynFileColumns.MQScore)
+        lstColumnNames.Add("Length", eInspectSynFileColumns.Length)
+        lstColumnNames.Add("TotalPRMScore", eInspectSynFileColumns.TotalPRMScore)
+        lstColumnNames.Add("MedianPRMScore", eInspectSynFileColumns.MedianPRMScore)
+        lstColumnNames.Add("FractionY", eInspectSynFileColumns.FractionY)
+        lstColumnNames.Add("FractionB", eInspectSynFileColumns.FractionB)
+        lstColumnNames.Add("Intensity", eInspectSynFileColumns.Intensity)
+        lstColumnNames.Add("NTT", eInspectSynFileColumns.NTT)
+        lstColumnNames.Add("PValue", eInspectSynFileColumns.PValue)
+        lstColumnNames.Add("FScore", eInspectSynFileColumns.FScore)
+        lstColumnNames.Add("DeltaScore", eInspectSynFileColumns.DeltaScore)
+        lstColumnNames.Add("DeltaScoreOther", eInspectSynFileColumns.DeltaScoreOther)
+        lstColumnNames.Add("DeltaNormMQScore", eInspectSynFileColumns.DeltaNormMQScore)
+        lstColumnNames.Add("DeltaNormTotalPRMScore", eInspectSynFileColumns.DeltaNormTotalPRMScore)
+        lstColumnNames.Add("RankTotalPRMScore", eInspectSynFileColumns.RankTotalPRMScore)
+        lstColumnNames.Add("RankFScore", eInspectSynFileColumns.RankFScore)
+        lstColumnNames.Add("MH", eInspectSynFileColumns.MH)
+        lstColumnNames.Add("RecordNumber", eInspectSynFileColumns.RecordNumber)
+        lstColumnNames.Add("DBFilePos", eInspectSynFileColumns.DBFilePos)
+        lstColumnNames.Add("SpecFilePos", eInspectSynFileColumns.SpecFilePos)
+        lstColumnNames.Add("PrecursorMZ", eInspectSynFileColumns.PrecursorMZ)
+        lstColumnNames.Add("PrecursorError", eInspectSynFileColumns.PrecursorError)
 
-		Try
-			' Initialize each entry in intColumnMapping to -1
-			For intIndex As Integer = 0 To intColumnMapping.Length - 1
-				intColumnMapping(intIndex) = -1
-			Next
+        Try
+            ' Initialize each entry in intColumnMapping to -1
+            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+                intColumnMapping(intIndex) = -1
+            Next
 
-			strSplitLine = strLineIn.Split(ControlChars.Tab)
-			For intIndex As Integer = 0 To strSplitLine.Length - 1
-				If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
-					' Recognized column name; update intColumnMapping
-					intColumnMapping(eResultFileColumn) = intIndex
-				End If
-			Next
+            strSplitLine = strLineIn.Split(ControlChars.Tab)
+            For intIndex As Integer = 0 To strSplitLine.Length - 1
+                If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
+                    ' Recognized column name; update intColumnMapping
+                    intColumnMapping(eResultFileColumn) = intIndex
+                End If
+            Next
 
-		Catch ex As Exception
-			SetErrorMessage("Error parsing header in Inspect synopsis file: " & ex.Message)
-			Return False
-		End Try
+        Catch ex As Exception
+            SetErrorMessage("Error parsing header in Inspect synopsis file: " & ex.Message)
+            Return False
+        End Try
 
-		Return True
+        Return True
 
-	End Function
+    End Function
 
-	Protected Function ParseInSpectSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
-		' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
+    Protected Function ParseInSpectSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
+        ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-		Dim strPreviousTotalPRMScore As String
+        Dim strPreviousTotalPRMScore As String
 
-		' Note that Inspect synopsis files are normally sorted on TotalPRMScore descending
-		' In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-		'  we will keep track of the scan, charge, and peptide information parsed for each unique TotalPRMScore encountered
+        ' Note that Inspect synopsis files are normally sorted on TotalPRMScore descending
+        ' In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
+        '  we will keep track of the scan, charge, and peptide information parsed for each unique TotalPRMScore encountered
 
-		Dim htPeptidesFoundForTotalPRMScoreLevel As Hashtable
+        Dim htPeptidesFoundForTotalPRMScoreLevel As Hashtable
 
-		Dim strKey As String
+        Dim strKey As String
 
-		Dim strLineIn As String
-		Dim strModificationSummaryFilePath As String
+        Dim strLineIn As String
+        Dim strModificationSummaryFilePath As String
 
-		Dim objSearchResult As clsSearchResultsInSpecT
+        Dim objSearchResult As clsSearchResultsInSpecT
 
-		Dim intResultsProcessed As Integer
-		Dim intPepToProteinMapIndex As Integer
-		Dim sngPercentComplete As Single
+        Dim intResultsProcessed As Integer
+        Dim intPepToProteinMapIndex As Integer
+        Dim sngPercentComplete As Single
 
-		Dim strCurrentPeptideWithMods As String = String.Empty
-		Dim strCurrentProtein As String
+        Dim strCurrentPeptideWithMods As String = String.Empty
+        Dim strCurrentProtein As String
 
-		Dim blnSuccess As Boolean
-		Dim blnDataLine As Boolean
-		Dim blnValidSearchResult As Boolean
-		Dim blnFirstMatchForGroup As Boolean
+        Dim blnSuccess As Boolean
+        Dim blnDataLine As Boolean
+        Dim blnValidSearchResult As Boolean
+        Dim blnFirstMatchForGroup As Boolean
 
-		Dim blnHeaderParsed As Boolean
-		Dim intColumnMapping() As Integer = Nothing
+        Dim blnHeaderParsed As Boolean
+        Dim intColumnMapping() As Integer = Nothing
 
-		Dim strErrorLog As String = String.Empty
+        Dim strErrorLog As String = String.Empty
 
-		Dim objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer
+        Dim objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer
 
-		Try
-			' Possibly reset the mass correction tags and Mod Definitions
-			If blnResetMassCorrectionTagsAndModificationDefinitions Then
-				ResetMassCorrectionTagsAndModificationDefinitions()
-			End If
+        Try
+            ' Possibly reset the mass correction tags and Mod Definitions
+            If blnResetMassCorrectionTagsAndModificationDefinitions Then
+                ResetMassCorrectionTagsAndModificationDefinitions()
+            End If
 
-			' Reset .OccurrenceCount
-			mPeptideMods.ResetOccurrenceCountStats()
+            ' Reset .OccurrenceCount
+            mPeptideMods.ResetOccurrenceCountStats()
 
-			' Initialize objSearchResult
-			objSearchResult = New clsSearchResultsInSpecT(mPeptideMods)
+            ' Initialize objSearchResult
+            objSearchResult = New clsSearchResultsInSpecT(mPeptideMods)
 
-			' Initialize htPeptidesFoundForTotalPRMScoreLevel
-			htPeptidesFoundForTotalPRMScoreLevel = New Hashtable
-			strPreviousTotalPRMScore = String.Empty
+            ' Initialize htPeptidesFoundForTotalPRMScoreLevel
+            htPeptidesFoundForTotalPRMScoreLevel = New Hashtable
+            strPreviousTotalPRMScore = String.Empty
 
-			' Initialize objPeptideSearchComparer
-			objPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer
+            ' Initialize objPeptideSearchComparer
+            objPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer
 
-			' Assure that lstPepToProteinMapping is sorted on peptide
-			If lstPepToProteinMapping.Count > 1 Then
-				lstPepToProteinMapping.Sort(New PepToProteinMappingComparer)
-			End If
+            ' Assure that lstPepToProteinMapping is sorted on peptide
+            If lstPepToProteinMapping.Count > 1 Then
+                lstPepToProteinMapping.Sort(New PepToProteinMappingComparer)
+            End If
 
-			Try
-				objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+            Try
+                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
-				' Open the input file and parse it
-				' Initialize the stream reader
-				Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                ' Open the input file and parse it
+                ' Initialize the stream reader
+                Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
-					strErrorLog = String.Empty
-					intResultsProcessed = 0
-					blnHeaderParsed = False
+                    strErrorLog = String.Empty
+                    intResultsProcessed = 0
+                    blnHeaderParsed = False
 
-					' Create the output files
-					Dim strBaseOutputFilePath As String = Path.Combine(strOutputFolderPath, Path.GetFileName(strInputFilePath))
-					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
+                    ' Create the output files
+                    Dim strBaseOutputFilePath As String = Path.Combine(strOutputFolderPath, Path.GetFileName(strInputFilePath))
+                    blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
-					' Parse the input file
-					Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
+                    ' Parse the input file
+                    Do While Not srDataFile.EndOfStream And Not MyBase.AbortProcessing
 
-						strLineIn = srDataFile.ReadLine()
-						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
+                        strLineIn = srDataFile.ReadLine()
+                        If String.IsNullOrWhiteSpace(strLineIn) Then
+                            Continue Do
+                        End If
 
-							blnDataLine = True
+                        blnDataLine = True
 
-							If Not blnHeaderParsed Then
-								blnSuccess = ParseInspectSynFileHeaderLine(strLineIn, intColumnMapping)
-								If blnSuccess Then
-									blnDataLine = False
-								Else
-									' Error parsing header; assume this is a data line
-									blnDataLine = True
-								End If
-								blnHeaderParsed = True
-							End If
+                        If Not blnHeaderParsed Then
+                            blnSuccess = ParseInspectSynFileHeaderLine(strLineIn, intColumnMapping)
+                            If blnSuccess Then
+                                blnDataLine = False
+                            Else
+                                ' Error parsing header; assume this is a data line
+                                blnDataLine = True
+                            End If
+                            blnHeaderParsed = True
+                        End If
 
-							If blnDataLine Then
-								blnValidSearchResult = ParseInSpectSynFileEntry(strLineIn, intColumnMapping, objSearchResult, strErrorLog, strCurrentPeptideWithMods)
-							Else
-								blnValidSearchResult = False
-							End If
+                        If blnDataLine Then
+                            blnValidSearchResult = ParseInSpectSynFileEntry(strLineIn, intColumnMapping, objSearchResult, strErrorLog, strCurrentPeptideWithMods)
+                        Else
+                            blnValidSearchResult = False
+                        End If
 
-							If blnValidSearchResult Then
-								strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.Charge
+                        If blnValidSearchResult Then
+                            strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.Charge
 
-								If objSearchResult.TotalPRMScore = strPreviousTotalPRMScore Then
-									' New result has the same TotalPRMScore as the previous result
-									' See if htPeptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
+                            If objSearchResult.TotalPRMScore = strPreviousTotalPRMScore Then
+                                ' New result has the same TotalPRMScore as the previous result
+                                ' See if htPeptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
 
-									If htPeptidesFoundForTotalPRMScoreLevel.ContainsKey(strKey) Then
-										blnFirstMatchForGroup = False
-									Else
-										htPeptidesFoundForTotalPRMScoreLevel.Add(strKey, 1)
-										blnFirstMatchForGroup = True
-									End If
+                                If htPeptidesFoundForTotalPRMScoreLevel.ContainsKey(strKey) Then
+                                    blnFirstMatchForGroup = False
+                                Else
+                                    htPeptidesFoundForTotalPRMScoreLevel.Add(strKey, 1)
+                                    blnFirstMatchForGroup = True
+                                End If
 
-								Else
-									' New TotalPRMScore
-									' Reset htPeptidesFoundForScan
-									htPeptidesFoundForTotalPRMScoreLevel.Clear()
+                            Else
+                                ' New TotalPRMScore
+                                ' Reset htPeptidesFoundForScan
+                                htPeptidesFoundForTotalPRMScoreLevel.Clear()
 
-									' Update strPreviousTotalPRMScore
-									strPreviousTotalPRMScore = objSearchResult.TotalPRMScore
+                                ' Update strPreviousTotalPRMScore
+                                strPreviousTotalPRMScore = objSearchResult.TotalPRMScore
 
-									' Append a new entry to htPeptidesFoundForScan
-									htPeptidesFoundForTotalPRMScoreLevel.Add(strKey, 1)
-									blnFirstMatchForGroup = True
-								End If
-
-
-								blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
-								If Not blnSuccess Then
-									If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-										strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'" & ControlChars.NewLine
-									End If
-								End If
-								MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
+                                ' Append a new entry to htPeptidesFoundForScan
+                                htPeptidesFoundForTotalPRMScoreLevel.Add(strKey, 1)
+                                blnFirstMatchForGroup = True
+                            End If
 
 
-								If lstPepToProteinMapping.Count > 0 Then
-									' Add the additional proteins for this peptide
-
-									' Use binary search to find this peptide in lstPepToProteinMapping
-									intPepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, strCurrentPeptideWithMods)
-
-									If intPepToProteinMapIndex >= 0 Then
-										' Call MyBase.SaveResultsFileEntrySeqInfo for each entry in lstPepToProteinMapping() for peptide , skipping objSearchResult.ProteinName
-										strCurrentProtein = String.Copy(objSearchResult.ProteinName)
-										Do
-											If lstPepToProteinMapping(intPepToProteinMapIndex).Protein <> strCurrentProtein Then
-												objSearchResult.ProteinName = String.Copy(lstPepToProteinMapping(intPepToProteinMapIndex).Protein)
-												MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), False)
-											End If
-
-											intPepToProteinMapIndex += 1
-										Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso strCurrentPeptideWithMods = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
-									Else
-										' Match not found; this is unexpected
-										ReportWarning("no match for '" & strCurrentPeptideWithMods & "' in lstPepToProteinMapping")
-									End If
-								End If
-
-							End If
-
-							' Update the progress
-							sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-							If mCreateProteinModsFile Then
-								sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
-							End If
-							UpdateProgress(sngPercentComplete)
-
-							intResultsProcessed += 1
-						End If
-					Loop
-				End Using
-
-				If mCreateModificationSummaryFile Then
-					' Create the modification summary file
-					Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
-					strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
-					strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
-
-					SaveModificationSummaryFile(strModificationSummaryFilePath)
-				End If
-
-				' Inform the user if any errors occurred
-				If strErrorLog.Length > 0 Then
-					SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
-				End If
-
-				blnSuccess = True
-
-			Catch ex As Exception
-				SetErrorMessage(ex.Message)
-				SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
-				blnSuccess = False
-			Finally
-				MyBase.CloseSequenceOutputFiles()
-			End Try
-		Catch ex As Exception
-			SetErrorMessage(ex.Message)
-			SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-			blnSuccess = False
-		End Try
-
-		Return blnSuccess
+                            blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
+                            If Not blnSuccess Then
+                                If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                                    strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'" & ControlChars.NewLine
+                                End If
+                            End If
+                            MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
 
 
-	End Function
+                            If lstPepToProteinMapping.Count > 0 Then
+                                ' Add the additional proteins for this peptide
+
+                                ' Use binary search to find this peptide in lstPepToProteinMapping
+                                intPepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, strCurrentPeptideWithMods)
+
+                                If intPepToProteinMapIndex >= 0 Then
+                                    ' Call MyBase.SaveResultsFileEntrySeqInfo for each entry in lstPepToProteinMapping() for peptide , skipping objSearchResult.ProteinName
+                                    strCurrentProtein = String.Copy(objSearchResult.ProteinName)
+                                    Do
+                                        If lstPepToProteinMapping(intPepToProteinMapIndex).Protein <> strCurrentProtein Then
+                                            objSearchResult.ProteinName = String.Copy(lstPepToProteinMapping(intPepToProteinMapIndex).Protein)
+                                            MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), False)
+                                        End If
+
+                                        intPepToProteinMapIndex += 1
+                                    Loop While intPepToProteinMapIndex < lstPepToProteinMapping.Count AndAlso strCurrentPeptideWithMods = lstPepToProteinMapping(intPepToProteinMapIndex).Peptide
+                                Else
+                                    ' Match not found; this is unexpected
+                                    ReportWarning("no match for '" & strCurrentPeptideWithMods & "' in lstPepToProteinMapping")
+                                End If
+                            End If
+
+                        End If
+
+                        ' Update the progress
+                        sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+                        If mCreateProteinModsFile Then
+                            sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+                        End If
+                        UpdateProgress(sngPercentComplete)
+
+                        intResultsProcessed += 1
+
+                    Loop
+                End Using
+
+                If mCreateModificationSummaryFile Then
+                    ' Create the modification summary file
+                    Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
+                    strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
+                    strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
+
+                    SaveModificationSummaryFile(strModificationSummaryFilePath)
+                End If
+
+                ' Inform the user if any errors occurred
+                If strErrorLog.Length > 0 Then
+                    SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
+                End If
+
+                blnSuccess = True
+
+            Catch ex As Exception
+                SetErrorMessage(ex.Message)
+                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                blnSuccess = False
+            Finally
+                MyBase.CloseSequenceOutputFiles()
+            End Try
+        Catch ex As Exception
+            SetErrorMessage(ex.Message)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        End Try
+
+        Return blnSuccess
+
+
+    End Function
 
 	Private Function ParseInspectResultsFileEntry(ByRef strLineIn As String, _
 	 ByRef udtInspectModInfo() As udtModInfoType, _
@@ -1271,117 +1278,117 @@ Public Class clsInSpecTResultsProcessor
 
 	End Function
 
-	Private Function ParseInSpectSynFileEntry(ByRef strLineIn As String, _
-	   ByRef intColumnMapping() As Integer, _
-	   ByRef objSearchResult As clsSearchResultsInSpecT, _
-	   ByRef strErrorLog As String, _
-	   ByRef strPeptideSequenceWithMods As String) As Boolean
+    Private Function ParseInSpectSynFileEntry(ByRef strLineIn As String, _
+       ByRef intColumnMapping() As Integer, _
+       ByVal objSearchResult As clsSearchResultsInSpecT, _
+       ByRef strErrorLog As String, _
+       ByRef strPeptideSequenceWithMods As String) As Boolean
 
-		' Parses an entry from the Inspect Synopsis file
+        ' Parses an entry from the Inspect Synopsis file
 
-		Dim strSplitLine() As String = Nothing
+        Dim strSplitLine() As String = Nothing
 
-		Dim blnValidSearchResult As Boolean
+        Dim blnValidSearchResult As Boolean
 
-		Try
-			' Set this to False for now
-			blnValidSearchResult = False
+        Try
+            ' Set this to False for now
+            blnValidSearchResult = False
 
-			' Reset objSearchResult
-			objSearchResult.Clear()
-			strPeptideSequenceWithMods = String.Empty
+            ' Reset objSearchResult
+            objSearchResult.Clear()
+            strPeptideSequenceWithMods = String.Empty
 
-			strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
-			If strSplitLine.Length < INSPECT_SYN_FILE_MIN_COL_COUNT Then
-				Exit Try
-			End If
+            strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
+            If strSplitLine.Length < INSPECT_SYN_FILE_MIN_COL_COUNT Then
+                Exit Try
+            End If
 
-			With objSearchResult
-				If Not GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.ResultID), .ResultID) Then
-					Throw New EvaluateException("ResultID column is missing or invalid")
-				End If
+            With objSearchResult
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.ResultID), .ResultID) Then
+                    Throw New EvaluateException("ResultID column is missing or invalid")
+                End If
 
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Scan), .Scan)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Charge), .Charge)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Scan), .Scan)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Charge), .Charge)
 
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Protein), .ProteinName)
-				.MultipleProteinCount = "0"
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Protein), .ProteinName)
+                .MultipleProteinCount = "0"
 
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Peptide), strPeptideSequenceWithMods)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Peptide), strPeptideSequenceWithMods)
 
-				' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
-				.SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
-			End With
+                ' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                .SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
+            End With
 
-			Dim objSearchResultBase As clsSearchResultsBaseClass
-			objSearchResultBase = DirectCast(objSearchResult, clsSearchResultsBaseClass)
+            Dim objSearchResultBase As clsSearchResultsBaseClass
+            objSearchResultBase = DirectCast(objSearchResult, clsSearchResultsBaseClass)
 
-			MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
+            MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
 
-			With objSearchResult
+            With objSearchResult
 
-				' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-				' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
-				' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
-				.ComputePeptideCleavageStateInProtein()
+                ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
+                ' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
+                .ComputePeptideCleavageStateInProtein()
 
-				If GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.PrecursorError), .PeptideDeltaMass) Then
-					' Note: .peptideDeltaMass is stored in the Inspect results file as "Observed_Mass - Theoretical_Mass"
-					' However, in MTS .peptideDeltaMass is "Theoretical - Observed"
-					' Therefore, we will negate .peptideDeltaMass
-					Try
-						.PeptideDeltaMass = (-Double.Parse(.PeptideDeltaMass)).ToString
-					Catch ex As Exception
-						' Error; Leave .peptideDeltaMass unchanged
-					End Try
+                If GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.PrecursorError), .PeptideDeltaMass) Then
+                    ' Note: .peptideDeltaMass is stored in the Inspect results file as "Observed_Mass - Theoretical_Mass"
+                    ' However, in MTS .peptideDeltaMass is "Theoretical - Observed"
+                    ' Therefore, we will negate .peptideDeltaMass
+                    Try
+                        .PeptideDeltaMass = (-Double.Parse(.PeptideDeltaMass)).ToString
+                    Catch ex As Exception
+                        ' Error; Leave .peptideDeltaMass unchanged
+                    End Try
 
-				Else
-					.PeptideDeltaMass = "0"
-				End If
+                Else
+                    .PeptideDeltaMass = "0"
+                End If
 
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.MQScore), .MQScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.MQScore), .MQScore)
 
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Length), .Length)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.TotalPRMScore), .TotalPRMScore)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.MedianPRMScore), .MedianPRMScore)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.FractionY), .FractionY)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.FractionB), .FractionB)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Intensity), .Intensity)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.NTT), .NTT)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.PValue), .pValue)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.FScore), .FScore)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DeltaScore), .DeltaScore)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DeltaScoreOther), .DeltaScoreOther)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DeltaNormMQScore), .DeltaNormMQScore)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DeltaNormTotalPRMScore), .DeltaNormTotalPRMScore)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.RankTotalPRMScore), .RankTotalPRMScore)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.RankFScore), .RankFScore)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.MH), .PeptideMH)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.RecordNumber), .RecordNumber)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DBFilePos), .DBFilePos)
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.SpecFilePos), .SpecFilePos)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Length), .Length)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.TotalPRMScore), .TotalPRMScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.MedianPRMScore), .MedianPRMScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.FractionY), .FractionY)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.FractionB), .FractionB)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.Intensity), .Intensity)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.NTT), .NTT)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.PValue), .pValue)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.FScore), .FScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DeltaScore), .DeltaScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DeltaScoreOther), .DeltaScoreOther)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DeltaNormMQScore), .DeltaNormMQScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DeltaNormTotalPRMScore), .DeltaNormTotalPRMScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.RankTotalPRMScore), .RankTotalPRMScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.RankFScore), .RankFScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.MH), .PeptideMH)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.RecordNumber), .RecordNumber)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.DBFilePos), .DBFilePos)
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.SpecFilePos), .SpecFilePos)
 
-				' Note: .PrecursorError was processed earlier in this function
-				GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.PrecursorMZ), .PrecursorMZ)
+                ' Note: .PrecursorError was processed earlier in this function
+                GetColumnValue(strSplitLine, intColumnMapping(eInspectSynFileColumns.PrecursorMZ), .PrecursorMZ)
 
-			End With
+            End With
 
-			blnValidSearchResult = True
-		Catch ex As Exception
-			' Error parsing this row from the synopsis or first hits file
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
-					strErrorLog &= "Error parsing InSpecT Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
-				Else
-					strErrorLog &= "Error parsing InSpecT Results in ParseInspectSynFileEntry" & ControlChars.NewLine
-				End If
-			End If
-			blnValidSearchResult = False
-		End Try
+            blnValidSearchResult = True
+        Catch ex As Exception
+            ' Error parsing this row from the synopsis or first hits file
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+                    strErrorLog &= "Error parsing InSpecT Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+                Else
+                    strErrorLog &= "Error parsing InSpecT Results in ParseInspectSynFileEntry" & ControlChars.NewLine
+                End If
+            End If
+            blnValidSearchResult = False
+        End Try
 
-		Return blnValidSearchResult
+        Return blnValidSearchResult
 
-	End Function
+    End Function
 
 	''' <summary>
 	''' Main processing function
@@ -1745,186 +1752,193 @@ Public Class clsInSpecTResultsProcessor
 		End If
 	End Sub
 
-	Protected Sub StoreOrWriteSearchResult(ByRef swResultFile As StreamWriter, _
-	   ByRef intResultID As Integer, _
-	   ByRef udtSearchResult As udtInspectSearchResultType, _
-	   ByRef intFilteredSearchResultCount As Integer, _
-	   ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-	   ByRef strErrorLog As String)
-		If mSortFHTandSynFiles Then
-			If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
-				ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
-			End If
+    Protected Sub StoreOrWriteSearchResult(
+      ByVal swResultFile As StreamWriter,
+      ByRef intResultID As Integer,
+      ByRef udtSearchResult As udtInspectSearchResultType,
+      ByRef intFilteredSearchResultCount As Integer,
+      ByRef udtFilteredSearchResults() As udtInspectSearchResultType,
+      ByRef strErrorLog As String)
 
-			udtFilteredSearchResults(intFilteredSearchResultCount) = udtSearchResult
-			intFilteredSearchResultCount += 1
-		Else
-			intResultID += 1
-			WriteSearchResultToFile(intResultID, swResultFile, udtSearchResult, strErrorLog)
-		End If
-	End Sub
+        If mSortFHTandSynFiles Then
+            If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
+                ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
+            End If
 
-	Private Sub SortAndWriteFilteredSearchResults(ByRef swResultFile As StreamWriter, _
-		ByVal intFilteredSearchResultCount As Integer, _
-		ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-		ByRef strErrorLog As String)
+            udtFilteredSearchResults(intFilteredSearchResultCount) = udtSearchResult
+            intFilteredSearchResultCount += 1
+        Else
+            intResultID += 1
+            WriteSearchResultToFile(intResultID, swResultFile, udtSearchResult, strErrorLog)
+        End If
+    End Sub
 
-		Dim intIndex As Integer
+    Private Sub SortAndWriteFilteredSearchResults(
+      ByVal swResultFile As StreamWriter,
+      ByVal intFilteredSearchResultCount As Integer,
+      ByRef udtFilteredSearchResults() As udtInspectSearchResultType,
+      ByRef strErrorLog As String)
 
-		' Sort udtFilteredSearchResults by descending TotalPRMScore, ascending scan, ascending charge, ascending peptide, and ascending protein
-		Array.Sort(udtFilteredSearchResults, 0, intFilteredSearchResultCount, New InspectSearchResultsComparerTotalPRMDescScanChargePeptide)
+        Dim intIndex As Integer
 
-		For intIndex = 0 To intFilteredSearchResultCount - 1
-			WriteSearchResultToFile(intIndex + 1, swResultFile, udtFilteredSearchResults(intIndex), strErrorLog)
-		Next intIndex
+        ' Sort udtFilteredSearchResults by descending TotalPRMScore, ascending scan, ascending charge, ascending peptide, and ascending protein
+        Array.Sort(udtFilteredSearchResults, 0, intFilteredSearchResultCount, New InspectSearchResultsComparerTotalPRMDescScanChargePeptide)
 
-	End Sub
+        For intIndex = 0 To intFilteredSearchResultCount - 1
+            WriteSearchResultToFile(intIndex + 1, swResultFile, udtFilteredSearchResults(intIndex), strErrorLog)
+        Next intIndex
 
-	Private Sub StoreTopFHTMatch(ByRef swResultFile As StreamWriter, _
-	 ByRef intResultID As Integer, _
-	 ByVal intCurrentScanResultsCount As Integer, _
-	 ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-	 ByRef intFilteredSearchResultCount As Integer, _
-	 ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-	 ByRef strErrorLog As String, _
-	 ByRef objSortComparer As IComparer(Of udtInspectSearchResultType))
+    End Sub
 
-		Dim intIndex As Integer
-		Dim intCurrentCharge As Short = Short.MinValue
+    Private Sub StoreTopFHTMatch(
+     ByVal swResultFile As StreamWriter,
+     ByRef intResultID As Integer,
+     ByVal intCurrentScanResultsCount As Integer,
+     ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType,
+     ByRef intFilteredSearchResultCount As Integer,
+     ByRef udtFilteredSearchResults() As udtInspectSearchResultType,
+     ByRef strErrorLog As String,
+     ByRef objSortComparer As IComparer(Of udtInspectSearchResultType))
 
-		AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
+        Dim intIndex As Integer
+        Dim intCurrentCharge As Short = Short.MinValue
 
-		' Sort udtFilteredSearchResults by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on objSortComparer)
-		' All of the data in udtSearchResultsCurrentScan should have the same scan number
-		Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortComparer)
+        AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
 
-		' Now store or write out the first match for each charge for this scan
-		For intIndex = 0 To intCurrentScanResultsCount - 1
-			If intIndex = 0 OrElse intCurrentCharge <> udtSearchResultsCurrentScan(intIndex).ChargeNum Then
-				StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-				intCurrentCharge = udtSearchResultsCurrentScan(intIndex).ChargeNum
-			End If
-		Next intIndex
+        ' Sort udtFilteredSearchResults by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on objSortComparer)
+        ' All of the data in udtSearchResultsCurrentScan should have the same scan number
+        Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortComparer)
 
-	End Sub
+        ' Now store or write out the first match for each charge for this scan
+        For intIndex = 0 To intCurrentScanResultsCount - 1
+            If intIndex = 0 OrElse intCurrentCharge <> udtSearchResultsCurrentScan(intIndex).ChargeNum Then
+                StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+                intCurrentCharge = udtSearchResultsCurrentScan(intIndex).ChargeNum
+            End If
+        Next intIndex
 
-	Private Sub StoreSynMatches(ByRef swResultFile As StreamWriter, _
-	 ByRef intResultID As Integer, _
-	 ByVal intCurrentScanResultsCount As Integer, _
-	 ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType, _
-	 ByRef intFilteredSearchResultCount As Integer, _
-	 ByRef udtFilteredSearchResults() As udtInspectSearchResultType, _
-	 ByRef strErrorLog As String, _
-	 ByRef objSortComparer As IComparer(Of udtInspectSearchResultType))
+    End Sub
 
-		Dim intIndex As Integer
-		Dim intCurrentCharge As Short = Short.MinValue
+    Private Sub StoreSynMatches(
+     ByVal swResultFile As StreamWriter,
+     ByRef intResultID As Integer,
+     ByVal intCurrentScanResultsCount As Integer,
+     ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType,
+     ByRef intFilteredSearchResultCount As Integer,
+     ByRef udtFilteredSearchResults() As udtInspectSearchResultType,
+     ByRef strErrorLog As String,
+     ByRef objSortComparer As IComparer(Of udtInspectSearchResultType))
 
-		AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
+        Dim intIndex As Integer
+        Dim intCurrentCharge As Short = Short.MinValue
 
-		' Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
-		' All of the data in udtSearchResultsCurrentScan should have the same scan number
-		Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortComparer)
+        AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
 
-		' Now store or write out the matches that pass the filters
-		For intIndex = 0 To intCurrentScanResultsCount - 1
-			If udtSearchResultsCurrentScan(intIndex).PValueNum <= mInspectSynopsisFilePValueThreshold OrElse _
-			   udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse _
-			   udtSearchResultsCurrentScan(intIndex).FScoreNum >= FSCORE_THRESHOLD Then
-				StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-			End If
-		Next intIndex
+        ' Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
+        ' All of the data in udtSearchResultsCurrentScan should have the same scan number
+        Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortComparer)
 
-	End Sub
+        ' Now store or write out the matches that pass the filters
+        For intIndex = 0 To intCurrentScanResultsCount - 1
+            If udtSearchResultsCurrentScan(intIndex).PValueNum <= mInspectSynopsisFilePValueThreshold OrElse _
+               udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse _
+               udtSearchResultsCurrentScan(intIndex).FScoreNum >= FSCORE_THRESHOLD Then
+                StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+            End If
+        Next intIndex
 
-	Private Sub WriteSynFHTFileHeader(ByRef swResultFile As StreamWriter, _
-			  ByRef strErrorLog As String)
+    End Sub
 
-		' Write out the header line for synopsis / first hits files
-		Try
-			Dim lstData As New List(Of String)
-			lstData.Add(COLUMN_NAME_RESULTID)
-			lstData.Add("Scan")
-			lstData.Add(COLUMN_NAME_PEPTIDE)
-			lstData.Add("Protein")
-			lstData.Add("Charge")
-			lstData.Add("MQScore")
-			lstData.Add("Length")
-			lstData.Add("TotalPRMScore")
-			lstData.Add("MedianPRMScore")
-			lstData.Add("FractionY")
-			lstData.Add("FractionB")
-			lstData.Add("Intensity")
-			lstData.Add("NTT")
-			lstData.Add("PValue")
-			lstData.Add("FScore")
-			lstData.Add("DeltaScore")
-			lstData.Add("DeltaScoreOther")
-			lstData.Add("DeltaNormMQScore")
-			lstData.Add("DeltaNormTotalPRMScore")
-			lstData.Add("RankTotalPRMScore")
-			lstData.Add("RankFScore")
-			lstData.Add("MH")
-			lstData.Add("RecordNumber")
-			lstData.Add("DBFilePos")
-			lstData.Add("SpecFilePos")
-			lstData.Add("PrecursorMZ")
-			lstData.Add("PrecursorError")
-			lstData.Add("DelM_PPM")
+    Private Sub WriteSynFHTFileHeader(
+      ByVal swResultFile As StreamWriter,
+      ByRef strErrorLog As String)
 
-			swResultFile.WriteLine(CollapseList(lstData))
+        ' Write out the header line for synopsis / first hits files
+        Try
+            Dim lstData As New List(Of String)
+            lstData.Add(COLUMN_NAME_RESULTID)
+            lstData.Add("Scan")
+            lstData.Add(COLUMN_NAME_PEPTIDE)
+            lstData.Add("Protein")
+            lstData.Add("Charge")
+            lstData.Add("MQScore")
+            lstData.Add("Length")
+            lstData.Add("TotalPRMScore")
+            lstData.Add("MedianPRMScore")
+            lstData.Add("FractionY")
+            lstData.Add("FractionB")
+            lstData.Add("Intensity")
+            lstData.Add("NTT")
+            lstData.Add("PValue")
+            lstData.Add("FScore")
+            lstData.Add("DeltaScore")
+            lstData.Add("DeltaScoreOther")
+            lstData.Add("DeltaNormMQScore")
+            lstData.Add("DeltaNormTotalPRMScore")
+            lstData.Add("RankTotalPRMScore")
+            lstData.Add("RankFScore")
+            lstData.Add("MH")
+            lstData.Add("RecordNumber")
+            lstData.Add("DBFilePos")
+            lstData.Add("SpecFilePos")
+            lstData.Add("PrecursorMZ")
+            lstData.Add("PrecursorError")
+            lstData.Add("DelM_PPM")
 
-		Catch ex As Exception
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
-			End If
-		End Try
+            swResultFile.WriteLine(CollapseList(lstData))
 
-	End Sub
+        Catch ex As Exception
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                strErrorLog &= "Error writing synopsis / first hits header" & ControlChars.NewLine
+            End If
+        End Try
 
-	Private Sub WriteSearchResultToFile(ByVal intResultID As Integer, _
-			 ByRef swResultFile As StreamWriter, _
-			 ByRef udtSearchResult As udtInspectSearchResultType, _
-			 ByRef strErrorLog As String)
+    End Sub
 
-		' Writes an entry to a synopsis or first hits file
-		Try
-			swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
-			  udtSearchResult.Scan & ControlChars.Tab & _
-			  udtSearchResult.PeptideAnnotation & ControlChars.Tab & _
-			  udtSearchResult.Protein & ControlChars.Tab & _
-			  udtSearchResult.Charge & ControlChars.Tab & _
-			  udtSearchResult.MQScore & ControlChars.Tab & _
-			  udtSearchResult.Length & ControlChars.Tab & _
-			  udtSearchResult.TotalPRMScore & ControlChars.Tab & _
-			  udtSearchResult.MedianPRMScore & ControlChars.Tab & _
-			  udtSearchResult.FractionY & ControlChars.Tab & _
-			  udtSearchResult.FractionB & ControlChars.Tab & _
-			  udtSearchResult.Intensity & ControlChars.Tab & _
-			  udtSearchResult.NTT & ControlChars.Tab & _
-			  udtSearchResult.pValue & ControlChars.Tab & _
-			  udtSearchResult.FScore & ControlChars.Tab & _
-			  udtSearchResult.DeltaScore & ControlChars.Tab & _
-			  udtSearchResult.DeltaScoreOther & ControlChars.Tab & _
-			  NumToString(udtSearchResult.DeltaNormMQScore, 5, True) & ControlChars.Tab & _
-			  NumToString(udtSearchResult.DeltaNormTotalPRMScore, 5, True) & ControlChars.Tab & _
-			  udtSearchResult.RankTotalPRMScore & ControlChars.Tab & _
-			  udtSearchResult.RankFScore & ControlChars.Tab & _
-			  NumToString(udtSearchResult.MH, 6, True) & ControlChars.Tab & _
-			  udtSearchResult.RecordNumber & ControlChars.Tab & _
-			  udtSearchResult.DBFilePos & ControlChars.Tab & _
-			  udtSearchResult.SpecFilePos & ControlChars.Tab & _
-			  udtSearchResult.PrecursorMZ & ControlChars.Tab & _
-			  udtSearchResult.PrecursorError & ControlChars.Tab & _
-			  udtSearchResult.DelMPPM)
+    Private Sub WriteSearchResultToFile(
+      ByVal intResultID As Integer,
+      ByVal swResultFile As StreamWriter,
+      ByRef udtSearchResult As udtInspectSearchResultType,
+      ByRef strErrorLog As String)
 
-		Catch ex As Exception
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
-			End If
-		End Try
+        ' Writes an entry to a synopsis or first hits file
+        Try
+            swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
+              udtSearchResult.Scan & ControlChars.Tab & _
+              udtSearchResult.PeptideAnnotation & ControlChars.Tab & _
+              udtSearchResult.Protein & ControlChars.Tab & _
+              udtSearchResult.Charge & ControlChars.Tab & _
+              udtSearchResult.MQScore & ControlChars.Tab & _
+              udtSearchResult.Length & ControlChars.Tab & _
+              udtSearchResult.TotalPRMScore & ControlChars.Tab & _
+              udtSearchResult.MedianPRMScore & ControlChars.Tab & _
+              udtSearchResult.FractionY & ControlChars.Tab & _
+              udtSearchResult.FractionB & ControlChars.Tab & _
+              udtSearchResult.Intensity & ControlChars.Tab & _
+              udtSearchResult.NTT & ControlChars.Tab & _
+              udtSearchResult.pValue & ControlChars.Tab & _
+              udtSearchResult.FScore & ControlChars.Tab & _
+              udtSearchResult.DeltaScore & ControlChars.Tab & _
+              udtSearchResult.DeltaScoreOther & ControlChars.Tab & _
+              NumToString(udtSearchResult.DeltaNormMQScore, 5, True) & ControlChars.Tab & _
+              NumToString(udtSearchResult.DeltaNormTotalPRMScore, 5, True) & ControlChars.Tab & _
+              udtSearchResult.RankTotalPRMScore & ControlChars.Tab & _
+              udtSearchResult.RankFScore & ControlChars.Tab & _
+              NumToString(udtSearchResult.MH, 6, True) & ControlChars.Tab & _
+              udtSearchResult.RecordNumber & ControlChars.Tab & _
+              udtSearchResult.DBFilePos & ControlChars.Tab & _
+              udtSearchResult.SpecFilePos & ControlChars.Tab & _
+              udtSearchResult.PrecursorMZ & ControlChars.Tab & _
+              udtSearchResult.PrecursorError & ControlChars.Tab & _
+              udtSearchResult.DelMPPM)
 
-	End Sub
+        Catch ex As Exception
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                strErrorLog &= "Error writing synopsis / first hits record" & ControlChars.NewLine
+            End If
+        End Try
+
+    End Sub
 
 #Region "IComparer Classes"
 

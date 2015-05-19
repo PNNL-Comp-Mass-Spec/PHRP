@@ -601,13 +601,14 @@ Public Class clsPeptideHitResultsProcRunner
 				' If ePeptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
 				blnSuccess = False
 
-				strMessage = "Error: Could not determine the format of the input file.  It must end in " &
-				  PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " &
-				  PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, .xml (for X!Tandem), " &
-				  PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE & ".txt, " &
-				  PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE & ".tsv, " &
-				  PeptideHitResultsProcessor.clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE & ".txt, or " &
-				  PeptideHitResultsProcessor.clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE & ".txt"
+                strMessage = "Error: Could not determine the format of the input file.  It must end in " &
+                  PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE & ".txt, " &
+                  PeptideHitResultsProcessor.clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE & ".txt, .xml (for X!Tandem), " &
+                  PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE & ".txt, " &
+                  PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE & ".tsv, " &
+                  PeptideHitResultsProcessor.clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE & ".txt, " &
+                  PeptideHitResultsProcessor.clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE & ".txt, or " &
+                  PeptideHitResultsProcessor.clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE & ".txt"
 
 				ShowErrorMessage(strMessage)
 			Else
@@ -640,6 +641,10 @@ Public Class clsPeptideHitResultsProcRunner
 					Case ePeptideHitResultsFileFormatConstants.MODaTXTFile
 						mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMODaResultsProcessor
 						LogMessage("Detected MODa results file")
+
+                    Case ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
+                        mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMODPlusResultsProcessor
+                        LogMessage("Detected MODPlus results file")
 
 					Case Else
 						' Unknown format

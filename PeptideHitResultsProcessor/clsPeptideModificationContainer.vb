@@ -1,6 +1,6 @@
 Option Strict On
 
-' This class can be used to track modifications that can be applied to peptides
+' This class is used to track modifications that can be applied to peptides
 ' It handles both residue level modifications and static, peptide-wide modifications
 '
 ' Use ReadMassCorrectionTagsFile() and ReadModificationDefinitionsFile() to customize

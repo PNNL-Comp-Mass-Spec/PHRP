@@ -106,6 +106,7 @@
     </Compile>
     <Compile Include="clsInSpecTResultsProcessor.vb" />
     <Compile Include="clsMODaResultsProcessor.vb" />
+    <Compile Include="clsMODPlusResultsProcessor.vb" />
     <Compile Include="clsMSAlignResultsProcessor.vb" />
     <Compile Include="clsMSGFDBResultsProcessor.vb" />
     <Compile Include="clsPeptideModificationContainer.vb">
@@ -119,6 +120,7 @@
     </Compile>
     <Compile Include="clsSearchResultsInSpecT.vb" />
     <Compile Include="clsSearchResultsMODa.vb" />
+    <Compile Include="clsSearchResultsMODPlus.vb" />
     <Compile Include="clsSearchResultsMSAlign.vb" />
     <Compile Include="clsSearchResultsMSGFDB.vb" />
     <Compile Include="clsSearchResultsSequest.vb">

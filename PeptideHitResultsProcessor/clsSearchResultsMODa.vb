@@ -1,11 +1,11 @@
 ﻿Option Strict On
 
-' This class can be used to track the peptide details for a MODa search result
+' This class is used to track the peptide details for a MODa search result
 ' See clsSearchResultsBaseClass for additional information
 '
 ' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Created -4/01/2014
+' Created 4/01/2014
 '
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
 ' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
@@ -13,7 +13,6 @@
 
 Public Class clsSearchResultsMODa
 	Inherits clsSearchResultsBaseClass
-
 
 #Region "Classwide Variables"
 	' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables 

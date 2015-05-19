@@ -244,62 +244,64 @@ Public Class clsPHRPParserMODa
     Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
         Dim strSettingValue As String = String.Empty
         Dim objModDef As clsModificationDefinition
-        Dim blnSuccess As Boolean
-
+      
         Try
-            blnSuccess = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MODa, objSearchEngineParams)
+            Dim blnSuccess = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MODa, objSearchEngineParams)
 
-            If blnSuccess Then
-                ' For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
-                ' But MODa does not have a _ModDefs.txt file because it performs a blind search
-                ' The user can define static mods on any of the residues, plus the peptide terminii; check for these now
-
-                Dim lstResiduesToFind = New List(Of String) From {"A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"}
-
-                ' This dictionary tracks the static mod names we will look for
-                ' It is populated using the amino acid letters in lstResiduesToFind, plus also the N and T terminus tags
-                Dim dctResiduesAndSymbols = New Dictionary(Of String, String)
-
-                For Each residueSymbol In lstResiduesToFind
-                    dctResiduesAndSymbols.Add(residueSymbol, residueSymbol)
-                Next
-
-                dctResiduesAndSymbols.Add("ADD_NTerm", N_TERMINAL_PEPTIDE_SYMBOL_DMS)
-                dctResiduesAndSymbols.Add("ADD_CTerm", C_TERMINAL_PEPTIDE_SYMBOL_DMS)
-
-                For Each residueSpec In dctResiduesAndSymbols
-                    Dim strKey = "ADD_" & residueSpec.Key
-
-                    If objSearchEngineParams.Parameters.TryGetValue(strKey, strSettingValue) Then
-                        Dim modMassDa As Double
-
-                        If Double.TryParse(strSettingValue, modMassDa) Then
-                            If Math.Abs(modMassDa) > Single.Epsilon Then
-
-                                Dim eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod
-                                If residueSpec.Value = N_TERMINAL_PEPTIDE_SYMBOL_DMS OrElse residueSpec.Value = C_TERMINAL_PEPTIDE_SYMBOL_DMS Then
-                                    eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-                                End If
-
-                                objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residueSpec.Value, eModType, "Mod" & modMassDa.ToString("0"))
-                                objSearchEngineParams.AddModification(objModDef)
-                            End If
-                        End If
-
-                    End If
-                Next
-
-                ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                Dim dblTolerancePPM As Double
-                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
-                objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
+            If Not blnSuccess Then
+                Return False
             End If
+
+            ' For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
+            ' But MODa does not have a _ModDefs.txt file because it performs a blind search
+            ' The user can define static mods on any of the residues, plus the peptide terminii; check for these now
+
+            Dim lstResiduesToFind = New List(Of String) From {"A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"}
+
+            ' This dictionary tracks the static mod names we will look for
+            ' It is populated using the amino acid letters in lstResiduesToFind, plus also the N and T terminus tags
+            Dim dctResiduesAndSymbols = New Dictionary(Of String, String)
+
+            For Each residueSymbol In lstResiduesToFind
+                dctResiduesAndSymbols.Add(residueSymbol, residueSymbol)
+            Next
+
+            dctResiduesAndSymbols.Add("ADD_NTerm", N_TERMINAL_PEPTIDE_SYMBOL_DMS)
+            dctResiduesAndSymbols.Add("ADD_CTerm", C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+
+            For Each residueSpec In dctResiduesAndSymbols
+                Dim strKey = "ADD_" & residueSpec.Key
+
+                If objSearchEngineParams.Parameters.TryGetValue(strKey, strSettingValue) Then
+                    Dim modMassDa As Double
+
+                    If Double.TryParse(strSettingValue, modMassDa) Then
+                        If Math.Abs(modMassDa) > Single.Epsilon Then
+
+                            Dim eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod
+                            If residueSpec.Value = N_TERMINAL_PEPTIDE_SYMBOL_DMS OrElse residueSpec.Value = C_TERMINAL_PEPTIDE_SYMBOL_DMS Then
+                                eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+                            End If
+
+                            objModDef = New clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residueSpec.Value, eModType, "Mod" & modMassDa.ToString("0"))
+                            objSearchEngineParams.AddModification(objModDef)
+                        End If
+                    End If
+
+                End If
+            Next
+
+            ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+            Dim dblTolerancePPM As Double
+            objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+            objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
+
+            Return True
 
         Catch ex As Exception
             ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
+            Return False
         End Try
-
-        Return blnSuccess
 
     End Function
 

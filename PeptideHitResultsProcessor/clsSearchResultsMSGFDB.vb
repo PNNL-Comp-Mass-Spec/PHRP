@@ -1,6 +1,6 @@
 Option Strict On
 
-' This class can be used to track the peptide details for an MSGF-DB search result
+' This class is used to track the peptide details for an MSGF-DB search result
 ' See clsSearchResultsBaseClass for additional information
 '
 ' -------------------------------------------------------------------------------

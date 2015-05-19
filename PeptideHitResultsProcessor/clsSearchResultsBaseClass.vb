@@ -1,6 +1,6 @@
 Option Strict On
 
-' This class can be used to track the peptide details for a given MS/MS search result
+' This class is used to track the peptide details for a given MS/MS search result
 ' It can track peptide residue level modifications and static, peptide-wide modifications
 '
 ' Use SearchResultClearModifications() and SearchResultAddModification() to track
@@ -863,13 +863,13 @@ Public MustInherit Class clsSearchResultsBaseClass
 		SetEnzymeMatchSpec(udtEnzymeMatchSpec)
 
 		' Update the N-Terminus and/or C-Terminus masses if those in the XML file are significantly different than the defaults
-		If dblPeptideNTerminusMassChange <> 0 Then
-			UpdatePeptideNTerminusMass(dblPeptideNTerminusMassChange)
-		End If
+        If Math.Abs(dblPeptideNTerminusMassChange - 0) > Single.Epsilon Then
+            UpdatePeptideNTerminusMass(dblPeptideNTerminusMassChange)
+        End If
 
-		If dblPeptideCTerminusMassChange <> 0 Then
-			UpdatePeptideCTerminusMass(dblPeptideCTerminusMassChange)
-		End If
+        If Math.Abs(dblPeptideCTerminusMassChange - 0) > Single.Epsilon Then
+            UpdatePeptideCTerminusMass(dblPeptideCTerminusMassChange)
+        End If
 
 	End Sub
 

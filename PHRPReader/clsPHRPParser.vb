@@ -408,6 +408,12 @@ Public MustInherit Class clsPHRPParser
 			Case clsPHRPReader.ePeptideHitResultType.XTandem
 				Return New clsPHRPParserXTandem(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
 
+            Case clsPHRPReader.ePeptideHitResultType.MODa
+                Return New clsPHRPParserMODa(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+
+            Case clsPHRPReader.ePeptideHitResultType.MODPlus
+                Return New clsPHRPParserMODPlus(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+
 			Case Else
 				Throw New Exception("Unrecognized value for PeptideHitResultType: " & ePeptideHitResultType.ToString())
 		End Select
@@ -868,9 +874,9 @@ Public MustInherit Class clsPHRPParser
             If Not File.Exists(strParamFilePath) Then
                 ReportError(strSearchEngineName & " param file not found: " & strParamFilePath)
             Else
-                Using srInFile As StreamReader = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Using srInFile = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                    While srInFile.Peek > -1
+                    While Not srInFile.EndOfStream
                         strLineIn = srInFile.ReadLine().TrimStart()
 
                         If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso strLineIn.Contains("="c) Then
@@ -931,9 +937,9 @@ Public MustInherit Class clsPHRPParser
                 strSearchEngineVersion = "Unknown"
                 dtSearchDate = New DateTime(1980, 1, 1)
 
-                Using srInFile As StreamReader = New StreamReader(New FileStream(strToolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Using srInFile = New StreamReader(New FileStream(strToolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                    While srInFile.Peek > -1
+                    While Not srInFile.EndOfStream
                         strLineIn = srInFile.ReadLine().TrimStart()
 
                         ' Split the line on a colon
@@ -949,7 +955,7 @@ Public MustInherit Class clsPHRPParser
                                     blnValidVersion = True
                                 Else
                                     ' The next line contains the search engine version
-                                    If srInFile.Peek > -1 Then
+                                    If Not srInFile.EndOfStream Then
                                         strLineIn = srInFile.ReadLine().TrimStart()
                                         strSearchEngineVersion = String.Copy(strLineIn)
                                         blnValidVersion = True

@@ -104,52 +104,52 @@ Public Class clsScanStatsReader
 			intLinesRead = 0
 			mErrorMessage = String.Empty
 
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-				Do While srInFile.Peek() > -1
-					strLineIn = srInFile.ReadLine()
-					intLinesRead += 1
-					blnSkipLine = False
+            Using srInFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Do While Not srInFile.EndOfStream
+                    strLineIn = srInFile.ReadLine()
+                    intLinesRead += 1
+                    blnSkipLine = False
 
-					If Not String.IsNullOrWhiteSpace(strLineIn) Then
-						strSplitLine = strLineIn.Split(ControlChars.Tab)
+                    If Not String.IsNullOrWhiteSpace(strLineIn) Then
+                        strSplitLine = strLineIn.Split(ControlChars.Tab)
 
-						If Not blnHeaderLineParsed Then
-							If Not clsPHRPReader.IsNumber(strSplitLine(0)) Then
-								' Parse the header line to confirm the column ordering
-								clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
-								blnSkipLine = True
-							End If
+                        If Not blnHeaderLineParsed Then
+                            If Not clsPHRPReader.IsNumber(strSplitLine(0)) Then
+                                ' Parse the header line to confirm the column ordering
+                                clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
+                                blnSkipLine = True
+                            End If
 
-							blnHeaderLineParsed = True
-						End If
+                            blnHeaderLineParsed = True
+                        End If
 
-						If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
+                        If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
 
-							intScanNumber = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1)
-							sngScanTimeMinutes = CSng(clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanTime, mColumnHeaders, 0.0#))
-							intScanType = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanType, mColumnHeaders, 0)
+                            intScanNumber = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1)
+                            sngScanTimeMinutes = CSng(clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanTime, mColumnHeaders, 0.0#))
+                            intScanType = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanType, mColumnHeaders, 0)
 
-							If intScanNumber >= 0 AndAlso Not lstScanStats.ContainsKey(intScanNumber) Then
+                            If intScanNumber >= 0 AndAlso Not lstScanStats.ContainsKey(intScanNumber) Then
 
-								Dim objScanStatsInfo As clsScanStatsInfo
-								objScanStatsInfo = New clsScanStatsInfo(intScanNumber, sngScanTimeMinutes, intScanType)
+                                Dim objScanStatsInfo As clsScanStatsInfo
+                                objScanStatsInfo = New clsScanStatsInfo(intScanNumber, sngScanTimeMinutes, intScanType)
 
-								objScanStatsInfo.TotalIonIntensity = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_TotalIonIntensity, mColumnHeaders, 0.0#)
-								objScanStatsInfo.BasePeakIntensity = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_BasePeakIntensity, mColumnHeaders, 0.0#)
-								objScanStatsInfo.BasePeakMZ = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_BasePeakMZ, mColumnHeaders, 0.0#)
-								objScanStatsInfo.BasePeakSignalToNoiseRatio = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_BasePeakSignalToNoiseRatio, mColumnHeaders, 0.0#)
-								objScanStatsInfo.IonCount = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_IonCount, mColumnHeaders, 0)
-								objScanStatsInfo.IonCountRaw = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_IonCountRaw, mColumnHeaders, 0)
-								objScanStatsInfo.ScanTypeName = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanTypeName, mColumnHeaders)
+                                objScanStatsInfo.TotalIonIntensity = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_TotalIonIntensity, mColumnHeaders, 0.0#)
+                                objScanStatsInfo.BasePeakIntensity = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_BasePeakIntensity, mColumnHeaders, 0.0#)
+                                objScanStatsInfo.BasePeakMZ = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_BasePeakMZ, mColumnHeaders, 0.0#)
+                                objScanStatsInfo.BasePeakSignalToNoiseRatio = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_BasePeakSignalToNoiseRatio, mColumnHeaders, 0.0#)
+                                objScanStatsInfo.IonCount = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_IonCount, mColumnHeaders, 0)
+                                objScanStatsInfo.IonCountRaw = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_IonCountRaw, mColumnHeaders, 0)
+                                objScanStatsInfo.ScanTypeName = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanTypeName, mColumnHeaders)
 
-								lstScanStats.Add(intScanNumber, objScanStatsInfo)
-							End If
+                                lstScanStats.Add(intScanNumber, objScanStatsInfo)
+                            End If
 
-						End If
-					End If
+                        End If
+                    End If
 
-				Loop
-			End Using
+                Loop
+            End Using
 
 		Catch ex As Exception
 			mErrorMessage = "Error reading the ScanStats data: " & ex.Message

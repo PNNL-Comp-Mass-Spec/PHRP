@@ -1,6 +1,6 @@
 Option Strict On
 
-' This class can be used to read or write settings in an Xml settings file
+' This class is used to read or write settings in an Xml settings file
 ' Based on a class from the DMS Analysis Manager software written by Dave Clark and Gary Kiebel (PNNL, Richland, WA)
 ' Additional features added by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in October 2003
 ' Copyright 2005, Battelle Memorial Institute

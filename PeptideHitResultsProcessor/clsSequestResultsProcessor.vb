@@ -92,7 +92,7 @@ Public Class clsSequestResultsProcessor
 #Region "Properties"
 #End Region
 
-    Private Function AddDynamicAndStaticResidueMods(ByRef objSearchResult As clsSearchResultsSequest, _
+    Private Function AddDynamicAndStaticResidueMods(ByVal objSearchResult As clsSearchResultsSequest, _
                                                     ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
         ' Step through .PeptideSequenceWithMods
         ' For each residue, check if a static mod is defined that affects that residue
@@ -119,41 +119,41 @@ Public Class clsSequestResultsProcessor
             For intIndex = 0 To strSequence.Length - 1
                 chChar = strSequence.Chars(intIndex)
 
-				If IsLetterAtoZ(chChar) Then
-					chMostRecentLetter = chChar
-					intResidueLocInPeptide += 1
+                If IsLetterAtoZ(chChar) Then
+                    chMostRecentLetter = chChar
+                    intResidueLocInPeptide += 1
 
-					For intModIndex = 0 To mPeptideMods.ModificationCount - 1
-						If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
-							objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+                    For intModIndex = 0 To mPeptideMods.ModificationCount - 1
+                        If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+                            objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
 
-							If objModificationDefinition.TargetResiduesContain(chChar) Then
-								' Match found; add this modification
-								blnSuccess = .SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+                            If objModificationDefinition.TargetResiduesContain(chChar) Then
+                                ' Match found; add this modification
+                                blnSuccess = .SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
 
-								If Not blnSuccess Then
-									' Error adding this static mod
-									SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
-									mErrorMessage = "Error calling objSearchResult.SearchResultAddModification for peptide '" & strSequence & "': " & .ErrorMessage
-									Exit For
-								End If
-							End If
-						End If
-					Next intModIndex
-				ElseIf IsLetterAtoZ(chMostRecentLetter) Then
-					blnSuccess = .SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+                                If Not blnSuccess Then
+                                    ' Error adding this static mod
+                                    SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
+                                    mErrorMessage = "Error calling objSearchResult.SearchResultAddModification for peptide '" & strSequence & "': " & .ErrorMessage
+                                    Exit For
+                                End If
+                            End If
+                        End If
+                    Next intModIndex
+                ElseIf IsLetterAtoZ(chMostRecentLetter) Then
+                    blnSuccess = .SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
 
-					If Not blnSuccess Then
-						' Error adding this dynamic mod
-						SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
-						mErrorMessage = "Error calling objSearchResult.SearchResultAddDynamicModification for peptide '" & strSequence & "': " & .ErrorMessage
-						Exit For
-					End If
+                    If Not blnSuccess Then
+                        ' Error adding this dynamic mod
+                        SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
+                        mErrorMessage = "Error calling objSearchResult.SearchResultAddDynamicModification for peptide '" & strSequence & "': " & .ErrorMessage
+                        Exit For
+                    End If
 
-				Else
-					' We found a modification symbol but chMostRecentLetter is not a letter
-					' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
-				End If
+                Else
+                    ' We found a modification symbol but chMostRecentLetter is not a letter
+                    ' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
+                End If
 
             Next intIndex
         End With
@@ -161,7 +161,7 @@ Public Class clsSequestResultsProcessor
         Return blnSuccess
     End Function
 
-    Private Function AddModificationsAndComputeMass(ByRef objSearchResult As clsSearchResultsSequest, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Private Function AddModificationsAndComputeMass(ByVal objSearchResult As clsSearchResultsSequest, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
 
         Dim blnSuccess As Boolean
@@ -280,82 +280,84 @@ Public Class clsSequestResultsProcessor
 					blnSuccess = MyBase.InitializeSequenceOutputFiles(strBaseOutputFilePath)
 
 					' Parse the input file
-					Do While srDataFile.Peek > -1 And Not MyBase.AbortProcessing
+                    Do While Not srDataFile.EndOfStream And Not MyBase.AbortProcessing
 
-						strLineIn = srDataFile.ReadLine()
-						If Not strLineIn Is Nothing AndAlso strLineIn.Trim.Length > 0 Then
+                        strLineIn = srDataFile.ReadLine()
+                        If String.IsNullOrWhiteSpace(strLineIn) Then
+                            Continue Do
+                        End If
 
-							blnDataLine = True
+                        blnDataLine = True
 
-							If Not blnHeaderParsed Then
-								blnSuccess = ParseSequestSynFileHeaderLine(strLineIn, intColumnMapping)
-								If blnSuccess Then
-									blnDataLine = False
-								Else
-									' Error parsing header; assume this is a data line
-									blnDataLine = True
-								End If
-								blnHeaderParsed = True
-							End If
+                        If Not blnHeaderParsed Then
+                            blnSuccess = ParseSequestSynFileHeaderLine(strLineIn, intColumnMapping)
+                            If blnSuccess Then
+                                blnDataLine = False
+                            Else
+                                ' Error parsing header; assume this is a data line
+                                blnDataLine = True
+                            End If
+                            blnHeaderParsed = True
+                        End If
 
-							If blnDataLine Then
-								blnValidSearchResult = ParseSequestResultsFileEntry(strLineIn, intColumnMapping, objSearchResult, strErrorLog)
-							Else
-								blnValidSearchResult = False
-							End If
+                        If blnDataLine Then
+                            blnValidSearchResult = ParseSequestResultsFileEntry(strLineIn, intColumnMapping, objSearchResult, strErrorLog)
+                        Else
+                            blnValidSearchResult = False
+                        End If
 
-							If blnValidSearchResult Then
-								strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.NumScans & "_" & objSearchResult.Charge & "_" & objSearchResult.PeptideMH
+                        If blnValidSearchResult Then
+                            strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.NumScans & "_" & objSearchResult.Charge & "_" & objSearchResult.PeptideMH
 
-								If objSearchResult.PeptideXCorr = strPreviousXCorr Then
-									' New result has the same XCorr as the previous results
-									' See if htPeptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
+                            If objSearchResult.PeptideXCorr = strPreviousXCorr Then
+                                ' New result has the same XCorr as the previous results
+                                ' See if htPeptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
 
-									If htPeptidesFoundForXCorrLevel.ContainsKey(strKey) Then
-										blnFirstMatchForGroup = False
-									Else
-										htPeptidesFoundForXCorrLevel.Add(strKey, 1)
-										blnFirstMatchForGroup = True
-									End If
+                                If htPeptidesFoundForXCorrLevel.ContainsKey(strKey) Then
+                                    blnFirstMatchForGroup = False
+                                Else
+                                    htPeptidesFoundForXCorrLevel.Add(strKey, 1)
+                                    blnFirstMatchForGroup = True
+                                End If
 
-								Else
-									' New XCorr
-									' Reset htPeptidesFoundForScan
-									htPeptidesFoundForXCorrLevel.Clear()
+                            Else
+                                ' New XCorr
+                                ' Reset htPeptidesFoundForScan
+                                htPeptidesFoundForXCorrLevel.Clear()
 
-									' Update strPreviousXCorr
-									strPreviousXCorr = objSearchResult.PeptideXCorr
+                                ' Update strPreviousXCorr
+                                strPreviousXCorr = objSearchResult.PeptideXCorr
 
-									' Append a new entry to htPeptidesFoundForScan
-									htPeptidesFoundForXCorrLevel.Add(strKey, 1)
-									blnFirstMatchForGroup = True
-								End If
+                                ' Append a new entry to htPeptidesFoundForScan
+                                htPeptidesFoundForXCorrLevel.Add(strKey, 1)
+                                blnFirstMatchForGroup = True
+                            End If
 
 
-								blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
-								If Not blnSuccess Then
-									If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-										strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'"
-										If Not mErrorMessage Is Nothing AndAlso mErrorMessage.Length > 0 Then
-											strErrorLog &= ": " & mErrorMessage
-											mErrorMessage = String.Empty
-										End If
-										strErrorLog &= ControlChars.NewLine
-									End If
-								End If
-								MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
-							End If
+                            blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
+                            If Not blnSuccess Then
+                                If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                                    strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'"
+                                    If Not mErrorMessage Is Nothing AndAlso mErrorMessage.Length > 0 Then
+                                        strErrorLog &= ": " & mErrorMessage
+                                        mErrorMessage = String.Empty
+                                    End If
+                                    strErrorLog &= ControlChars.NewLine
+                                End If
+                            End If
+                            MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
+                        End If
 
-							' Update the progress
-							sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-							If mCreateProteinModsFile Then
-								sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
-							End If
-							UpdateProgress(sngPercentComplete)
+                        ' Update the progress
+                        sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
+                        If mCreateProteinModsFile Then
+                            sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
+                        End If
+                        UpdateProgress(sngPercentComplete)
 
-							intResultsProcessed += 1
-						End If
-					Loop
+                        intResultsProcessed += 1
+
+                    Loop
 
 				End Using
 
@@ -393,96 +395,96 @@ Public Class clsSequestResultsProcessor
 
 	End Function
 
-	Private Function ParseSequestResultsFileEntry(ByRef strLineIn As String, _
-												  ByRef intColumnMapping() As Integer, _
-												  ByRef objSearchResult As clsSearchResultsSequest, _
-												  ByRef strErrorLog As String) As Boolean
+    Private Function ParseSequestResultsFileEntry(ByRef strLineIn As String, _
+                                                  ByRef intColumnMapping() As Integer, _
+                                                  ByVal objSearchResult As clsSearchResultsSequest, _
+                                                  ByRef strErrorLog As String) As Boolean
 
-		Dim strSplitLine() As String = Nothing
-		Dim strPeptideSequenceWithMods As String = String.Empty
+        Dim strSplitLine() As String = Nothing
+        Dim strPeptideSequenceWithMods As String = String.Empty
 
-		Dim blnValidSearchResult As Boolean
-		blnValidSearchResult = False
+        Dim blnValidSearchResult As Boolean
+        blnValidSearchResult = False
 
-		Try
-			' Set this to False for now
-			blnValidSearchResult = False
+        Try
+            ' Set this to False for now
+            blnValidSearchResult = False
 
-			' Reset objSearchResult
-			objSearchResult.Clear()
+            ' Reset objSearchResult
+            objSearchResult.Clear()
 
-			strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
-			If strSplitLine.Length < SEQUEST_SYN_FILE_MIN_COL_COUNT Then
-				Exit Try
-			End If
+            strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
+            If strSplitLine.Length < SEQUEST_SYN_FILE_MIN_COL_COUNT Then
+                Exit Try
+            End If
 
-			With objSearchResult
-				If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RowIndex), .ResultID) Then
-					Throw New EvaluateException("RowIndex column is missing or invalid")
-				End If
+            With objSearchResult
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RowIndex), .ResultID) Then
+                    Throw New EvaluateException("RowIndex column is missing or invalid")
+                End If
 
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Scan), .Scan)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NumScans), .NumScans)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Charge), .Charge)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideMH), .PeptideMH)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XCorr), .PeptideXCorr)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn), .PeptideDeltaCn)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Sp), .PeptideSp)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.ProteinName), .ProteinName)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MultipleProteinCount), .MultipleProteinCount)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Scan), .Scan)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NumScans), .NumScans)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Charge), .Charge)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideMH), .PeptideMH)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XCorr), .PeptideXCorr)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn), .PeptideDeltaCn)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.Sp), .PeptideSp)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.ProteinName), .ProteinName)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MultipleProteinCount), .MultipleProteinCount)
 
-				If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideSequence), strPeptideSequenceWithMods) Then
-					Throw New EvaluateException("Peptide column is missing or invalid")
-				End If
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PeptideSequence), strPeptideSequenceWithMods) Then
+                    Throw New EvaluateException("Peptide column is missing or invalid")
+                End If
 
-				' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
-				.SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
+                ' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
+                .SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
 
-			End With
+            End With
 
-			Dim objSearchResultBase As clsSearchResultsBaseClass
-			objSearchResultBase = DirectCast(objSearchResult, clsSearchResultsBaseClass)
+            Dim objSearchResultBase As clsSearchResultsBaseClass
+            objSearchResultBase = DirectCast(objSearchResult, clsSearchResultsBaseClass)
 
-			MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
+            MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
 
-			With objSearchResult
+            With objSearchResult
 
-				' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-				' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
-				' will all be based on the first protein since Sequest only outputs the prefix and suffix letters for the first protein
-				.ComputePeptideCleavageStateInProtein()
+                ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
+                ' will all be based on the first protein since Sequest only outputs the prefix and suffix letters for the first protein
+                .ComputePeptideCleavageStateInProtein()
 
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn2), .PeptideDeltaCn2)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankSP), .PeptideRankSP)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankXC), .PeptideRankXC)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelM), .PeptideDeltaMass)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XcRatio), .PeptideXcRatio)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PassFilt), .PeptidePassFilt)			 ' Legacy/Unused
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MScore), .PeptideMScore)				 ' Legacy/Unused
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NTT), .PeptideNTT)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DeltaCn2), .PeptideDeltaCn2)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankSP), .PeptideRankSP)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.RankXC), .PeptideRankXC)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelM), .PeptideDeltaMass)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.XcRatio), .PeptideXcRatio)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.PassFilt), .PeptidePassFilt)           ' Legacy/Unused
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.MScore), .PeptideMScore)               ' Legacy/Unused
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.NTT), .PeptideNTT)
 
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsObserved), .IonsObserved)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsExpected), .IonsExpected)
-				GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelMPPM), .DelMPPM)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsObserved), .IonsObserved)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.IonsExpected), .IonsExpected)
+                GetColumnValue(strSplitLine, intColumnMapping(eSequestSynopsisFileColumns.DelMPPM), .DelMPPM)
 
-			End With
+            End With
 
-			blnValidSearchResult = True
+            blnValidSearchResult = True
 
-		Catch ex As Exception
-			' Error parsing this row from the synopsis or first hits file
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
-					strErrorLog &= "Error parsing Sequest Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
-				Else
-					strErrorLog &= "Error parsing Sequest Results in ParseSequestResultsFileEntry" & ControlChars.NewLine
-				End If
-			End If
-			blnValidSearchResult = False
-		End Try
+        Catch ex As Exception
+            ' Error parsing this row from the synopsis or first hits file
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+                    strErrorLog &= "Error parsing Sequest Results for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+                Else
+                    strErrorLog &= "Error parsing Sequest Results in ParseSequestResultsFileEntry" & ControlChars.NewLine
+                End If
+            End If
+            blnValidSearchResult = False
+        End Try
 
-		Return blnValidSearchResult
-	End Function
+        Return blnValidSearchResult
+    End Function
 
 	''' <summary>
 	''' Main processing function
@@ -669,7 +671,7 @@ Public Class clsSequestResultsProcessor
 
     End Function
 
-	''Private Sub SaveSequestResultsFileEntry(ByRef objSearchResult As clsSearchResultsSequest, ByRef swSynopsisOutputFile As StreamWriter)
+    ''Private Sub SaveSequestResultsFileEntry(ByVal objSearchResult As clsSearchResultsSequest, ByRef swSynopsisOutputFile As StreamWriter)
 
     ''    ' Write the results to the output file
     ''    With objSearchResult

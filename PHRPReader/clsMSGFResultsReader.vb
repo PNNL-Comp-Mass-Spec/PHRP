@@ -93,42 +93,42 @@ Public Class clsMSGFResultsReader
 			intLinesRead = 0
 			mErrorMessage = String.Empty
 
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-				Do While srInFile.Peek() > -1
-					strLineIn = srInFile.ReadLine()
-					intLinesRead += 1
-					blnSkipLine = False
+            Using srInFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Do While Not srInFile.EndOfStream
+                    strLineIn = srInFile.ReadLine()
+                    intLinesRead += 1
+                    blnSkipLine = False
 
-					If Not String.IsNullOrWhiteSpace(strLineIn) Then
-						strSplitLine = strLineIn.Split(ControlChars.Tab)
+                    If Not String.IsNullOrWhiteSpace(strLineIn) Then
+                        strSplitLine = strLineIn.Split(ControlChars.Tab)
 
-						If Not blnHeaderLineParsed Then
-							If Not clsPHRPReader.IsNumber(strSplitLine(0)) Then
-								' Parse the header line to confirm the column ordering
-								clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
-								blnSkipLine = True
-							End If
+                        If Not blnHeaderLineParsed Then
+                            If Not clsPHRPReader.IsNumber(strSplitLine(0)) Then
+                                ' Parse the header line to confirm the column ordering
+                                clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
+                                blnSkipLine = True
+                            End If
 
-							blnHeaderLineParsed = True
-						End If
+                            blnHeaderLineParsed = True
+                        End If
 
-						If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
+                        If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
 
-							intResultID = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1)
+                            intResultID = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1)
 
-							If intResultID >= 0 Then
-								strMSGFSpecProb = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SpecProb, mColumnHeaders)
+                            If intResultID >= 0 Then
+                                strMSGFSpecProb = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SpecProb, mColumnHeaders)
 
-								If Not String.IsNullOrEmpty(strMSGFSpecProb) AndAlso Not lstMSGFData.ContainsKey(intResultID) Then
-									lstMSGFData.Add(intResultID, strMSGFSpecProb)
-								End If
-							End If
+                                If Not String.IsNullOrEmpty(strMSGFSpecProb) AndAlso Not lstMSGFData.ContainsKey(intResultID) Then
+                                    lstMSGFData.Add(intResultID, strMSGFSpecProb)
+                                End If
+                            End If
 
-						End If
-					End If
+                        End If
+                    End If
 
-				Loop
-			End Using
+                Loop
+            End Using
 
 		Catch ex As Exception
 			mErrorMessage = "Error reading the MSGF data: " & ex.Message

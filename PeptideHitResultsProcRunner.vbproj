@@ -172,7 +172,11 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>xcopy "$(ProjectDir)PeptideHitResultsProcessor\Lib\x86\SQLite.Interop.dll" "$(TargetDir)" /D
+    <PostBuildEvent>if not exist "$(TargetDir)\x86" mkdir "$(TargetDir)\x86"
+if not exist "$(TargetDir)\x64" mkdir "$(TargetDir)\x64"
+xcopy "$(ProjectDir)PeptideHitResultsProcessor\Lib\x86\*" "$(TargetDir)\x86\" /D /Y
+xcopy "$(ProjectDir)PeptideHitResultsProcessor\Lib\x64\*" "$(TargetDir)\x64\" /D /Y
+
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

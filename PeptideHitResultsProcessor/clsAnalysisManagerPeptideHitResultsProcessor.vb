@@ -292,6 +292,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 				Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile
 					m_PeptideHitResultsProcessor = New clsMODaResultsProcessor
 
+                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
+                    m_PeptideHitResultsProcessor = New clsMODaResultsProcessor
+
                 Case Else
                     ' Unknown format; cannot continue
                     LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " & m_PeptideHitResultsFileFormat.ToString, Nothing)
@@ -377,53 +380,56 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         If Not VerifyDirExists(m_OutFolderPath) Then Return False 'Error msg handled by VerifyDirExists
 
         'Analysis tool name defined?
-		If String.IsNullOrWhiteSpace(m_AnalysisToolName) Then
-			m_ErrMsg = "Analysis tool name not specified"
-			Return False
-		End If
+        If String.IsNullOrWhiteSpace(m_AnalysisToolName) Then
+            m_ErrMsg = "Analysis tool name not specified"
+            Return False
+        End If
 
         'Dataset name defined?
-		If String.IsNullOrWhiteSpace(m_DSName) Then
-			m_ErrMsg = "Dataset name not specified"
-			Return False
-		End If
+        If String.IsNullOrWhiteSpace(m_DSName) Then
+            m_ErrMsg = "Dataset name not specified"
+            Return False
+        End If
 
         'Settings file name defined?
-		If String.IsNullOrWhiteSpace(m_SettingsFileName) Then
-			m_ErrMsg = "Settings file name not specified"
-			Return False
-		End If
+        If String.IsNullOrWhiteSpace(m_SettingsFileName) Then
+            m_ErrMsg = "Settings file name not specified"
+            Return False
+        End If
 
         'Parameter file name defined?
-		If String.IsNullOrWhiteSpace(m_ParameterFileName) Then
-			m_ErrMsg = "Parameter file name not specified"
-			Return False
-		End If
+        If String.IsNullOrWhiteSpace(m_ParameterFileName) Then
+            m_ErrMsg = "Parameter file name not specified"
+            Return False
+        End If
 
         'Define the parameter file path; this is passed as the search tool parameter file
-		m_ParameterFilePath = Path.Combine(m_SourceFolderPath, m_ParameterFileName)
+        m_ParameterFilePath = Path.Combine(m_SourceFolderPath, m_ParameterFileName)
 
-		'Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
-		m_SettingsFilePath = Path.Combine(m_SourceFolderPath, m_SettingsFileName)
+        'Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
+        m_SettingsFilePath = Path.Combine(m_SourceFolderPath, m_SettingsFileName)
 
-		'Define the peptide hit results format based on the analysis tool name
-		If m_AnalysisToolName.IndexOf("xtandem", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
-			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
+        'Define the peptide hit results format based on the analysis tool name
+        If m_AnalysisToolName.IndexOf("xtandem", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
 
-		ElseIf m_AnalysisToolName.IndexOf("sequest", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
-			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
+        ElseIf m_AnalysisToolName.IndexOf("sequest", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
 
-		ElseIf m_AnalysisToolName.IndexOf("inspect", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
-			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
+        ElseIf m_AnalysisToolName.IndexOf("inspect", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
-		ElseIf m_AnalysisToolName.IndexOf("msgfdb", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
-			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
+        ElseIf m_AnalysisToolName.IndexOf("msgfdb", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
-		ElseIf m_AnalysisToolName.IndexOf("msalign", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
-			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
+        ElseIf m_AnalysisToolName.IndexOf("msalign", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 
-		ElseIf m_AnalysisToolName.IndexOf("moda", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
-			m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile
+        ElseIf m_AnalysisToolName.IndexOf("moda", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile
+
+        ElseIf m_AnalysisToolName.IndexOf("modplus", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
 
 		ElseIf m_AnalysisToolName.IndexOf("dataextractor", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
 			' Data Extractor step-tool; we'll need to auto-determine the results format
