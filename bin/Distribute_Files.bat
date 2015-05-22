@@ -8,10 +8,10 @@ copy PeptideHitResultsProcRunner.exe "F:\My Documents\Projects\DataMining\DMS_Ma
 copy PeptideHitResultsProcRunner.pdb "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP"
 
 copy *.dll "C:\DMS_Programs\PHRP"
+copy PHRPReader.pdb "C:\DMS_Programs\PHRP"
 copy PeptideHitResultsProcessor.pdb "C:\DMS_Programs\PHRP"
 copy PeptideHitResultsProcRunner.exe "C:\DMS_Programs\PHRP"
 copy PeptideHitResultsProcRunner.pdb "C:\DMS_Programs\PHRP"
-
 
 
 pause

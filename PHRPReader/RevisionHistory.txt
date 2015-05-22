@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5620; May 22, 2015
+	- Replaced column Rank_Probability with Rank_Score for MODPlus
+
 Version 1.1.5617; May 19, 2015
 	- Added QValue column to MODPlus result files
 

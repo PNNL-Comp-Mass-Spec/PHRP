@@ -11,12 +11,12 @@ Option Strict On
 ' Program started January 2, 2006
 '
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
 ' -------------------------------------------------------------------------------
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "May 19, 2015"
+    Public Const PROGRAM_DATE As String = "May 22, 2015"
 
 	Private mInputFilePath As String
 	Private mOutputFolderPath As String							' Optional
@@ -431,7 +431,7 @@ Module modMain
 			Console.WriteLine()
 
 			Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
-			Console.WriteLine("Website: http://panomics.pnnl.gov/ or http://omics.pnl.gov")
+			Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/")
 			Console.WriteLine()
 
 			' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)

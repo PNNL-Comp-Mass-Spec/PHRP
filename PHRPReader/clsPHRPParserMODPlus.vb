@@ -34,7 +34,7 @@ Public Class clsPHRPParserMODPlus
     Public Const DATA_COLUMN_Peptide_Position As String = "Peptide_Position"
     Public Const DATA_COLUMN_Score As String = "Score"
     Public Const DATA_COLUMN_Probability As String = "Probability"
-    Public Const DATA_COLUMN_Rank_Probability As String = "Rank_Probability"
+    Public Const DATA_COLUMN_Rank_Score As String = "Rank_Score"
     Public Const DATA_COLUMN_QValue As String = "QValue"
 
     Public Const FILENAME_SUFFIX_SYN As String = "_modp_syn.txt"
@@ -156,7 +156,7 @@ Public Class clsPHRPParserMODPlus
         AddHeaderColumn(DATA_COLUMN_Peptide_Position)
         AddHeaderColumn(DATA_COLUMN_Score)
         AddHeaderColumn(DATA_COLUMN_Probability)
-        AddHeaderColumn(DATA_COLUMN_Rank_Probability)        
+        AddHeaderColumn(DATA_COLUMN_Rank_Score)
         AddHeaderColumn(DATA_COLUMN_QValue)
 
     End Sub
@@ -385,7 +385,7 @@ Public Class clsPHRPParserMODPlus
                 Else
 
                     .ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
-                    .ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_Probability, mColumnHeaders, 1)
+                    .ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_Score, mColumnHeaders, 1)
 
                     strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 

@@ -21,7 +21,7 @@ Public Class clsMODPlusResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "May 19, 2015"
+        MyBase.mFileDate = "May 22, 2015"
     End Sub
 
 #Region "Constants and Enums"
@@ -78,7 +78,7 @@ Public Class clsMODPlusResultsProcessor
         Peptide_Position = 12
         Score = 13
         Probability = 14
-        Rank_Probability = 15
+        Rank_Score = 15
         QValue = 16
     End Enum
 
@@ -100,9 +100,10 @@ Public Class clsMODPlusResultsProcessor
         Public DelM As String                   ' Computed by this class using Precursor_mass - CalculatedMonoMass
         Public DelM_PPM As String               ' Computed by this class using DelM and CalculatedMonoMass	
         Public Score As String
+        Public ScoreNum As Double
         Public Probability As String            ' Higher values are better
         Public ProbabilityNum As Double         ' Higher values are better
-        Public RankProbability As Integer
+        Public RankScore As Integer
         Public Peptide As String
         Public NTT As String                    ' Number of Tryptic Terminii
         Public ProteinList As String            ' One or more protein entries of the form ref|YP_003651515.1[K.196~206.Q(2)] where the text in brackets is the start/stop residues of the peptide; Multiple entries will be separated by semicolons, e.g. ref|YP_003651515.1[K.196~206.Q(2)];ref|YP_003201491.1[K.223~233.Q(2)];ref|YP_003313784.1[K.266~276.Q(2)]
@@ -124,9 +125,10 @@ Public Class clsMODPlusResultsProcessor
             DelM = String.Empty
             DelM_PPM = String.Empty
             Score = String.Empty
+            ScoreNum = 0
             Probability = String.Empty
             ProbabilityNum = 0
-            RankProbability = 0
+            RankScore = 0
             Peptide = String.Empty
             NTT = String.Empty
             ProteinList = String.Empty
@@ -320,25 +322,25 @@ Public Class clsMODPlusResultsProcessor
             dctResultsSubset.Add(intIndex, lstSearchResults(intIndex))
         Next
 
-        Dim lstResultsByProbability = (From item In dctResultsSubset Select item Order By item.Value.ProbabilityNum Descending).ToList()
+        Dim lstResultsByScore = (From item In dctResultsSubset Select item Order By item.Value.ScoreNum Descending).ToList()
 
         Dim dblLastValue As Double
         Dim intCurrentRank As Integer = -1
 
-        For Each entry In lstResultsByProbability
+        For Each entry In lstResultsByScore
             Dim oResult = lstSearchResults(entry.Key)
 
             If intCurrentRank < 0 Then
-                dblLastValue = oResult.ProbabilityNum
+                dblLastValue = oResult.ScoreNum
                 intCurrentRank = 1
             Else
-                If Math.Abs(oResult.ProbabilityNum - dblLastValue) > Double.Epsilon Then
-                    dblLastValue = oResult.ProbabilityNum
+                If Math.Abs(oResult.ScoreNum - dblLastValue) > Double.Epsilon Then
+                    dblLastValue = oResult.ScoreNum
                     intCurrentRank += 1
                 End If
             End If
 
-            oResult.RankProbability = intCurrentRank
+            oResult.RankScore = intCurrentRank
             lstSearchResults(entry.Key) = oResult
         Next
 
@@ -533,8 +535,8 @@ Public Class clsMODPlusResultsProcessor
 
                 Loop
 
-                ' Sort the SearchResults by scan, charge, and Descending probability
-                lstSearchResultsUnfiltered.Sort(New MODPlusSearchResultsComparerScanChargeProbabilityPeptide)
+                ' Sort the SearchResults by scan, charge, and descending score
+                lstSearchResultsUnfiltered.Sort(New MODPlusSearchResultsComparerScanChargeScorePeptide)
 
                 ' Now filter the data
 
@@ -895,6 +897,7 @@ Public Class clsMODPlusResultsProcessor
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMODPlusResultsFileColumns.DeltaMass), .DeltaMass)
                     GetColumnValue(strSplitLine, intColumnMapping(eMODPlusResultsFileColumns.Score), .Score)
+                    If Not Double.TryParse(.Score, .ScoreNum) Then .ScoreNum = 0
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMODPlusResultsFileColumns.Probability), .Probability)
                     If Not Double.TryParse(.Probability, .ProbabilityNum) Then .ProbabilityNum = 0
@@ -1105,7 +1108,7 @@ Public Class clsMODPlusResultsProcessor
         lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_Peptide_Position, eMODPlusSynFileColumns.Peptide_Position)
         lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_Score, eMODPlusSynFileColumns.Score)
         lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_Probability, eMODPlusSynFileColumns.Probability)
-        lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_Rank_Probability, eMODPlusSynFileColumns.Rank_Probability)
+        lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_Rank_Score, eMODPlusSynFileColumns.Rank_Score)
         lstColumnNames.Add(clsPHRPParserMODPlus.DATA_COLUMN_QValue, eMODPlusSynFileColumns.QValue)
 
         Try
@@ -1423,8 +1426,8 @@ Public Class clsMODPlusResultsProcessor
       ByVal lstFilteredSearchResults As List(Of udtMODPlusSearchResultType),
       ByRef strErrorLog As String)
 
-        ' Sort udtFilteredSearchResults by descending probability, ascending scan, ascending charge, ascending peptide, and ascending protein
-        lstFilteredSearchResults.Sort(New MODPlusSearchResultsComparerProbabilityScanChargePeptide)
+        ' Sort udtFilteredSearchResults by descending score, ascending scan, ascending charge, ascending peptide, and ascending protein
+        lstFilteredSearchResults.Sort(New MODPlusSearchResultsComparerScoreScanChargePeptide)
 
         ' Compute FDR values then assign QValues
         ComputeQValues(lstFilteredSearchResults)
@@ -1470,7 +1473,7 @@ Public Class clsMODPlusResultsProcessor
     ''' Compute FDR values then assign QValues
     ''' </summary>
     ''' <param name="lstSearchResults"></param>
-    ''' <remarks>Assumes the data is sorted by descending probability using MODPlusSearchResultsComparerProbabilityScanChargePeptide</remarks>
+    ''' <remarks>Assumes the data is sorted by descending score using MODPlusSearchResultsComparerScoreScanChargePeptide</remarks>
     Private Sub ComputeQValues(ByVal lstSearchResults As List(Of udtMODPlusSearchResultType))
 
         Dim forwardPeptideCount = 0
@@ -1590,7 +1593,7 @@ Public Class clsMODPlusResultsProcessor
             lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_Peptide_Position)
             lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_Score)
             lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_Probability)
-            lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_Rank_Probability)
+            lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_Rank_Score)
             lstData.Add(clsPHRPParserMODPlus.DATA_COLUMN_QValue)
 
             swResultFile.WriteLine(CollapseList(lstData))
@@ -1642,7 +1645,7 @@ Public Class clsMODPlusResultsProcessor
             lstData.Add(peptidePosition)
             lstData.Add(udtSearchResult.Score)
             lstData.Add(udtSearchResult.Probability)
-            lstData.Add(udtSearchResult.RankProbability.ToString())
+            lstData.Add(udtSearchResult.RankScore.ToString())
             lstData.Add(udtSearchResult.QValue.ToString("0.000000"))
 
             swResultFile.WriteLine(CollapseList(lstData))
@@ -1657,7 +1660,7 @@ Public Class clsMODPlusResultsProcessor
 
 #Region "IComparer Classes"
 
-    Protected Class MODPlusSearchResultsComparerScanChargeProbabilityPeptide
+    Protected Class MODPlusSearchResultsComparerScanChargeScorePeptide
         Implements IComparer(Of udtMODPlusSearchResultType)
 
         Public Function Compare(x As udtMODPlusSearchResultType, y As udtMODPlusSearchResultType) As Integer Implements IComparer(Of udtMODPlusSearchResultType).Compare
@@ -1673,10 +1676,10 @@ Public Class clsMODPlusResultsProcessor
                 ElseIf x.ChargeNum < y.ChargeNum Then
                     Return -1
                 Else
-                    ' Charge is the same; check ProbabilityNum
-                    If x.ProbabilityNum < y.ProbabilityNum Then
+                    ' Charge is the same; check ScoreNum
+                    If x.ScoreNum < y.ScoreNum Then
                         Return 1
-                    ElseIf x.ProbabilityNum > y.ProbabilityNum Then
+                    ElseIf x.ScoreNum > y.ScoreNum Then
                         Return -1
                     Else
                         ' Probability is the same; check peptide
@@ -1702,14 +1705,14 @@ Public Class clsMODPlusResultsProcessor
 
     End Class
 
-    Protected Class MODPlusSearchResultsComparerProbabilityScanChargePeptide
+    Protected Class MODPlusSearchResultsComparerScoreScanChargePeptide
         Implements IComparer(Of udtMODPlusSearchResultType)
 
         Public Function Compare(x As udtMODPlusSearchResultType, y As udtMODPlusSearchResultType) As Integer Implements IComparer(Of udtMODPlusSearchResultType).Compare
 
-            If x.ProbabilityNum < y.ProbabilityNum Then
+            If x.ScoreNum < y.ScoreNum Then
                 Return 1
-            ElseIf x.ProbabilityNum > y.ProbabilityNum Then
+            ElseIf x.ScoreNum > y.ScoreNum Then
                 Return -1
             Else
                 ' Pvalue is the same; check scan number

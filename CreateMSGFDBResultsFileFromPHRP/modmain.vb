@@ -11,7 +11,7 @@ Imports PHRPReader
 ' Program started March 14, 2013
 '
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
 ' -------------------------------------------------------------------------------
 
 Module modMain
@@ -325,7 +325,7 @@ Module modMain
 			Console.WriteLine()
 
 			Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
-			Console.WriteLine("Website: http://panomics.pnnl.gov/ or http://www.sysbio.org/resources/staff/")
+			Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/")
 
 			' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
 			System.Threading.Thread.Sleep(750)
