@@ -193,11 +193,11 @@ Public MustInherit Class clsPHRPBaseClass
 
 #Region "Progress Events and Variables"
     Public Event ProgressReset()
-    Public Event ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single)     ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
+    Public Event ProgressChanged(taskDescription As String, percentComplete As Single)     ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
     Public Event ProgressComplete()
 
-    Public Event ErrorOccurred(ByVal ErrorMessage As String)
-    Public Event WarningMessageEvent(ByVal WarningMessage As String)
+    Public Event ErrorOccurred(ErrMessage As String)
+    Public Event WarningMessageEvent(WarningMessage As String)
 
     Protected mProgressStepDescription As String = String.Empty
     Protected mProgressPercentComplete As Single        ' Ranges from 0 to 100, but can contain decimal percentage values
@@ -208,7 +208,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mAbortProcessing
         End Get
-        Set(ByVal Value As Boolean)
+        Set(Value As Boolean)
             mAbortProcessing = Value
         End Set
     End Property
@@ -217,7 +217,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mCreateModificationSummaryFile
         End Get
-        Set(ByVal Value As Boolean)
+        Set(Value As Boolean)
             mCreateModificationSummaryFile = Value
         End Set
     End Property
@@ -226,7 +226,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mCreateInspectOrMSGFDbFirstHitsFile
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mCreateInspectOrMSGFDbFirstHitsFile = value
         End Set
     End Property
@@ -235,7 +235,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mCreateInspectOrMSGFDbSynopsisFile
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mCreateInspectOrMSGFDbSynopsisFile = value
         End Set
     End Property
@@ -244,7 +244,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mCreateInspectOrMSGFDbFirstHitsFile
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mCreateInspectOrMSGFDbFirstHitsFile = value
         End Set
     End Property
@@ -253,7 +253,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mCreateInspectOrMSGFDbSynopsisFile
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             mCreateInspectOrMSGFDbSynopsisFile = value
         End Set
     End Property
@@ -271,7 +271,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mEnzymeMatchSpec
         End Get
-        Set(ByVal Value As udtEnzymeMatchSpecType)
+        Set(Value As udtEnzymeMatchSpecType)
             mEnzymeMatchSpec = Value
         End Set
     End Property
@@ -322,7 +322,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mInspectSynopsisFilePValueThreshold
         End Get
-        Set(ByVal value As Single)
+        Set(value As Single)
             mInspectSynopsisFilePValueThreshold = value
         End Set
     End Property
@@ -331,7 +331,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mMassCorrectionTagsFilePath
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mMassCorrectionTagsFilePath = Value
         End Set
     End Property
@@ -340,7 +340,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mModificationDefinitionsFilePath
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mModificationDefinitionsFilePath = Value
         End Set
     End Property
@@ -385,7 +385,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mPeptideCTerminusMassChange
         End Get
-        Set(ByVal Value As Double)
+        Set(Value As Double)
             mPeptideCTerminusMassChange = Value
         End Set
     End Property
@@ -394,7 +394,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mPeptideNTerminusMassChange
         End Get
-        Set(ByVal Value As Double)
+        Set(Value As Double)
             mPeptideNTerminusMassChange = Value
         End Set
     End Property
@@ -425,7 +425,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mSearchToolParameterFilePath
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mSearchToolParameterFilePath = value
         End Set
     End Property
@@ -443,7 +443,7 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return mWarnMissingParameterFileSection
         End Get
-        Set(ByVal Value As Boolean)
+        Set(Value As Boolean)
             mWarnMissingParameterFileSection = Value
         End Set
     End Property
@@ -453,9 +453,9 @@ Public MustInherit Class clsPHRPBaseClass
         mAbortProcessing = True
     End Sub
 
-    Public Shared Function AutoDefinePeptideHitResultsFilePath(ByVal ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants, _
-      ByVal strSourceFolderPath As String, _
-      ByVal strBaseName As String) As String
+    Public Shared Function AutoDefinePeptideHitResultsFilePath(ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants, _
+      strSourceFolderPath As String, _
+      strBaseName As String) As String
 
         If Not strBaseName Is Nothing AndAlso strBaseName.Length > 0 Then
             Select Case ePeptideHitResultFileFormat
@@ -492,7 +492,7 @@ Public MustInherit Class clsPHRPBaseClass
         Return AutoDefinePeptideHitResultsFilePath(strSourceFolderPath)
     End Function
 
-    Public Shared Function AutoDefinePeptideHitResultsFilePath(ByVal strSourceFolderPath As String) As String
+    Public Shared Function AutoDefinePeptideHitResultsFilePath(strSourceFolderPath As String) As String
         ' Looks for a file ending in _syn.txt, _fht.txt, _xt.xml, or _inspect.txt in folder strSourceFolderPath
         ' Returns the first matching file found
 
@@ -529,7 +529,7 @@ Public MustInherit Class clsPHRPBaseClass
         Return String.Empty
     End Function
 
-    Protected Function CheckSeqToProteinMapDefined(ByVal intUniqueSeqID As Integer, ByVal strProteinName As String) As Boolean
+    Protected Function CheckSeqToProteinMapDefined(intUniqueSeqID As Integer, strProteinName As String) As Boolean
         ' Returns True if the sequence to protein map was already defined
         ' Returns False if the mapping was not defined (will also update mSeqToProteinMap)
 
@@ -556,7 +556,7 @@ Public MustInherit Class clsPHRPBaseClass
         Return blnExistingMapFound
     End Function
 
-    Protected Function CIntSafe(ByVal strValue As String, ByVal intDefaultValue As Integer) As Integer
+    Protected Function CIntSafe(strValue As String, intDefaultValue As Integer) As Integer
         Try
             ' Note: Integer.Parse() fails if strValue contains a decimal point, even if it is "8.000"
             ' Thus, we're using CInt() instead
@@ -567,7 +567,7 @@ Public MustInherit Class clsPHRPBaseClass
         End Try
     End Function
 
-    Protected Function CDblSafe(ByVal strValue As String, ByVal dblDefaultValue As Double) As Double
+    Protected Function CDblSafe(strValue As String, dblDefaultValue As Double) As Double
         Try
             Return Double.Parse(strValue)
         Catch ex As Exception
@@ -576,7 +576,7 @@ Public MustInherit Class clsPHRPBaseClass
         End Try
     End Function
 
-    Protected Function CSngSafe(ByVal strValue As String, ByVal sngDefaultValue As Single) As Single
+    Protected Function CSngSafe(strValue As String, sngDefaultValue As Single) As Single
         Try
             Return Single.Parse(strValue)
         Catch ex As Exception
@@ -642,7 +642,7 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Function
 
-    Public Shared Function DetermineResultsFileFormat(ByVal strFilePath As String) As ePeptideHitResultsFileFormatConstants
+    Public Shared Function DetermineResultsFileFormat(strFilePath As String) As ePeptideHitResultsFileFormatConstants
         ' Examine the extension on strFilePath to determine the file format
 
         Dim strExtensionLCase As String
@@ -722,7 +722,7 @@ Public MustInherit Class clsPHRPBaseClass
         End Try
     End Sub
 
-    Protected Sub ComputePseudoPeptideLocInProtein(ByVal objSearchResult As clsSearchResultsBaseClass)
+    Protected Sub ComputePseudoPeptideLocInProtein(objSearchResult As clsSearchResultsBaseClass)
 
         With objSearchResult
 
@@ -770,7 +770,7 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Sub
 
-    Protected Overridable Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+    Protected Overridable Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
         Dim strPepToProteinMapFilePath As String = String.Empty
 
         strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
@@ -799,7 +799,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' <param name="strMTSPepToProteinMapFilePath"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function CreatePepToProteinMapFile(ByVal lstSourcePHRPDataFiles As List(Of String), ByVal strMTSPepToProteinMapFilePath As String) As Boolean
+    Protected Function CreatePepToProteinMapFile(lstSourcePHRPDataFiles As List(Of String), strMTSPepToProteinMapFilePath As String) As Boolean
 
         Dim objPeptideToProteinMapper As PeptideToProteinMapEngine.clsPeptideToProteinMapEngine
 
@@ -972,7 +972,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' <param name="strPHRPDataFilePath"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Function CreateProteinModDetailsFile(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String) As Boolean
+    Public Function CreateProteinModDetailsFile(strPHRPDataFilePath As String, strOutputFolderPath As String) As Boolean
 
         Dim strMTSPepToProteinMapFilePath As String
 
@@ -1000,7 +1000,7 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Function
 
-    Public Function CreateProteinModDetailsFile(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String, ByVal strMTSPepToProteinMapFilePath As String, ByVal ePHRPResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType) As Boolean
+    Public Function CreateProteinModDetailsFile(strPHRPDataFilePath As String, strOutputFolderPath As String, strMTSPepToProteinMapFilePath As String, ePHRPResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType) As Boolean
 
         Dim intPepToProteinMapIndex As Integer
 
@@ -1213,7 +1213,7 @@ Public MustInherit Class clsPHRPBaseClass
         End Try
     End Sub
 
-    Protected Sub ExpandListIfRequired(Of T)(lstItems As List(Of T), countToAdd As Integer, Optional ByVal largeListThreshold As Integer = 1000000)
+    Protected Sub ExpandListIfRequired(Of T)(lstItems As List(Of T), countToAdd As Integer, Optional largeListThreshold As Integer = 1000000)
 
         If lstItems.Count > largeListThreshold AndAlso lstItems.Count + countToAdd > lstItems.Capacity Then
             ' .NET by default will double the size of the list to accomodate these new items
@@ -1222,7 +1222,7 @@ Public MustInherit Class clsPHRPBaseClass
         End If
     End Sub
 
-    Protected Function FindFirstMatchInPepToProteinMapping(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal strPeptideToFind As String) As Integer
+    Protected Function FindFirstMatchInPepToProteinMapping(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), strPeptideToFind As String) As Integer
 
         Static objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer()
 
@@ -1245,14 +1245,14 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Function
 
-    Protected Function GetCleanSequence(ByVal strSequenceWithMods As String) As String
+    Protected Function GetCleanSequence(strSequenceWithMods As String) As String
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
 
         Return GetCleanSequence(strSequenceWithMods, strPrefix, strSuffix)
     End Function
 
-    Protected Function GetCleanSequence(ByVal strSequenceWithMods As String, ByRef strPrefix As String, ByRef strSuffix As String) As String
+    Protected Function GetCleanSequence(strSequenceWithMods As String, ByRef strPrefix As String, ByRef strSuffix As String) As String
 
         Dim strPrimarySequence As String = String.Empty
         strPrefix = String.Empty
@@ -1279,7 +1279,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef strValue As String) As Boolean
+    Protected Function GetColumnValue(ByRef strSplitLine() As String, intColumnIndex As Integer, ByRef strValue As String) As Boolean
         Return GetColumnValue(strSplitLine, intColumnIndex, strValue, String.Empty)
     End Function
 
@@ -1289,7 +1289,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef intValue As Integer) As Boolean
+    Protected Function GetColumnValue(ByRef strSplitLine() As String, intColumnIndex As Integer, ByRef intValue As Integer) As Boolean
         Return GetColumnValue(strSplitLine, intColumnIndex, intValue, 0)
     End Function
 
@@ -1299,7 +1299,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef strValue As String, ByVal strValueIfMissing As String) As Boolean
+    Protected Function GetColumnValue(ByRef strSplitLine() As String, intColumnIndex As Integer, ByRef strValue As String, strValueIfMissing As String) As Boolean
         If intColumnIndex >= 0 AndAlso intColumnIndex < strSplitLine.Length Then
             strValue = String.Copy(strSplitLine(intColumnIndex))
             Return True
@@ -1315,7 +1315,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(ByRef strSplitLine() As String, ByVal intColumnIndex As Integer, ByRef intValue As Integer, ByVal intValueIfMissing As Integer) As Boolean
+    Protected Function GetColumnValue(ByRef strSplitLine() As String, intColumnIndex As Integer, ByRef intValue As Integer, intValueIfMissing As Integer) As Boolean
         Dim strValue As String = String.Empty
 
         If GetColumnValue(strSplitLine, intColumnIndex, strValue, intValueIfMissing.ToString) Then
@@ -1445,218 +1445,218 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Sub
 
-	Protected Function InitializeSequenceOutputFiles(ByVal strBaseOutputFilePath As String) As Boolean
+    Protected Function InitializeSequenceOutputFiles(strBaseOutputFilePath As String) As Boolean
 
-		' Initializes the StreamWriter objects using strBaseOutputFilePath as a base name and replacing the suffix with the default suffix names
-		' Returns True if success; does not catch errors; they will be thrown to the calling function if they occur
-		Dim fiOutputFileInfo As FileInfo
-		Dim strResultToSeqMapFilePath As String
-		Dim strSeqInfoFilePath As String
-		Dim strModDetailsFilePath As String
-		Dim strSeqToProteinMapFilePath As String
+        ' Initializes the StreamWriter objects using strBaseOutputFilePath as a base name and replacing the suffix with the default suffix names
+        ' Returns True if success; does not catch errors; they will be thrown to the calling function if they occur
+        Dim fiOutputFileInfo As FileInfo
+        Dim strResultToSeqMapFilePath As String
+        Dim strSeqInfoFilePath As String
+        Dim strModDetailsFilePath As String
+        Dim strSeqToProteinMapFilePath As String
 
-		fiOutputFileInfo = New FileInfo(strBaseOutputFilePath)
+        fiOutputFileInfo = New FileInfo(strBaseOutputFilePath)
 
-		' Initialize the file paths based on strBaseOutputFilePath
-		strResultToSeqMapFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_RESULT_TO_SEQ_MAP)
-		strSeqInfoFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_SEQ_INFO)
-		strModDetailsFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_MOD_DETAILS)
-		strSeqToProteinMapFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP)
+        ' Initialize the file paths based on strBaseOutputFilePath
+        strResultToSeqMapFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_RESULT_TO_SEQ_MAP)
+        strSeqInfoFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_SEQ_INFO)
+        strModDetailsFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_MOD_DETAILS)
+        strSeqToProteinMapFilePath = ReplaceFilenameSuffix(fiOutputFileInfo, FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP)
 
-		' Clear the unique sequences container
-		mUniqueSequences.Clear()
+        ' Clear the unique sequences container
+        mUniqueSequences.Clear()
 
-		' Clear the sequence to protein map
-		mSeqToProteinMap.Clear()
+        ' Clear the sequence to protein map
+        mSeqToProteinMap.Clear()
 
-		' Initialize the ResultToSeqMap file
-		mResultToSeqMapFile = New StreamWriter(strResultToSeqMapFilePath)
-		mResultToSeqMapFile.WriteLine("Result_ID" & SEP_CHAR & COLUMN_NAME_UNIQUE_SEQ_ID)
-
-
-		' Initialize the SeqInfo file
-		mSeqInfoFile = New StreamWriter(strSeqInfoFilePath, False)
-		mSeqInfoFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
-		  "Mod_Count" & SEP_CHAR & _
-		  "Mod_Description" & SEP_CHAR & _
-		  "Monoisotopic_Mass")
-
-		' Initialize the ModDetails file
-		mModDetailsFile = New StreamWriter(strModDetailsFilePath)
-		mModDetailsFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
-		  "Mass_Correction_Tag" & SEP_CHAR & _
-		  "Position")
+        ' Initialize the ResultToSeqMap file
+        mResultToSeqMapFile = New StreamWriter(strResultToSeqMapFilePath)
+        mResultToSeqMapFile.WriteLine("Result_ID" & SEP_CHAR & COLUMN_NAME_UNIQUE_SEQ_ID)
 
 
-		' Initialize the SeqToProtein map file
-		mSeqToProteinMapFile = New StreamWriter(strSeqToProteinMapFilePath, False)
-		mSeqToProteinMapFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
-		 "Cleavage_State" & SEP_CHAR & _
-		 "Terminus_State" & SEP_CHAR & _
-		 COLUMN_NAME_PROTEIN_NAME & SEP_CHAR & _
-		 "Protein_Expectation_Value_Log(e)" & SEP_CHAR & _
-		 "Protein_Intensity_Log(I)")
+        ' Initialize the SeqInfo file
+        mSeqInfoFile = New StreamWriter(strSeqInfoFilePath, False)
+        mSeqInfoFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
+          "Mod_Count" & SEP_CHAR & _
+          "Mod_Description" & SEP_CHAR & _
+          "Monoisotopic_Mass")
 
-		Return True
+        ' Initialize the ModDetails file
+        mModDetailsFile = New StreamWriter(strModDetailsFilePath)
+        mModDetailsFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
+          "Mass_Correction_Tag" & SEP_CHAR & _
+          "Position")
 
-	End Function
 
-	''' <summary>
-	''' Returns true if the character is a letter between A and Z or a and z
-	''' </summary>
-	''' <param name="chChar">Character to examine</param>
-	''' <returns></returns>
-	''' <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
-	Public Shared Function IsLetterAtoZ(chChar As Char) As Boolean
+        ' Initialize the SeqToProtein map file
+        mSeqToProteinMapFile = New StreamWriter(strSeqToProteinMapFilePath, False)
+        mSeqToProteinMapFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
+         "Cleavage_State" & SEP_CHAR & _
+         "Terminus_State" & SEP_CHAR & _
+         COLUMN_NAME_PROTEIN_NAME & SEP_CHAR & _
+         "Protein_Expectation_Value_Log(e)" & SEP_CHAR & _
+         "Protein_Intensity_Log(I)")
 
-		Static reIsLetter As Regex = New Regex("[A-Za-z]", RegexOptions.Compiled)
-
-		If reIsLetter.IsMatch(chChar) Then
-			Return True
-		Else
-			Return False
-		End If
-
-	End Function
-
-	''' <summary>
-	''' Examines the string to determine if it is numeric
-	''' </summary>
-	''' <param name="strData"></param>
-	''' <returns>True if a number, otherwise false</returns>
-	Public Shared Function IsNumber(ByVal strData As String) As Boolean
-		Try
-			If Double.TryParse(strData, 0) Then
-				Return True
-			ElseIf Integer.TryParse(strData, 0) Then
-				Return True
-			End If
-		Catch ex As Exception
-			' Ignore errors here
-		End Try
-
-		Return False
-	End Function
-
-	Protected Function IsReversedProtein(ByVal strProteinName As String) As Boolean
-
-		Dim strProteinNameLCase As String = strProteinName.ToLower()
-
-		If strProteinNameLCase.StartsWith("reversed_") Then
-			' Used in DMS-generated protein collections
-			Return True
-		ElseIf strProteinName.StartsWith("REV_") Then
-			' Used by MSGFDB
-			Return True
-		ElseIf strProteinNameLCase.StartsWith("scrambled_") Then
-			' Used in DMS-generated protein collections
-			Return True
-		ElseIf strProteinNameLCase.StartsWith("xxx_") Then
-			' Used by MSGF+
-			Return True
-		ElseIf strProteinNameLCase.StartsWith("xxx.") Then
-			' Used by Inspect
-			Return True
-		ElseIf strProteinNameLCase.EndsWith(":reversed") Then
-			' Used by X!Tandem
-			Return True
-		End If
-
-		Return False
+        Return True
 
     End Function
 
-	Protected Overridable Function LoadParameterFileSettings(ByVal strParameterFilePath As String) As Boolean
+    ''' <summary>
+    ''' Returns true if the character is a letter between A and Z or a and z
+    ''' </summary>
+    ''' <param name="chChar">Character to examine</param>
+    ''' <returns></returns>
+    ''' <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
+    Public Shared Function IsLetterAtoZ(chChar As Char) As Boolean
 
-		Const OPTIONS_SECTION As String = "PeptideHitResultsProcessorOptions"
+        Static reIsLetter As Regex = New Regex("[A-Za-z]", RegexOptions.Compiled)
 
-		Dim objSettingsFile As New XmlSettingsFileAccessor
+        If reIsLetter.IsMatch(chChar) Then
+            Return True
+        Else
+            Return False
+        End If
 
-		Dim strLeftResidueRegEx As String, strRightResidueRegEx As String
-		Dim blnValueNotPresent As Boolean
+    End Function
 
-		Try
+    ''' <summary>
+    ''' Examines the string to determine if it is numeric
+    ''' </summary>
+    ''' <param name="strData"></param>
+    ''' <returns>True if a number, otherwise false</returns>
+    Public Shared Function IsNumber(strData As String) As Boolean
+        Try
+            If Double.TryParse(strData, 0) Then
+                Return True
+            ElseIf Integer.TryParse(strData, 0) Then
+                Return True
+            End If
+        Catch ex As Exception
+            ' Ignore errors here
+        End Try
 
-			If String.IsNullOrWhiteSpace(strParameterFilePath) Then
-				' No parameter file specified; nothing to load
-				Return True
-			End If
+        Return False
+    End Function
 
-			If Not File.Exists(strParameterFilePath) Then
-				' See if strParameterFilePath points to a file in the same directory as the application
-				strParameterFilePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Path.GetFileName(strParameterFilePath))
-				If Not File.Exists(strParameterFilePath) Then
-					SetErrorCode(ePHRPErrorCodes.ParameterFileNotFound)
-					Return False
-				End If
-			End If
+    Protected Function IsReversedProtein(strProteinName As String) As Boolean
 
-			If objSettingsFile.LoadSettings(strParameterFilePath) Then
-				If Not objSettingsFile.SectionPresent(OPTIONS_SECTION) Then
-					' Section OPTIONS_SECTION was not found in the parameter file; warn the user if mWarnMissingParameterFileSection = True
-					If mWarnMissingParameterFileSection Then
-						SetErrorMessage("The node '<section name=""" & OPTIONS_SECTION & """> was not found in the parameter file: " & strParameterFilePath)
-						SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile)
-						Return False
-					Else
-						Return True
-					End If
-				Else
-					mMassCorrectionTagsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", mMassCorrectionTagsFilePath)
-					mModificationDefinitionsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", mModificationDefinitionsFilePath)
-					mSearchToolParameterFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", mSearchToolParameterFilePath)
+        Dim strProteinNameLCase As String = strProteinName.ToLower()
 
-					mCreateModificationSummaryFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", mCreateModificationSummaryFile)
+        If strProteinNameLCase.StartsWith("reversed_") Then
+            ' Used in DMS-generated protein collections
+            Return True
+        ElseIf strProteinName.StartsWith("REV_") Then
+            ' Used by MSGFDB
+            Return True
+        ElseIf strProteinNameLCase.StartsWith("scrambled_") Then
+            ' Used in DMS-generated protein collections
+            Return True
+        ElseIf strProteinNameLCase.StartsWith("xxx_") Then
+            ' Used by MSGF+
+            Return True
+        ElseIf strProteinNameLCase.StartsWith("xxx.") Then
+            ' Used by Inspect
+            Return True
+        ElseIf strProteinNameLCase.EndsWith(":reversed") Then
+            ' Used by X!Tandem
+            Return True
+        End If
 
-					mCreateProteinModsFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", mCreateProteinModsFile)
-					mFastaFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", mFastaFilePath)
-					mProteinModsFileIncludesReversedProteins = objSettingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", mProteinModsFileIncludesReversedProteins)
-					mUseExistingMTSPepToProteinMapFile = objSettingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", mUseExistingMTSPepToProteinMapFile)
+        Return False
 
-					With mEnzymeMatchSpec
-						strLeftResidueRegEx = String.Copy(.LeftResidueRegEx)
-						strRightResidueRegEx = String.Copy(.RightResidueRegEx)
-					End With
+    End Function
 
-					strLeftResidueRegEx = objSettingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecLeftResidue", strLeftResidueRegEx, blnValueNotPresent)
-					If Not blnValueNotPresent Then
-						strRightResidueRegEx = objSettingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecRightResidue", strRightResidueRegEx, blnValueNotPresent)
+    Protected Overridable Function LoadParameterFileSettings(strParameterFilePath As String) As Boolean
 
-						If Not blnValueNotPresent Then
-							With mEnzymeMatchSpec
-								.LeftResidueRegEx = strLeftResidueRegEx
-								.RightResidueRegEx = strRightResidueRegEx
-							End With
-						End If
-					End If
+        Const OPTIONS_SECTION As String = "PeptideHitResultsProcessorOptions"
 
-					mPeptideNTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", mPeptideNTerminusMassChange)
-					mPeptideCTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", mPeptideCTerminusMassChange)
+        Dim objSettingsFile As New XmlSettingsFileAccessor
 
-				End If
-			End If
+        Dim strLeftResidueRegEx As String, strRightResidueRegEx As String
+        Dim blnValueNotPresent As Boolean
 
-		Catch ex As Exception
-			SetErrorMessage("Error in LoadParameterFileSettings:" & ex.Message)
-			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingParameterFile)
-			Return False
-		End Try
+        Try
 
-		Return True
+            If String.IsNullOrWhiteSpace(strParameterFilePath) Then
+                ' No parameter file specified; nothing to load
+                Return True
+            End If
 
-	End Function
+            If Not File.Exists(strParameterFilePath) Then
+                ' See if strParameterFilePath points to a file in the same directory as the application
+                strParameterFilePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Path.GetFileName(strParameterFilePath))
+                If Not File.Exists(strParameterFilePath) Then
+                    SetErrorCode(ePHRPErrorCodes.ParameterFileNotFound)
+                    Return False
+                End If
+            End If
 
-	''' <summary>
-	''' Load the PeptideToProteinMap information
-	''' </summary>
-	''' <param name="strPepToProteinMapFilePath">File to read</param>
+            If objSettingsFile.LoadSettings(strParameterFilePath) Then
+                If Not objSettingsFile.SectionPresent(OPTIONS_SECTION) Then
+                    ' Section OPTIONS_SECTION was not found in the parameter file; warn the user if mWarnMissingParameterFileSection = True
+                    If mWarnMissingParameterFileSection Then
+                        SetErrorMessage("The node '<section name=""" & OPTIONS_SECTION & """> was not found in the parameter file: " & strParameterFilePath)
+                        SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile)
+                        Return False
+                    Else
+                        Return True
+                    End If
+                Else
+                    mMassCorrectionTagsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", mMassCorrectionTagsFilePath)
+                    mModificationDefinitionsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", mModificationDefinitionsFilePath)
+                    mSearchToolParameterFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", mSearchToolParameterFilePath)
+
+                    mCreateModificationSummaryFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", mCreateModificationSummaryFile)
+
+                    mCreateProteinModsFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", mCreateProteinModsFile)
+                    mFastaFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", mFastaFilePath)
+                    mProteinModsFileIncludesReversedProteins = objSettingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", mProteinModsFileIncludesReversedProteins)
+                    mUseExistingMTSPepToProteinMapFile = objSettingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", mUseExistingMTSPepToProteinMapFile)
+
+                    With mEnzymeMatchSpec
+                        strLeftResidueRegEx = String.Copy(.LeftResidueRegEx)
+                        strRightResidueRegEx = String.Copy(.RightResidueRegEx)
+                    End With
+
+                    strLeftResidueRegEx = objSettingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecLeftResidue", strLeftResidueRegEx, blnValueNotPresent)
+                    If Not blnValueNotPresent Then
+                        strRightResidueRegEx = objSettingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecRightResidue", strRightResidueRegEx, blnValueNotPresent)
+
+                        If Not blnValueNotPresent Then
+                            With mEnzymeMatchSpec
+                                .LeftResidueRegEx = strLeftResidueRegEx
+                                .RightResidueRegEx = strRightResidueRegEx
+                            End With
+                        End If
+                    End If
+
+                    mPeptideNTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", mPeptideNTerminusMassChange)
+                    mPeptideCTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", mPeptideCTerminusMassChange)
+
+                End If
+            End If
+
+        Catch ex As Exception
+            SetErrorMessage("Error in LoadParameterFileSettings:" & ex.Message)
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingParameterFile)
+            Return False
+        End Try
+
+        Return True
+
+    End Function
+
+    ''' <summary>
+    ''' Load the PeptideToProteinMap information
+    ''' </summary>
+    ''' <param name="strPepToProteinMapFilePath">File to read</param>
     ''' <param name="lstPepToProteinMapping">Output parameter: peptide to protein mapping (calling function must pre-initialize the list)</param>
-	''' <param name="strHeaderLine">Output parameter: Header line text</param>
-	''' <returns></returns>
-	''' <remarks></remarks>
+    ''' <param name="strHeaderLine">Output parameter: Header line text</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Protected Function LoadPeptideToProteinMapInfo(
-       ByVal strPepToProteinMapFilePath As String,
-       ByVal lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
+       strPepToProteinMapFilePath As String,
+       lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
        ByRef strHeaderLine As String) As Boolean
 
         Dim strLineIn As String
@@ -1733,156 +1733,171 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Function
 
-	Protected Function NumToString(ByVal intNumber As Integer, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
-		Return intNumber.ToString()
-	End Function
+    Protected Function NumToString(intNumber As Integer, intDigitsOfPrecision As Integer, blnRemoveDecimalsWhenZero As Boolean) As String
+        Return intNumber.ToString()
+    End Function
 
-	Protected Function NumToString(ByVal sngNumber As Single, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
-		Return NumToString(CDbl(sngNumber), intDigitsOfPrecision, blnRemoveDecimalsWhenZero)
-	End Function
+    Protected Function NumToString(sngNumber As Single, intDigitsOfPrecision As Integer, blnRemoveDecimalsWhenZero As Boolean) As String
+        Return NumToString(CDbl(sngNumber), intDigitsOfPrecision, blnRemoveDecimalsWhenZero)
+    End Function
 
-	Protected Function NumToString(ByVal dblNumber As Double, ByVal intDigitsOfPrecision As Integer, ByVal blnRemoveDecimalsWhenZero As Boolean) As String
-		Static strFormatString As String = "0"
-		Static intFormatStringPrecision As Integer = 0
+    Protected Function NumToString(dblNumber As Double, intDigitsOfPrecision As Integer, blnRemoveDecimalsWhenZero As Boolean) As String
+        Static strFormatString As String = "0"
+        Static intFormatStringPrecision As Integer = 0
 
-		If blnRemoveDecimalsWhenZero AndAlso Math.Abs(dblNumber - 0) < Double.Epsilon Then
-			Return "0"
-		Else
-			If intFormatStringPrecision <> intDigitsOfPrecision Then
-				' Update strFormatString
-				If intDigitsOfPrecision <= 0 Then
-					strFormatString = "0"
-				Else
-					strFormatString = "0." & New String("0"c, intDigitsOfPrecision)
-				End If
-				intFormatStringPrecision = intDigitsOfPrecision
-			End If
+        If blnRemoveDecimalsWhenZero AndAlso Math.Abs(dblNumber - 0) < Double.Epsilon Then
+            Return "0"
+        Else
+            If intFormatStringPrecision <> intDigitsOfPrecision Then
+                ' Update strFormatString
+                If intDigitsOfPrecision <= 0 Then
+                    strFormatString = "0"
+                Else
+                    strFormatString = "0." & New String("0"c, intDigitsOfPrecision)
+                End If
+                intFormatStringPrecision = intDigitsOfPrecision
+            End If
 
-			Return dblNumber.ToString(strFormatString)
-		End If
+            Return dblNumber.ToString(strFormatString)
+        End If
 
-	End Function
+    End Function
 
-	Protected Sub OperationComplete()
-		RaiseEvent ProgressComplete()
-	End Sub
+    Protected Sub OperationComplete()
+        RaiseEvent ProgressComplete()
+    End Sub
 
-	Public Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String) As Boolean
-		Return ProcessFile(strInputFilePath, strOutputFolderPath, String.Empty)
-	End Function
+    Public Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String) As Boolean
+        Return ProcessFile(strInputFilePath, strOutputFolderPath, String.Empty)
+    End Function
 
-	Public MustOverride Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
+    Public MustOverride Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
-	Protected Function ReplaceFilenameSuffix(ByVal fiOriginalFile As FileInfo, ByVal strNewSuffix As String) As String
-		' Appends strNewSuffix to the base name of the original file, then returns a full path to the file using the folder associated with strOriginalFilePath
-		' Note that strNewSuffix may contain a file extension though it does not have to
-		'  If strNewSuffix does not contain an extension, then the path returned will end in the same extension as strOriginalFilePath
+    Protected Function ReplaceFilenameSuffix(fiOriginalFile As FileInfo, strNewSuffix As String) As String
+        ' Appends strNewSuffix to the base name of the original file, then returns a full path to the file using the folder associated with strOriginalFilePath
+        ' Note that strNewSuffix may contain a file extension though it does not have to
+        '  If strNewSuffix does not contain an extension, then the path returned will end in the same extension as strOriginalFilePath
 
-		Dim strNewFileName As String
-		Dim strOriginalExtension As String
+        Dim strNewFileName As String
+        Dim strOriginalExtension As String
 
-		' Keep track of the original extension on strOriginalFilePath
-		strOriginalExtension = fiOriginalFile.Extension
+        ' Keep track of the original extension on strOriginalFilePath
+        strOriginalExtension = fiOriginalFile.Extension
 
-		' Make sure strNewSuffix is not nothing
-		If strNewSuffix Is Nothing Then strNewSuffix = String.Empty
+        ' Make sure strNewSuffix is not nothing
+        If strNewSuffix Is Nothing Then strNewSuffix = String.Empty
 
-		' Obtain the filename, without its extension
-		strNewFileName = Path.GetFileNameWithoutExtension(fiOriginalFile.Name)
+        ' Obtain the filename, without its extension
+        strNewFileName = Path.GetFileNameWithoutExtension(fiOriginalFile.Name)
 
-		' Append strNewSuffix to strNewFileName
-		If Path.HasExtension(strNewSuffix) Then
-			strNewFileName &= strNewSuffix
-		Else
-			strNewFileName &= strNewSuffix & strOriginalExtension
-		End If
+        ' Append strNewSuffix to strNewFileName
+        If Path.HasExtension(strNewSuffix) Then
+            strNewFileName &= strNewSuffix
+        Else
+            strNewFileName &= strNewSuffix & strOriginalExtension
+        End If
 
-		strNewFileName = Path.Combine(fiOriginalFile.DirectoryName, strNewFileName)
+        strNewFileName = Path.Combine(fiOriginalFile.DirectoryName, strNewFileName)
 
-		Return strNewFileName
+        Return strNewFileName
 
-	End Function
+    End Function
 
-	Protected Sub ReportWarning(strMessage As String)
-		RaiseEvent WarningMessageEvent(strMessage)
-	End Sub
+    Protected Sub ReportError(errMsg As String, Optional throwException As Boolean = False, Optional innerException As Exception = Nothing)
 
-	Public Function ResetMassCorrectionTagsAndModificationDefinitions() As Boolean
-		Dim blnSuccess As Boolean
-		Dim blnFileNotFound As Boolean
+        SetErrorMessage(errMsg)
 
-		' Note: If mMassCorrectionTagsFilePath is blank then the mass correction tags will be reset to the defaults and blnSuccess will be True
-		blnSuccess = mPeptideMods.ReadMassCorrectionTagsFile(mMassCorrectionTagsFilePath, blnFileNotFound)
-		If Not blnSuccess Then
-			If blnFileNotFound Then
-				SetErrorCode(ePHRPErrorCodes.MassCorrectionTagsFileNotFound)
-			Else
-				SetErrorCode(ePHRPErrorCodes.ErrorReadingMassCorrectionTagsFile)
-			End If
-		End If
+        If throwException Then
+            If innerException Is Nothing Then
+                Throw New Exception(errMsg)
+            Else
+                Throw New Exception(errMsg, innerException)
+            End If
 
-		' Note: If mModificationDefinitionsFilePath is blank, then the modifications will be cleared and blnSuccess will be True
-		blnSuccess = mPeptideMods.ReadModificationDefinitionsFile(mModificationDefinitionsFilePath, blnFileNotFound)
-		If Not blnSuccess Then
-			If blnFileNotFound Then
-				SetErrorCode(ePHRPErrorCodes.ModificationDefinitionFileNotFound)
-				ReportWarning("File not found: " & mModificationDefinitionsFilePath)
-			Else
-				SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
-			End If
-		End If
+        End If
 
-		Return blnSuccess
+    End Sub
 
-	End Function
+    Protected Sub ReportWarning(strMessage As String)
+        RaiseEvent WarningMessageEvent(strMessage)
+    End Sub
 
-	Protected Sub ResetProgress()
-		ResetProgress(String.Empty)
-	End Sub
+    Public Function ResetMassCorrectionTagsAndModificationDefinitions() As Boolean
+        Dim blnSuccess As Boolean
+        Dim blnFileNotFound As Boolean
 
-	Protected Sub ResetProgress(ByVal strProgressStepDescription As String)
-		mProgressStepDescription = String.Copy(strProgressStepDescription)
-		mProgressPercentComplete = 0
-		RaiseEvent ProgressReset()
-	End Sub
+        ' Note: If mMassCorrectionTagsFilePath is blank then the mass correction tags will be reset to the defaults and blnSuccess will be True
+        blnSuccess = mPeptideMods.ReadMassCorrectionTagsFile(mMassCorrectionTagsFilePath, blnFileNotFound)
+        If Not blnSuccess Then
+            If blnFileNotFound Then
+                SetErrorCode(ePHRPErrorCodes.MassCorrectionTagsFileNotFound)
+            Else
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingMassCorrectionTagsFile)
+            End If
+        End If
 
-	Protected Sub SaveModificationSummaryFile(ByVal strModificationSummaryFilePath As String)
-		Dim intIndex As Integer
+        ' Note: If mModificationDefinitionsFilePath is blank, then the modifications will be cleared and blnSuccess will be True
+        blnSuccess = mPeptideMods.ReadModificationDefinitionsFile(mModificationDefinitionsFilePath, blnFileNotFound)
+        If Not blnSuccess Then
+            If blnFileNotFound Then
+                SetErrorCode(ePHRPErrorCodes.ModificationDefinitionFileNotFound)
+                ReportWarning("File not found: " & mModificationDefinitionsFilePath)
+            Else
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+            End If
+        End If
 
-		Try
-			Using swOutFile As StreamWriter = New StreamWriter(strModificationSummaryFilePath, False)
+        Return blnSuccess
 
-				' Write the header line
-				swOutFile.WriteLine( _
-				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol & SEP_CHAR & _
-				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass & SEP_CHAR & _
-				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues & SEP_CHAR & _
-				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type & SEP_CHAR & _
-				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag & SEP_CHAR & _
-				  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count)
+    End Function
 
-				For intIndex = 0 To mPeptideMods.ModificationCount - 1
-					Dim oModInfo = mPeptideMods.GetModificationByIndex(intIndex)
-					With oModInfo
-						If .OccurrenceCount > 0 OrElse Not .UnknownModAutoDefined Then
-							swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR & _
-							  .ModificationMass.ToString & SEP_CHAR & _
-							  .TargetResidues & SEP_CHAR & _
-							  clsModificationDefinition.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
-							  .MassCorrectionTag & SEP_CHAR & _
-							  .OccurrenceCount.ToString)
-						End If
-					End With
-				Next intIndex
-			End Using
+    Protected Sub ResetProgress()
+        ResetProgress(String.Empty)
+    End Sub
 
-		Catch ex As Exception
-			Throw ex
-		End Try
+    Protected Sub ResetProgress(strProgressStepDescription As String)
+        mProgressStepDescription = String.Copy(strProgressStepDescription)
+        mProgressPercentComplete = 0
+        RaiseEvent ProgressReset()
+    End Sub
 
-	End Sub
+    Protected Sub SaveModificationSummaryFile(strModificationSummaryFilePath As String)
+        Dim intIndex As Integer
 
-    Protected Sub SaveResultsFileEntrySeqInfo(ByVal objSearchResult As clsSearchResultsBaseClass, ByVal blnUpdateResultToSeqMapFile As Boolean)
+        Try
+            Using swOutFile As StreamWriter = New StreamWriter(strModificationSummaryFilePath, False)
+
+                ' Write the header line
+                swOutFile.WriteLine( _
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol & SEP_CHAR & _
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass & SEP_CHAR & _
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues & SEP_CHAR & _
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type & SEP_CHAR & _
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag & SEP_CHAR & _
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count)
+
+                For intIndex = 0 To mPeptideMods.ModificationCount - 1
+                    Dim oModInfo = mPeptideMods.GetModificationByIndex(intIndex)
+                    With oModInfo
+                        If .OccurrenceCount > 0 OrElse Not .UnknownModAutoDefined Then
+                            swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR & _
+                              .ModificationMass.ToString & SEP_CHAR & _
+                              .TargetResidues & SEP_CHAR & _
+                              clsModificationDefinition.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
+                              .MassCorrectionTag & SEP_CHAR & _
+                              .OccurrenceCount.ToString)
+                        End If
+                    End With
+                Next intIndex
+            End Using
+
+        Catch ex As Exception
+            Throw ex
+        End Try
+
+    End Sub
+
+    Protected Sub SaveResultsFileEntrySeqInfo(objSearchResult As clsSearchResultsBaseClass, blnUpdateResultToSeqMapFile As Boolean)
         ' Note: Be sure to call Me.InitializeOutputFiles before calling this function
         ' blnUpdateResultToSeqMapFile should be set to True only for the first protein of each peptide in each group
 
@@ -1957,90 +1972,90 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Sub
 
-	Protected Sub SetErrorCode(ByVal eNewErrorCode As ePHRPErrorCodes)
-		SetErrorCode(eNewErrorCode, False)
-	End Sub
+    Protected Sub SetErrorCode(eNewErrorCode As ePHRPErrorCodes)
+        SetErrorCode(eNewErrorCode, False)
+    End Sub
 
-	Protected Sub SetErrorCode(ByVal eNewErrorCode As ePHRPErrorCodes, ByVal blnLeaveExistingErrorCodeUnchanged As Boolean)
-		If blnLeaveExistingErrorCodeUnchanged AndAlso mErrorCode <> ePHRPErrorCodes.NoError Then
-			' An error code is already defined; do not change it
-		Else
-			mErrorCode = eNewErrorCode
-		End If
-	End Sub
+    Protected Sub SetErrorCode(eNewErrorCode As ePHRPErrorCodes, blnLeaveExistingErrorCodeUnchanged As Boolean)
+        If blnLeaveExistingErrorCodeUnchanged AndAlso mErrorCode <> ePHRPErrorCodes.NoError Then
+            ' An error code is already defined; do not change it
+        Else
+            mErrorCode = eNewErrorCode
+        End If
+    End Sub
 
-	Protected Sub SetErrorMessage(ByVal strMessage As String)
-		If strMessage Is Nothing Then strMessage = String.Empty
-		mErrorMessage = String.Copy(strMessage)
-		If strMessage.Length > 0 Then
-			RaiseEvent ErrorOccurred(mErrorMessage)
-			Console.WriteLine(mErrorMessage)
-		End If
-	End Sub
+    Protected Sub SetErrorMessage(strMessage As String)
+        If strMessage Is Nothing Then strMessage = String.Empty
+        mErrorMessage = String.Copy(strMessage)
+        If strMessage.Length > 0 Then
+            RaiseEvent ErrorOccurred(mErrorMessage)
+            Console.WriteLine(mErrorMessage)
+        End If
+    End Sub
 
-	''' <summary>
-	''' Return the text up to (but not including) the first space in strProteinNameAndDescription
-	''' </summary>
-	''' <param name="strProteinNameAndDescription"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Overridable Function TruncateProteinName(ByVal strProteinNameAndDescription As String) As String
+    ''' <summary>
+    ''' Return the text up to (but not including) the first space in strProteinNameAndDescription
+    ''' </summary>
+    ''' <param name="strProteinNameAndDescription"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Overridable Function TruncateProteinName(strProteinNameAndDescription As String) As String
 
-		Dim intIndex As Integer
+        Dim intIndex As Integer
 
-		intIndex = strProteinNameAndDescription.IndexOf(" "c)
-		If intIndex > 0 Then
-			Return strProteinNameAndDescription.Substring(0, intIndex)
-		Else
-			Return strProteinNameAndDescription
-		End If
+        intIndex = strProteinNameAndDescription.IndexOf(" "c)
+        If intIndex > 0 Then
+            Return strProteinNameAndDescription.Substring(0, intIndex)
+        Else
+            Return strProteinNameAndDescription
+        End If
 
-	End Function
+    End Function
 
-	Protected Sub UpdatePepToProteinMapPeptide(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal intIndex As Integer, ByVal strPeptide As String)
-		Dim udtItem As udtPepToProteinMappingType
-		udtItem = lstPepToProteinMapping(intIndex)
-		udtItem.Peptide = strPeptide
-		lstPepToProteinMapping(intIndex) = udtItem
-	End Sub
+    Protected Sub UpdatePepToProteinMapPeptide(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), intIndex As Integer, strPeptide As String)
+        Dim udtItem As udtPepToProteinMappingType
+        udtItem = lstPepToProteinMapping(intIndex)
+        udtItem.Peptide = strPeptide
+        lstPepToProteinMapping(intIndex) = udtItem
+    End Sub
 
-	Protected Sub UpdateProgress(ByVal strProgressStepDescription As String)
-		UpdateProgress(strProgressStepDescription, mProgressPercentComplete)
-	End Sub
+    Protected Sub UpdateProgress(strProgressStepDescription As String)
+        UpdateProgress(strProgressStepDescription, mProgressPercentComplete)
+    End Sub
 
-	Protected Sub UpdateProgress(ByVal sngPercentComplete As Single)
-		UpdateProgress(Me.ProgressStepDescription, sngPercentComplete)
-	End Sub
+    Protected Sub UpdateProgress(sngPercentComplete As Single)
+        UpdateProgress(Me.ProgressStepDescription, sngPercentComplete)
+    End Sub
 
-	Protected Sub UpdateProgress(ByVal strProgressStepDescription As String, ByVal sngPercentComplete As Single)
-		mProgressStepDescription = String.Copy(strProgressStepDescription)
-		If sngPercentComplete < 0 Then
-			sngPercentComplete = 0
-		ElseIf sngPercentComplete > 100 Then
-			sngPercentComplete = 100
-		End If
-		mProgressPercentComplete = sngPercentComplete
+    Protected Sub UpdateProgress(strProgressStepDescription As String, sngPercentComplete As Single)
+        mProgressStepDescription = String.Copy(strProgressStepDescription)
+        If sngPercentComplete < 0 Then
+            sngPercentComplete = 0
+        ElseIf sngPercentComplete > 100 Then
+            sngPercentComplete = 100
+        End If
+        mProgressPercentComplete = sngPercentComplete
 
-		RaiseEvent ProgressChanged(Me.ProgressStepDescription, Me.ProgressPercentComplete)
-	End Sub
+        RaiseEvent ProgressChanged(Me.ProgressStepDescription, Me.ProgressPercentComplete)
+    End Sub
 
-	Private Function ValidatePeptideToProteinMapResults(ByVal strPeptideToProteinMapFilePath As String, ByVal blnIgnorePeptideToProteinMapperErrors As Boolean) As Boolean
+    Private Function ValidatePeptideToProteinMapResults(strPeptideToProteinMapFilePath As String, blnIgnorePeptideToProteinMapperErrors As Boolean) As Boolean
 
-		Const PROTEIN_NAME_NO_MATCH As String = "__NoMatch__"
+        Const PROTEIN_NAME_NO_MATCH As String = "__NoMatch__"
 
-		Dim blnSuccess As Boolean = False
+        Dim blnSuccess As Boolean = False
 
-		Dim intPeptideCount As Integer = 0
-		Dim intPeptideCountNoMatch As Integer = 0
-		Dim intLinesRead As Integer = 0
-		Dim chSplitChars() As Char = New Char() {ControlChars.Tab}
+        Dim intPeptideCount As Integer = 0
+        Dim intPeptideCountNoMatch As Integer = 0
+        Dim intLinesRead As Integer = 0
+        Dim chSplitChars() As Char = New Char() {ControlChars.Tab}
 
-		Try
-			' Validate that none of the results in strPeptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH
+        Try
+            ' Validate that none of the results in strPeptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH
 
-			Dim strLineIn As String
-			Dim strLastPeptide As String = String.Empty
-			Dim strSplitLine() As String
+            Dim strLineIn As String
+            Dim strLastPeptide As String = String.Empty
+            Dim strSplitLine() As String
 
             Using srInFile = New StreamReader(New FileStream(strPeptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
 
@@ -2067,181 +2082,181 @@ Public MustInherit Class clsPHRPBaseClass
 
             End Using
 
-			If intPeptideCount = 0 Then
-				SetErrorMessage("Peptide to protein mapping file is empty: " & strPeptideToProteinMapFilePath)
-				SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
-				blnSuccess = False
+            If intPeptideCount = 0 Then
+                SetErrorMessage("Peptide to protein mapping file is empty: " & strPeptideToProteinMapFilePath)
+                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
+                blnSuccess = False
 
-			ElseIf intPeptideCountNoMatch = 0 Then
-				blnSuccess = True
+            ElseIf intPeptideCountNoMatch = 0 Then
+                blnSuccess = True
 
-			Else
-				Dim dblErrorPercent As Double	' Value between 0 and 100
-				dblErrorPercent = intPeptideCountNoMatch / intPeptideCount * 100.0
+            Else
+                Dim dblErrorPercent As Double   ' Value between 0 and 100
+                dblErrorPercent = intPeptideCountNoMatch / intPeptideCount * 100.0
 
-				Dim strErrorMessage As String
-				strErrorMessage = dblErrorPercent.ToString("0.00") & "% of the entries (" & intPeptideCountNoMatch & " / " & intPeptideCount & ") in the peptide to protein map file (" & IO.Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & IO.Path.GetFileName(mFastaFilePath) & ")"
+                Dim strErrorMessage As String
+                strErrorMessage = dblErrorPercent.ToString("0.00") & "% of the entries (" & intPeptideCountNoMatch & " / " & intPeptideCount & ") in the peptide to protein map file (" & IO.Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & IO.Path.GetFileName(mFastaFilePath) & ")"
 
-				If blnIgnorePeptideToProteinMapperErrors OrElse dblErrorPercent < 0.1 Then
-					ReportWarning(strErrorMessage)
-					blnSuccess = True
-				Else
-					SetErrorMessage(strErrorMessage)
-					blnSuccess = False
-				End If
-			End If
+                If blnIgnorePeptideToProteinMapperErrors OrElse dblErrorPercent < 0.1 Then
+                    ReportWarning(strErrorMessage)
+                    blnSuccess = True
+                Else
+                    SetErrorMessage(strErrorMessage)
+                    blnSuccess = False
+                End If
+            End If
 
-		Catch ex As Exception
-			SetErrorMessage("Error in ValidatePeptideToProteinMapResults:" & ex.Message)
-			SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
-			blnSuccess = False
-		End Try
+        Catch ex As Exception
+            SetErrorMessage("Error in ValidatePeptideToProteinMapResults:" & ex.Message)
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Sub ValidatePHRPReaderSupportFiles(ByVal strPHRPDataFilePath As String, ByVal strOutputFolderPath As String)
+    Protected Sub ValidatePHRPReaderSupportFiles(strPHRPDataFilePath As String, strOutputFolderPath As String)
 
-		Dim ioPHRPFile As FileInfo
-		Dim ioOutputFolder As DirectoryInfo
-		Dim strMSGFFileName As String
-		Dim strSourcePath As String
-		Dim strTargetPath As String
+        Dim ioPHRPFile As FileInfo
+        Dim ioOutputFolder As DirectoryInfo
+        Dim strMSGFFileName As String
+        Dim strSourcePath As String
+        Dim strTargetPath As String
 
-		Try
-			If Not String.IsNullOrWhiteSpace(strOutputFolderPath) Then
+        Try
+            If Not String.IsNullOrWhiteSpace(strOutputFolderPath) Then
 
-				ioPHRPFile = New FileInfo(strPHRPDataFilePath)
-				ioOutputFolder = New DirectoryInfo(strOutputFolderPath)
+                ioPHRPFile = New FileInfo(strPHRPDataFilePath)
+                ioOutputFolder = New DirectoryInfo(strOutputFolderPath)
 
-				If ioPHRPFile.DirectoryName.ToLower() <> ioOutputFolder.FullName.ToLower() Then
-					strMSGFFileName = IO.Path.GetFileName(ReplaceFilenameSuffix(ioPHRPFile, FILENAME_SUFFIX_MSGF))
+                If ioPHRPFile.DirectoryName.ToLower() <> ioOutputFolder.FullName.ToLower() Then
+                    strMSGFFileName = IO.Path.GetFileName(ReplaceFilenameSuffix(ioPHRPFile, FILENAME_SUFFIX_MSGF))
 
-					strSourcePath = IO.Path.Combine(ioPHRPFile.DirectoryName, strMSGFFileName)
-					strTargetPath = IO.Path.Combine(ioOutputFolder.FullName, strMSGFFileName)
+                    strSourcePath = IO.Path.Combine(ioPHRPFile.DirectoryName, strMSGFFileName)
+                    strTargetPath = IO.Path.Combine(ioOutputFolder.FullName, strMSGFFileName)
 
-					If IO.File.Exists(strSourcePath) And Not IO.File.Exists(strTargetPath) Then
-						IO.File.Copy(strSourcePath, strTargetPath)
-					End If
+                    If IO.File.Exists(strSourcePath) And Not IO.File.Exists(strTargetPath) Then
+                        IO.File.Copy(strSourcePath, strTargetPath)
+                    End If
 
-				End If
+                End If
 
-			End If
+            End If
 
-		Catch ex As Exception
-			ReportWarning("Error in ValidatePHRPReaderSupportFiles: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            ReportWarning("Error in ValidatePHRPReaderSupportFiles: " & ex.Message)
+        End Try
 
-	End Sub
+    End Sub
 
-	Protected Function ValidateProteinFastaFile(ByVal strFastaFilePath As String) As Boolean
+    Protected Function ValidateProteinFastaFile(strFastaFilePath As String) As Boolean
 
-		Dim blnSuccess As Boolean
-		Dim strWarningMessage As String = String.Empty
-		blnSuccess = ValidateProteinFastaFile(strFastaFilePath, strWarningMessage)
+        Dim blnSuccess As Boolean
+        Dim strWarningMessage As String = String.Empty
+        blnSuccess = ValidateProteinFastaFile(strFastaFilePath, strWarningMessage)
 
-		If Not blnSuccess Then
-			ReportWarning(strWarningMessage)
-		End If
+        If Not blnSuccess Then
+            ReportWarning(strWarningMessage)
+        End If
 
-		Return blnSuccess
-	End Function
+        Return blnSuccess
+    End Function
 
-	Public Shared Function ValidateProteinFastaFile(ByVal strFastaFilePath As String, ByRef strWarningMessage As String) As Boolean
+    Public Shared Function ValidateProteinFastaFile(strFastaFilePath As String, ByRef strWarningMessage As String) As Boolean
 
-		Dim objFastaFile As ProteinFileReader.FastaFileReader
+        Dim objFastaFile As ProteinFileReader.FastaFileReader
 
-		' This RegEx looks for standard amino acids, skipping A, T, C, and G
-		Dim reDefiniteAminoAcid As Regex = New Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+        ' This RegEx looks for standard amino acids, skipping A, T, C, and G
+        Dim reDefiniteAminoAcid As Regex = New Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
-		' This RegEx looks for A, T, C, and G
-		Dim rePotentialNucleicAcid As Regex = New Regex("[ATCG]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+        ' This RegEx looks for A, T, C, and G
+        Dim rePotentialNucleicAcid As Regex = New Regex("[ATCG]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
-		' This matches any letter
-		Dim reLetter As Regex = New Regex("[A-Z]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+        ' This matches any letter
+        Dim reLetter As Regex = New Regex("[A-Z]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
-		Dim intDefiniteAminoAcidCount As Integer
-		Dim intPotentialNucleicAcidCount As Integer
-		Dim intLetterCount As Integer
+        Dim intDefiniteAminoAcidCount As Integer
+        Dim intPotentialNucleicAcidCount As Integer
+        Dim intLetterCount As Integer
 
-		Dim intValidProteinCount As Integer = 0
-		Dim intInvalidProteinCount As Integer = 0
+        Dim intValidProteinCount As Integer = 0
+        Dim intInvalidProteinCount As Integer = 0
 
-		Try
-			strWarningMessage = String.Empty
+        Try
+            strWarningMessage = String.Empty
 
-			If String.IsNullOrEmpty(strFastaFilePath) Then
-				Console.WriteLine()
-				strWarningMessage = "strFastaFilePath is not defined in ValidateProteinFastaFile"
-				Return False
-			ElseIf Not IO.File.Exists(strFastaFilePath) Then
-				Console.WriteLine()
-				strWarningMessage = "Fasta file not found: " & strFastaFilePath
-				Return False
-			End If
+            If String.IsNullOrEmpty(strFastaFilePath) Then
+                Console.WriteLine()
+                strWarningMessage = "strFastaFilePath is not defined in ValidateProteinFastaFile"
+                Return False
+            ElseIf Not IO.File.Exists(strFastaFilePath) Then
+                Console.WriteLine()
+                strWarningMessage = "Fasta file not found: " & strFastaFilePath
+                Return False
+            End If
 
-			objFastaFile = New ProteinFileReader.FastaFileReader()
-			If Not objFastaFile.OpenFile(strFastaFilePath) Then
-				Console.WriteLine()
-				strWarningMessage = "Error opening the fasta file: " & strFastaFilePath
-				Return False
-			End If
+            objFastaFile = New ProteinFileReader.FastaFileReader()
+            If Not objFastaFile.OpenFile(strFastaFilePath) Then
+                Console.WriteLine()
+                strWarningMessage = "Error opening the fasta file: " & strFastaFilePath
+                Return False
+            End If
 
-			' Read the first 500 proteins and confirm that each contains amino acid residues
-			Do While objFastaFile.ReadNextProteinEntry()
-				intDefiniteAminoAcidCount = reDefiniteAminoAcid.Matches(objFastaFile.ProteinSequence).Count
-				intPotentialNucleicAcidCount = rePotentialNucleicAcid.Matches(objFastaFile.ProteinSequence).Count
-				intLetterCount = reLetter.Matches(objFastaFile.ProteinSequence).Count
+            ' Read the first 500 proteins and confirm that each contains amino acid residues
+            Do While objFastaFile.ReadNextProteinEntry()
+                intDefiniteAminoAcidCount = reDefiniteAminoAcid.Matches(objFastaFile.ProteinSequence).Count
+                intPotentialNucleicAcidCount = rePotentialNucleicAcid.Matches(objFastaFile.ProteinSequence).Count
+                intLetterCount = reLetter.Matches(objFastaFile.ProteinSequence).Count
 
-				If intDefiniteAminoAcidCount > 0.1 * intLetterCount Then
-					intValidProteinCount += 1
-				ElseIf intPotentialNucleicAcidCount > 0.95 * intLetterCount Then
-					intInvalidProteinCount += 1
-				End If
+                If intDefiniteAminoAcidCount > 0.1 * intLetterCount Then
+                    intValidProteinCount += 1
+                ElseIf intPotentialNucleicAcidCount > 0.95 * intLetterCount Then
+                    intInvalidProteinCount += 1
+                End If
 
-				If intValidProteinCount + intInvalidProteinCount >= 500 Then
-					Exit Do
-				End If
-			Loop
+                If intValidProteinCount + intInvalidProteinCount >= 500 Then
+                    Exit Do
+                End If
+            Loop
 
-			If intValidProteinCount < intInvalidProteinCount Then
-				Console.WriteLine()
-				strWarningMessage = "Fasta file contains Nucleic Acids, not Amino Acids: " & IO.Path.GetFileName(strFastaFilePath)
-				Return False
-			End If
+            If intValidProteinCount < intInvalidProteinCount Then
+                Console.WriteLine()
+                strWarningMessage = "Fasta file contains Nucleic Acids, not Amino Acids: " & IO.Path.GetFileName(strFastaFilePath)
+                Return False
+            End If
 
-		Catch ex As Exception
-			Console.WriteLine()
-			strWarningMessage = "Exception in ValidateProteinFastaFile: " & ex.Message
-			Return False
-		End Try
+        Catch ex As Exception
+            Console.WriteLine()
+            strWarningMessage = "Exception in ValidateProteinFastaFile: " & ex.Message
+            Return False
+        End Try
 
-		Return True
+        Return True
 
-	End Function
+    End Function
 
 #Region "PHRPReader Event Handlers"
 
-	Protected Sub PHRPReader_ErrorEvent(strErrorMessage As String)
-		RaiseEvent ErrorOccurred(strErrorMessage)
-	End Sub
+    Protected Sub PHRPReader_ErrorEvent(strErrorMessage As String)
+        RaiseEvent ErrorOccurred(strErrorMessage)
+    End Sub
 
-	Protected Sub PHRPReader_WarningEvent(strWarningMessage As String)
-		ReportWarning(strWarningMessage)
-	End Sub
+    Protected Sub PHRPReader_WarningEvent(strWarningMessage As String)
+        ReportWarning(strWarningMessage)
+    End Sub
 #End Region
 
 
 #Region "PeptideToProteinMapper Event Handlers"
 
-	Private Sub PeptideToProteinMapper_ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single)
-		If percentComplete >= mNextPeptideToProteinMapperLevel Then
-			mNextPeptideToProteinMapperLevel += 25
-			UpdateProgress(PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE + percentComplete * (PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE - PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE) / 100)
-			Console.WriteLine(" PeptideToProteinMapper is " & percentComplete.ToString("0") & "% complete")
-		End If
-	End Sub
+    Private Sub PeptideToProteinMapper_ProgressChanged(taskDescription As String, percentComplete As Single)
+        If percentComplete >= mNextPeptideToProteinMapperLevel Then
+            mNextPeptideToProteinMapperLevel += 25
+            UpdateProgress(PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE + percentComplete * (PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE - PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE) / 100)
+            Console.WriteLine(" PeptideToProteinMapper is " & percentComplete.ToString("0") & "% complete")
+        End If
+    End Sub
 
 #End Region
 

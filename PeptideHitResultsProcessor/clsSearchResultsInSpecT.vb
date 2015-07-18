@@ -62,7 +62,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mSpectrumFile
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mSpectrumFile = Value
         End Set
     End Property
@@ -70,7 +70,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mMQScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mMQScore = Value
         End Set
     End Property
@@ -78,7 +78,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mLength
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mLength = Value
         End Set
     End Property
@@ -86,7 +86,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mTotalPRMScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mTotalPRMScore = Value
         End Set
     End Property
@@ -94,7 +94,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mMedianPRMScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mMedianPRMScore = Value
         End Set
     End Property
@@ -102,7 +102,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mFractionY
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mFractionY = Value
         End Set
     End Property
@@ -110,7 +110,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mFractionB
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mFractionB = Value
         End Set
     End Property
@@ -118,7 +118,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mIntensity
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mIntensity = Value
         End Set
     End Property
@@ -126,7 +126,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mNTT
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mNTT = Value
         End Set
     End Property
@@ -134,7 +134,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mpValue
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mpValue = Value
         End Set
     End Property
@@ -142,7 +142,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mFScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mFScore = Value
         End Set
     End Property
@@ -150,7 +150,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mDeltaScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mDeltaScore = value
         End Set
     End Property
@@ -158,7 +158,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mDeltaScoreOther
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mDeltaScoreOther = Value
         End Set
     End Property
@@ -166,7 +166,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mDeltaNormMQScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mDeltaNormMQScore = value
         End Set
     End Property
@@ -174,7 +174,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mDeltaNormTotalPRMScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mDeltaNormTotalPRMScore = value
         End Set
     End Property
@@ -183,7 +183,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mRankTotalPRMScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mRankTotalPRMScore = value
         End Set
     End Property
@@ -191,7 +191,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mRankFScore
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mRankFScore = value
         End Set
     End Property
@@ -199,7 +199,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mRecordNumber
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mRecordNumber = Value
         End Set
     End Property
@@ -207,7 +207,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mDBFilePos
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mDBFilePos = Value
         End Set
     End Property
@@ -215,7 +215,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mSpecFilePos
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mSpecFilePos = Value
         End Set
     End Property
@@ -223,7 +223,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mPrecursorMZ
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mPrecursorMZ = value
         End Set
     End Property
@@ -231,7 +231,7 @@ Public Class clsSearchResultsInSpecT
         Get
             Return mPrecursorError
         End Get
-        Set(ByVal value As String)
+        Set(value As String)
             mPrecursorError = value
         End Set
     End Property

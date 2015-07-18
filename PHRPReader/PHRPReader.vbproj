@@ -78,6 +78,7 @@
     <Compile Include="clsPHRPParserMODa.vb" />
     <Compile Include="clsPHRPParserMODPlus.vb" />
     <Compile Include="clsPHRPParserMSAlign.vb" />
+    <Compile Include="clsPHRPParserMSPathFinder.vb" />
     <Compile Include="clsPHRPReader.vb" />
     <Compile Include="clsPHRPParserInspect.vb" />
     <Compile Include="clsPHRPParserMSGFDB.vb" />

@@ -157,7 +157,7 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="objSearchResult"></param>
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <remarks></remarks>
-    Private Sub AddDynamicAndStaticResidueMods(ByVal objSearchResult As clsSearchResultsMODPlus, ByVal blnUpdateModOccurrenceCounts As Boolean)
+    Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMODPlus, blnUpdateModOccurrenceCounts As Boolean)
         Const NO_RESIDUE As Char = "-"c
 
         Dim intIndex As Integer, intModIndex As Integer
@@ -231,7 +231,7 @@ Public Class clsMODPlusResultsProcessor
 
     End Sub
 
-    Private Function AddModificationsAndComputeMass(ByVal objSearchResult As clsSearchResultsMODPlus, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsMODPlus, blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
 
         Dim blnSuccess As Boolean
@@ -266,11 +266,11 @@ Public Class clsMODPlusResultsProcessor
     End Function
 
     Private Sub AssociateDynamicModWithResidue(
-      ByVal objSearchResult As clsSearchResultsMODPlus,
-      ByVal chMostRecentResidue As Char,
-      ByVal intResidueLocInPeptide As Integer,
-      ByVal strModMassDigits As String,
-      ByVal blnUpdateModOccurrenceCounts As Boolean)
+      objSearchResult As clsSearchResultsMODPlus,
+      chMostRecentResidue As Char,
+      intResidueLocInPeptide As Integer,
+      strModMassDigits As String,
+      blnUpdateModOccurrenceCounts As Boolean)
 
         Dim blnSuccess As Boolean
 
@@ -308,9 +308,9 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="intEndIndex"></param>
     ''' <remarks></remarks>
     Private Sub AssignRankAndDeltaNormValues(
-      ByVal lstSearchResults As List(Of udtMODPlusSearchResultType),
-      ByVal intStartIndex As Integer,
-      ByVal intEndIndex As Integer)
+      lstSearchResults As List(Of udtMODPlusSearchResultType),
+      intStartIndex As Integer,
+      intEndIndex As Integer)
 
         ' Prior to September 2014 ranks were assign per charge state per scan; 
         ' Ranks are now assigned per scan (across all charge states)
@@ -346,7 +346,7 @@ Public Class clsMODPlusResultsProcessor
 
     End Sub
 
-    Protected Function AssureInteger(ByVal strInteger As String, ByVal intDefaultValue As Integer) As String
+    Protected Function AssureInteger(strInteger As String, intDefaultValue As Integer) As String
 
         Dim intValue As Integer
         Dim dblValue As Double
@@ -363,7 +363,7 @@ Public Class clsMODPlusResultsProcessor
 
     End Function
 
-    Protected Function ComputePeptideMass(ByVal strPeptide As String, ByVal dblTotalModMass As Double) As Double
+    Protected Function ComputePeptideMass(strPeptide As String, dblTotalModMass As Double) As Double
 
         Dim strCleanSequence = GetCleanSequence(strPeptide)
 
@@ -383,7 +383,7 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="strPeptide">Peptide sequence, with mod masses in the form +53.8 or -23</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function ComputeTotalModMass(ByVal strPeptide As String) As Double
+    Protected Function ComputeTotalModMass(strPeptide As String) As Double
 
         Static reModMassRegEx As New Regex(MODPlus_MOD_MASS_REGEX, REGEX_OPTIONS)
 
@@ -447,7 +447,7 @@ Public Class clsMODPlusResultsProcessor
 
     End Function
 
-    Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+    Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
 
         Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
         If strPepToProteinMapFilePath.ToLower().EndsWith("_MODPlus_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_MODPlus_fht") Then
@@ -466,13 +466,11 @@ Public Class clsMODPlusResultsProcessor
     ''' </summary>
     ''' <param name="strInputFilePath"></param>
     ''' <param name="strOutputFilePath"></param>
-    ''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
     Protected Function CreateSynResultsFile(
        strInputFilePath As String,
-       strOutputFilePath As String,
-       Optional blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+       strOutputFilePath As String) As Boolean
 
         Try
             Dim intColumnMapping() As Integer = Nothing
@@ -583,7 +581,7 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="lstModInfo"></param>
     ''' <returns></returns>
     ''' <remarks>We don't care about the dynamic mods because there are so many possible mods.  We'll add each dynamic mod as we encounter it in the results</remarks>
-    Protected Function ExtractModInfoFromMODPlusParamFile(ByVal strMODPlusParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
+    Protected Function ExtractModInfoFromMODPlusParamFile(strMODPlusParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
 
         Try
             ' Initialize the modification list
@@ -602,6 +600,7 @@ Public Class clsMODPlusResultsProcessor
             Dim fiParamFile = New FileInfo(strMODPlusParamFilePath)
             If Not fiParamFile.Exists Then
                 SetErrorMessage("MODPlus param file not found: " & strMODPlusParamFilePath)
+                Return False
             End If
 
             ' Read the contents of the parameter file
@@ -665,9 +664,9 @@ Public Class clsMODPlusResultsProcessor
     ''' <returns></returns>
     ''' <remarks></remarks>
     Protected Function ParseMODPlusSynopsisFile(
-      ByVal strInputFilePath As String,
-      ByVal strOutputFolderPath As String,
-      ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
+      strInputFilePath As String,
+      strOutputFolderPath As String,
+      blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
 
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -827,7 +826,7 @@ Public Class clsMODPlusResultsProcessor
     End Function
 
     ''' <summary>
-    ''' Parse a MODPlus results line while creating the MODPlus sysnopsis file
+    ''' Parse a MODPlus results line while creating the MODPlus synopsis file
     ''' </summary>
     ''' <param name="strLineIn"></param>
     ''' <param name="udtSearchResult"></param>
@@ -836,10 +835,10 @@ Public Class clsMODPlusResultsProcessor
     ''' <returns></returns>
     ''' <remarks></remarks>
     Private Function ParseMODPlusResultsFileEntry(
-      ByVal strLineIn As String,
+      strLineIn As String,
       ByRef udtSearchResult As udtMODPlusSearchResultType,
       ByRef strErrorLog As String,
-      ByVal intColumnMapping() As Integer) As Boolean
+      intColumnMapping() As Integer) As Boolean
 
         ' Parses an entry from the MODPlus results file
 
@@ -868,14 +867,14 @@ Public Class clsMODPlusResultsProcessor
                     GetColumnValue(strSplitLine, intColumnMapping(eMODPlusResultsFileColumns.SpectrumFileName), .SpectrumFileName)
 
                     If Not GetColumnValue(strSplitLine, intColumnMapping(eMODPlusResultsFileColumns.SpectrumIndex), .SpectrumIndex) Then
-                        Throw New EvaluateException("Index column is missing or invalid")
+                        ReportError("Index column is missing or invalid", True)
                     Else
                         rowIndex = .SpectrumIndex
                     End If
 
                     Dim spectrumIndex As Integer
                     If Not Integer.TryParse(.SpectrumIndex, spectrumIndex) Then
-                        Throw New EvaluateException("Index column is not numeric")
+                        ReportError("Index column is not numeric", True)
                     End If
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMODPlusResultsFileColumns.ScanNumber), .ScanNum)
@@ -903,7 +902,7 @@ Public Class clsMODPlusResultsProcessor
                     If Not Double.TryParse(.Probability, .ProbabilityNum) Then .ProbabilityNum = 0
 
                     If Not GetColumnValue(strSplitLine, intColumnMapping(eMODPlusResultsFileColumns.Peptide), .Peptide) Then
-                        Throw New EvaluateException("Peptide column is missing or invalid")
+                        ReportError("Peptide column is missing or invalid", True)
                     End If
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMODPlusResultsFileColumns.NTT), .NTT)
@@ -1003,7 +1002,7 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="intColumnMapping"></param>
     ''' <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
     ''' <remarks></remarks>
-    Private Function ParseMODPlusResultsFileHeaderLine(ByVal strLineIn As String, <Out()> ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMODPlusResultsFileHeaderLine(strLineIn As String, <Out()> ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -1082,7 +1081,7 @@ Public Class clsMODPlusResultsProcessor
 
     End Function
 
-    Private Function ParseMODPlusSynFileHeaderLine(ByVal strLineIn As String, <Out()> ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMODPlusSynFileHeaderLine(strLineIn As String, <Out()> ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -1136,10 +1135,10 @@ Public Class clsMODPlusResultsProcessor
     End Function
 
     Private Function ParseMODPlusSynFileEntry(
-      ByVal strLineIn As String,
-      ByVal objSearchResult As clsSearchResultsMODPlus,
+      strLineIn As String,
+      objSearchResult As clsSearchResultsMODPlus,
       ByRef strErrorLog As String,
-      ByVal intResultsProcessed As Integer,
+      intResultsProcessed As Integer,
       ByRef intColumnMapping() As Integer,
       <Out()> ByRef strPeptideSequenceWithMods As String) As Boolean
 
@@ -1252,7 +1251,7 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="strOutputFolderPath">Output folder</param>
     ''' <param name="strParameterFilePath">Parameter file</param>
     ''' <returns>True if success, False if failure</returns>
-    Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
+    Public Overloads Overrides Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
         Dim strBaseName As String = String.Empty
         Dim strSynOutputFilePath As String = String.Empty
@@ -1271,6 +1270,7 @@ Public Class clsMODPlusResultsProcessor
             If String.IsNullOrWhiteSpace(strInputFilePath) Then
                 SetErrorMessage("Input file name is empty")
                 SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
+                Return False
             End If
 
             blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
@@ -1312,9 +1312,10 @@ Public Class clsMODPlusResultsProcessor
                 Console.WriteLine()
                 Console.WriteLine(MyBase.ProgressStepDescription)
 
+                ' The synopsis file name will be of the form BasePath_modp_syn.txt
                 strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
-                blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath, True)
+                blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath)
 
                 ' Create the other PHRP-specific files
                 MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
@@ -1422,8 +1423,8 @@ Public Class clsMODPlusResultsProcessor
     End Sub
 
     Private Sub SortAndWriteFilteredSearchResults(
-      ByVal swResultFile As StreamWriter,
-      ByVal lstFilteredSearchResults As List(Of udtMODPlusSearchResultType),
+      swResultFile As StreamWriter,
+      lstFilteredSearchResults As List(Of udtMODPlusSearchResultType),
       ByRef strErrorLog As String)
 
         ' Sort udtFilteredSearchResults by descending score, ascending scan, ascending charge, ascending peptide, and ascending protein
@@ -1474,7 +1475,7 @@ Public Class clsMODPlusResultsProcessor
     ''' </summary>
     ''' <param name="lstSearchResults"></param>
     ''' <remarks>Assumes the data is sorted by descending score using MODPlusSearchResultsComparerScoreScanChargePeptide</remarks>
-    Private Sub ComputeQValues(ByVal lstSearchResults As List(Of udtMODPlusSearchResultType))
+    Private Sub ComputeQValues(lstSearchResults As List(Of udtMODPlusSearchResultType))
 
         Dim forwardPeptideCount = 0
         Dim reversePeptideCount = 0
@@ -1505,7 +1506,7 @@ Public Class clsMODPlusResultsProcessor
                         isReverse = False
                         Exit For
                     End If
-                Next                
+                Next
             Next
 
             If isReverse Then
@@ -1551,10 +1552,10 @@ Public Class clsMODPlusResultsProcessor
     End Sub
 
     Private Sub StoreSynMatches(
-     ByVal lstSearchResults As List(Of udtMODPlusSearchResultType),
-     ByVal intStartIndex As Integer,
-     ByVal intEndIndex As Integer,
-     ByVal lstFilteredSearchResults As List(Of udtMODPlusSearchResultType))
+     lstSearchResults As List(Of udtMODPlusSearchResultType),
+     intStartIndex As Integer,
+     intEndIndex As Integer,
+     lstFilteredSearchResults As List(Of udtMODPlusSearchResultType))
 
         Dim intIndex As Integer
 
@@ -1572,7 +1573,7 @@ Public Class clsMODPlusResultsProcessor
     End Sub
 
     Private Sub WriteSynFHTFileHeader(
-      ByVal swResultFile As StreamWriter,
+      swResultFile As StreamWriter,
       ByRef strErrorLog As String)
 
         ' Write out the header line for synopsis / first hits files
@@ -1615,11 +1616,11 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="strErrorLog"></param>
     ''' <remarks></remarks>
     Private Sub WriteSearchResultToFile(
-      ByVal intResultID As Integer,
-      ByVal swResultFile As StreamWriter,
+      intResultID As Integer,
+      swResultFile As StreamWriter,
       ByRef udtSearchResult As udtMODPlusSearchResultType,
-      ByVal proteinName As String,
-      ByVal peptidePosition As String,
+      proteinName As String,
+      peptidePosition As String,
       ByRef strErrorLog As String)
 
         Try

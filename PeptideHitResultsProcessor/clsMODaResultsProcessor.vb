@@ -144,7 +144,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="objSearchResult"></param>
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <remarks></remarks>
-    Private Sub AddDynamicAndStaticResidueMods(ByVal objSearchResult As clsSearchResultsMODa, ByVal blnUpdateModOccurrenceCounts As Boolean)
+    Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMODa, blnUpdateModOccurrenceCounts As Boolean)
         Const NO_RESIDUE As Char = "-"c
 
         Dim intIndex As Integer, intModIndex As Integer
@@ -218,7 +218,7 @@ Public Class clsMODaResultsProcessor
 
     End Sub
 
-    Private Function AddModificationsAndComputeMass(ByVal objSearchResult As clsSearchResultsMODa, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsMODa, blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
 
         Dim blnSuccess As Boolean
@@ -255,7 +255,7 @@ Public Class clsMODaResultsProcessor
     '' This function was an experiment to compute better DelM_PPM values
     '' by reading the synopsis file with PHRPReader and re-computing the DelM_PPM values based on the monoisotopic mass values computed for the sequences
     '' It turned out to not be required, since the DelM_PPM values reported by MODa are quite accurate (despite the fact that it reports integer mod mass values)
-    'Private Function AppendDelMPPMRefinedToSynFile(ByVal strSynOutputFilePath As String) As Boolean
+    'Private Function AppendDelMPPMRefinedToSynFile(strSynOutputFilePath As String) As Boolean
 
     '   Const SYNOPSIS_FILE_COLUMN_DELM_PPM_REFINED As String = "DelM_PPM_Refined"
 
@@ -384,11 +384,11 @@ Public Class clsMODaResultsProcessor
     'End Function
 
     Private Sub AssociateDynamicModWithResidue(
-      ByVal objSearchResult As clsSearchResultsMODa,
-      ByVal chMostRecentResidue As Char,
-      ByVal intResidueLocInPeptide As Integer,
-      ByVal strModMassDigits As String,
-      ByVal blnUpdateModOccurrenceCounts As Boolean)
+      objSearchResult As clsSearchResultsMODa,
+      chMostRecentResidue As Char,
+      intResidueLocInPeptide As Integer,
+      strModMassDigits As String,
+      blnUpdateModOccurrenceCounts As Boolean)
 
         Dim blnSuccess As Boolean
 
@@ -426,9 +426,9 @@ Public Class clsMODaResultsProcessor
     ''' <param name="intEndIndex"></param>
     ''' <remarks></remarks>
     Private Sub AssignRankAndDeltaNormValues(
-      ByVal lstSearchResults As List(Of udtMODaSearchResultType),
-      ByVal intStartIndex As Integer,
-      ByVal intEndIndex As Integer)
+      lstSearchResults As List(Of udtMODaSearchResultType),
+      intStartIndex As Integer,
+      intEndIndex As Integer)
 
         ' Prior to September 2014 ranks were assign per charge state per scan; 
         ' Ranks are now assigned per scan (across all charge states)
@@ -464,7 +464,7 @@ Public Class clsMODaResultsProcessor
 
     End Sub
 
-    Protected Function AssureInteger(ByVal strInteger As String, ByVal intDefaultValue As Integer) As String
+    Protected Function AssureInteger(strInteger As String, intDefaultValue As Integer) As String
 
         Dim intValue As Integer
         Dim dblValue As Double
@@ -481,7 +481,7 @@ Public Class clsMODaResultsProcessor
 
     End Function
 
-    Protected Function ComputePeptideMass(ByVal strPeptide As String, ByVal dblTotalModMass As Double) As Double
+    Protected Function ComputePeptideMass(strPeptide As String, dblTotalModMass As Double) As Double
 
         Dim strCleanSequence = GetCleanSequence(strPeptide)
 
@@ -501,7 +501,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="strPeptide">Peptide sequence, with mod masses in the form +53.8 or -23</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function ComputeTotalModMass(ByVal strPeptide As String) As Double
+    Protected Function ComputeTotalModMass(strPeptide As String) As Double
 
         Static reModMassRegEx As New Regex(MODA_MOD_MASS_REGEX, REGEX_OPTIONS)
 
@@ -565,7 +565,7 @@ Public Class clsMODaResultsProcessor
 
     End Function
 
-    Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
+    Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
 
         Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
         If strPepToProteinMapFilePath.ToLower().EndsWith("_MODa_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_MODa_fht") Then
@@ -584,13 +584,11 @@ Public Class clsMODaResultsProcessor
     ''' </summary>
     ''' <param name="strInputFilePath"></param>
     ''' <param name="strOutputFilePath"></param>
-    ''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
     Protected Function CreateSynResultsFile(
       strInputFilePath As String,
-      strOutputFilePath As String,
-      Optional blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+      strOutputFilePath As String) As Boolean
 
         Try
             Dim intColumnMapping() As Integer = Nothing
@@ -701,7 +699,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="lstModInfo"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function ExtractModInfoFromMODaParamFile(ByVal strMODaParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
+    Protected Function ExtractModInfoFromMODaParamFile(strMODaParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
 
         Dim strLineIn As String
         Dim kvSetting As KeyValuePair(Of String, String)
@@ -799,7 +797,7 @@ Public Class clsMODaResultsProcessor
         mSpectrumIndexToScanMap = New Dictionary(Of Integer, Integer)
     End Sub
 
-    Protected Function LoadMGFIndexToScanMapFile(ByVal fiInputFile As FileInfo) As Boolean
+    Protected Function LoadMGFIndexToScanMapFile(fiInputFile As FileInfo) As Boolean
 
         Dim indexToScanMapFilePath As String = String.Empty
 
@@ -874,7 +872,7 @@ Public Class clsMODaResultsProcessor
 
     End Function
 
-    Protected Function LookupScanBySpectrumIndex(ByVal spectrumIndex As Integer) As Integer
+    Protected Function LookupScanBySpectrumIndex(spectrumIndex As Integer) As Integer
 
         Dim scanNumber As Integer
         If mSpectrumIndexToScanMap.TryGetValue(spectrumIndex, scanNumber) Then
@@ -885,10 +883,10 @@ Public Class clsMODaResultsProcessor
     End Function
 
     Protected Function ParseMODaSynopsisFile(
-      ByVal strInputFilePath As String,
-      ByVal strOutputFolderPath As String,
-      ByVal lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
-      ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
+      strInputFilePath As String,
+      strOutputFolderPath As String,
+      lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
+      blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
 
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -1074,10 +1072,10 @@ Public Class clsMODaResultsProcessor
     End Function
 
     Private Function ParseMODaResultsFileEntry(
-      ByVal strLineIn As String,
+      strLineIn As String,
       ByRef udtSearchResult As udtMODaSearchResultType,
       ByRef strErrorLog As String,
-      ByVal intColumnMapping() As Integer) As Boolean
+      intColumnMapping() As Integer) As Boolean
 
         ' Parses an entry from the MODa results file
 
@@ -1106,14 +1104,14 @@ Public Class clsMODaResultsProcessor
                     GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.SpectrumFileName), .SpectrumFileName)
 
                     If Not GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.SpectrumIndex), .SpectrumIndex) Then
-                        Throw New EvaluateException("Index column is missing or invalid")
+                        ReportError("Index column is missing or invalid", True)
                     Else
                         rowIndex = .SpectrumIndex
                     End If
 
                     Dim spectrumIndex As Integer
                     If Not Integer.TryParse(.SpectrumIndex, spectrumIndex) Then
-                        Throw New EvaluateException("Index column is not numeric")
+                        ReportError("Index column is not numeric", True)
                     End If
                     .ScanNum = LookupScanBySpectrumIndex(spectrumIndex)
                     If .ScanNum = 0 Then
@@ -1142,7 +1140,7 @@ Public Class clsMODaResultsProcessor
                     If Not Double.TryParse(.Probability, .ProbabilityNum) Then .ProbabilityNum = 0
 
                     If Not GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.Peptide), .Peptide) Then
-                        Throw New EvaluateException("Peptide column is missing or invalid")
+                        ReportError("Peptide column is missing or invalid", True)
                     End If
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMODaResultsFileColumns.Protein), .Protein)
@@ -1224,7 +1222,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="intColumnMapping"></param>
     ''' <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
     ''' <remarks></remarks>
-    Private Function ParseMODaResultsFileHeaderLine(ByVal strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMODaResultsFileHeaderLine(strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -1301,7 +1299,7 @@ Public Class clsMODaResultsProcessor
 
     End Function
 
-    Private Function ParseMODaSynFileHeaderLine(ByVal strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMODaSynFileHeaderLine(strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -1353,10 +1351,10 @@ Public Class clsMODaResultsProcessor
     End Function
 
     Private Function ParseMODaSynFileEntry(
-      ByVal strLineIn As String,
-      ByVal objSearchResult As clsSearchResultsMODa,
+      strLineIn As String,
+      objSearchResult As clsSearchResultsMODa,
       ByRef strErrorLog As String,
-      ByVal intResultsProcessed As Integer,
+      intResultsProcessed As Integer,
       ByRef intColumnMapping() As Integer,
       ByRef strPeptideSequenceWithMods As String) As Boolean
 
@@ -1469,7 +1467,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="strOutputFolderPath">Output folder</param>
     ''' <param name="strParameterFilePath">Parameter file</param>
     ''' <returns>True if success, False if failure</returns>
-    Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
+    Public Overloads Overrides Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
         Dim strBaseName As String = String.Empty
         Dim strSynOutputFilePath As String = String.Empty
@@ -1490,6 +1488,7 @@ Public Class clsMODaResultsProcessor
             If String.IsNullOrWhiteSpace(strInputFilePath) Then
                 SetErrorMessage("Input file name is empty")
                 SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
+                Return False
             End If
 
             blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
@@ -1535,6 +1534,7 @@ Public Class clsMODaResultsProcessor
                 Console.WriteLine()
                 Console.WriteLine(MyBase.ProgressStepDescription)
 
+                ' The synopsis file name will be of the form BasePath_moda_syn.txt
                 strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
                 blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath)
@@ -1654,8 +1654,8 @@ Public Class clsMODaResultsProcessor
     End Sub
 
     Private Sub SortAndWriteFilteredSearchResults(
-      ByVal swResultFile As StreamWriter,
-      ByVal lstFilteredSearchResults As List(Of udtMODaSearchResultType),
+      swResultFile As StreamWriter,
+      lstFilteredSearchResults As List(Of udtMODaSearchResultType),
       ByRef strErrorLog As String)
 
         Dim intIndex As Integer
@@ -1677,7 +1677,7 @@ Public Class clsMODaResultsProcessor
     ''' </summary>
     ''' <param name="lstSearchResults"></param>
     ''' <remarks>Assumes the data is sorted by descending probability using MODaSearchResultsComparerProbabilityScanChargePeptide</remarks>
-    Private Sub ComputeQValues(ByVal lstSearchResults As List(Of udtMODaSearchResultType))
+    Private Sub ComputeQValues(lstSearchResults As List(Of udtMODaSearchResultType))
 
         Dim forwardPeptideCount = 0
         Dim reversePeptideCount = 0
@@ -1750,10 +1750,10 @@ Public Class clsMODaResultsProcessor
     End Sub
 
     Private Sub StoreSynMatches(
-      ByVal lstSearchResults As List(Of udtMODaSearchResultType),
-      ByVal intStartIndex As Integer,
-      ByVal intEndIndex As Integer,
-      ByVal lstFilteredSearchResults As List(Of udtMODaSearchResultType))
+      lstSearchResults As List(Of udtMODaSearchResultType),
+      intStartIndex As Integer,
+      intEndIndex As Integer,
+      lstFilteredSearchResults As List(Of udtMODaSearchResultType))
 
         Dim intIndex As Integer
 
@@ -1771,7 +1771,7 @@ Public Class clsMODaResultsProcessor
     End Sub
 
     Private Sub WriteSynFHTFileHeader(
-      ByVal swResultFile As StreamWriter,
+      swResultFile As StreamWriter,
       ByRef strErrorLog As String)
 
         ' Write out the header line for synopsis / first hits files
@@ -1812,8 +1812,8 @@ Public Class clsMODaResultsProcessor
     ''' <param name="strErrorLog"></param>
     ''' <remarks></remarks>
     Private Sub WriteSearchResultToFile(
-      ByVal intResultID As Integer,
-       ByVal swResultFile As StreamWriter,
+      intResultID As Integer,
+       swResultFile As StreamWriter,
        ByRef udtSearchResult As udtMODaSearchResultType,
        ByRef strErrorLog As String)
 

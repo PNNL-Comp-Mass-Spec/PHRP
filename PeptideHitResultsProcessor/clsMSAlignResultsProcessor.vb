@@ -173,7 +173,7 @@ Public Class clsMSAlignResultsProcessor
 	''' <param name="objSearchResult"></param>
 	''' <param name="blnUpdateModOccurrenceCounts"></param>
 	''' <remarks></remarks>
-    Private Sub AddDynamicAndStaticResidueMods(ByVal objSearchResult As clsSearchResultsMSAlign, ByVal blnUpdateModOccurrenceCounts As Boolean)
+    Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMSAlign, blnUpdateModOccurrenceCounts As Boolean)
         Const NO_RESIDUE As Char = "-"c
 
         Dim intIndex As Integer, intModIndex As Integer
@@ -304,7 +304,7 @@ Public Class clsMSAlignResultsProcessor
         End With
     End Sub
 
-    Private Function AddModificationsAndComputeMass(ByVal objSearchResult As clsSearchResultsMSAlign, ByVal blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsMSAlign, blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
 
         Dim blnSuccess As Boolean
@@ -338,17 +338,17 @@ Public Class clsMSAlignResultsProcessor
 
     End Function
 
-	''' <summary>
-	''' Ranks each entry (assumes all of the data is from the same scan)
-	''' </summary>
-	''' <param name="lstSearchResults"></param>
-	''' <param name="intStartIndex"></param>
-	''' <param name="intEndIndex"></param>
-	''' <remarks></remarks>
+    ''' <summary>
+    ''' Ranks each entry (assumes all of the data is from the same scan)
+    ''' </summary>
+    ''' <param name="lstSearchResults"></param>
+    ''' <param name="intStartIndex"></param>
+    ''' <param name="intEndIndex"></param>
+    ''' <remarks></remarks>
     Private Sub AssignRankAndDeltaNormValues(
-      ByVal lstSearchResults As List(Of udtMSAlignSearchResultType),
-      ByVal intStartIndex As Integer,
-      ByVal intEndIndex As Integer)
+      lstSearchResults As List(Of udtMSAlignSearchResultType),
+      intStartIndex As Integer,
+      intEndIndex As Integer)
 
         ' Prior to September 2014 ranks were assign per charge state per scan; 
         ' Ranks are now assigned per scan (across all charge states)
@@ -384,108 +384,107 @@ Public Class clsMSAlignResultsProcessor
 
     End Sub
 
-	Protected Function AssureInteger(ByVal strInteger As String, ByVal intDefaultValue As Integer) As String
+    Protected Function AssureInteger(strInteger As String, intDefaultValue As Integer) As String
 
-		Dim intValue As Integer
-		Dim dblValue As Double
+        Dim intValue As Integer
+        Dim dblValue As Double
 
-		If strInteger.EndsWith(".0") Then strInteger = strInteger.Substring(0, strInteger.Length - 2)
+        If strInteger.EndsWith(".0") Then strInteger = strInteger.Substring(0, strInteger.Length - 2)
 
-		If Integer.TryParse(strInteger, intValue) Then
-			Return intValue.ToString()
-		ElseIf Double.TryParse(strInteger, dblValue) Then
-			Return dblValue.ToString("0")
-		Else
-			Return intDefaultValue.ToString()
-		End If
+        If Integer.TryParse(strInteger, intValue) Then
+            Return intValue.ToString()
+        ElseIf Double.TryParse(strInteger, dblValue) Then
+            Return dblValue.ToString("0")
+        Else
+            Return intDefaultValue.ToString()
+        End If
 
-	End Function
+    End Function
 
-	Protected Function ComputePeptideMass(ByVal strPeptide As String, ByVal dblTotalModMass As Double) As Double
+    Protected Function ComputePeptideMass(strPeptide As String, dblTotalModMass As Double) As Double
 
-		Dim strCleanSequence As String
-		Dim dblMass As Double
+        Dim strCleanSequence As String
+        Dim dblMass As Double
 
-		strCleanSequence = GetCleanSequence(strPeptide)
+        strCleanSequence = GetCleanSequence(strPeptide)
 
-		dblMass = mPeptideSeqMassCalculator.ComputeSequenceMass(strCleanSequence)
+        dblMass = mPeptideSeqMassCalculator.ComputeSequenceMass(strCleanSequence)
 
-		If Math.Abs(dblTotalModMass) > Double.Epsilon Then
-			dblMass += dblTotalModMass
-		End If
+        If Math.Abs(dblTotalModMass) > Double.Epsilon Then
+            dblMass += dblTotalModMass
+        End If
 
-		Return dblMass
+        Return dblMass
 
-	End Function
+    End Function
 
-	''' <summary>
-	''' Computes the total of all modification masses defined for the peptide
-	''' </summary>
-	''' <param name="strPeptide">Peptide sequence, with mod masses in the form [23.5432]</param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Function ComputeTotalModMass(ByVal strPeptide As String) As Double
+    ''' <summary>
+    ''' Computes the total of all modification masses defined for the peptide
+    ''' </summary>
+    ''' <param name="strPeptide">Peptide sequence, with mod masses in the form [23.5432]</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function ComputeTotalModMass(strPeptide As String) As Double
 
-		Static reModMassRegEx As New Regex(MSALIGN_MOD_MASS_REGEX, REGEX_OPTIONS)
+        Static reModMassRegEx As New Regex(MSALIGN_MOD_MASS_REGEX, REGEX_OPTIONS)
 
-		Dim dblTotalModMass As Double
-		Dim dblModMassFound As Double
+        Dim dblTotalModMass As Double
+        Dim dblModMassFound As Double
 
-		dblTotalModMass = 0
+        dblTotalModMass = 0
 
-		For Each reMatch As Match In reModMassRegEx.Matches(strPeptide)
-			If Double.TryParse(reMatch.Groups(1).Value, dblModMassFound) Then
-				dblTotalModMass += dblModMassFound
-			End If
-		Next
+        For Each reMatch As Match In reModMassRegEx.Matches(strPeptide)
+            If Double.TryParse(reMatch.Groups(1).Value, dblModMassFound) Then
+                dblTotalModMass += dblModMassFound
+            End If
+        Next
 
-		Return dblTotalModMass
+        Return dblTotalModMass
 
-	End Function
+    End Function
 
-	Protected Overrides Function ConstructPepToProteinMapFilePath(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal MTS As Boolean) As String
-		Dim strPepToProteinMapFilePath As String = String.Empty
+    Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
+        Dim strPepToProteinMapFilePath As String = String.Empty
 
-		strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-		If strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_fht") Then
-			' Remove _syn or _fht
-			strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
-		End If
+        strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+        If strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_fht") Then
+            ' Remove _syn or _fht
+            strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
+        End If
 
-		Return MyBase.ConstructPepToProteinMapFilePath(strPepToProteinMapFilePath, strOutputFolderPath, MTS)
+        Return MyBase.ConstructPepToProteinMapFilePath(strPepToProteinMapFilePath, strOutputFolderPath, MTS)
 
-	End Function
+    End Function
 
-	''' <summary>
-	''' This routine creates a first hits file or synopsis file from the output from MSAlign
-	''' The synopsis file includes every result with a p-value below a set threshold or a SpecProb below a certain threshold
-	''' The first-hits file includes the results with the lowest SpecProb (for each scan and charge)
-	''' </summary>
-	''' <param name="strInputFilePath"></param>
-	''' <param name="strOutputFilePath"></param>
-	''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Protected Function CreateSynResultsFile(ByVal strInputFilePath As String, _
-	   ByVal strOutputFilePath As String, _
-	   Optional ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean = True) As Boolean
+    ''' <summary>
+    ''' This routine creates a first hits file or synopsis file from the output from MSAlign
+    ''' The synopsis file includes every result with a p-value below a set threshold or a SpecProb below a certain threshold
+    ''' The first-hits file includes the results with the lowest SpecProb (for each scan and charge)
+    ''' </summary>
+    ''' <param name="strInputFilePath"></param>
+    ''' <param name="strOutputFilePath"></param>
+    ''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function CreateSynResultsFile(strInputFilePath As String, _
+       strOutputFilePath As String) As Boolean
 
-		Dim strLineIn As String
+        Dim strLineIn As String
 
-		Dim sngPercentComplete As Single
+        Dim sngPercentComplete As Single
 
-		Dim blnHeaderParsed As Boolean
+        Dim blnHeaderParsed As Boolean
 
-		Dim intColumnMapping() As Integer = Nothing
+        Dim intColumnMapping() As Integer = Nothing
 
-		Dim intResultsProcessed As Integer
+        Dim intResultsProcessed As Integer
 
-		Dim blnSuccess As Boolean
-		Dim blnValidSearchResult As Boolean
+        Dim blnSuccess As Boolean
+        Dim blnValidSearchResult As Boolean
 
-		Dim strErrorLog As String = String.Empty
+        Dim strErrorLog As String = String.Empty
 
-		Try
+        Try
 
             ' Open the input file and parse it
             ' Initialize the stream reader and the stream Text writer
@@ -583,7 +582,7 @@ Public Class clsMSAlignResultsProcessor
 
     End Function
 
-    Protected Function ExtractModInfoFromMSAlignParamFile(ByVal strMSAlignParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
+    Protected Function ExtractModInfoFromMSAlignParamFile(strMSAlignParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
 
         Dim strLineIn As String
         Dim kvSetting As KeyValuePair(Of String, String)
@@ -664,7 +663,7 @@ Public Class clsMSAlignResultsProcessor
     End Sub
 
 
-    Protected Function ParseMSAlignSynopsisFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), ByVal blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
+    Protected Function ParseMSAlignSynopsisFile(strInputFilePath As String, strOutputFolderPath As String, ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
         Dim strPreviousPValue As String
@@ -867,319 +866,319 @@ Public Class clsMSAlignResultsProcessor
 
     End Function
 
-	Private Function ParseMSAlignResultsFileEntry(ByRef strLineIn As String, _
-	   ByRef udtSearchResult As udtMSAlignSearchResultType, _
-	   ByRef strErrorLog As String, _
-	   ByRef intColumnMapping() As Integer) As Boolean
-
-		' Parses an entry from the MSAlign results file
-
-		Dim strSplitLine() As String = Nothing
-
-		Dim dblPrecursorMonoMass As Double				' Observed m/z, converted to monoisotopic mass
-		Dim dblPeptideMonoMassMSAlign As Double		' Theoretical peptide monoisotopic mass, including mods, as computed by MSAlign
-		Dim dblPeptideMonoMassPHRP As Double		' Theoretical peptide monoisotopic mass, including mods, as computed by PHRP
-
-		Dim dblPrecursorMZ As Double
-		Dim dblDelM As Double
-		Dim dblFDR As Double
-
-		Dim dblTotalModMass As Double
-
-		Dim blnValidSearchResult As Boolean
-
-		Try
-			' Set this to False for now
-			blnValidSearchResult = False
-
-			udtSearchResult.Clear()
-			strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
-
-			If strSplitLine.Length >= 13 Then
-
-				With udtSearchResult
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Data_file_name), .Data_file_name)
-					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Prsm_ID), .Prsm_ID) Then
-						Throw New EvaluateException("Prsm_ID column is missing or invalid")
-					End If
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Spectrum_ID), .Spectrum_ID)
-
-					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Scans), .Scans) Then
-						Throw New EvaluateException("Scan(s) column is missing or invalid")
-					End If
-
-					If Not Integer.TryParse(.Scans, .ScanNum) Then
-						' .Scans likely has a list of scan numbers; extract the first scan number from .scans
-						Dim strScanNumberDigits As String = String.Empty
-						For Each chChar As Char In .Scans
-							If Char.IsDigit(chChar) Then
-								strScanNumberDigits &= chChar
-							End If
-						Next
-						If Not Integer.TryParse(strScanNumberDigits, .ScanNum) Then
-							ReportWarning("Error parsing out the scan number from the scan list; could not find an integer: " & .Scans)
-							.ScanNum = 0
-						End If
-					End If
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Peaks), .Peaks)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Charge), .Charge)
-					.ChargeNum = CShort(CIntSafe(.Charge, 0))
-
-					' Monoisotopic mass value of the observed precursor_mz
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Precursor_mass), .Precursor_mass)
-
-					If Double.TryParse(.Precursor_mass, dblPrecursorMonoMass) Then
-						If .ChargeNum > 0 Then
-							dblPrecursorMZ = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMonoMass, 0, .ChargeNum)
-							.PrecursorMZ = NumToString(dblPrecursorMZ, 6, True)
-						End If
-					End If
-
-					If intColumnMapping(eMSAlignResultsFileColumns.Adjusted_precursor_mass) >= 0 Then
-						' Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
-						GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Adjusted_precursor_mass), .Adjusted_precursor_mass)
-
-						Double.TryParse(.Adjusted_precursor_mass, dblPeptideMonoMassMSAlign)
-					Else
-						dblPeptideMonoMassMSAlign = 0
-					End If
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_ID), .Protein_ID)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Species_ID), .Species_ID)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_name), .Protein)
-					.Protein = TruncateProteinName(.Protein)
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_mass), .Protein_mass)
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.First_residue), .First_residue)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Last_residue), .Last_residue)
-
-					If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Peptide), .Peptide) Then
-						Throw New EvaluateException("Peptide column is missing or invalid")
-					End If
-
-					' Add the standard terminus symbols to the peptide sequence
-					.Peptide = ReplaceTerminus(.Peptide)
-
-					' Parse the sequence to determine the total mod mass
-					' Note that we do not remove any of the mod symbols since MSAlign identifies mods by mass alone, and since mods can ambiguously apply to residues
-					dblTotalModMass = ComputeTotalModMass(.Peptide)
-
-					' Compute monoisotopic mass of the peptide
-					dblPeptideMonoMassPHRP = ComputePeptideMass(.Peptide, dblTotalModMass)
+    Private Function ParseMSAlignResultsFileEntry(ByRef strLineIn As String, _
+       ByRef udtSearchResult As udtMSAlignSearchResultType, _
+       ByRef strErrorLog As String, _
+       ByRef intColumnMapping() As Integer) As Boolean
+
+        ' Parses an entry from the MSAlign results file
+
+        Dim strSplitLine() As String = Nothing
+
+        Dim dblPrecursorMonoMass As Double              ' Observed m/z, converted to monoisotopic mass
+        Dim dblPeptideMonoMassMSAlign As Double     ' Theoretical peptide monoisotopic mass, including mods, as computed by MSAlign
+        Dim dblPeptideMonoMassPHRP As Double        ' Theoretical peptide monoisotopic mass, including mods, as computed by PHRP
+
+        Dim dblPrecursorMZ As Double
+        Dim dblDelM As Double
+        Dim dblFDR As Double
+
+        Dim dblTotalModMass As Double
+
+        Dim blnValidSearchResult As Boolean
+
+        Try
+            ' Set this to False for now
+            blnValidSearchResult = False
+
+            udtSearchResult.Clear()
+            strSplitLine = strLineIn.Trim.Split(ControlChars.Tab)
+
+            If strSplitLine.Length >= 13 Then
+
+                With udtSearchResult
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Data_file_name), .Data_file_name)
+                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Prsm_ID), .Prsm_ID) Then
+                        ReportError("Prsm_ID column is missing or invalid", True)
+                    End If
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Spectrum_ID), .Spectrum_ID)
+
+                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Scans), .Scans) Then
+                        ReportError("Scan(s) column is missing or invalid", True)
+                    End If
+
+                    If Not Integer.TryParse(.Scans, .ScanNum) Then
+                        ' .Scans likely has a list of scan numbers; extract the first scan number from .scans
+                        Dim strScanNumberDigits As String = String.Empty
+                        For Each chChar As Char In .Scans
+                            If Char.IsDigit(chChar) Then
+                                strScanNumberDigits &= chChar
+                            End If
+                        Next
+                        If Not Integer.TryParse(strScanNumberDigits, .ScanNum) Then
+                            ReportWarning("Error parsing out the scan number from the scan list; could not find an integer: " & .Scans)
+                            .ScanNum = 0
+                        End If
+                    End If
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Peaks), .Peaks)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Charge), .Charge)
+                    .ChargeNum = CShort(CIntSafe(.Charge, 0))
+
+                    ' Monoisotopic mass value of the observed precursor_mz
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Precursor_mass), .Precursor_mass)
+
+                    If Double.TryParse(.Precursor_mass, dblPrecursorMonoMass) Then
+                        If .ChargeNum > 0 Then
+                            dblPrecursorMZ = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMonoMass, 0, .ChargeNum)
+                            .PrecursorMZ = NumToString(dblPrecursorMZ, 6, True)
+                        End If
+                    End If
+
+                    If intColumnMapping(eMSAlignResultsFileColumns.Adjusted_precursor_mass) >= 0 Then
+                        ' Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Adjusted_precursor_mass), .Adjusted_precursor_mass)
+
+                        Double.TryParse(.Adjusted_precursor_mass, dblPeptideMonoMassMSAlign)
+                    Else
+                        dblPeptideMonoMassMSAlign = 0
+                    End If
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_ID), .Protein_ID)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Species_ID), .Species_ID)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_name), .Protein)
+                    .Protein = TruncateProteinName(.Protein)
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Protein_mass), .Protein_mass)
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.First_residue), .First_residue)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Last_residue), .Last_residue)
+
+                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Peptide), .Peptide) Then
+                        ReportError("Peptide column is missing or invalid", True)
+                    End If
+
+                    ' Add the standard terminus symbols to the peptide sequence
+                    .Peptide = ReplaceTerminus(.Peptide)
+
+                    ' Parse the sequence to determine the total mod mass
+                    ' Note that we do not remove any of the mod symbols since MSAlign identifies mods by mass alone, and since mods can ambiguously apply to residues
+                    dblTotalModMass = ComputeTotalModMass(.Peptide)
+
+                    ' Compute monoisotopic mass of the peptide
+                    dblPeptideMonoMassPHRP = ComputePeptideMass(.Peptide, dblTotalModMass)
 
-					If Math.Abs(dblPeptideMonoMassMSAlign) < Double.Epsilon Then
-						dblPeptideMonoMassMSAlign = dblPeptideMonoMassPHRP
-					End If
-
-					Dim dblMassDiffThreshold As Double = dblPeptideMonoMassMSAlign / 50000
-					If dblMassDiffThreshold < 0.1 Then dblMassDiffThreshold = 0.1
-
-					If Math.Abs(dblPeptideMonoMassPHRP - dblPeptideMonoMassMSAlign) > dblMassDiffThreshold Then
-						' Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
-						Dim strFirst30Residues As String
-						If .Peptide.Length < 27 Then
-							strFirst30Residues = .Peptide
-						Else
-							strFirst30Residues = .Peptide.Substring(0, 27) & "..."
-						End If
-						ReportWarning("The monoisotopic mass computed by PHRP is more than " & dblMassDiffThreshold.ToString("0.00") & " Da away from the mass computed by MSAlign: " & dblPeptideMonoMassPHRP.ToString("0.0000") & " vs. " & dblPeptideMonoMassMSAlign.ToString("0.0000") & "; peptide " & strFirst30Residues)
-					End If
-
-					If dblPeptideMonoMassMSAlign > 0 Then
-						' Compute DelM and DelM_PPM
-						dblDelM = dblPrecursorMonoMass - dblPeptideMonoMassMSAlign
-						.DelM = NumToString(dblDelM, 6, True)
-
-						If dblPrecursorMZ > 0 Then
-							.DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, dblPrecursorMZ), 5, True)
-						Else
-							.DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, 1000), 5, True)
-						End If
-					End If
-
-					' Store the monoisotopic MH value in .MH; note that this is (M+H)+
-					.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoMassPHRP, 0, 1), 6, True)
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Unexpected_modifications), .Unexpected_modifications)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Matched_peaks), .Matched_peaks)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Matched_fragment_ions), .Matched_fragment_ions)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Pvalue), .Pvalue)
-					If Not Double.TryParse(.Pvalue, .PValueNum) Then .PValueNum = 0
-
-					' Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
-					.Unexpected_modifications = AssureInteger(.Unexpected_modifications, 0)	' Unexpected_Mod_Count
-					.Peaks = AssureInteger(.Peaks, 0)										' Peak_count
-					.Matched_peaks = AssureInteger(.Matched_peaks, 0)						' Matched_Peak_Count
-					.Matched_fragment_ions = AssureInteger(.Matched_fragment_ions, 0)		' Matched_Fragment_Ion_Count
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Evalue), .Evalue)
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.FDR), .FDR)
-
-					If .FDR.ToLower() = "infinity" Then
-						.FDR = "10"
-					ElseIf Not String.IsNullOrEmpty(.FDR) And Not Double.TryParse(.FDR, dblFDR) Then
-						.FDR = ""
-					End If
-
-					GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.FragMethod), .FragMethod)
-
-				End With
-
-				blnValidSearchResult = True
-			End If
-
-		Catch ex As Exception
-			' Error parsing this row from the MSAlign results file
-			If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-				If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
-					strErrorLog &= "Error parsing MSAlign Results in ParseMSAlignResultsFileEntry for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
-				Else
-					strErrorLog &= "Error parsing MSAlign Results in ParseMSAlignResultsFileEntry" & ControlChars.NewLine
-				End If
-			End If
-			blnValidSearchResult = False
-		End Try
-
-		Return blnValidSearchResult
-
-	End Function
-
-	Private Function ParseMSAlignResultsFileHeaderLine(ByVal strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
-
-		' Parse the header line
-
-		' The expected header from MSAlign v0.5 is:
-		'                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                                           Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
-
-		' The expected header from MSAlign v0.6 is:
-		' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID                  Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR
-
-		' The expected header from MSAlign_Histone v0.9 is
-		' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Species_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR    FragMethod
-
-
-
-		Dim strSplitLine() As String
-		Dim eResultFileColumn As eMSAlignResultsFileColumns
-		Dim lstColumnNames As SortedDictionary(Of String, eMSAlignResultsFileColumns)
-		lstColumnNames = New SortedDictionary(Of String, eMSAlignResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
-
-		ReDim intColumnMapping(MSAlignResultsFileColCount - 1)
-
-		lstColumnNames.Add("Data_file_name", eMSAlignResultsFileColumns.Data_file_name)
-		lstColumnNames.Add("Prsm_ID", eMSAlignResultsFileColumns.Prsm_ID)
-		lstColumnNames.Add("Spectrum_ID", eMSAlignResultsFileColumns.Spectrum_ID)
-		lstColumnNames.Add("Protein_Sequence_ID", eMSAlignResultsFileColumns.Protein_Sequence_ID)
-		lstColumnNames.Add("Scan(s)", eMSAlignResultsFileColumns.Scans)
-		lstColumnNames.Add("#peaks", eMSAlignResultsFileColumns.Peaks)
-		lstColumnNames.Add("Charge", eMSAlignResultsFileColumns.Charge)
-		lstColumnNames.Add("Precursor_mass", eMSAlignResultsFileColumns.Precursor_mass)
-		lstColumnNames.Add("Adjusted_precursor_mass", eMSAlignResultsFileColumns.Adjusted_precursor_mass)
-		lstColumnNames.Add("Protein_ID", eMSAlignResultsFileColumns.Protein_ID)
-		lstColumnNames.Add("Species_ID", eMSAlignResultsFileColumns.Species_ID)
-		lstColumnNames.Add("Protein_name", eMSAlignResultsFileColumns.Protein_name)
-		lstColumnNames.Add("Protein_mass", eMSAlignResultsFileColumns.Protein_mass)
-		lstColumnNames.Add("First_residue", eMSAlignResultsFileColumns.First_residue)
-		lstColumnNames.Add("Last_residue", eMSAlignResultsFileColumns.Last_residue)
-		lstColumnNames.Add("Peptide", eMSAlignResultsFileColumns.Peptide)
-		lstColumnNames.Add("#unexpected_modifications", eMSAlignResultsFileColumns.Unexpected_modifications)
-		lstColumnNames.Add("#matched_peaks", eMSAlignResultsFileColumns.Matched_peaks)
-		lstColumnNames.Add("#matched_fragment_ions", eMSAlignResultsFileColumns.Matched_fragment_ions)
-		lstColumnNames.Add("P-value", eMSAlignResultsFileColumns.Pvalue)
-		lstColumnNames.Add("E-value", eMSAlignResultsFileColumns.Evalue)
-		lstColumnNames.Add("FDR", eMSAlignResultsFileColumns.FDR)
-		lstColumnNames.Add("FragMethod", eMSAlignResultsFileColumns.FragMethod)
-
-		Try
-			' Initialize each entry in intColumnMapping to -1
-			For intIndex As Integer = 0 To intColumnMapping.Length - 1
-				intColumnMapping(intIndex) = -1
-			Next
-
-			strSplitLine = strLineIn.Split(ControlChars.Tab)
-			For intIndex As Integer = 0 To strSplitLine.Length - 1
-				If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
-					' Recognized column name; update intColumnMapping
-					intColumnMapping(eResultFileColumn) = intIndex
-				Else
-					' Unrecognized column name
-					Console.WriteLine("Warning: Unrecognized column header name '" & strSplitLine(intIndex) & "' in ParseMSAlignResultsFileHeaderLine")
-				End If
-			Next
-
-		Catch ex As Exception
-			SetErrorMessage("Error parsing header in MSAlign results file: " & ex.Message)
-			Return False
-		End Try
-
-		Return True
-
-	End Function
-
-	Private Function ParseMSAlignSynFileHeaderLine(ByVal strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
-
-		' Parse the header line
-
-		Dim strSplitLine() As String
-		Dim eResultFileColumn As eMSAlignSynFileColumns
-		Dim lstColumnNames As SortedDictionary(Of String, eMSAlignSynFileColumns)
-		lstColumnNames = New SortedDictionary(Of String, eMSAlignSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
-
-		ReDim intColumnMapping(MSAlignSynFileColCount - 1)
-
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_ResultID, eMSAlignSynFileColumns.ResultID)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Scan, eMSAlignSynFileColumns.Scan)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Prsm_ID, eMSAlignSynFileColumns.Prsm_ID)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Spectrum_ID, eMSAlignSynFileColumns.Spectrum_ID)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Charge, eMSAlignSynFileColumns.Charge)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_PrecursorMZ, eMSAlignSynFileColumns.PrecursorMZ)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_DelM, eMSAlignSynFileColumns.DelM)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_DelM_PPM, eMSAlignSynFileColumns.DelMPPM)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_MH, eMSAlignSynFileColumns.MH)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Peptide, eMSAlignSynFileColumns.Peptide)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Protein, eMSAlignSynFileColumns.Protein)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Protein_Mass, eMSAlignSynFileColumns.Protein_Mass)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Unexpected_Mod_Count, eMSAlignSynFileColumns.Unexpected_Mod_Count)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Peak_Count, eMSAlignSynFileColumns.Peak_Count)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Matched_Peak_Count, eMSAlignSynFileColumns.Matched_Peak_Count)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Matched_Fragment_Ion_Count, eMSAlignSynFileColumns.Matched_Fragment_Ion_Count)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_PValue, eMSAlignSynFileColumns.PValue)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue, eMSAlignSynFileColumns.Rank_PValue)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_EValue, eMSAlignSynFileColumns.EValue)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FDR, eMSAlignSynFileColumns.FDR)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Species_ID, eMSAlignSynFileColumns.Species_ID)
-		lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FragMethod, eMSAlignSynFileColumns.FragMethod)
-
-		Try
-			' Initialize each entry in intColumnMapping to -1
-			For intIndex As Integer = 0 To intColumnMapping.Length - 1
-				intColumnMapping(intIndex) = -1
-			Next
-
-			strSplitLine = strLineIn.Split(ControlChars.Tab)
-			For intIndex As Integer = 0 To strSplitLine.Length - 1
-				If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
-					' Recognized column name; update intColumnMapping
-					intColumnMapping(eResultFileColumn) = intIndex
-				End If
-
-			Next
-
-		Catch ex As Exception
-			SetErrorMessage("Error parsing header in MSAlign synopsis file: " & ex.Message)
-			Return False
-		End Try
-
-		Return True
-
-	End Function
+                    If Math.Abs(dblPeptideMonoMassMSAlign) < Double.Epsilon Then
+                        dblPeptideMonoMassMSAlign = dblPeptideMonoMassPHRP
+                    End If
+
+                    Dim dblMassDiffThreshold As Double = dblPeptideMonoMassMSAlign / 50000
+                    If dblMassDiffThreshold < 0.1 Then dblMassDiffThreshold = 0.1
+
+                    If Math.Abs(dblPeptideMonoMassPHRP - dblPeptideMonoMassMSAlign) > dblMassDiffThreshold Then
+                        ' Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
+                        Dim strFirst30Residues As String
+                        If .Peptide.Length < 27 Then
+                            strFirst30Residues = .Peptide
+                        Else
+                            strFirst30Residues = .Peptide.Substring(0, 27) & "..."
+                        End If
+                        ReportWarning("The monoisotopic mass computed by PHRP is more than " & dblMassDiffThreshold.ToString("0.00") & " Da away from the mass computed by MSAlign: " & dblPeptideMonoMassPHRP.ToString("0.0000") & " vs. " & dblPeptideMonoMassMSAlign.ToString("0.0000") & "; peptide " & strFirst30Residues)
+                    End If
+
+                    If dblPeptideMonoMassMSAlign > 0 Then
+                        ' Compute DelM and DelM_PPM
+                        dblDelM = dblPrecursorMonoMass - dblPeptideMonoMassMSAlign
+                        .DelM = NumToString(dblDelM, 6, True)
+
+                        If dblPrecursorMZ > 0 Then
+                            .DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, dblPrecursorMZ), 5, True)
+                        Else
+                            .DelM_PPM = NumToString(clsPeptideMassCalculator.MassToPPM(dblDelM, 1000), 5, True)
+                        End If
+                    End If
+
+                    ' Store the monoisotopic MH value in .MH; note that this is (M+H)+
+                    .MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoMassPHRP, 0, 1), 6, True)
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Unexpected_modifications), .Unexpected_modifications)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Matched_peaks), .Matched_peaks)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Matched_fragment_ions), .Matched_fragment_ions)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Pvalue), .Pvalue)
+                    If Not Double.TryParse(.Pvalue, .PValueNum) Then .PValueNum = 0
+
+                    ' Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
+                    .Unexpected_modifications = AssureInteger(.Unexpected_modifications, 0) ' Unexpected_Mod_Count
+                    .Peaks = AssureInteger(.Peaks, 0)                                       ' Peak_count
+                    .Matched_peaks = AssureInteger(.Matched_peaks, 0)                       ' Matched_Peak_Count
+                    .Matched_fragment_ions = AssureInteger(.Matched_fragment_ions, 0)       ' Matched_Fragment_Ion_Count
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Evalue), .Evalue)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.FDR), .FDR)
+
+                    If .FDR.ToLower() = "infinity" Then
+                        .FDR = "10"
+                    ElseIf Not String.IsNullOrEmpty(.FDR) And Not Double.TryParse(.FDR, dblFDR) Then
+                        .FDR = ""
+                    End If
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.FragMethod), .FragMethod)
+
+                End With
+
+                blnValidSearchResult = True
+            End If
+
+        Catch ex As Exception
+            ' Error parsing this row from the MSAlign results file
+            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
+                    strErrorLog &= "Error parsing MSAlign Results in ParseMSAlignResultsFileEntry for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+                Else
+                    strErrorLog &= "Error parsing MSAlign Results in ParseMSAlignResultsFileEntry" & ControlChars.NewLine
+                End If
+            End If
+            blnValidSearchResult = False
+        End Try
+
+        Return blnValidSearchResult
+
+    End Function
+
+    Private Function ParseMSAlignResultsFileHeaderLine(strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
+
+        ' Parse the header line
+
+        ' The expected header from MSAlign v0.5 is:
+        '                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                                           Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
+
+        ' The expected header from MSAlign v0.6 is:
+        ' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID                  Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR
+
+        ' The expected header from MSAlign_Histone v0.9 is
+        ' Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Species_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR    FragMethod
+
+
+
+        Dim strSplitLine() As String
+        Dim eResultFileColumn As eMSAlignResultsFileColumns
+        Dim lstColumnNames As SortedDictionary(Of String, eMSAlignResultsFileColumns)
+        lstColumnNames = New SortedDictionary(Of String, eMSAlignResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+
+        ReDim intColumnMapping(MSAlignResultsFileColCount - 1)
+
+        lstColumnNames.Add("Data_file_name", eMSAlignResultsFileColumns.Data_file_name)
+        lstColumnNames.Add("Prsm_ID", eMSAlignResultsFileColumns.Prsm_ID)
+        lstColumnNames.Add("Spectrum_ID", eMSAlignResultsFileColumns.Spectrum_ID)
+        lstColumnNames.Add("Protein_Sequence_ID", eMSAlignResultsFileColumns.Protein_Sequence_ID)
+        lstColumnNames.Add("Scan(s)", eMSAlignResultsFileColumns.Scans)
+        lstColumnNames.Add("#peaks", eMSAlignResultsFileColumns.Peaks)
+        lstColumnNames.Add("Charge", eMSAlignResultsFileColumns.Charge)
+        lstColumnNames.Add("Precursor_mass", eMSAlignResultsFileColumns.Precursor_mass)
+        lstColumnNames.Add("Adjusted_precursor_mass", eMSAlignResultsFileColumns.Adjusted_precursor_mass)
+        lstColumnNames.Add("Protein_ID", eMSAlignResultsFileColumns.Protein_ID)
+        lstColumnNames.Add("Species_ID", eMSAlignResultsFileColumns.Species_ID)
+        lstColumnNames.Add("Protein_name", eMSAlignResultsFileColumns.Protein_name)
+        lstColumnNames.Add("Protein_mass", eMSAlignResultsFileColumns.Protein_mass)
+        lstColumnNames.Add("First_residue", eMSAlignResultsFileColumns.First_residue)
+        lstColumnNames.Add("Last_residue", eMSAlignResultsFileColumns.Last_residue)
+        lstColumnNames.Add("Peptide", eMSAlignResultsFileColumns.Peptide)
+        lstColumnNames.Add("#unexpected_modifications", eMSAlignResultsFileColumns.Unexpected_modifications)
+        lstColumnNames.Add("#matched_peaks", eMSAlignResultsFileColumns.Matched_peaks)
+        lstColumnNames.Add("#matched_fragment_ions", eMSAlignResultsFileColumns.Matched_fragment_ions)
+        lstColumnNames.Add("P-value", eMSAlignResultsFileColumns.Pvalue)
+        lstColumnNames.Add("E-value", eMSAlignResultsFileColumns.Evalue)
+        lstColumnNames.Add("FDR", eMSAlignResultsFileColumns.FDR)
+        lstColumnNames.Add("FragMethod", eMSAlignResultsFileColumns.FragMethod)
+
+        Try
+            ' Initialize each entry in intColumnMapping to -1
+            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+                intColumnMapping(intIndex) = -1
+            Next
+
+            strSplitLine = strLineIn.Split(ControlChars.Tab)
+            For intIndex As Integer = 0 To strSplitLine.Length - 1
+                If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
+                    ' Recognized column name; update intColumnMapping
+                    intColumnMapping(eResultFileColumn) = intIndex
+                Else
+                    ' Unrecognized column name
+                    Console.WriteLine("Warning: Unrecognized column header name '" & strSplitLine(intIndex) & "' in ParseMSAlignResultsFileHeaderLine")
+                End If
+            Next
+
+        Catch ex As Exception
+            SetErrorMessage("Error parsing header in MSAlign results file: " & ex.Message)
+            Return False
+        End Try
+
+        Return True
+
+    End Function
+
+    Private Function ParseMSAlignSynFileHeaderLine(strLineIn As String, ByRef intColumnMapping() As Integer) As Boolean
+
+        ' Parse the header line
+
+        Dim strSplitLine() As String
+        Dim eResultFileColumn As eMSAlignSynFileColumns
+        Dim lstColumnNames As SortedDictionary(Of String, eMSAlignSynFileColumns)
+        lstColumnNames = New SortedDictionary(Of String, eMSAlignSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+
+        ReDim intColumnMapping(MSAlignSynFileColCount - 1)
+
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_ResultID, eMSAlignSynFileColumns.ResultID)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Scan, eMSAlignSynFileColumns.Scan)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Prsm_ID, eMSAlignSynFileColumns.Prsm_ID)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Spectrum_ID, eMSAlignSynFileColumns.Spectrum_ID)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Charge, eMSAlignSynFileColumns.Charge)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_PrecursorMZ, eMSAlignSynFileColumns.PrecursorMZ)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_DelM, eMSAlignSynFileColumns.DelM)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_DelM_PPM, eMSAlignSynFileColumns.DelMPPM)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_MH, eMSAlignSynFileColumns.MH)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Peptide, eMSAlignSynFileColumns.Peptide)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Protein, eMSAlignSynFileColumns.Protein)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Protein_Mass, eMSAlignSynFileColumns.Protein_Mass)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Unexpected_Mod_Count, eMSAlignSynFileColumns.Unexpected_Mod_Count)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Peak_Count, eMSAlignSynFileColumns.Peak_Count)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Matched_Peak_Count, eMSAlignSynFileColumns.Matched_Peak_Count)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Matched_Fragment_Ion_Count, eMSAlignSynFileColumns.Matched_Fragment_Ion_Count)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_PValue, eMSAlignSynFileColumns.PValue)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue, eMSAlignSynFileColumns.Rank_PValue)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_EValue, eMSAlignSynFileColumns.EValue)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FDR, eMSAlignSynFileColumns.FDR)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Species_ID, eMSAlignSynFileColumns.Species_ID)
+        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FragMethod, eMSAlignSynFileColumns.FragMethod)
+
+        Try
+            ' Initialize each entry in intColumnMapping to -1
+            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+                intColumnMapping(intIndex) = -1
+            Next
+
+            strSplitLine = strLineIn.Split(ControlChars.Tab)
+            For intIndex As Integer = 0 To strSplitLine.Length - 1
+                If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
+                    ' Recognized column name; update intColumnMapping
+                    intColumnMapping(eResultFileColumn) = intIndex
+                End If
+
+            Next
+
+        Catch ex As Exception
+            SetErrorMessage("Error parsing header in MSAlign synopsis file: " & ex.Message)
+            Return False
+        End Try
+
+        Return True
+
+    End Function
 
     Private Function ParseMSAlignSynFileEntry(ByRef strLineIn As String, _
-      ByVal objSearchResult As clsSearchResultsMSAlign, _
+      objSearchResult As clsSearchResultsMSAlign, _
       ByRef strErrorLog As String, _
-      ByVal intResultsProcessed As Integer, _
+      intResultsProcessed As Integer, _
       ByRef intColumnMapping() As Integer, _
       ByRef strPeptideSequenceWithMods As String) As Boolean
 
@@ -1297,88 +1296,90 @@ Public Class clsMSAlignResultsProcessor
 
     End Function
 
-	''' <summary>
-	''' Main processing function
-	''' </summary>
-	''' <param name="strInputFilePath">MSAlign results file</param>
-	''' <param name="strOutputFolderPath">Output folder</param>
-	''' <param name="strParameterFilePath">Parameter file</param>
-	''' <returns>True if success, False if failure</returns>
-	Public Overloads Overrides Function ProcessFile(ByVal strInputFilePath As String, ByVal strOutputFolderPath As String, ByVal strParameterFilePath As String) As Boolean
+    ''' <summary>
+    ''' Main processing function
+    ''' </summary>
+    ''' <param name="strInputFilePath">MSAlign results file</param>
+    ''' <param name="strOutputFolderPath">Output folder</param>
+    ''' <param name="strParameterFilePath">Parameter file</param>
+    ''' <returns>True if success, False if failure</returns>
+    Public Overloads Overrides Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
-		Dim strBaseName As String = String.Empty
-		Dim strSynOutputFilePath As String = String.Empty
+        Dim strBaseName As String = String.Empty
+        Dim strSynOutputFilePath As String = String.Empty
 
-		Dim lstMSAlignModInfo As List(Of clsModificationDefinition)
-		Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType)
-		Dim strMTSPepToProteinMapFilePath As String = String.Empty
+        Dim lstMSAlignModInfo As List(Of clsModificationDefinition)
+        Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType)
+        Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		If Not LoadParameterFileSettings(strParameterFilePath) Then
-			SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, True)
-			Return False
-		End If
+        If Not LoadParameterFileSettings(strParameterFilePath) Then
+            SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, True)
+            Return False
+        End If
 
-		Try
-			If String.IsNullOrWhiteSpace(strInputFilePath) Then
-				SetErrorMessage("Input file name is empty")
-				SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
-			End If
+        Try
+            If String.IsNullOrWhiteSpace(strInputFilePath) Then
+                SetErrorMessage("Input file name is empty")
+                SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
+                Return False
+            End If
 
-			blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
-			If Not blnSuccess Then
-				Return False
-			End If
+            blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions()
+            If Not blnSuccess Then
+                Return False
+            End If
 
-			MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
+            MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
 
-			If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
-				Return False
-			End If
+            If Not CleanupFilePaths(strInputFilePath, strOutputFolderPath) Then
+                Return False
+            End If
 
-			Try
-				' Obtain the full path to the input file
-				Dim fiInputFile = New FileInfo(strInputFilePath)
+            Try
+                ' Obtain the full path to the input file
+                Dim fiInputFile = New FileInfo(strInputFilePath)
 
-				lstMSAlignModInfo = New List(Of clsModificationDefinition)
-				lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
+                lstMSAlignModInfo = New List(Of clsModificationDefinition)
+                lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
-				' Load the MSAlign Parameter File so that we can determine whether Cysteine residues are statically modified
-				ExtractModInfoFromMSAlignParamFile(mSearchToolParameterFilePath, lstMSAlignModInfo)
+                ' Load the MSAlign Parameter File so that we can determine whether Cysteine residues are statically modified
+                ExtractModInfoFromMSAlignParamFile(mSearchToolParameterFilePath, lstMSAlignModInfo)
 
-				' Resolve the mods in lstMSAlignModInfo with the ModDefs mods
-				ResolveMSAlignModsWithModDefinitions(lstMSAlignModInfo)
+                ' Resolve the mods in lstMSAlignModInfo with the ModDefs mods
+                ResolveMSAlignModsWithModDefinitions(lstMSAlignModInfo)
 
-				' Define the base output filename using strInputFilePath
-				strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
+                ' Define the base output filename using strInputFilePath
+                strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
-				' Auto-replace "_MSAlign_ResultTable" with "_msalign"
-				If strBaseName.ToLower().EndsWith("_MSAlign_ResultTable".ToLower()) Then
-					strBaseName = strBaseName.Substring(0, strBaseName.Length - "_MSAlign_ResultTable".Length) & "_msalign"
-				End If
+                ' Auto-replace "_MSAlign_ResultTable" with "_msalign"
+                If strBaseName.ToLower().EndsWith("_MSAlign_ResultTable".ToLower()) Then
+                    strBaseName = strBaseName.Substring(0, strBaseName.Length - "_MSAlign_ResultTable".Length) & "_msalign"
+                End If
 
-				' Do not create a first-hits file for MSAlign results
+                ' Do not create a first-hits file for MSAlign results
 
-				' Create the synopsis output file
-				MyBase.ResetProgress("Creating the SYN file")
-				Console.WriteLine()
-				Console.WriteLine()
-				Console.WriteLine(MyBase.ProgressStepDescription)
+                ' Create the synopsis output file
+                MyBase.ResetProgress("Creating the SYN file")
+                Console.WriteLine()
+                Console.WriteLine()
+                Console.WriteLine(MyBase.ProgressStepDescription)
 
-				strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
+                ' The synopsis file name will be of the form BasePath_msalign_syn.txt
+                strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
-				blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath)
+                blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath)
 
-				' Create the other PHRP-specific files
-				MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
-				Console.WriteLine()
-				Console.WriteLine()
-				Console.WriteLine(MyBase.ProgressStepDescription)
+                ' Create the other PHRP-specific files
+                MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
+                Console.WriteLine()
+                Console.WriteLine()
+                Console.WriteLine(MyBase.ProgressStepDescription)
 
-				' Now parse the _syn.txt file that we just created to next create the other PHRP files
-				blnSuccess = ParseMSAlignSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
+                ' Now parse the _syn.txt file that we just created to next create the other PHRP files
+                blnSuccess = ParseMSAlignSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
 
                 ' Remove all items from lstPepToProteinMapping to reduce memory overhead
                 lstPepToProteinMapping.Clear()
@@ -1453,45 +1454,45 @@ Public Class clsMSAlignResultsProcessor
         Return blnSuccess
     End Function
 
-	Protected Function ReplaceTerminus(ByVal strPeptide As String) As String
+    Protected Function ReplaceTerminus(strPeptide As String) As String
 
-		If strPeptide.StartsWith(N_TERMINUS_SYMBOL_MSALIGN) Then
-			strPeptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST & "." & strPeptide.Substring(N_TERMINUS_SYMBOL_MSALIGN.Length)
-		End If
+        If strPeptide.StartsWith(N_TERMINUS_SYMBOL_MSALIGN) Then
+            strPeptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST & "." & strPeptide.Substring(N_TERMINUS_SYMBOL_MSALIGN.Length)
+        End If
 
-		If strPeptide.EndsWith(C_TERMINUS_SYMBOL_MSALIGN) Then
-			strPeptide = strPeptide.Substring(0, strPeptide.Length - C_TERMINUS_SYMBOL_MSALIGN.Length) & "." & clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST
-		End If
+        If strPeptide.EndsWith(C_TERMINUS_SYMBOL_MSALIGN) Then
+            strPeptide = strPeptide.Substring(0, strPeptide.Length - C_TERMINUS_SYMBOL_MSALIGN.Length) & "." & clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST
+        End If
 
-		Return strPeptide
+        Return strPeptide
 
-	End Function
+    End Function
 
-	Protected Sub ResolveMSAlignModsWithModDefinitions(ByRef lstMSAlignModInfo As List(Of clsModificationDefinition))
+    Protected Sub ResolveMSAlignModsWithModDefinitions(ByRef lstMSAlignModInfo As List(Of clsModificationDefinition))
 
-		Dim blnExistingModFound As Boolean
-		Dim objModDef As clsModificationDefinition
+        Dim blnExistingModFound As Boolean
+        Dim objModDef As clsModificationDefinition
 
-		If Not lstMSAlignModInfo Is Nothing Then
+        If Not lstMSAlignModInfo Is Nothing Then
 
-			' Call .LookupModificationDefinitionByMass for each entry in lstMSAlignModInfo
-			For Each objModInfo As clsModificationDefinition In lstMSAlignModInfo
-				If String.IsNullOrEmpty(objModInfo.TargetResidues) Then
-					objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
-				Else
-					For Each chTargetResidue As Char In objModInfo.TargetResidues
-						objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
-					Next
-				End If
-			Next
+            ' Call .LookupModificationDefinitionByMass for each entry in lstMSAlignModInfo
+            For Each objModInfo As clsModificationDefinition In lstMSAlignModInfo
+                If String.IsNullOrEmpty(objModInfo.TargetResidues) Then
+                    objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+                Else
+                    For Each chTargetResidue As Char In objModInfo.TargetResidues
+                        objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+                    Next
+                End If
+            Next
 
-		End If
+        End If
 
-	End Sub
+    End Sub
 
     Private Sub SortAndWriteFilteredSearchResults(
-      ByVal swResultFile As StreamWriter,
-      ByVal lstFilteredSearchResults As List(Of udtMSAlignSearchResultType), _
+      swResultFile As StreamWriter,
+      lstFilteredSearchResults As List(Of udtMSAlignSearchResultType), _
       ByRef strErrorLog As String)
 
         Dim intIndex As Integer
@@ -1506,10 +1507,10 @@ Public Class clsMSAlignResultsProcessor
     End Sub
 
     Private Sub StoreSynMatches(
-      ByVal lstSearchResults As List(Of udtMSAlignSearchResultType),
-      ByVal intStartIndex As Integer,
-      ByVal intEndIndex As Integer,
-      ByVal lstFilteredSearchResults As List(Of udtMSAlignSearchResultType))
+      lstSearchResults As List(Of udtMSAlignSearchResultType),
+      intStartIndex As Integer,
+      intEndIndex As Integer,
+      lstFilteredSearchResults As List(Of udtMSAlignSearchResultType))
 
         Dim intIndex As Integer
 
@@ -1527,7 +1528,7 @@ Public Class clsMSAlignResultsProcessor
     End Sub
 
     Private Sub WriteSynFHTFileHeader(
-      ByVal swResultFile As StreamWriter,
+      swResultFile As StreamWriter,
       ByRef strErrorLog As String)
 
         ' Write out the header line for synopsis / first hits files
@@ -1566,17 +1567,17 @@ Public Class clsMSAlignResultsProcessor
 
     End Sub
 
-	''' <summary>
-	''' Writes an entry to the synopsis file
-	''' </summary>
-	''' <param name="intResultID"></param>
-	''' <param name="swResultFile"></param>
-	''' <param name="udtSearchResult"></param>
-	''' <param name="strErrorLog"></param>
-	''' <remarks></remarks>
+    ''' <summary>
+    ''' Writes an entry to the synopsis file
+    ''' </summary>
+    ''' <param name="intResultID"></param>
+    ''' <param name="swResultFile"></param>
+    ''' <param name="udtSearchResult"></param>
+    ''' <param name="strErrorLog"></param>
+    ''' <remarks></remarks>
     Private Sub WriteSearchResultToFile(
-       ByVal intResultID As Integer,
-       ByVal swResultFile As StreamWriter,
+       intResultID As Integer,
+       swResultFile As StreamWriter,
        ByRef udtSearchResult As udtMSAlignSearchResultType,
        ByRef strErrorLog As String)
 

@@ -53,7 +53,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mfI
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mfI = Value
         End Set
     End Property
@@ -61,7 +61,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideExpectationValue
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideExpectationValue = Value
         End Set
     End Property
@@ -69,7 +69,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideHyperscore
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideHyperscore = Value
         End Set
     End Property
@@ -77,7 +77,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideNextScore
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideNextScore = Value
             ComputePeptideDeltaCn2()
         End Set
@@ -91,7 +91,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideYScore
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideYScore = Value
         End Set
     End Property
@@ -99,7 +99,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideYIons
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideYIons = Value
         End Set
     End Property
@@ -107,7 +107,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideBScore
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideBScore = Value
         End Set
     End Property
@@ -115,7 +115,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideBIons
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideBIons = Value
         End Set
     End Property
@@ -123,7 +123,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideIntensity
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideIntensity = Value
         End Set
     End Property
@@ -131,7 +131,7 @@ Public Class clsSearchResultsXTandem
         Get
             Return mPeptideIntensityMax
         End Get
-        Set(ByVal Value As String)
+        Set(Value As String)
             mPeptideIntensityMax = Value
         End Set
     End Property

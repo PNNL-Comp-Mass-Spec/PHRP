@@ -42,11 +42,11 @@ Public Interface IPeptideHitResultsProcessor
 #End Region
 
 #Region "Events"
-    Event ErrorOccurred(ByVal strMessage As String)
-    Event DebugEvent(ByVal strMessage As String)
+    Event ErrorOccurred(strMessage As String)
+    Event DebugEvent(strMessage As String)
 
     ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
-    Event ProgressChanged(ByVal taskDescription As String, ByVal percentComplete As Single)
+    Event ProgressChanged(taskDescription As String, percentComplete As Single)
 #End Region
 
 #Region "Properties"
@@ -64,9 +64,9 @@ Public Interface IPeptideHitResultsProcessor
     Property CreateInspectSynopsisFile() As Boolean
     Property CreateInspectFirstHitsFile() As Boolean
 
-	WriteOnly Property MiscParams() As Dictionary(Of String, String)	'For passing miscelleneous parameters (not presently used)
-	ReadOnly Property Status() As ProcessStatus	'Allows calling program to get current status
-	ReadOnly Property Results() As ProcessResults  'Allows calling program to determine if processing succeeded
+    WriteOnly Property MiscParams() As Dictionary(Of String, String)    'For passing miscelleneous parameters (not presently used)
+    ReadOnly Property Status() As ProcessStatus 'Allows calling program to get current status
+    ReadOnly Property Results() As ProcessResults  'Allows calling program to determine if processing succeeded
     ReadOnly Property ErrMsg() As String  'Error message describing any errors encountered
     ReadOnly Property PercentComplete() As Single   ' Progress indicator, value between 0 and 100
     Property DebugLevel() As Integer 'Allows control of debug information verbosity; 0=minimum, 5=maximum verbosity
@@ -74,11 +74,11 @@ Public Interface IPeptideHitResultsProcessor
 #End Region
 
 #Region "Methods"
-    Sub Setup(ByVal InitParams As InitializationParams)  'Initializes parameters. Must be called before executing Start()
+    Sub Setup(InitParams As InitializationParams)  'Initializes parameters. Must be called before executing Start()
 
-	Function Start() As ProcessStatus  'Starts the spectra file creation process
+    Function Start() As ProcessStatus  'Starts the spectra file creation process
 
-	Function Abort() As ProcessStatus  'Aborts spectra file creation
+    Function Abort() As ProcessStatus  'Aborts spectra file creation
 #End Region
 
 End Interface

@@ -54,6 +54,7 @@ Public Class clsPHRPReader
 		MSAlign = 5
         MODa = 6
         MODPlus = 7
+        MSPathFinder = 8
 	End Enum
 
 	Public Enum ePHRPReaderErrorCodes As Integer

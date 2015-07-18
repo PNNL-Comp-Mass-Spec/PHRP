@@ -53,7 +53,7 @@ Public Class clsUniqueSequencesContainer
         Me.Clear(DEFAULT_INITIAL_SEQ_ID)
     End Sub
 
-    Public Sub Clear(ByVal intInitialSeqID As Integer)
+    Public Sub Clear(intInitialSeqID As Integer)
         ' Clears htMasterSequences and resets mNextUniqueSeqID to intInitialSeqID
         mNextUniqueSeqID = intInitialSeqID
         If htMasterSequences Is Nothing Then
@@ -63,7 +63,7 @@ Public Class clsUniqueSequencesContainer
         End If
     End Sub
 
-    Public Function GetNextUniqueSequenceID(ByVal strSequence As String, ByVal strModDescription As String, ByRef blnExistingSequenceFound As Boolean) As Integer
+    Public Function GetNextUniqueSequenceID(strSequence As String, strModDescription As String, ByRef blnExistingSequenceFound As Boolean) As Integer
 
         Dim intUniqueSeqID As Integer
         Dim strKey As String

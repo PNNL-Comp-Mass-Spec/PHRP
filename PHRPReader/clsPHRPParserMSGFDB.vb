@@ -192,13 +192,13 @@ Public Class clsPHRPParserMSGFDB
 	End Sub
 
 	''' <summary>
-	''' Determines the precursor mass tolerance
+    ''' Determines the precursor mass tolerance for either MSGF+ or MSPathFinder
 	''' </summary>
 	''' <param name="objSearchEngineParams"></param>
 	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
 	''' <returns>Precursor tolerance, in Da</returns>
 	''' <remarks></remarks>
-    Protected Function DeterminePrecursorMassTolerance(ByVal objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+    Public Shared Function DeterminePrecursorMassTolerance(ByVal objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
         Dim strTolerance As String = String.Empty
         Dim strToleranceSplit As String()
 

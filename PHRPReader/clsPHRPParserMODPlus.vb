@@ -354,6 +354,7 @@ Public Class clsPHRPParserMODPlus
         Return String.Empty
 
     End Function
+
     ''' <summary>
     ''' Parse the data line read from a PHRP results file
     ''' </summary>
