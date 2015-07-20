@@ -83,32 +83,32 @@ Public Class clsAminoAcidModInfo
 		End Get
 	End Property
 
-	Public Sub New(
-	  ByVal chResidue As Char,
-	  ByVal intResidueLocInPeptide As Integer,
-	  ByVal eResidueTerminusState As eResidueTerminusStateConstants,
-	  ByVal objModDefinition As clsModificationDefinition)
+    Public Sub New(
+      chResidue As Char,
+      intResidueLocInPeptide As Integer,
+      eResidueTerminusState As eResidueTerminusStateConstants,
+      objModDefinition As clsModificationDefinition)
 
-		mModDefinition = objModDefinition
-		mResidue = chResidue
-		mResidueLocInPeptide = intResidueLocInPeptide
-		mEndResidueLocInPeptide = mResidueLocInPeptide
-		mResidueTerminusState = eResidueTerminusState
+        mModDefinition = objModDefinition
+        mResidue = chResidue
+        mResidueLocInPeptide = intResidueLocInPeptide
+        mEndResidueLocInPeptide = mResidueLocInPeptide
+        mResidueTerminusState = eResidueTerminusState
 
-	End Sub
+    End Sub
 
-	Public Sub New(
-	  ByVal chResidue As Char,
-	  ByVal intResidueLocInPeptide As Integer,
-	  ByVal eResidueTerminusState As eResidueTerminusStateConstants,
-	  ByVal objModDefinition As clsModificationDefinition,
-	  ByVal intEndResidueLocInPeptide As Integer)
+    Public Sub New(
+      chResidue As Char,
+      intResidueLocInPeptide As Integer,
+      eResidueTerminusState As eResidueTerminusStateConstants,
+      objModDefinition As clsModificationDefinition,
+      intEndResidueLocInPeptide As Integer)
 
-		mModDefinition = objModDefinition
-		mResidue = chResidue
-		mResidueLocInPeptide = intResidueLocInPeptide
-		mEndResidueLocInPeptide = intEndResidueLocInPeptide
-		mResidueTerminusState = eResidueTerminusState
+        mModDefinition = objModDefinition
+        mResidue = chResidue
+        mResidueLocInPeptide = intResidueLocInPeptide
+        mEndResidueLocInPeptide = intEndResidueLocInPeptide
+        mResidueTerminusState = eResidueTerminusState
 
-	End Sub
+    End Sub
 End Class

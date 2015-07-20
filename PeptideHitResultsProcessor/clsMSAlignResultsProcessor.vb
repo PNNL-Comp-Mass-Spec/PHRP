@@ -463,11 +463,11 @@ Public Class clsMSAlignResultsProcessor
     ''' </summary>
     ''' <param name="strInputFilePath"></param>
     ''' <param name="strOutputFilePath"></param>
-    ''' <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function CreateSynResultsFile(strInputFilePath As String, _
-       strOutputFilePath As String) As Boolean
+    Protected Function CreateSynResultsFile(
+      strInputFilePath As String,
+      strOutputFilePath As String) As Boolean
 
         Dim strLineIn As String
 

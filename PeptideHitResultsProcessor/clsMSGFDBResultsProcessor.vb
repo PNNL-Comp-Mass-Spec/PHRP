@@ -653,13 +653,14 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function CreateFHTorSYNResultsFile(strInputFilePath As String, _
-       strOutputFilePath As String, _
-       strScanGroupFilePath As String, _
-       ByRef lstMSGFDBModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType), _
-       ByRef blnMSGFPlus As Boolean, _
-       ByRef lstSpecIdToIndex As Dictionary(Of String, Integer), _
-       eFilteredOutputFileType As eFilteredOutputFileTypeConstants) As Boolean
+    Protected Function CreateFHTorSYNResultsFile(
+      strInputFilePath As String,
+      strOutputFilePath As String,
+      strScanGroupFilePath As String,
+      ByRef lstMSGFDBModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
+      ByRef blnMSGFPlus As Boolean,
+      ByRef lstSpecIdToIndex As Dictionary(Of String, Integer),
+      eFilteredOutputFileType As eFilteredOutputFileTypeConstants) As Boolean
 
         Dim strLineIn As String
 

@@ -190,7 +190,7 @@ Public Class clsScanStatsExInfo
 		End Set
 	End Property
 
-	Public Sub New(ByVal intScanNumber As Integer)
-		mScanNumber = intScanNumber
-	End Sub
+    Public Sub New(intScanNumber As Integer)
+        mScanNumber = intScanNumber
+    End Sub
 End Class

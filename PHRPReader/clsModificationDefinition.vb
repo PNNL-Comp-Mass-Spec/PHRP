@@ -66,347 +66,347 @@ Public Class clsModificationDefinition
 		Get
 			Return mModificationSymbol
 		End Get
-		Set(ByVal Value As Char)
-			If Value = Nothing Then
-				mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL
-			Else
-				mModificationSymbol = Value
-			End If
-		End Set
-	End Property
-	Public Property ModificationMass() As Double
-		Get
-			Return mModificationMass
-		End Get
-		Set(ByVal Value As Double)
-			mModificationMass = Value
-			mModificationMassAsText = mModificationMass.ToString()
-		End Set
-	End Property
-	Public Property ModificationMassAsText() As String
-		Get
-			Return mModificationMassAsText
-		End Get
-		Set(value As String)
-			mModificationMassAsText = value
-		End Set
-	End Property
-	Public Property TargetResidues() As String
-		Get
-			Return mTargetResidues
-		End Get
-		Set(ByVal Value As String)
-			If Value Is Nothing Then
-				mTargetResidues = String.Empty
-			Else
-				mTargetResidues = String.Copy(Value)
-			End If
-		End Set
-	End Property
-	Public Property ModificationType() As eModificationTypeConstants
-		Get
-			Return mModificationType
-		End Get
-		Set(ByVal Value As eModificationTypeConstants)
-			mModificationType = Value
-		End Set
-	End Property
-	Public Property MassCorrectionTag() As String
-		Get
-			Return mMassCorrectionTag
-		End Get
-		Set(ByVal Value As String)
-			If Value Is Nothing Then
-				mMassCorrectionTag = String.Empty
-			Else
-				mMassCorrectionTag = String.Copy(Value)
-			End If
-		End Set
-	End Property
-	Public Property AffectedAtom() As Char
-		Get
-			Return mAffectedAtom
-		End Get
-		Set(ByVal Value As Char)
-			If Value = Nothing Then
-				mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL
-			Else
-				mAffectedAtom = Value
-			End If
-		End Set
-	End Property
-	Public Property OccurrenceCount() As Integer
-		Get
-			Return mOccurrenceCount
-		End Get
-		Set(ByVal Value As Integer)
-			mOccurrenceCount = Value
-		End Set
-	End Property
-	Public Property UnknownModAutoDefined() As Boolean
-		Get
-			Return mUnknownModAutoDefined
-		End Get
-		Set(ByVal Value As Boolean)
-			mUnknownModAutoDefined = Value
-		End Set
-	End Property
+        Set(Value As Char)
+            If Value = Nothing Then
+                mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL
+            Else
+                mModificationSymbol = Value
+            End If
+        End Set
+    End Property
+    Public Property ModificationMass() As Double
+        Get
+            Return mModificationMass
+        End Get
+        Set(Value As Double)
+            mModificationMass = Value
+            mModificationMassAsText = mModificationMass.ToString()
+        End Set
+    End Property
+    Public Property ModificationMassAsText() As String
+        Get
+            Return mModificationMassAsText
+        End Get
+        Set(value As String)
+            mModificationMassAsText = value
+        End Set
+    End Property
+    Public Property TargetResidues() As String
+        Get
+            Return mTargetResidues
+        End Get
+        Set(Value As String)
+            If Value Is Nothing Then
+                mTargetResidues = String.Empty
+            Else
+                mTargetResidues = String.Copy(Value)
+            End If
+        End Set
+    End Property
+    Public Property ModificationType() As eModificationTypeConstants
+        Get
+            Return mModificationType
+        End Get
+        Set(Value As eModificationTypeConstants)
+            mModificationType = Value
+        End Set
+    End Property
+    Public Property MassCorrectionTag() As String
+        Get
+            Return mMassCorrectionTag
+        End Get
+        Set(Value As String)
+            If Value Is Nothing Then
+                mMassCorrectionTag = String.Empty
+            Else
+                mMassCorrectionTag = String.Copy(Value)
+            End If
+        End Set
+    End Property
+    Public Property AffectedAtom() As Char
+        Get
+            Return mAffectedAtom
+        End Get
+        Set(Value As Char)
+            If Value = Nothing Then
+                mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL
+            Else
+                mAffectedAtom = Value
+            End If
+        End Set
+    End Property
+    Public Property OccurrenceCount() As Integer
+        Get
+            Return mOccurrenceCount
+        End Get
+        Set(Value As Integer)
+            mOccurrenceCount = Value
+        End Set
+    End Property
+    Public Property UnknownModAutoDefined() As Boolean
+        Get
+            Return mUnknownModAutoDefined
+        End Get
+        Set(Value As Boolean)
+            mUnknownModAutoDefined = Value
+        End Set
+    End Property
 #End Region
 
-	Public Sub New()
-		Me.Clear()
-	End Sub
-
-	Public Sub New(ByVal chModificationSymbol As Char, ByVal dblModificationMass As Double)
-		Me.Clear()
-
-		Me.ModificationSymbol = chModificationSymbol
-		Me.ModificationMass = dblModificationMass
+    Public Sub New()
+        Me.Clear()
     End Sub
 
-	Public Sub New(ByVal dblModificationMass As Double, ByVal strTargetResidues As String, ByVal eModificationType As eModificationTypeConstants)
-		Me.Clear()
+    Public Sub New(chModificationSymbol As Char, dblModificationMass As Double)
+        Me.Clear()
 
-		Me.ModificationMass = dblModificationMass
-		Me.TargetResidues = strTargetResidues
-		Me.ModificationType = eModificationType
+        Me.ModificationSymbol = chModificationSymbol
+        Me.ModificationMass = dblModificationMass
     End Sub
 
-	Public Sub New(ByVal chModificationSymbol As Char, ByVal dblModificationMass As Double, ByVal strTargetResidues As String, ByVal eModificationType As eModificationTypeConstants, ByVal strMassCorrectionTag As String)
-		Me.Clear()
+    Public Sub New(dblModificationMass As Double, strTargetResidues As String, eModificationType As eModificationTypeConstants)
+        Me.Clear()
 
-		Me.ModificationSymbol = chModificationSymbol
-		Me.ModificationMass = dblModificationMass
-		Me.TargetResidues = strTargetResidues
-		Me.ModificationType = eModificationType
-		Me.MassCorrectionTag = strMassCorrectionTag
+        Me.ModificationMass = dblModificationMass
+        Me.TargetResidues = strTargetResidues
+        Me.ModificationType = eModificationType
     End Sub
 
-	Public Sub New(ByVal chModificationSymbol As Char, ByVal dblModificationMass As Double, ByVal strTargetResidues As String, ByVal eModificationType As eModificationTypeConstants, ByVal strMassCorrectionTag As String, ByVal chAffectedAtom As Char, ByVal blnUnknownModAutoDefined As Boolean)
-		Me.Clear()
+    Public Sub New(chModificationSymbol As Char, dblModificationMass As Double, strTargetResidues As String, eModificationType As eModificationTypeConstants, strMassCorrectionTag As String)
+        Me.Clear()
 
-		Me.ModificationSymbol = chModificationSymbol
-		Me.ModificationMass = dblModificationMass
-		Me.TargetResidues = strTargetResidues
-		Me.ModificationType = eModificationType
-		Me.MassCorrectionTag = strMassCorrectionTag
-		Me.AffectedAtom = chAffectedAtom
-		Me.UnknownModAutoDefined = blnUnknownModAutoDefined
-	End Sub
+        Me.ModificationSymbol = chModificationSymbol
+        Me.ModificationMass = dblModificationMass
+        Me.TargetResidues = strTargetResidues
+        Me.ModificationType = eModificationType
+        Me.MassCorrectionTag = strMassCorrectionTag
+    End Sub
 
-	Public Sub Clear()
-		mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL
-		mModificationMass = 0
-		mModificationMassAsText = "0"
-		mTargetResidues = String.Empty
-		mModificationType = eModificationTypeConstants.UnknownType
-		mMassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME
-		mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL
-		mOccurrenceCount = 0
-		mUnknownModAutoDefined = False
-	End Sub
+    Public Sub New(chModificationSymbol As Char, dblModificationMass As Double, strTargetResidues As String, eModificationType As eModificationTypeConstants, strMassCorrectionTag As String, chAffectedAtom As Char, blnUnknownModAutoDefined As Boolean)
+        Me.Clear()
 
-	Public Function EquivalentMassTypeTagAndAtom(ByVal objB As clsModificationDefinition) As Boolean
-		' Compares objB to this object, ignoring .ModificationSymbol and ignoring .AffectedResidues
-		Return EquivalentMassTypeTagAndAtom(Me, objB)
-	End Function
+        Me.ModificationSymbol = chModificationSymbol
+        Me.ModificationMass = dblModificationMass
+        Me.TargetResidues = strTargetResidues
+        Me.ModificationType = eModificationType
+        Me.MassCorrectionTag = strMassCorrectionTag
+        Me.AffectedAtom = chAffectedAtom
+        Me.UnknownModAutoDefined = blnUnknownModAutoDefined
+    End Sub
 
-	Public Function EquivalentMassTypeTagAndAtom(ByVal objA As clsModificationDefinition, ByVal objB As clsModificationDefinition) As Boolean
-		Dim blnEquivalent As Boolean
+    Public Sub Clear()
+        mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL
+        mModificationMass = 0
+        mModificationMassAsText = "0"
+        mTargetResidues = String.Empty
+        mModificationType = eModificationTypeConstants.UnknownType
+        mMassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME
+        mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL
+        mOccurrenceCount = 0
+        mUnknownModAutoDefined = False
+    End Sub
 
-		' Compare objA to objB but ignore .ModificationSymbol and .AffectedResidues
-		blnEquivalent = False
-		With objA
-			If Math.Round(.ModificationMass - objB.ModificationMass, MASS_DIGITS_OF_PRECISION) = 0 AndAlso _
-			   .ModificationType = objB.ModificationType AndAlso _
-			   .MassCorrectionTag = objB.MassCorrectionTag AndAlso _
-			   .AffectedAtom = objB.AffectedAtom Then
-				blnEquivalent = True
-			End If
-		End With
+    Public Function EquivalentMassTypeTagAndAtom(objB As clsModificationDefinition) As Boolean
+        ' Compares objB to this object, ignoring .ModificationSymbol and ignoring .AffectedResidues
+        Return EquivalentMassTypeTagAndAtom(Me, objB)
+    End Function
 
-		Return blnEquivalent
-	End Function
+    Public Function EquivalentMassTypeTagAndAtom(objA As clsModificationDefinition, objB As clsModificationDefinition) As Boolean
+        Dim blnEquivalent As Boolean
 
-	Public Function EquivalentMassTypeTagAtomAndResidues(ByVal objB As clsModificationDefinition) As Boolean
-		' Compares objB to this object, ignoring .ModificationSymbol
-		Return EquivalentMassTypeTagAtomAndResidues(Me, objB)
-	End Function
+        ' Compare objA to objB but ignore .ModificationSymbol and .AffectedResidues
+        blnEquivalent = False
+        With objA
+            If Math.Round(.ModificationMass - objB.ModificationMass, MASS_DIGITS_OF_PRECISION) = 0 AndAlso _
+               .ModificationType = objB.ModificationType AndAlso _
+               .MassCorrectionTag = objB.MassCorrectionTag AndAlso _
+               .AffectedAtom = objB.AffectedAtom Then
+                blnEquivalent = True
+            End If
+        End With
 
-	Public Function EquivalentMassTypeTagAtomAndResidues(ByVal objA As clsModificationDefinition, ByVal objB As clsModificationDefinition) As Boolean
-		Dim blnEquivalent As Boolean
+        Return blnEquivalent
+    End Function
 
-		' First compare objA to objB but ignore .ModificationSymbol and .AffectedResidues
-		blnEquivalent = EquivalentMassTypeTagAndAtom(objA, objB)
+    Public Function EquivalentMassTypeTagAtomAndResidues(objB As clsModificationDefinition) As Boolean
+        ' Compares objB to this object, ignoring .ModificationSymbol
+        Return EquivalentMassTypeTagAtomAndResidues(Me, objB)
+    End Function
 
-		If blnEquivalent Then
-			' Mass, ModificationType, MassCorrectionTag, and AffectedAtom are identical
-			' What about the residues?
+    Public Function EquivalentMassTypeTagAtomAndResidues(objA As clsModificationDefinition, objB As clsModificationDefinition) As Boolean
+        Dim blnEquivalent As Boolean
 
-			blnEquivalent = False
-			With objA
-				If .TargetResidues Is Nothing AndAlso objB.TargetResidues Is Nothing Then
-					blnEquivalent = True
-				ElseIf Not .TargetResidues Is Nothing AndAlso Not objB.TargetResidues Is Nothing Then
-					If .ModificationType = eModificationTypeConstants.DynamicMod OrElse _
-					   .ModificationType = eModificationTypeConstants.StaticMod Then
-						' Matching dynamic or static modification definitions
-						' Make sure each of the residues in objB.TargetResidues is present in .TargetResidues
-						If EquivalentTargetResidues(.TargetResidues, objB.TargetResidues, False) Then
-							blnEquivalent = True
-						End If
-					Else
-						' Not a dynamic or static mod; require identical target residue lists in order to flag them as identical
-						If .TargetResidues = objB.TargetResidues Then
-							blnEquivalent = True
-						End If
-					End If
-				End If
-			End With
-		End If
+        ' First compare objA to objB but ignore .ModificationSymbol and .AffectedResidues
+        blnEquivalent = EquivalentMassTypeTagAndAtom(objA, objB)
 
-		Return blnEquivalent
-	End Function
+        If blnEquivalent Then
+            ' Mass, ModificationType, MassCorrectionTag, and AffectedAtom are identical
+            ' What about the residues?
 
-	Public Shared Function EquivalentTargetResidues(ByVal strResidues1 As String, ByVal strResidues2 As String, ByVal blnAllowResidues2ToBeSubsetOfResidues1 As Boolean) As Boolean
-		Dim chChar As Char
-		Dim intMatchCount As Integer
-		Dim blnEquivalent As Boolean
+            blnEquivalent = False
+            With objA
+                If .TargetResidues Is Nothing AndAlso objB.TargetResidues Is Nothing Then
+                    blnEquivalent = True
+                ElseIf Not .TargetResidues Is Nothing AndAlso Not objB.TargetResidues Is Nothing Then
+                    If .ModificationType = eModificationTypeConstants.DynamicMod OrElse _
+                       .ModificationType = eModificationTypeConstants.StaticMod Then
+                        ' Matching dynamic or static modification definitions
+                        ' Make sure each of the residues in objB.TargetResidues is present in .TargetResidues
+                        If EquivalentTargetResidues(.TargetResidues, objB.TargetResidues, False) Then
+                            blnEquivalent = True
+                        End If
+                    Else
+                        ' Not a dynamic or static mod; require identical target residue lists in order to flag them as identical
+                        If .TargetResidues = objB.TargetResidues Then
+                            blnEquivalent = True
+                        End If
+                    End If
+                End If
+            End With
+        End If
 
-		blnEquivalent = False
+        Return blnEquivalent
+    End Function
 
-		If strResidues1 Is Nothing AndAlso strResidues2 Is Nothing Then
-			' Both residues lists are blank
-			blnEquivalent = True
-		ElseIf Not (strResidues1 Is Nothing OrElse strResidues2 Is Nothing) Then
-			If strResidues1.Length = 0 AndAlso strResidues2.Length = 0 Then
-				blnEquivalent = True
-			ElseIf strResidues1 = strResidues2 Then
-				blnEquivalent = True
-			ElseIf strResidues1.Length >= strResidues2.Length Then
-				' See if each of the residues in strResidues2 is in strResidues1
-				intMatchCount = 0
-				For Each chChar In strResidues2
-					If strResidues1.IndexOf(chChar) >= 0 Then
-						intMatchCount += 1
-					Else
-						Exit For
-					End If
-				Next chChar
-				If intMatchCount = strResidues1.Length Then
-					blnEquivalent = True
-				ElseIf blnAllowResidues2ToBeSubsetOfResidues1 AndAlso intMatchCount > 0 Then
-					blnEquivalent = True
-				End If
-			End If
-		End If
+    Public Shared Function EquivalentTargetResidues(strResidues1 As String, strResidues2 As String, blnAllowResidues2ToBeSubsetOfResidues1 As Boolean) As Boolean
+        Dim chChar As Char
+        Dim intMatchCount As Integer
+        Dim blnEquivalent As Boolean
 
-		Return blnEquivalent
+        blnEquivalent = False
 
-	End Function
+        If strResidues1 Is Nothing AndAlso strResidues2 Is Nothing Then
+            ' Both residues lists are blank
+            blnEquivalent = True
+        ElseIf Not (strResidues1 Is Nothing OrElse strResidues2 Is Nothing) Then
+            If strResidues1.Length = 0 AndAlso strResidues2.Length = 0 Then
+                blnEquivalent = True
+            ElseIf strResidues1 = strResidues2 Then
+                blnEquivalent = True
+            ElseIf strResidues1.Length >= strResidues2.Length Then
+                ' See if each of the residues in strResidues2 is in strResidues1
+                intMatchCount = 0
+                For Each chChar In strResidues2
+                    If strResidues1.IndexOf(chChar) >= 0 Then
+                        intMatchCount += 1
+                    Else
+                        Exit For
+                    End If
+                Next chChar
+                If intMatchCount = strResidues1.Length Then
+                    blnEquivalent = True
+                ElseIf blnAllowResidues2ToBeSubsetOfResidues1 AndAlso intMatchCount > 0 Then
+                    blnEquivalent = True
+                End If
+            End If
+        End If
 
-	''' <summary>
-	''' Returns True if this modification can affect the peptide or protein terminus
-	''' Note that some modifications can affect either peptide teriminii or internal residues
-	''' </summary>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Function CanAffectPeptideOrProteinTerminus() As Boolean
-		Dim lstTerminalSymbols As SortedSet(Of Char) = GetTerminalSymbols()
+        Return blnEquivalent
 
-		If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
-			Return True
-		Else
-			For Each chChar As Char In mTargetResidues
-				If lstTerminalSymbols.Contains(chChar) Then
-					Return True
-				End If
-			Next
-			Return False
-		End If
+    End Function
 
-	End Function
+    ''' <summary>
+    ''' Returns True if this modification can affect the peptide or protein terminus
+    ''' Note that some modifications can affect either peptide teriminii or internal residues
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function CanAffectPeptideOrProteinTerminus() As Boolean
+        Dim lstTerminalSymbols As SortedSet(Of Char) = GetTerminalSymbols()
 
-	Public Function CanAffectPeptideResidues() As Boolean
-		Dim lstTerminalSymbols As SortedSet(Of Char) = GetTerminalSymbols()
+        If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
+            Return True
+        Else
+            For Each chChar As Char In mTargetResidues
+                If lstTerminalSymbols.Contains(chChar) Then
+                    Return True
+                End If
+            Next
+            Return False
+        End If
 
-		If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
-			Return False
-		Else
-			If String.IsNullOrEmpty(mTargetResidues) Then
-				Return True
-			Else
-				For Each chChar As Char In mTargetResidues
-					If Not lstTerminalSymbols.Contains(chChar) Then
-						Return True
-					End If
-				Next
-			End If
+    End Function
 
-			Return False
-		End If
+    Public Function CanAffectPeptideResidues() As Boolean
+        Dim lstTerminalSymbols As SortedSet(Of Char) = GetTerminalSymbols()
 
-	End Function
+        If mModificationType = eModificationTypeConstants.ProteinTerminusStaticMod OrElse mModificationType = eModificationTypeConstants.TerminalPeptideStaticMod Then
+            Return False
+        Else
+            If String.IsNullOrEmpty(mTargetResidues) Then
+                Return True
+            Else
+                For Each chChar As Char In mTargetResidues
+                    If Not lstTerminalSymbols.Contains(chChar) Then
+                        Return True
+                    End If
+                Next
+            End If
 
-	Public Shared Function GetTerminalSymbols() As SortedSet(Of Char)
-		Dim lstTerminalSymbols As SortedSet(Of Char)
+            Return False
+        End If
 
-		lstTerminalSymbols = New SortedSet(Of Char)
+    End Function
 
-		lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)
-		lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS)
-		lstTerminalSymbols.Add(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
-		lstTerminalSymbols.Add(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+    Public Shared Function GetTerminalSymbols() As SortedSet(Of Char)
+        Dim lstTerminalSymbols As SortedSet(Of Char)
 
-		Return lstTerminalSymbols
+        lstTerminalSymbols = New SortedSet(Of Char)
 
-	End Function
+        lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)
+        lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS)
+        lstTerminalSymbols.Add(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
+        lstTerminalSymbols.Add(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
 
-	Public Shared Function ModificationSymbolToModificationType(ByVal chModificationTypeSymbol As Char) As clsModificationDefinition.eModificationTypeConstants
-		If chModificationTypeSymbol = Nothing Then
-			Return clsModificationDefinition.eModificationTypeConstants.UnknownType
-		Else
-			Select Case chModificationTypeSymbol
-				Case "D"c
-					Return clsModificationDefinition.eModificationTypeConstants.DynamicMod
-				Case "S"c
-					Return clsModificationDefinition.eModificationTypeConstants.StaticMod
-				Case "T"c
-					Return clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-				Case "I"c
-					Return clsModificationDefinition.eModificationTypeConstants.IsotopicMod
-				Case "P"c
-					Return clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
-				Case Else
-					Return clsModificationDefinition.eModificationTypeConstants.UnknownType
-			End Select
-		End If
-	End Function
+        Return lstTerminalSymbols
 
-	Public Shared Function ModificationTypeToModificationSymbol(ByVal eModificationType As clsModificationDefinition.eModificationTypeConstants) As Char
-		Select Case eModificationType
-			Case clsModificationDefinition.eModificationTypeConstants.DynamicMod
-				Return "D"c
-			Case clsModificationDefinition.eModificationTypeConstants.StaticMod
-				Return "S"c
-			Case clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
-				Return "T"c
-			Case clsModificationDefinition.eModificationTypeConstants.IsotopicMod
-				Return "I"c
-			Case clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
-				Return "P"c
-			Case Else
-				Return "?"c
-		End Select
-	End Function
+    End Function
 
-	Public Function TargetResiduesContain(ByVal chComparisonResidue As Char) As Boolean
-		If chComparisonResidue = Nothing Then
-			Return False
-		ElseIf Me.TargetResidues.IndexOf(chComparisonResidue) >= 0 Then
-			Return True
-		Else
-			Return False
-		End If
-	End Function
+    Public Shared Function ModificationSymbolToModificationType(chModificationTypeSymbol As Char) As clsModificationDefinition.eModificationTypeConstants
+        If chModificationTypeSymbol = Nothing Then
+            Return clsModificationDefinition.eModificationTypeConstants.UnknownType
+        Else
+            Select Case chModificationTypeSymbol
+                Case "D"c
+                    Return clsModificationDefinition.eModificationTypeConstants.DynamicMod
+                Case "S"c
+                    Return clsModificationDefinition.eModificationTypeConstants.StaticMod
+                Case "T"c
+                    Return clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+                Case "I"c
+                    Return clsModificationDefinition.eModificationTypeConstants.IsotopicMod
+                Case "P"c
+                    Return clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+                Case Else
+                    Return clsModificationDefinition.eModificationTypeConstants.UnknownType
+            End Select
+        End If
+    End Function
+
+    Public Shared Function ModificationTypeToModificationSymbol(eModificationType As clsModificationDefinition.eModificationTypeConstants) As Char
+        Select Case eModificationType
+            Case clsModificationDefinition.eModificationTypeConstants.DynamicMod
+                Return "D"c
+            Case clsModificationDefinition.eModificationTypeConstants.StaticMod
+                Return "S"c
+            Case clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+                Return "T"c
+            Case clsModificationDefinition.eModificationTypeConstants.IsotopicMod
+                Return "I"c
+            Case clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+                Return "P"c
+            Case Else
+                Return "?"c
+        End Select
+    End Function
+
+    Public Function TargetResiduesContain(chComparisonResidue As Char) As Boolean
+        If chComparisonResidue = Nothing Then
+            Return False
+        ElseIf Me.TargetResidues.IndexOf(chComparisonResidue) >= 0 Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
 End Class

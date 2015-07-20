@@ -59,354 +59,354 @@ Public MustInherit Class clsPHRPParser
 #End Region
 
 #Region "Events"
-	Public Event MessageEvent(ByVal strMessage As String)
-	Public Event ErrorEvent(ByVal strErrorMessage As String)
-	Public Event WarningEvent(ByVal strWarningMessage As String)
+    Public Event MessageEvent(strMessage As String)
+    Public Event ErrorEvent(strErrorMessage As String)
+    Public Event WarningEvent(strWarningMessage As String)
 #End Region
 
 #Region "Properties"
 
-	''' <summary>
-	''' Cached error messages
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property ErrorMessages() As List(Of String)
-		Get
-			Return mErrorMessages
-		End Get
-	End Property
+    ''' <summary>
+    ''' Cached error messages
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property ErrorMessages() As List(Of String)
+        Get
+            Return mErrorMessages
+        End Get
+    End Property
 
-	''' <summary>
-	''' Input file path
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property InputFilePath As String
-		Get
-			Return mInputFilePath
-		End Get
-	End Property
+    ''' <summary>
+    ''' Input file path
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property InputFilePath As String
+        Get
+            Return mInputFilePath
+        End Get
+    End Property
 
-	''' <summary>
-	''' Input folder path
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property InputFolderPath As String
-		Get
-			Return mInputFolderPath
-		End Get
-	End Property
+    ''' <summary>
+    ''' Input folder path
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property InputFolderPath As String
+        Get
+            Return mInputFolderPath
+        End Get
+    End Property
 
-	''' <summary>
-	''' Maximum number of proteins to associate with each PSM
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks>0 means to load all proteins</remarks>
-	Public Property MaxProteinsPerPSM() As Integer
-		Get
-			Return mMaxProteinsPerPSM
-		End Get
-		Set(value As Integer)
-			mMaxProteinsPerPSM = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Maximum number of proteins to associate with each PSM
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>0 means to load all proteins</remarks>
+    Public Property MaxProteinsPerPSM() As Integer
+        Get
+            Return mMaxProteinsPerPSM
+        End Get
+        Set(value As Integer)
+            mMaxProteinsPerPSM = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property PeptideHitResultType As clsPHRPReader.ePeptideHitResultType
-		Get
-			Return mPeptideHitResultType
-		End Get
-	End Property
+    ''' <summary>
+    ''' Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property PeptideHitResultType As clsPHRPReader.ePeptideHitResultType
+        Get
+            Return mPeptideHitResultType
+        End Get
+    End Property
 
-	Public ReadOnly Property PepToProteinMap() As Dictionary(Of String, clsPepToProteinMapInfo)
-		Get
-			Return mPepToProteinMap
-		End Get
-	End Property	
+    Public ReadOnly Property PepToProteinMap() As Dictionary(Of String, clsPepToProteinMapInfo)
+        Get
+            Return mPepToProteinMap
+        End Get
+    End Property
 
-	''' <summary>
-	''' Returns the cached mapping between ResultID and SeqID
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property ResultToSeqMap() As SortedList(Of Integer, Integer)
-		Get
-			Return mResultToSeqMap
-		End Get
-	End Property
+    ''' <summary>
+    ''' Returns the cached mapping between ResultID and SeqID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property ResultToSeqMap() As SortedList(Of Integer, Integer)
+        Get
+            Return mResultToSeqMap
+        End Get
+    End Property
 
-	''' <summary>
-	''' Returns the cached sequence info, where key is SeqID
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property SeqInfo() As SortedList(Of Integer, clsSeqInfo)
-		Get
-			Return mSeqInfo
-		End Get
-	End Property
+    ''' <summary>
+    ''' Returns the cached sequence info, where key is SeqID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property SeqInfo() As SortedList(Of Integer, clsSeqInfo)
+        Get
+            Return mSeqInfo
+        End Get
+    End Property
 
-	''' <summary>
-	''' Returns the cached sequence to protein map information
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property SeqToProteinMap() As SortedList(Of Integer, List(Of clsProteinInfo))
-		Get
-			Return mSeqToProteinMap
-		End Get
-	End Property
+    ''' <summary>
+    ''' Returns the cached sequence to protein map information
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property SeqToProteinMap() As SortedList(Of Integer, List(Of clsProteinInfo))
+        Get
+            Return mSeqToProteinMap
+        End Get
+    End Property
 
-	''' <summary>
-	''' Cached warning messages
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property WarningMessages() As List(Of String)
-		Get
-			Return mWarningMessages
-		End Get
-	End Property
+    ''' <summary>
+    ''' Cached warning messages
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property WarningMessages() As List(Of String)
+        Get
+            Return mWarningMessages
+        End Get
+    End Property
 
 #End Region
 
 #Region "Properties overridden by derived classes"
 
-	Public MustOverride ReadOnly Property PHRPFirstHitsFileName() As String
+    Public MustOverride ReadOnly Property PHRPFirstHitsFileName() As String
 
-	Public MustOverride ReadOnly Property PHRPModSummaryFileName() As String
+    Public MustOverride ReadOnly Property PHRPModSummaryFileName() As String
 
-	Public MustOverride ReadOnly Property PHRPPepToProteinMapFileName() As String
+    Public MustOverride ReadOnly Property PHRPPepToProteinMapFileName() As String
 
-	Public MustOverride ReadOnly Property PHRPProteinModsFileName() As String
+    Public MustOverride ReadOnly Property PHRPProteinModsFileName() As String
 
-	Public MustOverride ReadOnly Property PHRPSynopsisFileName() As String
+    Public MustOverride ReadOnly Property PHRPSynopsisFileName() As String
 
-	Public MustOverride ReadOnly Property PHRPResultToSeqMapFileName() As String
+    Public MustOverride ReadOnly Property PHRPResultToSeqMapFileName() As String
 
-	Public MustOverride ReadOnly Property PHRPSeqInfoFileName() As String
+    Public MustOverride ReadOnly Property PHRPSeqInfoFileName() As String
 
-	Public MustOverride ReadOnly Property PHRPSeqToProteinMapFileName() As String
+    Public MustOverride ReadOnly Property PHRPSeqToProteinMapFileName() As String
 
-	Public MustOverride ReadOnly Property SearchEngineName() As String
+    Public MustOverride ReadOnly Property SearchEngineName() As String
 
 #End Region
 
-	''' <summary>
-	''' Initialize the parser for the given dataset, input file, and result type
-	''' </summary>
-	''' <param name="strDatasetName">Dataset Name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
-	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-	''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-	Protected Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean)
-		Dim startupOptions = New clsPHRPStartupOptions
-		startupOptions.LoadModsAndSeqInfo = blnLoadModsAndSeqInfo
-		InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions)
-	End Sub
+    ''' <summary>
+    ''' Initialize the parser for the given dataset, input file, and result type
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset Name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
+    ''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
+    ''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
+    Protected Sub New(strDatasetName As String, strInputFilePath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, blnLoadModsAndSeqInfo As Boolean)
+        Dim startupOptions = New clsPHRPStartupOptions
+        startupOptions.LoadModsAndSeqInfo = blnLoadModsAndSeqInfo
+        InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions)
+    End Sub
 
-	''' <summary>
-	''' Initialize the parser for the given dataset, input file, and result type
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
-	''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-	Protected Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal startupOptions As clsPHRPStartupOptions)
-		InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions)
-	End Sub
+    ''' <summary>
+    ''' Initialize the parser for the given dataset, input file, and result type
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+    ''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
+    Protected Sub New(strDatasetName As String, strInputFilePath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, startupOptions As clsPHRPStartupOptions)
+        InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions)
+    End Sub
 
-	''' <summary>
-	''' Initialize the parser for the given dataset and input file
-	''' </summary>
-	''' <param name="strDatasetName">Dataset Name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
-	''' <param name="startupOptions">Startup options</param>
-	''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable
-	''' startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
-	''' Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
-	''' </remarks>
-	Protected Sub InitializeParser(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal startupOptions As clsPHRPStartupOptions)
+    ''' <summary>
+    ''' Initialize the parser for the given dataset and input file
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset Name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
+    ''' <param name="startupOptions">Startup options</param>
+    ''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable
+    ''' startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
+    ''' Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
+    ''' </remarks>
+    Protected Sub InitializeParser(strDatasetName As String, strInputFilePath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, startupOptions As clsPHRPStartupOptions)
 
-		mErrorMessages = New List(Of String)
-		mWarningMessages = New List(Of String)
+        mErrorMessages = New List(Of String)
+        mWarningMessages = New List(Of String)
 
-		If String.IsNullOrWhiteSpace(strDatasetName) Then strDatasetName = "Undefined"
-		mDatasetName = strDatasetName
+        If String.IsNullOrWhiteSpace(strDatasetName) Then strDatasetName = "Undefined"
+        mDatasetName = strDatasetName
 
-		mPeptideHitResultType = ePeptideHitResultType
+        mPeptideHitResultType = ePeptideHitResultType
 
-		mMaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM
+        mMaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM
 
-		Dim fiFileInfo As FileInfo
-		Dim blnIsSynopsisFile As Boolean = False
+        Dim fiFileInfo As FileInfo
+        Dim blnIsSynopsisFile As Boolean = False
 
-		If String.IsNullOrEmpty(strInputFilePath) Then
-			' User instantiated the class without a filename
-			' Functions that solely require a dataset name will be callable, but cannot call functions that read a data line
-			mInputFilePath = String.Empty
-			mInputFolderPath = String.Empty
+        If String.IsNullOrEmpty(strInputFilePath) Then
+            ' User instantiated the class without a filename
+            ' Functions that solely require a dataset name will be callable, but cannot call functions that read a data line
+            mInputFilePath = String.Empty
+            mInputFolderPath = String.Empty
 
-			startupOptions.LoadModsAndSeqInfo = False
-		Else
-			fiFileInfo = New FileInfo(strInputFilePath)
-			mInputFilePath = fiFileInfo.FullName
-			mInputFolderPath = fiFileInfo.DirectoryName
+            startupOptions.LoadModsAndSeqInfo = False
+        Else
+            fiFileInfo = New FileInfo(strInputFilePath)
+            mInputFilePath = fiFileInfo.FullName
+            mInputFolderPath = fiFileInfo.DirectoryName
 
-			If String.Equals(fiFileInfo.Name, clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName), StringComparison.CurrentCultureIgnoreCase) Then
-				blnIsSynopsisFile = True
-			End If
+            If String.Equals(fiFileInfo.Name, clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName), StringComparison.CurrentCultureIgnoreCase) Then
+                blnIsSynopsisFile = True
+            End If
 
-		End If
+        End If
 
-		mErrorMessage = String.Empty
+        mErrorMessage = String.Empty
 
-		' Initialize the column mapping object
-		' Using a case-insensitive comparer
-		mColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+        ' Initialize the column mapping object
+        ' Using a case-insensitive comparer
+        mColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
 
-		mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
-		mPeptideMassCalculator = New clsPeptideMassCalculator()
+        mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
+        mPeptideMassCalculator = New clsPeptideMassCalculator()
 
-		' Initialize the tracking lists
-		mResultToSeqMap = New SortedList(Of Integer, Integer)
-		mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
-		mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
-		mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
+        ' Initialize the tracking lists
+        mResultToSeqMap = New SortedList(Of Integer, Integer)
+        mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
+        mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
+        mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
 
-		mResultIDToProteins = New SortedList(Of Integer, List(Of String))
+        mResultIDToProteins = New SortedList(Of Integer, List(Of String))
 
-		If startupOptions.LoadModsAndSeqInfo Then
-			' Read the ModSummary file (if it exists)
-			LoadModSummary()
-		End If
+        If startupOptions.LoadModsAndSeqInfo Then
+            ' Read the ModSummary file (if it exists)
+            LoadModSummary()
+        End If
 
-		If startupOptions.LoadModsAndSeqInfo Then
-			' Read the ResultToSeqMapInfo (if the files exist)			
-			If blnIsSynopsisFile Then
-				' Assume the files exist
-				LoadSeqInfo()
-			Else
-				' Only continue if the fht versions exists
+        If startupOptions.LoadModsAndSeqInfo Then
+            ' Read the ResultToSeqMapInfo (if the files exist)			
+            If blnIsSynopsisFile Then
+                ' Assume the files exist
+                LoadSeqInfo()
+            Else
+                ' Only continue if the fht versions exists
 
-				Dim strResultToSeqMapFilePath As String = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName)
-				Dim blnSeqInfoLoaded As Boolean = False
+                Dim strResultToSeqMapFilePath As String = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName)
+                Dim blnSeqInfoLoaded As Boolean = False
 
-				If Not String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
-					strResultToSeqMapFilePath = Path.Combine(mInputFolderPath, strResultToSeqMapFilePath)
-					strResultToSeqMapFilePath = clsPHRPReader.AutoSwitchToFHTIfRequired(strResultToSeqMapFilePath, mInputFilePath)
+                If Not String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
+                    strResultToSeqMapFilePath = Path.Combine(mInputFolderPath, strResultToSeqMapFilePath)
+                    strResultToSeqMapFilePath = clsPHRPReader.AutoSwitchToFHTIfRequired(strResultToSeqMapFilePath, mInputFilePath)
 
-					If File.Exists(strResultToSeqMapFilePath) Then
-						blnSeqInfoLoaded = LoadSeqInfo()
-					End If
-				End If
+                    If File.Exists(strResultToSeqMapFilePath) Then
+                        blnSeqInfoLoaded = LoadSeqInfo()
+                    End If
+                End If
 
-				If Not blnSeqInfoLoaded Then
-					If String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
-						ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file and unable to determine the ResultToSeqMapFilename using clsPHRPReader.GetPHRPResultToSeqMapFileName()")
-					Else
-						ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file but the ResultToSeqMap file does not exist: " & strResultToSeqMapFilePath)
-					End If
-				End If
+                If Not blnSeqInfoLoaded Then
+                    If String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
+                        ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file and unable to determine the ResultToSeqMapFilename using clsPHRPReader.GetPHRPResultToSeqMapFileName()")
+                    Else
+                        ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file but the ResultToSeqMap file does not exist: " & strResultToSeqMapFilePath)
+                    End If
+                End If
 
-			End If
-		End If
+            End If
+        End If
 
-		' The following will be overridden by a derived form of this class
-		DefineColumnHeaders()
+        ' The following will be overridden by a derived form of this class
+        DefineColumnHeaders()
 
-		mInitialized = True
+        mInitialized = True
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Returns the appropriate PHRPParser class based on the input file name; assumes blnLoadModsAndSeqInfo=True
-	''' </summary>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from strInputFilePath</remarks>
-	Public Shared Function GetParser(ByVal strInputFilePath As String) As clsPHRPParser
-		Return GetParser(strInputFilePath, True)
-	End Function
+    ''' <summary>
+    ''' Returns the appropriate PHRPParser class based on the input file name; assumes blnLoadModsAndSeqInfo=True
+    ''' </summary>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from strInputFilePath</remarks>
+    Public Shared Function GetParser(strInputFilePath As String) As clsPHRPParser
+        Return GetParser(strInputFilePath, True)
+    End Function
 
-	''' <summary>
-	''' Returns the appropriate PHRPParser class based on the input file name
-	''' </summary>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-	''' <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from strInputFilePath</remarks>
-	Public Shared Function GetParser(ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
-		Dim ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strInputFilePath)
+    ''' <summary>
+    ''' Returns the appropriate PHRPParser class based on the input file name
+    ''' </summary>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
+    ''' <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from strInputFilePath</remarks>
+    Public Shared Function GetParser(strInputFilePath As String, blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
+        Dim ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strInputFilePath)
 
-		If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
-			Throw New Exception("Unable to auto-determine the PeptideHitResultType for " & strInputFilePath)
-		End If
+        If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
+            Throw New Exception("Unable to auto-determine the PeptideHitResultType for " & strInputFilePath)
+        End If
 
-		Dim strDatasetName = clsPHRPReader.AutoDetermineDatasetName(strInputFilePath)
-		If String.IsNullOrEmpty(strDatasetName) Then
-			Throw New Exception("Unable to auto-determine the Dataset Name for " & strInputFilePath)
-		End If
+        Dim strDatasetName = clsPHRPReader.AutoDetermineDatasetName(strInputFilePath)
+        If String.IsNullOrEmpty(strDatasetName) Then
+            Throw New Exception("Unable to auto-determine the Dataset Name for " & strInputFilePath)
+        End If
 
-		Return GetParser(strInputFilePath, strDatasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo)
-	End Function
+        Return GetParser(strInputFilePath, strDatasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo)
+    End Function
 
-	''' <summary>
-	''' Returns the appropriate PHRPParser class based on the input file name
-	''' </summary>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' ''' <param name="strDatasetName">Dataset Name</param>
-	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-	''' <remarks>Throws an exception if unable to auto-determine the input file type from strInputFilePath</remarks>
-	Public Shared Function GetParser(ByVal strInputFilePath As String, ByVal strDatasetName As String, ByVal blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
-		Dim ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strInputFilePath)
+    ''' <summary>
+    ''' Returns the appropriate PHRPParser class based on the input file name
+    ''' </summary>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' ''' <param name="strDatasetName">Dataset Name</param>
+    ''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
+    ''' <remarks>Throws an exception if unable to auto-determine the input file type from strInputFilePath</remarks>
+    Public Shared Function GetParser(strInputFilePath As String, strDatasetName As String, blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
+        Dim ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strInputFilePath)
 
-		If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
-			Throw New Exception("Unable to auto-determine the PeptideHitResultType for " & strInputFilePath)
-		End If
+        If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
+            Throw New Exception("Unable to auto-determine the PeptideHitResultType for " & strInputFilePath)
+        End If
 
-		Return GetParser(strInputFilePath, strDatasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo)
-	End Function
+        Return GetParser(strInputFilePath, strDatasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo)
+    End Function
 
-	''' <summary>
-	''' Returns the appropriate PHRPParser class based on ePeptideHitResultType
-	''' </summary>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="strDatasetName">Dataset Name</param>
-	''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
-	''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-	''' <remarks></remarks>
-	Public Shared Function GetParser(ByVal strInputFilePath As String, ByVal strDatasetName As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
-		Select Case ePeptideHitResultType
-			Case clsPHRPReader.ePeptideHitResultType.Inspect
-				Return New clsPHRPParserInspect(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+    ''' <summary>
+    ''' Returns the appropriate PHRPParser class based on ePeptideHitResultType
+    ''' </summary>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="strDatasetName">Dataset Name</param>
+    ''' <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
+    ''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
+    ''' <remarks></remarks>
+    Public Shared Function GetParser(strInputFilePath As String, strDatasetName As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, blnLoadModsAndSeqInfo As Boolean) As clsPHRPParser
+        Select Case ePeptideHitResultType
+            Case clsPHRPReader.ePeptideHitResultType.Inspect
+                Return New clsPHRPParserInspect(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
 
-			Case clsPHRPReader.ePeptideHitResultType.MSAlign
-				Return New clsPHRPParserMSAlign(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+            Case clsPHRPReader.ePeptideHitResultType.MSAlign
+                Return New clsPHRPParserMSAlign(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
 
-			Case clsPHRPReader.ePeptideHitResultType.MSGFDB
-				Return New clsPHRPParserMSGFDB(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+            Case clsPHRPReader.ePeptideHitResultType.MSGFDB
+                Return New clsPHRPParserMSGFDB(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
 
-			Case clsPHRPReader.ePeptideHitResultType.Sequest
-				Return New clsPHRPParserSequest(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+            Case clsPHRPReader.ePeptideHitResultType.Sequest
+                Return New clsPHRPParserSequest(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
 
-			Case clsPHRPReader.ePeptideHitResultType.XTandem
-				Return New clsPHRPParserXTandem(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
+            Case clsPHRPReader.ePeptideHitResultType.XTandem
+                Return New clsPHRPParserXTandem(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
 
             Case clsPHRPReader.ePeptideHitResultType.MODa
                 Return New clsPHRPParserMODa(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
@@ -414,54 +414,54 @@ Public MustInherit Class clsPHRPParser
             Case clsPHRPReader.ePeptideHitResultType.MODPlus
                 Return New clsPHRPParserMODPlus(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo)
 
-			Case Else
-				Throw New Exception("Unrecognized value for PeptideHitResultType: " & ePeptideHitResultType.ToString())
-		End Select
+            Case Else
+                Throw New Exception("Unrecognized value for PeptideHitResultType: " & ePeptideHitResultType.ToString())
+        End Select
 
-	End Function	
+    End Function
 
 #Region "Functions overridden by derived classes"
-	Protected MustOverride Sub DefineColumnHeaders()
+    Protected MustOverride Sub DefineColumnHeaders()
 
-	''' <summary>
-	''' Parse the data line read from a PHRP results file
-	''' </summary>
-	''' <param name="strLine">Data line</param>
-	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
-	''' <param name="objPSM">clsPSM object (output)</param>
-	''' <returns>True if success, false if an error</returns>
-    Public Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM) As Boolean
+    ''' <summary>
+    ''' Parse the data line read from a PHRP results file
+    ''' </summary>
+    ''' <param name="strLine">Data line</param>
+    ''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
+    ''' <param name="objPSM">clsPSM object (output)</param>
+    ''' <returns>True if success, false if an error</returns>
+    Public Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM) As Boolean
         Return ParsePHRPDataLine(strLine, intLinesRead, objPSM, fastReadMode:=False)
     End Function
 
-	''' <summary>
-	''' Parse the data line read from a PHRP results file
-	''' </summary>
-	''' <param name="strLine">Data line</param>
-	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
-	''' <param name="objPSM">clsPSM object (output)</param>
-	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
-	''' <returns>True if success, false if an error</returns>
-	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
-    Public MustOverride Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
+    ''' <summary>
+    ''' Parse the data line read from a PHRP results file
+    ''' </summary>
+    ''' <param name="strLine">Data line</param>
+    ''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
+    ''' <param name="objPSM">clsPSM object (output)</param>
+    ''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
+    ''' <returns>True if success, false if an error</returns>
+    ''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
+    Public MustOverride Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
 
-	''' <summary>
-	''' Parses the specified parameter file
-	''' Also reads the Tool_Version_Info file in the same folder (if present)
-	''' </summary>
-	''' <param name="strSearchEngineParamFileName">Name of the parameter file to parse (must reside in InputFolderPath)</param>
-	''' <param name="objSearchEngineParams">Search engine parameters class (output)</param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-    Public MustOverride Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    ''' <summary>
+    ''' Parses the specified parameter file
+    ''' Also reads the Tool_Version_Info file in the same folder (if present)
+    ''' </summary>
+    ''' <param name="strSearchEngineParamFileName">Name of the parameter file to parse (must reside in InputFolderPath)</param>
+    ''' <param name="objSearchEngineParams">Search engine parameters class (output)</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public MustOverride Function LoadSearchEngineParameters(strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
 #End Region
 
-	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
-		mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
-	End Sub
+    Protected Sub AddHeaderColumn(strColumnName As String)
+        mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
+    End Sub
 
-    Protected Sub AddScore(ByVal objPSM As clsPSM, ByVal strColumns() As String, ByVal strScoreColumnName As String)
+    Protected Sub AddScore(objPSM As clsPSM, strColumns() As String, strScoreColumnName As String)
         Const NOT_FOUND As String = "==SCORE_NOT_FOUND=="
 
         Dim strValue As String
@@ -473,23 +473,23 @@ Public MustInherit Class clsPHRPParser
 
     End Sub
 
-	''' <summary>
-	''' Clear any cached error messages
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub ClearErrors()
-		mErrorMessages.Clear()
-	End Sub
+    ''' <summary>
+    ''' Clear any cached error messages
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub ClearErrors()
+        mErrorMessages.Clear()
+    End Sub
 
-	''' <summary>
-	''' Clear any cached warning messages
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub ClearWarnings()
-		mWarningMessages.Clear()
-	End Sub
+    ''' <summary>
+    ''' Clear any cached warning messages
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub ClearWarnings()
+        mWarningMessages.Clear()
+    End Sub
 
-    Protected Function ConvertModsToNumericMods(ByVal strCleanSequence As String, ByVal lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
+    Protected Function ConvertModsToNumericMods(strCleanSequence As String, lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
         Static sbNewPeptide As New Text.StringBuilder
 
         sbNewPeptide.Length = 0
@@ -512,73 +512,73 @@ Public MustInherit Class clsPHRPParser
 
     End Function
 
-	''' <summary>
-	''' Look for ambiguous mods in strSequenceWithMods
-	''' For example, -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
-	''' </summary>
-	''' <param name="strSequenceWithMods"></param>
-	''' <returns></returns>
-	''' <remarks>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</remarks>
-	Protected Function ExtractAmbiguousMods(ByVal strSequenceWithMods As String) As SortedList(Of Integer, udtAmbiguousModInfo)
+    ''' <summary>
+    ''' Look for ambiguous mods in strSequenceWithMods
+    ''' For example, -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
+    ''' </summary>
+    ''' <param name="strSequenceWithMods"></param>
+    ''' <returns></returns>
+    ''' <remarks>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</remarks>
+    Protected Function ExtractAmbiguousMods(strSequenceWithMods As String) As SortedList(Of Integer, udtAmbiguousModInfo)
 
-		Dim strPrimarySequence As String = String.Empty
-		Dim strPrefix As String = String.Empty
-		Dim strSuffix As String = String.Empty
+        Dim strPrimarySequence As String = String.Empty
+        Dim strPrefix As String = String.Empty
+        Dim strSuffix As String = String.Empty
 
-		If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
-			strPrimarySequence = String.Copy(strSequenceWithMods)
-		End If
+        If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
+            strPrimarySequence = String.Copy(strSequenceWithMods)
+        End If
 
-		Dim lstAmbiguousMods = New SortedList(Of Integer, udtAmbiguousModInfo)
+        Dim lstAmbiguousMods = New SortedList(Of Integer, udtAmbiguousModInfo)
 
-		Dim intResidueNumber As Integer = 0
-		Dim blnParsingAmbiguousMod As Boolean = False
-		Dim udtCurrentMod As udtAmbiguousModInfo
+        Dim intResidueNumber As Integer = 0
+        Dim blnParsingAmbiguousMod As Boolean = False
+        Dim udtCurrentMod As udtAmbiguousModInfo
 
-		For intCharIndex = 0 To strPrimarySequence.Length - 1
-			If clsPHRPReader.IsLetterAtoZ(strPrimarySequence.Chars(intCharIndex)) Then
-				' Found a letter
-				intResidueNumber += 1
+        For intCharIndex = 0 To strPrimarySequence.Length - 1
+            If clsPHRPReader.IsLetterAtoZ(strPrimarySequence.Chars(intCharIndex)) Then
+                ' Found a letter
+                intResidueNumber += 1
 
-				If intCharIndex > 0 AndAlso strPrimarySequence.Chars(intCharIndex - 1) = "("c Then
-					' Found an ambiguous mod
-					If Not blnParsingAmbiguousMod Then
-						blnParsingAmbiguousMod = True
-						udtCurrentMod.ResidueStart = intResidueNumber
-						udtCurrentMod.ResidueEnd = intResidueNumber
-						udtCurrentMod.ModMassString = String.Empty
-					End If
-				End If
+                If intCharIndex > 0 AndAlso strPrimarySequence.Chars(intCharIndex - 1) = "("c Then
+                    ' Found an ambiguous mod
+                    If Not blnParsingAmbiguousMod Then
+                        blnParsingAmbiguousMod = True
+                        udtCurrentMod.ResidueStart = intResidueNumber
+                        udtCurrentMod.ResidueEnd = intResidueNumber
+                        udtCurrentMod.ModMassString = String.Empty
+                    End If
+                End If
 
-			ElseIf blnParsingAmbiguousMod Then
-				' Found a non-letter, and we are parsing an ambiguous mod
+            ElseIf blnParsingAmbiguousMod Then
+                ' Found a non-letter, and we are parsing an ambiguous mod
 
-				udtCurrentMod.ResidueEnd = intResidueNumber
-				blnParsingAmbiguousMod = False
+                udtCurrentMod.ResidueEnd = intResidueNumber
+                blnParsingAmbiguousMod = False
 
-				' The mod mass should be next, in the form [-30.09]
-				' Parse out the mod mass
-				If intCharIndex < strPrimarySequence.Length - 2 Then
-					If strPrimarySequence.Chars(intCharIndex + 1) = "[" Then
-						Dim strModMassString = strPrimarySequence.Substring(intCharIndex + 2)
-						Dim bracketIndex = strModMassString.IndexOf("]"c)
-						If bracketIndex > 0 Then
-							' Valid ambiguous mod found; store it
-							strModMassString = strModMassString.Substring(0, bracketIndex)
-							udtCurrentMod.ModMassString = String.Copy(strModMassString)
+                ' The mod mass should be next, in the form [-30.09]
+                ' Parse out the mod mass
+                If intCharIndex < strPrimarySequence.Length - 2 Then
+                    If strPrimarySequence.Chars(intCharIndex + 1) = "[" Then
+                        Dim strModMassString = strPrimarySequence.Substring(intCharIndex + 2)
+                        Dim bracketIndex = strModMassString.IndexOf("]"c)
+                        If bracketIndex > 0 Then
+                            ' Valid ambiguous mod found; store it
+                            strModMassString = strModMassString.Substring(0, bracketIndex)
+                            udtCurrentMod.ModMassString = String.Copy(strModMassString)
 
-							lstAmbiguousMods.Add(udtCurrentMod.ResidueStart, udtCurrentMod)
-						End If
-					End If
-				End If
-			End If
-		Next
+                            lstAmbiguousMods.Add(udtCurrentMod.ResidueStart, udtCurrentMod)
+                        End If
+                    End If
+                End If
+            End If
+        Next
 
-		Return lstAmbiguousMods
+        Return lstAmbiguousMods
 
-	End Function
+    End Function
 
-    Public Sub FinalizePSM(ByVal objPSM As clsPSM)
+    Public Sub FinalizePSM(objPSM As clsPSM)
 
         If mCleavageStateCalculator Is Nothing Then
             mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
@@ -592,123 +592,123 @@ Public MustInherit Class clsPHRPParser
 
     End Sub
 
-	Private Function GetMODaStaticModSetting(ByVal kvSetting As KeyValuePair(Of String, String)) As KeyValuePair(Of String, String)
+    Private Function GetMODaStaticModSetting(kvSetting As KeyValuePair(Of String, String)) As KeyValuePair(Of String, String)
 
-		Dim strKey = kvSetting.Key
-		Dim strValue = kvSetting.Value
+        Dim strKey = kvSetting.Key
+        Dim strValue = kvSetting.Value
 
-		If Not String.Equals(strKey, "ADD", StringComparison.CurrentCultureIgnoreCase) Then
-			Throw New Exception("Key name is not ADD; this is not a MODa Static Mod Setting")
-		End If
+        If Not String.Equals(strKey, "ADD", StringComparison.CurrentCultureIgnoreCase) Then
+            Throw New Exception("Key name is not ADD; this is not a MODa Static Mod Setting")
+        End If
 
-		Dim commaIndex = strValue.IndexOf(","c)
+        Dim commaIndex = strValue.IndexOf(","c)
 
-		If commaIndex > 0 Then
-			Dim strResidue = strValue.Substring(0, commaIndex).Trim()
-			strValue = strValue.Substring(commaIndex + 1).Trim()
+        If commaIndex > 0 Then
+            Dim strResidue = strValue.Substring(0, commaIndex).Trim()
+            strValue = strValue.Substring(commaIndex + 1).Trim()
 
-			' Update Key to look like ADD_A or ADD_NTerm
-			strKey = strKey & "_" & strResidue
+            ' Update Key to look like ADD_A or ADD_NTerm
+            strKey = strKey & "_" & strResidue
 
-			kvSetting = New KeyValuePair(Of String, String)(strKey, strValue)
-		Else
-			ReportWarning("Value for MODa keyword ADD does not contain a comma")
-		End If
+            kvSetting = New KeyValuePair(Of String, String)(strKey, strValue)
+        Else
+            ReportWarning("Value for MODa keyword ADD does not contain a comma")
+        End If
 
-		Return kvSetting
+        Return kvSetting
 
-	End Function
+    End Function
 
-	Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As Exception)
-		If String.IsNullOrEmpty(strBaseMessage) Then
-			strBaseMessage = "Error"
-		End If
+    Protected Sub HandleException(strBaseMessage As String, ex As Exception)
+        If String.IsNullOrEmpty(strBaseMessage) Then
+            strBaseMessage = "Error"
+        End If
 
-		ReportError(strBaseMessage & ": " & ex.Message)
-	End Sub
+        ReportError(strBaseMessage & ": " & ex.Message)
+    End Sub
 
-	''' <summary>
-	''' Reads the data in strModSummaryFilePath.  Populates mModInfo with the modification names, masses, and affected residues
-	''' </summary>
-	''' <returns>True if success; false if an error</returns>
-	Protected Function LoadModSummary() As Boolean
+    ''' <summary>
+    ''' Reads the data in strModSummaryFilePath.  Populates mModInfo with the modification names, masses, and affected residues
+    ''' </summary>
+    ''' <returns>True if success; false if an error</returns>
+    Protected Function LoadModSummary() As Boolean
 
-		Dim objModSummaryReader As clsPHRPModSummaryReader
+        Dim objModSummaryReader As clsPHRPModSummaryReader
 
-		Dim strModSummaryFilePath As String
-		Dim strModSummaryFilePathPreferred As String
+        Dim strModSummaryFilePath As String
+        Dim strModSummaryFilePathPreferred As String
 
-		Dim blnSuccess As Boolean
+        Dim blnSuccess As Boolean
 
-		Try
-			strModSummaryFilePath = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName)
-			If String.IsNullOrEmpty(strModSummaryFilePath) Then
-				ReportWarning("ModSummaryFile path is empty; unable to continue")
-				Return False
-			End If
+        Try
+            strModSummaryFilePath = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName)
+            If String.IsNullOrEmpty(strModSummaryFilePath) Then
+                ReportWarning("ModSummaryFile path is empty; unable to continue")
+                Return False
+            End If
 
-			strModSummaryFilePath = Path.Combine(mInputFolderPath, strModSummaryFilePath)
-			strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, mInputFilePath)
-			If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso File.Exists(strModSummaryFilePathPreferred) Then
-				strModSummaryFilePath = strModSummaryFilePathPreferred
-			End If
+            strModSummaryFilePath = Path.Combine(mInputFolderPath, strModSummaryFilePath)
+            strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, mInputFilePath)
+            If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso File.Exists(strModSummaryFilePathPreferred) Then
+                strModSummaryFilePath = strModSummaryFilePathPreferred
+            End If
 
-			If Not File.Exists(strModSummaryFilePath) Then
-				ReportWarning("ModSummary file not found: " & strModSummaryFilePath)
-				Return False
-			End If
+            If Not File.Exists(strModSummaryFilePath) Then
+                ReportWarning("ModSummary file not found: " & strModSummaryFilePath)
+                Return False
+            End If
 
-			ShowMessage("Reading the PHRP ModSummary file")
+            ShowMessage("Reading the PHRP ModSummary file")
 
-			objModSummaryReader = New clsPHRPModSummaryReader(strModSummaryFilePath)
-			blnSuccess = objModSummaryReader.Success
+            objModSummaryReader = New clsPHRPModSummaryReader(strModSummaryFilePath)
+            blnSuccess = objModSummaryReader.Success
 
-			If blnSuccess Then
-				mModInfo = objModSummaryReader.ModificationDefs
-			End If
+            If blnSuccess Then
+                mModInfo = objModSummaryReader.ModificationDefs
+            End If
 
-		Catch ex As Exception
-			HandleException("Exception reading PHRP Mod Summary file", ex)
-			Return False
-		End Try
+        Catch ex As Exception
+            HandleException("Exception reading PHRP Mod Summary file", ex)
+            Return False
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function LoadSeqInfo() As Boolean
+    Protected Function LoadSeqInfo() As Boolean
 
-		Dim blnSuccess As Boolean
-		Dim objReader As clsPHRPSeqMapReader
+        Dim blnSuccess As Boolean
+        Dim objReader As clsPHRPSeqMapReader
 
         Dim entriesParsed As Integer
         Dim dtLastProgress As DateTime = DateTime.UtcNow()
         Dim blnNotifyComplete As Boolean
 
-		Try
+        Try
 
-			ShowMessage("Reading the PHRP SeqInfo file")
+            ShowMessage("Reading the PHRP SeqInfo file")
 
-			' Instantiate the reader
-			objReader = New clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType, mInputFilePath)
+            ' Instantiate the reader
+            objReader = New clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType, mInputFilePath)
 
-			objReader.MaxProteinsPerSeqID = mMaxProteinsPerPSM
+            objReader.MaxProteinsPerSeqID = mMaxProteinsPerPSM
 
-			' Read the files
-			blnSuccess = objReader.GetProteinMapping(mResultToSeqMap, mSeqToProteinMap, mSeqInfo, mPepToProteinMap)
+            ' Read the files
+            blnSuccess = objReader.GetProteinMapping(mResultToSeqMap, mSeqToProteinMap, mSeqInfo, mPepToProteinMap)
 
-			If Not blnSuccess Then
-				ReportWarning(objReader.ErrorMessage)
-			End If
+            If Not blnSuccess Then
+                ReportWarning(objReader.ErrorMessage)
+            End If
 
-			mResultIDToProteins.Clear()
+            mResultIDToProteins.Clear()
 
-			If blnSuccess Then
-				' Populate mResultIDToProteins
+            If blnSuccess Then
+                ' Populate mResultIDToProteins
 
-				For Each objItem As KeyValuePair(Of Integer, Integer) In mResultToSeqMap
+                For Each objItem As KeyValuePair(Of Integer, Integer) In mResultToSeqMap
 
-					Dim lstProteinsForSeqID As List(Of clsProteinInfo) = Nothing
+                    Dim lstProteinsForSeqID As List(Of clsProteinInfo) = Nothing
                     Dim lstProteinsForResultID As List(Of String)
 
                     If mSeqToProteinMap.TryGetValue(objItem.Value, lstProteinsForSeqID) Then
@@ -728,13 +728,13 @@ Public MustInherit Class clsPHRPParser
                         lstProteinsForResultID = New List(Of String)
                     End If
 
-					If mMaxProteinsPerPSM > 0 AndAlso lstProteinsForResultID.Count > mMaxProteinsPerPSM Then
-						' Only add a subset of the proteins in lstProteinsForResultID
-						Dim lstProteinSubset = (From item In lstProteinsForResultID Take mMaxProteinsPerPSM Order By item Select item).ToList()
-						mResultIDToProteins.Add(objItem.Key, lstProteinSubset)
-					Else
-						mResultIDToProteins.Add(objItem.Key, lstProteinsForResultID)
-					End If
+                    If mMaxProteinsPerPSM > 0 AndAlso lstProteinsForResultID.Count > mMaxProteinsPerPSM Then
+                        ' Only add a subset of the proteins in lstProteinsForResultID
+                        Dim lstProteinSubset = (From item In lstProteinsForResultID Take mMaxProteinsPerPSM Order By item Select item).ToList()
+                        mResultIDToProteins.Add(objItem.Key, lstProteinSubset)
+                    Else
+                        mResultIDToProteins.Add(objItem.Key, lstProteinsForResultID)
+                    End If
 
                     entriesParsed += 1
                     If DateTime.UtcNow.Subtract(dtLastProgress).TotalSeconds >= 5 Then
@@ -744,120 +744,120 @@ Public MustInherit Class clsPHRPParser
                         blnNotifyComplete = True
                     End If
 
-				Next
+                Next
 
                 If blnNotifyComplete Then
                     Console.WriteLine(" ... associating proteins with sequences: 100% complete")
                 End If
 
-			End If
+            End If
 
-		Catch ex As Exception
-			HandleException("Error loading PHRP Seq Info", ex)
-			blnSuccess = False
-			If Not mInitialized Then Throw New Exception(mErrorMessage, ex)
-		End Try
+        Catch ex As Exception
+            HandleException("Error loading PHRP Seq Info", ex)
+            blnSuccess = False
+            If Not mInitialized Then Throw New Exception(mErrorMessage, ex)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	''' <summary>
-	''' Formats a number so that it begins with a + sign if positive or a - sign if negative
-	''' Rounds the number to the specified number of digits, trimming off trailing zeros
-	''' Example output: +79.9663 or -17.016
-	''' </summary>
-	''' <param name="Value"></param>
-	''' <param name="DigitsOfPrecision"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Shared Function NumToStringPlusMinus(ByVal Value As Double, ByVal DigitsOfPrecision As Integer) As String
+    ''' <summary>
+    ''' Formats a number so that it begins with a + sign if positive or a - sign if negative
+    ''' Rounds the number to the specified number of digits, trimming off trailing zeros
+    ''' Example output: +79.9663 or -17.016
+    ''' </summary>
+    ''' <param name="Value"></param>
+    ''' <param name="DigitsOfPrecision"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function NumToStringPlusMinus(Value As Double, DigitsOfPrecision As Integer) As String
 
-		Dim strFormatString As String = "+0;-0"
-		If DigitsOfPrecision > 0 Then
-			strFormatString = "+0." & New String("0"c, DigitsOfPrecision) & ";-0." & New String("0"c, DigitsOfPrecision)
-		End If
+        Dim strFormatString As String = "+0;-0"
+        If DigitsOfPrecision > 0 Then
+            strFormatString = "+0." & New String("0"c, DigitsOfPrecision) & ";-0." & New String("0"c, DigitsOfPrecision)
+        End If
 
-		Dim strValue As String = Value.ToString(strFormatString).TrimEnd("0"c)
+        Dim strValue As String = Value.ToString(strFormatString).TrimEnd("0"c)
 
-		If strValue.EndsWith("."c) Then
-			' Ends in a decimal point; remove the decimal point
-			strValue = strValue.TrimEnd("."c)
-		End If
+        If strValue.EndsWith("."c) Then
+            ' Ends in a decimal point; remove the decimal point
+            strValue = strValue.TrimEnd("."c)
+        End If
 
-		Return strValue
+        Return strValue
 
-	End Function
+    End Function
 
-	''' <summary>
-	''' Parse the column names in strSplitLine and update the local column header mapping
-	''' </summary>
-	''' <param name="strSplitLine"></param>
-	''' <remarks></remarks>
-    Public Sub ParseColumnHeaders(ByVal strSplitLine() As String)
+    ''' <summary>
+    ''' Parse the column names in strSplitLine and update the local column header mapping
+    ''' </summary>
+    ''' <param name="strSplitLine"></param>
+    ''' <remarks></remarks>
+    Public Sub ParseColumnHeaders(strSplitLine() As String)
         clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
     End Sub
 
-	''' <summary>
-	''' Splits strText on strText, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
-	''' </summary>
-	''' <param name="strText"></param>
-	''' <param name="chDelimiter"></param>
-	''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
-	''' <remarks>Automatically trims whitespace</remarks>
-	Public Shared Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char) As KeyValuePair(Of String, String)
-		Return ParseKeyValueSetting(strText, chDelimiter, String.Empty)
-	End Function
+    ''' <summary>
+    ''' Splits strText on strText, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
+    ''' </summary>
+    ''' <param name="strText"></param>
+    ''' <param name="chDelimiter"></param>
+    ''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
+    ''' <remarks>Automatically trims whitespace</remarks>
+    Public Shared Function ParseKeyValueSetting(strText As String, chDelimiter As Char) As KeyValuePair(Of String, String)
+        Return ParseKeyValueSetting(strText, chDelimiter, String.Empty)
+    End Function
 
-	''' <summary>
-	''' Splits strText on strText, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
-	''' </summary>
-	''' <param name="strText"></param>
-	''' <param name="chDelimiter"></param>
-	''' <param name="strCommentChar">If defined, then looks for this character in the value portion of the setting and removes that character plus any text after it</param>
-	''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
-	''' <remarks>Automatically trims whitespace</remarks>
-	Public Shared Function ParseKeyValueSetting(ByVal strText As String, ByVal chDelimiter As Char, ByVal strCommentChar As String) As KeyValuePair(Of String, String)
-		Dim kvSetting As KeyValuePair(Of String, String)
-		Dim strKey As String
-		Dim strValue As String
-		Dim intCharIndex As Integer
+    ''' <summary>
+    ''' Splits strText on strText, returning a KeyValuePair object where the key is the text to the left of the delimiter and the value is the text to the right
+    ''' </summary>
+    ''' <param name="strText"></param>
+    ''' <param name="chDelimiter"></param>
+    ''' <param name="strCommentChar">If defined, then looks for this character in the value portion of the setting and removes that character plus any text after it</param>
+    ''' <returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
+    ''' <remarks>Automatically trims whitespace</remarks>
+    Public Shared Function ParseKeyValueSetting(strText As String, chDelimiter As Char, strCommentChar As String) As KeyValuePair(Of String, String)
+        Dim kvSetting As KeyValuePair(Of String, String)
+        Dim strKey As String
+        Dim strValue As String
+        Dim intCharIndex As Integer
 
-		If Not String.IsNullOrEmpty(strText) Then
-			intCharIndex = strText.IndexOf(chDelimiter)
-			If intCharIndex > 0 Then
-				strKey = strText.Substring(0, intCharIndex).Trim()
-				If intCharIndex < strText.Length - 1 Then
-					strValue = strText.Substring(intCharIndex + 1).Trim()
+        If Not String.IsNullOrEmpty(strText) Then
+            intCharIndex = strText.IndexOf(chDelimiter)
+            If intCharIndex > 0 Then
+                strKey = strText.Substring(0, intCharIndex).Trim()
+                If intCharIndex < strText.Length - 1 Then
+                    strValue = strText.Substring(intCharIndex + 1).Trim()
 
-					If Not String.IsNullOrEmpty(strCommentChar) Then
-						' Look for the comment character
-						Dim intCommentCharIndex As Integer
-						intCommentCharIndex = strValue.IndexOf(strCommentChar, StringComparison.Ordinal)
-						If intCommentCharIndex > 0 Then
-							' Trim off the comment
-							strValue = strValue.Substring(0, intCommentCharIndex).Trim()
-						End If
-					End If
+                    If Not String.IsNullOrEmpty(strCommentChar) Then
+                        ' Look for the comment character
+                        Dim intCommentCharIndex As Integer
+                        intCommentCharIndex = strValue.IndexOf(strCommentChar, StringComparison.Ordinal)
+                        If intCommentCharIndex > 0 Then
+                            ' Trim off the comment
+                            strValue = strValue.Substring(0, intCommentCharIndex).Trim()
+                        End If
+                    End If
 
-				Else
-					strValue = String.Empty
-				End If
+                Else
+                    strValue = String.Empty
+                End If
 
-				kvSetting = New KeyValuePair(Of String, String)(strKey, strValue)
-				Return kvSetting
-			End If
-		End If
+                kvSetting = New KeyValuePair(Of String, String)(strKey, strValue)
+                Return kvSetting
+            End If
+        End If
 
-		Return New KeyValuePair(Of String, String)(String.Empty, String.Empty)
+        Return New KeyValuePair(Of String, String)(String.Empty, String.Empty)
 
-	End Function
+    End Function
 
     Protected Function ReadKeyValuePairSearchEngineParamFile(
-      ByVal strSearchEngineName As String,
-      ByVal strSearchEngineParamFileName As String,
-      ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
-      ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
+      strSearchEngineName As String,
+      strSearchEngineParamFileName As String,
+      ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
+      objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Dim strParamFilePath As String
         Dim blnSuccess As Boolean
@@ -911,9 +911,9 @@ Public MustInherit Class clsPHRPParser
     End Function
 
     Protected Function ReadSearchEngineVersion(
-      ByVal strFolderPath As String,
-      ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
-      ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
+      strFolderPath As String,
+      ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
+      objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Dim strToolVersionInfoFilePath As String
         Dim strLineIn As String
@@ -991,22 +991,22 @@ Public MustInherit Class clsPHRPParser
 
     End Function
 
-	Protected Sub ReportError(ByVal strErrorMessage As String)
-		mErrorMessage = strErrorMessage
-		mErrorMessages.Add(strErrorMessage)
-		RaiseEvent ErrorEvent(strErrorMessage)
-	End Sub
+    Protected Sub ReportError(strErrorMessage As String)
+        mErrorMessage = strErrorMessage
+        mErrorMessages.Add(strErrorMessage)
+        RaiseEvent ErrorEvent(strErrorMessage)
+    End Sub
 
-	Protected Sub ReportWarning(ByVal strWarningMessage As String)
-		mWarningMessages.Add(strWarningMessage)
-		RaiseEvent WarningEvent(strWarningMessage)
-	End Sub
+    Protected Sub ReportWarning(strWarningMessage As String)
+        mWarningMessages.Add(strWarningMessage)
+        RaiseEvent WarningEvent(strWarningMessage)
+    End Sub
 
-	Protected Sub ShowMessage(ByVal strMessage As String)
-		RaiseEvent MessageEvent(strMessage)
-	End Sub
+    Protected Sub ShowMessage(strMessage As String)
+        RaiseEvent MessageEvent(strMessage)
+    End Sub
 
-    Protected Sub StoreModInfo(ByVal objPSM As clsPSM, ByVal objSeqInfo As clsSeqInfo)
+    Protected Sub StoreModInfo(objPSM As clsPSM, objSeqInfo As clsSeqInfo)
 
         Dim strMods() As String
         Dim kvModDetails As KeyValuePair(Of String, String)
@@ -1115,15 +1115,15 @@ Public MustInherit Class clsPHRPParser
 
     End Sub
 
-	''' <summary>
-	''' Updates the theoretical (computed) monoisotopic mass of objPSM using mResultToSeqMap and mSeqInfo
-	''' Also updates the modification info
-	''' Also updates SeqID
-	''' </summary>
-	''' <param name="objPSM"></param>
-	''' <returns>True if success, False if objPSM.ResultID is not found in mResultToSeqMap</returns>
-	''' <remarks></remarks>
-    Protected Function UpdatePSMUsingSeqInfo(ByVal objPSM As clsPSM) As Boolean
+    ''' <summary>
+    ''' Updates the theoretical (computed) monoisotopic mass of objPSM using mResultToSeqMap and mSeqInfo
+    ''' Also updates the modification info
+    ''' Also updates SeqID
+    ''' </summary>
+    ''' <param name="objPSM"></param>
+    ''' <returns>True if success, False if objPSM.ResultID is not found in mResultToSeqMap</returns>
+    ''' <remarks></remarks>
+    Protected Function UpdatePSMUsingSeqInfo(objPSM As clsPSM) As Boolean
         Dim intSeqID As Integer
         Dim objSeqInfo As clsSeqInfo = Nothing
 
@@ -1226,9 +1226,9 @@ Public MustInherit Class clsPHRPParser
     End Function
 
     Protected Function UpdatePSMFindMatchingModInfo( _
-      ByVal strMassCorrectionTag As String, _
-      ByVal blnFavorTerminalMods As Boolean, _
-      ByVal eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
+      strMassCorrectionTag As String, _
+      blnFavorTerminalMods As Boolean, _
+      eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
       <Out()> ByRef objMatchedModDef As clsModificationDefinition) As Boolean
 
         objMatchedModDef = New clsModificationDefinition()

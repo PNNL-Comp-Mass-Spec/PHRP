@@ -64,60 +64,60 @@ Public Class clsExtendedScanStatsReader
 		mColumnHeaders = New SortedDictionary(Of String, Integer)
 	End Sub
 
-	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
-		mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
-	End Sub
+    Protected Sub AddHeaderColumn(strColumnName As String)
+        mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
+    End Sub
 
-	Protected Sub DefineColumnHeaders()
+    Protected Sub DefineColumnHeaders()
 
-		mColumnHeaders.Clear()
+        mColumnHeaders.Clear()
 
-		' Define the default column mapping
-		AddHeaderColumn(DATA_COLUMN_Dataset)
-		AddHeaderColumn(DATA_COLUMN_ScanNumber)
-		AddHeaderColumn(DATA_COLUMN_IonInjectionTime)
-		AddHeaderColumn(DATA_COLUMN_ScanEvent)
-		AddHeaderColumn(DATA_COLUMN_MasterIndex)
-		AddHeaderColumn(DATA_COLUMN_ElapsedScanTime)
-		AddHeaderColumn(DATA_COLUMN_ChargeState)
-		AddHeaderColumn(DATA_COLUMN_MonoisotopicMZ)
-		AddHeaderColumn(DATA_COLUMN_MS2IsolationWidth)
-		AddHeaderColumn(DATA_COLUMN_FTAnalyzerSettings)
-		AddHeaderColumn(DATA_COLUMN_FTAnalyzerMessage)
-		AddHeaderColumn(DATA_COLUMN_FTResolution)
-		AddHeaderColumn(DATA_COLUMN_ConversionParameterB)
-		AddHeaderColumn(DATA_COLUMN_ConversionParameterC)
-		AddHeaderColumn(DATA_COLUMN_ConversionParameterD)
-		AddHeaderColumn(DATA_COLUMN_ConversionParameterE)
-		AddHeaderColumn(DATA_COLUMN_CollisionMode)
-		AddHeaderColumn(DATA_COLUMN_ScanFilterText)
-		AddHeaderColumn(DATA_COLUMN_SourceVoltage)
-		AddHeaderColumn(DATA_COLUMN_Source_Current)
+        ' Define the default column mapping
+        AddHeaderColumn(DATA_COLUMN_Dataset)
+        AddHeaderColumn(DATA_COLUMN_ScanNumber)
+        AddHeaderColumn(DATA_COLUMN_IonInjectionTime)
+        AddHeaderColumn(DATA_COLUMN_ScanEvent)
+        AddHeaderColumn(DATA_COLUMN_MasterIndex)
+        AddHeaderColumn(DATA_COLUMN_ElapsedScanTime)
+        AddHeaderColumn(DATA_COLUMN_ChargeState)
+        AddHeaderColumn(DATA_COLUMN_MonoisotopicMZ)
+        AddHeaderColumn(DATA_COLUMN_MS2IsolationWidth)
+        AddHeaderColumn(DATA_COLUMN_FTAnalyzerSettings)
+        AddHeaderColumn(DATA_COLUMN_FTAnalyzerMessage)
+        AddHeaderColumn(DATA_COLUMN_FTResolution)
+        AddHeaderColumn(DATA_COLUMN_ConversionParameterB)
+        AddHeaderColumn(DATA_COLUMN_ConversionParameterC)
+        AddHeaderColumn(DATA_COLUMN_ConversionParameterD)
+        AddHeaderColumn(DATA_COLUMN_ConversionParameterE)
+        AddHeaderColumn(DATA_COLUMN_CollisionMode)
+        AddHeaderColumn(DATA_COLUMN_ScanFilterText)
+        AddHeaderColumn(DATA_COLUMN_SourceVoltage)
+        AddHeaderColumn(DATA_COLUMN_Source_Current)
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Open a tab-delimited _ScanStatsEx.txt file and read the data
-	''' </summary>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
-	Public Function ReadExtendedScanStatsData(ByVal strInputFilePath As String) As Dictionary(Of Integer, clsScanStatsExInfo)
+    ''' <summary>
+    ''' Open a tab-delimited _ScanStatsEx.txt file and read the data
+    ''' </summary>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
+    Public Function ReadExtendedScanStatsData(strInputFilePath As String) As Dictionary(Of Integer, clsScanStatsExInfo)
 
-		Dim lstScanStats As Dictionary(Of Integer, clsScanStatsExInfo)
-		lstScanStats = New Dictionary(Of Integer, clsScanStatsExInfo)
+        Dim lstScanStats As Dictionary(Of Integer, clsScanStatsExInfo)
+        lstScanStats = New Dictionary(Of Integer, clsScanStatsExInfo)
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
-		Dim blnHeaderLineParsed As Boolean
-		Dim blnSkipLine As Boolean
+        Dim strLineIn As String
+        Dim strSplitLine() As String
+        Dim blnHeaderLineParsed As Boolean
+        Dim blnSkipLine As Boolean
 
-		Dim intLinesRead As Integer
-		Dim intScanNumber As Integer
+        Dim intLinesRead As Integer
+        Dim intScanNumber As Integer
 
-		Try
-			DefineColumnHeaders()
-			intLinesRead = 0
-			mErrorMessage = String.Empty
+        Try
+            DefineColumnHeaders()
+            intLinesRead = 0
+            mErrorMessage = String.Empty
 
             Using srInFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 Do While Not srInFile.EndOfStream
@@ -175,13 +175,13 @@ Public Class clsExtendedScanStatsReader
                 Loop
             End Using
 
-		Catch ex As Exception
-			mErrorMessage = "Error reading the ScanStatsEx data: " & ex.Message
-		End Try
+        Catch ex As Exception
+            mErrorMessage = "Error reading the ScanStatsEx data: " & ex.Message
+        End Try
 
-		Return lstScanStats
+        Return lstScanStats
 
-	End Function
+    End Function
 
 
 

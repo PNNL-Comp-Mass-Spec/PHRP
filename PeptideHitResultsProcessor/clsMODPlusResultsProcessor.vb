@@ -469,8 +469,8 @@ Public Class clsMODPlusResultsProcessor
     ''' <returns></returns>
     ''' <remarks></remarks>
     Protected Function CreateSynResultsFile(
-       strInputFilePath As String,
-       strOutputFilePath As String) As Boolean
+      strInputFilePath As String,
+      strOutputFilePath As String) As Boolean
 
         Try
             Dim intColumnMapping() As Integer = Nothing

@@ -133,85 +133,85 @@ Public Class clsSearchEngineParameters
 
 #End Region
 
-	Public Sub New(ByVal SearchEngineName As String)
-		Me.New(SearchEngineName, New List(Of clsModificationDefinition), Nothing)
-	End Sub
+    Public Sub New(SearchEngineName As String)
+        Me.New(SearchEngineName, New List(Of clsModificationDefinition), Nothing)
+    End Sub
 
-	Public Sub New(ByVal SearchEngineName As String, ByVal objModInfo As List(Of clsModificationDefinition))
-		Me.New(SearchEngineName, objModInfo, Nothing)
-	End Sub
+    Public Sub New(SearchEngineName As String, objModInfo As List(Of clsModificationDefinition))
+        Me.New(SearchEngineName, objModInfo, Nothing)
+    End Sub
 
-	Public Sub New(ByVal SearchEngineName As String, ByVal objModInfo As List(Of clsModificationDefinition), ByVal Parameters As Dictionary(Of String, String))
-		Me.InitializeDefaults()
+    Public Sub New(SearchEngineName As String, objModInfo As List(Of clsModificationDefinition), Parameters As Dictionary(Of String, String))
+        Me.InitializeDefaults()
 
-		mSearchEngineName = SearchEngineName
+        mSearchEngineName = SearchEngineName
 
-		mModInfo = objModInfo
+        mModInfo = objModInfo
 
-		If objModInfo Is Nothing Then
-			mModInfo = New List(Of clsModificationDefinition)
-		Else
-			mModInfo = objModInfo
-		End If
+        If objModInfo Is Nothing Then
+            mModInfo = New List(Of clsModificationDefinition)
+        Else
+            mModInfo = objModInfo
+        End If
 
-		If mParameters Is Nothing Then
-			mParameters = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
-		Else
-			mParameters = Parameters
-		End If
+        If mParameters Is Nothing Then
+            mParameters = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
+        Else
+            mParameters = Parameters
+        End If
 
-	End Sub
+    End Sub
 
-	Public Sub AddModification(ByVal objModInfo As clsModificationDefinition)
-		mModInfo.Add(objModInfo)
-	End Sub
+    Public Sub AddModification(objModInfo As clsModificationDefinition)
+        mModInfo.Add(objModInfo)
+    End Sub
 
-	Public Sub AddUpdateParameter(ByVal kvSetting As KeyValuePair(Of String, String))
-		AddUpdateParameter(kvSetting.Key, kvSetting.Value)
-	End Sub
+    Public Sub AddUpdateParameter(kvSetting As KeyValuePair(Of String, String))
+        AddUpdateParameter(kvSetting.Key, kvSetting.Value)
+    End Sub
 
-	Public Sub AddUpdateParameter(ByVal ParamName As String, ParamValue As String)
-		If mParameters.ContainsKey(ParamName) Then
-			mParameters(ParamName) = ParamValue
-		Else
-			mParameters.Add(ParamName, ParamValue)
-		End If
-	End Sub
+    Public Sub AddUpdateParameter(ParamName As String, ParamValue As String)
+        If mParameters.ContainsKey(ParamName) Then
+            mParameters(ParamName) = ParamValue
+        Else
+            mParameters.Add(ParamName, ParamValue)
+        End If
+    End Sub
 
-	Public Sub ClearModifications()
-		mModInfo.Clear()
-	End Sub
+    Public Sub ClearModifications()
+        mModInfo.Clear()
+    End Sub
 
-	Public Sub ClearParameters()
-		mParameters.Clear()
-	End Sub
+    Public Sub ClearParameters()
+        mParameters.Clear()
+    End Sub
 
-	Protected Sub InitializeDefaults()
-		mSearchEngineName = "Unknown"
-		mSearchEngineVersion = "Unknown"
-		mSearchDate = New DateTime(1980, 1, 1)
+    Protected Sub InitializeDefaults()
+        mSearchEngineName = "Unknown"
+        mSearchEngineVersion = "Unknown"
+        mSearchDate = New DateTime(1980, 1, 1)
 
-		mFastaFilePath = String.Empty
+        mFastaFilePath = String.Empty
 
-		mPrecursorMassToleranceDa = 0
-		mPrecursorMassTolerancePpm = 0
+        mPrecursorMassToleranceDa = 0
+        mPrecursorMassTolerancePpm = 0
 
-		mPrecursorMassType = MASS_TYPE_MONOISOTOPIC
-		mFragmentMassType = MASS_TYPE_MONOISOTOPIC
+        mPrecursorMassType = MASS_TYPE_MONOISOTOPIC
+        mFragmentMassType = MASS_TYPE_MONOISOTOPIC
 
-		mEnzyme = "trypsin"
-		mMaxNumberInternalCleavages = 4
-		mMinNumberTermini = 0
+        mEnzyme = "trypsin"
+        mMaxNumberInternalCleavages = 4
+        mMinNumberTermini = 0
 
-	End Sub
+    End Sub
 
-	Public Sub UpdateSearchEngineVersion(ByVal strSearchEngineVersion As String)
-		mSearchEngineVersion = String.Copy(strSearchEngineVersion)
-	End Sub
+    Public Sub UpdateSearchEngineVersion(strSearchEngineVersion As String)
+        mSearchEngineVersion = String.Copy(strSearchEngineVersion)
+    End Sub
 
-	Public Sub UpdateSearchDate(ByVal dtSearchDate As DateTime)
-		mSearchDate = dtSearchDate
-	End Sub
+    Public Sub UpdateSearchDate(dtSearchDate As DateTime)
+        mSearchDate = dtSearchDate
+    End Sub
 
 End Class
 

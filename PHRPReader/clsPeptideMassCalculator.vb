@@ -82,511 +82,511 @@ Public Class clsPeptideMassCalculator
 		Get
 			Return mPeptideCTerminusMass
 		End Get
-		Set(ByVal Value As Double)
-			mPeptideCTerminusMass = Value
-		End Set
-	End Property
+        Set(Value As Double)
+            mPeptideCTerminusMass = Value
+        End Set
+    End Property
 
-	Public Property PeptideNTerminusMass() As Double
-		Get
-			Return mPeptideNTerminusMass
-		End Get
-		Set(ByVal Value As Double)
-			mPeptideNTerminusMass = Value
-		End Set
-	End Property
+    Public Property PeptideNTerminusMass() As Double
+        Get
+            Return mPeptideNTerminusMass
+        End Get
+        Set(Value As Double)
+            mPeptideNTerminusMass = Value
+        End Set
+    End Property
 
-	Public Property RemovePrefixAndSuffixIfPresent() As Boolean
-		Get
-			Return mRemovePrefixAndSuffixIfPresent
-		End Get
-		Set(ByVal Value As Boolean)
-			mRemovePrefixAndSuffixIfPresent = Value
-		End Set
-	End Property
+    Public Property RemovePrefixAndSuffixIfPresent() As Boolean
+        Get
+            Return mRemovePrefixAndSuffixIfPresent
+        End Get
+        Set(Value As Boolean)
+            mRemovePrefixAndSuffixIfPresent = Value
+        End Set
+    End Property
 #End Region
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub New()
-		mErrorMessage = String.Empty
-		mRemovePrefixAndSuffixIfPresent = True
-		InitializeAminoAcidData()
-	End Sub
-
-	Private Sub AddAminoAcidStatEntry(ByVal intIndex As Integer, ByVal dblMonoisotopicMass As Double, ByVal CountC As Integer, ByVal CountH As Integer, ByVal CountN As Integer, ByVal CountO As Integer, ByVal CountS As Integer)
-		' Adds new entry to AminoAcidMasses and AminoAcidSymbols
-
-		mAminoAcidMasses(intIndex) = dblMonoisotopicMass
-
-		With mAminoAcidAtomCounts(intIndex)
-			.CountC = CountC
-			.CountH = CountH
-			.CountN = CountN
-			.CountO = CountO
-			.CountS = CountS
-		End With
-	End Sub
-
-	''' <summary>
-	''' Compute the mass of peptide sequence strSequence.  If modification symbols are present, returns -1
-	''' </summary>
-	''' <param name="strSequence"></param>
-	''' <returns></returns>
-	''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
-	Public Function ComputeSequenceMass(ByVal strSequence As String) As Double
-		' Computes the mass for sequence strSequence
-		' Returns -1 if an error
-
-		Dim strPrimarySequence As String = String.Empty
-		Dim chChar As Char
-		Dim intAAIndex As Integer
-		Dim dblMass As Double = 0
-		Dim intValidResidueCount As Short = 0
-
-		If mRemovePrefixAndSuffixIfPresent Then
-			If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, strPrimarySequence, Nothing, Nothing) Then
-				' Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
-				strPrimarySequence = String.Copy(strSequence)
-			End If
-		End If
-
-		mErrorMessage = String.Empty
-		For Each chChar In strSequence
-			' Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
-			intAAIndex = System.Convert.ToInt32(chChar) - 65
-
-			Try
-				If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
-					mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strSequence
-					intValidResidueCount = 0
-					dblMass = -1
-					Exit For
-				Else
-					dblMass += mAminoAcidMasses(intAAIndex)
-					intValidResidueCount += 1S
-				End If
-			Catch ex As Exception
-				' Invalid value; ignore
-			End Try
-		Next chChar
-
-		If intValidResidueCount > 0 Then
-			dblMass += (mPeptideNTerminusMass + mPeptideCTerminusMass)
-		End If
-
-		Return dblMass
-
-	End Function
-
-	''' <summary>
-	''' Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
-	''' </summary>
-	''' <param name="strSequence"></param>
-	''' <returns></returns>
-	''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
-	Public Function ComputeSequenceMass(ByVal strSequence As String, ByVal intModCount As Integer, ByRef udtResidueModificationInfo() As udtPeptideSequenceModInfoType) As Double
-		' Computes the mass for sequence strSequence using the mods in udtResidueModificationInfo()
-		' Returns -1 if an error
-
-		Dim intIndex As Integer
-		Dim dblMass As Double
-
-		Dim udtAtomCounts As udtAtomCountsType
-		Dim blnAtomCountsDefined As Boolean
-
-		' Note that ComputeSequenceMass will reset mErorMessage
-		dblMass = ComputeSequenceMass(strSequence)
-
-		If intModCount > 0 AndAlso dblMass >= 0 Then
-
-			blnAtomCountsDefined = False
-			For intIndex = 0 To intModCount - 1
-				With udtResidueModificationInfo(intIndex)
-
-					If .AffectedAtom = Nothing OrElse .AffectedAtom = NO_AFFECTED_ATOM_SYMBOL Then
-						' Positional modification (static or dynamic mod)
-						' Simply add the modification mass to dblMass
-						dblMass += .ModificationMass
-					Else
-						' Isotopic modification
-						If Not blnAtomCountsDefined Then
-							CountAtoms(strSequence, udtAtomCounts)
-							blnAtomCountsDefined = True
-						End If
-
-
-						Select Case Char.ToUpper(.AffectedAtom)
-							Case "C"c
-								dblMass += (udtAtomCounts.CountC * .ModificationMass)
-							Case "H"c
-								dblMass += (udtAtomCounts.CountH * .ModificationMass)
-							Case "N"c
-								dblMass += (udtAtomCounts.CountN * .ModificationMass)
-							Case "O"c
-								dblMass += (udtAtomCounts.CountO * .ModificationMass)
-							Case "S"c
-								dblMass += (udtAtomCounts.CountS * .ModificationMass)
-							Case Else
-								mErrorMessage = "Unknown Affected Atom '" & .AffectedAtom & "'"
-								dblMass = -1
-								Exit For
-						End Select
-					End If
-
-				End With
-			Next intIndex
-		End If
-
-		Return dblMass
-
-	End Function
-
-
-	''' <summary>
-	''' Compute the mass of peptide sequence strSequence.  Supports peptide sequences with with numeric mod masses
-	''' Examples of numeric mods:
-	'''  R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
-	'''  K.Q-17.0265QIEESTSDYDKEK.L
-	''' </summary>
-	''' <param name="strSequence"></param>
-	''' <returns></returns>
-	''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
-	Public Function ComputeSequenceMassNumericMods(ByVal strSequence As String) As Double
-
-		Static reModMasses As Regex = New Regex("[+-][0-9.]+", RegexOptions.Compiled)
-
-		Dim strPrimarySequence As String = String.Empty
-
-		If mRemovePrefixAndSuffixIfPresent Then
-			If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, strPrimarySequence, Nothing, Nothing) Then
-				' Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
-				strPrimarySequence = String.Copy(strSequence)
-			End If
-		Else
-			strPrimarySequence = String.Copy(strSequence)
-		End If
-
-		Dim reMatch = reModMasses.Match(strPrimarySequence)
-
-		Dim sbSequenceWithoutMods = New StringBuilder
-		Dim intStartIndex = 0
-		Dim dblModMassTotal As Double = 0
-
-		Do While reMatch.Success
-			If reMatch.Index > intStartIndex Then
-				sbSequenceWithoutMods.Append(strPrimarySequence.Substring(intStartIndex, reMatch.Index - intStartIndex))
-			End If
-
-			Dim strModMass = reMatch.ToString()
-			Dim dblModMass As Double
-			If Double.TryParse(strModMass, dblModMass) Then
-				dblModMassTotal += dblModMass
-			End If
-
-			intStartIndex = reMatch.Index + strModMass.Length
-			reMatch = reMatch.NextMatch()
-			
-		Loop
-
-		If intStartIndex < strPrimarySequence.Length Then
-			sbSequenceWithoutMods.Append(strPrimarySequence.Substring(intStartIndex, strPrimarySequence.Length - intStartIndex))
-		End If
-
-		Dim dblPeptideMass = ComputeSequenceMass(sbSequenceWithoutMods.ToString())
-
-		If dblPeptideMass < 0 Then
-			Return -1
-		Else
-			Return dblPeptideMass + dblModMassTotal
-		End If
-
-	End Function
-
-	''' <summary>
-	''' Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
-	''' </summary>
-	''' <param name="dblMassMZ"></param>
-	''' <param name="intCurrentCharge"></param>
-	''' <param name="intDesiredCharge"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Shared Function ConvoluteMass(ByVal dblMassMZ As Double, ByVal intCurrentCharge As Integer, Optional ByVal intDesiredCharge As Integer = 1) As Double
-		' Converts dblMassMZ to the MZ that would appear at the given intDesiredCharge
-		' If intCurrentCharge = 0, then assumes dblMassMZ is the neutral, monoisotopic mass
-		' To return the neutral mass, set intDesiredCharge to 0
-
-		Dim dblNewMZ As Double
-
-		Try
-			If intCurrentCharge = intDesiredCharge Then
-				dblNewMZ = dblMassMZ
-			Else
-				If intCurrentCharge = 1 Then
-					dblNewMZ = dblMassMZ
-				ElseIf intCurrentCharge > 1 Then
-					' Convert dblMassMZ to M+H
-					dblNewMZ = (dblMassMZ * intCurrentCharge) - MASS_PROTON * (intCurrentCharge - 1)
-				ElseIf intCurrentCharge = 0 Then
-					' Convert dblMassMZ (which is neutral) to M+H and store in dblNewMZ
-					dblNewMZ = dblMassMZ + MASS_PROTON
-				Else
-					' Negative charges are not supported; return 0
-					Return 0
-				End If
-
-				If intDesiredCharge > 1 Then
-					dblNewMZ = (dblNewMZ + MASS_PROTON * (intDesiredCharge - 1)) / intDesiredCharge
-				ElseIf intDesiredCharge = 1 Then
-					' Return M+H, which is currently stored in dblNewMZ
-				ElseIf intDesiredCharge = 0 Then
-					' Return the neutral mass
-					dblNewMZ -= MASS_PROTON
-				Else
-					' Negative charges are not supported; return 0
-					dblNewMZ = 0
-				End If
-			End If
-		Catch ex As Exception
-			' Error occurred
-			dblNewMZ = 0
-		End Try
-
-		Return dblNewMZ
-
-	End Function
-
-	Private Sub CountAtoms(ByRef strSequence As String, ByRef udtAtomCounts As udtAtomCountsType)
-
-		Dim chChar As Char
-		Dim intAAIndex As Integer
-
-		With udtAtomCounts
-			.CountC = 0
-			.CountH = 0
-			.CountN = 0
-			.CountO = 0
-			.CountS = 0
-		End With
-
-		For Each chChar In strSequence
-			' Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
-			intAAIndex = System.Convert.ToInt32(chChar) - 65
-
-			Try
-				If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
-					mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strSequence
-					Exit For
-				Else
-					With udtAtomCounts
-						.CountC += mAminoAcidAtomCounts(intAAIndex).CountC
-						.CountH += mAminoAcidAtomCounts(intAAIndex).CountH
-						.CountN += mAminoAcidAtomCounts(intAAIndex).CountN
-						.CountO += mAminoAcidAtomCounts(intAAIndex).CountO
-						.CountS += mAminoAcidAtomCounts(intAAIndex).CountS
-					End With
-				End If
-			Catch ex As Exception
-				' Invalid value; ignore
-			End Try
-		Next chChar
-	End Sub
-
-	''' <summary>
-	''' Returns a structure with the number of atoms of C, H, N, O, and S in the specified amino acid
-	''' </summary>
-	''' <param name="chAminoAcidSymbol"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Function GetAminoAcidAtomCounts(ByVal chAminoAcidSymbol As Char) As udtAtomCountsType
-		' Returns the atom counts if success, 0 if an error
-
-		Dim intAAIndex As Integer
-
-		If Not chAminoAcidSymbol = Nothing Then
-			intAAIndex = System.Convert.ToInt32(chAminoAcidSymbol) - 65
-			If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
-				' Invalid Index
-				Return New udtAtomCountsType
-			Else
-				Return mAminoAcidAtomCounts(intAAIndex)
-			End If
-		End If
-
-	End Function
-
-	''' <summary>
-	''' Returns the mass of the specified amino acid
-	''' </summary>
-	''' <param name="chAminoAcidSymbol"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Function GetAminoAcidMass(ByVal chAminoAcidSymbol As Char) As Double
-		' Returns the mass if success, 0 if an error
-
-		Dim intAAIndex As Integer
-
-		If Not chAminoAcidSymbol = Nothing Then
-			intAAIndex = System.Convert.ToInt32(chAminoAcidSymbol) - 65
-			If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
-				' Invalid Index
-				Return 0
-			Else
-				Return mAminoAcidMasses(intAAIndex)
-			End If
-		End If
-
-		Return 0
-
-	End Function
-
-	Private Sub InitializeAminoAcidData()
-		' These monoisotopic masses come from those traditionally used in DMS
-		' They were originally assembled by Gordon Anderson for use in ICR-2LS
-
-		ReDim mAminoAcidMasses(AMINO_ACID_LIST_MAX_INDEX)
-		ReDim mAminoAcidAtomCounts(AMINO_ACID_LIST_MAX_INDEX)
-
-		AddAminoAcidStatEntry(0, 71.0371100902557, 3, 5, 1, 1, 0)			' A
-		AddAminoAcidStatEntry(1, 114.042921543121, 4, 6, 2, 2, 0)			' B: use N or D (aka Asn/Asp)
-		AddAminoAcidStatEntry(2, 103.009180784225, 3, 5, 1, 1, 1)			' C
-		AddAminoAcidStatEntry(3, 115.026938199997, 4, 5, 1, 3, 0)			' D
-		AddAminoAcidStatEntry(4, 129.042587518692, 5, 7, 1, 3, 0)			' E
-		AddAminoAcidStatEntry(5, 147.068408727646, 9, 9, 1, 1, 0)			' F
-		AddAminoAcidStatEntry(6, 57.0214607715607, 2, 3, 1, 1, 0)			' G
-		AddAminoAcidStatEntry(7, 137.058904886246, 6, 7, 3, 1, 0)			' H
-		AddAminoAcidStatEntry(8, 113.084058046341, 6, 11, 1, 1, 0)			' I
-		AddAminoAcidStatEntry(9, 0, 0, 0, 0, 0, 0)							' J: Could use mass of Ile/Leu, but we're using ""
-		AddAminoAcidStatEntry(10, 128.094955444336, 6, 12, 2, 1, 0)			' K
-		AddAminoAcidStatEntry(11, 113.084058046341, 6, 11, 1, 1, 0)			' L
-		AddAminoAcidStatEntry(12, 131.040479421616, 5, 9, 1, 1, 1)			' M
-		AddAminoAcidStatEntry(13, 114.042921543121, 4, 6, 2, 2, 0)			' N
-		AddAminoAcidStatEntry(14, 114.079306125641, 5, 10, 2, 1, 0)			' O
-		AddAminoAcidStatEntry(15, 97.0527594089508, 5, 7, 1, 1, 0)			' P
-		AddAminoAcidStatEntry(16, 128.058570861816, 5, 8, 2, 2, 0)			' Q
-		AddAminoAcidStatEntry(17, 156.101100921631, 6, 12, 4, 1, 0)			' R
-		AddAminoAcidStatEntry(18, 87.0320241451263, 3, 5, 1, 2, 0)			' S
-		AddAminoAcidStatEntry(19, 101.047673463821, 4, 7, 1, 2, 0)			' T
-		AddAminoAcidStatEntry(20, 150.95363, 3, 5, 1, 1, 0)					' U: Corresponds to Sec = Selenocysteine (C3H5NOSe)
-		AddAminoAcidStatEntry(21, 99.0684087276459, 5, 9, 1, 1, 0)			' V
-		AddAminoAcidStatEntry(22, 186.079306125641, 11, 10, 2, 1, 0)		' W
-		AddAminoAcidStatEntry(23, 113.084058046341, 6, 11, 1, 1, 0)			' X: Unknown; use mass of Ile/Leu
-		AddAminoAcidStatEntry(24, 163.063322782516, 9, 9, 1, 2, 0)			' Y
-		AddAminoAcidStatEntry(25, 128.058570861816, 5, 8, 2, 2, 0)			' Z: use Q or E (aka Gln/Glu); note that these are 0.984 Da apart
-
-		ResetTerminusMasses()
-	End Sub
-
-	''' <summary>
-	''' Converts dblMassToConvert to ppm, based on the value of dblCurrentMZ
-	''' </summary>
-	''' <param name="dblMassToConvert"></param>
-	''' <param name="dblCurrentMZ"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Shared Function MassToPPM(ByVal dblMassToConvert As Double, ByVal dblCurrentMZ As Double) As Double
-		Return dblMassToConvert * 1000000.0 / dblCurrentMZ
-	End Function
-
-	''' <summary>
-	''' Converts and MH mass to the uncharged (neutral) mass
-	''' </summary>
-	''' <param name="dblMH"></param>
-	''' <returns></returns>
-	''' <remarks>Equivalent to ConvoluteMass(dblMH, 1, 0)</remarks>
-	Public Shared Function MHToMonoisotopicMass(ByVal dblMH As Double) As Double
-		Return ConvoluteMass(dblMH, 1, 0)
-	End Function
-
-	''' <summary>
-	''' Converts an uncharged (neutral) mass to the m/z value for the specified charge
-	''' </summary>
-	''' <param name="dblMonoisotopicMass"></param>
-	''' <param name="intDesiredCharge"></param>
-	''' <returns></returns>
-	''' <remarks>Equivalent to ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)</remarks>
-	Public Shared Function MonoisotopicMassToMZ(ByVal dblMonoisotopicMass As Double, ByVal intDesiredCharge As Integer) As Double
-		Return ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)
-	End Function
-
-	''' <summary>
-	''' Converts from a ppm value to a mass value, using the specified m/z as a reference point
-	''' </summary>
-	''' <param name="dblPPMToConvert"></param>
-	''' <param name="dblCurrentMZ"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Shared Function PPMToMass(ByVal dblPPMToConvert As Double, ByVal dblCurrentMZ As Double) As Double
-		' Converts dblPPMToConvert to a mass value, which is dependent on dblCurrentMZ
-
-		Return dblPPMToConvert / 1000000.0 * dblCurrentMZ
-	End Function
-
-	''' <summary>
-	''' Reset the N and C terminus default mass values
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub ResetTerminusMasses()
-		' See comment in Sub InitializeAminoAcidData concerning these masses
-
-		mPeptideNTerminusMass = DEFAULT_N_TERMINUS_MASS_CHANGE
-		mPeptideCTerminusMass = DEFAULT_C_TERMINUS_MASS_CHANGE
-	End Sub
-
-	''' <summary>
-	''' Defines the number of C, H, N, O, and S atoms in an amino acid
-	''' </summary>
-	''' <param name="chAminoAcidSymbol"></param>
-	''' <param name="udtAtomCounts"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Function SetAminoAcidAtomCounts(ByVal chAminoAcidSymbol As Char, ByVal udtAtomCounts As udtAtomCountsType) As Boolean
-		' Returns True if success, False if an invalid amino acid symbol
-
-		Dim intAAIndex As Integer
-
-		If Not chAminoAcidSymbol = Nothing Then
-			intAAIndex = System.Convert.ToInt32(chAminoAcidSymbol) - 65
-			If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
-				' Invalid Index
-				Return False
-			Else
-				mAminoAcidAtomCounts(intAAIndex) = udtAtomCounts
-				Return True
-			End If
-		End If
-
-		Return False
-
-	End Function
-
-	''' <summary>
-	''' Defines a custom mass for an amino acid
-	''' </summary>
-	''' <param name="chAminoAcidSymbol"></param>
-	''' <param name="dblMass"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Function SetAminoAcidMass(ByVal chAminoAcidSymbol As Char, ByVal dblMass As Double) As Boolean
-		' Returns True if success, False if an invalid amino acid symbol
-
-		Dim intAAIndex As Integer
-
-		If Not chAminoAcidSymbol = Nothing Then
-			intAAIndex = System.Convert.ToInt32(chAminoAcidSymbol) - 65
-			If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
-				' Invalid Index
-				Return False
-			Else
-				mAminoAcidMasses(intAAIndex) = dblMass
-				Return True
-			End If
-		End If
-
-		Return False
-
-	End Function
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub New()
+        mErrorMessage = String.Empty
+        mRemovePrefixAndSuffixIfPresent = True
+        InitializeAminoAcidData()
+    End Sub
+
+    Private Sub AddAminoAcidStatEntry(intIndex As Integer, dblMonoisotopicMass As Double, CountC As Integer, CountH As Integer, CountN As Integer, CountO As Integer, CountS As Integer)
+        ' Adds new entry to AminoAcidMasses and AminoAcidSymbols
+
+        mAminoAcidMasses(intIndex) = dblMonoisotopicMass
+
+        With mAminoAcidAtomCounts(intIndex)
+            .CountC = CountC
+            .CountH = CountH
+            .CountN = CountN
+            .CountO = CountO
+            .CountS = CountS
+        End With
+    End Sub
+
+    ''' <summary>
+    ''' Compute the mass of peptide sequence strSequence.  If modification symbols are present, returns -1
+    ''' </summary>
+    ''' <param name="strSequence"></param>
+    ''' <returns></returns>
+    ''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+    Public Function ComputeSequenceMass(strSequence As String) As Double
+        ' Computes the mass for sequence strSequence
+        ' Returns -1 if an error
+
+        Dim strPrimarySequence As String = String.Empty
+        Dim chChar As Char
+        Dim intAAIndex As Integer
+        Dim dblMass As Double = 0
+        Dim intValidResidueCount As Short = 0
+
+        If mRemovePrefixAndSuffixIfPresent Then
+            If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, strPrimarySequence, Nothing, Nothing) Then
+                ' Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
+                strPrimarySequence = String.Copy(strSequence)
+            End If
+        End If
+
+        mErrorMessage = String.Empty
+        For Each chChar In strSequence
+            ' Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
+            intAAIndex = System.Convert.ToInt32(chChar) - 65
+
+            Try
+                If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
+                    mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strSequence
+                    intValidResidueCount = 0
+                    dblMass = -1
+                    Exit For
+                Else
+                    dblMass += mAminoAcidMasses(intAAIndex)
+                    intValidResidueCount += 1S
+                End If
+            Catch ex As Exception
+                ' Invalid value; ignore
+            End Try
+        Next chChar
+
+        If intValidResidueCount > 0 Then
+            dblMass += (mPeptideNTerminusMass + mPeptideCTerminusMass)
+        End If
+
+        Return dblMass
+
+    End Function
+
+    ''' <summary>
+    ''' Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
+    ''' </summary>
+    ''' <param name="strSequence"></param>
+    ''' <returns></returns>
+    ''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+    Public Function ComputeSequenceMass(strSequence As String, intModCount As Integer, ByRef udtResidueModificationInfo() As udtPeptideSequenceModInfoType) As Double
+        ' Computes the mass for sequence strSequence using the mods in udtResidueModificationInfo()
+        ' Returns -1 if an error
+
+        Dim intIndex As Integer
+        Dim dblMass As Double
+
+        Dim udtAtomCounts As udtAtomCountsType
+        Dim blnAtomCountsDefined As Boolean
+
+        ' Note that ComputeSequenceMass will reset mErorMessage
+        dblMass = ComputeSequenceMass(strSequence)
+
+        If intModCount > 0 AndAlso dblMass >= 0 Then
+
+            blnAtomCountsDefined = False
+            For intIndex = 0 To intModCount - 1
+                With udtResidueModificationInfo(intIndex)
+
+                    If .AffectedAtom = Nothing OrElse .AffectedAtom = NO_AFFECTED_ATOM_SYMBOL Then
+                        ' Positional modification (static or dynamic mod)
+                        ' Simply add the modification mass to dblMass
+                        dblMass += .ModificationMass
+                    Else
+                        ' Isotopic modification
+                        If Not blnAtomCountsDefined Then
+                            CountAtoms(strSequence, udtAtomCounts)
+                            blnAtomCountsDefined = True
+                        End If
+
+
+                        Select Case Char.ToUpper(.AffectedAtom)
+                            Case "C"c
+                                dblMass += (udtAtomCounts.CountC * .ModificationMass)
+                            Case "H"c
+                                dblMass += (udtAtomCounts.CountH * .ModificationMass)
+                            Case "N"c
+                                dblMass += (udtAtomCounts.CountN * .ModificationMass)
+                            Case "O"c
+                                dblMass += (udtAtomCounts.CountO * .ModificationMass)
+                            Case "S"c
+                                dblMass += (udtAtomCounts.CountS * .ModificationMass)
+                            Case Else
+                                mErrorMessage = "Unknown Affected Atom '" & .AffectedAtom & "'"
+                                dblMass = -1
+                                Exit For
+                        End Select
+                    End If
+
+                End With
+            Next intIndex
+        End If
+
+        Return dblMass
+
+    End Function
+
+
+    ''' <summary>
+    ''' Compute the mass of peptide sequence strSequence.  Supports peptide sequences with with numeric mod masses
+    ''' Examples of numeric mods:
+    '''  R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
+    '''  K.Q-17.0265QIEESTSDYDKEK.L
+    ''' </summary>
+    ''' <param name="strSequence"></param>
+    ''' <returns></returns>
+    ''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+    Public Function ComputeSequenceMassNumericMods(strSequence As String) As Double
+
+        Static reModMasses As Regex = New Regex("[+-][0-9.]+", RegexOptions.Compiled)
+
+        Dim strPrimarySequence As String = String.Empty
+
+        If mRemovePrefixAndSuffixIfPresent Then
+            If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, strPrimarySequence, Nothing, Nothing) Then
+                ' Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
+                strPrimarySequence = String.Copy(strSequence)
+            End If
+        Else
+            strPrimarySequence = String.Copy(strSequence)
+        End If
+
+        Dim reMatch = reModMasses.Match(strPrimarySequence)
+
+        Dim sbSequenceWithoutMods = New StringBuilder
+        Dim intStartIndex = 0
+        Dim dblModMassTotal As Double = 0
+
+        Do While reMatch.Success
+            If reMatch.Index > intStartIndex Then
+                sbSequenceWithoutMods.Append(strPrimarySequence.Substring(intStartIndex, reMatch.Index - intStartIndex))
+            End If
+
+            Dim strModMass = reMatch.ToString()
+            Dim dblModMass As Double
+            If Double.TryParse(strModMass, dblModMass) Then
+                dblModMassTotal += dblModMass
+            End If
+
+            intStartIndex = reMatch.Index + strModMass.Length
+            reMatch = reMatch.NextMatch()
+
+        Loop
+
+        If intStartIndex < strPrimarySequence.Length Then
+            sbSequenceWithoutMods.Append(strPrimarySequence.Substring(intStartIndex, strPrimarySequence.Length - intStartIndex))
+        End If
+
+        Dim dblPeptideMass = ComputeSequenceMass(sbSequenceWithoutMods.ToString())
+
+        If dblPeptideMass < 0 Then
+            Return -1
+        Else
+            Return dblPeptideMass + dblModMassTotal
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
+    ''' </summary>
+    ''' <param name="dblMassMZ"></param>
+    ''' <param name="intCurrentCharge"></param>
+    ''' <param name="intDesiredCharge"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function ConvoluteMass(dblMassMZ As Double, intCurrentCharge As Integer, Optional intDesiredCharge As Integer = 1) As Double
+        ' Converts dblMassMZ to the MZ that would appear at the given intDesiredCharge
+        ' If intCurrentCharge = 0, then assumes dblMassMZ is the neutral, monoisotopic mass
+        ' To return the neutral mass, set intDesiredCharge to 0
+
+        Dim dblNewMZ As Double
+
+        Try
+            If intCurrentCharge = intDesiredCharge Then
+                dblNewMZ = dblMassMZ
+            Else
+                If intCurrentCharge = 1 Then
+                    dblNewMZ = dblMassMZ
+                ElseIf intCurrentCharge > 1 Then
+                    ' Convert dblMassMZ to M+H
+                    dblNewMZ = (dblMassMZ * intCurrentCharge) - MASS_PROTON * (intCurrentCharge - 1)
+                ElseIf intCurrentCharge = 0 Then
+                    ' Convert dblMassMZ (which is neutral) to M+H and store in dblNewMZ
+                    dblNewMZ = dblMassMZ + MASS_PROTON
+                Else
+                    ' Negative charges are not supported; return 0
+                    Return 0
+                End If
+
+                If intDesiredCharge > 1 Then
+                    dblNewMZ = (dblNewMZ + MASS_PROTON * (intDesiredCharge - 1)) / intDesiredCharge
+                ElseIf intDesiredCharge = 1 Then
+                    ' Return M+H, which is currently stored in dblNewMZ
+                ElseIf intDesiredCharge = 0 Then
+                    ' Return the neutral mass
+                    dblNewMZ -= MASS_PROTON
+                Else
+                    ' Negative charges are not supported; return 0
+                    dblNewMZ = 0
+                End If
+            End If
+        Catch ex As Exception
+            ' Error occurred
+            dblNewMZ = 0
+        End Try
+
+        Return dblNewMZ
+
+    End Function
+
+    Private Sub CountAtoms(ByRef strSequence As String, ByRef udtAtomCounts As udtAtomCountsType)
+
+        Dim chChar As Char
+        Dim intAAIndex As Integer
+
+        With udtAtomCounts
+            .CountC = 0
+            .CountH = 0
+            .CountN = 0
+            .CountO = 0
+            .CountS = 0
+        End With
+
+        For Each chChar In strSequence
+            ' Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
+            intAAIndex = System.Convert.ToInt32(chChar) - 65
+
+            Try
+                If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
+                    mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strSequence
+                    Exit For
+                Else
+                    With udtAtomCounts
+                        .CountC += mAminoAcidAtomCounts(intAAIndex).CountC
+                        .CountH += mAminoAcidAtomCounts(intAAIndex).CountH
+                        .CountN += mAminoAcidAtomCounts(intAAIndex).CountN
+                        .CountO += mAminoAcidAtomCounts(intAAIndex).CountO
+                        .CountS += mAminoAcidAtomCounts(intAAIndex).CountS
+                    End With
+                End If
+            Catch ex As Exception
+                ' Invalid value; ignore
+            End Try
+        Next chChar
+    End Sub
+
+    ''' <summary>
+    ''' Returns a structure with the number of atoms of C, H, N, O, and S in the specified amino acid
+    ''' </summary>
+    ''' <param name="chAminoAcidSymbol"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetAminoAcidAtomCounts(chAminoAcidSymbol As Char) As udtAtomCountsType
+        ' Returns the atom counts if success, 0 if an error
+
+        Dim intAAIndex As Integer
+
+        If Not chAminoAcidSymbol = Nothing Then
+            intAAIndex = System.Convert.ToInt32(chAminoAcidSymbol) - 65
+            If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
+                ' Invalid Index
+                Return New udtAtomCountsType
+            Else
+                Return mAminoAcidAtomCounts(intAAIndex)
+            End If
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' Returns the mass of the specified amino acid
+    ''' </summary>
+    ''' <param name="chAminoAcidSymbol"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetAminoAcidMass(chAminoAcidSymbol As Char) As Double
+        ' Returns the mass if success, 0 if an error
+
+        Dim intAAIndex As Integer
+
+        If Not chAminoAcidSymbol = Nothing Then
+            intAAIndex = System.Convert.ToInt32(chAminoAcidSymbol) - 65
+            If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
+                ' Invalid Index
+                Return 0
+            Else
+                Return mAminoAcidMasses(intAAIndex)
+            End If
+        End If
+
+        Return 0
+
+    End Function
+
+    Private Sub InitializeAminoAcidData()
+        ' These monoisotopic masses come from those traditionally used in DMS
+        ' They were originally assembled by Gordon Anderson for use in ICR-2LS
+
+        ReDim mAminoAcidMasses(AMINO_ACID_LIST_MAX_INDEX)
+        ReDim mAminoAcidAtomCounts(AMINO_ACID_LIST_MAX_INDEX)
+
+        AddAminoAcidStatEntry(0, 71.0371100902557, 3, 5, 1, 1, 0)           ' A
+        AddAminoAcidStatEntry(1, 114.042921543121, 4, 6, 2, 2, 0)           ' B: use N or D (aka Asn/Asp)
+        AddAminoAcidStatEntry(2, 103.009180784225, 3, 5, 1, 1, 1)           ' C
+        AddAminoAcidStatEntry(3, 115.026938199997, 4, 5, 1, 3, 0)           ' D
+        AddAminoAcidStatEntry(4, 129.042587518692, 5, 7, 1, 3, 0)           ' E
+        AddAminoAcidStatEntry(5, 147.068408727646, 9, 9, 1, 1, 0)           ' F
+        AddAminoAcidStatEntry(6, 57.0214607715607, 2, 3, 1, 1, 0)           ' G
+        AddAminoAcidStatEntry(7, 137.058904886246, 6, 7, 3, 1, 0)           ' H
+        AddAminoAcidStatEntry(8, 113.084058046341, 6, 11, 1, 1, 0)          ' I
+        AddAminoAcidStatEntry(9, 0, 0, 0, 0, 0, 0)                          ' J: Could use mass of Ile/Leu, but we're using ""
+        AddAminoAcidStatEntry(10, 128.094955444336, 6, 12, 2, 1, 0)         ' K
+        AddAminoAcidStatEntry(11, 113.084058046341, 6, 11, 1, 1, 0)         ' L
+        AddAminoAcidStatEntry(12, 131.040479421616, 5, 9, 1, 1, 1)          ' M
+        AddAminoAcidStatEntry(13, 114.042921543121, 4, 6, 2, 2, 0)          ' N
+        AddAminoAcidStatEntry(14, 114.079306125641, 5, 10, 2, 1, 0)         ' O
+        AddAminoAcidStatEntry(15, 97.0527594089508, 5, 7, 1, 1, 0)          ' P
+        AddAminoAcidStatEntry(16, 128.058570861816, 5, 8, 2, 2, 0)          ' Q
+        AddAminoAcidStatEntry(17, 156.101100921631, 6, 12, 4, 1, 0)         ' R
+        AddAminoAcidStatEntry(18, 87.0320241451263, 3, 5, 1, 2, 0)          ' S
+        AddAminoAcidStatEntry(19, 101.047673463821, 4, 7, 1, 2, 0)          ' T
+        AddAminoAcidStatEntry(20, 150.95363, 3, 5, 1, 1, 0)                 ' U: Corresponds to Sec = Selenocysteine (C3H5NOSe)
+        AddAminoAcidStatEntry(21, 99.0684087276459, 5, 9, 1, 1, 0)          ' V
+        AddAminoAcidStatEntry(22, 186.079306125641, 11, 10, 2, 1, 0)        ' W
+        AddAminoAcidStatEntry(23, 113.084058046341, 6, 11, 1, 1, 0)         ' X: Unknown; use mass of Ile/Leu
+        AddAminoAcidStatEntry(24, 163.063322782516, 9, 9, 1, 2, 0)          ' Y
+        AddAminoAcidStatEntry(25, 128.058570861816, 5, 8, 2, 2, 0)          ' Z: use Q or E (aka Gln/Glu); note that these are 0.984 Da apart
+
+        ResetTerminusMasses()
+    End Sub
+
+    ''' <summary>
+    ''' Converts dblMassToConvert to ppm, based on the value of dblCurrentMZ
+    ''' </summary>
+    ''' <param name="dblMassToConvert"></param>
+    ''' <param name="dblCurrentMZ"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function MassToPPM(dblMassToConvert As Double, dblCurrentMZ As Double) As Double
+        Return dblMassToConvert * 1000000.0 / dblCurrentMZ
+    End Function
+
+    ''' <summary>
+    ''' Converts and MH mass to the uncharged (neutral) mass
+    ''' </summary>
+    ''' <param name="dblMH"></param>
+    ''' <returns></returns>
+    ''' <remarks>Equivalent to ConvoluteMass(dblMH, 1, 0)</remarks>
+    Public Shared Function MHToMonoisotopicMass(dblMH As Double) As Double
+        Return ConvoluteMass(dblMH, 1, 0)
+    End Function
+
+    ''' <summary>
+    ''' Converts an uncharged (neutral) mass to the m/z value for the specified charge
+    ''' </summary>
+    ''' <param name="dblMonoisotopicMass"></param>
+    ''' <param name="intDesiredCharge"></param>
+    ''' <returns></returns>
+    ''' <remarks>Equivalent to ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)</remarks>
+    Public Shared Function MonoisotopicMassToMZ(dblMonoisotopicMass As Double, intDesiredCharge As Integer) As Double
+        Return ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)
+    End Function
+
+    ''' <summary>
+    ''' Converts from a ppm value to a mass value, using the specified m/z as a reference point
+    ''' </summary>
+    ''' <param name="dblPPMToConvert"></param>
+    ''' <param name="dblCurrentMZ"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function PPMToMass(dblPPMToConvert As Double, dblCurrentMZ As Double) As Double
+        ' Converts dblPPMToConvert to a mass value, which is dependent on dblCurrentMZ
+
+        Return dblPPMToConvert / 1000000.0 * dblCurrentMZ
+    End Function
+
+    ''' <summary>
+    ''' Reset the N and C terminus default mass values
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub ResetTerminusMasses()
+        ' See comment in Sub InitializeAminoAcidData concerning these masses
+
+        mPeptideNTerminusMass = DEFAULT_N_TERMINUS_MASS_CHANGE
+        mPeptideCTerminusMass = DEFAULT_C_TERMINUS_MASS_CHANGE
+    End Sub
+
+    ''' <summary>
+    ''' Defines the number of C, H, N, O, and S atoms in an amino acid
+    ''' </summary>
+    ''' <param name="chAminoAcidSymbol"></param>
+    ''' <param name="udtAtomCounts"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function SetAminoAcidAtomCounts(chAminoAcidSymbol As Char, udtAtomCounts As udtAtomCountsType) As Boolean
+        ' Returns True if success, False if an invalid amino acid symbol
+
+        Dim intAAIndex As Integer
+
+        If Not chAminoAcidSymbol = Nothing Then
+            intAAIndex = System.Convert.ToInt32(chAminoAcidSymbol) - 65
+            If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
+                ' Invalid Index
+                Return False
+            Else
+                mAminoAcidAtomCounts(intAAIndex) = udtAtomCounts
+                Return True
+            End If
+        End If
+
+        Return False
+
+    End Function
+
+    ''' <summary>
+    ''' Defines a custom mass for an amino acid
+    ''' </summary>
+    ''' <param name="chAminoAcidSymbol"></param>
+    ''' <param name="dblMass"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function SetAminoAcidMass(chAminoAcidSymbol As Char, dblMass As Double) As Boolean
+        ' Returns True if success, False if an invalid amino acid symbol
+
+        Dim intAAIndex As Integer
+
+        If Not chAminoAcidSymbol = Nothing Then
+            intAAIndex = System.Convert.ToInt32(chAminoAcidSymbol) - 65
+            If intAAIndex < 0 OrElse intAAIndex > AMINO_ACID_LIST_MAX_INDEX Then
+                ' Invalid Index
+                Return False
+            Else
+                mAminoAcidMasses(intAAIndex) = dblMass
+                Return True
+            End If
+        End If
+
+        Return False
+
+    End Function
 End Class
 

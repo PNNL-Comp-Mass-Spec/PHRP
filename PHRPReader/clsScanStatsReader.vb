@@ -56,53 +56,53 @@ Public Class clsScanStatsReader
 		mColumnHeaders = New SortedDictionary(Of String, Integer)
 	End Sub
 
-	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
-		mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
-	End Sub
+    Protected Sub AddHeaderColumn(strColumnName As String)
+        mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
+    End Sub
 
-	Protected Sub DefineColumnHeaders()
+    Protected Sub DefineColumnHeaders()
 
-		mColumnHeaders.Clear()
+        mColumnHeaders.Clear()
 
-		' Define the default column mapping
-		AddHeaderColumn(DATA_COLUMN_Dataset)
-		AddHeaderColumn(DATA_COLUMN_ScanNumber)
-		AddHeaderColumn(DATA_COLUMN_ScanTime)
-		AddHeaderColumn(DATA_COLUMN_ScanType)
-		AddHeaderColumn(DATA_COLUMN_TotalIonIntensity)
-		AddHeaderColumn(DATA_COLUMN_BasePeakIntensity)
-		AddHeaderColumn(DATA_COLUMN_BasePeakMZ)
-		AddHeaderColumn(DATA_COLUMN_BasePeakSignalToNoiseRatio)
-		AddHeaderColumn(DATA_COLUMN_IonCount)
-		AddHeaderColumn(DATA_COLUMN_IonCountRaw)
-		AddHeaderColumn(DATA_COLUMN_ScanTypeName)
+        ' Define the default column mapping
+        AddHeaderColumn(DATA_COLUMN_Dataset)
+        AddHeaderColumn(DATA_COLUMN_ScanNumber)
+        AddHeaderColumn(DATA_COLUMN_ScanTime)
+        AddHeaderColumn(DATA_COLUMN_ScanType)
+        AddHeaderColumn(DATA_COLUMN_TotalIonIntensity)
+        AddHeaderColumn(DATA_COLUMN_BasePeakIntensity)
+        AddHeaderColumn(DATA_COLUMN_BasePeakMZ)
+        AddHeaderColumn(DATA_COLUMN_BasePeakSignalToNoiseRatio)
+        AddHeaderColumn(DATA_COLUMN_IonCount)
+        AddHeaderColumn(DATA_COLUMN_IonCountRaw)
+        AddHeaderColumn(DATA_COLUMN_ScanTypeName)
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Open a tab-delimited _ScanStats.txt file and read the data
-	''' </summary>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
-	Public Function ReadScanStatsData(ByVal strInputFilePath As String) As Dictionary(Of Integer, clsScanStatsInfo)
+    ''' <summary>
+    ''' Open a tab-delimited _ScanStats.txt file and read the data
+    ''' </summary>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
+    Public Function ReadScanStatsData(strInputFilePath As String) As Dictionary(Of Integer, clsScanStatsInfo)
 
-		Dim lstScanStats As Dictionary(Of Integer, clsScanStatsInfo)
-		lstScanStats = New Dictionary(Of Integer, clsScanStatsInfo)
+        Dim lstScanStats As Dictionary(Of Integer, clsScanStatsInfo)
+        lstScanStats = New Dictionary(Of Integer, clsScanStatsInfo)
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
-		Dim blnHeaderLineParsed As Boolean
-		Dim blnSkipLine As Boolean
+        Dim strLineIn As String
+        Dim strSplitLine() As String
+        Dim blnHeaderLineParsed As Boolean
+        Dim blnSkipLine As Boolean
 
-		Dim intLinesRead As Integer
-		Dim intScanNumber As Integer
-		Dim sngScanTimeMinutes As Single
-		Dim intScanType As Integer
+        Dim intLinesRead As Integer
+        Dim intScanNumber As Integer
+        Dim sngScanTimeMinutes As Single
+        Dim intScanType As Integer
 
-		Try
-			DefineColumnHeaders()
-			intLinesRead = 0
-			mErrorMessage = String.Empty
+        Try
+            DefineColumnHeaders()
+            intLinesRead = 0
+            mErrorMessage = String.Empty
 
             Using srInFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 Do While Not srInFile.EndOfStream
@@ -151,12 +151,12 @@ Public Class clsScanStatsReader
                 Loop
             End Using
 
-		Catch ex As Exception
-			mErrorMessage = "Error reading the ScanStats data: " & ex.Message
-		End Try
+        Catch ex As Exception
+            mErrorMessage = "Error reading the ScanStats data: " & ex.Message
+        End Try
 
-		Return lstScanStats
+        Return lstScanStats
 
-	End Function
+    End Function
 
 End Class

@@ -429,10 +429,11 @@ Public Class clsInSpecTResultsProcessor
     ''' <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function CreateFHTorSYNResultsFile(strInputFilePath As String, _
-                                                 strOutputFilePath As String, _
-                                                 ByRef udtInspectModInfo() As udtModInfoType, _
-                                                 eFilteredOutputFileType As eFilteredOutputFileTypeConstants) As Boolean
+    Protected Function CreateFHTorSYNResultsFile(
+      strInputFilePath As String,
+      strOutputFilePath As String,
+      ByRef udtInspectModInfo() As udtModInfoType,
+      eFilteredOutputFileType As eFilteredOutputFileTypeConstants) As Boolean
 
         Dim intPreviousScan As Integer
 

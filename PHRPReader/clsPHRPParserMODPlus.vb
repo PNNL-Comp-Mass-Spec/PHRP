@@ -110,7 +110,7 @@ Public Class clsPHRPParserMODPlus
     ''' <param name="strDatasetName">Dataset name</param>
     ''' <param name="strInputFilePath">Input file path</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
+    Public Sub New(strDatasetName As String, strInputFilePath As String)
         Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
     End Sub
 
@@ -121,7 +121,7 @@ Public Class clsPHRPParserMODPlus
     ''' <param name="strInputFilePath">Input file path</param>
     ''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
+    Public Sub New(strDatasetName As String, strInputFilePath As String, blnLoadModsAndSeqInfo As Boolean)
         MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MODPlus, blnLoadModsAndSeqInfo)
     End Sub
 
@@ -132,7 +132,7 @@ Public Class clsPHRPParserMODPlus
     ''' <param name="strInputFilePath">Input file path</param>
     ''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal startupOptions As clsPHRPStartupOptions)
+    Public Sub New(strDatasetName As String, strInputFilePath As String, startupOptions As clsPHRPStartupOptions)
         MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MODPlus, startupOptions)
     End Sub
 
@@ -161,36 +161,36 @@ Public Class clsPHRPParserMODPlus
 
     End Sub
 
-    Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPFirstHitsFileName(strDatasetName As String) As String
         ' MODplus does not have a first-hits file; just the _syn.txt file
         Return String.Empty
     End Function
 
-    Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPModSummaryFileName(strDatasetName As String) As String
         Return strDatasetName & "_modp_syn_ModSummary.txt"
     End Function
 
-    Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPPepToProteinMapFileName(strDatasetName As String) As String
         Return strDatasetName & "_modp_PepToProtMapMTS.txt"
     End Function
 
-    Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPProteinModsFileName(strDatasetName As String) As String
         Return strDatasetName & "_modp_syn_ProteinMods.txt"
     End Function
 
-    Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPSynopsisFileName(strDatasetName As String) As String
         Return strDatasetName & FILENAME_SUFFIX_SYN
     End Function
 
-    Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPResultToSeqMapFileName(strDatasetName As String) As String
         Return strDatasetName & "_modp_syn_ResultToSeqMap.txt"
     End Function
 
-    Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPSeqInfoFileName(strDatasetName As String) As String
         Return strDatasetName & "_modp_syn_SeqInfo.txt"
     End Function
 
-    Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPSeqToProteinMapFileName(strDatasetName As String) As String
         Return strDatasetName & "_modp_syn_SeqToProteinMap.txt"
     End Function
 
@@ -205,7 +205,7 @@ Public Class clsPHRPParserMODPlus
     ''' <param name="objSearchEngineParams"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Public Overrides Function LoadSearchEngineParameters(strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Dim blnSuccess As Boolean
 
@@ -219,7 +219,7 @@ Public Class clsPHRPParserMODPlus
 
     End Function
 
-    Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Protected Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Try
 
@@ -348,7 +348,7 @@ Public Class clsPHRPParserMODPlus
                 ' Ignore errors
                 Console.WriteLine("Attribute lookup error: " & ex.Message)
             End Try
-          
+
         End If
 
         Return String.Empty
@@ -364,7 +364,7 @@ Public Class clsPHRPParserMODPlus
     ''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-    Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
+    Public Overrides Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
 
         Dim strColumns() As String = strLine.Split(ControlChars.Tab)
         Dim strPeptide As String

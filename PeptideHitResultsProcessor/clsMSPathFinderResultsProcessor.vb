@@ -232,9 +232,9 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <returns></returns>
     ''' <remarks></remarks>
     Protected Function CreateSynResultsFile(
-       strInputFilePath As String,
-       strOutputFilePath As String,
-       lstMSPathFinderModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
+      strInputFilePath As String,
+      strOutputFilePath As String,
+      lstMSPathFinderModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
 
         Try
             Dim intColumnMapping() As Integer = Nothing

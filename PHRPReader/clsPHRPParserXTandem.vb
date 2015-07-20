@@ -112,74 +112,74 @@ Public Class clsPHRPParserXTandem
 	''' <param name="strDatasetName">Dataset name</param>
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
-		Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
-	End Sub
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
-	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
-		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.XTandem, blnLoadModsAndSeqInfo)
-	End Sub
+    Public Sub New(strDatasetName As String, strInputFilePath As String)
+        Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
+    End Sub
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
+    ''' <remarks></remarks>
+    Public Sub New(strDatasetName As String, strInputFilePath As String, blnLoadModsAndSeqInfo As Boolean)
+        MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.XTandem, blnLoadModsAndSeqInfo)
+    End Sub
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
-	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal startupOptions As clsPHRPStartupOptions)
-		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.XTandem, startupOptions)
-	End Sub
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+    ''' <remarks></remarks>
+    Public Sub New(strDatasetName As String, strInputFilePath As String, startupOptions As clsPHRPStartupOptions)
+        MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.XTandem, startupOptions)
+    End Sub
 
-	Protected Shared Function AppendToString(ByVal strText As String, ByVal strAppend As String) As String
+    Protected Shared Function AppendToString(strText As String, strAppend As String) As String
 
-		If String.IsNullOrEmpty(strText) Then
-			Return strAppend
-		Else
-			Return strText & "; " & strAppend
-		End If
+        If String.IsNullOrEmpty(strText) Then
+            Return strAppend
+        Else
+            Return strText & "; " & strAppend
+        End If
 
-	End Function
+    End Function
 
-	Protected Overrides Sub DefineColumnHeaders()
+    Protected Overrides Sub DefineColumnHeaders()
 
-		mColumnHeaders.Clear()
+        mColumnHeaders.Clear()
 
-		' Define the default column mapping
-		AddHeaderColumn(DATA_COLUMN_Result_ID)
-		AddHeaderColumn(DATA_COLUMN_Group_ID)
-		AddHeaderColumn(DATA_COLUMN_Scan)
-		AddHeaderColumn(DATA_COLUMN_Charge)
-		AddHeaderColumn(DATA_COLUMN_Peptide_MH)
-		AddHeaderColumn(DATA_COLUMN_Peptide_Hyperscore)
-		AddHeaderColumn(DATA_COLUMN_Peptide_Expectation_Value_LogE)
-		AddHeaderColumn(DATA_COLUMN_Multiple_Protein_Count)
-		AddHeaderColumn(DATA_COLUMN_Peptide_Sequence)
-		AddHeaderColumn(DATA_COLUMN_DeltaCn2)
-		AddHeaderColumn(DATA_COLUMN_y_score)
-		AddHeaderColumn(DATA_COLUMN_y_ions)
-		AddHeaderColumn(DATA_COLUMN_b_score)
-		AddHeaderColumn(DATA_COLUMN_b_ions)
-		AddHeaderColumn(DATA_COLUMN_Delta_Mass)
-		AddHeaderColumn(DATA_COLUMN_Peptide_Intensity_LogI)
-		AddHeaderColumn(DATA_COLUMN_DelM_PPM)
+        ' Define the default column mapping
+        AddHeaderColumn(DATA_COLUMN_Result_ID)
+        AddHeaderColumn(DATA_COLUMN_Group_ID)
+        AddHeaderColumn(DATA_COLUMN_Scan)
+        AddHeaderColumn(DATA_COLUMN_Charge)
+        AddHeaderColumn(DATA_COLUMN_Peptide_MH)
+        AddHeaderColumn(DATA_COLUMN_Peptide_Hyperscore)
+        AddHeaderColumn(DATA_COLUMN_Peptide_Expectation_Value_LogE)
+        AddHeaderColumn(DATA_COLUMN_Multiple_Protein_Count)
+        AddHeaderColumn(DATA_COLUMN_Peptide_Sequence)
+        AddHeaderColumn(DATA_COLUMN_DeltaCn2)
+        AddHeaderColumn(DATA_COLUMN_y_score)
+        AddHeaderColumn(DATA_COLUMN_y_ions)
+        AddHeaderColumn(DATA_COLUMN_b_score)
+        AddHeaderColumn(DATA_COLUMN_b_ions)
+        AddHeaderColumn(DATA_COLUMN_Delta_Mass)
+        AddHeaderColumn(DATA_COLUMN_Peptide_Intensity_LogI)
+        AddHeaderColumn(DATA_COLUMN_DelM_PPM)
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Determines the precursor mass tolerance
-	''' </summary>
-	''' <param name="objSearchEngineParams"></param>
-	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
-	''' <returns>Precursor tolerance, in Da</returns>
-	''' <remarks></remarks>
-    Protected Function DeterminePrecursorMassTolerance(ByVal objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+    ''' <summary>
+    ''' Determines the precursor mass tolerance
+    ''' </summary>
+    ''' <param name="objSearchEngineParams"></param>
+    ''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
+    ''' <returns>Precursor tolerance, in Da</returns>
+    ''' <remarks></remarks>
+    Protected Function DeterminePrecursorMassTolerance(objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
         Dim strTolerance As String = String.Empty
         Dim strUnits As String = String.Empty
         Dim blnPPM As Boolean = False
@@ -215,95 +215,95 @@ Public Class clsPHRPParserXTandem
 
     End Function
 
-	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
-		' X!Tandem does not have a first-hits file; just the _xt.txt file
-		Return String.Empty
-	End Function
+    Public Shared Function GetPHRPFirstHitsFileName(strDatasetName As String) As String
+        ' X!Tandem does not have a first-hits file; just the _xt.txt file
+        Return String.Empty
+    End Function
 
-	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_xt_ModSummary.txt"
-	End Function
+    Public Shared Function GetPHRPModSummaryFileName(strDatasetName As String) As String
+        Return strDatasetName & "_xt_ModSummary.txt"
+    End Function
 
-	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_xt_PepToProtMapMTS.txt"
-	End Function
+    Public Shared Function GetPHRPPepToProteinMapFileName(strDatasetName As String) As String
+        Return strDatasetName & "_xt_PepToProtMapMTS.txt"
+    End Function
 
-	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_xt_ProteinMods.txt"
-	End Function
+    Public Shared Function GetPHRPProteinModsFileName(strDatasetName As String) As String
+        Return strDatasetName & "_xt_ProteinMods.txt"
+    End Function
 
-	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & FILENAME_SUFFIX_SYN
-	End Function
+    Public Shared Function GetPHRPSynopsisFileName(strDatasetName As String) As String
+        Return strDatasetName & FILENAME_SUFFIX_SYN
+    End Function
 
-	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_xt_ResultToSeqMap.txt"
-	End Function
+    Public Shared Function GetPHRPResultToSeqMapFileName(strDatasetName As String) As String
+        Return strDatasetName & "_xt_ResultToSeqMap.txt"
+    End Function
 
-	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_xt_SeqInfo.txt"
-	End Function
+    Public Shared Function GetPHRPSeqInfoFileName(strDatasetName As String) As String
+        Return strDatasetName & "_xt_SeqInfo.txt"
+    End Function
 
-	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_xt_SeqToProteinMap.txt"
-	End Function
+    Public Shared Function GetPHRPSeqToProteinMapFileName(strDatasetName As String) As String
+        Return strDatasetName & "_xt_SeqToProteinMap.txt"
+    End Function
 
-	Public Shared Function GetAdditionalSearchEngineParamFileNames(ByVal strSearchEngineParamFilePath As String) As List(Of String)
-		Dim lstFileNames As List(Of String)
-		lstFileNames = New List(Of String)
+    Public Shared Function GetAdditionalSearchEngineParamFileNames(strSearchEngineParamFilePath As String) As List(Of String)
+        Dim lstFileNames As List(Of String)
+        lstFileNames = New List(Of String)
 
-		Dim strDefaultParamsFilename As String
-		Dim strTaxonomyFilename As String = String.Empty
-		Dim strErrorMessage As String = String.Empty
+        Dim strDefaultParamsFilename As String
+        Dim strTaxonomyFilename As String = String.Empty
+        Dim strErrorMessage As String = String.Empty
 
-		Dim fiFileInfo As FileInfo
-		Dim objSearchEngineParams As clsSearchEngineParameters
+        Dim fiFileInfo As FileInfo
+        Dim objSearchEngineParams As clsSearchEngineParameters
 
-		Try
-			If Not File.Exists(strSearchEngineParamFilePath) Then
-				lstFileNames.Add("default_input.xml  (Not Confirmed)")
-				lstFileNames.Add("taxonomy.xml  (Not Confirmed)")
-			Else
-				fiFileInfo = New FileInfo(strSearchEngineParamFilePath)
-				objSearchEngineParams = New clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME)
+        Try
+            If Not File.Exists(strSearchEngineParamFilePath) Then
+                lstFileNames.Add("default_input.xml  (Not Confirmed)")
+                lstFileNames.Add("taxonomy.xml  (Not Confirmed)")
+            Else
+                fiFileInfo = New FileInfo(strSearchEngineParamFilePath)
+                objSearchEngineParams = New clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME)
 
-				Try
-					strDefaultParamsFilename = GetXTandemDefaultParamsFilename(strSearchEngineParamFilePath)
-					If Not String.IsNullOrEmpty(strDefaultParamsFilename) Then
-						lstFileNames.Add(strDefaultParamsFilename)
-					End If
-				Catch ex As Exception
-					Console.WriteLine("Error in GetXTandemDefaultParamsFilename: " & ex.Message)
-					strDefaultParamsFilename = String.Empty
-				End Try
+                Try
+                    strDefaultParamsFilename = GetXTandemDefaultParamsFilename(strSearchEngineParamFilePath)
+                    If Not String.IsNullOrEmpty(strDefaultParamsFilename) Then
+                        lstFileNames.Add(strDefaultParamsFilename)
+                    End If
+                Catch ex As Exception
+                    Console.WriteLine("Error in GetXTandemDefaultParamsFilename: " & ex.Message)
+                    strDefaultParamsFilename = String.Empty
+                End Try
 
-				Try
+                Try
 
-					ParseXTandemParamFileWork(fiFileInfo.DirectoryName, fiFileInfo.Name, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile:=False, blnLookForDefaultParamsFileName:=True, strErrorMessage:=strErrorMessage)
+                    ParseXTandemParamFileWork(fiFileInfo.DirectoryName, fiFileInfo.Name, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile:=False, blnLookForDefaultParamsFileName:=True, strErrorMessage:=strErrorMessage)
 
-					If objSearchEngineParams.Parameters.TryGetValue(TAXONOMY_INFO_KEY_NAME, strTaxonomyFilename) Then
-						lstFileNames.Add(Path.GetFileName(strTaxonomyFilename))
-					End If
+                    If objSearchEngineParams.Parameters.TryGetValue(TAXONOMY_INFO_KEY_NAME, strTaxonomyFilename) Then
+                        lstFileNames.Add(Path.GetFileName(strTaxonomyFilename))
+                    End If
 
-				Catch ex As Exception
-					Console.WriteLine("Error in ParseXTandemParamFileWork: " & ex.Message)
-				End Try
+                Catch ex As Exception
+                    Console.WriteLine("Error in ParseXTandemParamFileWork: " & ex.Message)
+                End Try
 
-				If Not String.IsNullOrEmpty(strErrorMessage) Then
-					Console.WriteLine(strErrorMessage)
-				End If
+                If Not String.IsNullOrEmpty(strErrorMessage) Then
+                    Console.WriteLine(strErrorMessage)
+                End If
 
-			End If
+            End If
 
-		Catch ex As Exception
-			Console.WriteLine("Exception in GetAdditionalSearchEngineParamFileNames: " & ex.Message)
-		End Try
+        Catch ex As Exception
+            Console.WriteLine("Exception in GetAdditionalSearchEngineParamFileNames: " & ex.Message)
+        End Try
 
-		Return lstFileNames
+        Return lstFileNames
 
-	End Function
+    End Function
 
-    Protected Shared Function GetFastaFileFromTaxonomyFile(ByVal strInputFolderPath As String, ByVal strTaxononomyFilename As String, <Out()> ByRef strErrorMessage As String) As String
+    Protected Shared Function GetFastaFileFromTaxonomyFile(strInputFolderPath As String, strTaxononomyFilename As String, <Out()> ByRef strErrorMessage As String) As String
 
         Dim strTaxonomyFilePath As String
         Dim strFastaFile As String = String.Empty
@@ -353,7 +353,7 @@ Public Class clsPHRPParserXTandem
         Return XT_SEARCH_ENGINE_NAME
     End Function
 
-    Protected Shared Function GetXTandemDefaultParamsFilename(ByVal strParamFilePath As String) As String
+    Protected Shared Function GetXTandemDefaultParamsFilename(strParamFilePath As String) As String
 
         Dim strDefaultParamsFilename As String = String.Empty
         Dim kvSetting As KeyValuePair(Of String, String) = Nothing
@@ -382,7 +382,7 @@ Public Class clsPHRPParserXTandem
     ''' <param name="objSearchEngineParams"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Public Overrides Function LoadSearchEngineParameters(strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         objSearchEngineParams = New clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME, mModInfo)
 
@@ -390,11 +390,11 @@ Public Class clsPHRPParserXTandem
 
     End Function
 
-    Public Function ParseXTandemParamFile(ByVal strParamFileName As String, ByVal objSearchEngineParams As clsSearchEngineParameters, ByVal blnLookForDefaultParamsFileName As Boolean) As Boolean
+    Public Function ParseXTandemParamFile(strParamFileName As String, objSearchEngineParams As clsSearchEngineParameters, blnLookForDefaultParamsFileName As Boolean) As Boolean
         Return ParseXTandemParamFile(strParamFileName, objSearchEngineParams, blnLookForDefaultParamsFileName, blnDetermineFastaFileNameUsingTaxonomyFile:=True)
     End Function
 
-    Public Function ParseXTandemParamFile(ByVal strParamFileName As String, ByVal objSearchEngineParams As clsSearchEngineParameters, ByVal blnLookForDefaultParamsFileName As Boolean, ByVal blnDetermineFastaFileNameUsingTaxonomyFile As Boolean) As Boolean
+    Public Function ParseXTandemParamFile(strParamFileName As String, objSearchEngineParams As clsSearchEngineParameters, blnLookForDefaultParamsFileName As Boolean, blnDetermineFastaFileNameUsingTaxonomyFile As Boolean) As Boolean
 
         Dim strParamFilePath As String
         Dim strErrorMessage As String = String.Empty
@@ -436,11 +436,11 @@ Public Class clsPHRPParserXTandem
     End Function
 
     Protected Shared Function ParseXTandemParamFileWork(
-      ByVal strInputFolderPath As String,
-      ByVal strParamFileName As String,
-      ByVal objSearchEngineParams As clsSearchEngineParameters,
-      ByVal blnDetermineFastaFileNameUsingTaxonomyFile As Boolean,
-      ByVal blnLookForDefaultParamsFileName As Boolean,
+      strInputFolderPath As String,
+      strParamFileName As String,
+      objSearchEngineParams As clsSearchEngineParameters,
+      blnDetermineFastaFileNameUsingTaxonomyFile As Boolean,
+      blnLookForDefaultParamsFileName As Boolean,
       ByRef strErrorMessage As String) As Boolean
 
         ' Note: Do not put a Try/Catch block in this function
@@ -517,7 +517,7 @@ Public Class clsPHRPParserXTandem
 
     End Function
 
-    Protected Shared Function MoveToNextInputParam(ByVal objXMLReader As Xml.XmlTextReader, <Out()> ByRef kvParameter As KeyValuePair(Of String, String)) As Boolean
+    Protected Shared Function MoveToNextInputParam(objXMLReader As Xml.XmlTextReader, <Out()> ByRef kvParameter As KeyValuePair(Of String, String)) As Boolean
 
         Dim strNoteType As String
         Dim strParamName As String
@@ -562,7 +562,7 @@ Public Class clsPHRPParserXTandem
     ''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-    Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
+    Public Overrides Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
 
         Dim strColumns() As String = strLine.Split(ControlChars.Tab)
         Dim strPeptide As String
@@ -655,7 +655,7 @@ Public Class clsPHRPParserXTandem
 
     End Function
 
-    Private Shared Function XMLTextReaderGetAttributeValue(ByVal objXMLReader As Xml.XmlTextReader, ByVal strAttributeName As String, ByVal strValueIfMissing As String) As String
+    Private Shared Function XMLTextReaderGetAttributeValue(objXMLReader As Xml.XmlTextReader, strAttributeName As String, strValueIfMissing As String) As String
         objXMLReader.MoveToAttribute(strAttributeName)
         If objXMLReader.ReadAttributeValue() Then
             Return objXMLReader.Value
@@ -664,7 +664,7 @@ Public Class clsPHRPParserXTandem
         End If
     End Function
 
-    Private Shared Function XMLTextReaderGetInnerText(ByVal objXMLReader As Xml.XmlTextReader) As String
+    Private Shared Function XMLTextReaderGetInnerText(objXMLReader As Xml.XmlTextReader) As String
         Dim strValue As String = String.Empty
         Dim blnSuccess As Boolean
 
@@ -682,7 +682,7 @@ Public Class clsPHRPParserXTandem
         Return strValue
     End Function
 
-    Private Shared Sub XMLTextReaderSkipWhitespace(ByVal objXMLReader As Xml.XmlTextReader)
+    Private Shared Sub XMLTextReaderSkipWhitespace(objXMLReader As Xml.XmlTextReader)
         If objXMLReader.NodeType = Xml.XmlNodeType.Whitespace Then
             ' Whitspace; read the next node
             objXMLReader.Read()

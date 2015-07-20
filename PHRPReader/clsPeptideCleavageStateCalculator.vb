@@ -109,7 +109,7 @@ Public Class clsPeptideCleavageStateCalculator
         Get
             Return mEnzymeMatchSpec
         End Get
-        Set(ByVal Value As udtEnzymeMatchSpecType)
+        Set(Value As udtEnzymeMatchSpecType)
             SetEnzymeMatchSpec(Value.LeftResidueRegEx, Value.RightResidueRegEx)
         End Set
     End Property
@@ -141,7 +141,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="eCleavageState"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function CleavageStateToShort(ByVal eCleavageState As ePeptideCleavageStateConstants) As Short
+    Public Shared Function CleavageStateToShort(eCleavageState As ePeptideCleavageStateConstants) As Short
         Return CShort(eCleavageState)
     End Function
 
@@ -151,7 +151,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="strSequenceWithPrefixAndSuffix"></param>
     ''' <returns></returns>
     ''' <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
-    Public Function ComputeCleavageState(ByVal strSequenceWithPrefixAndSuffix As String) As ePeptideCleavageStateConstants
+    Public Function ComputeCleavageState(strSequenceWithPrefixAndSuffix As String) As ePeptideCleavageStateConstants
         Dim strPrimarySequence As String = String.Empty
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
@@ -171,7 +171,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="strSuffixResidues"></param>
     ''' <returns></returns>
     ''' <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
-    Public Function ComputeCleavageState(ByVal strCleanSequence As String, ByVal strPrefixResidues As String, ByVal strSuffixResidues As String) As ePeptideCleavageStateConstants
+    Public Function ComputeCleavageState(strCleanSequence As String, strPrefixResidues As String, strSuffixResidues As String) As ePeptideCleavageStateConstants
         ' Determine the cleavage state of strCleanSequence utilizing the rules specified in mEnzymeMatchSpec
 
         Dim chSequenceStart As Char, chSequenceEnd As Char
@@ -241,7 +241,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="strSequenceWithPrefixAndSuffix"></param>
     ''' <returns></returns>
     ''' <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
-    Public Function ComputeNumberOfMissedCleavages(ByVal strSequenceWithPrefixAndSuffix As String) As Short
+    Public Function ComputeNumberOfMissedCleavages(strSequenceWithPrefixAndSuffix As String) As Short
         Dim strPrimarySequence As String = String.Empty
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
@@ -280,7 +280,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="strSequenceWithPrefixAndSuffix"></param>
     ''' <returns></returns>
     ''' <remarks>Peptide must have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
-    Public Function ComputeTerminusState(ByVal strSequenceWithPrefixAndSuffix As String) As ePeptideTerminusStateConstants
+    Public Function ComputeTerminusState(strSequenceWithPrefixAndSuffix As String) As ePeptideTerminusStateConstants
         Dim strPrimarySequence As String = String.Empty
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
@@ -299,7 +299,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="chSuffix"></param>
     ''' <returns></returns>
     ''' <remarks>For example, if the peptide is -.PEPTIDE.G then pass chPrefix="-" and chSuffix="G"</remarks>
-    Public Function ComputeTerminusState(ByVal chPrefix As Char, ByVal chSuffix As Char) As ePeptideTerminusStateConstants
+    Public Function ComputeTerminusState(chPrefix As Char, chSuffix As Char) As ePeptideTerminusStateConstants
 
         Dim ePeptideTerminusState As ePeptideTerminusStateConstants = ePeptideTerminusStateConstants.None
 
@@ -332,7 +332,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="strSuffixResidues"></param>
     ''' <returns></returns>
     ''' <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
-    Public Function ComputeTerminusState(ByVal strCleanSequence As String, ByVal strPrefixResidues As String, ByVal strSuffixResidues As String) As ePeptideTerminusStateConstants
+    Public Function ComputeTerminusState(strCleanSequence As String, strPrefixResidues As String, strSuffixResidues As String) As ePeptideTerminusStateConstants
         ' Determine the terminus state of strCleanSequence
 
         Dim chPrefix As Char
@@ -362,33 +362,33 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="blnCheckForPrefixAndSuffixResidues"></param>
     ''' <returns>Clean peptide sequence</returns>
     ''' <remarks></remarks>
-    Public Shared Function ExtractCleanSequenceFromSequenceWithMods(ByVal strSequenceWithMods As String, ByVal blnCheckForPrefixAndSuffixResidues As Boolean) As String
+    Public Shared Function ExtractCleanSequenceFromSequenceWithMods(strSequenceWithMods As String, blnCheckForPrefixAndSuffixResidues As Boolean) As String
 
-		Static reNotLetter As Regex = New Regex("[^A-Za-z]", RegexOptions.Compiled)
+        Static reNotLetter As Regex = New Regex("[^A-Za-z]", RegexOptions.Compiled)
 
-		If strSequenceWithMods Is Nothing Then
-			Return String.Empty
-		End If
+        If strSequenceWithMods Is Nothing Then
+            Return String.Empty
+        End If
 
-		' Use a RegEx to remove any characters that are not letters, then return the result
-		' This method of string parsing is 4x faster than using a StringBuilder object
+        ' Use a RegEx to remove any characters that are not letters, then return the result
+        ' This method of string parsing is 4x faster than using a StringBuilder object
 
-		If blnCheckForPrefixAndSuffixResidues Then
+        If blnCheckForPrefixAndSuffixResidues Then
 
-			Dim strPrimarySequence As String = String.Empty
-			Dim strPrefix As String = String.Empty
-			Dim strSuffix As String = String.Empty
+            Dim strPrimarySequence As String = String.Empty
+            Dim strPrefix As String = String.Empty
+            Dim strSuffix As String = String.Empty
 
-			If SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
-				Return reNotLetter.Replace(strPrimarySequence, String.Empty)
-			End If
-		End If
+            If SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
+                Return reNotLetter.Replace(strPrimarySequence, String.Empty)
+            End If
+        End If
 
-		Return reNotLetter.Replace(strSequenceWithMods, String.Empty)
+        Return reNotLetter.Replace(strSequenceWithMods, String.Empty)
 
     End Function
 
-    Private Function FindLetterNearestEnd(ByVal strText As String) As Char
+    Private Function FindLetterNearestEnd(strText As String) As Char
         Dim intIndex As Integer
         Dim chMatch As Char
 
@@ -407,7 +407,7 @@ Public Class clsPeptideCleavageStateCalculator
 
     End Function
 
-    Private Function FindLetterNearestStart(ByVal strText As String) As Char
+    Private Function FindLetterNearestStart(strText As String) As Char
         Dim intIndex As Integer
         Dim chMatch As Char
 
@@ -472,7 +472,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="strLeftResidueRegEx"></param>
     ''' <param name="strRightResidueRegEx"></param>
     ''' <remarks></remarks>
-    Public Sub SetEnzymeMatchSpec(ByVal strLeftResidueRegEx As String, ByVal strRightResidueRegEx As String)
+    Public Sub SetEnzymeMatchSpec(strLeftResidueRegEx As String, strRightResidueRegEx As String)
         If Not strLeftResidueRegEx Is Nothing AndAlso Not strRightResidueRegEx Is Nothing Then
             If strLeftResidueRegEx.Length = 0 Then strLeftResidueRegEx = "[A-Z]"
             If strRightResidueRegEx.Length = 0 Then strRightResidueRegEx = "[A-Z]"
@@ -505,7 +505,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' </summary>
     ''' <param name="eStandardCleavageAgent"></param>
     ''' <remarks></remarks>
-    Public Sub SetStandardEnzymeMatchSpec(ByVal eStandardCleavageAgent As eStandardCleavageAgentConstants)
+    Public Sub SetStandardEnzymeMatchSpec(eStandardCleavageAgent As eStandardCleavageAgentConstants)
 
         Select Case eStandardCleavageAgent
             Case eStandardCleavageAgentConstants.Trypsin
@@ -547,7 +547,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' If the peptide ends with ".." then it is auto-changed to end with "."
     ''' </remarks>
     Public Shared Function SplitPrefixAndSuffixFromSequence(
-      ByVal strSequenceIn As String,
+      strSequenceIn As String,
       <Out()> ByRef strPrimarySequence As String,
       <Out()> ByRef strPrefix As String,
       <Out()> ByRef strSuffix As String) As Boolean
@@ -641,7 +641,7 @@ Public Class clsPeptideCleavageStateCalculator
     ''' <param name="chRightChar"></param>
     ''' <returns>True if the characters match the currently defined cleavage rule</returns>
     ''' <remarks></remarks>
-    Public Function TestCleavageRule(ByVal chLeftChar As Char, ByVal chRightChar As Char) As Boolean
+    Public Function TestCleavageRule(chLeftChar As Char, chRightChar As Char) As Boolean
 
         If mUsingStandardTrypsinRules Then
             If chLeftChar = "K"c OrElse chLeftChar = "R"c Then

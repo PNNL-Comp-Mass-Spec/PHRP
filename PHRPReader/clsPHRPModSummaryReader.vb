@@ -29,91 +29,91 @@ Public Class clsPHRPModSummaryReader
 		End Get
 	End Property
 
-	Public Sub New(ByVal strModSummaryFilePath As String)
+    Public Sub New(strModSummaryFilePath As String)
 
-		mModificationDefs = New List(Of clsModificationDefinition)
-		mModDefMassesAsText = New Dictionary(Of String, String)
+        mModificationDefs = New List(Of clsModificationDefinition)
+        mModDefMassesAsText = New Dictionary(Of String, String)
 
-		mSuccess = False
+        mSuccess = False
 
-		If String.IsNullOrEmpty(strModSummaryFilePath) Then
-			Throw New Exception("ModSummaryFilePath is empty; unable to continue")
-		ElseIf Not File.Exists(strModSummaryFilePath) Then
-			Throw New FileNotFoundException("ModSummary file not found: " & strModSummaryFilePath)
-		End If
+        If String.IsNullOrEmpty(strModSummaryFilePath) Then
+            Throw New Exception("ModSummaryFilePath is empty; unable to continue")
+        ElseIf Not File.Exists(strModSummaryFilePath) Then
+            Throw New FileNotFoundException("ModSummary file not found: " & strModSummaryFilePath)
+        End If
 
-		mSuccess = ReadModSummaryFile(strModSummaryFilePath, mModificationDefs)
+        mSuccess = ReadModSummaryFile(strModSummaryFilePath, mModificationDefs)
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Returns the mass value associated with the given mass correction tag
-	''' </summary>
-	''' <param name="strMassCorrectionTag"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Function GetModificationMassAsText(ByVal strMassCorrectionTag As String) As String
-		Dim strModMass As String = String.Empty
+    ''' <summary>
+    ''' Returns the mass value associated with the given mass correction tag
+    ''' </summary>
+    ''' <param name="strMassCorrectionTag"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetModificationMassAsText(strMassCorrectionTag As String) As String
+        Dim strModMass As String = String.Empty
 
-		If mModDefMassesAsText.TryGetValue(strMassCorrectionTag, strModMass) Then
-			Return strModMass
-		Else
-			Return String.Empty
-		End If
-	End Function
+        If mModDefMassesAsText.TryGetValue(strMassCorrectionTag, strModMass) Then
+            Return strModMass
+        Else
+            Return String.Empty
+        End If
+    End Function
 
-	Protected Function ReadModSummaryFile(ByVal strModSummaryFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
+    Protected Function ReadModSummaryFile(strModSummaryFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
+        Dim strLineIn As String
+        Dim strSplitLine() As String
 
-		Dim objColumnHeaders As SortedDictionary(Of String, Integer)
+        Dim objColumnHeaders As SortedDictionary(Of String, Integer)
 
-		Dim strModSymbol As String
-		Dim strModMass As String
-		Dim strTargetResidues As String
-		Dim strModType As String
-		Dim strMassCorrectionTag As String
+        Dim strModSymbol As String
+        Dim strModMass As String
+        Dim strTargetResidues As String
+        Dim strModType As String
+        Dim strMassCorrectionTag As String
 
-		Dim chModSymbol As Char
-		Dim dblModificationMass As Double
-		Dim eModificationType As clsModificationDefinition.eModificationTypeConstants
+        Dim chModSymbol As Char
+        Dim dblModificationMass As Double
+        Dim eModificationType As clsModificationDefinition.eModificationTypeConstants
 
-		Dim lstModMasses As List(Of String) = Nothing
+        Dim lstModMasses As List(Of String) = Nothing
 
-		Dim blnSkipLine As Boolean
-		Dim blnHeaderLineParsed As Boolean
+        Dim blnSkipLine As Boolean
+        Dim blnHeaderLineParsed As Boolean
 
 
-		If lstModInfo Is Nothing Then
-			lstModInfo = New List(Of clsModificationDefinition)
-		Else
-			lstModInfo.Clear()
-		End If
+        If lstModInfo Is Nothing Then
+            lstModInfo = New List(Of clsModificationDefinition)
+        Else
+            lstModInfo.Clear()
+        End If
 
-		If String.IsNullOrEmpty(strModSummaryFilePath) Then
-			Return False
-		End If
+        If String.IsNullOrEmpty(strModSummaryFilePath) Then
+            Return False
+        End If
 
-		' Initialize the column mapping
-		' Using a case-insensitive comparer
-		objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+        ' Initialize the column mapping
+        ' Using a case-insensitive comparer
+        objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
 
-		' Define the default column mapping
-		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Symbol, 0)
-		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Mass, 1)
-		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Target_Residues, 2)
-		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Type, 3)
-		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Mass_Correction_Tag, 4)
-		objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Occurrence_Count, 5)
+        ' Define the default column mapping
+        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Symbol, 0)
+        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Mass, 1)
+        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Target_Residues, 2)
+        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Type, 3)
+        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Mass_Correction_Tag, 4)
+        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Occurrence_Count, 5)
 
-		' Read the data from the ModSummary.txt file
-		' The first line is typically a header line:
-		' Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
+        ' Read the data from the ModSummary.txt file
+        ' The first line is typically a header line:
+        ' Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
 
-		Using srModSummaryFile As StreamReader = New StreamReader(New FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        Using srModSummaryFile As StreamReader = New StreamReader(New FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-			blnHeaderLineParsed = False
+            blnHeaderLineParsed = False
 
             Do While Not srModSummaryFile.EndOfStream
                 strLineIn = srModSummaryFile.ReadLine
@@ -173,11 +173,11 @@ Public Class clsPHRPModSummaryReader
 
             Loop
 
-		End Using
+        End Using
 
-		Return True
+        Return True
 
-	End Function
+    End Function
 
 
 End Class

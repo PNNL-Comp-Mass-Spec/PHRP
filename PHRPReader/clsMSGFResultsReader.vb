@@ -50,48 +50,48 @@ Public Class clsMSGFResultsReader
 		mColumnHeaders = New SortedDictionary(Of String, Integer)
 	End Sub
 
-	Protected Sub AddHeaderColumn(ByVal strColumnName As String)
-		mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
-	End Sub
+    Protected Sub AddHeaderColumn(strColumnName As String)
+        mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
+    End Sub
 
-	Protected Sub DefineColumnHeaders()
+    Protected Sub DefineColumnHeaders()
 
-		mColumnHeaders.Clear()
+        mColumnHeaders.Clear()
 
-		' Define the default column mapping
-		AddHeaderColumn(DATA_COLUMN_ResultID)
-		AddHeaderColumn(DATA_COLUMN_Scan)
-		AddHeaderColumn(DATA_COLUMN_Charge)
-		AddHeaderColumn(DATA_COLUMN_Protein)
-		AddHeaderColumn(DATA_COLUMN_Peptide)
-		AddHeaderColumn(DATA_COLUMN_SpecProb)
-		AddHeaderColumn(DATA_COLUMN_Notes)
+        ' Define the default column mapping
+        AddHeaderColumn(DATA_COLUMN_ResultID)
+        AddHeaderColumn(DATA_COLUMN_Scan)
+        AddHeaderColumn(DATA_COLUMN_Charge)
+        AddHeaderColumn(DATA_COLUMN_Protein)
+        AddHeaderColumn(DATA_COLUMN_Peptide)
+        AddHeaderColumn(DATA_COLUMN_SpecProb)
+        AddHeaderColumn(DATA_COLUMN_Notes)
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Open a tab-delimited MSGF results file and read the data
-	''' </summary>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
-	Public Function ReadMSGFData(ByVal strInputFilePath As String) As Dictionary(Of Integer, String)
+    ''' <summary>
+    ''' Open a tab-delimited MSGF results file and read the data
+    ''' </summary>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
+    Public Function ReadMSGFData(strInputFilePath As String) As Dictionary(Of Integer, String)
 
-		Dim lstMSGFData As Dictionary(Of Integer, String)
-		lstMSGFData = New Dictionary(Of Integer, String)
+        Dim lstMSGFData As Dictionary(Of Integer, String)
+        lstMSGFData = New Dictionary(Of Integer, String)
 
-		Dim strLineIn As String
-		Dim strSplitLine() As String
-		Dim blnHeaderLineParsed As Boolean
-		Dim blnSkipLine As Boolean
+        Dim strLineIn As String
+        Dim strSplitLine() As String
+        Dim blnHeaderLineParsed As Boolean
+        Dim blnSkipLine As Boolean
 
-		Dim intLinesRead As Integer
-		Dim intResultID As Integer
-		Dim strMSGFSpecProb As String
+        Dim intLinesRead As Integer
+        Dim intResultID As Integer
+        Dim strMSGFSpecProb As String
 
-		Try
-			DefineColumnHeaders()
-			intLinesRead = 0
-			mErrorMessage = String.Empty
+        Try
+            DefineColumnHeaders()
+            intLinesRead = 0
+            mErrorMessage = String.Empty
 
             Using srInFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 Do While Not srInFile.EndOfStream
@@ -130,11 +130,11 @@ Public Class clsMSGFResultsReader
                 Loop
             End Using
 
-		Catch ex As Exception
-			mErrorMessage = "Error reading the MSGF data: " & ex.Message
-		End Try
+        Catch ex As Exception
+            mErrorMessage = "Error reading the MSGF data: " & ex.Message
+        End Try
 
-		Return lstMSGFData
-	End Function
+        Return lstMSGFData
+    End Function
 
 End Class

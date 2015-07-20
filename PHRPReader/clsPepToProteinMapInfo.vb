@@ -25,14 +25,14 @@ Public Class clsPepToProteinMapInfo
         End Get
     End Property
 
-    Public Sub New(ByVal proteinName As String, ByVal residueStart As Integer, ByVal residueEnd As Integer)
+    Public Sub New(proteinName As String, residueStart As Integer, residueEnd As Integer)
 
         mProteinMapInfo = New Dictionary(Of String, List(Of udtProteinLocationInfo))(StringComparer.CurrentCultureIgnoreCase)
 
         AddProtein(proteinName, residueStart, residueEnd)
     End Sub
 
-    Public Sub AddProtein(ByVal proteinName As String, ByVal residueStart As Integer, ByVal residueEnd As Integer)
+    Public Sub AddProtein(proteinName As String, residueStart As Integer, residueEnd As Integer)
 
         Dim lstLocations As List(Of udtProteinLocationInfo) = Nothing
 

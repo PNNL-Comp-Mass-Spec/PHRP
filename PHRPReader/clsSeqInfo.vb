@@ -68,36 +68,36 @@ Public Class clsSeqInfo
 	''' Constructor using Sequence ID and mass
 	''' </summary>
 	''' <remarks></remarks>
-	Public Sub New(ByVal SeqID As Integer, ByVal MonoisotopicMass As Double)
-		Me.New(SeqID, MonoisotopicMass, 0, String.Empty)
-	End Sub
+    Public Sub New(SeqID As Integer, MonoisotopicMass As Double)
+        Me.New(SeqID, MonoisotopicMass, 0, String.Empty)
+    End Sub
 
-	''' <summary>
-	''' Constructor using Sequence ID, mass, mod count, and list of modifications
-	''' </summary>
-	''' <param name="SeqID">Sequence ID</param>
-	''' <param name="MonoisotopicMass">Theoretical, monoisotopic mass (including the modified residues)</param>
-	''' <param name="ModCount">Number of modifications</param>
-	''' <param name="ModDescription">Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"</param>
-	''' <remarks></remarks>
-	Public Sub New(ByVal SeqID As Integer, ByVal MonoisotopicMass As Double, ByVal ModCount As Integer, ByVal ModDescription As String)
-		mSeqID = SeqID
-		mMonoisotopicMass = MonoisotopicMass
-		mModCount = ModCount
+    ''' <summary>
+    ''' Constructor using Sequence ID, mass, mod count, and list of modifications
+    ''' </summary>
+    ''' <param name="SeqID">Sequence ID</param>
+    ''' <param name="MonoisotopicMass">Theoretical, monoisotopic mass (including the modified residues)</param>
+    ''' <param name="ModCount">Number of modifications</param>
+    ''' <param name="ModDescription">Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"</param>
+    ''' <remarks></remarks>
+    Public Sub New(SeqID As Integer, MonoisotopicMass As Double, ModCount As Integer, ModDescription As String)
+        mSeqID = SeqID
+        mMonoisotopicMass = MonoisotopicMass
+        mModCount = ModCount
 
-		If String.IsNullOrEmpty(ModDescription) Then
-			mModDescription = String.Empty
-		Else
-			mModDescription = ModDescription
-		End If
-	End Sub
+        If String.IsNullOrEmpty(ModDescription) Then
+            mModDescription = String.Empty
+        Else
+            mModDescription = ModDescription
+        End If
+    End Sub
 
-	''' <summary>
-	''' Update the monoisotopic mass for this sequence
-	''' </summary>
-	''' <param name="MonoisotopicMass"></param>
-	''' <remarks></remarks>
-	Public Sub UpdateMonoisotopicMass(ByVal MonoisotopicMass As Double)
-		mMonoisotopicMass = MonoisotopicMass
-	End Sub
+    ''' <summary>
+    ''' Update the monoisotopic mass for this sequence
+    ''' </summary>
+    ''' <param name="MonoisotopicMass"></param>
+    ''' <remarks></remarks>
+    Public Sub UpdateMonoisotopicMass(MonoisotopicMass As Double)
+        mMonoisotopicMass = MonoisotopicMass
+    End Sub
 End Class

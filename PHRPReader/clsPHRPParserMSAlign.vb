@@ -110,70 +110,70 @@ Public Class clsPHRPParserMSAlign
 	''' <param name="strDatasetName">Dataset name</param>
 	''' <param name="strInputFilePath">Input file path</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String)
-		Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
-	End Sub
+    Public Sub New(strDatasetName As String, strInputFilePath As String)
+        Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
+    End Sub
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
-	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean)
-		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSAlign, blnLoadModsAndSeqInfo)
-	End Sub
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
+    ''' <remarks></remarks>
+    Public Sub New(strDatasetName As String, strInputFilePath As String, blnLoadModsAndSeqInfo As Boolean)
+        MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSAlign, blnLoadModsAndSeqInfo)
+    End Sub
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
-	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFilePath As String, ByVal startupOptions As clsPHRPStartupOptions)
-		MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSAlign, startupOptions)
-	End Sub
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+    ''' <remarks></remarks>
+    Public Sub New(strDatasetName As String, strInputFilePath As String, startupOptions As clsPHRPStartupOptions)
+        MyBase.New(strDatasetName, strInputFilePath, ePeptideHitResultType.MSAlign, startupOptions)
+    End Sub
 
-	Protected Overrides Sub DefineColumnHeaders()
+    Protected Overrides Sub DefineColumnHeaders()
 
-		mColumnHeaders.Clear()
+        mColumnHeaders.Clear()
 
-		' Define the default column mapping	
-		AddHeaderColumn(DATA_COLUMN_ResultID)
-		AddHeaderColumn(DATA_COLUMN_Scan)
-		AddHeaderColumn(DATA_COLUMN_Prsm_ID)
-		AddHeaderColumn(DATA_COLUMN_Spectrum_ID)
-		AddHeaderColumn(DATA_COLUMN_Charge)
-		AddHeaderColumn(DATA_COLUMN_PrecursorMZ)
-		AddHeaderColumn(DATA_COLUMN_DelM)
-		AddHeaderColumn(DATA_COLUMN_DelM_PPM)
-		AddHeaderColumn(DATA_COLUMN_MH)
-		AddHeaderColumn(DATA_COLUMN_Peptide)
-		AddHeaderColumn(DATA_COLUMN_Protein)
-		AddHeaderColumn(DATA_COLUMN_Protein_Mass)
-		AddHeaderColumn(DATA_COLUMN_Unexpected_Mod_Count)
-		AddHeaderColumn(DATA_COLUMN_Peak_Count)
-		AddHeaderColumn(DATA_COLUMN_Matched_Peak_Count)
-		AddHeaderColumn(DATA_COLUMN_Matched_Fragment_Ion_Count)
-		AddHeaderColumn(DATA_COLUMN_PValue)
-		AddHeaderColumn(DATA_COLUMN_Rank_PValue)
-		AddHeaderColumn(DATA_COLUMN_EValue)
-		AddHeaderColumn(DATA_COLUMN_FDR)
-		AddHeaderColumn(DATA_COLUMN_Species_ID)
-		AddHeaderColumn(DATA_COLUMN_FragMethod)
+        ' Define the default column mapping	
+        AddHeaderColumn(DATA_COLUMN_ResultID)
+        AddHeaderColumn(DATA_COLUMN_Scan)
+        AddHeaderColumn(DATA_COLUMN_Prsm_ID)
+        AddHeaderColumn(DATA_COLUMN_Spectrum_ID)
+        AddHeaderColumn(DATA_COLUMN_Charge)
+        AddHeaderColumn(DATA_COLUMN_PrecursorMZ)
+        AddHeaderColumn(DATA_COLUMN_DelM)
+        AddHeaderColumn(DATA_COLUMN_DelM_PPM)
+        AddHeaderColumn(DATA_COLUMN_MH)
+        AddHeaderColumn(DATA_COLUMN_Peptide)
+        AddHeaderColumn(DATA_COLUMN_Protein)
+        AddHeaderColumn(DATA_COLUMN_Protein_Mass)
+        AddHeaderColumn(DATA_COLUMN_Unexpected_Mod_Count)
+        AddHeaderColumn(DATA_COLUMN_Peak_Count)
+        AddHeaderColumn(DATA_COLUMN_Matched_Peak_Count)
+        AddHeaderColumn(DATA_COLUMN_Matched_Fragment_Ion_Count)
+        AddHeaderColumn(DATA_COLUMN_PValue)
+        AddHeaderColumn(DATA_COLUMN_Rank_PValue)
+        AddHeaderColumn(DATA_COLUMN_EValue)
+        AddHeaderColumn(DATA_COLUMN_FDR)
+        AddHeaderColumn(DATA_COLUMN_Species_ID)
+        AddHeaderColumn(DATA_COLUMN_FragMethod)
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Determines the precursor mass tolerance
-	''' </summary>
-	''' <param name="objSearchEngineParams"></param>
-	''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
-	''' <returns>Precursor tolerance, in Da</returns>
-	''' <remarks></remarks>
-    Protected Function DeterminePrecursorMassTolerance(ByVal objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+    ''' <summary>
+    ''' Determines the precursor mass tolerance
+    ''' </summary>
+    ''' <param name="objSearchEngineParams"></param>
+    ''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
+    ''' <returns>Precursor tolerance, in Da</returns>
+    ''' <remarks></remarks>
+    Protected Function DeterminePrecursorMassTolerance(objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
         Dim strTolerance As String = String.Empty
 
         Dim dblToleranceDa As Double = 0
@@ -191,50 +191,50 @@ Public Class clsPHRPParserMSAlign
 
     End Function
 
-	Public Shared Function GetPHRPFirstHitsFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & FILENAME_SUFFIX_FHT
-	End Function
+    Public Shared Function GetPHRPFirstHitsFileName(strDatasetName As String) As String
+        Return strDatasetName & FILENAME_SUFFIX_FHT
+    End Function
 
-	Public Shared Function GetPHRPModSummaryFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_ModSummary.txt"
-	End Function
+    Public Shared Function GetPHRPModSummaryFileName(strDatasetName As String) As String
+        Return strDatasetName & "_msalign_syn_ModSummary.txt"
+    End Function
 
-	Public Shared Function GetPHRPPepToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_PepToProtMapMTS.txt"
-	End Function
+    Public Shared Function GetPHRPPepToProteinMapFileName(strDatasetName As String) As String
+        Return strDatasetName & "_msalign_PepToProtMapMTS.txt"
+    End Function
 
-	Public Shared Function GetPHRPProteinModsFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_ProteinMods.txt"
-	End Function
+    Public Shared Function GetPHRPProteinModsFileName(strDatasetName As String) As String
+        Return strDatasetName & "_msalign_syn_ProteinMods.txt"
+    End Function
 
-	Public Shared Function GetPHRPSynopsisFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & FILENAME_SUFFIX_SYN
-	End Function
+    Public Shared Function GetPHRPSynopsisFileName(strDatasetName As String) As String
+        Return strDatasetName & FILENAME_SUFFIX_SYN
+    End Function
 
-	Public Shared Function GetPHRPResultToSeqMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_ResultToSeqMap.txt"
-	End Function
+    Public Shared Function GetPHRPResultToSeqMapFileName(strDatasetName As String) As String
+        Return strDatasetName & "_msalign_syn_ResultToSeqMap.txt"
+    End Function
 
-	Public Shared Function GetPHRPSeqInfoFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_SeqInfo.txt"
-	End Function
+    Public Shared Function GetPHRPSeqInfoFileName(strDatasetName As String) As String
+        Return strDatasetName & "_msalign_syn_SeqInfo.txt"
+    End Function
 
-	Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal strDatasetName As String) As String
-		Return strDatasetName & "_msalign_syn_SeqToProteinMap.txt"
-	End Function
+    Public Shared Function GetPHRPSeqToProteinMapFileName(strDatasetName As String) As String
+        Return strDatasetName & "_msalign_syn_SeqToProteinMap.txt"
+    End Function
 
-	Public Shared Function GetSearchEngineName() As String
-		Return MSAlign_SEARCH_ENGINE_NAME
-	End Function
+    Public Shared Function GetSearchEngineName() As String
+        Return MSAlign_SEARCH_ENGINE_NAME
+    End Function
 
-	''' <summary>
-	''' Parses the specified MSAlign parameter file
-	''' </summary>
-	''' <param name="strSearchEngineParamFileName"></param>
-	''' <param name="objSearchEngineParams"></param>
-	''' <returns></returns>
-	''' <remarks></remarks>
-    Public Overrides Function LoadSearchEngineParameters(ByVal strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    ''' <summary>
+    ''' Parses the specified MSAlign parameter file
+    ''' </summary>
+    ''' <param name="strSearchEngineParamFileName"></param>
+    ''' <param name="objSearchEngineParams"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Overrides Function LoadSearchEngineParameters(strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Dim blnSuccess As Boolean
 
@@ -248,7 +248,7 @@ Public Class clsPHRPParserMSAlign
 
     End Function
 
-    Protected Function ReadSearchEngineParamFile(ByVal strSearchEngineParamFileName As String, ByVal objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Protected Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
         Dim strSettingValue As String = String.Empty
         Dim objModDef As clsModificationDefinition
         Dim blnSuccess As Boolean
@@ -289,16 +289,16 @@ Public Class clsPHRPParserMSAlign
 
     End Function
 
-	''' <summary>
-	''' Parse the data line read from a PHRP results file
-	''' </summary>
-	''' <param name="strLine">Data line</param>
-	''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
-	''' <param name="objPSM">clsPSM object (output)</param>
-	''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
-	''' <returns>True if success, false if an error</returns>
-	''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-    Public Overrides Function ParsePHRPDataLine(ByVal strLine As String, ByVal intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, ByVal fastReadMode As Boolean) As Boolean
+    ''' <summary>
+    ''' Parse the data line read from a PHRP results file
+    ''' </summary>
+    ''' <param name="strLine">Data line</param>
+    ''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
+    ''' <param name="objPSM">clsPSM object (output)</param>
+    ''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
+    ''' <returns>True if success, false if an error</returns>
+    ''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
+    Public Overrides Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
 
         Dim strColumns() As String = strLine.Split(ControlChars.Tab)
         Dim strPeptide As String

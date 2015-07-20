@@ -446,320 +446,320 @@ Public Class clsPSM
 		Me.Clear()
 	End Sub
 
-	Public Sub AddCombinedScan(ByVal intScanNumber As Integer)
-		If Not mScanList.Contains(intScanNumber) Then
-			mScanList.Add(intScanNumber)
-		End If
-	End Sub
+    Public Sub AddCombinedScan(intScanNumber As Integer)
+        If Not mScanList.Contains(intScanNumber) Then
+            mScanList.Add(intScanNumber)
+        End If
+    End Sub
 
-	''' <summary>
-	''' Add the details for a modified residue
-	''' </summary>
-	''' <param name="objModInfo">Modification info class</param>
-	''' <remarks></remarks>
-	Public Sub AddModifiedResidue(ByVal objModInfo As clsAminoAcidModInfo)
-		mModifiedPeptideResidues.Add(objModInfo)
-	End Sub
+    ''' <summary>
+    ''' Add the details for a modified residue
+    ''' </summary>
+    ''' <param name="objModInfo">Modification info class</param>
+    ''' <remarks></remarks>
+    Public Sub AddModifiedResidue(objModInfo As clsAminoAcidModInfo)
+        mModifiedPeptideResidues.Add(objModInfo)
+    End Sub
 
-	''' <summary>
-	''' Add the details for a modified residue
-	''' </summary>
-	''' <param name="Residue">Amino acid letter; use angle brackets or square brackes for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
-	''' <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
-	''' <param name="ResidueTerminusState">Terminus state of residue</param>
-	''' <param name="ModDefinition">Modification details</param>
-	''' <remarks></remarks>
-	Public Sub AddModifiedResidue(ByVal Residue As Char, ByVal ResidueLocInPeptide As Integer, ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ByVal ModDefinition As clsModificationDefinition)
-		mModifiedPeptideResidues.Add(New clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition))
-	End Sub
+    ''' <summary>
+    ''' Add the details for a modified residue
+    ''' </summary>
+    ''' <param name="Residue">Amino acid letter; use angle brackets or square brackes for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+    ''' <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
+    ''' <param name="ResidueTerminusState">Terminus state of residue</param>
+    ''' <param name="ModDefinition">Modification details</param>
+    ''' <remarks></remarks>
+    Public Sub AddModifiedResidue(Residue As Char, ResidueLocInPeptide As Integer, ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ModDefinition As clsModificationDefinition)
+        mModifiedPeptideResidues.Add(New clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition))
+    End Sub
 
-	''' <summary>
-	''' Add the details for a modified residue
-	''' </summary>
-	''' <param name="Residue">Amino acid letter; use angle brackets or square brackes for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
-	''' <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
-	''' <param name="ResidueTerminusState">Terminus state of residue</param>
-	''' <param name="ModDefinition">Modification details</param>
-	''' <param name="EndResidueLocInPeptide">For ambiguous mods, the residue number of the last residue that could have this modification</param>
-	''' <remarks></remarks>
-	Public Sub AddModifiedResidue(ByVal Residue As Char, ByVal ResidueLocInPeptide As Integer, ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ByVal ModDefinition As clsModificationDefinition, ByVal EndResidueLocInPeptide As Integer)
-		mModifiedPeptideResidues.Add(New clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition, EndResidueLocInPeptide))
-	End Sub
+    ''' <summary>
+    ''' Add the details for a modified residue
+    ''' </summary>
+    ''' <param name="Residue">Amino acid letter; use angle brackets or square brackes for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+    ''' <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
+    ''' <param name="ResidueTerminusState">Terminus state of residue</param>
+    ''' <param name="ModDefinition">Modification details</param>
+    ''' <param name="EndResidueLocInPeptide">For ambiguous mods, the residue number of the last residue that could have this modification</param>
+    ''' <remarks></remarks>
+    Public Sub AddModifiedResidue(Residue As Char, ResidueLocInPeptide As Integer, ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, ModDefinition As clsModificationDefinition, EndResidueLocInPeptide As Integer)
+        mModifiedPeptideResidues.Add(New clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition, EndResidueLocInPeptide))
+    End Sub
 
-	''' <summary>
-	''' Add a new protein to associate with this peptide
-	''' </summary>
-	''' <param name="strProteinName"></param>
-	''' <remarks></remarks>
-	Public Sub AddProtein(ByVal strProteinName As String)
-		If Not String.IsNullOrWhiteSpace(strProteinName) AndAlso Not mProteins.Contains(strProteinName) Then
-			mProteins.Add(strProteinName)
-		End If
-	End Sub
+    ''' <summary>
+    ''' Add a new protein to associate with this peptide
+    ''' </summary>
+    ''' <param name="strProteinName"></param>
+    ''' <remarks></remarks>
+    Public Sub AddProtein(strProteinName As String)
+        If Not String.IsNullOrWhiteSpace(strProteinName) AndAlso Not mProteins.Contains(strProteinName) Then
+            mProteins.Add(strProteinName)
+        End If
+    End Sub
 
-	''' <summary>
-	''' Add new detailed protein info for this peptide
-	''' </summary>
-	''' <param name="oProteinInfo"></param>
-	''' <remarks></remarks>
-	Public Sub AddProteinDetail(ByVal oProteinInfo As clsProteinInfo)
+    ''' <summary>
+    ''' Add new detailed protein info for this peptide
+    ''' </summary>
+    ''' <param name="oProteinInfo"></param>
+    ''' <remarks></remarks>
+    Public Sub AddProteinDetail(oProteinInfo As clsProteinInfo)
 
-		Dim oCachedInfo As clsProteinInfo = Nothing
-		If mProteinDetails.TryGetValue(oProteinInfo.ProteinName, oCachedInfo) Then
-			mProteinDetails(oProteinInfo.ProteinName) = oProteinInfo
-		Else
-			mProteinDetails.Add(oProteinInfo.ProteinName, oProteinInfo)
-		End If
+        Dim oCachedInfo As clsProteinInfo = Nothing
+        If mProteinDetails.TryGetValue(oProteinInfo.ProteinName, oCachedInfo) Then
+            mProteinDetails(oProteinInfo.ProteinName) = oProteinInfo
+        Else
+            mProteinDetails.Add(oProteinInfo.ProteinName, oProteinInfo)
+        End If
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Reset the peptide to default values (and empty strings)
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub Clear()
-		mDataLineText = String.Empty
-		mScanNumber = 0
-		mElutionTimeMinutes = 0
+    ''' <summary>
+    ''' Reset the peptide to default values (and empty strings)
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub Clear()
+        mDataLineText = String.Empty
+        mScanNumber = 0
+        mElutionTimeMinutes = 0
 
-		mScanList.Clear()
+        mScanList.Clear()
 
-		mPeptide = String.Empty
-		mPeptideWithNumericMods = String.Empty
-		mPeptideCleanSequence = String.Empty
-		mCharge = 0
-		mResultID = 0
-		mScoreRank = 0
+        mPeptide = String.Empty
+        mPeptideWithNumericMods = String.Empty
+        mPeptideCleanSequence = String.Empty
+        mCharge = 0
+        mResultID = 0
+        mScoreRank = 0
 
-		mCollisionMode = UNKNOWN_COLLISION_MODE
-		mMSGFSpecProb = String.Empty
+        mCollisionMode = UNKNOWN_COLLISION_MODE
+        mMSGFSpecProb = String.Empty
 
-		mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Unknown
-		mNumMissedCleavages = 0
-		mNumTrypticTerminii = 0
+        mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Unknown
+        mNumMissedCleavages = 0
+        mNumTrypticTerminii = 0
 
-		mPrecursorNeutralMass = 0
-		mMassErrorDa = String.Empty
-		mMassErrorPPM = String.Empty
+        mPrecursorNeutralMass = 0
+        mMassErrorDa = String.Empty
+        mMassErrorPPM = String.Empty
 
-		mPeptideMonoisotopicMass = 0
+        mPeptideMonoisotopicMass = 0
 
-		mProteins.Clear()
-		mProteinDetails.Clear()
+        mProteins.Clear()
+        mProteinDetails.Clear()
 
-		mModifiedPeptideResidues.Clear()
-		mAdditionalScores.Clear()
-	End Sub
+        mModifiedPeptideResidues.Clear()
+        mAdditionalScores.Clear()
+    End Sub
 
-	Public Sub ClearModifiedResidues()
-		mModifiedPeptideResidues.Clear()
-	End Sub
+    Public Sub ClearModifiedResidues()
+        mModifiedPeptideResidues.Clear()
+    End Sub
 
-	''' <summary>
-	''' Duplicate this PSM object and return a new one
-	''' </summary>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Function Clone() As clsPSM
-		Dim objNew As clsPSM
+    ''' <summary>
+    ''' Duplicate this PSM object and return a new one
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function Clone() As clsPSM
+        Dim objNew As clsPSM
 
-		objNew = New clsPSM()
+        objNew = New clsPSM()
 
-		With objNew
-			.ResultID = mResultID
-			.ScoreRank = mScoreRank
-			.ScanNumber = mScanNumber
-			.ElutionTimeMinutes = mElutionTimeMinutes
+        With objNew
+            .ResultID = mResultID
+            .ScoreRank = mScoreRank
+            .ScanNumber = mScanNumber
+            .ElutionTimeMinutes = mElutionTimeMinutes
 
-			For Each intScanNumber In mScanList
-				.AddCombinedScan(intScanNumber)
-			Next
+            For Each intScanNumber In mScanList
+                .AddCombinedScan(intScanNumber)
+            Next
 
-			.SetPeptide(mPeptide)				' Note: this will auto-update mPeptideCleanSequence in objNew
-			.PeptideWithNumericMods = mPeptideWithNumericMods
-			.Charge = mCharge
-			.CollisionMode = mCollisionMode
-			.MSGFSpecProb = mMSGFSpecProb
+            .SetPeptide(mPeptide)               ' Note: this will auto-update mPeptideCleanSequence in objNew
+            .PeptideWithNumericMods = mPeptideWithNumericMods
+            .Charge = mCharge
+            .CollisionMode = mCollisionMode
+            .MSGFSpecProb = mMSGFSpecProb
 
-			.CleavageState = mCleavageState
-			.NumMissedCleavages = mNumMissedCleavages
-			.NumTrypticTerminii = mNumTrypticTerminii
+            .CleavageState = mCleavageState
+            .NumMissedCleavages = mNumMissedCleavages
+            .NumTrypticTerminii = mNumTrypticTerminii
 
-			.PrecursorNeutralMass = mPrecursorNeutralMass
-			.MassErrorDa = mMassErrorDa
-			.MassErrorPPM = mMassErrorPPM
+            .PrecursorNeutralMass = mPrecursorNeutralMass
+            .MassErrorDa = mMassErrorDa
+            .MassErrorPPM = mMassErrorPPM
 
-			For Each strProtein In mProteins
-				.AddProtein(strProtein)
-			Next
+            For Each strProtein In mProteins
+                .AddProtein(strProtein)
+            Next
 
-			For Each item In mProteinDetails.Values
-				.AddProteinDetail(item)
-			Next
+            For Each item In mProteinDetails.Values
+                .AddProteinDetail(item)
+            Next
 
-			For Each objItem In mModifiedPeptideResidues
-				.AddModifiedResidue(objItem.Residue, objItem.ResidueLocInPeptide, objItem.ResidueTerminusState, objItem.ModDefinition)
-			Next
+            For Each objItem In mModifiedPeptideResidues
+                .AddModifiedResidue(objItem.Residue, objItem.ResidueLocInPeptide, objItem.ResidueTerminusState, objItem.ModDefinition)
+            Next
 
-			For Each objScore As KeyValuePair(Of String, String) In mAdditionalScores
-				.SetScore(objScore.Key, objScore.Value)
-			Next
+            For Each objScore As KeyValuePair(Of String, String) In mAdditionalScores
+                .SetScore(objScore.Key, objScore.Value)
+            Next
 
-		End With
+        End With
 
-		Return objNew
-	End Function
+        Return objNew
+    End Function
 
-	Public Sub UpdateCleanSequence()
-		UpdateCleanSequence(mPeptide)
-	End Sub
+    Public Sub UpdateCleanSequence()
+        UpdateCleanSequence(mPeptide)
+    End Sub
 
-	Protected Sub UpdateCleanSequence(strPeptide As String)
-		If String.IsNullOrEmpty(strPeptide) Then
-			mPeptideCleanSequence = String.Empty
-		Else
-			mPeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, True)
-		End If
-	End Sub
+    Protected Sub UpdateCleanSequence(strPeptide As String)
+        If String.IsNullOrEmpty(strPeptide) Then
+            mPeptideCleanSequence = String.Empty
+        Else
+            mPeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, True)
+        End If
+    End Sub
 
-	''' <summary>
-	''' Returns the value stored for the specified score
-	''' </summary>
-	''' <param name="strScoreName">Score name</param>
-	''' <returns>Score if defined, otherwise an empty string</returns>
-	Public Function GetScore(ByVal strScoreName As String) As String
-		Dim strScoreValue As String = String.Empty
-		If mAdditionalScores.TryGetValue(strScoreName, strScoreValue) Then
-			Return strScoreValue
-		Else
-			Return String.Empty
-		End If
-	End Function
+    ''' <summary>
+    ''' Returns the value stored for the specified score
+    ''' </summary>
+    ''' <param name="strScoreName">Score name</param>
+    ''' <returns>Score if defined, otherwise an empty string</returns>
+    Public Function GetScore(strScoreName As String) As String
+        Dim strScoreValue As String = String.Empty
+        If mAdditionalScores.TryGetValue(strScoreName, strScoreValue) Then
+            Return strScoreValue
+        Else
+            Return String.Empty
+        End If
+    End Function
 
-	''' <summary>
-	'''  Returns the value stored for the specified score (as a double)
-	''' </summary>
-	''' <param name="strScoreName">Score name</param>
-	''' <returns>Score if defined, otherwise 0</returns>
-	''' <remarks></remarks>
-	Public Function GetScoreDbl(ByVal strScoreName As String) As Double
-		Return GetScoreDbl(strScoreName, 0)
-	End Function
+    ''' <summary>
+    '''  Returns the value stored for the specified score (as a double)
+    ''' </summary>
+    ''' <param name="strScoreName">Score name</param>
+    ''' <returns>Score if defined, otherwise 0</returns>
+    ''' <remarks></remarks>
+    Public Function GetScoreDbl(strScoreName As String) As Double
+        Return GetScoreDbl(strScoreName, 0)
+    End Function
 
-	''' <summary>
-	'''  Returns the value stored for the specified score (as a double)
-	''' </summary>
-	''' <param name="strScoreName">Score name</param>
-	''' <param name="dblValueIfMissing">Value to return if the score is not defined</param>
-	''' <returns>Score if defined, otherwise dblValueIfMissing</returns>
-	''' <remarks></remarks>
-	Public Function GetScoreDbl(ByVal strScoreName As String, ByVal dblValueIfMissing As Double) As Double
-		Dim strScoreValue As String
-		Dim dblScore As Double
+    ''' <summary>
+    '''  Returns the value stored for the specified score (as a double)
+    ''' </summary>
+    ''' <param name="strScoreName">Score name</param>
+    ''' <param name="dblValueIfMissing">Value to return if the score is not defined</param>
+    ''' <returns>Score if defined, otherwise dblValueIfMissing</returns>
+    ''' <remarks></remarks>
+    Public Function GetScoreDbl(strScoreName As String, dblValueIfMissing As Double) As Double
+        Dim strScoreValue As String
+        Dim dblScore As Double
 
-		strScoreValue = GetScore(strScoreName)
-		If Not String.IsNullOrEmpty(strScoreValue) AndAlso Double.TryParse(strScoreValue, dblScore) Then
-			Return dblScore
-		Else
-			Return dblValueIfMissing
-		End If
+        strScoreValue = GetScore(strScoreName)
+        If Not String.IsNullOrEmpty(strScoreValue) AndAlso Double.TryParse(strScoreValue, dblScore) Then
+            Return dblScore
+        Else
+            Return dblValueIfMissing
+        End If
 
-	End Function
+    End Function
 
-	''' <summary>
-	'''  Returns the value stored for the specified score (as an integer)
-	''' </summary>
-	''' <param name="strScoreName">Score name</param>
-	''' <returns>Score if defined, otherwise 0</returns>
-	''' <remarks></remarks>
-	Public Function GetScoreInt(ByVal strScoreName As String) As Integer
-		Return GetScoreInt(strScoreName, 0)
-	End Function
+    ''' <summary>
+    '''  Returns the value stored for the specified score (as an integer)
+    ''' </summary>
+    ''' <param name="strScoreName">Score name</param>
+    ''' <returns>Score if defined, otherwise 0</returns>
+    ''' <remarks></remarks>
+    Public Function GetScoreInt(strScoreName As String) As Integer
+        Return GetScoreInt(strScoreName, 0)
+    End Function
 
-	''' <summary>
-	'''  Returns the value stored for the specified score (as an integer)
-	''' </summary>
-	''' <param name="strScoreName">Score name</param>
-	''' <param name="intValueIfMissing">Value to return if the score is not defined</param>
-	''' <returns>Score if defined, otherwise intValueIfMissing</returns>
-	''' <remarks></remarks>
-	Public Function GetScoreInt(ByVal strScoreName As String, ByVal intValueIfMissing As Integer) As Integer
-		Dim strScoreValue As String
-		Dim intScore As Integer
+    ''' <summary>
+    '''  Returns the value stored for the specified score (as an integer)
+    ''' </summary>
+    ''' <param name="strScoreName">Score name</param>
+    ''' <param name="intValueIfMissing">Value to return if the score is not defined</param>
+    ''' <returns>Score if defined, otherwise intValueIfMissing</returns>
+    ''' <remarks></remarks>
+    Public Function GetScoreInt(strScoreName As String, intValueIfMissing As Integer) As Integer
+        Dim strScoreValue As String
+        Dim intScore As Integer
 
-		strScoreValue = GetScore(strScoreName)
-		If Not String.IsNullOrEmpty(strScoreValue) AndAlso Integer.TryParse(strScoreValue, intScore) Then
-			Return intScore
-		Else
-			Return intValueIfMissing
-		End If
+        strScoreValue = GetScore(strScoreName)
+        If Not String.IsNullOrEmpty(strScoreValue) AndAlso Integer.TryParse(strScoreValue, intScore) Then
+            Return intScore
+        Else
+            Return intValueIfMissing
+        End If
 
-	End Function
+    End Function
 
-	Public Sub SetPeptide(ByVal strPeptide As String)
-		SetPeptide(strPeptide, blnUpdateCleanSequence:=True)
-	End Sub
+    Public Sub SetPeptide(strPeptide As String)
+        SetPeptide(strPeptide, blnUpdateCleanSequence:=True)
+    End Sub
 
-	''' <summary>
-	''' Update the peptide sequence, auto-determining the clean sequence if blnUpdateCleanSequence is true
-	''' </summary>
-	''' <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
-	''' <remarks>Does not update the cleavage state info.  If blnUpdateCleanSequence is false, then call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
-	Public Sub SetPeptide(ByVal strPeptide As String, ByVal blnUpdateCleanSequence As Boolean)
-		If String.IsNullOrEmpty(strPeptide) Then
-			mPeptide = String.Empty
-		Else
-			mPeptide = strPeptide
-		End If
+    ''' <summary>
+    ''' Update the peptide sequence, auto-determining the clean sequence if blnUpdateCleanSequence is true
+    ''' </summary>
+    ''' <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
+    ''' <remarks>Does not update the cleavage state info.  If blnUpdateCleanSequence is false, then call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
+    Public Sub SetPeptide(strPeptide As String, blnUpdateCleanSequence As Boolean)
+        If String.IsNullOrEmpty(strPeptide) Then
+            mPeptide = String.Empty
+        Else
+            mPeptide = strPeptide
+        End If
 
-		If blnUpdateCleanSequence Then
-			UpdateCleanSequence(mPeptide)
-		End If
+        If blnUpdateCleanSequence Then
+            UpdateCleanSequence(mPeptide)
+        End If
 
-	End Sub
+    End Sub
 
-	''' <summary>
-	''' Update the peptide sequence (auto-determines the clean sequence); also auto-update the the cleavage state info
-	''' </summary>
-	''' <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
-	''' <param name="objCleavageStateCalculator">Cleavage state calculator object</param>
-	''' <remarks></remarks>
-	Public Sub SetPeptide(ByVal strPeptide As String, objCleavageStateCalculator As clsPeptideCleavageStateCalculator)
-		SetPeptide(strPeptide)
-		UpdateCleavageInfo(objCleavageStateCalculator)
-	End Sub
+    ''' <summary>
+    ''' Update the peptide sequence (auto-determines the clean sequence); also auto-update the the cleavage state info
+    ''' </summary>
+    ''' <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
+    ''' <param name="objCleavageStateCalculator">Cleavage state calculator object</param>
+    ''' <remarks></remarks>
+    Public Sub SetPeptide(strPeptide As String, objCleavageStateCalculator As clsPeptideCleavageStateCalculator)
+        SetPeptide(strPeptide)
+        UpdateCleavageInfo(objCleavageStateCalculator)
+    End Sub
 
-	''' <summary>
-	''' Add/update an additional score to associate with this peptide
-	''' </summary>
-	''' <param name="strScoreName"></param>
-	''' <param name="strScoreValue"></param>
-	''' <remarks></remarks>
-	Public Sub SetScore(strScoreName As String, strScoreValue As String)
-		If mAdditionalScores.ContainsKey(strScoreName) Then
-			mAdditionalScores(strScoreName) = strScoreValue
-		Else
-			mAdditionalScores.Add(strScoreName, strScoreValue)
-		End If
-	End Sub
+    ''' <summary>
+    ''' Add/update an additional score to associate with this peptide
+    ''' </summary>
+    ''' <param name="strScoreName"></param>
+    ''' <param name="strScoreValue"></param>
+    ''' <remarks></remarks>
+    Public Sub SetScore(strScoreName As String, strScoreValue As String)
+        If mAdditionalScores.ContainsKey(strScoreName) Then
+            mAdditionalScores(strScoreName) = strScoreValue
+        Else
+            mAdditionalScores.Add(strScoreName, strScoreValue)
+        End If
+    End Sub
 
-	''' <summary>
-	''' Returns the value stored for the specified score
-	''' </summary>
-	''' <param name="strScoreName"></param>
-	''' <param name="strScoreValue"></param>
-	''' <returns>True if the score is defined, otherwise false</returns>
-	''' <remarks></remarks>
-	Public Function TryGetScore(ByVal strScoreName As String, <Out()> ByRef strScoreValue As String) As Boolean
+    ''' <summary>
+    ''' Returns the value stored for the specified score
+    ''' </summary>
+    ''' <param name="strScoreName"></param>
+    ''' <param name="strScoreValue"></param>
+    ''' <returns>True if the score is defined, otherwise false</returns>
+    ''' <remarks></remarks>
+    Public Function TryGetScore(strScoreName As String, <Out()> ByRef strScoreValue As String) As Boolean
 
-		strScoreValue = String.Empty
-		If mAdditionalScores.TryGetValue(strScoreName, strScoreValue) Then
-			Return True
-		Else
-			Return False
-		End If
+        strScoreValue = String.Empty
+        If mAdditionalScores.TryGetValue(strScoreName, strScoreValue) Then
+            Return True
+        Else
+            Return False
+        End If
 
-	End Function
+    End Function
 
 	''' <summary>
 	''' Auto-determine the number of missed cleavages, cleavage state, and number of tryptic terminii based on the peptide sequence

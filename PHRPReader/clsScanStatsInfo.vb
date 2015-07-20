@@ -104,9 +104,9 @@ Public Class clsScanStatsInfo
 		End Set
 	End Property
 
-	Public Sub New(ByVal intScanNumber As Integer, ByVal sngScanTimeMinutes As Single, intScanType As Integer)
-		mScanNumber = intScanNumber
-		mScanTimeMinutes = sngScanTimeMinutes
-		mScanType = intScanType
-	End Sub
+    Public Sub New(intScanNumber As Integer, sngScanTimeMinutes As Single, intScanType As Integer)
+        mScanNumber = intScanNumber
+        mScanTimeMinutes = sngScanTimeMinutes
+        mScanType = intScanType
+    End Sub
 End Class

@@ -135,9 +135,9 @@ Public Class clsPHRPReader
 #End Region
 
 #Region "Events"
-    Public Event MessageEvent(ByVal strMessage As String)
-    Public Event ErrorEvent(ByVal strErrorMessage As String)
-    Public Event WarningEvent(ByVal strWarningMessage As String)
+    Public Event MessageEvent(strMessage As String)
+    Public Event ErrorEvent(strErrorMessage As String)
+    Public Event WarningEvent(strWarningMessage As String)
 #End Region
 
 #Region "Properties"
@@ -235,23 +235,23 @@ Public Class clsPHRPReader
         End Get
     End Property
 
-	''' <summary>
-	''' Used to enable fast read mode when calling MoveNext
-	''' When FastReadMode is True, you should call FinalizeCurrentPSM after calling MoveNext to populate the remaining fields if the peptide is a peptide of interest
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks>Once FastReadMode is enabled it cannot be turned off (this is a safety measure due to how data is cached)</remarks>
-	Public Property FastReadMode() As Boolean
-		Get
-			Return mFastReadMode
-		End Get
-		Set(value As Boolean)
-			If value Then
-				mFastReadMode = True
-			End If
-		End Set
-	End Property
+    ''' <summary>
+    ''' Used to enable fast read mode when calling MoveNext
+    ''' When FastReadMode is True, you should call FinalizeCurrentPSM after calling MoveNext to populate the remaining fields if the peptide is a peptide of interest
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Once FastReadMode is enabled it cannot be turned off (this is a safety measure due to how data is cached)</remarks>
+    Public Property FastReadMode() As Boolean
+        Get
+            Return mFastReadMode
+        End Get
+        Set(value As Boolean)
+            If value Then
+                mFastReadMode = True
+            End If
+        End Set
+    End Property
 
     ''' <summary>
     ''' If True, then looks for and loads the modification definitions from the _ModSummary.txt file associated with the input file
@@ -439,7 +439,7 @@ Public Class clsPHRPReader
     ''' </summary>
     ''' <param name="strInputFilePath">Input file to read</param>
     ''' <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
-    Public Sub New(ByVal strInputFilePath As String)
+    Public Sub New(strInputFilePath As String)
         Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModsAndSeqInfo:=True, blnLoadMSGFResults:=True, blnLoadScanStats:=False)
     End Sub
 
@@ -449,7 +449,7 @@ Public Class clsPHRPReader
     ''' <param name="strInputFilePath">Input file to read</param>
     ''' <param name="eResultType">Source file PeptideHit result type</param>
     ''' <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
-    Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType)
+    Public Sub New(strInputFilePath As String, eResultType As ePeptideHitResultType)
         Me.New(strInputFilePath, eResultType, blnLoadModsAndSeqInfo:=True, blnLoadMSGFResults:=True, blnLoadScanStats:=False)
     End Sub
 
@@ -460,7 +460,7 @@ Public Class clsPHRPReader
     ''' <param name="blnLoadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
     ''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean, ByVal blnLoadMSGFResults As Boolean)
+    Public Sub New(strInputFilePath As String, blnLoadModsAndSeqInfo As Boolean, blnLoadMSGFResults As Boolean)
         Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModsAndSeqInfo, blnLoadMSGFResults, blnLoadScanStats:=False)
     End Sub
 
@@ -472,7 +472,7 @@ Public Class clsPHRPReader
     ''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
     ''' <param name="blnLoadScanStats">If True, then looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strInputFilePath As String, ByVal blnLoadModsAndSeqInfo As Boolean, ByVal blnLoadMSGFResults As Boolean, ByVal blnLoadScanStats As Boolean)
+    Public Sub New(strInputFilePath As String, blnLoadModsAndSeqInfo As Boolean, blnLoadMSGFResults As Boolean, blnLoadScanStats As Boolean)
         Me.New(strInputFilePath, ePeptideHitResultType.Unknown, blnLoadModsAndSeqInfo, blnLoadMSGFResults, blnLoadScanStats)
     End Sub
 
@@ -482,7 +482,7 @@ Public Class clsPHRPReader
     ''' <param name="strInputFilePath">Input file to read</param>
     ''' <param name="oStartupOptions">Startup options</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strInputFilePath As String, ByVal oStartupOptions As clsPHRPStartupOptions)
+    Public Sub New(strInputFilePath As String, oStartupOptions As clsPHRPStartupOptions)
         Me.New(strInputFilePath, ePeptideHitResultType.Unknown, oStartupOptions)
     End Sub
 
@@ -494,7 +494,7 @@ Public Class clsPHRPReader
     ''' <param name="blnLoadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
     ''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean, ByVal blnLoadMSGFResults As Boolean)
+    Public Sub New(strInputFilePath As String, eResultType As ePeptideHitResultType, blnLoadModsAndSeqInfo As Boolean, blnLoadMSGFResults As Boolean)
         Me.New(strInputFilePath, eResultType, blnLoadModsAndSeqInfo, blnLoadMSGFResults, blnLoadScanStats:=False)
     End Sub
 
@@ -507,7 +507,7 @@ Public Class clsPHRPReader
     ''' <param name="blnLoadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
     ''' <param name="blnLoadScanStats">If True, then looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal blnLoadModsAndSeqInfo As Boolean, ByVal blnLoadMSGFResults As Boolean, ByVal blnLoadScanStats As Boolean)
+    Public Sub New(strInputFilePath As String, eResultType As ePeptideHitResultType, blnLoadModsAndSeqInfo As Boolean, blnLoadMSGFResults As Boolean, blnLoadScanStats As Boolean)
 
         Dim oStartupOptions = New clsPHRPStartupOptions()
         With oStartupOptions
@@ -527,7 +527,7 @@ Public Class clsPHRPReader
     ''' <param name="eResultType">Source file PeptideHit result type</param>
     ''' <param name="oStartupOptions">Startup options</param>
     ''' <remarks></remarks>
-    Public Sub New(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal oStartupOptions As clsPHRPStartupOptions)
+    Public Sub New(strInputFilePath As String, eResultType As ePeptideHitResultType, oStartupOptions As clsPHRPStartupOptions)
 
         InitializeClass(strInputFilePath, eResultType, oStartupOptions)
 
@@ -540,7 +540,7 @@ Public Class clsPHRPReader
     ''' <param name="strBasePHRPFileName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoSwitchToFHTIfRequired(ByVal strFilePath As String, ByVal strBasePHRPFileName As String) As String
+    Public Shared Function AutoSwitchToFHTIfRequired(strFilePath As String, strBasePHRPFileName As String) As String
 
         Dim fiFileInfo As FileInfo
         Dim intSynIndex As Integer
@@ -625,7 +625,7 @@ Public Class clsPHRPReader
     ''' <param name="eResultType">Source file PeptideHit result type</param>
     ''' <param name="oStartupOptions">Startup options</param>
     ''' <remarks></remarks>
-    Private Sub InitializeClass(ByVal strInputFilePath As String, eResultType As ePeptideHitResultType, ByVal oStartupOptions As clsPHRPStartupOptions)
+    Private Sub InitializeClass(strInputFilePath As String, eResultType As ePeptideHitResultType, oStartupOptions As clsPHRPStartupOptions)
 
         mInitialized = False
 
@@ -636,7 +636,7 @@ Public Class clsPHRPReader
         mInitialized = True
     End Sub
 
-    Private Sub InitializeMemberVariables(ByVal oStartupOptions As clsPHRPStartupOptions)
+    Private Sub InitializeMemberVariables(oStartupOptions As clsPHRPStartupOptions)
         mDatasetName = String.Empty
         mInputFilePath = String.Empty
         mInputFolderPath = String.Empty
@@ -671,7 +671,7 @@ Public Class clsPHRPReader
 
     End Sub
 
-    Protected Function InitializeReader(ByVal strInputFilePath As String, ByVal eResultType As ePeptideHitResultType) As Boolean
+    Protected Function InitializeReader(strInputFilePath As String, eResultType As ePeptideHitResultType) As Boolean
 
         Dim strModSummaryFilePath As String = String.Empty
 
@@ -746,7 +746,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Function InitializeParser(ByVal eResultType As ePeptideHitResultType) As Boolean
+    Protected Function InitializeParser(eResultType As ePeptideHitResultType) As Boolean
 
         Dim blnSuccess As Boolean = True
         Dim strDatasetName As String = String.Copy(mDatasetName)
@@ -848,7 +848,7 @@ Public Class clsPHRPReader
     ''' <param name="strInputFolderPath">Input folder path</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String) As String
+    Public Shared Function AutoDetermineBestInputFile(strInputFolderPath As String) As String
         Dim eMatchedResultType = ePeptideHitResultType.Unknown
         Return AutoDetermineBestInputFile(strInputFolderPath, eMatchedResultType)
     End Function
@@ -862,7 +862,7 @@ Public Class clsPHRPReader
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
     Public Shared Function AutoDetermineBestInputFile(
-       ByVal strInputFolderPath As String,
+       strInputFolderPath As String,
        <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
 
         ' Find candidate dataset names in strInputFolderPath
@@ -943,7 +943,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName">Dataset name</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal strDatasetName As String) As String
+    Public Shared Function AutoDetermineBestInputFile(strInputFolderPath As String, strDatasetName As String) As String
         Dim eMatchedResultType = ePeptideHitResultType.Unknown
         Return AutoDetermineBestInputFile(strInputFolderPath, strDatasetName, eMatchedResultType)
     End Function
@@ -957,7 +957,7 @@ Public Class clsPHRPReader
     ''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineBestInputFile(ByVal strInputFolderPath As String, ByVal strDatasetName As String, <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
+    Public Shared Function AutoDetermineBestInputFile(strInputFolderPath As String, strDatasetName As String, <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
         Dim lstDatasetNames As List(Of String) = New List(Of String)
         lstDatasetNames.Add(strDatasetName)
 
@@ -974,8 +974,8 @@ Public Class clsPHRPReader
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
     Public Shared Function AutoDetermineBestInputFile(
-       ByVal strInputFolderPath As String,
-       ByVal lstDatasetNames As List(Of String),
+       strInputFolderPath As String,
+       lstDatasetNames As List(Of String),
        <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
 
         Dim fiInputFolder As DirectoryInfo
@@ -1091,7 +1091,7 @@ Public Class clsPHRPReader
     ''' <param name="strFilePath"></param>
     ''' <returns>Dataset name</returns>
     ''' <remarks>Returns an empty string if unable to determine the dataset name</remarks>
-    Public Shared Function AutoDetermineDatasetName(ByVal strFilePath As String) As String
+    Public Shared Function AutoDetermineDatasetName(strFilePath As String) As String
         Dim eResultType As ePeptideHitResultType
 
         eResultType = AutoDetermineResultType(strFilePath)
@@ -1106,7 +1106,7 @@ Public Class clsPHRPReader
     ''' <param name="eResultType"></param>
     ''' <returns>Dataset name</returns>
     ''' <remarks>Returns an empty string if unable to determine the dataset name</remarks>
-    Public Shared Function AutoDetermineDatasetName(ByVal strFilePath As String, ByVal eResultType As ePeptideHitResultType) As String
+    Public Shared Function AutoDetermineDatasetName(strFilePath As String, eResultType As ePeptideHitResultType) As String
 
         Dim strDatasetName As String = String.Empty
         Dim strInputFileName As String
@@ -1173,7 +1173,7 @@ Public Class clsPHRPReader
     ''' <param name="strFilePath"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineResultType(ByVal strFilePath As String) As ePeptideHitResultType
+    Public Shared Function AutoDetermineResultType(strFilePath As String) As ePeptideHitResultType
 
         Dim strFilePathLCase As String
 
@@ -1256,7 +1256,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Shared Function AutoTrimExtraSuffix(ByVal strFilePath As String, ByRef strFilePathTrimmed As String) As Boolean
+    Protected Shared Function AutoTrimExtraSuffix(strFilePath As String, ByRef strFilePathTrimmed As String) As Boolean
 
         ' Check whether strfilePathLCase ends in other known PHRP extensions
         Dim lstExtraSuffixes As List(Of String)
@@ -1285,7 +1285,7 @@ Public Class clsPHRPReader
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks>strPeptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
     Protected Function ConvertModsToNumericMods(
-      ByVal strPeptide As String,
+      strPeptide As String,
       <Out()> ByRef strPeptideWithNumericMods As String,
       <Out()> ByRef lstPeptideMods As List(Of clsAminoAcidModInfo)) As Boolean
 
@@ -1405,13 +1405,13 @@ Public Class clsPHRPReader
     End Function
 
     Protected Sub AddDynamicModIfPresent(
-      ByVal objMods As SortedDictionary(Of Char, clsModificationDefinition),
-      ByVal chResidue As Char,
-      ByVal chModSymbol As Char,
-      ByVal ResidueLocInPeptide As Integer,
-      ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
-      ByVal sbNewPeptide As Text.StringBuilder,
-      ByVal lstPeptideMods As List(Of clsAminoAcidModInfo))
+      objMods As SortedDictionary(Of Char, clsModificationDefinition),
+      chResidue As Char,
+      chModSymbol As Char,
+      ResidueLocInPeptide As Integer,
+      ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
+      sbNewPeptide As Text.StringBuilder,
+      lstPeptideMods As List(Of clsAminoAcidModInfo))
 
         Dim objModDef As clsModificationDefinition = Nothing
 
@@ -1424,12 +1424,12 @@ Public Class clsPHRPReader
     End Sub
 
     Protected Sub AddStaticModIfPresent(
-       ByVal objMods As SortedDictionary(Of String, List(Of clsModificationDefinition)),
-       ByVal chResidue As Char,
-       ByVal ResidueLocInPeptide As Integer,
-       ByVal ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
-       ByVal sbNewPeptide As Text.StringBuilder,
-       ByVal lstPeptideMods As List(Of clsAminoAcidModInfo))
+       objMods As SortedDictionary(Of String, List(Of clsModificationDefinition)),
+       chResidue As Char,
+       ResidueLocInPeptide As Integer,
+       ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
+       sbNewPeptide As Text.StringBuilder,
+       lstPeptideMods As List(Of clsAminoAcidModInfo))
 
         Dim lstModDefs As List(Of clsModificationDefinition) = Nothing
 
@@ -1451,7 +1451,7 @@ Public Class clsPHRPReader
     ''' <param name="strScanTypeName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function GetCollisionMode(ByVal strScanTypeName As String) As String
+    Protected Function GetCollisionMode(strScanTypeName As String) As String
         ' Typical scan types, along with DMS usage count as of 4/26/2012
 
         ' Scan Type     Usage Count
@@ -1511,7 +1511,7 @@ Public Class clsPHRPReader
         Return Path.GetFileNameWithoutExtension(strSynopsisOrFirstHitsFileName) & MSGF_RESULT_FILENAME_SUFFIX
     End Function
 
-    Public Shared Function GetPeptideHitResultType(ByVal ResultTypeName As String) As ePeptideHitResultType
+    Public Shared Function GetPeptideHitResultType(ResultTypeName As String) As ePeptideHitResultType
         Select Case ResultTypeName.ToLower()
             Case "Peptide_Hit".ToLower
                 Return ePeptideHitResultType.Sequest
@@ -1555,7 +1555,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Shared Function GetPHRPFileFreeParser(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As clsPHRPParser
+    Protected Shared Function GetPHRPFileFreeParser(eResultType As ePeptideHitResultType, strDatasetName As String) As clsPHRPParser
 
         Static oCachedParser As clsPHRPParser
         Static eCachedResultType As ePeptideHitResultType = ePeptideHitResultType.Unknown
@@ -1608,7 +1608,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function GetPHRPFirstHitsFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPFirstHitsFileName(eResultType As ePeptideHitResultType, strDatasetName As String) As String
 
         Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
         Dim strPHRPResultsFileName = oParser.PHRPFirstHitsFileName()
@@ -1624,7 +1624,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function GetPHRPModSummaryFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPModSummaryFileName(eResultType As ePeptideHitResultType, strDatasetName As String) As String
 
         Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
         Dim strPHRPModSummaryFileName = oParser.PHRPModSummaryFileName()
@@ -1640,7 +1640,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function GetPHRPPepToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPPepToProteinMapFileName(eResultType As ePeptideHitResultType, strDatasetName As String) As String
 
         Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
         Dim strPepToProteinMapFileName = oParser.PHRPPepToProteinMapFileName()
@@ -1656,7 +1656,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function GetPHRPProteinModsFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPProteinModsFileName(eResultType As ePeptideHitResultType, strDatasetName As String) As String
 
         Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
         Dim strProteinModsFileName = oParser.PHRPProteinModsFileName()
@@ -1672,7 +1672,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function GetPHRPSynopsisFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPSynopsisFileName(eResultType As ePeptideHitResultType, strDatasetName As String) As String
 
         Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
         Dim strPHRPResultsFileName = oParser.PHRPSynopsisFileName()
@@ -1688,7 +1688,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function GetPHRPResultToSeqMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPResultToSeqMapFileName(eResultType As ePeptideHitResultType, strDatasetName As String) As String
 
         Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
         Dim strResultToSeqMapFilename = oParser.PHRPResultToSeqMapFileName()
@@ -1704,7 +1704,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function GetPHRPSeqInfoFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPSeqInfoFileName(eResultType As ePeptideHitResultType, strDatasetName As String) As String
 
         Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
         Dim strSeqInfoFilename = oParser.PHRPSeqInfoFileName()
@@ -1720,7 +1720,7 @@ Public Class clsPHRPReader
     ''' <param name="strDatasetName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function GetPHRPSeqToProteinMapFileName(ByVal eResultType As ePeptideHitResultType, ByVal strDatasetName As String) As String
+    Public Shared Function GetPHRPSeqToProteinMapFileName(eResultType As ePeptideHitResultType, strDatasetName As String) As String
 
         Dim oParser As clsPHRPParser = GetPHRPFileFreeParser(eResultType, strDatasetName)
         Dim strSeqToProteinMapFileName = oParser.PHRPSeqToProteinMapFileName()
@@ -1729,15 +1729,15 @@ Public Class clsPHRPReader
 
     End Function
 
-    Public Shared Function GetScanStatsFilename(ByVal strDatasetName As String) As String
+    Public Shared Function GetScanStatsFilename(strDatasetName As String) As String
         Return strDatasetName & SCAN_STATS_FILENAME_SUFFIX
     End Function
 
-    Public Shared Function GetExtendedScanStatsFilename(ByVal strDatasetName As String) As String
+    Public Shared Function GetExtendedScanStatsFilename(strDatasetName As String) As String
         Return strDatasetName & EXTENDED_SCAN_STATS_FILENAME_SUFFIX
     End Function
 
-    Public Shared Function GetToolVersionInfoFilename(ByVal eResultType As ePeptideHitResultType) As String
+    Public Shared Function GetToolVersionInfoFilename(eResultType As ePeptideHitResultType) As String
 
         Dim strToolVersionInfoFilename As String = String.Empty
 
@@ -1768,7 +1768,7 @@ Public Class clsPHRPReader
         Return strToolVersionInfoFilename
     End Function
 
-    Protected Sub HandleException(ByVal strBaseMessage As String, ByVal ex As Exception)
+    Protected Sub HandleException(strBaseMessage As String, ex As Exception)
         If String.IsNullOrEmpty(strBaseMessage) Then
             strBaseMessage = "Error"
         End If
@@ -1800,7 +1800,7 @@ Public Class clsPHRPReader
     ''' </summary>
     ''' <param name="strData"></param>
     ''' <returns>True if a number, otherwise false</returns>
-    Public Shared Function IsNumber(ByVal strData As String) As Boolean
+    Public Shared Function IsNumber(strData As String) As Boolean
         Try
             If Double.TryParse(strData, 0) Then
                 Return True
@@ -1814,7 +1814,7 @@ Public Class clsPHRPReader
         Return False
     End Function
 
-    Protected Shared Function LineContainsValues(ByVal strDataLine As String, ParamArray lstValuesToFind As String()) As Boolean
+    Protected Shared Function LineContainsValues(strDataLine As String, ParamArray lstValuesToFind As String()) As Boolean
         Dim intMatchCount As Integer = 0
 
         For Each item In lstValuesToFind
@@ -1838,7 +1838,7 @@ Public Class clsPHRPReader
     ''' <param name="objColumnHeaders"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function LookupColumnIndex(ByVal strColumnName As String, ByVal objColumnHeaders As SortedDictionary(Of String, Integer)) As Integer
+    Public Shared Function LookupColumnIndex(strColumnName As String, objColumnHeaders As SortedDictionary(Of String, Integer)) As Integer
 
         Dim intColIndex As Integer
 
@@ -1858,9 +1858,9 @@ Public Class clsPHRPReader
     ''' <returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
     ''' <remarks></remarks>
     Public Shared Function LookupColumnValue(
-      ByVal strColumns() As String, _
-      ByVal strColumnName As String, _
-      ByVal objColumnHeaders As SortedDictionary(Of String, Integer)) As String
+      strColumns() As String, _
+      strColumnName As String, _
+      objColumnHeaders As SortedDictionary(Of String, Integer)) As String
 
         Return LookupColumnValue(strColumns, strColumnName, objColumnHeaders, String.Empty)
     End Function
@@ -1871,10 +1871,10 @@ Public Class clsPHRPReader
     ''' <returns>The text in the specified column; strValueIfMissing if the specific column name is not recognized</returns>
     ''' <remarks></remarks>
     Public Shared Function LookupColumnValue(
-      ByVal strColumns() As String, _
-      ByVal strColumnName As String, _
-      ByVal objColumnHeaders As SortedDictionary(Of String, Integer), _
-      ByVal strValueIfMissing As String) As String
+      strColumns() As String, _
+      strColumnName As String, _
+      objColumnHeaders As SortedDictionary(Of String, Integer), _
+      strValueIfMissing As String) As String
 
         Dim intColIndex As Integer
 
@@ -1901,10 +1901,10 @@ Public Class clsPHRPReader
     ''' <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
     ''' <remarks></remarks>
     Public Shared Function LookupColumnValue(
-      ByVal strColumns() As String,
-      ByVal strColumnName As String,
-      ByVal objColumnHeaders As SortedDictionary(Of String, Integer),
-      ByVal ValueIfMissing As Integer) As Integer
+      strColumns() As String,
+      strColumnName As String,
+      objColumnHeaders As SortedDictionary(Of String, Integer),
+      ValueIfMissing As Integer) As Integer
 
         Dim strValue As String
         Dim intValue As Integer
@@ -1923,10 +1923,10 @@ Public Class clsPHRPReader
     ''' <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
     ''' <remarks></remarks>
     Public Shared Function LookupColumnValue(
-      ByVal strColumns() As String,
-      ByVal strColumnName As String,
-      ByVal objColumnHeaders As SortedDictionary(Of String, Integer),
-      ByVal ValueIfMissing As Double) As Double
+      strColumns() As String,
+      strColumnName As String,
+      objColumnHeaders As SortedDictionary(Of String, Integer),
+      ValueIfMissing As Double) As Double
 
         Dim strValue As String
         Dim dblValue As Double
@@ -1945,7 +1945,7 @@ Public Class clsPHRPReader
     ''' <param name="strColumns">Column names read from the input file</param>
     ''' <param name="objColumnHeaders">Column mapping dictionary object to update</param>
     ''' <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.CurrentCultureIgnoreCase)</remarks>
-    Public Shared Sub ParseColumnHeaders(ByVal strColumns() As String, ByVal objColumnHeaders As SortedDictionary(Of String, Integer))
+    Public Shared Sub ParseColumnHeaders(strColumns() As String, objColumnHeaders As SortedDictionary(Of String, Integer))
 
         Dim intIndex As Integer
 
@@ -1971,126 +1971,126 @@ Public Class clsPHRPReader
 
     End Sub
 
-	''' <summary>
-	''' Reads the next line from a synopsis file or first hits file
-	''' </summary>
-	''' <returns>True if a line was read, false if not more data is available</returns>
-	''' <remarks>When FastReadMode is True, you should call FinalizeCurrentPSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
-	Public Function MoveNext() As Boolean
+    ''' <summary>
+    ''' Reads the next line from a synopsis file or first hits file
+    ''' </summary>
+    ''' <returns>True if a line was read, false if not more data is available</returns>
+    ''' <remarks>When FastReadMode is True, you should call FinalizeCurrentPSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
+    Public Function MoveNext() As Boolean
 
-		Dim strLineIn As String = String.Empty
+        Dim strLineIn As String = String.Empty
 
-		Dim blnSuccess As Boolean = False
-		Dim blnMatchFound As Boolean = False
-		Dim blnUsingCachedPSM As Boolean = False
+        Dim blnSuccess As Boolean = False
+        Dim blnMatchFound As Boolean = False
+        Dim blnUsingCachedPSM As Boolean = False
 
-		If mCachedLineAvailable Then
-			strLineIn = mCachedLine
-			mCachedLineAvailable = False
-			mPSMCurrent = mCachedPSM
-			blnUsingCachedPSM = True
-			blnSuccess = True
-			mPSMCurrentFinalized = False
-			mExtendedScanStatsValid = False
+        If mCachedLineAvailable Then
+            strLineIn = mCachedLine
+            mCachedLineAvailable = False
+            mPSMCurrent = mCachedPSM
+            blnUsingCachedPSM = True
+            blnSuccess = True
+            mPSMCurrentFinalized = False
+            mExtendedScanStatsValid = False
         ElseIf Not mSourceFile.EndOfStream Then
             strLineIn = mSourceFile.ReadLine()
             mSourceFileLinesRead += 1
             blnSuccess = True
-		Else
-			mCanRead = False
-		End If
+        Else
+            mCanRead = False
+        End If
 
-		If Not blnSuccess OrElse String.IsNullOrEmpty(strLineIn) Then
-			Return False
-		End If
+        If Not blnSuccess OrElse String.IsNullOrEmpty(strLineIn) Then
+            Return False
+        End If
 
-		If Not mHeaderLineParsed Then
-			Dim strSplitLine() = strLineIn.Split(ControlChars.Tab)
-			If Not IsNumber(strSplitLine(0)) Then
-				' Parse the header line to confirm the column ordering
-				mPHRPParser.ParseColumnHeaders(strSplitLine)
+        If Not mHeaderLineParsed Then
+            Dim strSplitLine() = strLineIn.Split(ControlChars.Tab)
+            If Not IsNumber(strSplitLine(0)) Then
+                ' Parse the header line to confirm the column ordering
+                mPHRPParser.ParseColumnHeaders(strSplitLine)
 
-				mHeaderLineParsed = True
-				Return MoveNext()
-			End If
+                mHeaderLineParsed = True
+                Return MoveNext()
+            End If
 
-			mHeaderLineParsed = True
-		End If
+            mHeaderLineParsed = True
+        End If
 
-		If Not blnUsingCachedPSM Then
-			mPSMCurrent = New clsPSM()
-			blnSuccess = mPHRPParser.ParsePHRPDataLine(strLineIn, mSourceFileLinesRead, mPSMCurrent, mFastReadMode)
-			mPSMCurrentFinalized = False
-			mExtendedScanStatsValid = False
-		End If
+        If Not blnUsingCachedPSM Then
+            mPSMCurrent = New clsPSM()
+            blnSuccess = mPHRPParser.ParsePHRPDataLine(strLineIn, mSourceFileLinesRead, mPSMCurrent, mFastReadMode)
+            mPSMCurrentFinalized = False
+            mExtendedScanStatsValid = False
+        End If
 
-		If Not blnSuccess Then
-			Return False
-		End If
+        If Not blnSuccess Then
+            Return False
+        End If
 
-		blnMatchFound = True
+        blnMatchFound = True
 
-		' The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
-		' If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods 
-		' by inferring the mods using mDynamicMods and mStaticMods (which were populated using the PHRP ModSummary file)
-		If Not mFastReadMode AndAlso mStartupOptions.LoadModsAndSeqInfo AndAlso String.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods) Then
-			MarkupPeptideWithMods()
-		End If
+        ' The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
+        ' If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods 
+        ' by inferring the mods using mDynamicMods and mStaticMods (which were populated using the PHRP ModSummary file)
+        If Not mFastReadMode AndAlso mStartupOptions.LoadModsAndSeqInfo AndAlso String.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods) Then
+            MarkupPeptideWithMods()
+        End If
 
-		Dim objScanStatsInfo As clsScanStatsInfo = Nothing
+        Dim objScanStatsInfo As clsScanStatsInfo = Nothing
 
-		Dim blnScanStatsValid = TryGetScanStats(mPSMCurrent.ScanNumber, objScanStatsInfo)
-		mExtendedScanStatsValid = TryGetExtendedScanStats(mPSMCurrent.ScanNumber, mExtendedScanStatsInfo)
+        Dim blnScanStatsValid = TryGetScanStats(mPSMCurrent.ScanNumber, objScanStatsInfo)
+        mExtendedScanStatsValid = TryGetExtendedScanStats(mPSMCurrent.ScanNumber, mExtendedScanStatsInfo)
 
-		If blnScanStatsValid Then
-			' Update the elution time
-			mPSMCurrent.ElutionTimeMinutes = objScanStatsInfo.ScanTimeMinutes
-		End If
+        If blnScanStatsValid Then
+            ' Update the elution time
+            mPSMCurrent.ElutionTimeMinutes = objScanStatsInfo.ScanTimeMinutes
+        End If
 
-		If String.IsNullOrEmpty(mPSMCurrent.CollisionMode) OrElse mPSMCurrent.CollisionMode = clsPSM.UNKNOWN_COLLISION_MODE Then
+        If String.IsNullOrEmpty(mPSMCurrent.CollisionMode) OrElse mPSMCurrent.CollisionMode = clsPSM.UNKNOWN_COLLISION_MODE Then
 
-			' Determine the ScanTypeName using the the ScanStats or ExtendedScanStats info
-			If blnScanStatsValid AndAlso Not String.IsNullOrEmpty(objScanStatsInfo.ScanTypeName) Then
-				mPSMCurrent.CollisionMode = GetCollisionMode(objScanStatsInfo.ScanTypeName)
-			End If
+            ' Determine the ScanTypeName using the the ScanStats or ExtendedScanStats info
+            If blnScanStatsValid AndAlso Not String.IsNullOrEmpty(objScanStatsInfo.ScanTypeName) Then
+                mPSMCurrent.CollisionMode = GetCollisionMode(objScanStatsInfo.ScanTypeName)
+            End If
 
-			If String.IsNullOrEmpty(mPSMCurrent.CollisionMode) AndAlso mExtendedScanStatsValid Then
-				' Scan type still not determined, but Extended Scan Stats data is available
-				If Not String.IsNullOrEmpty(mExtendedScanStatsInfo.CollisionMode) Then
-					' Check for Collision mode being "0"
-					' This is often the case for the first scan in a Thermo .Raw file
-					If mExtendedScanStatsInfo.CollisionMode <> "0" Then
-						mPSMCurrent.CollisionMode = mExtendedScanStatsInfo.CollisionMode.ToUpper()
-					End If
-				End If
-			End If
-		End If
+            If String.IsNullOrEmpty(mPSMCurrent.CollisionMode) AndAlso mExtendedScanStatsValid Then
+                ' Scan type still not determined, but Extended Scan Stats data is available
+                If Not String.IsNullOrEmpty(mExtendedScanStatsInfo.CollisionMode) Then
+                    ' Check for Collision mode being "0"
+                    ' This is often the case for the first scan in a Thermo .Raw file
+                    If mExtendedScanStatsInfo.CollisionMode <> "0" Then
+                        mPSMCurrent.CollisionMode = mExtendedScanStatsInfo.CollisionMode.ToUpper()
+                    End If
+                End If
+            End If
+        End If
 
-		If Not mFastReadMode Then
-			If mPHRPParser.PeptideHitResultType = ePeptideHitResultType.Sequest OrElse mPHRPParser.PeptideHitResultType = ePeptideHitResultType.XTandem Then
-				ComputePrecursorNeutralMass()
-			End If
-		End If
+        If Not mFastReadMode Then
+            If mPHRPParser.PeptideHitResultType = ePeptideHitResultType.Sequest OrElse mPHRPParser.PeptideHitResultType = ePeptideHitResultType.XTandem Then
+                ComputePrecursorNeutralMass()
+            End If
+        End If
 
-		If Not mMSGFCachedResults Is Nothing AndAlso mMSGFCachedResults.Count > 0 Then
-			Dim strMSGFSpecProb As String = String.Empty
-			Dim dblSpecProb As Double
+        If Not mMSGFCachedResults Is Nothing AndAlso mMSGFCachedResults.Count > 0 Then
+            Dim strMSGFSpecProb As String = String.Empty
+            Dim dblSpecProb As Double
 
-			If mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, strMSGFSpecProb) Then
-				mPSMCurrent.MSGFSpecProb = strMSGFSpecProb
-				If strMSGFSpecProb.Length > 12 Then
-					' Attempt to shorten the SpecProb value
-					If Double.TryParse(strMSGFSpecProb, dblSpecProb) Then
-						mPSMCurrent.MSGFSpecProb = dblSpecProb.ToString("0.00000E-00")
-					End If
-				End If
-			End If
-		End If
+            If mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, strMSGFSpecProb) Then
+                mPSMCurrent.MSGFSpecProb = strMSGFSpecProb
+                If strMSGFSpecProb.Length > 12 Then
+                    ' Attempt to shorten the SpecProb value
+                    If Double.TryParse(strMSGFSpecProb, dblSpecProb) Then
+                        mPSMCurrent.MSGFSpecProb = dblSpecProb.ToString("0.00000E-00")
+                    End If
+                End If
+            End If
+        End If
 
-		If mSkipDuplicatePSMs Then
+        If mSkipDuplicatePSMs Then
 
-			' Read the next line and check whether it's the same hit, but a different protein
-			Dim blnReadNext As Boolean = True
+            ' Read the next line and check whether it's the same hit, but a different protein
+            Dim blnReadNext As Boolean = True
             Do While blnReadNext AndAlso Not mSourceFile.EndOfStream
                 strLineIn = mSourceFile.ReadLine()
                 mSourceFileLinesRead += 1
@@ -2143,146 +2143,146 @@ Public Class clsPHRPReader
                 End If
             Loop
 
-		End If
+        End If
 
-		Return blnMatchFound
+        Return blnMatchFound
 
-	End Function
+    End Function
 
-	Private Sub ComputePrecursorNeutralMass()
-		Dim dblMonoisotopicPrecursorMass As Double
+    Private Sub ComputePrecursorNeutralMass()
+        Dim dblMonoisotopicPrecursorMass As Double
 
-		If Not mExtendedScanStatsValid Then Exit Sub
+        If Not mExtendedScanStatsValid Then Exit Sub
 
-		dblMonoisotopicPrecursorMass = 0
+        dblMonoisotopicPrecursorMass = 0
 
-		' Try to extract out the precursor m/z value from the "Scan Filter Text" field
-		Dim dblParentIonMZ As Double
-		Dim intMSLevel As Integer
-		Dim strCollisionMode As String = String.Empty
+        ' Try to extract out the precursor m/z value from the "Scan Filter Text" field
+        Dim dblParentIonMZ As Double
+        Dim intMSLevel As Integer
+        Dim strCollisionMode As String = String.Empty
 
-		If ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO.ExtractParentIonMZFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
-			If dblParentIonMZ > 0 Then
-				dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(dblParentIonMZ, mPSMCurrent.Charge, 0)
-			End If
-		End If
+        If ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO.ExtractParentIonMZFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
+            If dblParentIonMZ > 0 Then
+                dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(dblParentIonMZ, mPSMCurrent.Charge, 0)
+            End If
+        End If
 
-		If Math.Abs(dblMonoisotopicPrecursorMass) < Double.Epsilon Then
-			If mExtendedScanStatsInfo.MonoisotopicMZ > 0 Then
-				' Determine the precursor m/z value using the Monoisotopic m/z value reported by the instrument
-				dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(mExtendedScanStatsInfo.MonoisotopicMZ,
-				 mPSMCurrent.Charge, 0)
-			End If
-		End If
+        If Math.Abs(dblMonoisotopicPrecursorMass) < Double.Epsilon Then
+            If mExtendedScanStatsInfo.MonoisotopicMZ > 0 Then
+                ' Determine the precursor m/z value using the Monoisotopic m/z value reported by the instrument
+                dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(mExtendedScanStatsInfo.MonoisotopicMZ,
+                 mPSMCurrent.Charge, 0)
+            End If
+        End If
 
-		If dblMonoisotopicPrecursorMass > 0 Then
-			mPSMCurrent.PrecursorNeutralMass = dblMonoisotopicPrecursorMass
-		End If
+        If dblMonoisotopicPrecursorMass > 0 Then
+            mPSMCurrent.PrecursorNeutralMass = dblMonoisotopicPrecursorMass
+        End If
 
-	End Sub
+    End Sub
 
-	Private Sub MarkupPeptideWithMods()
-		Dim blnSuccess As Boolean
+    Private Sub MarkupPeptideWithMods()
+        Dim blnSuccess As Boolean
 
-		' Markup the peptide with the dynamic and static mods
+        ' Markup the peptide with the dynamic and static mods
         Dim strPeptideWithMods As String = String.Empty
         Dim lstPeptideMods As List(Of clsAminoAcidModInfo) = Nothing
 
-		blnSuccess = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim, strPeptideWithMods, lstPeptideMods)
-		If blnSuccess Then
-			Dim dblTotalModMass As Double = 0
+        blnSuccess = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim, strPeptideWithMods, lstPeptideMods)
+        If blnSuccess Then
+            Dim dblTotalModMass As Double = 0
 
-			mPSMCurrent.PeptideWithNumericMods = strPeptideWithMods
-			mPSMCurrent.ClearModifiedResidues()
-			For Each objModEntry In lstPeptideMods
-				mPSMCurrent.AddModifiedResidue(objModEntry)
-				dblTotalModMass += objModEntry.ModDefinition.ModificationMass
-			Next
+            mPSMCurrent.PeptideWithNumericMods = strPeptideWithMods
+            mPSMCurrent.ClearModifiedResidues()
+            For Each objModEntry In lstPeptideMods
+                mPSMCurrent.AddModifiedResidue(objModEntry)
+                dblTotalModMass += objModEntry.ModDefinition.ModificationMass
+            Next
 
-			If Math.Abs(mPSMCurrent.PeptideMonoisotopicMass) < Double.Epsilon Then
-				mPSMCurrent.PeptideMonoisotopicMass = mPeptideMassCalculator.ComputeSequenceMass(mPSMCurrent.PeptideCleanSequence) + dblTotalModMass
-			End If
+            If Math.Abs(mPSMCurrent.PeptideMonoisotopicMass) < Double.Epsilon Then
+                mPSMCurrent.PeptideMonoisotopicMass = mPeptideMassCalculator.ComputeSequenceMass(mPSMCurrent.PeptideCleanSequence) + dblTotalModMass
+            End If
 
-		End If
-	End Sub
+        End If
+    End Sub
 
-	''' <summary>
-	''' When FastReadMode is True, you first call MoveNext to read the peptide scores, then if the peptide
-	''' is a peptide of interest, you call this function to finalize any processing steps that were skipped
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub FinalizeCurrentPSM()
+    ''' <summary>
+    ''' When FastReadMode is True, you first call MoveNext to read the peptide scores, then if the peptide
+    ''' is a peptide of interest, you call this function to finalize any processing steps that were skipped
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub FinalizeCurrentPSM()
 
-		If mPSMCurrentFinalized Then Exit Sub
+        If mPSMCurrentFinalized Then Exit Sub
 
-		' Determine the clean sequence and cleavage state, and update the Seq_ID fields
-		mPHRPParser.FinalizePSM(mPSMCurrent)
+        ' Determine the clean sequence and cleavage state, and update the Seq_ID fields
+        mPHRPParser.FinalizePSM(mPSMCurrent)
 
-		MarkupPeptideWithMods()
+        MarkupPeptideWithMods()
 
-		ComputePrecursorNeutralMass()
+        ComputePrecursorNeutralMass()
 
-		mPSMCurrentFinalized = True
+        mPSMCurrentFinalized = True
 
-	End Sub
+    End Sub
 
-	Protected Function ReadAndCacheMSGFData() As Boolean
+    Protected Function ReadAndCacheMSGFData() As Boolean
 
-		Dim strMSGFFilePath As String
-		Dim blnSuccess As Boolean = False
+        Dim strMSGFFilePath As String
+        Dim blnSuccess As Boolean = False
 
-		Try
-			strMSGFFilePath = GetMSGFFileName(mInputFilePath)
-			strMSGFFilePath = Path.Combine(mInputFolderPath, strMSGFFilePath)
+        Try
+            strMSGFFilePath = GetMSGFFileName(mInputFilePath)
+            strMSGFFilePath = Path.Combine(mInputFolderPath, strMSGFFilePath)
 
-			blnSuccess = ReadAndCacheMSGFData(strMSGFFilePath)
+            blnSuccess = ReadAndCacheMSGFData(strMSGFFilePath)
 
-		Catch ex As Exception
-			HandleException("Exception determining MSGF file path", ex)
-		End Try
+        Catch ex As Exception
+            HandleException("Exception determining MSGF file path", ex)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ReadAndCacheMSGFData(ByVal strMSGFFilePath As String) As Boolean
-		Dim blnSuccess As Boolean = False
+    Protected Function ReadAndCacheMSGFData(strMSGFFilePath As String) As Boolean
+        Dim blnSuccess As Boolean = False
 
-		Try
-			strMSGFFilePath = AutoSwitchToFHTIfRequired(strMSGFFilePath, mInputFilePath)
+        Try
+            strMSGFFilePath = AutoSwitchToFHTIfRequired(strMSGFFilePath, mInputFilePath)
 
-			If File.Exists(strMSGFFilePath) Then
+            If File.Exists(strMSGFFilePath) Then
 
-				Dim oMSGFReader As New clsMSGFResultsReader()
-				mMSGFCachedResults = oMSGFReader.ReadMSGFData(strMSGFFilePath)
+                Dim oMSGFReader As New clsMSGFResultsReader()
+                mMSGFCachedResults = oMSGFReader.ReadMSGFData(strMSGFFilePath)
 
-				If oMSGFReader.ErrorMessage.Length > 0 Then
-					ReportError("Error reading MSGF data: " & oMSGFReader.ErrorMessage)
-				Else
-					blnSuccess = True
-				End If
-			Else
-				ReportWarning("MSGF file not found: " & strMSGFFilePath)
-			End If
-		Catch ex As Exception
-			HandleException("Exception reading MSGF file", ex)
-		End Try
+                If oMSGFReader.ErrorMessage.Length > 0 Then
+                    ReportError("Error reading MSGF data: " & oMSGFReader.ErrorMessage)
+                Else
+                    blnSuccess = True
+                End If
+            Else
+                ReportWarning("MSGF file not found: " & strMSGFFilePath)
+            End If
+        Catch ex As Exception
+            HandleException("Exception reading MSGF file", ex)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	''' <summary>
-	''' Reads the data in strModSummaryFilePath.  Populates objDynamicMods and objStaticMods with the modification definitions
-	''' </summary>
-	''' <param name="strModSummaryFilePath">Path to the PHRP Mod Summary file to read</param>
-	''' <param name="objDynamicMods">List with mod symbols as the key and the corresponding mod mass</param>
-	''' <param name="objStaticMods">List with amino acid names as the key and the corresponding mod mass</param>
-	''' <returns>True if success; false if an error</returns>
+    ''' <summary>
+    ''' Reads the data in strModSummaryFilePath.  Populates objDynamicMods and objStaticMods with the modification definitions
+    ''' </summary>
+    ''' <param name="strModSummaryFilePath">Path to the PHRP Mod Summary file to read</param>
+    ''' <param name="objDynamicMods">List with mod symbols as the key and the corresponding mod mass</param>
+    ''' <param name="objStaticMods">List with amino acid names as the key and the corresponding mod mass</param>
+    ''' <returns>True if success; false if an error</returns>
     Protected Function ReadModSummaryFile(
-      ByVal strModSummaryFilePath As String,
-      ByVal objDynamicMods As SortedDictionary(Of Char, clsModificationDefinition),
-      ByVal objStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))) As Boolean
+      strModSummaryFilePath As String,
+      objDynamicMods As SortedDictionary(Of Char, clsModificationDefinition),
+      objStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))) As Boolean
 
         Dim objModSummaryReader As clsPHRPModSummaryReader
 
@@ -2386,136 +2386,136 @@ Public Class clsPHRPReader
 
     End Function
 
-	Protected Function ReadScanStatsData() As Boolean
+    Protected Function ReadScanStatsData() As Boolean
 
-		Dim strScanStatsFilePath As String
-		Dim blnSuccess As Boolean = False
+        Dim strScanStatsFilePath As String
+        Dim blnSuccess As Boolean = False
 
-		Try
-			strScanStatsFilePath = GetScanStatsFilename(mDatasetName)
-			strScanStatsFilePath = Path.Combine(mInputFolderPath, strScanStatsFilePath)
+        Try
+            strScanStatsFilePath = GetScanStatsFilename(mDatasetName)
+            strScanStatsFilePath = Path.Combine(mInputFolderPath, strScanStatsFilePath)
 
-			blnSuccess = ReadScanStatsData(strScanStatsFilePath)
+            blnSuccess = ReadScanStatsData(strScanStatsFilePath)
 
-		Catch ex As Exception
-			HandleException("Exception determining Scan Stats file path", ex)
-		End Try
+        Catch ex As Exception
+            HandleException("Exception determining Scan Stats file path", ex)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ReadScanStatsData(ByVal strScanStatsFilePath As String) As Boolean
+    Protected Function ReadScanStatsData(strScanStatsFilePath As String) As Boolean
 
-		Dim blnSuccess As Boolean = False
+        Dim blnSuccess As Boolean = False
 
-		Try
-			If File.Exists(strScanStatsFilePath) Then
+        Try
+            If File.Exists(strScanStatsFilePath) Then
 
-				Dim oScanStatsReader As New clsScanStatsReader()
-				mScanStats = oScanStatsReader.ReadScanStatsData(strScanStatsFilePath)
+                Dim oScanStatsReader As New clsScanStatsReader()
+                mScanStats = oScanStatsReader.ReadScanStatsData(strScanStatsFilePath)
 
-				If oScanStatsReader.ErrorMessage.Length > 0 Then
-					ReportError("Error reading ScanStats data: " & oScanStatsReader.ErrorMessage)
-				Else
-					blnSuccess = True
-				End If
-			Else
-				ReportWarning("ScanStats file not found: " & strScanStatsFilePath)
-			End If
+                If oScanStatsReader.ErrorMessage.Length > 0 Then
+                    ReportError("Error reading ScanStats data: " & oScanStatsReader.ErrorMessage)
+                Else
+                    blnSuccess = True
+                End If
+            Else
+                ReportWarning("ScanStats file not found: " & strScanStatsFilePath)
+            End If
 
-		Catch ex As Exception
-			HandleException("Exception reading Scan Stats file", ex)
-		End Try
+        Catch ex As Exception
+            HandleException("Exception reading Scan Stats file", ex)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ReadExtendedScanStatsData() As Boolean
+    Protected Function ReadExtendedScanStatsData() As Boolean
 
-		Dim strExtendedScanStatsFilePath As String
-		Dim blnSuccess As Boolean = False
+        Dim strExtendedScanStatsFilePath As String
+        Dim blnSuccess As Boolean = False
 
-		Try
-			strExtendedScanStatsFilePath = GetExtendedScanStatsFilename(mDatasetName)
-			strExtendedScanStatsFilePath = Path.Combine(mInputFolderPath, strExtendedScanStatsFilePath)
+        Try
+            strExtendedScanStatsFilePath = GetExtendedScanStatsFilename(mDatasetName)
+            strExtendedScanStatsFilePath = Path.Combine(mInputFolderPath, strExtendedScanStatsFilePath)
 
-			blnSuccess = ReadExtendedScanStatsData(strExtendedScanStatsFilePath)
+            blnSuccess = ReadExtendedScanStatsData(strExtendedScanStatsFilePath)
 
-		Catch ex As Exception
-			HandleException("Exception determining Scan Stats file path", ex)
-		End Try
+        Catch ex As Exception
+            HandleException("Exception determining Scan Stats file path", ex)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Function ReadExtendedScanStatsData(ByVal strExtendedScanStatsFilePath As String) As Boolean
+    Protected Function ReadExtendedScanStatsData(strExtendedScanStatsFilePath As String) As Boolean
 
-		Dim blnSuccess As Boolean = False
+        Dim blnSuccess As Boolean = False
 
-		Try
-			If File.Exists(strExtendedScanStatsFilePath) Then
+        Try
+            If File.Exists(strExtendedScanStatsFilePath) Then
 
-				Dim oExtendedScanStatsReader As New clsExtendedScanStatsReader()
-				mScanStatsEx = oExtendedScanStatsReader.ReadExtendedScanStatsData(strExtendedScanStatsFilePath)
+                Dim oExtendedScanStatsReader As New clsExtendedScanStatsReader()
+                mScanStatsEx = oExtendedScanStatsReader.ReadExtendedScanStatsData(strExtendedScanStatsFilePath)
 
-				If oExtendedScanStatsReader.ErrorMessage.Length > 0 Then
-					ReportError("Error reading Extended ScanStats data: " & oExtendedScanStatsReader.ErrorMessage)
-				Else
-					blnSuccess = True
-				End If
-			Else
-				' Note: we do not need to raise a warning for MSGFDB results since the extended scan stats file isn't needed
-				If mPHRPParser.PeptideHitResultType <> ePeptideHitResultType.MSGFDB Then
-					ReportWarning("Extended ScanStats file not found: " & strExtendedScanStatsFilePath)
-				End If
-			End If
+                If oExtendedScanStatsReader.ErrorMessage.Length > 0 Then
+                    ReportError("Error reading Extended ScanStats data: " & oExtendedScanStatsReader.ErrorMessage)
+                Else
+                    blnSuccess = True
+                End If
+            Else
+                ' Note: we do not need to raise a warning for MSGFDB results since the extended scan stats file isn't needed
+                If mPHRPParser.PeptideHitResultType <> ePeptideHitResultType.MSGFDB Then
+                    ReportWarning("Extended ScanStats file not found: " & strExtendedScanStatsFilePath)
+                End If
+            End If
 
-		Catch ex As Exception
-			HandleException("Exception reading Extended Scan Stats file", ex)
-		End Try
+        Catch ex As Exception
+            HandleException("Exception reading Extended Scan Stats file", ex)
+        End Try
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
+    End Function
 
-	Protected Sub ReportError(ByVal strErrorMessage As String)
-		mErrorMessage = strErrorMessage
-		If mEchoMessagesToConsole Then Console.WriteLine(strErrorMessage)
-		mErrorMessages.Add(strErrorMessage)
+    Protected Sub ReportError(strErrorMessage As String)
+        mErrorMessage = strErrorMessage
+        If mEchoMessagesToConsole Then Console.WriteLine(strErrorMessage)
+        mErrorMessages.Add(strErrorMessage)
 
-		RaiseEvent ErrorEvent(strErrorMessage)
-	End Sub
+        RaiseEvent ErrorEvent(strErrorMessage)
+    End Sub
 
-	Protected Sub ReportWarning(ByVal strWarningMessage As String)
-		If mEchoMessagesToConsole Then Console.WriteLine(strWarningMessage)
-		mWarningMessages.Add(strWarningMessage)
+    Protected Sub ReportWarning(strWarningMessage As String)
+        If mEchoMessagesToConsole Then Console.WriteLine(strWarningMessage)
+        mWarningMessages.Add(strWarningMessage)
 
-		RaiseEvent WarningEvent(strWarningMessage)
-	End Sub
+        RaiseEvent WarningEvent(strWarningMessage)
+    End Sub
 
-	Private Sub SetLocalErrorCode(ByVal eNewErrorCode As ePHRPReaderErrorCodes)
-		SetLocalErrorCode(eNewErrorCode, False)
-	End Sub
+    Private Sub SetLocalErrorCode(eNewErrorCode As ePHRPReaderErrorCodes)
+        SetLocalErrorCode(eNewErrorCode, False)
+    End Sub
 
-	Private Sub SetLocalErrorCode(ByVal eNewErrorCode As ePHRPReaderErrorCodes, ByVal blnLeaveExistingErrorCodeUnchanged As Boolean)
+    Private Sub SetLocalErrorCode(eNewErrorCode As ePHRPReaderErrorCodes, blnLeaveExistingErrorCodeUnchanged As Boolean)
 
-		If blnLeaveExistingErrorCodeUnchanged AndAlso mLocalErrorCode <> ePHRPReaderErrorCodes.NoError Then
-			' An error code is already defined; do not change it
-		Else
-			mLocalErrorCode = eNewErrorCode
-		End If
+        If blnLeaveExistingErrorCodeUnchanged AndAlso mLocalErrorCode <> ePHRPReaderErrorCodes.NoError Then
+            ' An error code is already defined; do not change it
+        Else
+            mLocalErrorCode = eNewErrorCode
+        End If
 
-	End Sub
+    End Sub
 
-	Protected Sub ShowMessage(ByVal strMessage As String)
-		If mEchoMessagesToConsole Then Console.WriteLine(strMessage)
-		RaiseEvent MessageEvent(strMessage)
-	End Sub
+    Protected Sub ShowMessage(strMessage As String)
+        If mEchoMessagesToConsole Then Console.WriteLine(strMessage)
+        RaiseEvent MessageEvent(strMessage)
+    End Sub
 
-    Protected Function TryGetScanStats(ByVal intScanNumber As Integer, <Out()> ByRef objScanStatsInfo As clsScanStatsInfo) As Boolean
+    Protected Function TryGetScanStats(intScanNumber As Integer, <Out()> ByRef objScanStatsInfo As clsScanStatsInfo) As Boolean
         If Not mScanStats Is Nothing AndAlso mScanStats.Count > 0 Then
             If mScanStats.TryGetValue(intScanNumber, objScanStatsInfo) Then
                 Return True
@@ -2525,7 +2525,7 @@ Public Class clsPHRPReader
         Return False
     End Function
 
-    Protected Function TryGetExtendedScanStats(ByVal intScanNumber As Integer, <Out()> ByRef objExtendedScanStatsInfo As clsScanStatsExInfo) As Boolean
+    Protected Function TryGetExtendedScanStats(intScanNumber As Integer, <Out()> ByRef objExtendedScanStatsInfo As clsScanStatsExInfo) As Boolean
         If Not mScanStatsEx Is Nothing AndAlso mScanStats.Count > 0 Then
             If mScanStatsEx.TryGetValue(intScanNumber, objExtendedScanStatsInfo) Then
                 Return True
@@ -2536,7 +2536,7 @@ Public Class clsPHRPReader
     End Function
 
     Private Function ValidateInputFiles(
-      ByVal strInputFilePath As String,
+      strInputFilePath As String,
       ByRef eResultType As ePeptideHitResultType,
       ByRef strModSummaryFilePath As String) As Boolean
 
@@ -2594,64 +2594,64 @@ Public Class clsPHRPReader
 
     End Function
 
-	Private Function ValidateRequiredFileExists(ByVal strFileDescription As String, ByVal strFilePath As String) As Boolean
-		Return ValidateRequiredFileExists(strFileDescription, strFilePath, True)
-	End Function
+    Private Function ValidateRequiredFileExists(strFileDescription As String, strFilePath As String) As Boolean
+        Return ValidateRequiredFileExists(strFileDescription, strFilePath, True)
+    End Function
 
-	Private Function ValidateRequiredFileExists(ByVal strFileDescription As String, ByVal strFilePath As String, ByVal blnReportErrors As Boolean) As Boolean
+    Private Function ValidateRequiredFileExists(strFileDescription As String, strFilePath As String, blnReportErrors As Boolean) As Boolean
 
-		If strFilePath Is Nothing OrElse strFilePath.Length = 0 Then
-			If blnReportErrors Then
-				ReportError(strFileDescription & " is not defined")
-			End If
-			Return False
+        If strFilePath Is Nothing OrElse strFilePath.Length = 0 Then
+            If blnReportErrors Then
+                ReportError(strFileDescription & " is not defined")
+            End If
+            Return False
 
-		ElseIf Not File.Exists(strFilePath) Then
-			If blnReportErrors Then
-				ReportError(strFileDescription & " not found: " & strFilePath)
-			End If
-			Return False
+        ElseIf Not File.Exists(strFilePath) Then
+            If blnReportErrors Then
+                ReportError(strFileDescription & " not found: " & strFilePath)
+            End If
+            Return False
 
-		End If
+        End If
 
-		Return True
+        Return True
 
-	End Function
+    End Function
 
-	Private Sub mPHRPParser_ErrorEvent(ByVal strErrorMessage As String) Handles mPHRPParser.ErrorEvent
-		ReportError(strErrorMessage)
-	End Sub
+    Private Sub mPHRPParser_ErrorEvent(strErrorMessage As String) Handles mPHRPParser.ErrorEvent
+        ReportError(strErrorMessage)
+    End Sub
 
-	Private Sub mPHRPParser_MessageEvent(ByVal strMessage As String) Handles mPHRPParser.MessageEvent
-		ShowMessage(strMessage)
-	End Sub
+    Private Sub mPHRPParser_MessageEvent(strMessage As String) Handles mPHRPParser.MessageEvent
+        ShowMessage(strMessage)
+    End Sub
 
-	Private Sub mPHRPParser_WarningEvent(ByVal strWarningMessage As String) Handles mPHRPParser.WarningEvent
-		ReportWarning(strWarningMessage)
-	End Sub
+    Private Sub mPHRPParser_WarningEvent(strWarningMessage As String) Handles mPHRPParser.WarningEvent
+        ReportWarning(strWarningMessage)
+    End Sub
 
 #Region "IDisposable Support"
-	Private disposedValue As Boolean ' To detect redundant calls
+    Private disposedValue As Boolean ' To detect redundant calls
 
-	' IDisposable
-	Protected Overridable Sub Dispose(disposing As Boolean)
-		If Not Me.disposedValue Then
-			If disposing Then
-				If Not mSourceFile Is Nothing Then
-					mSourceFile.Close()
-				End If
-			End If
+    ' IDisposable
+    Protected Overridable Sub Dispose(disposing As Boolean)
+        If Not Me.disposedValue Then
+            If disposing Then
+                If Not mSourceFile Is Nothing Then
+                    mSourceFile.Close()
+                End If
+            End If
 
-		End If
-		Me.disposedValue = True
-	End Sub
+        End If
+        Me.disposedValue = True
+    End Sub
 
-	' This code added by Visual Basic to correctly implement the disposable pattern.
-	Public Sub Dispose() Implements IDisposable.Dispose
-		' Do not change this code.  Put cleanup code in Dispose(ByVal disposing As Boolean) above.
-		Dispose(True)
-		GC.SuppressFinalize(Me)
-	End Sub
+    ' This code added by Visual Basic to correctly implement the disposable pattern.
+    Public Sub Dispose() Implements IDisposable.Dispose
+        ' Do not change this code.  Put cleanup code in Dispose(disposing As Boolean) above.
+        Dispose(True)
+        GC.SuppressFinalize(Me)
+    End Sub
 #End Region
 
 End Class

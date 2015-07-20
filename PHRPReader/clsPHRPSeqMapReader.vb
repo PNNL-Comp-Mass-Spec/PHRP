@@ -98,226 +98,226 @@ Public Class clsPHRPSeqMapReader
 	''' <param name="strInputFolderPath">Input file path</param>
 	''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
 	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFolderPath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType)
-		Me.New(strDatasetName, strInputFolderPath, ePeptideHitResultType, PHRPReader.clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, strDatasetName))
-	End Sub
+    Public Sub New(strDatasetName As String, strInputFolderPath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType)
+        Me.New(strDatasetName, strInputFolderPath, ePeptideHitResultType, PHRPReader.clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, strDatasetName))
+    End Sub
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFolderPath">Input file path</param>
-	''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
-	''' <param name="strPHRPDataFileName">The base PHRP data file name; used when calling AutoSwitchToFHTIfRequired</param>
-	''' <remarks></remarks>
-	Public Sub New(ByVal strDatasetName As String, ByVal strInputFolderPath As String, ByVal ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, ByVal strPHRPDataFileName As String)
-		mDatasetName = strDatasetName
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFolderPath">Input file path</param>
+    ''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
+    ''' <param name="strPHRPDataFileName">The base PHRP data file name; used when calling AutoSwitchToFHTIfRequired</param>
+    ''' <remarks></remarks>
+    Public Sub New(strDatasetName As String, strInputFolderPath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, strPHRPDataFileName As String)
+        mDatasetName = strDatasetName
 
-		If String.IsNullOrEmpty(mDatasetName) Then
-			mErrorMessage = "Dataset name cannot be empty"
-			Throw New Exception(mErrorMessage)
-		End If
+        If String.IsNullOrEmpty(mDatasetName) Then
+            mErrorMessage = "Dataset name cannot be empty"
+            Throw New Exception(mErrorMessage)
+        End If
 
-		mInputFolderPath = strInputFolderPath
-		If String.IsNullOrEmpty(mInputFolderPath) Then
-			mInputFolderPath = String.Empty
-		End If
+        mInputFolderPath = strInputFolderPath
+        If String.IsNullOrEmpty(mInputFolderPath) Then
+            mInputFolderPath = String.Empty
+        End If
 
-		mPeptideHitResultType = ePeptideHitResultType
+        mPeptideHitResultType = ePeptideHitResultType
 
-		mResultToSeqMapFilename = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName)
-		If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
-			mErrorMessage = "Unable to determine ResultToSeqMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
-			Throw New Exception(mErrorMessage)
-		Else
-			mResultToSeqMapFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mResultToSeqMapFilename, strPHRPDataFileName))
-		End If
+        mResultToSeqMapFilename = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName)
+        If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
+            mErrorMessage = "Unable to determine ResultToSeqMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
+            Throw New Exception(mErrorMessage)
+        Else
+            mResultToSeqMapFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mResultToSeqMapFilename, strPHRPDataFileName))
+        End If
 
-		mSeqToProteinMapFilename = clsPHRPReader.GetPHRPSeqToProteinMapFileName(mPeptideHitResultType, mDatasetName)
-		If String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
-			mErrorMessage = "Unable to determine SeqToProteinMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
-			Throw New Exception(mErrorMessage)
-		Else
-			mSeqToProteinMapFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqToProteinMapFilename, strPHRPDataFileName))
-		End If
+        mSeqToProteinMapFilename = clsPHRPReader.GetPHRPSeqToProteinMapFileName(mPeptideHitResultType, mDatasetName)
+        If String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
+            mErrorMessage = "Unable to determine SeqToProteinMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
+            Throw New Exception(mErrorMessage)
+        Else
+            mSeqToProteinMapFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqToProteinMapFilename, strPHRPDataFileName))
+        End If
 
-		mSeqInfoFilename = clsPHRPReader.GetPHRPSeqInfoFileName(mPeptideHitResultType, mDatasetName)
-		If String.IsNullOrEmpty(mSeqInfoFilename) Then
-			mErrorMessage = "Unable to determine SeqInfo filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
-			Throw New Exception(mErrorMessage)
-		Else
-			mSeqInfoFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqInfoFilename, strPHRPDataFileName))
-		End If
+        mSeqInfoFilename = clsPHRPReader.GetPHRPSeqInfoFileName(mPeptideHitResultType, mDatasetName)
+        If String.IsNullOrEmpty(mSeqInfoFilename) Then
+            mErrorMessage = "Unable to determine SeqInfo filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
+            Throw New Exception(mErrorMessage)
+        Else
+            mSeqInfoFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqInfoFilename, strPHRPDataFileName))
+        End If
 
-		mPepToProteinMapFilename = clsPHRPReader.GetPHRPPepToProteinMapFileName(mPeptideHitResultType, mDatasetName)
-		If String.IsNullOrEmpty(mPepToProteinMapFilename) Then
-			mErrorMessage = "Unable to determine PepToProtMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
-			Throw New Exception(mErrorMessage)		
-		End If
+        mPepToProteinMapFilename = clsPHRPReader.GetPHRPPepToProteinMapFileName(mPeptideHitResultType, mDatasetName)
+        If String.IsNullOrEmpty(mPepToProteinMapFilename) Then
+            mErrorMessage = "Unable to determine PepToProtMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
+            Throw New Exception(mErrorMessage)
+        End If
 
-		mMaxProteinsPerSeqID = 0
-	End Sub
+        mMaxProteinsPerSeqID = 0
+    End Sub
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <param name="strInputFolderPath">Input folder path</param>
-	''' <param name="strResultToSeqMapFilename">ResultToSeqMap filename</param>
-	''' <param name="strSeqInfoFilename">SeqInfo filename</param>
-	''' <remarks></remarks>
-	Public Sub New(ByVal strInputFolderPath As String, ByVal strResultToSeqMapFilename As String, ByVal strSeqToProteinMapFilename As String, ByVal strSeqInfoFilename As String)
-		mInputFolderPath = strInputFolderPath
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="strInputFolderPath">Input folder path</param>
+    ''' <param name="strResultToSeqMapFilename">ResultToSeqMap filename</param>
+    ''' <param name="strSeqInfoFilename">SeqInfo filename</param>
+    ''' <remarks></remarks>
+    Public Sub New(strInputFolderPath As String, strResultToSeqMapFilename As String, strSeqToProteinMapFilename As String, strSeqInfoFilename As String)
+        mInputFolderPath = strInputFolderPath
 
-		If String.IsNullOrEmpty(mInputFolderPath) Then
-			mInputFolderPath = String.Empty
-		End If
+        If String.IsNullOrEmpty(mInputFolderPath) Then
+            mInputFolderPath = String.Empty
+        End If
 
-		mPeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strResultToSeqMapFilename)
-		If mPeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
-			mErrorMessage = "Unable to auto-determine the PepthideHit result type based on filename " & strResultToSeqMapFilename
-			Throw New Exception(mErrorMessage)
-		End If
+        mPeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strResultToSeqMapFilename)
+        If mPeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Unknown Then
+            mErrorMessage = "Unable to auto-determine the PepthideHit result type based on filename " & strResultToSeqMapFilename
+            Throw New Exception(mErrorMessage)
+        End If
 
-		mDatasetName = clsPHRPReader.AutoDetermineDatasetName(strResultToSeqMapFilename)
-		If String.IsNullOrEmpty(mDatasetName) Then
-			mErrorMessage = "Unable to auto-determine the dataset name using filename '" & strResultToSeqMapFilename & "'"
-			Throw New Exception(mErrorMessage)
-		End If
+        mDatasetName = clsPHRPReader.AutoDetermineDatasetName(strResultToSeqMapFilename)
+        If String.IsNullOrEmpty(mDatasetName) Then
+            mErrorMessage = "Unable to auto-determine the dataset name using filename '" & strResultToSeqMapFilename & "'"
+            Throw New Exception(mErrorMessage)
+        End If
 
-		mResultToSeqMapFilename = strResultToSeqMapFilename
-		mSeqToProteinMapFilename = strSeqToProteinMapFilename
-		mSeqInfoFilename = strSeqInfoFilename
+        mResultToSeqMapFilename = strResultToSeqMapFilename
+        mSeqToProteinMapFilename = strSeqToProteinMapFilename
+        mSeqInfoFilename = strSeqInfoFilename
 
-		mMaxProteinsPerSeqID = 0
-	End Sub
+        mMaxProteinsPerSeqID = 0
+    End Sub
 
-	''' <summary>
-	''' Load the mapping between ResultID and Protein Name
-	''' </summary>
-	''' <param name="lstResultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
-	''' <param name="lstSeqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
-	''' <param name="lstSeqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
-	''' <returns>True if success, false if an error</returns>
-	''' <remarks></remarks>
-	Public Function GetProteinMapping(
-	  ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
-	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
-	  ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
+    ''' <summary>
+    ''' Load the mapping between ResultID and Protein Name
+    ''' </summary>
+    ''' <param name="lstResultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
+    ''' <param name="lstSeqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
+    ''' <param name="lstSeqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
+    ''' <returns>True if success, false if an error</returns>
+    ''' <remarks></remarks>
+    Public Function GetProteinMapping(
+      ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
+      ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
+      ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
         Dim lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
 
-		Return GetProteinMapping(lstResultToSeqMap, lstSeqToProteinMap, lstSeqInfo, lstPepToProteinMap)
-	End Function
-	''' <summary>
-	''' Load the mapping between ResultID and Protein Name
-	''' </summary>
-	''' <param name="lstResultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
-	''' <param name="lstSeqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
-	''' <param name="lstSeqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
-	''' <param name="lstPepToProteinMap">PepToProteinMap list (ouput); keys are clean peptide sequences (no mods), Values are Protein name and residue start/end locations for the peptide</param>
-	''' <returns>True if success, false if an error</returns>
-	''' <remarks></remarks>
-	Public Function GetProteinMapping(
-	  ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
-	  ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
-	  ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo),
-	  ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
+        Return GetProteinMapping(lstResultToSeqMap, lstSeqToProteinMap, lstSeqInfo, lstPepToProteinMap)
+    End Function
+    ''' <summary>
+    ''' Load the mapping between ResultID and Protein Name
+    ''' </summary>
+    ''' <param name="lstResultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
+    ''' <param name="lstSeqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
+    ''' <param name="lstSeqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
+    ''' <param name="lstPepToProteinMap">PepToProteinMap list (ouput); keys are clean peptide sequences (no mods), Values are Protein name and residue start/end locations for the peptide</param>
+    ''' <returns>True if success, false if an error</returns>
+    ''' <remarks></remarks>
+    Public Function GetProteinMapping(
+      ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
+      ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
+      ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo),
+      ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
 
-		Dim blnSuccess As Boolean
-		Dim strFilePath As String
+        Dim blnSuccess As Boolean
+        Dim strFilePath As String
 
-		' Note: do not put a Try/Catch handler in this function
-		'       Instead, allow LoadResultToSeqMapping or LoadSeqToProteinMapping to raise exceptions
+        ' Note: do not put a Try/Catch handler in this function
+        '       Instead, allow LoadResultToSeqMapping or LoadSeqToProteinMapping to raise exceptions
 
-		If lstResultToSeqMap Is Nothing Then
-			lstResultToSeqMap = New SortedList(Of Integer, Integer)
-		Else
-			lstResultToSeqMap.Clear()
-		End If
+        If lstResultToSeqMap Is Nothing Then
+            lstResultToSeqMap = New SortedList(Of Integer, Integer)
+        Else
+            lstResultToSeqMap.Clear()
+        End If
 
-		If lstSeqToProteinMap Is Nothing Then
-			lstSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
-		Else
-			lstSeqToProteinMap.Clear()
-		End If
+        If lstSeqToProteinMap Is Nothing Then
+            lstSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
+        Else
+            lstSeqToProteinMap.Clear()
+        End If
 
-		If lstSeqInfo Is Nothing Then
-			lstSeqInfo = New SortedList(Of Integer, clsSeqInfo)
-		Else
-			lstSeqInfo.Clear()
-		End If
+        If lstSeqInfo Is Nothing Then
+            lstSeqInfo = New SortedList(Of Integer, clsSeqInfo)
+        Else
+            lstSeqInfo.Clear()
+        End If
 
-		If lstPepToProteinMap Is Nothing Then
-			lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
-		Else
-			lstPepToProteinMap.Clear()
-		End If
+        If lstPepToProteinMap Is Nothing Then
+            lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
+        Else
+            lstPepToProteinMap.Clear()
+        End If
 
-		If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
-			blnSuccess = False
-		Else
-			strFilePath = Path.Combine(mInputFolderPath, mResultToSeqMapFilename)
-			If Not File.Exists(strFilePath) Then
-				mErrorMessage = "SeqInfo file not found: " & strFilePath
-				blnSuccess = False
-			Else
-				blnSuccess = LoadResultToSeqMapping(strFilePath, lstResultToSeqMap)
-			End If
-		End If
+        If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
+            blnSuccess = False
+        Else
+            strFilePath = Path.Combine(mInputFolderPath, mResultToSeqMapFilename)
+            If Not File.Exists(strFilePath) Then
+                mErrorMessage = "SeqInfo file not found: " & strFilePath
+                blnSuccess = False
+            Else
+                blnSuccess = LoadResultToSeqMapping(strFilePath, lstResultToSeqMap)
+            End If
+        End If
 
-		If blnSuccess Then
+        If blnSuccess Then
 
-			If Not String.IsNullOrEmpty(mSeqInfoFilename) Then
-				strFilePath = Path.Combine(mInputFolderPath, mSeqInfoFilename)
-				If File.Exists(strFilePath) Then
-					LoadSeqInfo(strFilePath, lstSeqInfo)
-				End If
-			End If
+            If Not String.IsNullOrEmpty(mSeqInfoFilename) Then
+                strFilePath = Path.Combine(mInputFolderPath, mSeqInfoFilename)
+                If File.Exists(strFilePath) Then
+                    LoadSeqInfo(strFilePath, lstSeqInfo)
+                End If
+            End If
 
-			If Not String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
-				strFilePath = Path.Combine(mInputFolderPath, mSeqToProteinMapFilename)
-				If Not File.Exists(strFilePath) Then
-					mErrorMessage = "SeqInfo file not found: " & strFilePath
-					blnSuccess = False
-				Else
-					blnSuccess = LoadSeqToProteinMapping(strFilePath, lstSeqToProteinMap)
-				End If
-			Else
-				blnSuccess = False
-			End If
+            If Not String.IsNullOrEmpty(mSeqToProteinMapFilename) Then
+                strFilePath = Path.Combine(mInputFolderPath, mSeqToProteinMapFilename)
+                If Not File.Exists(strFilePath) Then
+                    mErrorMessage = "SeqInfo file not found: " & strFilePath
+                    blnSuccess = False
+                Else
+                    blnSuccess = LoadSeqToProteinMapping(strFilePath, lstSeqToProteinMap)
+                End If
+            Else
+                blnSuccess = False
+            End If
 
-			If blnSuccess AndAlso Not String.IsNullOrEmpty(mPepToProteinMapFilename) Then
-				strFilePath = Path.Combine(mInputFolderPath, mPepToProteinMapFilename)
-				If Not File.Exists(strFilePath) Then
-					Console.WriteLine("Warning: PepToProtMap file not found; protein residue start/end values will be zero")
-					Console.WriteLine("         " & strFilePath)
-				Else
-					blnSuccess = LoadPepToProtMapData(strFilePath, lstPepToProteinMap)
-				End If
-			End If
-		End If
+            If blnSuccess AndAlso Not String.IsNullOrEmpty(mPepToProteinMapFilename) Then
+                strFilePath = Path.Combine(mInputFolderPath, mPepToProteinMapFilename)
+                If Not File.Exists(strFilePath) Then
+                    Console.WriteLine("Warning: PepToProtMap file not found; protein residue start/end values will be zero")
+                    Console.WriteLine("         " & strFilePath)
+                Else
+                    blnSuccess = LoadPepToProtMapData(strFilePath, lstPepToProteinMap)
+                End If
+            End If
+        End If
 
-		Return blnSuccess
+        Return blnSuccess
 
-	End Function
-	
-	''' <summary>
-	''' Load the Peptide to Protein mapping using the specified PHRP result file
-	''' </summary>
-	''' <param name="strFilePath"></param>
-	''' <param name="lstPepToProteinMap"></param>
-	''' <returns></returns>
-	''' <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
-	Protected Function LoadPepToProtMapData(ByVal strFilePath As String, ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
+    End Function
+
+    ''' <summary>
+    ''' Load the Peptide to Protein mapping using the specified PHRP result file
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <param name="lstPepToProteinMap"></param>
+    ''' <returns></returns>
+    ''' <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
+    Protected Function LoadPepToProtMapData(strFilePath As String, ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
 
         Dim linesRead As Integer = 0
         Dim dtLastProgress As DateTime = DateTime.UtcNow()
         Dim blnNotifyComplete As Boolean
 
-		Try
+        Try
 
-			' Read the data from the PepToProtMap file
-			Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            ' Read the data from the PepToProtMap file
+            Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
                     Dim strLineIn = srInFile.ReadLine
@@ -388,7 +388,7 @@ Public Class clsPHRPSeqMapReader
     ''' <param name="lstResultToSeqMap"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function LoadResultToSeqMapping(ByVal strFilePath As String, ByRef lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
+    Protected Function LoadResultToSeqMapping(strFilePath As String, ByRef lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
 
         Dim strLineIn As String
         Dim strSplitLine() As String
@@ -435,7 +435,7 @@ Public Class clsPHRPSeqMapReader
 
     End Function
 
-    Protected Function LoadSeqInfo(ByVal strFilePath As String, ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
+    Protected Function LoadSeqInfo(strFilePath As String, ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
         Dim objColumnHeaders As SortedDictionary(Of String, Integer)
 
@@ -520,7 +520,7 @@ Public Class clsPHRPSeqMapReader
     ''' <returns></returns>
     ''' <remarks></remarks>
     Protected Function LoadSeqToProteinMapping(
-      ByVal strFilePath As String,
+      strFilePath As String,
       ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
 
         Dim lstProteins As List(Of clsProteinInfo) = Nothing

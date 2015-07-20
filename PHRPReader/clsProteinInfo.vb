@@ -47,54 +47,54 @@ Public Class clsProteinInfo
 		End Get
 	End Property
 
-	Public Sub New(
-	  ByVal ProteinName As String,
-	  ByVal SeqID As Integer,
-	  ByVal CleavageState As ePeptideCleavageStateConstants,
-	  ByVal TerminusState As ePeptideTerminusStateConstants)
+    Public Sub New(
+      ProteinName As String,
+      SeqID As Integer,
+      CleavageState As ePeptideCleavageStateConstants,
+      TerminusState As ePeptideTerminusStateConstants)
 
-		Me.New(ProteinName, String.Empty, SeqID, CleavageState, TerminusState)
+        Me.New(ProteinName, String.Empty, SeqID, CleavageState, TerminusState)
 
-	End Sub
+    End Sub
 
-	Public Sub New(
-	 ByVal ProteinName As String,
-	 ByVal ProteinDescription As String,
-	 ByVal SeqID As Integer,
-	 ByVal CleavageState As ePeptideCleavageStateConstants,
-	 ByVal TerminusState As ePeptideTerminusStateConstants)
+    Public Sub New(
+     ProteinName As String,
+     ProteinDescription As String,
+     SeqID As Integer,
+     CleavageState As ePeptideCleavageStateConstants,
+     TerminusState As ePeptideTerminusStateConstants)
 
-		Me.New(ProteinName, String.Empty, SeqID, CleavageState, TerminusState, 0, 0)
+        Me.New(ProteinName, String.Empty, SeqID, CleavageState, TerminusState, 0, 0)
 
-	End Sub
+    End Sub
 
-	Public Sub New(
-	  ByVal ProteinName As String,
-	  ByVal ProteinDescription As String,
-	  ByVal SeqID As Integer,
-	  ByVal CleavageState As ePeptideCleavageStateConstants,
-	  ByVal TerminusState As ePeptideTerminusStateConstants,
-	  ByVal ProteinResidueStart As Integer,
-	  ByVal ProteinResidueEnd As Integer)
+    Public Sub New(
+      ProteinName As String,
+      ProteinDescription As String,
+      SeqID As Integer,
+      CleavageState As ePeptideCleavageStateConstants,
+      TerminusState As ePeptideTerminusStateConstants,
+      ProteinResidueStart As Integer,
+      ProteinResidueEnd As Integer)
 
-		mProteinName = ProteinName
-		If String.IsNullOrEmpty(ProteinDescription) Then
-			mProteinDescription = String.Empty
-		Else
-			mProteinDescription = ProteinDescription
-		End If
-		mSeqID = SeqID
-		mCleavageState = CleavageState
-		mTerminusState = TerminusState
+        mProteinName = ProteinName
+        If String.IsNullOrEmpty(ProteinDescription) Then
+            mProteinDescription = String.Empty
+        Else
+            mProteinDescription = ProteinDescription
+        End If
+        mSeqID = SeqID
+        mCleavageState = CleavageState
+        mTerminusState = TerminusState
 
-		UpdateLocationInProtein(ProteinResidueStart, ProteinResidueEnd)
+        UpdateLocationInProtein(ProteinResidueStart, ProteinResidueEnd)
 
-	End Sub
+    End Sub
 
-	Public Sub UpdateLocationInProtein(ByVal ProteinResidueStart As Integer, ByVal ProteinResidueEnd As Integer)
+    Public Sub UpdateLocationInProtein(ProteinResidueStart As Integer, ProteinResidueEnd As Integer)
 
-		mResidueStart = ProteinResidueStart
-		mResidueEnd = ProteinResidueEnd
+        mResidueStart = ProteinResidueStart
+        mResidueEnd = ProteinResidueEnd
 
     End Sub
 
