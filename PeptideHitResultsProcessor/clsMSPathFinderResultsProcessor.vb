@@ -24,14 +24,14 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "June 17, 2015"
+        MyBase.mFileDate = "June 22, 2015"
 
-        mGetModName = New Regex("(.+) \d+", RegexOptions.Compiled)
+        mGetModName = New Regex("(.+) (\d+)", RegexOptions.Compiled)
     End Sub
 
 #Region "Constants and Enums"
 
-    Public Const FILENAME_SUFFIX_MODA_FILE As String = "_IcTda.tsv"
+    Public Const FILENAME_SUFFIX_MSPathFinder_FILE As String = "_IcTda"
 
     Public Const N_TERMINUS_SYMBOL_MSPATHFINDER As String = "-"
     Public Const C_TERMINUS_SYMBOL_MSPATHFINDER As String = "-"
@@ -39,8 +39,6 @@ Public Class clsMSPathFinderResultsProcessor
     Public Const DEFAULT_SYN_FILE_QVALUE_THRESHOLD As Single = 0.05
 
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
-
-    Private Const MODA_MASS_DIGITS_OF_PRECISION As Byte = 0
 
     Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
@@ -53,7 +51,7 @@ Public Class clsMSPathFinderResultsProcessor
         SuffixResidue = 3
         Modifications = 4
         Composition = 5
-        ProteinName = 6
+        Protein = 6
         ProteinDesc = 7
         ProteinLength = 8
         ResidueStart = 9
@@ -64,17 +62,18 @@ Public Class clsMSPathFinderResultsProcessor
         NumMatchedFragments = 14
         QValue = 15
         PepQValue = 16
+        ' Future: SpecProb = 17
     End Enum
 
     ' These columns correspond to the Synopsis file created by this class
-    Protected Const MSPathFinderSynFileColCount As Integer = 15
+    Protected Const MSPathFinderSynFileColCount As Integer = 16
     Public Enum eMSPathFinderSynFileColumns As Integer
         ResultID = 0
         Scan = 1
         Charge = 2
         MostAbundantIsotopeMz = 3
         Mass = 4
-        Sequence = 5
+        Sequence = 5                ' PrefixLetter.Sequence.SuffixLetter
         Modifications = 6
         Composition = 7
         Protein = 8
@@ -85,6 +84,7 @@ Public Class clsMSPathFinderResultsProcessor
         MatchedFragments = 13
         QValue = 14
         PepQValue = 15
+        ' Future: SpecProb = 16
     End Enum
 
 #End Region
@@ -100,7 +100,7 @@ Public Class clsMSPathFinderResultsProcessor
         Public SuffixResidue As String
         Public Modifications As String
         Public Composition As String
-        Public ProteinName As String
+        Public Protein As String
         Public ProteinDesc As String
         Public ProteinLength As String
         Public ResidueStart As String
@@ -112,7 +112,10 @@ Public Class clsMSPathFinderResultsProcessor
         Public CalculatedMonoMassPHRP As Double     ' Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
         Public NumMatchedFragments As String
         Public QValue As String                     ' FDR, at the scan level
+        Public QValueNum As Double
         Public PepQValue As String                  ' FDR, at the peptide level
+
+        ' Future: Public SpecProb As String
 
         ' The following are typically defined for other search engines, but are not used for MSPathFinder
         '   Public DelM As String                   ' Computed using Precursor_mass - CalculatedMonoMass
@@ -126,7 +129,7 @@ Public Class clsMSPathFinderResultsProcessor
             SuffixResidue = String.Empty
             Modifications = String.Empty
             Composition = String.Empty
-            ProteinName = String.Empty
+            Protein = String.Empty
             ProteinDesc = String.Empty
             ProteinLength = String.Empty
             ResidueStart = String.Empty
@@ -138,7 +141,9 @@ Public Class clsMSPathFinderResultsProcessor
             CalculatedMonoMassPHRP = 0
             NumMatchedFragments = String.Empty
             QValue = String.Empty
+            QValueNum = 0
             PepQValue = String.Empty
+            ' Future: SpecProb = String.empty
 
             ' Unused at present: MH = String.Empty
             ' Unused at present: DelM = String.Empty
@@ -153,6 +158,121 @@ Public Class clsMSPathFinderResultsProcessor
 
     Private ReadOnly mGetModName As Regex
 #End Region
+
+
+    ''' <summary>
+    ''' Step through the Modifications and associate each modification with the residues
+    ''' For each residue, check if a static mod is defined that affects that residue
+    ''' For each mod mass, determine the modification and add to objSearchResult
+    ''' </summary>
+    ''' <param name="objSearchResult"></param>
+    ''' <param name="blnUpdateModOccurrenceCounts"></param>
+    ''' <remarks></remarks>
+    Private Sub AddModificationsToResidues(
+       objSearchResult As clsSearchResultsMSPathFinder,
+       blnUpdateModOccurrenceCounts As Boolean,
+       lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType))
+
+        If String.IsNullOrWhiteSpace(objSearchResult.Modifications) Then
+            Return
+        End If
+
+        Dim lstMods = objSearchResult.Modifications.Split(","c)
+        Dim finalResidueLoc = objSearchResult.PeptideCleanSequence.Length
+
+        For Each modEntry In lstMods
+
+            ' Find the mod in the list of known modifications (loaded from the MSPathFinder parameter file)
+            Dim matchFound = False
+
+            ' Obtain the mod name, for example "Dehydro" from "Dehydro 52"
+            Dim reMatch = mGetModName.Match(modEntry)
+
+            If Not reMatch.Success Then
+                ReportError("Mod entry does not have a name separated by a number: " & modEntry, False)
+                Continue For
+            End If
+
+            Dim modName = reMatch.Groups(1).Value
+            Dim residueNumber = reMatch.Groups(2).Value
+
+            For Each modDef As clsMSGFPlusParamFileModExtractor.udtModInfoType In lstModInfo
+                If String.Equals(modDef.ModName, modName, StringComparison.CurrentCultureIgnoreCase) Then
+
+                    Dim intResidueLocInPeptide As Integer
+                    If Not Integer.TryParse(residueNumber, intResidueLocInPeptide) Then
+                        ReportError("Mod entry does not have a number after the name: " & modEntry, False)
+                        Continue For
+                    End If
+
+                    Dim eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
+                    If intResidueLocInPeptide <= 1 Then
+                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
+                    ElseIf intResidueLocInPeptide >= finalResidueLoc Then
+                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
+                    End If
+
+                    ' Now that we know the terminus position, assure that intResidueLocInPeptide is 1 not 0
+                    If intResidueLocInPeptide < 1 Then
+                        intResidueLocInPeptide = 1
+                    ElseIf intResidueLocInPeptide > finalResidueLoc Then
+                        intResidueLocInPeptide = finalResidueLoc
+                    End If
+
+                    Dim chMostRecentResidue = "-"c
+
+                    If intResidueLocInPeptide >= 1 AndAlso intResidueLocInPeptide <= finalResidueLoc Then
+                        chMostRecentResidue = objSearchResult.PeptideCleanSequence.Chars(intResidueLocInPeptide - 1)
+                    End If
+
+                    ' Associate the mod with the given residue
+                    objSearchResult.SearchResultAddModification(modDef.ModMassVal, chMostRecentResidue, intResidueLocInPeptide, eResidueTerminusState, blnUpdateModOccurrenceCounts)
+
+                    matchFound = True
+                    Exit For
+
+                End If
+            Next
+
+            If Not matchFound Then
+                ReportError("Mod name " & modName & " was not defined in the MSPathFinder parameter file; cannot determine mod mass", False)
+            End If
+        Next
+
+
+    End Sub
+
+    Private Function AddModificationsAndComputeMass(
+       objSearchResult As clsSearchResultsMSPathFinder,
+       blnUpdateModOccurrenceCounts As Boolean,
+       lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
+
+        Dim blnSuccess As Boolean
+
+        Try
+
+            ' For other tools, we would add IsotopicMods here
+            ' This is not supported for MSPathFinder
+            ' 
+            ' objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
+
+            ' Parse .Modifications to determine the modified residues present
+            AddModificationsToResidues(objSearchResult, blnUpdateModOccurrenceCounts, lstModInfo)
+
+            ' Compute the monoisotopic mass for this peptide
+            objSearchResult.ComputeMonoisotopicMass()
+
+            ' Populate .PeptideModDescription
+            objSearchResult.UpdateModDescription()
+
+            blnSuccess = True
+        Catch ex As Exception
+            blnSuccess = False
+        End Try
+
+        Return blnSuccess
+
+    End Function
 
     Protected Function ComputePeptideMass(strCleanSequence As String, dblTotalModMass As Double) As Double
 
@@ -174,7 +294,7 @@ Public Class clsMSPathFinderResultsProcessor
     Protected Function ComputeTotalModMass(
       cleanSequence As String,
       modificationList As String,
-      lstMSPathFinderModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Double
+      lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Double
 
         If String.IsNullOrWhiteSpace(modificationList) Then
             Return 0
@@ -197,8 +317,8 @@ Public Class clsMSPathFinderResultsProcessor
 
             Dim modName = reMatch.Groups(1).Value
 
-            For Each modDef As clsMSGFPlusParamFileModExtractor.udtModInfoType In lstMSPathFinderModInfo
-                If String.Equals(modDef.ModName, modEntry, StringComparison.CurrentCultureIgnoreCase) Then
+            For Each modDef As clsMSGFPlusParamFileModExtractor.udtModInfoType In lstModInfo
+                If String.Equals(modDef.ModName, modName, StringComparison.CurrentCultureIgnoreCase) Then
                     dblTotalModMass += modDef.ModMassVal
                     matchFound = True
                     Exit For
@@ -220,6 +340,48 @@ Public Class clsMSPathFinderResultsProcessor
      strSynOutputFilePath As String,
      strOutputFolderPath As String) As Boolean
 
+        Dim blnSuccess As Boolean
+
+        ' Create the MTSPepToProteinMap file
+
+        Dim strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(strBaseName, strOutputFolderPath, MTS:=True)
+
+        Dim lstSourcePHRPDataFiles = New List(Of String)
+
+        If Not String.IsNullOrEmpty(strSynOutputFilePath) Then
+            lstSourcePHRPDataFiles.Add(strSynOutputFilePath)
+        End If
+
+        If lstSourcePHRPDataFiles.Count = 0 Then
+            SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
+            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            blnSuccess = False
+        Else
+            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+                blnSuccess = True
+            Else
+                blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
+                If Not blnSuccess Then
+                    ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
+                End If
+            End If
+        End If
+
+        If blnSuccess Then
+            ' If necessary, copy various PHRPReader support files to the output folder
+            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+
+            ' Create the Protein Mods file
+            blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSPathFinder)
+        End If
+
+        If Not blnSuccess Then
+            ' Do not treat this as a fatal error
+            blnSuccess = True
+        End If
+
+        Return blnSuccess
+
     End Function
 
     ''' <summary>
@@ -234,7 +396,7 @@ Public Class clsMSPathFinderResultsProcessor
     Protected Function CreateSynResultsFile(
       strInputFilePath As String,
       strOutputFilePath As String,
-      lstMSPathFinderModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
+      lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
 
         Try
             Dim intColumnMapping() As Integer = Nothing
@@ -242,7 +404,7 @@ Public Class clsMSPathFinderResultsProcessor
 
             ' Open the input file and parse it
             ' Initialize the stream reader and the stream Text writer
-            Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)),
+            Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)),
                   swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
                 Dim headerParsed = False
@@ -283,7 +445,7 @@ Public Class clsMSPathFinderResultsProcessor
 
                     Dim udtSearchResult = New udtMSPathFinderSearchResultType
 
-                    Dim blnValidSearchResult = ParseMSPathFinderResultsFileEntry(strLineIn, udtSearchResult, strErrorLog, intColumnMapping, lstMSPathFinderModInfo, rowNumber)
+                    Dim blnValidSearchResult = ParseMSPathFinderResultsFileEntry(strLineIn, udtSearchResult, strErrorLog, intColumnMapping, lstModInfo, rowNumber)
 
                     If blnValidSearchResult Then
                         lstSearchResultsUnfiltered.Add(udtSearchResult)
@@ -298,7 +460,8 @@ Public Class clsMSPathFinderResultsProcessor
 
                 Loop
 
-                ' The results should have already been sorted by ascending QValue (FDR); leave the sort as-is
+                ' Sort the SearchResults by scan, charge, and ascending QValue (future, ascending SpecProb)
+                lstSearchResultsUnfiltered.Sort(New MSPathFinderSearchResultsComparerScanChargeScorePeptide)
 
                 ' Now filter the data
 
@@ -309,18 +472,19 @@ Public Class clsMSPathFinderResultsProcessor
                 intStartIndex = 0
                 Do While intStartIndex < lstSearchResultsUnfiltered.Count
                     intEndIndex = intStartIndex
-                    Do While intEndIndex + 1 < lstSearchResultsUnfiltered.Count AndAlso lstSearchResultsUnfiltered(intEndIndex + 1).ScanNum = lstSearchResultsUnfiltered(intStartIndex).ScanNum
+                    Do While intEndIndex + 1 < lstSearchResultsUnfiltered.Count AndAlso
+                             lstSearchResultsUnfiltered(intEndIndex + 1).ScanNum = lstSearchResultsUnfiltered(intStartIndex).ScanNum
                         intEndIndex += 1
                     Loop
 
                     ' Store the results for this scan
-                    'StoreSynMatches(lstSearchResultsUnfiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
+                    StoreSynMatches(lstSearchResultsUnfiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
 
                     intStartIndex = intEndIndex + 1
                 Loop
 
                 ' Sort the data in udtFilteredSearchResults then write out to disk
-                'SortAndWriteFilteredSearchResults(swResultFile, lstFilteredSearchResults, strErrorLog)
+                SortAndWriteFilteredSearchResults(swResultFile, lstFilteredSearchResults, strErrorLog)
 
             End Using
 
@@ -339,6 +503,34 @@ Public Class clsMSPathFinderResultsProcessor
 
     End Function
 
+    Private Function ExtractModInfoFromParamFile(
+       strMSGFDBParamFilePath As String,
+       <Out()> ByRef lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
+
+        ' The DMS-based parameter file for MSPathFinder uses the same formatting as MSGF+
+
+        Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor("MSPathFinder")
+
+        AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
+        AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
+
+        ' Note that this call will intialize lstModInfo
+        Dim success = modFileProcessor.ExtractModInfoFromParamFile(strMSGFDBParamFilePath, lstModInfo)
+
+        If Not success OrElse mErrorCode <> ePHRPErrorCodes.NoError Then
+            If mErrorCode = ePHRPErrorCodes.NoError Then
+                SetErrorMessage("Unknown error extracting the modification definitions from the MSPathFinder parameter file")
+                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+            End If
+            Return False
+        End If
+
+        modFileProcessor.ResolveMSGFDBModsWithModDefinitions(lstModInfo, mPeptideMods)
+
+        Return True
+
+    End Function
+
     ''' <summary>
     ''' Parse the Synopsis file to create the other PHRP-compatible files
     ''' </summary>
@@ -350,11 +542,12 @@ Public Class clsMSPathFinderResultsProcessor
     Protected Function ParseMSPathfinderSynopsisFile(
       strInputFilePath As String,
       strOutputFolderPath As String,
-      blnResetMassCorrectionTagsAndModificationDefinitions As Boolean) As Boolean
+      blnResetMassCorrectionTagsAndModificationDefinitions As Boolean,
+      lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
 
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-        Dim strPreviousProbability As String
+        Dim strPreviousQValue As String
 
         ' Note that ParseMSPathfinderSynopsisFile synopsis files are normally sorted on Probability value, ascending
         ' In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
@@ -375,11 +568,11 @@ Public Class clsMSPathFinderResultsProcessor
             ' Initialize objSearchResult
             Dim objSearchResult = New clsSearchResultsMSPathFinder(mPeptideMods)
 
-            ' Initialize htPeptidesFoundForProbabilityLevel
-            Dim htPeptidesFoundForProbabilityLevel = New Hashtable
+            ' Initialize htPeptidesFoundForQValue
+            Dim htPeptidesFoundForQValue = New Hashtable
             Dim blnFirstMatchForGroup As Boolean
 
-            strPreviousProbability = String.Empty
+            strPreviousQValue = String.Empty
 
             Dim strErrorLog = String.Empty
 
@@ -388,7 +581,7 @@ Public Class clsMSPathFinderResultsProcessor
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
-                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                     Dim intResultsProcessed = 0
                     Dim blnHeaderParsed = False
@@ -428,40 +621,40 @@ Public Class clsMSPathFinderResultsProcessor
                             Continue Do
                         End If
 
-                        'Dim strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.Charge
+                        Dim strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.Charge
 
-                        'If objSearchResult.Probability = strPreviousProbability Then
-                        '    ' New result has the same Probability as the previous result
-                        '    ' See if htPeptidesFoundForProbabilityLevel contains the peptide, scan and charge
+                        If objSearchResult.QValue = strPreviousQValue Then
+                            ' New result has the same QValue as the previous result
+                            ' See if htPeptidesFoundForQValue contains the peptide, scan and charge
 
-                        '    If htPeptidesFoundForProbabilityLevel.ContainsKey(strKey) Then
-                        '        blnFirstMatchForGroup = False
-                        '    Else
-                        '        htPeptidesFoundForProbabilityLevel.Add(strKey, 1)
-                        '        blnFirstMatchForGroup = True
-                        '    End If
+                            If htPeptidesFoundForQValue.ContainsKey(strKey) Then
+                                blnFirstMatchForGroup = False
+                            Else
+                                htPeptidesFoundForQValue.Add(strKey, 1)
+                                blnFirstMatchForGroup = True
+                            End If
 
-                        'Else
-                        '    ' New Probability
-                        '    ' Reset htPeptidesFoundForScan
-                        '    htPeptidesFoundForProbabilityLevel.Clear()
+                        Else
+                            ' New QValue
+                            ' Reset htPeptidesFoundForQValue
+                            htPeptidesFoundForQValue.Clear()
 
-                        '    ' Update strPreviousProbability
-                        '    strPreviousProbability = objSearchResult.Probability
+                            ' Update strPreviousQValue
+                            strPreviousQValue = objSearchResult.QValue
 
-                        '    ' Append a new entry to htPeptidesFoundForScan
-                        '    htPeptidesFoundForProbabilityLevel.Add(strKey, 1)
-                        '    blnFirstMatchForGroup = True
-                        'End If
+                            ' Append a new entry to htPeptidesFoundForQValue
+                            htPeptidesFoundForQValue.Add(strKey, 1)
+                            blnFirstMatchForGroup = True
+                        End If
 
-                        'blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
-                        'If Not blnSuccess Then
-                        '    If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
-                        '        strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'" & ControlChars.NewLine
-                        '    End If
-                        'End If
+                        blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup, lstModInfo)
+                        If Not blnSuccess Then
+                            If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
+                                strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'" & ControlChars.NewLine
+                            End If
+                        End If
 
-                        'MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
+                        MyBase.SaveResultsFileEntrySeqInfo(DirectCast(objSearchResult, clsSearchResultsBaseClass), blnFirstMatchForGroup)
 
                         ' Update the progress
                         Dim sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
@@ -509,7 +702,6 @@ Public Class clsMSPathFinderResultsProcessor
 
     End Function
 
-
     ''' <summary>
     ''' Parse a MSPathFinder results line while creating the MSPathFinder synopsis file
     ''' </summary>
@@ -517,7 +709,7 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <param name="udtSearchResult"></param>
     ''' <param name="strErrorLog"></param>
     ''' <param name="intColumnMapping"></param>
-    ''' <param name="lstMSPathFinderModInfo"></param>
+    ''' <param name="lstModInfo"></param>
     ''' <param name="rowNumber">Row number (used for error reporting)</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
@@ -526,7 +718,7 @@ Public Class clsMSPathFinderResultsProcessor
       ByRef udtSearchResult As udtMSPathFinderSearchResultType,
       ByRef strErrorLog As String,
       intColumnMapping() As Integer,
-      lstMSPathFinderModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
+      lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       rowNumber As Integer) As Boolean
 
         ' Parses an entry from the MSPathFinder results file
@@ -570,14 +762,32 @@ Public Class clsMSPathFinderResultsProcessor
                     GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.SuffixResidue), .SuffixResidue)
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.Modifications), .Modifications)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.Composition), .Composition)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.Protein), .Protein)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.ProteinDesc), .ProteinDesc)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.ProteinLength), .ProteinLength)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.ResidueEnd), .ResidueEnd)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.ResidueStart), .ResidueStart)
 
                     ' Parse the list of modified residues to determine the total mod mass
-                    ' Note that we do not remove any of the mod symbols since MSPathFinder identifies mods by mass alone
-                    ' Note that static mods are implied (thus are not explicitly displayed by MSPathFinder)
-                    Dim dblTotalModMass = ComputeTotalModMass(.Sequence, .Modifications, lstMSPathFinderModInfo)
+                    Dim dblTotalModMass = ComputeTotalModMass(.Sequence, .Modifications, lstModInfo)
 
                     ' Compute monoisotopic mass of the peptide
                     .CalculatedMonoMassPHRP = ComputePeptideMass(.Sequence, dblTotalModMass)
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz), .MostAbundantIsotopeMz)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.NumMatchedFragments), .NumMatchedFragments)
+
+                    If GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.QValue), .QValue) Then
+                        Double.TryParse(.QValue, .QValueNum)
+                    End If
+
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.PepQValue), .PepQValue)
+
+                    ' Future:
+                    'If GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.SpecProb), .SpecProb) Then
+                    '    Double.TryParse(.SpecProb, .SpecProbNum)
+                    'End If
 
                 End With
 
@@ -623,7 +833,7 @@ Public Class clsMSPathFinderResultsProcessor
         lstColumnNames.Add("Post", eMSPathFinderResultsFileColumns.SuffixResidue)
         lstColumnNames.Add("Modifications", eMSPathFinderResultsFileColumns.Modifications)
         lstColumnNames.Add("Composition", eMSPathFinderResultsFileColumns.Composition)
-        lstColumnNames.Add("ProteinName", eMSPathFinderResultsFileColumns.ProteinName)
+        lstColumnNames.Add("ProteinName", eMSPathFinderResultsFileColumns.Protein)
         lstColumnNames.Add("ProteinDesc", eMSPathFinderResultsFileColumns.ProteinDesc)
         lstColumnNames.Add("ProteinLength", eMSPathFinderResultsFileColumns.ProteinLength)
         lstColumnNames.Add("Start", eMSPathFinderResultsFileColumns.ResidueStart)
@@ -715,6 +925,7 @@ Public Class clsMSPathFinderResultsProcessor
         lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_MatchedFragments, eMSPathFinderSynFileColumns.MatchedFragments)
         lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_QValue, eMSPathFinderSynFileColumns.QValue)
         lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_PepQValue, eMSPathFinderSynFileColumns.PepQValue)
+        ' Future: lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_SpecProb, eMSPathFinderSynFileColumns.SpecProb)
 
         Try
             ' Initialize each entry in intColumnMapping to -1
@@ -746,13 +957,13 @@ Public Class clsMSPathFinderResultsProcessor
       ByRef strErrorLog As String,
       intResultsProcessed As Integer,
       ByRef intColumnMapping() As Integer,
-      <Out()> ByRef strPeptideSequenceWithMods As String) As Boolean
+      <Out()> ByRef strPeptideSequence As String) As Boolean
 
         ' Parses an entry from the MSPathFinder Synopsis file
 
         Dim strSplitLine As String() = Nothing
 
-        strPeptideSequenceWithMods = String.Empty
+        strPeptideSequence = String.Empty
 
         Try
 
@@ -780,7 +991,7 @@ Public Class clsMSPathFinderResultsProcessor
                 GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Scan), .Scan)
                 GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Charge), .Charge)
 
-                If Not GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Sequence), strPeptideSequenceWithMods) Then
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Sequence), strPeptideSequence) Then
                     If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
                         strErrorLog &= "Error reading Peptide sequence value from MSPathFinder Results line " & (intResultsProcessed + 1).ToString() & ControlChars.NewLine
                     End If
@@ -792,8 +1003,10 @@ Public Class clsMSPathFinderResultsProcessor
 
                 .PeptideDeltaMass = "0"
 
+                ' Note that MSPathFinder sequences don't actually have mod symbols; that informtion is tracked via strModifications
+
                 ' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
-                .SetPeptideSequenceWithMods(strPeptideSequenceWithMods, True, True)
+                .SetPeptideSequenceWithMods(strPeptideSequence, True, True)
 
             End With
 
@@ -802,24 +1015,39 @@ Public Class clsMSPathFinderResultsProcessor
 
             MyBase.ComputePseudoPeptideLocInProtein(objSearchResultBase)
 
-            'With objSearchResult
+            With objSearchResult
 
-            '    ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-            '    ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
-            '    ' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
-            '    .ComputePeptideCleavageStateInProtein()
+                ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
+                ' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
+                .ComputePeptideCleavageStateInProtein()
 
-            '    ' Read the remaining data values
-            '    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Spectrum_Index), .Spectrum_Index)
+                ' Read the remaining data values
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.MostAbundantIsotopeMz), .MostAbundantIsotopeMz)
 
-            '    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.PrecursorMZ), .Precursor_mz)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Modifications), .Modifications)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Composition), .Composition)
 
-            '    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.MH), .ParentIonMH)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.ProteinDesc), .ProteinDesc)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.ProteinLength), .ProteinLength)
 
-            '    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Score), .MSPathFinderScore)
-            '    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.Probability), .Probability)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.ResidueStart), .ResidueStart)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.ResidueEnd), .ResidueEnd)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.MatchedFragments), .MatchedFragments)
 
-            'End With
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.QValue), .QValue)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.PepQValue), .PepQValue)
+
+                ' Update the peptide location in the protein
+                If Not String.IsNullOrEmpty(.ResidueStart) Then
+                    Integer.TryParse(.ResidueStart, .PeptideLocInProteinStart)
+                End If
+
+                If Not String.IsNullOrEmpty(.ResidueEnd) Then
+                    Integer.TryParse(.ResidueEnd, .PeptideLocInProteinEnd)
+                End If
+
+            End With
 
             Return True
 
@@ -838,7 +1066,6 @@ Public Class clsMSPathFinderResultsProcessor
 
     End Function
 
-
     ''' <summary>
     ''' Main processing function
     ''' </summary>
@@ -851,7 +1078,7 @@ Public Class clsMSPathFinderResultsProcessor
         Dim strBaseName As String = String.Empty
         Dim strSynOutputFilePath As String = String.Empty
 
-        Dim lstMSPathFinderModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)
+        Dim lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType) = Nothing
 
         Dim blnSuccess As Boolean
 
@@ -882,8 +1109,9 @@ Public Class clsMSPathFinderResultsProcessor
                 ' Obtain the full path to the input file
                 Dim fiInputFile = New FileInfo(strInputFilePath)
 
-                ' Load the MSPathFinder Parameter File so that we can determine the modification names and masses                
-                Dim success = ExtractModInfoFromParamFile(mSearchToolParameterFilePath, lstMSPathFinderModInfo)
+                ' Load the MSPathFinder Parameter File so that we can determine the modification names and masses
+                ' Note that this call will intialize lstModInfo
+                Dim success = ExtractModInfoFromParamFile(mSearchToolParameterFilePath, lstModInfo)
                 If Not success Then
                     Return False
                 End If
@@ -892,8 +1120,8 @@ Public Class clsMSPathFinderResultsProcessor
                 strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
                 ' Auto-replace "_IcTda.tsv" with "_mspath"
-                If strBaseName.ToLower().EndsWith("_IcTda.tsv".ToLower()) Then
-                    strBaseName = strBaseName.Substring(0, strBaseName.Length - "_IcTda.tsv".Length) & "_mspath"
+                If strBaseName.ToLower().EndsWith("_IcTda".ToLower()) Then
+                    strBaseName = strBaseName.Substring(0, strBaseName.Length - "_IcTda".Length) & "_mspath"
                 End If
 
                 ' Do not create a first-hits file for MSPathFinder results
@@ -907,7 +1135,7 @@ Public Class clsMSPathFinderResultsProcessor
                 ' The synopsis file name will be of the form BasePath_mspath_syn.txt
                 strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
-                blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath, lstMSPathFinderModInfo)
+                blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath, lstModInfo)
 
                 ' Create the other PHRP-specific files
                 MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
@@ -916,7 +1144,7 @@ Public Class clsMSPathFinderResultsProcessor
                 Console.WriteLine(MyBase.ProgressStepDescription)
 
                 ' Now parse the _syn.txt file that we just created to next create the other PHRP files
-                blnSuccess = ParseMSPathFinderSynopsisFile(strSynOutputFilePath, strOutputFolderPath, False)
+                blnSuccess = ParseMSPathfinderSynopsisFile(strSynOutputFilePath, strOutputFolderPath, False, lstModInfo)
 
                 If blnSuccess AndAlso mCreateProteinModsFile Then
                     blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strSynOutputFilePath, strOutputFolderPath)
@@ -940,33 +1168,55 @@ Public Class clsMSPathFinderResultsProcessor
 
     End Function
 
-    Private Function ExtractModInfoFromParamFile(
-       strMSGFDBParamFilePath As String,
-       <Out()> ByRef lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
+    Private Sub SortAndWriteFilteredSearchResults(
+      swResultFile As StreamWriter,
+      lstFilteredSearchResults As List(Of udtMSPathFinderSearchResultType),
+      ByRef strErrorLog As String)
 
-        ' The DMS-based parameter file for MSPathFinder uses the same formatting as MSGF+
+        ' Sort udtFilteredSearchResults by ascending QValue, scan, peptide, and protein     
+        Dim query = From item In lstFilteredSearchResults Order By item.QValueNum, item.ScanNum, item.Sequence, item.Protein Select item
 
-        Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor("MSPathFinder")
+        Dim intIndex = 1
+        For Each result In query
+            WriteSearchResultToFile(intIndex, swResultFile, result, strErrorLog)
+            intIndex += 1
+        Next
 
-        AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
-        AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
+    End Sub
 
-        Dim success = modFileProcessor.ExtractModInfoFromParamFile(strMSGFDBParamFilePath, lstModInfo)
 
-        If Not success OrElse mErrorCode <> ePHRPErrorCodes.NoError Then
-            If mErrorCode = ePHRPErrorCodes.NoError Then
-                SetErrorMessage("Unknown error extracting the modification definitions from the MSPathFinder parameter file")
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
-            End If
-            Return False
-        End If
+    ''' <summary>
+    ''' Stores the synopsis file matches for a single scan (typically there will only be one result)
+    ''' </summary>
+    ''' <param name="lstSearchResults">Search results</param>
+    ''' <param name="intStartIndex">Start index for data in this scan</param>
+    ''' <param name="intEndIndex">End index for data in this scan</param>
+    ''' <param name="lstFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
+    ''' <remarks></remarks>
+    Private Sub StoreSynMatches(
+      lstSearchResults As List(Of udtMSPathFinderSearchResultType),
+      intStartIndex As Integer,
+      intEndIndex As Integer,
+      lstFilteredSearchResults As List(Of udtMSPathFinderSearchResultType))
 
-        modFileProcessor.ResolveMSGFDBModsWithModDefinitions(lstModInfo, mPeptideMods)
+        Dim intIndex As Integer
 
-        Return True
+        ' If there was more than one result, we could rank them by score
+        ' AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
 
-    End Function
+        ' The calling procedure already sorted by scan, charge, and Score; no need to re-sort
 
+        ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
+
+        ' Now store the matches that pass the filters (will filter on SpecProb once it is implemented)        
+        For intIndex = intStartIndex To intEndIndex
+            'If lstSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse
+            '   lstSearchResults(intIndex).SpecProbNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
+            lstFilteredSearchResults.Add(lstSearchResults(intIndex))
+            'End If
+        Next intIndex
+
+    End Sub
     Private Sub WriteSynFHTFileHeader(
       swResultFile As StreamWriter,
       ByRef strErrorLog As String)
@@ -991,6 +1241,8 @@ Public Class clsMSPathFinderResultsProcessor
             lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_QValue)
             lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_PepQValue)
 
+            ' Future: lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_SpecProb)
+
             swResultFile.WriteLine(CollapseList(lstData))
 
         Catch ex As Exception
@@ -1008,68 +1260,35 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <param name="swResultFile"></param>
     ''' <param name="udtSearchResult"></param>
     ''' <param name="strErrorLog"></param>
-    ''' <param name="blnIncludeFDRandPepFDR"></param>
-    ''' <param name="blnIncludeEFDR"></param>
-    ''' <param name="blnIncludeIMSFields"></param>
-    ''' <param name="blnMSGFPlus"></param>
     ''' <remarks></remarks>
     Private Sub WriteSearchResultToFile(
       intResultID As Integer,
       swResultFile As StreamWriter,
       ByRef udtSearchResult As udtMSPathFinderSearchResultType,
-      ByRef strErrorLog As String,
-      blnIncludeFDRandPepFDR As Boolean,
-      blnIncludeEFDR As Boolean,
-      blnIncludeIMSFields As Boolean,
-      blnMSGFPlus As Boolean)
+      ByRef strErrorLog As String)
 
         Try
 
-            ' Primary Columns (other columns are added in certain circumstances):
-            '
-            ' MSGFDB
-            ' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb    Rank_MSGFDB_SpecProb    PValue  FDR     PepFDR
+            Dim lstData As New List(Of String)
+            lstData.Add(intResultID.ToString())
+            lstData.Add(udtSearchResult.Scan)
+            lstData.Add(udtSearchResult.Charge)
+            lstData.Add(udtSearchResult.MostAbundantIsotopeMz)
+            lstData.Add(udtSearchResult.CalculatedMonoMass)
+            lstData.Add(udtSearchResult.PrefixResidue & "." & udtSearchResult.Sequence & "." & udtSearchResult.SuffixResidue)
+            lstData.Add(udtSearchResult.Modifications)
+            lstData.Add(udtSearchResult.Composition)
+            lstData.Add(udtSearchResult.Protein)
+            lstData.Add(udtSearchResult.ProteinDesc)
+            lstData.Add(udtSearchResult.ProteinLength)
+            lstData.Add(udtSearchResult.ResidueStart)
+            lstData.Add(udtSearchResult.ResidueEnd)
+            lstData.Add(udtSearchResult.NumMatchedFragments)
+            lstData.Add(udtSearchResult.QValue)
+            lstData.Add(udtSearchResult.PepQValue)
+            ' Future: lstData.Add(udtSearchResult.SpecProb)
 
-            ' MSGF+
-            ' ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecEValue  Rank_MSGFDB_SpecEValue  EValue  QValue  PepQValue  IsotopeError
-
-            'Dim lstData As New List(Of String)
-            'lstData.Add(intResultID.ToString)
-            'lstData.Add(udtSearchResult.Scan)
-            'lstData.Add(udtSearchResult.FragMethod)
-            'lstData.Add(udtSearchResult.SpecIndex)
-            'lstData.Add(udtSearchResult.Charge)
-            'lstData.Add(udtSearchResult.PrecursorMZ)
-            'lstData.Add(udtSearchResult.PMErrorDa)
-            'lstData.Add(udtSearchResult.PMErrorPPM)
-            'lstData.Add(udtSearchResult.MH)
-            'lstData.Add(udtSearchResult.Peptide)
-            'lstData.Add(udtSearchResult.Protein)
-            'lstData.Add(udtSearchResult.NTT)
-            'lstData.Add(udtSearchResult.DeNovoScore)
-            'lstData.Add(udtSearchResult.MSGFScore)
-            'lstData.Add(udtSearchResult.SpecProb)
-            'lstData.Add(udtSearchResult.RankSpecProb.ToString)
-            'lstData.Add(udtSearchResult.PValue)
-
-            'If blnIncludeFDRandPepFDR Then
-            '    lstData.Add(udtSearchResult.FDR)
-            '    lstData.Add(udtSearchResult.PepFDR)
-            'ElseIf blnIncludeEFDR Then
-            '    lstData.Add(udtSearchResult.FDR)
-            '    lstData.Add("1")
-            'End If
-
-            'If blnMSGFPlus Then
-            '    lstData.Add(udtSearchResult.IsotopeError.ToString)
-            'End If
-
-            'If blnIncludeIMSFields Then
-            '    lstData.Add(udtSearchResult.IMSScan.ToString)
-            '    lstData.Add(udtSearchResult.IMSDriftTime)
-            'End If
-
-            'swResultFile.WriteLine(CollapseList(lstData))
+            swResultFile.WriteLine(CollapseList(lstData))
 
         Catch ex As Exception
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
@@ -1078,7 +1297,6 @@ Public Class clsMSPathFinderResultsProcessor
         End Try
 
     End Sub
-
 
 #Region "Event Handlers"
     Private Sub ModExtractorErrorHandler(errMsg As String)
@@ -1089,6 +1307,50 @@ Public Class clsMSPathFinderResultsProcessor
     Private Sub ModExtractorWarningHandler(warningMsg As String)
         ReportWarning(warningMsg)
     End Sub
+#End Region
+
+
+#Region "IComparer Classes"
+
+    Protected Class MSPathFinderSearchResultsComparerScanChargeScorePeptide
+        Implements IComparer(Of udtMSPathFinderSearchResultType)
+
+        Public Function Compare(x As udtMSPathFinderSearchResultType, y As udtMSPathFinderSearchResultType) As Integer Implements IComparer(Of udtMSPathFinderSearchResultType).Compare
+
+            ' First sort on Scan
+            If x.ScanNum > y.ScanNum Then
+                Return 1
+            ElseIf x.ScanNum < y.ScanNum Then
+                Return -1
+            Else
+                ' Scan is the same; check QValue (future: SpecProb)
+                If x.QValueNum > y.QValueNum Then
+                    Return 1
+                ElseIf x.QValueNum < y.QValueNum Then
+                    Return -1
+                Else
+                    ' QValue is the same; check sequence
+                    If x.Sequence > y.Sequence Then
+                        Return 1
+                    ElseIf x.Sequence < y.Sequence Then
+                        Return -1
+                    Else
+                        ' Peptide is the same, check Protein
+                        If x.Protein > y.Protein Then
+                            Return 1
+                        ElseIf x.Protein < y.Protein Then
+                            Return -1
+                        Else
+                            Return 0
+                        End If
+                    End If
+                End If
+            End If
+
+        End Function
+
+    End Class
+
 #End Region
 
 End Class

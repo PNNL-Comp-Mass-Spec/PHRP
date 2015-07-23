@@ -478,7 +478,7 @@ Public Class clsMODPlusResultsProcessor
 
             ' Open the input file and parse it
             ' Initialize the stream reader and the stream Text writer
-            Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)),
+            Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)),
                   swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
                 Dim headerParsed = False
@@ -704,7 +704,7 @@ Public Class clsMODPlusResultsProcessor
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
-                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                     Dim intResultsProcessed = 0
                     Dim blnHeaderParsed = False
@@ -759,13 +759,13 @@ Public Class clsMODPlusResultsProcessor
 
                         Else
                             ' New Probability
-                            ' Reset htPeptidesFoundForScan
+                            ' Reset htPeptidesFoundForProbabilityLevel
                             htPeptidesFoundForProbabilityLevel.Clear()
 
                             ' Update strPreviousProbability
                             strPreviousProbability = objSearchResult.Probability
 
-                            ' Append a new entry to htPeptidesFoundForScan
+                            ' Append a new entry to htPeptidesFoundForProbabilityLevel
                             htPeptidesFoundForProbabilityLevel.Add(strKey, 1)
                             blnFirstMatchForGroup = True
                         End If
@@ -1631,7 +1631,7 @@ Public Class clsMODPlusResultsProcessor
             ' ResultID	Scan	Spectrum_Index	Charge	PrecursorMZ	DelM	DelM_PPM	MH	Peptide	NTT	ModificationAnnotation	Protein	Peptide_Position	Score	Probability	Rank_Probability   QValue
 
             Dim lstData As New List(Of String)
-            lstData.Add(intResultID.ToString)
+            lstData.Add(intResultID.ToString())
             lstData.Add(udtSearchResult.ScanNum.ToString)
             lstData.Add(udtSearchResult.SpectrumIndex)
             lstData.Add(udtSearchResult.Charge)

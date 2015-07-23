@@ -83,10 +83,6 @@
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PeptideHitResultsProcessor">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>PeptideHitResultsProcessor\bin\PeptideHitResultsProcessor.dll</HintPath>
-    </Reference>
     <Reference Include="PeptideToProteinMapEngine">
       <HintPath>PeptideHitResultsProcessor\Lib\PeptideToProteinMapEngine.dll</HintPath>
     </Reference>
@@ -167,6 +163,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="PeptideHitResultsProcessor\PeptideHitResultsProcessor.vbproj">
+      <Project>{101064e4-f653-4e4e-9c61-3bd11ea0b197}</Project>
+      <Name>PeptideHitResultsProcessor</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>

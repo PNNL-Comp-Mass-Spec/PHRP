@@ -348,7 +348,7 @@ Public Class clsInSpecTResultsProcessor
         Array.Sort(udtSearchResultsCurrentScan, 0, intCurrentScanResultsCount, objSortScanChargeMQScore)
 
         For intIndex = 0 To intCurrentScanResultsCount - 1
-            If intIndex < intCurrentScanResultsCount - 1 AndAlso _
+            If intIndex < intCurrentScanResultsCount - 1 AndAlso
                udtSearchResultsCurrentScan(intIndex).ChargeNum = udtSearchResultsCurrentScan(intIndex + 1).ChargeNum Then
                 udtSearchResultsCurrentScan(intIndex).DeltaNormMQScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan(intIndex).MQScoreNum, udtSearchResultsCurrentScan(intIndex + 1).MQScoreNum, DeltaNormMQScore_If_Undefined)
             Else
@@ -375,7 +375,7 @@ Public Class clsInSpecTResultsProcessor
 
             udtSearchResultsCurrentScan(intIndex).RankTotalPRMScore = intCurrentRank
 
-            If intIndex < intCurrentScanResultsCount - 1 AndAlso _
+            If intIndex < intCurrentScanResultsCount - 1 AndAlso
                udtSearchResultsCurrentScan(intIndex).ChargeNum = udtSearchResultsCurrentScan(intIndex + 1).ChargeNum Then
                 udtSearchResultsCurrentScan(intIndex).DeltaNormTotalPRMScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum, udtSearchResultsCurrentScan(intIndex + 1).TotalPRMScoreNum, DeltaNormTotalPRMScore_If_Undefined)
             Else
@@ -477,77 +477,75 @@ Public Class clsInSpecTResultsProcessor
             Try
                 ' Open the input file and parse it
                 ' Initialize the stream reader and the stream Text writer
-                Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)),
+                      swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
-                    Using swResultFile As StreamWriter = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    ' Write the header line
+                    WriteSynFHTFileHeader(swResultFile, strErrorLog)
 
-                        ' Write the header line
-                        WriteSynFHTFileHeader(swResultFile, strErrorLog)
+                    strErrorLog = String.Empty
+                    intResultsProcessed = 0
 
-                        strErrorLog = String.Empty
-                        intResultsProcessed = 0
+                    ' Initialize array that will hold all of the records for a given scan
+                    intCurrentScanResultsCount = 0
+                    ReDim udtSearchResultsCurrentScan(9)
 
-                        ' Initialize array that will hold all of the records for a given scan
-                        intCurrentScanResultsCount = 0
-                        ReDim udtSearchResultsCurrentScan(9)
+                    ' Initialize the array that will hold all of the records that will ultimately be written out to disk
+                    intFilteredSearchResultCount = 0
+                    ReDim udtFilteredSearchResults(999)
 
-                        ' Initialize the array that will hold all of the records that will ultimately be written out to disk
-                        intFilteredSearchResultCount = 0
-                        ReDim udtFilteredSearchResults(999)
+                    ' Parse the input file
+                    Do While Not srDataFile.EndOfStream And Not MyBase.AbortProcessing
+                        strLineIn = srDataFile.ReadLine()
 
-                        ' Parse the input file
-                        Do While Not srDataFile.EndOfStream And Not MyBase.AbortProcessing
-                            strLineIn = srDataFile.ReadLine()
+                        If String.IsNullOrWhiteSpace(strLineIn) Then
+                            Continue Do
+                        End If
 
-                            If String.IsNullOrWhiteSpace(strLineIn) Then
-                                Continue Do
-                            End If
+                        ' Initialize udtSearchResult
+                        udtSearchResult.Clear()
 
-                            ' Initialize udtSearchResult
-                            udtSearchResult.Clear()
+                        blnValidSearchResult = ParseInspectResultsFileEntry(strLineIn, udtInspectModInfo, udtSearchResult, strErrorLog, intResultsProcessed)
 
-                            blnValidSearchResult = ParseInspectResultsFileEntry(strLineIn, udtInspectModInfo, udtSearchResult, strErrorLog, intResultsProcessed)
-
-                            If blnValidSearchResult Then
-                                If intPreviousScan <> Int32.MinValue AndAlso intPreviousScan <> udtSearchResult.ScanNum Then
-                                    ' New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
-                                    If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-                                        StoreSynMatches(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
-                                    Else
-                                        StoreTopFHTMatch(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
-                                    End If
-                                    intCurrentScanResultsCount = 0
+                        If blnValidSearchResult Then
+                            If intPreviousScan <> Int32.MinValue AndAlso intPreviousScan <> udtSearchResult.ScanNum Then
+                                ' New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
+                                If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
+                                    StoreSynMatches(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
+                                Else
+                                    StoreTopFHTMatch(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
                                 End If
-
-                                AddCurrentRecordToSearchResults(intCurrentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult)
-
-                                intPreviousScan = udtSearchResult.ScanNum
+                                intCurrentScanResultsCount = 0
                             End If
 
-                            ' Update the progress
-                            UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
+                            AddCurrentRecordToSearchResults(intCurrentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult)
 
-                            intResultsProcessed += 1
-
-                        Loop
-
-
-                        ' Store the last record
-                        If intCurrentScanResultsCount > 0 Then
-                            If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-                                StoreSynMatches(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
-                            Else
-                                StoreTopFHTMatch(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
-                            End If
-                            intCurrentScanResultsCount = 0
+                            intPreviousScan = udtSearchResult.ScanNum
                         End If
 
-                        If mSortFHTandSynFiles Then
-                            ' Sort the data in udtFilteredSearchResults then write out to disk
-                            SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
-                        End If
+                        ' Update the progress
+                        UpdateProgress(CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100))
 
-                    End Using
+                        intResultsProcessed += 1
+
+                    Loop
+
+
+                    ' Store the last record
+                    If intCurrentScanResultsCount > 0 Then
+                        If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
+                            StoreSynMatches(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
+                        Else
+                            StoreTopFHTMatch(swResultFile, intResultID, intCurrentScanResultsCount, udtSearchResultsCurrentScan, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog, objSortComparer)
+                        End If
+                        intCurrentScanResultsCount = 0
+                    End If
+
+                    If mSortFHTandSynFiles Then
+                        ' Sort the data in udtFilteredSearchResults then write out to disk
+                        SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
+                    End If
+
                 End Using
 
                 ' Inform the user if any errors occurred
@@ -572,8 +570,10 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
-    Protected Function ComputeDelMCorrectedPPM(dblPrecursorErrorDa As Double, dblPrecursorMonoMass As Double, _
-     dblPeptideMonoisotopicMass As Double, _
+    Protected Function ComputeDelMCorrectedPPM(
+     dblPrecursorErrorDa As Double,
+     dblPrecursorMonoMass As Double,
+     dblPeptideMonoisotopicMass As Double,
      blnAdjustPrecursorMassForC13 As Boolean) As Double
 
         Dim dblPeptideDeltaMassCorrectedPpm As Double
@@ -665,7 +665,7 @@ Public Class clsInSpecTResultsProcessor
             End If
 
             ' Read the contents of the inspect parameter file
-            Using srInFile = New StreamReader(New FileStream(strInspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            Using srInFile = New StreamReader(New FileStream(strInspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
                     strLineIn = srInFile.ReadLine().Trim()
@@ -793,10 +793,10 @@ Public Class clsInSpecTResultsProcessor
     ''' <returns></returns>
     ''' <remarks></remarks>
     Protected Function LoadPeptideToProteinMapInfoInspect(
-      strPepToProteinMapFilePath As String, _
-      strOutputFolderPath As String, _
-      ByRef udtInspectModInfo() As udtModInfoType, _
-      ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), _
+      strPepToProteinMapFilePath As String,
+      strOutputFolderPath As String,
+      ByRef udtInspectModInfo() As udtModInfoType,
+      ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
       ByRef strMTSPepToProteinMapFilePath As String) As Boolean
 
         Dim strHeaderLine As String = String.Empty
@@ -841,10 +841,10 @@ Public Class clsInSpecTResultsProcessor
                             UpdatePepToProteinMapPeptide(lstPepToProteinMapping, intIndex, strMTSCompatiblePeptide)
                         End If
 
-                        swOutFile.WriteLine( _
-                          lstPepToProteinMapping(intIndex).Peptide & ControlChars.Tab & _
-                          lstPepToProteinMapping(intIndex).Protein & ControlChars.Tab & _
-                          lstPepToProteinMapping(intIndex).ResidueStart & ControlChars.Tab & _
+                        swOutFile.WriteLine(
+                          lstPepToProteinMapping(intIndex).Peptide & ControlChars.Tab &
+                          lstPepToProteinMapping(intIndex).Protein & ControlChars.Tab &
+                          lstPepToProteinMapping(intIndex).ResidueStart & ControlChars.Tab &
                           lstPepToProteinMapping(intIndex).ResidueEnd)
 
                     Next
@@ -864,7 +864,8 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
-    Private Function ParseInspectSynFileHeaderLine(strLineIn As String, _
+    Private Function ParseInspectSynFileHeaderLine(
+      strLineIn As String,
       ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
@@ -993,7 +994,7 @@ Public Class clsInSpecTResultsProcessor
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
-                Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                     strErrorLog = String.Empty
                     intResultsProcessed = 0
@@ -1046,13 +1047,13 @@ Public Class clsInSpecTResultsProcessor
 
                             Else
                                 ' New TotalPRMScore
-                                ' Reset htPeptidesFoundForScan
+                                ' Reset htPeptidesFoundForTotalPRMScoreLevel
                                 htPeptidesFoundForTotalPRMScoreLevel.Clear()
 
                                 ' Update strPreviousTotalPRMScore
                                 strPreviousTotalPRMScore = objSearchResult.TotalPRMScore
 
-                                ' Append a new entry to htPeptidesFoundForScan
+                                ' Append a new entry to htPeptidesFoundForTotalPRMScoreLevel
                                 htPeptidesFoundForTotalPRMScoreLevel.Add(strKey, 1)
                                 blnFirstMatchForGroup = True
                             End If
@@ -1138,10 +1139,11 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
-    Private Function ParseInspectResultsFileEntry(ByRef strLineIn As String, _
-     ByRef udtInspectModInfo() As udtModInfoType, _
-     ByRef udtSearchResult As udtInspectSearchResultType, _
-     ByRef strErrorLog As String, _
+    Private Function ParseInspectResultsFileEntry(
+     ByRef strLineIn As String,
+     ByRef udtInspectModInfo() As udtModInfoType,
+     ByRef udtSearchResult As udtInspectSearchResultType,
+     ByRef strErrorLog As String,
      intResultsProcessed As Integer) As Boolean
 
         ' Parses an entry from the Inspect results file
@@ -1166,8 +1168,8 @@ Public Class clsInSpecTResultsProcessor
                 If intResultsProcessed = 0 Then
                     ' This is the first line of the file; it may be a header row
                     ' Determine this by seeing if any of the first three columns contains a number
-                    If Not (clsPHRPBaseClass.IsNumber(strSplitLine(0)) OrElse _
-                      clsPHRPBaseClass.IsNumber(strSplitLine(1)) OrElse _
+                    If Not (clsPHRPBaseClass.IsNumber(strSplitLine(0)) OrElse
+                      clsPHRPBaseClass.IsNumber(strSplitLine(1)) OrElse
                       clsPHRPBaseClass.IsNumber(strSplitLine(2))) Then
                         ' This is a header line; ignore it
                         blnValidSearchResult = False
@@ -1241,8 +1243,7 @@ Public Class clsInSpecTResultsProcessor
 
                             dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
 
-                            dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, _
-                             dblPeptideMonoisotopicMass, True)
+                            dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, dblPeptideMonoisotopicMass, True)
 
                             .DelMPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 4, True)
 
@@ -1277,11 +1278,12 @@ Public Class clsInSpecTResultsProcessor
 
     End Function
 
-    Private Function ParseInSpectSynFileEntry(ByRef strLineIn As String, _
-       ByRef intColumnMapping() As Integer, _
-       objSearchResult As clsSearchResultsInSpecT, _
-       ByRef strErrorLog As String, _
-       ByRef strPeptideSequenceWithMods As String) As Boolean
+    Private Function ParseInSpectSynFileEntry(
+      ByRef strLineIn As String,
+      ByRef intColumnMapping() As Integer,
+      objSearchResult As clsSearchResultsInSpecT,
+      ByRef strErrorLog As String,
+      ByRef strPeptideSequenceWithMods As String) As Boolean
 
         ' Parses an entry from the Inspect Synopsis file
 
@@ -1602,8 +1604,9 @@ Public Class clsInSpecTResultsProcessor
         Dim reMatch As Match
 
         If strPeptide.Length >= 4 Then
-            If strPeptide.Chars(1) = "."c AndAlso _
+            If strPeptide.Chars(1) = "."c AndAlso
                strPeptide.Chars(strPeptide.Length - 2) = "."c Then
+
                 strPrefix = strPeptide.Substring(0, 2)
                 strSuffix = strPeptide.Substring(strPeptide.Length - 2, 2)
 
@@ -1616,7 +1619,7 @@ Public Class clsInSpecTResultsProcessor
             If udtInspectModInfo(intIndex).ModType <> eInspectModType.StaticMod Then
                 strPeptide = strPeptide.Replace(udtInspectModInfo(intIndex).ModName, udtInspectModInfo(intIndex).ModSymbol)
 
-                If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Or _
+                If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Or
                    udtInspectModInfo(intIndex).ModType = eInspectModType.DynCTermPeptide Then
 
                     If udtInspectModInfo(intIndex).ModType = eInspectModType.DynNTermPeptide Then
@@ -1840,8 +1843,8 @@ Public Class clsInSpecTResultsProcessor
 
         ' Now store or write out the matches that pass the filters
         For intIndex = 0 To intCurrentScanResultsCount - 1
-            If udtSearchResultsCurrentScan(intIndex).PValueNum <= mInspectSynopsisFilePValueThreshold OrElse _
-               udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse _
+            If udtSearchResultsCurrentScan(intIndex).PValueNum <= mInspectSynopsisFilePValueThreshold OrElse
+               udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse
                udtSearchResultsCurrentScan(intIndex).FScoreNum >= FSCORE_THRESHOLD Then
                 StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
             End If
@@ -1903,33 +1906,33 @@ Public Class clsInSpecTResultsProcessor
 
         ' Writes an entry to a synopsis or first hits file
         Try
-            swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab & _
-              udtSearchResult.Scan & ControlChars.Tab & _
-              udtSearchResult.PeptideAnnotation & ControlChars.Tab & _
-              udtSearchResult.Protein & ControlChars.Tab & _
-              udtSearchResult.Charge & ControlChars.Tab & _
-              udtSearchResult.MQScore & ControlChars.Tab & _
-              udtSearchResult.Length & ControlChars.Tab & _
-              udtSearchResult.TotalPRMScore & ControlChars.Tab & _
-              udtSearchResult.MedianPRMScore & ControlChars.Tab & _
-              udtSearchResult.FractionY & ControlChars.Tab & _
-              udtSearchResult.FractionB & ControlChars.Tab & _
-              udtSearchResult.Intensity & ControlChars.Tab & _
-              udtSearchResult.NTT & ControlChars.Tab & _
-              udtSearchResult.pValue & ControlChars.Tab & _
-              udtSearchResult.FScore & ControlChars.Tab & _
-              udtSearchResult.DeltaScore & ControlChars.Tab & _
-              udtSearchResult.DeltaScoreOther & ControlChars.Tab & _
-              NumToString(udtSearchResult.DeltaNormMQScore, 5, True) & ControlChars.Tab & _
-              NumToString(udtSearchResult.DeltaNormTotalPRMScore, 5, True) & ControlChars.Tab & _
-              udtSearchResult.RankTotalPRMScore & ControlChars.Tab & _
-              udtSearchResult.RankFScore & ControlChars.Tab & _
-              NumToString(udtSearchResult.MH, 6, True) & ControlChars.Tab & _
-              udtSearchResult.RecordNumber & ControlChars.Tab & _
-              udtSearchResult.DBFilePos & ControlChars.Tab & _
-              udtSearchResult.SpecFilePos & ControlChars.Tab & _
-              udtSearchResult.PrecursorMZ & ControlChars.Tab & _
-              udtSearchResult.PrecursorError & ControlChars.Tab & _
+            swResultFile.WriteLine(intResultID.ToString & ControlChars.Tab &
+              udtSearchResult.Scan & ControlChars.Tab &
+              udtSearchResult.PeptideAnnotation & ControlChars.Tab &
+              udtSearchResult.Protein & ControlChars.Tab &
+              udtSearchResult.Charge & ControlChars.Tab &
+              udtSearchResult.MQScore & ControlChars.Tab &
+              udtSearchResult.Length & ControlChars.Tab &
+              udtSearchResult.TotalPRMScore & ControlChars.Tab &
+              udtSearchResult.MedianPRMScore & ControlChars.Tab &
+              udtSearchResult.FractionY & ControlChars.Tab &
+              udtSearchResult.FractionB & ControlChars.Tab &
+              udtSearchResult.Intensity & ControlChars.Tab &
+              udtSearchResult.NTT & ControlChars.Tab &
+              udtSearchResult.pValue & ControlChars.Tab &
+              udtSearchResult.FScore & ControlChars.Tab &
+              udtSearchResult.DeltaScore & ControlChars.Tab &
+              udtSearchResult.DeltaScoreOther & ControlChars.Tab &
+              NumToString(udtSearchResult.DeltaNormMQScore, 5, True) & ControlChars.Tab &
+              NumToString(udtSearchResult.DeltaNormTotalPRMScore, 5, True) & ControlChars.Tab &
+              udtSearchResult.RankTotalPRMScore & ControlChars.Tab &
+              udtSearchResult.RankFScore & ControlChars.Tab &
+              NumToString(udtSearchResult.MH, 6, True) & ControlChars.Tab &
+              udtSearchResult.RecordNumber & ControlChars.Tab &
+              udtSearchResult.DBFilePos & ControlChars.Tab &
+              udtSearchResult.SpecFilePos & ControlChars.Tab &
+              udtSearchResult.PrecursorMZ & ControlChars.Tab &
+              udtSearchResult.PrecursorError & ControlChars.Tab &
               udtSearchResult.DelMPPM)
 
         Catch ex As Exception

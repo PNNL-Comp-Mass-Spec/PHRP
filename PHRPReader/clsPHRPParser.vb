@@ -1225,10 +1225,10 @@ Public MustInherit Class clsPHRPParser
         Return blnSuccess
     End Function
 
-    Protected Function UpdatePSMFindMatchingModInfo( _
-      strMassCorrectionTag As String, _
-      blnFavorTerminalMods As Boolean, _
-      eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
+    Protected Function UpdatePSMFindMatchingModInfo(
+      strMassCorrectionTag As String,
+      blnFavorTerminalMods As Boolean,
+      eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
       <Out()> ByRef objMatchedModDef As clsModificationDefinition) As Boolean
 
         objMatchedModDef = New clsModificationDefinition()
@@ -1255,17 +1255,17 @@ Public MustInherit Class clsPHRPParser
                 If blnFavorTerminalMods Then
                     ' Look for an entry in lstMatchedDefs that is a terminal mod
                     For Each objMod In lstMatchedDefs
-                        If objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
+                        If objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse
                            objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
 
-                            If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus AndAlso _
+                            If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus AndAlso
                               (objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
                                 blnMatchFound = True
                                 objMatchedModDef = objMod
                                 Exit For
                             End If
 
-                            If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus AndAlso _
+                            If eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus AndAlso
                               (objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) OrElse objMod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)) Then
                                 blnMatchFound = True
                                 objMatchedModDef = objMod
@@ -1276,7 +1276,7 @@ Public MustInherit Class clsPHRPParser
                 Else
                     ' Look for an entry in lstMatchedDefs that is not a terminal mod
                     For Each objMod In lstMatchedDefs
-                        If Not (objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse _
+                        If Not (objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod OrElse
                           objMod.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod) Then
                             blnMatchFound = True
                             objMatchedModDef = objMod

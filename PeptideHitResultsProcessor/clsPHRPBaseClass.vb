@@ -68,6 +68,7 @@ Public MustInherit Class clsPHRPBaseClass
 
     Public Const MODa_RESULTS_FILE_SUFFIX As String = "_moda.id.txt"
     Public Const MODPlus_RESULTS_FILE_SUFFIX As String = "_modp.id.txt"
+    Public Const MSPathFinder_RESULTS_FILE_SUFFIX As String = "_IcTda.tsv"
 
 	Public Const FILENAME_SUFFIX_RESULT_TO_SEQ_MAP As String = "_ResultToSeqMap.txt"
 	Public Const FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP As String = "_SeqToProteinMap.txt"
@@ -93,6 +94,7 @@ Public MustInherit Class clsPHRPBaseClass
 		MSAlignTXTFile = 6
         MODaTXTFile = 7
         MODPlusTXTFile = 8
+        MSPathFinderTSVFile = 9
     End Enum
 
     Public Enum ePHRPErrorCodes
@@ -168,8 +170,8 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected mMSAlignSynopsisFilePValueThreshold As Single     ' Only used by clsMSAlignResultsProcessor; note that lower p-values are higher confidence results
 
-    Protected mMSGFDBSynopsisFilePValueThreshold As Single      ' Only used by clsMSGFDBResultsProcessor; note that lower p-values are higher confidence results
-    Protected mMSGFDBSynopsisFileSpecProbThreshold As Single    ' Only used by clsMSGFDBResultsProcessor; note that lower SpecProb values are higher confidence results
+    Protected mMSGFDBSynopsisFilePValueThreshold As Single      ' Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor; note that lower p-values are higher confidence results
+    Protected mMSGFDBSynopsisFileSpecProbThreshold As Single    ' Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor; note that lower SpecProb values are higher confidence results
 
     Protected mEnzymeMatchSpec As udtEnzymeMatchSpecType
     Protected mPeptideNTerminusMassChange As Double             ' This is ignored if equal to 0; typical non-zero value is 1.0078246
@@ -453,8 +455,8 @@ Public MustInherit Class clsPHRPBaseClass
         mAbortProcessing = True
     End Sub
 
-    Public Shared Function AutoDefinePeptideHitResultsFilePath(ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants, _
-      strSourceFolderPath As String, _
+    Public Shared Function AutoDefinePeptideHitResultsFilePath(ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants,
+      strSourceFolderPath As String,
       strBaseName As String) As String
 
         If Not strBaseName Is Nothing AndAlso strBaseName.Length > 0 Then
@@ -482,6 +484,9 @@ Public MustInherit Class clsPHRPBaseClass
 
                 Case ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
                     Return Path.Combine(strSourceFolderPath, strBaseName & MODPlus_RESULTS_FILE_SUFFIX)
+
+                Case ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
+                    Return Path.Combine(strSourceFolderPath, strBaseName & MSPathFinder_RESULTS_FILE_SUFFIX)
 
                 Case Else
                     ' Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
@@ -654,29 +659,32 @@ Public MustInherit Class clsPHRPBaseClass
         If strExtensionLCase = ".xml" Then
             Return ePeptideHitResultsFileFormatConstants.XTandemXMLFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE.ToLower) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE.ToLower) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE.ToLower) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE.ToLower) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE.ToLower) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE.ToLower) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE.ToLower) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.MODaTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE.ToLower) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
+
+        ElseIf strBaseFileNameLCase.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_File.ToLower()) Then
+            Return ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
 
         ElseIf strExtensionLCase = ".tsv" Then
             ' Assume this is an MSGF+ TSV file
@@ -771,9 +779,8 @@ Public MustInherit Class clsPHRPBaseClass
     End Sub
 
     Protected Overridable Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
-        Dim strPepToProteinMapFilePath As String = String.Empty
 
-        strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+        Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
 
         If MTS Then
             strPepToProteinMapFilePath &= FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING & "MTS.txt"
@@ -866,7 +873,7 @@ Public MustInherit Class clsPHRPBaseClass
                 .ShowMessages = True
             End With
 
-            Using swMTSpepToProteinMapFile As StreamWriter = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+            Using swMTSpepToProteinMapFile = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
                 For Each strInputFilePath As String In lstSourcePHRPDataFiles
 
@@ -923,32 +930,34 @@ Public MustInherit Class clsPHRPBaseClass
                     End If
 
 
-                    If IO.File.Exists(strResultsFilePath) Then
-                        ' Read the newly created file and append new entries to strMTSPepToProteinMapFilePath
-                        Using srResultsFile As StreamReader = New StreamReader(New FileStream(strResultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                            While srResultsFile.Peek > -1
-                                strLineIn = srResultsFile.ReadLine()
-
-                                If Not String.IsNullOrWhiteSpace(strLineIn) Then
-                                    strSplitLine = Split(strLineIn, ControlChars.Tab, 2)
-                                    If strSplitLine.Length >= 2 Then
-                                        strPeptideAndProteinKey = strSplitLine(0) & "_" & strSplitLine(1)
-
-                                        If Not htPeptideToProteinMapResults.ContainsKey(strPeptideAndProteinKey) Then
-                                            htPeptideToProteinMapResults.Add(strPeptideAndProteinKey, 0)
-                                            swMTSpepToProteinMapFile.WriteLine(strLineIn)
-                                        End If
-                                    End If
-
-                                End If
-                            End While
-
-                        End Using
-
-                        ' Delete the interim results file
-                        DeleteFileIgnoreErrors(strResultsFilePath)
-
+                    If Not File.Exists(strResultsFilePath) Then
+                        Continue For
                     End If
+
+                    ' Read the newly created file and append new entries to strMTSPepToProteinMapFilePath
+                    Using srResultsFile = New StreamReader(New FileStream(strResultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        While Not srResultsFile.EndOfStream
+                            strLineIn = srResultsFile.ReadLine()
+
+                            If Not String.IsNullOrWhiteSpace(strLineIn) Then
+                                strSplitLine = Split(strLineIn, ControlChars.Tab, 2)
+                                If strSplitLine.Length >= 2 Then
+                                    strPeptideAndProteinKey = strSplitLine(0) & "_" & strSplitLine(1)
+
+                                    If Not htPeptideToProteinMapResults.ContainsKey(strPeptideAndProteinKey) Then
+                                        htPeptideToProteinMapResults.Add(strPeptideAndProteinKey, 0)
+                                        swMTSpepToProteinMapFile.WriteLine(strLineIn)
+                                    End If
+                                End If
+
+                            End If
+                        End While
+
+                    End Using
+
+                    ' Delete the interim results file
+                    DeleteFileIgnoreErrors(strResultsFilePath)
+
 
                 Next
 
@@ -1000,7 +1009,11 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Function
 
-    Public Function CreateProteinModDetailsFile(strPHRPDataFilePath As String, strOutputFolderPath As String, strMTSPepToProteinMapFilePath As String, ePHRPResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType) As Boolean
+    Public Function CreateProteinModDetailsFile(
+       strPHRPDataFilePath As String,
+       strOutputFolderPath As String,
+       strMTSPepToProteinMapFilePath As String,
+       ePHRPResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType) As Boolean
 
         Dim intPepToProteinMapIndex As Integer
 
@@ -1064,18 +1077,18 @@ Public MustInherit Class clsPHRPBaseClass
             intPSMCountSkippedSinceReversedOrScrambledProtein = 0
 
             ' Create a ProteinMods file parallel to the PHRP file
-            Using swProteinModsFile As StreamWriter = New StreamWriter(New FileStream(strProteinModsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+            Using swProteinModsFile = New StreamWriter(New FileStream(strProteinModsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
                 ' Write the header line
-                swProteinModsFile.WriteLine( _
-                   COLUMN_NAME_RESULTID & ControlChars.Tab & _
-                   COLUMN_NAME_PEPTIDE & ControlChars.Tab & _
-                   COLUMN_NAME_UNIQUE_SEQ_ID & ControlChars.Tab & _
-                   COLUMN_NAME_PROTEIN_NAME & ControlChars.Tab & _
-                   COLUMN_NAME_RESIDUE & ControlChars.Tab & _
-                   COLUMN_NAME_PROTEIN_RESIDUE_NUMBER & ControlChars.Tab & _
-                   COLUMN_NAME_RESIDUE_MOD_NAME & ControlChars.Tab & _
-                   COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER & ControlChars.Tab & _
+                swProteinModsFile.WriteLine(
+                   COLUMN_NAME_RESULTID & ControlChars.Tab &
+                   COLUMN_NAME_PEPTIDE & ControlChars.Tab &
+                   COLUMN_NAME_UNIQUE_SEQ_ID & ControlChars.Tab &
+                   COLUMN_NAME_PROTEIN_NAME & ControlChars.Tab &
+                   COLUMN_NAME_RESIDUE & ControlChars.Tab &
+                   COLUMN_NAME_PROTEIN_RESIDUE_NUMBER & ControlChars.Tab &
+                   COLUMN_NAME_RESIDUE_MOD_NAME & ControlChars.Tab &
+                   COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER & ControlChars.Tab &
                    COLUMN_NAME_MSGF_SPECPROB)
 
                 Dim blnLoadMSGFResults = ePHRPResultType <> clsPHRPReader.ePeptideHitResultType.MSGFDB
@@ -1148,15 +1161,15 @@ Public MustInherit Class clsPHRPBaseClass
                                             ' Skip this result
                                             intPSMCountSkippedSinceReversedOrScrambledProtein += 1
                                         Else
-                                            swProteinModsFile.WriteLine( _
-                                              objReader.CurrentPSM.ResultID & ControlChars.Tab & _
-                                              objReader.CurrentPSM.Peptide & ControlChars.Tab & _
-                                              objReader.CurrentPSM.SeqID & ControlChars.Tab & _
-                                              lstPepToProteinMapping(intPepToProteinMapIndex).Protein & ControlChars.Tab & _
-                                              strResidue & ControlChars.Tab & _
-                                              intResidueLocInProtein.ToString() & ControlChars.Tab & _
-                                              objMod.ModDefinition.MassCorrectionTag & ControlChars.Tab & _
-                                              objMod.ResidueLocInPeptide.ToString() & ControlChars.Tab & _
+                                            swProteinModsFile.WriteLine(
+                                              objReader.CurrentPSM.ResultID & ControlChars.Tab &
+                                              objReader.CurrentPSM.Peptide & ControlChars.Tab &
+                                              objReader.CurrentPSM.SeqID & ControlChars.Tab &
+                                              lstPepToProteinMapping(intPepToProteinMapIndex).Protein & ControlChars.Tab &
+                                              strResidue & ControlChars.Tab &
+                                              intResidueLocInProtein.ToString() & ControlChars.Tab &
+                                              objMod.ModDefinition.MassCorrectionTag & ControlChars.Tab &
+                                              objMod.ResidueLocInPeptide.ToString() & ControlChars.Tab &
                                               objReader.CurrentPSM.MSGFSpecProb)
                                         End If
 
@@ -1476,25 +1489,25 @@ Public MustInherit Class clsPHRPBaseClass
 
         ' Initialize the SeqInfo file
         mSeqInfoFile = New StreamWriter(strSeqInfoFilePath, False)
-        mSeqInfoFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
-          "Mod_Count" & SEP_CHAR & _
-          "Mod_Description" & SEP_CHAR & _
+        mSeqInfoFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR &
+          "Mod_Count" & SEP_CHAR &
+          "Mod_Description" & SEP_CHAR &
           "Monoisotopic_Mass")
 
         ' Initialize the ModDetails file
         mModDetailsFile = New StreamWriter(strModDetailsFilePath)
-        mModDetailsFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
-          "Mass_Correction_Tag" & SEP_CHAR & _
+        mModDetailsFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR &
+          "Mass_Correction_Tag" & SEP_CHAR &
           "Position")
 
 
         ' Initialize the SeqToProtein map file
         mSeqToProteinMapFile = New StreamWriter(strSeqToProteinMapFilePath, False)
-        mSeqToProteinMapFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR & _
-         "Cleavage_State" & SEP_CHAR & _
-         "Terminus_State" & SEP_CHAR & _
-         COLUMN_NAME_PROTEIN_NAME & SEP_CHAR & _
-         "Protein_Expectation_Value_Log(e)" & SEP_CHAR & _
+        mSeqToProteinMapFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID & SEP_CHAR &
+         "Cleavage_State" & SEP_CHAR &
+         "Terminus_State" & SEP_CHAR &
+         COLUMN_NAME_PROTEIN_NAME & SEP_CHAR &
+         "Protein_Expectation_Value_Log(e)" & SEP_CHAR &
          "Protein_Intensity_Log(I)")
 
         Return True
@@ -1568,7 +1581,7 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected Overridable Function LoadParameterFileSettings(strParameterFilePath As String) As Boolean
 
-        Const OPTIONS_SECTION As String = "PeptideHitResultsProcessorOptions"
+        Const OPTIONS_SECTION = "PeptideHitResultsProcessorOptions"
 
         Dim objSettingsFile As New XmlSettingsFileAccessor
 
@@ -1684,7 +1697,7 @@ Public MustInherit Class clsPHRPBaseClass
             End If
 
             ' Open strProteinToPeptideMappingFilePath for reading
-            Using srInFile = New StreamReader(New FileStream(strPepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            Using srInFile = New StreamReader(New FileStream(strPepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 intLinesRead = 0
                 Do While Not srInFile.EndOfStream
@@ -1868,23 +1881,23 @@ Public MustInherit Class clsPHRPBaseClass
             Using swOutFile As StreamWriter = New StreamWriter(strModificationSummaryFilePath, False)
 
                 ' Write the header line
-                swOutFile.WriteLine( _
-                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol & SEP_CHAR & _
-                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass & SEP_CHAR & _
-                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues & SEP_CHAR & _
-                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type & SEP_CHAR & _
-                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag & SEP_CHAR & _
+                swOutFile.WriteLine(
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol & SEP_CHAR &
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass & SEP_CHAR &
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues & SEP_CHAR &
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type & SEP_CHAR &
+                  clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag & SEP_CHAR &
                   clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count)
 
                 For intIndex = 0 To mPeptideMods.ModificationCount - 1
                     Dim oModInfo = mPeptideMods.GetModificationByIndex(intIndex)
                     With oModInfo
                         If .OccurrenceCount > 0 OrElse Not .UnknownModAutoDefined Then
-                            swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR & _
-                              .ModificationMass.ToString & SEP_CHAR & _
-                              .TargetResidues & SEP_CHAR & _
-                              clsModificationDefinition.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR & _
-                              .MassCorrectionTag & SEP_CHAR & _
+                            swOutFile.WriteLine(.ModificationSymbol & SEP_CHAR &
+                              .ModificationMass.ToString & SEP_CHAR &
+                              .TargetResidues & SEP_CHAR &
+                              clsModificationDefinition.ModificationTypeToModificationSymbol(.ModificationType) & SEP_CHAR &
+                              .MassCorrectionTag & SEP_CHAR &
                               .OccurrenceCount.ToString)
                         End If
                     End With
@@ -1917,11 +1930,12 @@ Public MustInherit Class clsPHRPBaseClass
 
                 ' Only write this entry to the SeqInfo and ModDetails files if blnExistingSequenceFound is False
                 If Not blnExistingSequenceFound Then
+
                     ' Write a new entry to the SeqInfo file
-                    mSeqInfoFile.WriteLine( _
-                     intUniqueSeqID.ToString & SEP_CHAR & _
-                     .SearchResultModificationCount & SEP_CHAR & _
-                     .PeptideModDescription & SEP_CHAR & _
+                    mSeqInfoFile.WriteLine(
+                     intUniqueSeqID.ToString & SEP_CHAR &
+                     .SearchResultModificationCount & SEP_CHAR &
+                     .PeptideModDescription & SEP_CHAR &
                      .PeptideMonoisotopicMass.ToString("0.0000000"))
 
 
@@ -1948,9 +1962,9 @@ Public MustInherit Class clsPHRPBaseClass
                         ' Note that mods of type IsotopicMod will have .ResidueLocInPeptide = 0; other mods will have positive .ResidueLocInPeptide values
                         For intIndex = 0 To .SearchResultModificationCount - 1
                             With .GetSearchResultModDetailsByIndex(intPointerArray(intIndex))
-                                mModDetailsFile.WriteLine( _
-                                 intUniqueSeqID.ToString & SEP_CHAR & _
-                                 .ModDefinition.MassCorrectionTag & SEP_CHAR & _
+                                mModDetailsFile.WriteLine(
+                                 intUniqueSeqID.ToString & SEP_CHAR &
+                                 .ModDefinition.MassCorrectionTag & SEP_CHAR &
                                  .ResidueLocInPeptide.ToString)
                             End With
                         Next intIndex
@@ -1960,12 +1974,12 @@ Public MustInherit Class clsPHRPBaseClass
 
             ' Write a new entry to the SeqToProteinMap file if not yet defined
             If Not CheckSeqToProteinMapDefined(intUniqueSeqID, .ProteinName) Then
-                mSeqToProteinMapFile.WriteLine( _
-                   intUniqueSeqID.ToString & SEP_CHAR & _
-                   CInt(.PeptideCleavageState).ToString & SEP_CHAR & _
-                   CInt(.PeptideTerminusState).ToString & SEP_CHAR & _
-                   .ProteinName & SEP_CHAR & _
-                   .ProteinExpectationValue & SEP_CHAR & _
+                mSeqToProteinMapFile.WriteLine(
+                   intUniqueSeqID.ToString & SEP_CHAR &
+                   CInt(.PeptideCleavageState).ToString & SEP_CHAR &
+                   CInt(.PeptideTerminusState).ToString & SEP_CHAR &
+                   .ProteinName & SEP_CHAR &
+                   .ProteinExpectationValue & SEP_CHAR &
                    .ProteinIntensity)
             End If
         End With
@@ -2057,7 +2071,7 @@ Public MustInherit Class clsPHRPBaseClass
             Dim strLastPeptide As String = String.Empty
             Dim strSplitLine() As String
 
-            Using srInFile = New StreamReader(New FileStream(strPeptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            Using srInFile = New StreamReader(New FileStream(strPeptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
                     strLineIn = srInFile.ReadLine()

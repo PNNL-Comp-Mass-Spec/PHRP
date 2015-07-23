@@ -802,6 +802,9 @@ Public Class clsPHRPReader
                 Case ePeptideHitResultType.MODPlus
                     mPHRPParser = New clsPHRPParserMODPlus(strDatasetName, mInputFilePath, mStartupOptions)
 
+                Case ePeptideHitResultType.MSPathFinder
+                    mPHRPParser = New clsPHRPParserMSPathFinder(strDatasetName, mInputFilePath, mStartupOptions)
+
                 Case Else
                     'Should never get here; invalid result type specified
                     ReportError("Invalid PeptideHit ResultType specified: " & eResultType)
@@ -905,6 +908,10 @@ Public Class clsPHRPReader
         ' MODPlus
         lstFileSpec.Add(clsPHRPParserMODPlus.FILENAME_SUFFIX_SYN)
         lstFileSpec.Add(clsPHRPParserMODPlus.FILENAME_SUFFIX_FHT)
+
+        ' MSPathFinder
+        lstFileSpec.Add(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_SYN)
+        lstFileSpec.Add(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_FHT)
 
         ' *****************
         ' ** Important: Sequest needs to be added last since files simply end in _syn.txt or _fht.txt)
@@ -1030,6 +1037,10 @@ Public Class clsPHRPReader
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMODPlus.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MODplus))
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMODPlus.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MODplus))
 
+            ' MSPathFinder
+            lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSPathFinder.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSPathFinder))
+            lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSPathFinder.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MSPathFinder))
+
             ' Inspect
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.Inspect))
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserInspect.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.Inspect))
@@ -1114,7 +1125,14 @@ Public Class clsPHRPReader
         strInputFileName = Path.GetFileNameWithoutExtension(strFilePath)
 
         Select Case eResultType
-            Case ePeptideHitResultType.Sequest, ePeptideHitResultType.Inspect, ePeptideHitResultType.MSGFDB, ePeptideHitResultType.MSAlign, ePeptideHitResultType.MODa, ePeptideHitResultType.MODPlus
+            Case ePeptideHitResultType.Sequest,
+                 ePeptideHitResultType.Inspect,
+                 ePeptideHitResultType.MSGFDB,
+                 ePeptideHitResultType.MSAlign,
+                 ePeptideHitResultType.MODa,
+                 ePeptideHitResultType.MODPlus,
+                 ePeptideHitResultType.MSPathFinder
+
                 If strInputFileName.ToLower.EndsWith("_fht") OrElse strInputFileName.ToLower.EndsWith("_syn") Then
                     strDatasetName = strInputFileName.Substring(0, strInputFileName.Length - 4)
 
@@ -1138,9 +1156,14 @@ Public Class clsPHRPReader
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_moda".Length)
                         End If
 
-                    ElseIf eResultType = ePeptideHitResultType.MODplus Then
+                    ElseIf eResultType = ePeptideHitResultType.MODPlus Then
                         If strDatasetName.ToLower.EndsWith("_modp") Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_modp".Length)
+                        End If
+
+                    ElseIf eResultType = ePeptideHitResultType.MSPathFinder Then
+                        If strDatasetName.ToLower.EndsWith("_mspath") Then
+                            strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_mspath".Length)
                         End If
 
                     End If
@@ -1199,6 +1222,9 @@ Public Class clsPHRPReader
 
                 ElseIf strFilePathLCase.EndsWith(clsPHRPParserMODplus.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserMODplus.FILENAME_SUFFIX_FHT) Then
                     eResultType = ePeptideHitResultType.MODplus
+
+                ElseIf strFilePathLCase.EndsWith(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_FHT) Then
+                    eResultType = ePeptideHitResultType.MSPathFinder
 
                 ElseIf strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_FHT) Then
                     eResultType = ePeptideHitResultType.Inspect
@@ -1534,6 +1560,9 @@ Public Class clsPHRPReader
             Case "MODPlus_Peptide_Hit".ToLower
                 Return ePeptideHitResultType.MODplus
 
+            Case "MSP_Peptide_Hit".ToLower
+                Return ePeptideHitResultType.MSPathFinder
+
             Case Else
                 Return ePeptideHitResultType.Unknown
         End Select
@@ -1558,7 +1587,10 @@ Public Class clsPHRPReader
     Protected Shared Function GetPHRPFileFreeParser(eResultType As ePeptideHitResultType, strDatasetName As String) As clsPHRPParser
 
         Static oCachedParser As clsPHRPParser
+
+        ' ReSharper disable once UseImplicitlyTypedVariableEvident
         Static eCachedResultType As ePeptideHitResultType = ePeptideHitResultType.Unknown
+
         Static strCachedDataset As String = String.Empty
 
         If eCachedResultType <> ePeptideHitResultType.Unknown AndAlso
@@ -1589,6 +1621,9 @@ Public Class clsPHRPReader
 
             Case ePeptideHitResultType.MODPlus
                 oCachedParser = New clsPHRPParserMODPlus(strDatasetName, String.Empty)
+
+            Case ePeptideHitResultType.MSPathFinder
+                oCachedParser = New clsPHRPParserMSPathFinder(strDatasetName, String.Empty)
 
             Case Else
                 Throw New Exception("Unsupported ePeptideHitResultType value: " & eResultType)
@@ -1763,6 +1798,9 @@ Public Class clsPHRPReader
             Case ePeptideHitResultType.MODPlus
                 strToolVersionInfoFilename = "Tool_Version_Info_MODPlus.txt"
 
+            Case ePeptideHitResultType.MSPathFinder
+                strToolVersionInfoFilename = "Tool_Version_Info_MSPathFinder.txt"
+
         End Select
 
         Return strToolVersionInfoFilename
@@ -1858,8 +1896,8 @@ Public Class clsPHRPReader
     ''' <returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
     ''' <remarks></remarks>
     Public Shared Function LookupColumnValue(
-      strColumns() As String, _
-      strColumnName As String, _
+      strColumns() As String,
+      strColumnName As String,
       objColumnHeaders As SortedDictionary(Of String, Integer)) As String
 
         Return LookupColumnValue(strColumns, strColumnName, objColumnHeaders, String.Empty)
@@ -1871,9 +1909,9 @@ Public Class clsPHRPReader
     ''' <returns>The text in the specified column; strValueIfMissing if the specific column name is not recognized</returns>
     ''' <remarks></remarks>
     Public Shared Function LookupColumnValue(
-      strColumns() As String, _
-      strColumnName As String, _
-      objColumnHeaders As SortedDictionary(Of String, Integer), _
+      strColumns() As String,
+      strColumnName As String,
+      objColumnHeaders As SortedDictionary(Of String, Integer),
       strValueIfMissing As String) As String
 
         Dim intColIndex As Integer

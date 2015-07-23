@@ -1,6 +1,4 @@
 Option Strict On
-Imports PeptideHitResultsProcessor.clsPHRPBaseClass
-Imports System.IO
 
 ' This class calls clsSequestSynopsisFileProcessor or clsXTandemResultsConverter
 ' to process the files to determine the modifications present for each peptide,
@@ -26,6 +24,9 @@ Imports System.IO
 ' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
+
+Imports PeptideHitResultsProcessor.clsPHRPBaseClass
+Imports System.IO
 
 Public Class clsPeptideHitResultsProcRunner
     Inherits clsProcessFilesBaseClass
@@ -247,8 +248,9 @@ Public Class clsPeptideHitResultsProcRunner
 
         Dim strErrorMessage As String
 
-        If MyBase.ErrorCode = clsProcessFilesBaseClass.eProcessFilesErrorCodes.LocalizedError Or _
+        If MyBase.ErrorCode = clsProcessFilesBaseClass.eProcessFilesErrorCodes.LocalizedError Or
            MyBase.ErrorCode = clsProcessFilesBaseClass.eProcessFilesErrorCodes.NoError Then
+
             Select Case mLocalErrorCode
                 Case eResultsProcessorErrorCodes.NoError
                     strErrorMessage = ""
@@ -538,6 +540,15 @@ Public Class clsPeptideHitResultsProcRunner
                     ePeptideHitResultType = PHRPReader.clsPHRPReader.ePeptideHitResultType.MSAlign
                     LogMessage("Detected MSAlign results file")
 
+                Case ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
+                    ePeptideHitResultType = PHRPReader.clsPHRPReader.ePeptideHitResultType.MODPlus
+                    LogMessage("Detected MODPlus results file")
+
+                Case ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
+                    ePeptideHitResultType = PHRPReader.clsPHRPReader.ePeptideHitResultType.MSPathFinder
+                    LogMessage("Detected MSPathfinder results file")
+
+
                 Case Else
                     ' Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
                     ePeptideHitResultType = PHRPReader.clsPHRPReader.AutoDetermineResultType(strInputFilePath)
@@ -622,8 +633,9 @@ Public Class clsPeptideHitResultsProcRunner
                   PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE & ".txt, " &
                   PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE & ".tsv, " &
                   PeptideHitResultsProcessor.clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE & ".txt, " &
-                  PeptideHitResultsProcessor.clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE & ".txt, or " &
-                  PeptideHitResultsProcessor.clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE & ".txt"
+                  PeptideHitResultsProcessor.clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE & ".txt, " &
+                  PeptideHitResultsProcessor.clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE & ".txt, or" &
+                  PeptideHitResultsProcessor.clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE & ".tsv"
 
                 ShowErrorMessage(strMessage)
             Else
@@ -661,6 +673,9 @@ Public Class clsPeptideHitResultsProcRunner
                         mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMODPlusResultsProcessor
                         LogMessage("Detected MODPlus results file")
 
+                    Case ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
+                        mPeptideHitResultsProcessor = New PeptideHitResultsProcessor.clsMSPathFinderResultsProcessor
+                        LogMessage("Detected MSPathFinder results file")
                     Case Else
                         ' Unknown format
                         blnSuccess = False

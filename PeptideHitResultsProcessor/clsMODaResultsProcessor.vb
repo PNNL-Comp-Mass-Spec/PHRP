@@ -317,7 +317,7 @@ Public Class clsMODaResultsProcessor
     '		Dim blnHeadersParsed As Boolean = False
     '		Dim blnSwapFiles As Boolean = True
 
-    '		Using srDataFile = New StreamReader(New FileStream(strSynOutputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+    '		Using srDataFile = New StreamReader(New FileStream(strSynOutputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
     '			Using swOutfile = New StreamWriter(New FileStream(strSynOutputFilePathNew, FileMode.Create, FileAccess.Write, FileShare.Read))
 
     '				Do While Not srDataFile.EndOfStream
@@ -596,7 +596,7 @@ Public Class clsMODaResultsProcessor
 
             ' Open the input file and parse it
             ' Initialize the stream reader and the stream Text writer
-            Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)),
+            Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)),
                   swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
                 strErrorLog = String.Empty
@@ -726,7 +726,7 @@ Public Class clsMODaResultsProcessor
                 SetErrorMessage("MODa param file not found: " & strMODaParamFilePath)
             Else
                 ' Read the contents of the parameter (or mods) file
-                Using srInFile = New StreamReader(New FileStream(strMODaParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srInFile = New StreamReader(New FileStream(strMODaParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                     Do While Not srInFile.EndOfStream
                         strLineIn = srInFile.ReadLine().Trim()
@@ -838,9 +838,9 @@ Public Class clsMODaResultsProcessor
                 Return False
             End If
 
-            Using srMapFile = New StreamReader(New FileStream(fiSourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            Using srMapFile = New StreamReader(New FileStream(fiSourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                While srMapFile.Peek > -1
+                While Not srMapFile.EndOfStream
                     Dim strLineIn = srMapFile.ReadLine()
                     If String.IsNullOrEmpty(strLineIn) Then Continue While
 
@@ -926,7 +926,7 @@ Public Class clsMODaResultsProcessor
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
-                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                     strErrorLog = String.Empty
                     Dim intResultsProcessed = 0
@@ -982,13 +982,13 @@ Public Class clsMODaResultsProcessor
 
                         Else
                             ' New Probability
-                            ' Reset htPeptidesFoundForScan
+                            ' Reset htPeptidesFoundForProbabilityLevel
                             htPeptidesFoundForProbabilityLevel.Clear()
 
                             ' Update strPreviousProbability
                             strPreviousProbability = objSearchResult.Probability
 
-                            ' Append a new entry to htPeptidesFoundForScan
+                            ' Append a new entry to htPeptidesFoundForProbabilityLevel
                             htPeptidesFoundForProbabilityLevel.Add(strKey, 1)
                             blnFirstMatchForGroup = True
                         End If
@@ -1825,7 +1825,7 @@ Public Class clsMODaResultsProcessor
             ' ResultID   Scan   Spectrum_Index   Charge   PrecursorMZ   DelM   DelM_PPM   MH   Peptide   Protein   Score   Probability   Rank_Probability   PeptidePosition      QValue
 
             Dim lstData As New List(Of String)
-            lstData.Add(intResultID.ToString)
+            lstData.Add(intResultID.ToString())
             lstData.Add(udtSearchResult.ScanNum.ToString)
             lstData.Add(udtSearchResult.SpectrumIndex)
             lstData.Add(udtSearchResult.Charge)

@@ -295,6 +295,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
                 Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
                     m_PeptideHitResultsProcessor = New clsMODaResultsProcessor
 
+                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
+                    m_PeptideHitResultsProcessor = New clsMSPathFinderResultsProcessor
+
                 Case Else
                     ' Unknown format; cannot continue
                     LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " & m_PeptideHitResultsFileFormat.ToString, Nothing)
@@ -430,6 +433,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
         ElseIf m_AnalysisToolName.IndexOf("modplus", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
+
+        ElseIf m_AnalysisToolName.IndexOf("mspathfinder", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
 
         ElseIf m_AnalysisToolName.IndexOf("dataextractor", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
             ' Data Extractor step-tool; we'll need to auto-determine the results format

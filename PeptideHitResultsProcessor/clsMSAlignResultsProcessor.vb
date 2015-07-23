@@ -488,7 +488,7 @@ Public Class clsMSAlignResultsProcessor
 
             ' Open the input file and parse it
             ' Initialize the stream reader and the stream Text writer
-            Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read)),
+            Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)),
                   swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
                 strErrorLog = String.Empty
@@ -609,7 +609,7 @@ Public Class clsMSAlignResultsProcessor
                 SetErrorMessage("MSAlign param file not found: " & strMSAlignParamFilePath)
             Else
                 ' Read the contents of the parameter (or mods) file
-                Using srInFile = New StreamReader(New FileStream(strMSAlignParamFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srInFile = New StreamReader(New FileStream(strMSAlignParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                     Do While Not srInFile.EndOfStream
                         strLineIn = srInFile.ReadLine().Trim()
@@ -725,7 +725,7 @@ Public Class clsMSAlignResultsProcessor
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
-                Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                     strErrorLog = String.Empty
                     intResultsProcessed = 0
@@ -754,8 +754,8 @@ Public Class clsMSAlignResultsProcessor
                             Continue Do
                         End If
 
-                        blnValidSearchResult = ParseMSAlignSynFileEntry(strLineIn, objSearchResult, strErrorLog, _
-                          intResultsProcessed, intColumnMapping, _
+                        blnValidSearchResult = ParseMSAlignSynFileEntry(strLineIn, objSearchResult, strErrorLog,
+                          intResultsProcessed, intColumnMapping,
                           strCurrentPeptideWithMods)
 
                         If blnValidSearchResult Then
@@ -774,13 +774,13 @@ Public Class clsMSAlignResultsProcessor
 
                             Else
                                 ' New PValue
-                                ' Reset htPeptidesFoundForScan
+                                ' Reset htPeptidesFoundForPValueLevel
                                 htPeptidesFoundForPValueLevel.Clear()
 
                                 ' Update strPreviousPValue
                                 strPreviousPValue = objSearchResult.PValue
 
-                                ' Append a new entry to htPeptidesFoundForScan
+                                ' Append a new entry to htPeptidesFoundForPValueLevel
                                 htPeptidesFoundForPValueLevel.Add(strKey, 1)
                                 blnFirstMatchForGroup = True
                             End If
@@ -866,10 +866,11 @@ Public Class clsMSAlignResultsProcessor
 
     End Function
 
-    Private Function ParseMSAlignResultsFileEntry(ByRef strLineIn As String, _
-       ByRef udtSearchResult As udtMSAlignSearchResultType, _
-       ByRef strErrorLog As String, _
-       ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMSAlignResultsFileEntry(
+      ByRef strLineIn As String,
+      ByRef udtSearchResult As udtMSAlignSearchResultType,
+      ByRef strErrorLog As String,
+      ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parses an entry from the MSAlign results file
 
@@ -1175,11 +1176,12 @@ Public Class clsMSAlignResultsProcessor
 
     End Function
 
-    Private Function ParseMSAlignSynFileEntry(ByRef strLineIn As String, _
-      objSearchResult As clsSearchResultsMSAlign, _
-      ByRef strErrorLog As String, _
-      intResultsProcessed As Integer, _
-      ByRef intColumnMapping() As Integer, _
+    Private Function ParseMSAlignSynFileEntry(
+      ByRef strLineIn As String,
+      objSearchResult As clsSearchResultsMSAlign,
+      ByRef strErrorLog As String,
+      intResultsProcessed As Integer,
+      ByRef intColumnMapping() As Integer,
       ByRef strPeptideSequenceWithMods As String) As Boolean
 
         ' Parses an entry from the MSAlign Synopsis file
@@ -1492,7 +1494,7 @@ Public Class clsMSAlignResultsProcessor
 
     Private Sub SortAndWriteFilteredSearchResults(
       swResultFile As StreamWriter,
-      lstFilteredSearchResults As List(Of udtMSAlignSearchResultType), _
+      lstFilteredSearchResults As List(Of udtMSAlignSearchResultType),
       ByRef strErrorLog As String)
 
         Dim intIndex As Integer
@@ -1589,7 +1591,7 @@ Public Class clsMSAlignResultsProcessor
             ' ResultID  Scan  Prsm_ID  Spectrum_ID  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  Protein_Mass  Unexpected_Mod_Count  Peak_Count  Matched_Peak_Count  Matched_Fragment_Ion_Count  PValue  Rank_PValue  EValue  FDR 
 
             Dim lstData As New List(Of String)
-            lstData.Add(intResultID.ToString)
+            lstData.Add(intResultID.ToString())
             lstData.Add(udtSearchResult.ScanNum.ToString)
             lstData.Add(udtSearchResult.Prsm_ID)
             lstData.Add(udtSearchResult.Spectrum_ID)

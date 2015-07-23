@@ -43,8 +43,6 @@ Public Class clsXTandemResultsProcessor
     End Sub
 
 #Region "Constants and Enums"
-    Private Const XTANDEM_SUPPORTS_ISOTOPIC_MODS As Boolean = False
-
     ' Note: These names must all be lowercase
     Private Const XTANDEM_XML_ROOT_ELEMENT As String = "bioml"
     Private Const XTANDEM_XML_ELEMENT_NAME_GROUP As String = "group"
@@ -119,10 +117,9 @@ Public Class clsXTandemResultsProcessor
         Try
             ' If any modifications of type IsotopicMod are defined we would add them to the Search Result Mods now
             ' However, since X!Tandem doesn't support Isotopic Mods, this step is currently skipped
-            If XTANDEM_SUPPORTS_ISOTOPIC_MODS Then
-                objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
-            End If
-
+            '
+            ' objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
+  
             ' Add the protein terminus static mods (if defined and if the peptide is at a protein terminus)
             ' Function .SearchResultAddStaticTerminusMods() will only add the terminus mod if the terminus
             '  is not already modified by the given terminus mod mass

@@ -1126,7 +1126,7 @@ Public Class XmlSettingsFileAccessor
                             Case XMLItemTypeEnum.GetValues
                                 items.Add(N.Attributes.GetNamedItem("value").Value)
                             Case XMLItemTypeEnum.GetKeysAndValues
-                                items.Add(N.Attributes.GetNamedItem("key").Value & "=" & _
+                                items.Add(N.Attributes.GetNamedItem("key").Value & "=" &
                                 N.Attributes.GetNamedItem("value").Value)
                         End Select
                     Next
@@ -1441,9 +1441,10 @@ Public Class XmlSettingsFileAccessor
 
         End Function
 
-        Private Function ParseLineManualCheckTag(strLine As String, _
-                                                 strTagTofind As String, _
-                                                 ByRef strTagValue As String) As Boolean
+        Private Function ParseLineManualCheckTag(
+          strLine As String,
+          strTagTofind As String,
+          ByRef strTagValue As String) As Boolean
 
             Dim intMatchIndex As Integer
             Dim intNextMatchIndex As Integer

@@ -217,7 +217,6 @@ Public Class clsPeptideMassCalculator
                             blnAtomCountsDefined = True
                         End If
 
-
                         Select Case Char.ToUpper(.AffectedAtom)
                             Case "C"c
                                 dblMass += (udtAtomCounts.CountC * .ModificationMass)

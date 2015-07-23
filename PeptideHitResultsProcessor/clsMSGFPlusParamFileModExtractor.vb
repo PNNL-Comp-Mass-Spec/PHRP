@@ -1,9 +1,5 @@
 ﻿Option Strict On
 
-Imports System.IO
-Imports System.Runtime.InteropServices
-Imports System.Text.RegularExpressions
-Imports PHRPReader
 ' This class reads a DMS-based parameter file for MSGF+ or MSPathFinder 
 ' to extract the dynamic and static modification information
 ' Example param file contents:
@@ -35,6 +31,11 @@ Imports PHRPReader
 ' Started 7/16/2015
 ' E-mail: matthew.monroe@pnnl.gov
 ' -------------------------------------------------------------------------------
+
+Imports System.IO
+Imports System.Runtime.InteropServices
+Imports System.Text.RegularExpressions
+Imports PHRPReader
 
 Public Class clsMSGFPlusParamFileModExtractor
 
@@ -183,7 +184,7 @@ Public Class clsMSGFPlusParamFileModExtractor
             End If
 
             ' Read the contents of the parameter (or mods) file
-            Using srInFile = New StreamReader(New FileStream(fiParamFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            Using srInFile = New StreamReader(New FileStream(fiParamFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
                     strLineIn = srInFile.ReadLine().Trim()
@@ -212,93 +213,94 @@ Public Class clsMSGFPlusParamFileModExtractor
 
                     End If
 
-                    If Not String.IsNullOrEmpty(strModSpec) Then
+                    If String.IsNullOrEmpty(strModSpec) Then
+                        Continue Do
+                    End If
 
-                        ' Modification definition line found
+                    ' Modification definition line found
 
-                        ' Split the line on commas
-                        strSplitLine = strModSpec.Split(","c)
+                    ' Split the line on commas
+                    strSplitLine = strModSpec.Split(","c)
 
-                        If strSplitLine.Length >= 5 Then
+                    If strSplitLine.Length < 5 Then
+                        Continue Do
+                    End If
 
-                            Dim udtModInfo As udtModInfoType = New udtModInfoType
+                    Dim udtModInfo = New udtModInfoType
 
-                            With udtModInfo
-                                .ModMass = strSplitLine(0).Trim()
+                    With udtModInfo
+                        .ModMass = strSplitLine(0).Trim()
 
-                                If Not Double.TryParse(.ModMass, .ModMassVal) Then
-                                    ' Mod is specified as an empirical formula
-                                    ' Compute the mass
-                                    .ModMassVal = ComputeMass(.ModMass)
-                                End If
-
-                                .Residues = strSplitLine(1).Trim()
-                                .ModSymbol = UNKNOWN_MSGFDB_MOD_SYMBOL
-
-                                Select Case strSplitLine(2).Trim().ToLower()
-                                    Case "opt"
-                                        .ModType = eMSGFDBModType.DynamicMod
-                                    Case "fix"
-                                        .ModType = eMSGFDBModType.StaticMod
-                                    Case Else
-                                        ReportWarning("Unrecognized Mod Type in the " & mToolName & " parameter file; should be 'opt' or 'fix'")
-                                        .ModType = eMSGFDBModType.DynamicMod
-                                End Select
-
-                                Select Case strSplitLine(3).Trim().ToLower().Replace("-", String.Empty)
-                                    Case "any"
-                                        ' Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
-                                    Case "nterm"
-                                        If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
-                                            ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                            .ModType = eMSGFDBModType.DynamicMod
-                                        End If
-                                        .Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
-                                        If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermPeptide
-
-                                    Case "cterm"
-                                        If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
-                                            ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                            .ModType = eMSGFDBModType.DynamicMod
-                                        End If
-                                        .Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
-                                        If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermPeptide
-
-                                    Case "protnterm"
-                                        ' Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
-                                        If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
-                                            ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                            .ModType = eMSGFDBModType.DynamicMod
-                                        End If
-                                        .Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
-                                        If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermProtein
-
-                                    Case "protcterm"
-                                        ' Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
-                                        If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
-                                            ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                            .ModType = eMSGFDBModType.DynamicMod
-                                        End If
-                                        .Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
-                                        If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
-
-                                    Case Else
-                                        ReportWarning("Unrecognized Mod Type in the " & mToolName & " parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
-                                End Select
-
-                                .ModName = strSplitLine(4).Trim()
-                                If String.IsNullOrEmpty(.ModName) Then
-                                    intUnnamedModID += 1
-                                    .ModName = "UnnamedMod" & intUnnamedModID.ToString
-                                End If
-
-                            End With
-
-                            lstModInfo.Add(udtModInfo)
-
+                        If Not Double.TryParse(.ModMass, .ModMassVal) Then
+                            ' Mod is specified as an empirical formula
+                            ' Compute the mass
+                            .ModMassVal = ComputeMass(.ModMass)
                         End If
 
-                    End If
+                        .Residues = strSplitLine(1).Trim()
+                        .ModSymbol = UNKNOWN_MSGFDB_MOD_SYMBOL
+
+                        Select Case strSplitLine(2).Trim().ToLower()
+                            Case "opt"
+                                .ModType = eMSGFDBModType.DynamicMod
+                            Case "fix"
+                                .ModType = eMSGFDBModType.StaticMod
+                            Case Else
+                                ReportWarning("Unrecognized Mod Type in the " & mToolName & " parameter file; should be 'opt' or 'fix'")
+                                .ModType = eMSGFDBModType.DynamicMod
+                        End Select
+
+                        Select Case strSplitLine(3).Trim().ToLower().Replace("-", String.Empty)
+                            Case "any"
+                                ' Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
+                            Case "nterm"
+                                If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+                                    ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                    .ModType = eMSGFDBModType.DynamicMod
+                                End If
+                                .Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
+                                If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermPeptide
+
+                            Case "cterm"
+                                If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+                                    ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                    .ModType = eMSGFDBModType.DynamicMod
+                                End If
+                                .Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+                                If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermPeptide
+
+                            Case "protnterm"
+                                ' Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
+                                If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+                                    ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                    .ModType = eMSGFDBModType.DynamicMod
+                                End If
+                                .Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
+                                If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermProtein
+
+                            Case "protcterm"
+                                ' Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
+                                If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+                                    ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                    .ModType = eMSGFDBModType.DynamicMod
+                                End If
+                                .Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
+                                If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
+
+                            Case Else
+                                ReportWarning("Unrecognized Mod Type in the " & mToolName & " parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
+                        End Select
+
+                        .ModName = strSplitLine(4).Trim()
+                        If String.IsNullOrEmpty(.ModName) Then
+                            intUnnamedModID += 1
+                            .ModName = "UnnamedMod" & intUnnamedModID.ToString
+                        End If
+
+                    End With
+
+                    lstModInfo.Add(udtModInfo)
+
                 Loop
             End Using
 

@@ -22,6 +22,7 @@ Public Class clsSearchResultsMSPathFinder
 
     ' Auto-Properties
     Public Property MostAbundantIsotopeMz As String
+    Public Property Modifications As String
     Public Property Composition As String
     Public Property ProteinDesc As String
     Public Property ProteinLength As String
@@ -42,6 +43,7 @@ Public Class clsSearchResultsMSPathFinder
         MyBase.Clear()
 
         MostAbundantIsotopeMz = String.Empty
+        Modifications = String.Empty
         Composition = String.Empty
         ProteinDesc = String.Empty
         ProteinLength = String.Empty

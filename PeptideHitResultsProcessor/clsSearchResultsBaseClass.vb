@@ -309,14 +309,18 @@ Public MustInherit Class clsSearchResultsBaseClass
         InitializeLocalVariables()
     End Sub
 
-    Public Function AddSearchResultModificationsToCleanSequence(strCleanSequence As String) As String
-        ' Generate the sequence with the mod symbols; returns the sequence
+    ''' <summary>
+    ''' Add the modification symbols for the current peptide to the clean sequence
+    ''' </summary>
+    ''' <returns>Sequence with mod symbols</returns>
+    ''' <remarks></remarks>
+    Public Function AddSearchResultModificationsToCleanSequence() As String
 
         Dim intIndex As Integer
         Dim strSequenceWithMods As String
 
-        ' Initialize strSequenceWithMods to strCleanSequence; we'll insert the mod symbols below if mSearchResultModifications.Count > 0
-        strSequenceWithMods = String.Copy(strCleanSequence)
+        ' Initialize strSequenceWithMods to the clean sequence; we'll insert the mod symbols below if mSearchResultModifications.Count > 0
+        strSequenceWithMods = String.Copy(mPeptideCleanSequence)
 
         If mSearchResultModifications.Count > 0 Then
             ' Insert the modification symbols into strSequenceWithMods
@@ -329,7 +333,7 @@ Public MustInherit Class clsSearchResultsBaseClass
             ' Now step backward through intResidueModificationPositions and add the symbols to strSequenceWithMods
             For intIndex = mSearchResultModifications.Count - 1 To 0 Step -1
                 With mSearchResultModifications(intIndex)
-                    If .ModDefinition.ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse _
+                    If .ModDefinition.ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod OrElse
                        .ModDefinition.ModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType Then
                         strSequenceWithMods = strSequenceWithMods.Insert(.ResidueLocInPeptide, .ModDefinition.ModificationSymbol)
                     End If
@@ -341,10 +345,13 @@ Public MustInherit Class clsSearchResultsBaseClass
 
     End Function
 
+    ''' <summary>
+    ''' Update .PeptideSequenceWithMods and .PeptideModDescription using the modifications defined for this peptide
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Sub ApplyModificationInformation()
-        ' Populate mPeptideSequenceWithMods and .PeptideModDescription
 
-        mPeptideSequenceWithMods = AddSearchResultModificationsToCleanSequence(mPeptideCleanSequence)
+        mPeptideSequenceWithMods = AddSearchResultModificationsToCleanSequence()
         UpdateModDescription()
     End Sub
 
@@ -398,10 +405,10 @@ Public MustInherit Class clsSearchResultsBaseClass
 
     End Sub
 
-    Public Shared Function ComputeDelMCorrectedPPM( _
-      dblDelM As Double, _
-      dblPrecursorMonoMass As Double, _
-      blnAdjustPrecursorMassForC13 As Boolean, _
+    Public Shared Function ComputeDelMCorrectedPPM(
+      dblDelM As Double,
+      dblPrecursorMonoMass As Double,
+      blnAdjustPrecursorMassForC13 As Boolean,
       dblPeptideMonoisotopicMass As Double) As Double
 
         Dim intCorrectionCount As Integer = 0
@@ -569,11 +576,12 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Function SearchResultAddDynamicModification(chModificationSymbol As Char, _
-                   chTargetResidue As Char, _
-                   intResidueLocInPeptide As Integer, _
-                   eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
-                   blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Public Function SearchResultAddDynamicModification(
+       chModificationSymbol As Char,
+       chTargetResidue As Char,
+       intResidueLocInPeptide As Integer,
+       eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
+       blnUpdateModOccurrenceCounts As Boolean) As Boolean
 
         Dim objModificationDefinition As clsModificationDefinition
         Dim blnExistingModFound As Boolean
@@ -589,11 +597,11 @@ Public MustInherit Class clsSearchResultsBaseClass
                 ' Invalid position; ignore this modification
                 mErrorMessage = "Invalid value for intResidueLocInPeptide: " & intResidueLocInPeptide.ToString
             Else
-                blnSuccess = SearchResultAddModification( _
-                     objModificationDefinition, _
-                     chTargetResidue, _
-                     intResidueLocInPeptide, _
-                     eResidueTerminusState, _
+                blnSuccess = SearchResultAddModification(
+                     objModificationDefinition,
+                     chTargetResidue,
+                     intResidueLocInPeptide,
+                     eResidueTerminusState,
                      blnUpdateModOccurrenceCounts)
             End If
         Else
@@ -658,18 +666,18 @@ Public MustInherit Class clsSearchResultsBaseClass
         Else
             ' Lookup the modification definition given the modification information
             ' If the modification mass is unknown, then will auto-add it to the list of known modifications
-            objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass( _
-              dblModificationMass, _
-              chTargetResidue, _
-              eResidueTerminusState, _
-              blnExistingModFound, _
+            objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(
+              dblModificationMass,
+              chTargetResidue,
+              eResidueTerminusState,
+              blnExistingModFound,
               True, modMassDigitsOfPrecision)
 
-            blnSuccess = SearchResultAddModification( _
-              objModificationDefinition, _
-              chTargetResidue, _
-              intResidueLocInPeptide, _
-              eResidueTerminusState, _
+            blnSuccess = SearchResultAddModification(
+              objModificationDefinition,
+              chTargetResidue,
+              intResidueLocInPeptide,
+              eResidueTerminusState,
               blnUpdateModOccurrenceCounts)
 
         End If
@@ -688,11 +696,12 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Function SearchResultAddModification(ByRef objModificationDefinition As clsModificationDefinition, _
-               chTargetResidue As Char, _
-               intResidueLocInPeptide As Integer, _
-               eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants, _
-               blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Public Function SearchResultAddModification(
+       ByRef objModificationDefinition As clsModificationDefinition,
+       chTargetResidue As Char,
+       intResidueLocInPeptide As Integer,
+       eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
+       blnUpdateModOccurrenceCounts As Boolean) As Boolean
 
         Dim blnSuccess As Boolean = False
 
@@ -727,11 +736,11 @@ Public MustInherit Class clsSearchResultsBaseClass
             If mPeptideMods.GetModificationTypeByIndex(intIndex) = clsModificationDefinition.eModificationTypeConstants.IsotopicMod Then
                 Dim intResidueLocInPeptide As Integer = 0
 
-                blnSuccess = SearchResultAddModification( _
-                  mPeptideMods.GetModificationByIndex(intIndex), _
-                  clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, _
-                  intResidueLocInPeptide, _
-                  clsAminoAcidModInfo.eResidueTerminusStateConstants.None, _
+                blnSuccess = SearchResultAddModification(
+                  mPeptideMods.GetModificationByIndex(intIndex),
+                  clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL,
+                  intResidueLocInPeptide,
+                  clsAminoAcidModInfo.eResidueTerminusStateConstants.None,
                   blnUpdateModOccurrenceCounts)
 
             End If
@@ -763,8 +772,8 @@ Public MustInherit Class clsSearchResultsBaseClass
                 objModificationDefinition = mPeptideMods.GetModificationByIndex(intModificationIndex)
                 If objModificationDefinition.TargetResidues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS Then
                     intResidueLocInPeptide = 1
-                    If mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus Or _
-                    mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
+                    If mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus Or
+                       mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
                         eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus
                     Else
                         eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
@@ -772,8 +781,8 @@ Public MustInherit Class clsSearchResultsBaseClass
                     blnAddModification = True
                 ElseIf objModificationDefinition.TargetResidues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS Then
                     intResidueLocInPeptide = mPeptideCleanSequence.Length
-                    If mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus Or _
-                    mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
+                    If mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus Or
+                       mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
                         eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
                     Else
                         eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus
@@ -786,15 +795,15 @@ Public MustInherit Class clsSearchResultsBaseClass
             ElseIf mPeptideMods.GetModificationTypeByIndex(intModificationIndex) = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod Then
                 objModificationDefinition = mPeptideMods.GetModificationByIndex(intModificationIndex)
                 If objModificationDefinition.TargetResidues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS Then
-                    If mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus Or _
-                    mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
+                    If mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus Or
+                       mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
                         intResidueLocInPeptide = 1
                         eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus
                         blnAddModification = True
                     End If
                 ElseIf objModificationDefinition.TargetResidues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS Then
-                    If mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus Or _
-                    mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
+                    If mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus Or
+                       mPeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus Then
                         intResidueLocInPeptide = mPeptideCleanSequence.Length
                         eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
                         blnAddModification = True
@@ -819,7 +828,7 @@ Public MustInherit Class clsSearchResultsBaseClass
                                 Exit For
                             Else
                                 dblMassDifference = Math.Abs(mSearchResultModifications(intIndexCompare).ModDefinition.ModificationMass - objModificationDefinition.ModificationMass)
-                                If Math.Round(dblMassDifference, MASS_DIGITS_OF_PRECISION) = 0 Then
+                                If Math.Abs(Math.Round(dblMassDifference, MASS_DIGITS_OF_PRECISION)) < Single.Epsilon Then
                                     blnAddModification = False
                                     Exit For
                                 End If
@@ -830,11 +839,11 @@ Public MustInherit Class clsSearchResultsBaseClass
                 End If
 
                 If blnAddModification Then
-                    SearchResultAddModification( _
-                      objModificationDefinition, _
-                      mPeptideCleanSequence.Chars(intResidueLocInPeptide - 1), _
-                      intResidueLocInPeptide, _
-                      eResidueTerminusState, _
+                    SearchResultAddModification(
+                      objModificationDefinition,
+                      mPeptideCleanSequence.Chars(intResidueLocInPeptide - 1),
+                      intResidueLocInPeptide,
+                      eResidueTerminusState,
                       blnUpdateModOccurrenceCounts)
                 End If
             End If
@@ -873,8 +882,16 @@ Public MustInherit Class clsSearchResultsBaseClass
 
     End Sub
 
+    ''' <summary>
+    ''' Obtain the peptide sequence
+    ''' </summary>
+    ''' <param name="blnReturnSequenceWithMods">When true, then include the mod symbols in the sequence</param>
+    ''' <returns></returns>
+    ''' <remarks>
+    ''' If you want to guarantee that mod symbols are included in the peptide sequence, 
+    ''' You must call ApplyModificationInformation before using this function
+    ''' </remarks>
     Public Function SequenceWithPrefixAndSuffix(blnReturnSequenceWithMods As Boolean) As String
-        ' Note: Be sure to call ApplyModificationInformation before calling this function
 
         Dim strWork As String
         Dim chPrefix As Char

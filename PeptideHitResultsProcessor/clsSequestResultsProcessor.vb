@@ -92,8 +92,10 @@ Public Class clsSequestResultsProcessor
 #Region "Properties"
 #End Region
 
-    Private Function AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsSequest, _
-                                                    blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Private Function AddDynamicAndStaticResidueMods(
+      objSearchResult As clsSearchResultsSequest,
+      blnUpdateModOccurrenceCounts As Boolean) As Boolean
+
         ' Step through .PeptideSequenceWithMods
         ' For each residue, check if a static mod is defined that affects that residue
         ' For each mod symbol, determine the modification and add to objSearchResult
@@ -162,7 +164,7 @@ Public Class clsSequestResultsProcessor
     End Function
 
     Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsSequest, blnUpdateModOccurrenceCounts As Boolean) As Boolean
-        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
+        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS = True
 
         Dim blnSuccess As Boolean
 
@@ -322,13 +324,13 @@ Public Class clsSequestResultsProcessor
 
                             Else
                                 ' New XCorr
-                                ' Reset htPeptidesFoundForScan
+                                ' Reset htPeptidesFoundForXCorrLevel
                                 htPeptidesFoundForXCorrLevel.Clear()
 
                                 ' Update strPreviousXCorr
                                 strPreviousXCorr = objSearchResult.PeptideXCorr
 
-                                ' Append a new entry to htPeptidesFoundForScan
+                                ' Append a new entry to htPeptidesFoundForXCorrLevel
                                 htPeptidesFoundForXCorrLevel.Add(strKey, 1)
                                 blnFirstMatchForGroup = True
                             End If
@@ -395,10 +397,11 @@ Public Class clsSequestResultsProcessor
 
     End Function
 
-    Private Function ParseSequestResultsFileEntry(ByRef strLineIn As String, _
-                                                  ByRef intColumnMapping() As Integer, _
-                                                  objSearchResult As clsSearchResultsSequest, _
-                                                  ByRef strErrorLog As String) As Boolean
+    Private Function ParseSequestResultsFileEntry(
+      ByRef strLineIn As String,
+      ByRef intColumnMapping() As Integer,
+      objSearchResult As clsSearchResultsSequest,
+      ByRef strErrorLog As String) As Boolean
 
         Dim strSplitLine() As String = Nothing
         Dim strPeptideSequenceWithMods As String = String.Empty
@@ -606,8 +609,9 @@ Public Class clsSequestResultsProcessor
 
     End Function
 
-    Private Function ParseSequestSynFileHeaderLine(strLineIn As String, _
-                                                   ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseSequestSynFileHeaderLine(
+      strLineIn As String,
+      ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -670,46 +674,5 @@ Public Class clsSequestResultsProcessor
         Return True
 
     End Function
-
-    ''Private Sub SaveSequestResultsFileEntry(objSearchResult As clsSearchResultsSequest, ByRef swSynopsisOutputFile As StreamWriter)
-
-    ''    ' Write the results to the output file
-    ''    With objSearchResult
-    ''        swSeqInfoFile.WriteLine(.ResultID & SEP_CHAR & _
-    ''                            CInt(.PeptideCleavageState).ToString & SEP_CHAR & _
-    ''                            CInt(.PeptideTerminusState).ToString & SEP_CHAR & _
-    ''                            .SearchResultModificationCount & SEP_CHAR & _
-    ''                            .PeptideModDescription & SEP_CHAR & _
-    ''                            .PeptideMonoisotopicMass.ToString("0.000000000"))
-
-    ''        '' Legacy code to re-create the synopsis file
-    ''        '' swSynopsisOutputFile.WriteLine(.ResultID & SEP_CHAR & _
-    ''        ''                    .Scan & SEP_CHAR & _
-    ''        ''                    .NumScans & SEP_CHAR & _
-    ''        ''                    .Charge & SEP_CHAR & _
-    ''        ''                    .PeptideMH & SEP_CHAR & _
-    ''        ''                    .PeptideXCorr & SEP_CHAR & _
-    ''        ''                    .PeptideDeltaCn & SEP_CHAR & _
-    ''        ''                    .PeptideSp & SEP_CHAR & _
-    ''        ''                    .ProteinName & SEP_CHAR & _
-    ''        ''                    .MultipleProteinCount & SEP_CHAR & _
-    ''        ''                    .SequenceWithPrefixAndSuffix(True) & SEP_CHAR & _
-    ''        ''                    .PeptideDeltaCn2 & SEP_CHAR & _
-    ''        ''                    .PeptideRankSP & SEP_CHAR & _
-    ''        ''                    .PeptideRankXC & SEP_CHAR & _
-    ''        ''                    .PeptideDeltaMass & SEP_CHAR & _
-    ''        ''                    .PeptideXcRatio & SEP_CHAR & _
-    ''        ''                    .PeptidePassFilt & SEP_CHAR & _
-    ''        ''                    .PeptideMScore & SEP_CHAR & _
-    ''        ''                    .PeptideNTT & SEP_CHAR & _
-    ''        ''                    CInt(.PeptideCleavageState).ToString & SEP_CHAR & _
-    ''        ''                    CInt(.PeptideTerminusState).ToString & SEP_CHAR & _
-    ''        ''                    .SearchResultModificationCount & SEP_CHAR & _
-    ''        ''                    .PeptideModDescription & SEP_CHAR & _
-    ''        ''                    .PeptideMonoisotopicMass.ToString("0.000000000"))
-
-    ''    End With
-
-    ''End Sub
 
 End Class
