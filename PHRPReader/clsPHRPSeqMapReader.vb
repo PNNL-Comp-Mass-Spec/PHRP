@@ -1,6 +1,7 @@
 ﻿Option Strict On
 
 Imports System.IO
+Imports System.Runtime.InteropServices
 
 Public Class clsPHRPSeqMapReader
 
@@ -200,14 +201,15 @@ Public Class clsPHRPSeqMapReader
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks></remarks>
     Public Function GetProteinMapping(
-      ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
-      ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
-      ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
+      <Out()> ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
+      <Out()> ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
+      <Out()> ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
-        Dim lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
+        Dim lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo) = Nothing
 
         Return GetProteinMapping(lstResultToSeqMap, lstSeqToProteinMap, lstSeqInfo, lstPepToProteinMap)
     End Function
+
     ''' <summary>
     ''' Load the mapping between ResultID and Protein Name
     ''' </summary>
@@ -218,10 +220,10 @@ Public Class clsPHRPSeqMapReader
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks></remarks>
     Public Function GetProteinMapping(
-      ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
-      ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
-      ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo),
-      ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
+      <Out()> ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
+      <Out()> ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
+      <Out()> ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo),
+      <Out()> ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
 
         Dim blnSuccess As Boolean
         Dim strFilePath As String
@@ -229,29 +231,10 @@ Public Class clsPHRPSeqMapReader
         ' Note: do not put a Try/Catch handler in this function
         '       Instead, allow LoadResultToSeqMapping or LoadSeqToProteinMapping to raise exceptions
 
-        If lstResultToSeqMap Is Nothing Then
-            lstResultToSeqMap = New SortedList(Of Integer, Integer)
-        Else
-            lstResultToSeqMap.Clear()
-        End If
-
-        If lstSeqToProteinMap Is Nothing Then
-            lstSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
-        Else
-            lstSeqToProteinMap.Clear()
-        End If
-
-        If lstSeqInfo Is Nothing Then
-            lstSeqInfo = New SortedList(Of Integer, clsSeqInfo)
-        Else
-            lstSeqInfo.Clear()
-        End If
-
-        If lstPepToProteinMap Is Nothing Then
-            lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
-        Else
-            lstPepToProteinMap.Clear()
-        End If
+        lstResultToSeqMap = New SortedList(Of Integer, Integer)
+        lstSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
+        lstSeqInfo = New SortedList(Of Integer, clsSeqInfo)
+        lstPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)
 
         If String.IsNullOrEmpty(mResultToSeqMapFilename) Then
             blnSuccess = False
@@ -305,10 +288,10 @@ Public Class clsPHRPSeqMapReader
     ''' Load the Peptide to Protein mapping using the specified PHRP result file
     ''' </summary>
     ''' <param name="strFilePath"></param>
-    ''' <param name="lstPepToProteinMap"></param>
+    ''' <param name="lstPepToProteinMap">Peptide to protein mapping</param>
     ''' <returns></returns>
     ''' <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
-    Protected Function LoadPepToProtMapData(strFilePath As String, ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
+    Protected Function LoadPepToProtMapData(strFilePath As String, ByVal lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
 
         Dim linesRead As Integer = 0
         Dim dtLastProgress As DateTime = DateTime.UtcNow()
@@ -317,7 +300,7 @@ Public Class clsPHRPSeqMapReader
         Try
 
             ' Read the data from the PepToProtMap file
-            Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
                     Dim strLineIn = srInFile.ReadLine
@@ -385,10 +368,10 @@ Public Class clsPHRPSeqMapReader
     ''' Load the Result to Seq mapping using the specified PHRP result file
     ''' </summary>
     ''' <param name="strFilePath"></param>
-    ''' <param name="lstResultToSeqMap"></param>
+    ''' <param name="lstResultToSeqMap">Result to sequence mapping</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function LoadResultToSeqMapping(strFilePath As String, ByRef lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
+    Protected Function LoadResultToSeqMapping(strFilePath As String, ByVal lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
 
         Dim strLineIn As String
         Dim strSplitLine() As String
@@ -435,7 +418,14 @@ Public Class clsPHRPSeqMapReader
 
     End Function
 
-    Protected Function LoadSeqInfo(strFilePath As String, ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
+    ''' <summary>
+    ''' Load the sequence info
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <param name="lstSeqInfo">Sequences</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Protected Function LoadSeqInfo(strFilePath As String, ByVal lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
         Dim objColumnHeaders As SortedDictionary(Of String, Integer)
 
@@ -516,12 +506,12 @@ Public Class clsPHRPSeqMapReader
     ''' Load the Sequence to Protein mapping using the specified PHRP result file
     ''' </summary>
     ''' <param name="strFilePath"></param>
-    ''' <param name="lstSeqToProteinMap"></param>
+    ''' <param name="lstSeqToProteinMap">Sequence to protein map</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
     Protected Function LoadSeqToProteinMapping(
       strFilePath As String,
-      ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
+      ByVal lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
 
         Dim lstProteins As List(Of clsProteinInfo) = Nothing
 

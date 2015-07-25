@@ -1,5 +1,9 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.5683; July 24, 2015
+	- Added support for MSPathFinder
+	- Breaking change for C#: GetProteinMapping arguments are now "out" parameters
+
 Version 1.1.5617; May 19, 2015
 	- Added QValue column to MODPlus result files
 

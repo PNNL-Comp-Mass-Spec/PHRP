@@ -247,7 +247,7 @@ Module modMain
         Dim intValue As Integer
         Dim blnValue As Boolean
         Dim lstValidParameters = New List(Of String) From {
-            "I", "O", "P", "M", "T", "N", "ProteinMods", "F", "Fasta",
+            "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods", "F", "Fasta",
             "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
             "SynPvalue", "InsFHT", "InsSyn", "SynProb",
             "S", "A", "R", "L", "Q"}
@@ -268,6 +268,11 @@ Module modMain
                     End If
 
                     If .RetrieveValueForParameter("O", strValue) Then mOutputFolderPath = String.Copy(strValue)
+
+                    ' Future
+                    ' If .RetrieveValueForParameter("Folder", strValue) Then mDatasetFolderPath = String.Copy(strValue)
+                    '
+
                     If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = String.Copy(strValue)
                     If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = String.Copy(strValue)
                     If .RetrieveValueForParameter("T", strValue) Then mMassCorrectionTagsFilePath = String.Copy(strValue)
@@ -392,6 +397,9 @@ Module modMain
             Console.WriteLine("Program syntax:" & Environment.NewLine &
                               IO.Path.GetFileName(Reflection.Assembly.GetExecutingAssembly().Location) &
                               " InputFilePath [/O:OutputFolderPath]")
+            ' Future: 
+            ' Console.WriteLine(" [/Folder:DatasetFolderPath]")
+            '
             Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
             Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]")
             Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]")
@@ -402,6 +410,11 @@ Module modMain
             Console.WriteLine()
             Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)")
             Console.WriteLine("The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file.")
+            Console.WriteLine()
+            ' Future: 
+            ' Console.WriteLine("As an alternative to specifying an input file, you can specify an input folder. In this case the program will look for the best file to process from that folder, and will auto-determine /T and /N")
+            ' 
+            Console.WriteLine()
             Console.WriteLine("The parameter file path is optional.  If included, it should point to a valid XML parameter file.")
             Console.WriteLine()
             Console.WriteLine("Use /M to specify the file containing the modification definitions.  This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).")
