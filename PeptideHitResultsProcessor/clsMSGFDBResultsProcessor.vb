@@ -1980,9 +1980,7 @@ Public Class clsMSGFDBResultsProcessor
                     End If
 
                     ' Create the first hits output file
-                    MyBase.ResetProgress("Creating the FHT file")
-                    Console.WriteLine()
-                    Console.WriteLine(MyBase.ProgressStepDescription)
+                    MyBase.ResetProgress("Creating the FHT file", True)
 
                     strFhtOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_FIRST_HITS_FILE_SUFFIX)
 
@@ -1995,10 +1993,7 @@ Public Class clsMSGFDBResultsProcessor
                 If MyBase.mCreateInspectOrMSGFDbSynopsisFile Then
 
                     ' Create the synopsis output file
-                    MyBase.ResetProgress("Creating the SYN file")
-                    Console.WriteLine()
-                    Console.WriteLine()
-                    Console.WriteLine(MyBase.ProgressStepDescription)
+                    MyBase.ResetProgress("Creating the SYN file", True)
 
                     ' The synopsis file name will be of the form BasePath_msgfdb_syn.txt
                     strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
@@ -2011,19 +2006,12 @@ Public Class clsMSGFDBResultsProcessor
                     ' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols							
                     strPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(strOutputFolderPath, strBaseName) & ".txt", strOutputFolderPath, MTS:=False)
 
-                    MyBase.ResetProgress("Loading the PepToProtein map file: " & Path.GetFileName(strPepToProteinMapFilePath))
-                    Console.WriteLine()
-                    Console.WriteLine()
-                    Console.WriteLine(MyBase.ProgressStepDescription)
+                    MyBase.ResetProgress("Loading the PepToProtein map file: " & Path.GetFileName(strPepToProteinMapFilePath), True)
 
                     LoadPeptideToProteinMapInfoMSGFDB(strPepToProteinMapFilePath, strOutputFolderPath, lstMSGFDBModInfo, blnMSGFPlus, lstPepToProteinMapping, strMTSPepToProteinMapFilePath)
 
-
                     ' Create the other PHRP-specific files
-                    MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
-                    Console.WriteLine()
-                    Console.WriteLine()
-                    Console.WriteLine(MyBase.ProgressStepDescription)
+                    MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath), True)
 
                     ' Now parse the _syn.txt file that we just created to next create the other PHRP files
                     blnSuccess = ParseMSGFDBSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)

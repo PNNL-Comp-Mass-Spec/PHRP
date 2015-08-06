@@ -196,6 +196,7 @@ Public MustInherit Class clsPHRPBaseClass
 #End Region
 
 #Region "Progress Events and Variables"
+    Public Event MessageEvent(message As String)
     Public Event ProgressReset()
     Public Event ProgressChanged(taskDescription As String, percentComplete As Single)     ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
     Public Event ProgressComplete()
@@ -537,6 +538,7 @@ Public MustInherit Class clsPHRPBaseClass
     End Function
 
     Protected Function CacheProteinNamesFromFasta() As Boolean
+
         If String.IsNullOrWhiteSpace(mFastaFilePath) Then
             ' Nothing to do
             Return True
@@ -544,6 +546,8 @@ Public MustInherit Class clsPHRPBaseClass
 
         mProteinNameOrder.Clear()
         Dim reExtractProteinName = New Regex("^>([^ ]+)", RegexOptions.Compiled)
+
+        ReportMessage("Caching protein names from the FASTA file")
 
         Try
             Dim proteinNumber = 0
@@ -565,6 +569,8 @@ Public MustInherit Class clsPHRPBaseClass
                     mProteinNameOrder.Add(proteinName, proteinNumber)
                 End While
             End Using
+
+            ReportMessage("Cached " & mProteinNameOrder.Count & " proteins")
 
             Return True
 
@@ -1870,8 +1876,12 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Sub
 
-    Protected Sub ReportWarning(strMessage As String)
-        RaiseEvent WarningMessageEvent(strMessage)
+    Protected Sub ReportMessage(message As String)
+        RaiseEvent MessageEvent(message)
+    End Sub
+
+    Protected Sub ReportWarning(message As String)
+        RaiseEvent WarningMessageEvent(message)
     End Sub
 
     Public Function ResetMassCorrectionTagsAndModificationDefinitions() As Boolean
@@ -1907,10 +1917,17 @@ Public MustInherit Class clsPHRPBaseClass
         ResetProgress(String.Empty)
     End Sub
 
-    Protected Sub ResetProgress(strProgressStepDescription As String)
+    Protected Sub ResetProgress(strProgressStepDescription As String, Optional echoToConsole As Boolean = False)
         mProgressStepDescription = String.Copy(strProgressStepDescription)
         mProgressPercentComplete = 0
         RaiseEvent ProgressReset()
+
+        If echoToConsole Then
+            Console.WriteLine()
+            Console.WriteLine()
+            Console.WriteLine(ProgressStepDescription)
+        End If
+
     End Sub
 
     Protected Sub SaveModificationSummaryFile(strModificationSummaryFilePath As String)

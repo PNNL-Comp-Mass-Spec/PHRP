@@ -707,12 +707,16 @@ Public Class clsPeptideHitResultsProcRunner
         LogMessage(ErrorMessage, eMessageTypeConstants.ErrorMsg)
     End Sub
 
-    Private Sub mPeptideHitResultsProcessor_WarningMessageEvent(WarningMessage As String) Handles mPeptideHitResultsProcessor.WarningMessageEvent
-        LogMessage(WarningMessage, eMessageTypeConstants.Warning)
+    Private Sub mPeptideHitResultsProcessor_MessageEvent(message As String) Handles mPeptideHitResultsProcessor.MessageEvent
+        LogMessage(message)
     End Sub
 
     Private Sub mPeptideHitResultsProcessor_ProgressChanged(taskDescription As String, percentComplete As Single) Handles mPeptideHitResultsProcessor.ProgressChanged
         UpdateProgress(taskDescription, percentComplete)
+    End Sub
+
+    Private Sub mPeptideHitResultsProcessor_WarningMessageEvent(WarningMessage As String) Handles mPeptideHitResultsProcessor.WarningMessageEvent
+        LogMessage(WarningMessage, eMessageTypeConstants.Warning)
     End Sub
 
 End Class

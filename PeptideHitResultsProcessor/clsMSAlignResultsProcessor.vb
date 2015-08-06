@@ -1364,10 +1364,7 @@ Public Class clsMSAlignResultsProcessor
                 ' Do not create a first-hits file for MSAlign results
 
                 ' Create the synopsis output file
-                MyBase.ResetProgress("Creating the SYN file")
-                Console.WriteLine()
-                Console.WriteLine()
-                Console.WriteLine(MyBase.ProgressStepDescription)
+                MyBase.ResetProgress("Creating the SYN file", True)
 
                 ' The synopsis file name will be of the form BasePath_msalign_syn.txt
                 strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
@@ -1375,10 +1372,7 @@ Public Class clsMSAlignResultsProcessor
                 blnSuccess = CreateSynResultsFile(strInputFilePath, strSynOutputFilePath)
 
                 ' Create the other PHRP-specific files
-                MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath))
-                Console.WriteLine()
-                Console.WriteLine()
-                Console.WriteLine(MyBase.ProgressStepDescription)
+                MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath), True)
 
                 ' Now parse the _syn.txt file that we just created to next create the other PHRP files
                 blnSuccess = ParseMSAlignSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
