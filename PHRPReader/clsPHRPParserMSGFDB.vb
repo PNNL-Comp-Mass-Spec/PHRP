@@ -198,46 +198,69 @@ Public Class clsPHRPParserMSGFDB
     ''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
     ''' <returns>Precursor tolerance, in Da</returns>
     ''' <remarks></remarks>
-    Public Shared Function DeterminePrecursorMassTolerance(objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+    Public Shared Function DeterminePrecursorMassTolerance(
+        objSearchEngineParams As clsSearchEngineParameters,
+        <Out()> ByRef dblTolerancePPM As Double,
+        resultType As ePeptideHitResultType) As Double
+
         Dim strTolerance As String = String.Empty
         Dim strToleranceSplit As String()
 
-        Dim reExtraTolerance As Regex
         Dim reMatch As Match
-        reExtraTolerance = New Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+        Dim reExtraToleranceWithUnits = New Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+        Dim reExtraToleranceNoUnits = New Regex("([0-9.]+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
 
         Dim dblToleranceDa As Double
-        Dim dblToleranceCurrent As Double
 
         dblTolerancePPM = 0
 
-        If objSearchEngineParams.Parameters.TryGetValue("PMTolerance", strTolerance) Then
-            ' Parent mass tolerance
-            ' Might contain two values, separated by a comma
-            strToleranceSplit = strTolerance.Split(","c)
-
-            If Not strToleranceSplit Is Nothing Then
-                For Each strItem As String In strToleranceSplit
-                    If Not strItem.Trim.StartsWith("#") Then
-                        reMatch = reExtraTolerance.Match(strItem)
-
-                        If reMatch.Success Then
-                            If Double.TryParse(reMatch.Groups(1).Value, dblToleranceCurrent) Then
-                                If reMatch.Groups(2).Value.ToLower().Contains("ppm") Then
-                                    ' Ppm
-                                    ' Convert from PPM to dalton (assuming a mass of 2000 m/z)
-                                    dblToleranceCurrent = clsPeptideMassCalculator.PPMToMass(dblToleranceCurrent, 2000)
-                                End If
-
-                                dblToleranceDa = Math.Max(dblToleranceDa, dblToleranceCurrent)
-                            End If
-                        End If
-                    End If
-                Next
-            End If
-
+        If Not objSearchEngineParams.Parameters.TryGetValue("PMTolerance", strTolerance) Then
+            Return dblToleranceDa
         End If
 
+        ' Parent mass tolerance
+        ' Might contain two values, separated by a comma
+        strToleranceSplit = strTolerance.Split(","c)
+
+        If strToleranceSplit Is Nothing Then
+            Return dblToleranceDa
+        End If
+
+        For Each strItem As String In strToleranceSplit
+            If strItem.Trim.StartsWith("#") Then Continue For
+
+            If resultType = ePeptideHitResultType.MSPathFinder Then
+                reMatch = reExtraToleranceNoUnits.Match(strItem)
+            Else
+                reMatch = reExtraToleranceWithUnits.Match(strItem)
+            End If
+
+            If Not reMatch.Success Then Continue For
+
+            Dim dblToleranceCurrent As Double
+
+            If Not Double.TryParse(reMatch.Groups(1).Value, dblToleranceCurrent) Then Continue For
+
+            If resultType = ePeptideHitResultType.MSPathFinder Then
+                ' Units are always ppm
+                dblTolerancePPM = dblToleranceCurrent
+                dblToleranceCurrent = clsPeptideMassCalculator.PPMToMass(dblToleranceCurrent, 2000)
+
+            ElseIf reMatch.Groups.Count > 1 AndAlso reMatch.Groups(2).Value.ToLower().Contains("ppm") Then
+                ' Ppm
+                ' Convert from PPM to dalton (assuming a mass of 2000 m/z)
+                dblTolerancePPM = dblToleranceCurrent
+                dblToleranceCurrent = clsPeptideMassCalculator.PPMToMass(dblToleranceCurrent, 2000)
+
+            End If
+
+            dblToleranceDa = Math.Max(dblToleranceDa, dblToleranceCurrent)
+
+        Next
+
+        If Math.Abs(dblTolerancePPM) < Single.Epsilon And Math.Abs(dblToleranceDa) > Single.Epsilon Then
+            dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblToleranceDa, 2000)
+        End If
 
         Return dblToleranceDa
 
@@ -370,7 +393,7 @@ Public Class clsPHRPParserMSGFDB
 
                 ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
                 Dim dblTolerancePPM As Double
-                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM, ePeptideHitResultType.MSGFDB)
                 objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
             End If
 

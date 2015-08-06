@@ -182,7 +182,7 @@ Public Class clsPHRPParserXTandem
     Protected Function DeterminePrecursorMassTolerance(objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
         Dim strTolerance As String = String.Empty
         Dim strUnits As String = String.Empty
-        Dim blnPPM As Boolean = False
+        Dim blnPPM = False
 
         Dim dblTolerancePlus As Double = 0
         Dim dblToleranceMinus As Double = 0

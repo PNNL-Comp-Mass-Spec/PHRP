@@ -207,7 +207,7 @@ Public Class clsPHRPParserMSPathFinder
 
         objSearchEngineParams = New clsSearchEngineParameters(MSPathFinder_SEARCH_ENGINE_NAME)
 
-        blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
+        blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams, ePeptideHitResultType.MSPathFinder)
 
         ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
 
@@ -215,7 +215,7 @@ Public Class clsPHRPParserMSPathFinder
 
     End Function
 
-    Protected Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Protected Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters, resultType As ePeptideHitResultType) As Boolean
 
         Try
             Dim blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MSGFDB, objSearchEngineParams)
@@ -229,7 +229,7 @@ Public Class clsPHRPParserMSPathFinder
 
             ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
             Dim dblTolerancePPM As Double
-            objSearchEngineParams.PrecursorMassToleranceDa = clsPHRPParserMSGFDB.DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM)
+            objSearchEngineParams.PrecursorMassToleranceDa = clsPHRPParserMSGFDB.DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM, resultType)
             objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
 
             Return True

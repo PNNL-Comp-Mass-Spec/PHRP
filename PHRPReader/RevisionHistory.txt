@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5695; August 5, 2015
+	- Fixed bug extracting the PMTolerance from MSPathFinder param files
+
 Version 1.1.5620; May 22, 2015
 	- Replaced column Rank_Probability with Rank_Score for MODPlus
 
@@ -11,7 +14,7 @@ Version 1.1.5616; May 18, 2015
 
 Version 1.1.5553; March 16, 2015
 	- Updated numerous methods to use ByVal or <Out()> ByRef, as appropriate
-		- This could be a breaking change for C# projects using PHRPReader 
+		- This could be a breaking change for C# projects using PHRPReader
 
 Version 1.1.5303; July 9, 2014
 	- Updated ExtractCleanSequenceFromSequenceWithMods to use a RegEx to remove non-letter characters
