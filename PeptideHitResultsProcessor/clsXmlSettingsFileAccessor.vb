@@ -1,5 +1,6 @@
 Option Strict On
 
+Imports System.IO
 ' This class is used to read or write settings in an Xml settings file
 ' Based on a class from the DMS Analysis Manager software written by Dave Clark and Gary Kiebel (PNNL, Richland, WA)
 ' Additional features added by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in October 2003
@@ -1292,7 +1293,7 @@ Public Class XmlSettingsFileAccessor
                     '     <item key="Setting1" value="ValueA" />
                     '   </section>
 
-                    Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(fi.FullName, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+                    Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(fi.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                         Do While srInFile.Peek() > -1
                             s = srInFile.ReadLine()

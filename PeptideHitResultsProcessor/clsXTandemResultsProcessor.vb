@@ -1443,7 +1443,7 @@ Public Class clsXTandemResultsProcessor
 
         If blnSuccess Then
             ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath)
+            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath)
 
             ' Now create the Protein Mods file
             blnSuccess = MyBase.CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem)

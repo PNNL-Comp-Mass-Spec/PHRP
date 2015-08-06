@@ -143,98 +143,98 @@ Public Class clsInSpecTResultsProcessor
 
 #Region "Structures"
 	Protected Structure udtInspectSearchResultType
-		Public SpectrumFile As String
-		Public Scan As String
-		Public ScanNum As Integer
-		Public PeptideAnnotation As String
-		Public Protein As String
-		Public Charge As String
-		Public ChargeNum As Short
-		Public MQScore As String				' Higher values are better scores; note that MQScore can be negative
-		Public MQScoreNum As Single				' Store the value of the string for quick reference when sorting
-		Public Length As Integer
-		Public TotalPRMScore As String			' Higher values are better scores
-		Public TotalPRMScoreNum As Single		' We store the value of the string for quick reference when sorting
-		Public MedianPRMScore As String
-		Public FractionY As String
-		Public FractionB As String
-		Public Intensity As String
-		Public NTT As Integer
-		Public pValue As String					' Lower values are better scores
-		Public PValueNum As Single				' Store the value of the string for quick reference when sorting
-		Public FScore As String					' Higher values are better scores
-		Public FScoreNum As Single				' Store the value of the string for quick reference when sorting
-		Public DeltaScore As String
-		Public DeltaScoreOther As String
-		Public DeltaNormMQScore As Single
-		Public DeltaNormTotalPRMScore As Single
-		Public RankTotalPRMScore As Integer
-		Public RankFScore As Integer
-		Public MH As Double
-		Public RecordNumber As String
-		Public DBFilePos As String
-		Public SpecFilePos As String
-		Public PrecursorMZ As String
-		Public PrecursorError As String			' Precursor error in; units are m/z (NOT Daltons)
-		Public DelMPPM As String				' Computed by this application
+        Public SpectrumFileName As String
+        Public Scan As String
+        Public ScanNum As Integer
+        Public PeptideAnnotation As String
+        Public Protein As String
+        Public Charge As String
+        Public ChargeNum As Short
+        Public MQScore As String                ' Higher values are better scores; note that MQScore can be negative
+        Public MQScoreNum As Single             ' Store the value of the string for quick reference when sorting
+        Public Length As Integer
+        Public TotalPRMScore As String          ' Higher values are better scores
+        Public TotalPRMScoreNum As Single       ' We store the value of the string for quick reference when sorting
+        Public MedianPRMScore As String
+        Public FractionY As String
+        Public FractionB As String
+        Public Intensity As String
+        Public NTT As Integer
+        Public pValue As String                 ' Lower values are better scores
+        Public PValueNum As Single              ' Store the value of the string for quick reference when sorting
+        Public FScore As String                 ' Higher values are better scores
+        Public FScoreNum As Single              ' Store the value of the string for quick reference when sorting
+        Public DeltaScore As String
+        Public DeltaScoreOther As String
+        Public DeltaNormMQScore As Single
+        Public DeltaNormTotalPRMScore As Single
+        Public RankTotalPRMScore As Integer
+        Public RankFScore As Integer
+        Public MH As Double
+        Public RecordNumber As String
+        Public DBFilePos As String
+        Public SpecFilePos As String
+        Public PrecursorMZ As String
+        Public PrecursorError As String         ' Precursor error in; units are m/z (NOT Daltons)
+        Public DelMPPM As String                ' Computed by this application
 
-		Public Sub Clear()
-			SpectrumFile = String.Empty
-			Scan = String.Empty
-			ScanNum = 0
-			PeptideAnnotation = String.Empty
-			Protein = String.Empty
-			Charge = String.Empty
-			ChargeNum = 0
-			MQScore = String.Empty
-			MQScoreNum = 0
-			Length = 0
-			TotalPRMScore = String.Empty
-			TotalPRMScoreNum = 0
-			MedianPRMScore = String.Empty
-			FractionY = String.Empty
-			FractionB = String.Empty
-			Intensity = String.Empty
-			NTT = 0
-			pValue = String.Empty
-			PValueNum = 0
-			FScore = String.Empty
-			FScoreNum = 0
-			DeltaScore = String.Empty
-			DeltaScoreOther = String.Empty
-			DeltaNormMQScore = 0
-			DeltaNormTotalPRMScore = 0
-			RankTotalPRMScore = 0
-			RankFScore = 0
-			MH = 0
-			RecordNumber = String.Empty
-			DBFilePos = String.Empty
-			SpecFilePos = String.Empty
-			PrecursorMZ = String.Empty
-			PrecursorError = String.Empty
-			DelMPPM = String.Empty
-		End Sub
-	End Structure
+        Public Sub Clear()
+            SpectrumFileName = String.Empty
+            Scan = String.Empty
+            ScanNum = 0
+            PeptideAnnotation = String.Empty
+            Protein = String.Empty
+            Charge = String.Empty
+            ChargeNum = 0
+            MQScore = String.Empty
+            MQScoreNum = 0
+            Length = 0
+            TotalPRMScore = String.Empty
+            TotalPRMScoreNum = 0
+            MedianPRMScore = String.Empty
+            FractionY = String.Empty
+            FractionB = String.Empty
+            Intensity = String.Empty
+            NTT = 0
+            pValue = String.Empty
+            PValueNum = 0
+            FScore = String.Empty
+            FScoreNum = 0
+            DeltaScore = String.Empty
+            DeltaScoreOther = String.Empty
+            DeltaNormMQScore = 0
+            DeltaNormTotalPRMScore = 0
+            RankTotalPRMScore = 0
+            RankFScore = 0
+            MH = 0
+            RecordNumber = String.Empty
+            DBFilePos = String.Empty
+            SpecFilePos = String.Empty
+            PrecursorMZ = String.Empty
+            PrecursorError = String.Empty
+            DelMPPM = String.Empty
+        End Sub
+    End Structure
 
-	Protected Structure udtModInfoType
-		Public ModName As String			' Mod names must be lower case, and 4 characters in length (or shorter)
-		Public ModMass As String			' Storing as a string since reading from a text file and writing to a text file
-		Public Residues As String
-		Public ModType As eInspectModType
-		Public ModSymbol As String
-	End Structure
+    Protected Structure udtModInfoType
+        Public ModName As String            ' Mod names must be lower case, and 4 characters in length (or shorter)
+        Public ModMass As String            ' Storing as a string since reading from a text file and writing to a text file
+        Public Residues As String
+        Public ModType As eInspectModType
+        Public ModSymbol As String
+    End Structure
 
 #End Region
 
 #Region "Classwide Variables"
-	Protected mSortFHTandSynFiles As Boolean
+    Protected mSortFHTandSynFiles As Boolean
 #End Region
 
 #Region "Properties"
-	Public Property SortFHTandSynFiles() As Boolean
-		Get
-			Return mSortFHTandSynFiles
-		End Get
+    Public Property SortFHTandSynFiles() As Boolean
+        Get
+            Return mSortFHTandSynFiles
+        End Get
         Set(value As Boolean)
             mSortFHTandSynFiles = value
         End Set
@@ -242,8 +242,8 @@ Public Class clsInSpecTResultsProcessor
 #End Region
 
     Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer,
-      ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType,
-      ByRef udtSearchResult As udtInspectSearchResultType)
+      udtSearchResultsCurrentScan() As udtInspectSearchResultType,
+      udtSearchResult As udtInspectSearchResultType)
 
         If intCurrentScanResultsCount >= udtSearchResultsCurrentScan.Length Then
             ReDim Preserve udtSearchResultsCurrentScan(udtSearchResultsCurrentScan.Length * 2 - 1)
@@ -333,7 +333,7 @@ Public Class clsInSpecTResultsProcessor
                 dblLastValue = udtSearchResultsCurrentScan(intIndex).FScoreNum
                 intCurrentRank = 1
             Else
-                If udtSearchResultsCurrentScan(intIndex).FScoreNum <> dblLastValue Then
+                If Math.Abs(udtSearchResultsCurrentScan(intIndex).FScoreNum - dblLastValue) > Single.Epsilon Then
                     dblLastValue = udtSearchResultsCurrentScan(intIndex).FScoreNum
                     intCurrentRank += 1
                 End If
@@ -367,7 +367,7 @@ Public Class clsInSpecTResultsProcessor
                 dblLastValue = udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum
                 intCurrentRank = 1
             Else
-                If udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum <> dblLastValue Then
+                If Math.Abs(udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum - dblLastValue) > Single.Epsilon Then
                     dblLastValue = udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum
                     intCurrentRank += 1
                 End If
@@ -1178,9 +1178,9 @@ Public Class clsInSpecTResultsProcessor
                 End If
 
                 With udtSearchResult
-                    .SpectrumFile = strSplitLine(eInspectResultsFileColumns.SpectrumFile)
+                    .SpectrumFileName = strSplitLine(eInspectResultsFileColumns.SpectrumFile)
                     If strSplitLine(eInspectResultsFileColumns.Scan) = "0" Then
-                        .Scan = ExtractScanNumFromDTAName(.SpectrumFile)
+                        .Scan = ExtractScanNumFromDTAName(.SpectrumFileName)
                     Else
                         .Scan = strSplitLine(eInspectResultsFileColumns.Scan)
                     End If
@@ -1523,7 +1523,7 @@ Public Class clsInSpecTResultsProcessor
 
                     If blnSuccess AndAlso mCreateProteinModsFile Then
                         ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                        MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+                        MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
                         ' Create the Protein Mods file
                         blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect)
@@ -1758,7 +1758,7 @@ Public Class clsInSpecTResultsProcessor
     Protected Sub StoreOrWriteSearchResult(
       swResultFile As StreamWriter,
       ByRef intResultID As Integer,
-      ByRef udtSearchResult As udtInspectSearchResultType,
+      udtSearchResult As udtInspectSearchResultType,
       ByRef intFilteredSearchResultCount As Integer,
       ByRef udtFilteredSearchResults() As udtInspectSearchResultType,
       ByRef strErrorLog As String)
@@ -1797,7 +1797,7 @@ Public Class clsInSpecTResultsProcessor
      swResultFile As StreamWriter,
      ByRef intResultID As Integer,
      intCurrentScanResultsCount As Integer,
-     ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType,
+     udtSearchResultsCurrentScan() As udtInspectSearchResultType,
      ByRef intFilteredSearchResultCount As Integer,
      ByRef udtFilteredSearchResults() As udtInspectSearchResultType,
      ByRef strErrorLog As String,
@@ -1826,7 +1826,7 @@ Public Class clsInSpecTResultsProcessor
      swResultFile As StreamWriter,
      ByRef intResultID As Integer,
      intCurrentScanResultsCount As Integer,
-     ByRef udtSearchResultsCurrentScan() As udtInspectSearchResultType,
+     udtSearchResultsCurrentScan() As udtInspectSearchResultType,
      ByRef intFilteredSearchResultCount As Integer,
      ByRef udtFilteredSearchResults() As udtInspectSearchResultType,
      ByRef strErrorLog As String,
@@ -1901,7 +1901,7 @@ Public Class clsInSpecTResultsProcessor
     Private Sub WriteSearchResultToFile(
       intResultID As Integer,
       swResultFile As StreamWriter,
-      ByRef udtSearchResult As udtInspectSearchResultType,
+      udtSearchResult As udtInspectSearchResultType,
       ByRef strErrorLog As String)
 
         ' Writes an entry to a synopsis or first hits file

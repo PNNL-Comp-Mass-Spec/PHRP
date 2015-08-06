@@ -369,7 +369,7 @@ Public Class clsMSPathFinderResultsProcessor
 
         If blnSuccess Then
             ' If necessary, copy various PHRPReader support files to the output folder
-            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, IO.Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
             ' Create the Protein Mods file
             blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSPathFinder)
@@ -1184,7 +1184,6 @@ Public Class clsMSPathFinderResultsProcessor
 
     End Sub
 
-
     ''' <summary>
     ''' Stores the synopsis file matches for a single scan (typically there will only be one result)
     ''' </summary>
@@ -1217,6 +1216,7 @@ Public Class clsMSPathFinderResultsProcessor
         Next intIndex
 
     End Sub
+
     Private Sub WriteSynFHTFileHeader(
       swResultFile As StreamWriter,
       ByRef strErrorLog As String)
@@ -1264,7 +1264,7 @@ Public Class clsMSPathFinderResultsProcessor
     Private Sub WriteSearchResultToFile(
       intResultID As Integer,
       swResultFile As StreamWriter,
-      ByRef udtSearchResult As udtMSPathFinderSearchResultType,
+      udtSearchResult As udtMSPathFinderSearchResultType,
       ByRef strErrorLog As String)
 
         Try

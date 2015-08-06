@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "July 22, 2015"
+    Public Const PROGRAM_DATE As String = "August 6, 2015"
 
 	Private mInputFilePath As String
 	Private mOutputFolderPath As String							' Optional
@@ -183,10 +183,10 @@ Module modMain
                 DisplayProgressPercent(mLastProgressReportValue, True)
             End If
 
-		Catch ex As Exception
-			ShowErrorMessage("Error occurred in modMain->Main: " & Environment.NewLine & ex.Message)
-			intReturnCode = -1
-		End Try
+        Catch ex As Exception
+            ShowErrorMessage("Error occurred in modMain->Main: " & Environment.NewLine & ex.Message)
+            intReturnCode = -1
+        End Try
 
 		Return intReturnCode
 

@@ -36,7 +36,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
-        mFileDate = "May 19, 2015"
+        mFileDate = "August 6, 2015"
         InitializeLocalVariables()
     End Sub
 
@@ -189,6 +189,8 @@ Public MustInherit Class clsPHRPBaseClass
     Protected mSeqToProteinMapFile As StreamWriter
 
     Protected mNextPeptideToProteinMapperLevel As Integer = 0
+
+    Protected mProteinNameOrder As Dictionary(Of String, Integer)
 
     Protected mReplaceSymbols As Regex
 #End Region
@@ -534,14 +536,52 @@ Public MustInherit Class clsPHRPBaseClass
         Return String.Empty
     End Function
 
+    Protected Function CacheProteinNamesFromFasta() As Boolean
+        If String.IsNullOrWhiteSpace(mFastaFilePath) Then
+            ' Nothing to do
+            Return True
+        End If
+
+        mProteinNameOrder.Clear()
+        Dim reExtractProteinName = New Regex("^>([^ ]+)", RegexOptions.Compiled)
+
+        Try
+            Dim proteinNumber = 0
+
+            Using reader = New StreamReader(New FileStream(mFastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                While Not reader.EndOfStream
+                    Dim lineIn = reader.ReadLine()
+                    If String.IsNullOrWhiteSpace(lineIn) Then Continue While
+
+                    Dim reMatch = reExtractProteinName.Match(lineIn)
+
+                    If Not reMatch.Success Then Continue While
+                    Dim proteinName = reMatch.Groups(1).Value
+
+                    If mProteinNameOrder.ContainsKey(proteinName) Then Continue While
+
+                    proteinNumber += 1
+
+                    mProteinNameOrder.Add(proteinName, proteinNumber)
+                End While
+            End Using
+
+            Return True
+
+        Catch ex As Exception
+            ReportError("Error caching protein names from fasta file " + Path.GetFileName(mFastaFilePath) + ex.Message, False)
+            Return False
+        End Try
+
+    End Function
+
     Protected Function CheckSeqToProteinMapDefined(intUniqueSeqID As Integer, strProteinName As String) As Boolean
         ' Returns True if the sequence to protein map was already defined
         ' Returns False if the mapping was not defined (will also update mSeqToProteinMap)
 
         Dim strKey As String
-        Dim blnExistingMapFound As Boolean
 
-        blnExistingMapFound = False
+        Dim blnExistingMapFound = False
 
         Try
             If strProteinName Is Nothing Then strProteinName = String.Empty
@@ -816,23 +856,23 @@ Public MustInherit Class clsPHRPBaseClass
 
         Dim htPeptideToProteinMapResults As Collections.Hashtable
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
 
             If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) Then
                 SetErrorMessage("Cannot create the PepToProtein map file because strMTSPepToProteinMapFilePath is empty; likely a programming bug")
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
                 Return False
             End If
 
             If String.IsNullOrEmpty(mFastaFilePath) Then
                 SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File Path is not defined")
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
                 Return False
-            ElseIf Not IO.File.Exists(mFastaFilePath) Then
+            ElseIf Not File.Exists(mFastaFilePath) Then
                 SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File was not found: " & mFastaFilePath)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
                 Return False
             End If
 
@@ -847,11 +887,9 @@ Public MustInherit Class clsPHRPBaseClass
             UpdateProgress("Creating Peptide to Protein Map file", PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE)
 
             ' Initialize items
-            Dim fiMTSPepToProteinMapFile As FileInfo = New FileInfo(strMTSPepToProteinMapFilePath)
-            Dim strOutputFolderPath As String = fiMTSPepToProteinMapFile.DirectoryName
+            Dim fiMTSPepToProteinMapFile = New FileInfo(strMTSPepToProteinMapFilePath)
+            Dim strOutputFolderPath = fiMTSPepToProteinMapFile.DirectoryName
 
-            fiMTSPepToProteinMapFile = New FileInfo(strMTSPepToProteinMapFilePath)
-            strOutputFolderPath = fiMTSPepToProteinMapFile.DirectoryName
             htPeptideToProteinMapResults = New Collections.Hashtable
 
             objPeptideToProteinMapper = New PeptideToProteinMapEngine.clsPeptideToProteinMapEngine
@@ -968,7 +1006,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         Catch ex As Exception
             SetErrorMessage("Error in CreatePepToProteinMapFile:" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
         End Try
 
         Return blnSuccess
@@ -1013,7 +1051,7 @@ Public MustInherit Class clsPHRPBaseClass
        strPHRPDataFilePath As String,
        strOutputFolderPath As String,
        strMTSPepToProteinMapFilePath As String,
-       ePHRPResultType As PHRPReader.clsPHRPReader.ePeptideHitResultType) As Boolean
+       ePHRPResultType As clsPHRPReader.ePeptideHitResultType) As Boolean
 
         Dim intPepToProteinMapIndex As Integer
 
@@ -1043,14 +1081,14 @@ Public MustInherit Class clsPHRPBaseClass
             fiPHRPDataFile = New FileInfo(strPHRPDataFilePath)
             If Not fiPHRPDataFile.Exists() Then
                 SetErrorMessage("PHRP data file not found in CreateProteinModDetailsFile: " & strPHRPDataFilePath)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
                 Return False
             End If
 
             ' Confirm that the _PepToProtMapMTS.txt file exists
             If String.IsNullOrEmpty(strMTSPepToProteinMapFilePath) Then
                 SetErrorMessage("Cannot create the ProteinMods file because strMTSPepToProteinMapFilePath is empty")
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
                 Return False
             End If
 
@@ -1070,7 +1108,7 @@ Public MustInherit Class clsPHRPBaseClass
 
             strProteinModsFilePath = ReplaceFilenameSuffix(fiPHRPDataFile, FILENAME_SUFFIX_PROTEIN_MODS)
             If Not String.IsNullOrEmpty(strOutputFolderPath) Then
-                strProteinModsFilePath = IO.Path.Combine(strOutputFolderPath, IO.Path.GetFileName(strProteinModsFilePath))
+                strProteinModsFilePath = Path.Combine(strOutputFolderPath, Path.GetFileName(strProteinModsFilePath))
             End If
 
             intPSMCount = 0
@@ -1134,7 +1172,7 @@ Public MustInherit Class clsPHRPBaseClass
 
                                 If Not blnSkipProtein Then
 
-                                    For Each objMod As PHRPReader.clsAminoAcidModInfo In objReader.CurrentPSM.ModifiedResidues
+                                    For Each objMod As clsAminoAcidModInfo In objReader.CurrentPSM.ModifiedResidues
 
                                         intResidueLocInProtein = lstPepToProteinMapping(intPepToProteinMapIndex).ResidueStart + objMod.ResidueLocInPeptide - 1
 
@@ -1206,7 +1244,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         Catch ex As Exception
             SetErrorMessage("Error in CreateProteinModDetailsFile:" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
         End Try
 
         Return blnSuccess
@@ -1216,7 +1254,7 @@ Public MustInherit Class clsPHRPBaseClass
     Protected Sub DeleteFileIgnoreErrors(strFilePath As String)
 
         Try
-            If IO.File.Exists(strFilePath) Then
+            If File.Exists(strFilePath) Then
                 Threading.Thread.Sleep(200)
                 File.Delete(strFilePath)
             End If
@@ -1271,7 +1309,7 @@ Public MustInherit Class clsPHRPBaseClass
         strPrefix = String.Empty
         strSuffix = String.Empty
 
-        If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
+        If SplitPrefixAndSuffixFromSequence(strSequenceWithMods, strPrimarySequence, strPrefix, strSuffix) Then
 
             ' Remove any non-letter characters when calling .ComputeCleavageState()
 
@@ -1399,7 +1437,7 @@ Public MustInherit Class clsPHRPBaseClass
         Dim strVersion As String
 
         Try
-            strVersion = System.Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString()
+            strVersion = Reflection.Assembly.GetExecutingAssembly.GetName.Version.ToString()
         Catch ex As Exception
             strVersion = "??.??.??.??"
         End Try
@@ -1455,6 +1493,8 @@ Public MustInherit Class clsPHRPBaseClass
 
         ' Define a RegEx to replace all of the non-letter characters
         mReplaceSymbols = New Regex("[^A-Za-z]", RegexOptions.Compiled)
+
+        mProteinNameOrder = New Dictionary(Of String, Integer)
 
     End Sub
 
@@ -1597,7 +1637,7 @@ Public MustInherit Class clsPHRPBaseClass
 
             If Not File.Exists(strParameterFilePath) Then
                 ' See if strParameterFilePath points to a file in the same directory as the application
-                strParameterFilePath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), Path.GetFileName(strParameterFilePath))
+                strParameterFilePath = Path.Combine(Path.GetDirectoryName(Reflection.Assembly.GetExecutingAssembly().Location), Path.GetFileName(strParameterFilePath))
                 If Not File.Exists(strParameterFilePath) Then
                     SetErrorCode(ePHRPErrorCodes.ParameterFileNotFound)
                     Return False
@@ -1651,7 +1691,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         Catch ex As Exception
             SetErrorMessage("Error in LoadParameterFileSettings:" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingParameterFile)
+            SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile)
             Return False
         End Try
 
@@ -1678,7 +1718,7 @@ Public MustInherit Class clsPHRPBaseClass
         Dim intLinesRead As Integer
         Dim intValue As Integer
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
 
@@ -1688,11 +1728,11 @@ Public MustInherit Class clsPHRPBaseClass
 
             If String.IsNullOrWhiteSpace(strPepToProteinMapFilePath) Then
                 SetErrorMessage("Warning: PepToProteinMap file is not defined")
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
+                SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
                 Return False
             ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
                 SetErrorMessage("Warning: PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.InvalidInputFilePath)
+                SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath)
                 Return False
             End If
 
@@ -1826,7 +1866,6 @@ Public MustInherit Class clsPHRPBaseClass
             Else
                 Throw New Exception(errMsg, innerException)
             End If
-
         End If
 
     End Sub
@@ -1905,7 +1944,7 @@ Public MustInherit Class clsPHRPBaseClass
             End Using
 
         Catch ex As Exception
-            Throw ex
+            Throw
         End Try
 
     End Sub
@@ -2057,7 +2096,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         Const PROTEIN_NAME_NO_MATCH As String = "__NoMatch__"
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Dim intPeptideCount As Integer = 0
         Dim intPeptideCountNoMatch As Integer = 0
@@ -2109,7 +2148,7 @@ Public MustInherit Class clsPHRPBaseClass
                 dblErrorPercent = intPeptideCountNoMatch / intPeptideCount * 100.0
 
                 Dim strErrorMessage As String
-                strErrorMessage = dblErrorPercent.ToString("0.00") & "% of the entries (" & intPeptideCountNoMatch & " / " & intPeptideCount & ") in the peptide to protein map file (" & IO.Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & IO.Path.GetFileName(mFastaFilePath) & ")"
+                strErrorMessage = dblErrorPercent.ToString("0.00") & "% of the entries (" & intPeptideCountNoMatch & " / " & intPeptideCount & ") in the peptide to protein map file (" & Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & Path.GetFileName(mFastaFilePath) & ")"
 
                 If blnIgnorePeptideToProteinMapperErrors OrElse dblErrorPercent < 0.1 Then
                     ReportWarning(strErrorMessage)
@@ -2122,7 +2161,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         Catch ex As Exception
             SetErrorMessage("Error in ValidatePeptideToProteinMapResults:" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         End Try
 
@@ -2145,13 +2184,13 @@ Public MustInherit Class clsPHRPBaseClass
                 ioOutputFolder = New DirectoryInfo(strOutputFolderPath)
 
                 If ioPHRPFile.DirectoryName.ToLower() <> ioOutputFolder.FullName.ToLower() Then
-                    strMSGFFileName = IO.Path.GetFileName(ReplaceFilenameSuffix(ioPHRPFile, FILENAME_SUFFIX_MSGF))
+                    strMSGFFileName = Path.GetFileName(ReplaceFilenameSuffix(ioPHRPFile, FILENAME_SUFFIX_MSGF))
 
-                    strSourcePath = IO.Path.Combine(ioPHRPFile.DirectoryName, strMSGFFileName)
-                    strTargetPath = IO.Path.Combine(ioOutputFolder.FullName, strMSGFFileName)
+                    strSourcePath = Path.Combine(ioPHRPFile.DirectoryName, strMSGFFileName)
+                    strTargetPath = Path.Combine(ioOutputFolder.FullName, strMSGFFileName)
 
-                    If IO.File.Exists(strSourcePath) And Not IO.File.Exists(strTargetPath) Then
-                        IO.File.Copy(strSourcePath, strTargetPath)
+                    If File.Exists(strSourcePath) And Not File.Exists(strTargetPath) Then
+                        File.Copy(strSourcePath, strTargetPath)
                     End If
 
                 End If
@@ -2204,7 +2243,7 @@ Public MustInherit Class clsPHRPBaseClass
                 Console.WriteLine()
                 strWarningMessage = "strFastaFilePath is not defined in ValidateProteinFastaFile"
                 Return False
-            ElseIf Not IO.File.Exists(strFastaFilePath) Then
+            ElseIf Not File.Exists(strFastaFilePath) Then
                 Console.WriteLine()
                 strWarningMessage = "Fasta file not found: " & strFastaFilePath
                 Return False
@@ -2236,7 +2275,7 @@ Public MustInherit Class clsPHRPBaseClass
 
             If intValidProteinCount < intInvalidProteinCount Then
                 Console.WriteLine()
-                strWarningMessage = "Fasta file contains Nucleic Acids, not Amino Acids: " & IO.Path.GetFileName(strFastaFilePath)
+                strWarningMessage = "Fasta file contains Nucleic Acids, not Amino Acids: " & Path.GetFileName(strFastaFilePath)
                 Return False
             End If
 
@@ -2349,17 +2388,17 @@ Public MustInherit Class clsPHRPBaseClass
 	Protected Class PepToProteinMappingPeptideSearchComparer
 		Implements IComparer(Of udtPepToProteinMappingType)
 
-		Public Function Compare(x As clsPHRPBaseClass.udtPepToProteinMappingType, y As clsPHRPBaseClass.udtPepToProteinMappingType) As Integer Implements IComparer(Of clsPHRPBaseClass.udtPepToProteinMappingType).Compare
+        Public Function Compare(x As udtPepToProteinMappingType, y As udtPepToProteinMappingType) As Integer Implements IComparer(Of udtPepToProteinMappingType).Compare
 
-			If x.Peptide > y.Peptide Then
-				Return 1
-			ElseIf x.Peptide < y.Peptide Then
-				Return -1
-			Else
-				Return 0
-			End If
+            If x.Peptide > y.Peptide Then
+                Return 1
+            ElseIf x.Peptide < y.Peptide Then
+                Return -1
+            Else
+                Return 0
+            End If
 
-		End Function
+        End Function
 
 	End Class
 

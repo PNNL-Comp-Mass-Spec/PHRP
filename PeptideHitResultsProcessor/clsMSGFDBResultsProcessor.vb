@@ -23,7 +23,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "May 7, 2015"
+        MyBase.mFileDate = "August 6, 2015"
         InitializeLocalVariables()
     End Sub
 
@@ -119,7 +119,7 @@ Public Class clsMSGFDBResultsProcessor
 #Region "Structures"
     Protected Structure udtMSGFDBSearchResultType
 
-        Public SpectrumFile As String
+        Public SpectrumFileName As String
         Public SpecIndex As String
         Public Scan As String
         Public ScanNum As Integer
@@ -147,7 +147,7 @@ Public Class clsMSGFDBResultsProcessor
         Public IsotopeError As Integer          ' Only used by MSGF+
 
         Public Sub Clear()
-            SpectrumFile = String.Empty
+            SpectrumFileName = String.Empty
             SpecIndex = String.Empty
             ScanNum = 0
             FragMethod = String.Empty
@@ -677,9 +677,9 @@ Public Class clsMSGFDBResultsProcessor
         Dim sngPercentComplete As Single
 
         Dim blnHeaderParsed As Boolean
-        Dim blnIncludeFDRandPepFDR As Boolean = False
-        Dim blnIncludeEFDR As Boolean = False
-        Dim blnIncludeIMSFields As Boolean = False
+        Dim blnIncludeFDRandPepFDR = False
+        Dim blnIncludeEFDR = False
+        Dim blnIncludeIMSFields = False
 
         Dim intColumnMapping() As Integer = Nothing
 
@@ -1309,7 +1309,7 @@ Public Class clsMSGFDBResultsProcessor
             If strSplitLine.Length >= 13 Then
 
                 With udtSearchResult
-                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpectrumFile), .SpectrumFile) Then
+                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpectrumFile), .SpectrumFileName) Then
                         ReportError("SpectrumFile column is missing or invalid", True)
                     End If
                     GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecIndex), .SpecIndex)
@@ -1973,6 +1973,12 @@ Public Class clsMSGFDBResultsProcessor
 
                 If MyBase.mCreateInspectOrMSGFDbFirstHitsFile Then
 
+                    ' Read the FASTA file to cache the protein names in memory
+                    ' These will be used when creating the first hits file
+                    If Not CacheProteinNamesFromFasta() Then
+                        Return False
+                    End If
+
                     ' Create the first hits output file
                     MyBase.ResetProgress("Creating the FHT file")
                     Console.WriteLine()
@@ -2465,12 +2471,10 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="lstFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
     ''' <remarks></remarks>
     Private Sub StoreTopFHTMatch(
-      lstSearchResults As List(Of udtMSGFDBSearchResultType),
+      lstSearchResults As IList(Of udtMSGFDBSearchResultType),
       intStartIndex As Integer,
       intEndIndex As Integer,
       lstFilteredSearchResults As List(Of udtMSGFDBSearchResultType))
-
-        Dim intCurrentCharge As Short = Short.MinValue
 
         AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
 
@@ -2478,15 +2482,45 @@ Public Class clsMSGFDBResultsProcessor
 
         ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
 
-        ' Now store or write out the first match for each charge for this scan
+        ' Now store the first match for each charge for this scan
+        ' When storing, we use the protein name that occurred first in the FASTA file
+
+        Dim udtCurrentResult = lstSearchResults(intStartIndex)
+        Dim intCurrentCharge As Short = udtCurrentResult.ChargeNum
+        Dim currentProteinNumber = Int32.MaxValue
+
         For intIndex = intStartIndex To intEndIndex
-            If intIndex = intStartIndex OrElse intCurrentCharge <> lstSearchResults(intIndex).ChargeNum Then
-                lstFilteredSearchResults.Add(lstSearchResults(intIndex))
-                intCurrentCharge = lstSearchResults(intIndex).ChargeNum
+            If intCurrentCharge <> lstSearchResults(intIndex).ChargeNum Then
+                ' New charge state
+                ' Store udtCurrentResult (from the previous charge state)
+                lstFilteredSearchResults.Add(udtCurrentResult)
+
+                udtCurrentResult = lstSearchResults(intIndex)
+                intCurrentCharge = udtCurrentResult.ChargeNum
+                currentProteinNumber = Int32.MaxValue
             End If
+
+            ' Lookup the protein number (to make sure we use the protein name that occurs first in the FASTA file)
+            Dim proteinNumber As Integer
+            Dim candidateName = lstSearchResults(intIndex).Protein
+
+            If mProteinNameOrder.TryGetValue(candidateName, proteinNumber) Then
+                If proteinNumber < currentProteinNumber Then
+                    currentProteinNumber = proteinNumber
+                    udtCurrentResult.Protein = candidateName
+                End If
+            Else
+                ' Protein not found in mProteinNameOrder
+                ' It's likely a reverse-hit protein
+            End If
+
         Next intIndex
 
+        ' Store udtCurrentResult (from the previous charge state)
+        lstFilteredSearchResults.Add(udtCurrentResult)
+
     End Sub
+
 
     ''' <summary>
     ''' Stores the synopsis file matches for a single scan
@@ -2607,7 +2641,7 @@ Public Class clsMSGFDBResultsProcessor
     Private Sub WriteSearchResultToFile(
       intResultID As Integer,
       swResultFile As StreamWriter,
-      ByRef udtSearchResult As udtMSGFDBSearchResultType,
+      udtSearchResult As udtMSGFDBSearchResultType,
       ByRef strErrorLog As String,
       blnIncludeFDRandPepFDR As Boolean,
       blnIncludeEFDR As Boolean,

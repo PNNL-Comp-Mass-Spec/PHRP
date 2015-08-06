@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5696; August 6, 2015
+	- Now assuring that the protein name shown in MSGF+ result files is the first protein that appears in the FASTA file
+		- Applies to peptides that are present in multiple proteins
+
 Version 1.5.5683; July 24, 2015
 	- Added support for MSPathFinder
 

@@ -564,7 +564,7 @@ Public Class clsSequestResultsProcessor
         Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
         Dim strAdditionalFile As String
-        Dim strInputFileBaseName As String = IO.Path.GetFileNameWithoutExtension(fiInputFile.Name)
+        Dim strInputFileBaseName As String = Path.GetFileNameWithoutExtension(fiInputFile.Name)
 
         lstSourcePHRPDataFiles.Add(fiInputFile.FullName)
         If strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE) Then

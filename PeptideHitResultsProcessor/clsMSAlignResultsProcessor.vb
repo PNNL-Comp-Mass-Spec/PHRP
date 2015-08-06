@@ -41,138 +41,138 @@ Public Class clsMSAlignResultsProcessor
 	' These columns correspond to the tab-delimited file created directly by MSAlign
 	Protected Const MSAlignResultsFileColCount As Integer = 23
 	Public Enum eMSAlignResultsFileColumns As Integer
-		Data_file_name = 0
-		Prsm_ID = 1
-		Spectrum_ID = 2
-		Protein_Sequence_ID = 3			' Used by MSAlign v0.5, but not by v0.6
-		Scans = 4
-		Peaks = 5
-		Charge = 6
-		Precursor_mass = 7				' Monoisotopic mass value of the observed precursor_mz
-		Adjusted_precursor_mass = 8		' Theoretical monoisotopic mass of the peptide (including mods)
-		Protein_ID = 9
-		Protein_name = 10				' Protein name and description
-		Protein_mass = 11
-		First_residue = 12
-		Last_residue = 13
-		Peptide = 14
-		Unexpected_modifications = 15
-		Matched_peaks = 16
-		Matched_fragment_ions = 17
-		Pvalue = 18
-		Evalue = 19
-		FDR = 20
-		Species_ID = 21				' Present between Protein_ID and Protein_name in MSAlign_Histone result files
-		FragMethod = 22				' Present as the last column in MSAlign_Histone result files
-	End Enum
+        SpectrumFileName = 0
+        Prsm_ID = 1
+        Spectrum_ID = 2
+        Protein_Sequence_ID = 3         ' Used by MSAlign v0.5, but not by v0.6
+        Scans = 4
+        Peaks = 5
+        Charge = 6
+        Precursor_mass = 7              ' Monoisotopic mass value of the observed precursor_mz
+        Adjusted_precursor_mass = 8     ' Theoretical monoisotopic mass of the peptide (including mods)
+        Protein_ID = 9
+        Protein_name = 10               ' Protein name and description
+        Protein_mass = 11
+        First_residue = 12
+        Last_residue = 13
+        Peptide = 14
+        Unexpected_modifications = 15
+        Matched_peaks = 16
+        Matched_fragment_ions = 17
+        Pvalue = 18
+        Evalue = 19
+        FDR = 20
+        Species_ID = 21             ' Present between Protein_ID and Protein_name in MSAlign_Histone result files
+        FragMethod = 22             ' Present as the last column in MSAlign_Histone result files
+    End Enum
 
-	' These columns correspond to the Synopsis file created by this class
-	Protected Const MSAlignSynFileColCount As Integer = 22
-	Public Enum eMSAlignSynFileColumns As Integer
-		ResultID = 0
-		Scan = 1
-		Prsm_ID = 2
-		Spectrum_ID = 3
-		Charge = 4
-		PrecursorMZ = 5
-		DelM = 6							' Precursor error, in Da
-		DelMPPM = 7							' Precursor error, in ppm
-		MH = 8								' Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-		Peptide = 9							' This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
-		Protein = 10						' Protein Name
-		Protein_Mass = 11
-		Unexpected_Mod_Count = 12
-		Peak_Count = 13
-		Matched_Peak_Count = 14
-		Matched_Fragment_Ion_Count = 15
-		PValue = 16
-		Rank_PValue = 17
-		EValue = 18
-		FDR = 19
-		Species_ID = 20
-		FragMethod = 21
-	End Enum
+    ' These columns correspond to the Synopsis file created by this class
+    Protected Const MSAlignSynFileColCount As Integer = 22
+    Public Enum eMSAlignSynFileColumns As Integer
+        ResultID = 0
+        Scan = 1
+        Prsm_ID = 2
+        Spectrum_ID = 3
+        Charge = 4
+        PrecursorMZ = 5
+        DelM = 6                            ' Precursor error, in Da
+        DelMPPM = 7                         ' Precursor error, in ppm
+        MH = 8                              ' Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+        Peptide = 9                         ' This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
+        Protein = 10                        ' Protein Name
+        Protein_Mass = 11
+        Unexpected_Mod_Count = 12
+        Peak_Count = 13
+        Matched_Peak_Count = 14
+        Matched_Fragment_Ion_Count = 15
+        PValue = 16
+        Rank_PValue = 17
+        EValue = 18
+        FDR = 19
+        Species_ID = 20
+        FragMethod = 21
+    End Enum
 
 #End Region
 
 #Region "Structures"
-	' This data structure holds rows read from the tab-delimited file created directly by MSAlign
-	Protected Structure udtMSAlignSearchResultType
+    ' This data structure holds rows read from the tab-delimited file created directly by MSAlign
+    Protected Structure udtMSAlignSearchResultType
 
-		Public Data_file_name As String
-		Public Scans As String
-		Public ScanNum As Integer
-		Public Prsm_ID As String
-		Public Spectrum_ID As String
-		Public Peaks As String
-		Public Charge As String
-		Public ChargeNum As Short
-		Public Precursor_mass As String				' Monoisotopic mass value of the observed precursor_mz
-		Public PrecursorMZ As String				' Computed from Precursor_mass
-		Public Adjusted_precursor_mass As String	' Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
-		Public MH As String							' Theoretical monoisotopic peptide MH (including mods), as computed by PHRP; note that this is (M+H)+
-		Public DelM As String						' Computed using Precursor_mass - Adjusted_precursor_mass
-		Public DelM_PPM As String					' Computed using DelM and Adjusted_precursor_mass
-		Public Protein_ID As String
-		Public Species_ID As String					' Only present in MSAlign_Histone results
-		Public Protein As String
-		Public Protein_mass As String
-		Public First_residue As String
-		Public Last_residue As String
-		Public Peptide As String
-		Public Unexpected_modifications As String
-		Public Matched_peaks As String
-		Public Matched_fragment_ions As String
-		Public Pvalue As String
-		Public PValueNum As Double
-		Public Evalue As String
-		Public FDR As String
-		Public FragMethod As String					' Only present in MSAlign_Histone results
-		Public RankPValue As Integer
+        Public SpectrumFileName As String
+        Public Scans As String
+        Public ScanNum As Integer
+        Public Prsm_ID As String
+        Public Spectrum_ID As String
+        Public Peaks As String
+        Public Charge As String
+        Public ChargeNum As Short
+        Public Precursor_mass As String             ' Monoisotopic mass value of the observed precursor_mz
+        Public PrecursorMZ As String                ' Computed from Precursor_mass
+        Public Adjusted_precursor_mass As String    ' Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
+        Public MH As String                         ' Theoretical monoisotopic peptide MH (including mods), as computed by PHRP; note that this is (M+H)+
+        Public DelM As String                       ' Computed using Precursor_mass - Adjusted_precursor_mass
+        Public DelM_PPM As String                   ' Computed using DelM and Adjusted_precursor_mass
+        Public Protein_ID As String
+        Public Species_ID As String                 ' Only present in MSAlign_Histone results
+        Public Protein As String
+        Public Protein_mass As String
+        Public First_residue As String
+        Public Last_residue As String
+        Public Peptide As String
+        Public Unexpected_modifications As String
+        Public Matched_peaks As String
+        Public Matched_fragment_ions As String
+        Public Pvalue As String
+        Public PValueNum As Double
+        Public Evalue As String
+        Public FDR As String
+        Public FragMethod As String                 ' Only present in MSAlign_Histone results
+        Public RankPValue As Integer
 
-		Public Sub Clear()
-			Data_file_name = String.Empty
-			Prsm_ID = String.Empty
-			Spectrum_ID = String.Empty
-			Scans = String.Empty
-			ScanNum = 0
-			Peaks = String.Empty
-			Charge = String.Empty
-			ChargeNum = 0
-			Precursor_mass = String.Empty
-			Adjusted_precursor_mass = String.Empty
-			MH = String.Empty
-			DelM = String.Empty
-			DelM_PPM = String.Empty
-			Protein_ID = String.Empty
-			Species_ID = String.Empty
-			Protein = String.Empty
-			Protein_mass = String.Empty
-			First_residue = String.Empty
-			Last_residue = String.Empty
-			Peptide = String.Empty
-			Unexpected_modifications = String.Empty
-			Matched_peaks = String.Empty
-			Matched_fragment_ions = String.Empty
-			Pvalue = String.Empty
-			PValueNum = 0
-			Evalue = String.Empty
-			FDR = String.Empty
-			FragMethod = String.Empty
-			RankPValue = 0
-		End Sub
-	End Structure
+        Public Sub Clear()
+            SpectrumFileName = String.Empty
+            Prsm_ID = String.Empty
+            Spectrum_ID = String.Empty
+            Scans = String.Empty
+            ScanNum = 0
+            Peaks = String.Empty
+            Charge = String.Empty
+            ChargeNum = 0
+            Precursor_mass = String.Empty
+            Adjusted_precursor_mass = String.Empty
+            MH = String.Empty
+            DelM = String.Empty
+            DelM_PPM = String.Empty
+            Protein_ID = String.Empty
+            Species_ID = String.Empty
+            Protein = String.Empty
+            Protein_mass = String.Empty
+            First_residue = String.Empty
+            Last_residue = String.Empty
+            Peptide = String.Empty
+            Unexpected_modifications = String.Empty
+            Matched_peaks = String.Empty
+            Matched_fragment_ions = String.Empty
+            Pvalue = String.Empty
+            PValueNum = 0
+            Evalue = String.Empty
+            FDR = String.Empty
+            FragMethod = String.Empty
+            RankPValue = 0
+        End Sub
+    End Structure
 
 #End Region
 
-	''' <summary>
-	''' Step through .PeptideSequenceWithMods
-	''' For each residue, check if a static mod is defined that affects that residue
-	''' For each mod mass, determine the modification and add to objSearchResult
-	''' </summary>
-	''' <param name="objSearchResult"></param>
-	''' <param name="blnUpdateModOccurrenceCounts"></param>
-	''' <remarks></remarks>
+    ''' <summary>
+    ''' Step through .PeptideSequenceWithMods
+    ''' For each residue, check if a static mod is defined that affects that residue
+    ''' For each mod mass, determine the modification and add to objSearchResult
+    ''' </summary>
+    ''' <param name="objSearchResult"></param>
+    ''' <param name="blnUpdateModOccurrenceCounts"></param>
+    ''' <remarks></remarks>
     Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMSAlign, blnUpdateModOccurrenceCounts As Boolean)
         Const NO_RESIDUE As Char = "-"c
 
@@ -898,7 +898,7 @@ Public Class clsMSAlignResultsProcessor
             If strSplitLine.Length >= 13 Then
 
                 With udtSearchResult
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Data_file_name), .Data_file_name)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.SpectrumFileName), .SpectrumFileName)
                     If Not GetColumnValue(strSplitLine, intColumnMapping(eMSAlignResultsFileColumns.Prsm_ID), .Prsm_ID) Then
                         ReportError("Prsm_ID column is missing or invalid", True)
                     End If
@@ -1068,7 +1068,7 @@ Public Class clsMSAlignResultsProcessor
 
         ReDim intColumnMapping(MSAlignResultsFileColCount - 1)
 
-        lstColumnNames.Add("Data_file_name", eMSAlignResultsFileColumns.Data_file_name)
+        lstColumnNames.Add("Data_file_name", eMSAlignResultsFileColumns.SpectrumFileName)
         lstColumnNames.Add("Prsm_ID", eMSAlignResultsFileColumns.Prsm_ID)
         lstColumnNames.Add("Spectrum_ID", eMSAlignResultsFileColumns.Spectrum_ID)
         lstColumnNames.Add("Protein_Sequence_ID", eMSAlignResultsFileColumns.Protein_Sequence_ID)
@@ -1580,7 +1580,7 @@ Public Class clsMSAlignResultsProcessor
     Private Sub WriteSearchResultToFile(
        intResultID As Integer,
        swResultFile As StreamWriter,
-       ByRef udtSearchResult As udtMSAlignSearchResultType,
+       udtSearchResult As udtMSAlignSearchResultType,
        ByRef strErrorLog As String)
 
         Try
