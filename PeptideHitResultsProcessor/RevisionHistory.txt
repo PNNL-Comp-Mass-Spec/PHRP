@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.5714; August 24, 2015
+	- Add columns SpecEValue and EValue for MSPathfinder
+
 Version 1.5.5696; August 6, 2015
 	- Now assuring that the protein name shown in MSGF+ result files is the first protein that appears in the FASTA file
 		- Applies to peptides that are present in multiple proteins

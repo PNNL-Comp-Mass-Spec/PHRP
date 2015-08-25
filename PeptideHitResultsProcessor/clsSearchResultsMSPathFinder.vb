@@ -29,6 +29,8 @@ Public Class clsSearchResultsMSPathFinder
     Public Property ResidueStart As String
     Public Property ResidueEnd As String
     Public Property MatchedFragments As String
+    Public Property SpecEValue As String
+    Public Property EValue As String
     Public Property QValue As String
     Public Property PepQValue As String
 
@@ -50,6 +52,8 @@ Public Class clsSearchResultsMSPathFinder
         ResidueStart = String.Empty
         ResidueEnd = String.Empty
         MatchedFragments = String.Empty
+        SpecEValue = String.Empty
+        EValue = String.Empty
         QValue = String.Empty
         PepQValue = String.Empty
 

@@ -36,7 +36,7 @@ Public Class clsMSGFDBResultsProcessor
     Public Const C_TERMINUS_SYMBOL_MSGFDB As String = "._"
 
     ' Filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_PVALUE_THRESHOLD
-    ' These filters will also used by MSPathFinder (once it implements SpecProb)
+    ' These filters are also used by MSPathFinder
     Public Const DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD As Single = 0.0001
     Public Const DEFAULT_SYN_FILE_PVALUE_THRESHOLD As Single = 0.95
 
@@ -2506,6 +2506,13 @@ Public Class clsMSGFDBResultsProcessor
 
         ' Store udtCurrentResult (from the previous charge state)
         lstFilteredSearchResults.Add(udtCurrentResult)
+
+        ' Alternative method using clsEngineResultsMSGFDB
+        ' Dim lstFilteredSearchResultsNew = clsEngineResultUtilities.StoreTopFHTMatch(mProteinNameOrder, lstSearchResults, intStartIndex, intEndIndex)
+
+        ' For Each newResult In lstFilteredSearchResultsNew
+        '     lstFilteredSearchResults.Add(CType(lstFilteredSearchResultsNew, clsEngineResultsMSGFDB))
+        ' Next
 
     End Sub
 

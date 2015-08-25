@@ -24,7 +24,7 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "June 22, 2015"
+        MyBase.mFileDate = "August 24, 2015"
 
         mGetModName = New Regex("(.+) (\d+)", RegexOptions.Compiled)
     End Sub
@@ -36,14 +36,10 @@ Public Class clsMSPathFinderResultsProcessor
     Public Const N_TERMINUS_SYMBOL_MSPATHFINDER As String = "-"
     Public Const C_TERMINUS_SYMBOL_MSPATHFINDER As String = "-"
 
-    Public Const DEFAULT_SYN_FILE_QVALUE_THRESHOLD As Single = 0.05
-
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
-    Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
-
     ' These columns correspond to the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
-    Protected Const MSPathFinderResultsFileColCount As Integer = 17
+    Protected Const MSPathFinderResultsFileColCount As Integer = 19
     Public Enum eMSPathFinderResultsFileColumns As Integer
         Scan = 0
         PrefixResidue = 1
@@ -60,13 +56,14 @@ Public Class clsMSPathFinderResultsProcessor
         MostAbundantIsotopeMz = 12
         CalculatedMonoMass = 13
         NumMatchedFragments = 14
-        QValue = 15
-        PepQValue = 16
-        ' Future: SpecProb = 17
+        SpecEValue = 15
+        EValue = 16
+        QValue = 17
+        PepQValue = 18
     End Enum
 
     ' These columns correspond to the Synopsis file created by this class
-    Protected Const MSPathFinderSynFileColCount As Integer = 16
+    Protected Const MSPathFinderSynFileColCount As Integer = 18
     Public Enum eMSPathFinderSynFileColumns As Integer
         ResultID = 0
         Scan = 1
@@ -82,9 +79,10 @@ Public Class clsMSPathFinderResultsProcessor
         ResidueStart = 11
         ResidueEnd = 12
         MatchedFragments = 13
-        QValue = 14
-        PepQValue = 15
-        ' Future: SpecProb = 16
+        SpecEValue = 14
+        EValue = 15
+        QValue = 16
+        PepQValue = 17
     End Enum
 
 #End Region
@@ -111,11 +109,11 @@ Public Class clsMSPathFinderResultsProcessor
         Public CalculatedMonoMass As String         ' Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by MSPathFinder
         Public CalculatedMonoMassPHRP As Double     ' Theoretical monoisotopic mass of the identified sequence (uncharged, including mods), as computed by PHRP
         Public NumMatchedFragments As String
+        Public SpecEValue As String                 ' EValue, at the scan level
+        Public SpecEValueNum As Double
+        Public EValue As String                     ' EValue, at the peptide level
         Public QValue As String                     ' FDR, at the scan level
-        Public QValueNum As Double
         Public PepQValue As String                  ' FDR, at the peptide level
-
-        ' Future: Public SpecProb As String
 
         ' The following are typically defined for other search engines, but are not used for MSPathFinder
         '   Public DelM As String                   ' Computed using Precursor_mass - CalculatedMonoMass
@@ -140,10 +138,11 @@ Public Class clsMSPathFinderResultsProcessor
             CalculatedMonoMass = String.Empty
             CalculatedMonoMassPHRP = 0
             NumMatchedFragments = String.Empty
+            SpecEValue = String.Empty
+            SpecEValueNum = 0
+            EValue = String.Empty
             QValue = String.Empty
-            QValueNum = 0
             PepQValue = String.Empty
-            ' Future: SpecProb = String.empty
 
             ' Unused at present: MH = String.Empty
             ' Unused at present: DelM = String.Empty
@@ -385,9 +384,8 @@ Public Class clsMSPathFinderResultsProcessor
     End Function
 
     ''' <summary>
-    ''' This routine creates a first hits file or synopsis file from the output from MSPathFinder
+    ''' This routine creates a synopsis file from the output from MSPathFinder
     ''' The synopsis file includes every result with a probability above a set threshold
-    ''' The first-hits file includes the result with the highest probability (for each scan and charge)
     ''' </summary>
     ''' <param name="strInputFilePath"></param>
     ''' <param name="strOutputFilePath"></param>
@@ -460,7 +458,7 @@ Public Class clsMSPathFinderResultsProcessor
 
                 Loop
 
-                ' Sort the SearchResults by scan, charge, and ascending QValue (future, ascending SpecProb)
+                ' Sort the SearchResults by scan, charge, and ascending SpecEValue
                 lstSearchResultsUnfiltered.Sort(New MSPathFinderSearchResultsComparerScanChargeScorePeptide)
 
                 ' Now filter the data
@@ -547,7 +545,7 @@ Public Class clsMSPathFinderResultsProcessor
 
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-        Dim strPreviousQValue As String
+        Dim strPreviousSpecEValue As String
 
         ' Note that ParseMSPathfinderSynopsisFile synopsis files are normally sorted on Probability value, ascending
         ' In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
@@ -568,11 +566,11 @@ Public Class clsMSPathFinderResultsProcessor
             ' Initialize objSearchResult
             Dim objSearchResult = New clsSearchResultsMSPathFinder(mPeptideMods)
 
-            ' Initialize htPeptidesFoundForQValue
-            Dim htPeptidesFoundForQValue = New Hashtable
+            ' Initialize htPeptidesFoundForSpecEValue
+            Dim htPeptidesFoundForSpecEValue = New Hashtable
             Dim blnFirstMatchForGroup As Boolean
 
-            strPreviousQValue = String.Empty
+            strPreviousSpecEValue = String.Empty
 
             Dim strErrorLog = String.Empty
 
@@ -623,27 +621,27 @@ Public Class clsMSPathFinderResultsProcessor
 
                         Dim strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.Charge
 
-                        If objSearchResult.QValue = strPreviousQValue Then
-                            ' New result has the same QValue as the previous result
-                            ' See if htPeptidesFoundForQValue contains the peptide, scan and charge
+                        If objSearchResult.SpecEValue = strPreviousSpecEValue Then
+                            ' New result has the same SpecEValue as the previous result
+                            ' See if htPeptidesFoundForSpecEValue contains the peptide, scan and charge
 
-                            If htPeptidesFoundForQValue.ContainsKey(strKey) Then
+                            If htPeptidesFoundForSpecEValue.ContainsKey(strKey) Then
                                 blnFirstMatchForGroup = False
                             Else
-                                htPeptidesFoundForQValue.Add(strKey, 1)
+                                htPeptidesFoundForSpecEValue.Add(strKey, 1)
                                 blnFirstMatchForGroup = True
                             End If
 
                         Else
-                            ' New QValue
-                            ' Reset htPeptidesFoundForQValue
-                            htPeptidesFoundForQValue.Clear()
+                            ' New SpecEValue
+                            ' Reset htPeptidesFoundForSpecEValue
+                            htPeptidesFoundForSpecEValue.Clear()
 
-                            ' Update strPreviousQValue
-                            strPreviousQValue = objSearchResult.QValue
+                            ' Update strPreviousSpecEValue
+                            strPreviousSpecEValue = objSearchResult.SpecEValue
 
-                            ' Append a new entry to htPeptidesFoundForQValue
-                            htPeptidesFoundForQValue.Add(strKey, 1)
+                            ' Append a new entry to htPeptidesFoundForSpecEValue
+                            htPeptidesFoundForSpecEValue.Add(strKey, 1)
                             blnFirstMatchForGroup = True
                         End If
 
@@ -778,16 +776,14 @@ Public Class clsMSPathFinderResultsProcessor
                     GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz), .MostAbundantIsotopeMz)
                     GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.NumMatchedFragments), .NumMatchedFragments)
 
-                    If GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.QValue), .QValue) Then
-                        Double.TryParse(.QValue, .QValueNum)
+                    If GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.SpecEValue), .SpecEValue) Then
+                        Double.TryParse(.SpecEValue, .SpecEValueNum)
                     End If
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.PepQValue), .PepQValue)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.EValue), .EValue)
 
-                    ' Future:
-                    'If GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.SpecProb), .SpecProb) Then
-                    '    Double.TryParse(.SpecProb, .SpecProbNum)
-                    'End If
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.QValue), .QValue)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.PepQValue), .PepQValue)
 
                 End With
 
@@ -819,7 +815,7 @@ Public Class clsMSPathFinderResultsProcessor
         ' Parse the header line
 
         ' The expected column order from MassMSPathFinder:
-        '   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	QValue	PepQValue
+        '   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	SpecEValue    EValue    QValue    PepQValue
 
 
         Dim lstColumnNames As SortedDictionary(Of String, eMSPathFinderResultsFileColumns)
@@ -842,6 +838,8 @@ Public Class clsMSPathFinderResultsProcessor
         lstColumnNames.Add("MostAbundantIsotopeMz", eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz)
         lstColumnNames.Add("Mass", eMSPathFinderResultsFileColumns.CalculatedMonoMass)
         lstColumnNames.Add("#MatchedFragments", eMSPathFinderResultsFileColumns.NumMatchedFragments)
+        lstColumnNames.Add("SpecEValue", eMSPathFinderResultsFileColumns.SpecEValue)
+        lstColumnNames.Add("EValue", eMSPathFinderResultsFileColumns.EValue)
         lstColumnNames.Add("QValue", eMSPathFinderResultsFileColumns.QValue)
         lstColumnNames.Add("PepQValue", eMSPathFinderResultsFileColumns.PepQValue)
 
@@ -923,9 +921,10 @@ Public Class clsMSPathFinderResultsProcessor
         lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_ResidueStart, eMSPathFinderSynFileColumns.ResidueStart)
         lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_ResidueEnd, eMSPathFinderSynFileColumns.ResidueEnd)
         lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_MatchedFragments, eMSPathFinderSynFileColumns.MatchedFragments)
+        lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_SpecEValue, eMSPathFinderSynFileColumns.SpecEValue)
+        lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_EValue, eMSPathFinderSynFileColumns.EValue)
         lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_QValue, eMSPathFinderSynFileColumns.QValue)
         lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_PepQValue, eMSPathFinderSynFileColumns.PepQValue)
-        ' Future: lstColumnNames.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_SpecProb, eMSPathFinderSynFileColumns.SpecProb)
 
         Try
             ' Initialize each entry in intColumnMapping to -1
@@ -1034,6 +1033,9 @@ Public Class clsMSPathFinderResultsProcessor
                 GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.ResidueStart), .ResidueStart)
                 GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.ResidueEnd), .ResidueEnd)
                 GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.MatchedFragments), .MatchedFragments)
+
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.SpecEValue), .SpecEValue)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.EValue), .EValue)
 
                 GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.QValue), .QValue)
                 GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderSynFileColumns.PepQValue), .PepQValue)
@@ -1167,8 +1169,8 @@ Public Class clsMSPathFinderResultsProcessor
       lstFilteredSearchResults As List(Of udtMSPathFinderSearchResultType),
       ByRef strErrorLog As String)
 
-        ' Sort udtFilteredSearchResults by ascending QValue, scan, peptide, and protein     
-        Dim query = From item In lstFilteredSearchResults Order By item.QValueNum, item.ScanNum, item.Sequence, item.Protein Select item
+        ' Sort udtFilteredSearchResults by ascending SpecEValue, scan, peptide, and protein     
+        Dim query = From item In lstFilteredSearchResults Order By item.SpecEValueNum, item.ScanNum, item.Sequence, item.Protein Select item
 
         Dim intIndex = 1
         For Each result In query
@@ -1201,12 +1203,11 @@ Public Class clsMSPathFinderResultsProcessor
 
         ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
 
-        ' Now store the matches that pass the filters (will filter on SpecProb once it is implemented)        
+        ' Now store the matches that pass the filters
         For intIndex = intStartIndex To intEndIndex
-            'If lstSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse
-            '   lstSearchResults(intIndex).SpecProbNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
-            lstFilteredSearchResults.Add(lstSearchResults(intIndex))
-            'End If
+            If lstSearchResults(intIndex).SpecEValueNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
+                lstFilteredSearchResults.Add(lstSearchResults(intIndex))
+            End If
         Next intIndex
 
     End Sub
@@ -1232,10 +1233,10 @@ Public Class clsMSPathFinderResultsProcessor
             lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_ResidueStart)
             lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_ResidueEnd)
             lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_MatchedFragments)
+            lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_SpecEValue)
+            lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_EValue)
             lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_QValue)
             lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_PepQValue)
-
-            ' Future: lstData.Add(clsPHRPParserMSPathFinder.DATA_COLUMN_SpecProb)
 
             swResultFile.WriteLine(CollapseList(lstData))
 
@@ -1278,9 +1279,10 @@ Public Class clsMSPathFinderResultsProcessor
             lstData.Add(udtSearchResult.ResidueStart)
             lstData.Add(udtSearchResult.ResidueEnd)
             lstData.Add(udtSearchResult.NumMatchedFragments)
+            lstData.Add(udtSearchResult.SpecEValue)
+            lstData.Add(udtSearchResult.EValue)
             lstData.Add(udtSearchResult.QValue)
             lstData.Add(udtSearchResult.PepQValue)
-            ' Future: lstData.Add(udtSearchResult.SpecProb)
 
             swResultFile.WriteLine(CollapseList(lstData))
 
@@ -1317,13 +1319,13 @@ Public Class clsMSPathFinderResultsProcessor
             ElseIf x.ScanNum < y.ScanNum Then
                 Return -1
             Else
-                ' Scan is the same; check QValue (future: SpecProb)
-                If x.QValueNum > y.QValueNum Then
+                ' Scan is the same; check SpecEValue
+                If x.SpecEValueNum > y.SpecEValueNum Then
                     Return 1
-                ElseIf x.QValueNum < y.QValueNum Then
+                ElseIf x.SpecEValueNum < y.SpecEValueNum Then
                     Return -1
                 Else
-                    ' QValue is the same; check sequence
+                    ' SpecEValue is the same; check sequence
                     If x.Sequence > y.Sequence Then
                         Return 1
                     ElseIf x.Sequence < y.Sequence Then

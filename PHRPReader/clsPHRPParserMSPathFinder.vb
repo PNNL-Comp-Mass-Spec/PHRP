@@ -31,6 +31,8 @@ Public Class clsPHRPParserMSPathFinder
     Public Const DATA_COLUMN_ResidueStart As String = "ResidueStart"
     Public Const DATA_COLUMN_ResidueEnd As String = "ResidueEnd"
     Public Const DATA_COLUMN_MatchedFragments As String = "MatchedFragments"
+    Public Const DATA_COLUMN_SpecEValue As String = "SpecEValue"
+    Public Const DATA_COLUMN_EValue As String = "EValue"
     Public Const DATA_COLUMN_QValue As String = "QValue"
     Public Const DATA_COLUMN_PepQValue As String = "PepQValue"
 
@@ -152,6 +154,8 @@ Public Class clsPHRPParserMSPathFinder
         AddHeaderColumn(DATA_COLUMN_ResidueStart)
         AddHeaderColumn(DATA_COLUMN_ResidueEnd)
         AddHeaderColumn(DATA_COLUMN_MatchedFragments)
+        AddHeaderColumn(DATA_COLUMN_SpecEValue)
+        AddHeaderColumn(DATA_COLUMN_EValue)
         AddHeaderColumn(DATA_COLUMN_QValue)
         AddHeaderColumn(DATA_COLUMN_PepQValue)
 
@@ -313,6 +317,8 @@ Public Class clsPHRPParserMSPathFinder
             AddScore(objPSM, strColumns, DATA_COLUMN_ResidueStart)
             AddScore(objPSM, strColumns, DATA_COLUMN_ResidueEnd)
             AddScore(objPSM, strColumns, DATA_COLUMN_MatchedFragments)
+            AddScore(objPSM, strColumns, DATA_COLUMN_SpecEValue)
+            AddScore(objPSM, strColumns, DATA_COLUMN_EValue)
             AddScore(objPSM, strColumns, DATA_COLUMN_QValue)
             AddScore(objPSM, strColumns, DATA_COLUMN_PepQValue)
 
