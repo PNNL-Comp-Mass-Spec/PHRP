@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5717; August 27, 2015
+	- Now considering QValue for sorting (in case SpecEValue is not defined)
+
 Version 1.5.5714; August 24, 2015
 	- Add columns SpecEValue and EValue for MSPathfinder
 
