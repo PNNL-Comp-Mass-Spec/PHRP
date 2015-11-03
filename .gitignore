@@ -105,3 +105,4 @@ Mass_Calculation_Test/*
 PeptideHitResultsProcessor_SourceCode/*
 Test_PHRPReader/*
 .hgignore
+/PeptideHitResultsProcessor/Unused
