@@ -290,6 +290,12 @@ Public Class clsPHRPReader
         End Get
     End Property
 
+    ''' <summary>
+    ''' The maximum number of proteins that will be tracked for each PSM
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public Property MaxProteinsPerPSM() As Integer
         Get
             Return mStartupOptions.MaxProteinsPerPSM
@@ -1537,6 +1543,12 @@ Public Class clsPHRPReader
         Return Path.GetFileNameWithoutExtension(strSynopsisOrFirstHitsFileName) & MSGF_RESULT_FILENAME_SUFFIX
     End Function
 
+    ''' <summary>
+    ''' Get the peptide hit result type for the given result type name
+    ''' </summary>
+    ''' <param name="ResultTypeName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public Shared Function GetPeptideHitResultType(ResultTypeName As String) As ePeptideHitResultType
         Select Case ResultTypeName.ToLower()
             Case "Peptide_Hit".ToLower
@@ -1568,6 +1580,11 @@ Public Class clsPHRPReader
         End Select
     End Function
 
+    ''' <summary>
+    ''' Get the list of auxiliary file suffixes
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public Shared Function GetPHRPAuxiliaryFileSuffixes() As List(Of String)
         Dim lstAuxSuffixes As List(Of String)
         lstAuxSuffixes = New List(Of String)
@@ -1764,14 +1781,32 @@ Public Class clsPHRPReader
 
     End Function
 
+    ''' <summary>
+    ''' Get the ScanStats filename for the given dataset
+    ''' </summary>
+    ''' <param name="strDatasetName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public Shared Function GetScanStatsFilename(strDatasetName As String) As String
         Return strDatasetName & SCAN_STATS_FILENAME_SUFFIX
     End Function
 
+    ''' <summary>
+    ''' Get the extended ScanStats filename for the given dataset
+    ''' </summary>
+    ''' <param name="strDatasetName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public Shared Function GetExtendedScanStatsFilename(strDatasetName As String) As String
         Return strDatasetName & EXTENDED_SCAN_STATS_FILENAME_SUFFIX
     End Function
 
+    ''' <summary>
+    ''' Get the tool version info filename for the given analysis tool
+    ''' </summary>
+    ''' <param name="eResultType"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public Shared Function GetToolVersionInfoFilename(eResultType As ePeptideHitResultType) As String
 
         Dim strToolVersionInfoFilename As String = String.Empty

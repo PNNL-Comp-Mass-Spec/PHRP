@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5792; November 10, 2015
+	- Added descriptions to public properties and methods in clsModificationDefinition
+
 Version 1.1.5695; August 5, 2015
 	- Fixed bug extracting the PMTolerance from MSPathFinder param files
 
