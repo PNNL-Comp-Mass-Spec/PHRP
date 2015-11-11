@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.1.5792; November 10, 2015
+	- Updated clsParseCommandLine, clsProcessFilesOrFoldersBase, and clsXmlSettingsFileAccessor
+
 Version 1.5.5717; August 27, 2015
 	- When filtering MSPathFinder results, test for SpecEValue < 0.0001 or QValue < 5%
 	- Now considering QValue for sorting (in case SpecEValue is not defined)
