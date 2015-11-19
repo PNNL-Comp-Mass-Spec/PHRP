@@ -747,7 +747,7 @@ Public Class clsMODaResultsProcessor
                             Continue Do
                         End If
 
-                        If String.Equals(kvSetting.Key, "add", StringComparison.CurrentCultureIgnoreCase) Then
+                        If String.Equals(kvSetting.Key, "add", StringComparison.InvariantCultureIgnoreCase) Then
                             ' ModA defines all of its static modifications with the ADD keyword
                             ' Split the value at the comma and create a new setting entry with the residue name
 
@@ -1230,7 +1230,7 @@ Public Class clsMODaResultsProcessor
         '   SpectrumFile	Index	ObservedMonoMass	Charge	CalculatedMonoMass	DeltaMass	Score	Probability	Peptide	Protein	PeptidePosition
 
         Dim lstColumnNames As SortedDictionary(Of String, eMODaResultsFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMODaResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMODaResultsFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MODaResultsFileColCount - 1)
 
@@ -1306,7 +1306,7 @@ Public Class clsMODaResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eMODaSynFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eMODaSynFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMODaSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMODaSynFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MODaSynFileColCount - 1)
 

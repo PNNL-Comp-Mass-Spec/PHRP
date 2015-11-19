@@ -1064,7 +1064,7 @@ Public Class clsMSAlignResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eMSAlignResultsFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eMSAlignResultsFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMSAlignResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMSAlignResultsFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MSAlignResultsFileColCount - 1)
 
@@ -1125,7 +1125,7 @@ Public Class clsMSAlignResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eMSAlignSynFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eMSAlignSynFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMSAlignSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMSAlignSynFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MSAlignSynFileColCount - 1)
 

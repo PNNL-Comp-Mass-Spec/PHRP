@@ -1595,7 +1595,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eMSGFDBResultsFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eMSGFDBResultsFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMSGFDBResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMSGFDBResultsFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MSGFDBResultsFileColCount - 1)
 
@@ -1672,7 +1672,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eMSFDBSynFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eMSFDBSynFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMSFDBSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMSFDBSynFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MSGFDBSynFileColCount - 1)
 

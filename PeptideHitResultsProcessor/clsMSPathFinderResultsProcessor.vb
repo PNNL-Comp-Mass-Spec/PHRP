@@ -24,7 +24,7 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "August 27, 2015"
+        MyBase.mFileDate = "November 18, 2015"
 
         mGetModName = New Regex("(.+) (\d+)", RegexOptions.Compiled)
     End Sub
@@ -39,7 +39,7 @@ Public Class clsMSPathFinderResultsProcessor
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
     ' These columns correspond to the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
-    Protected Const MSPathFinderResultsFileColCount As Integer = 19
+    Protected Const MSPathFinderResultsFileColCount As Integer = 20
     Public Enum eMSPathFinderResultsFileColumns As Integer
         Scan = 0
         PrefixResidue = 1
@@ -56,10 +56,11 @@ Public Class clsMSPathFinderResultsProcessor
         MostAbundantIsotopeMz = 12
         CalculatedMonoMass = 13
         NumMatchedFragments = 14
-        SpecEValue = 15                 ' Column added 2015-08-25
-        EValue = 16                     ' Column added 2015-08-25
-        QValue = 17
-        PepQValue = 18
+        Probability = 15                ' Column added 2015-11-18
+        SpecEValue = 16                 ' Column added 2015-08-25
+        EValue = 17                     ' Column added 2015-08-25
+        QValue = 18
+        PepQValue = 19
     End Enum
 
     ' These columns correspond to the Synopsis file created by this class
@@ -197,7 +198,7 @@ Public Class clsMSPathFinderResultsProcessor
             Dim residueNumber = reMatch.Groups(2).Value
 
             For Each modDef As clsMSGFPlusParamFileModExtractor.udtModInfoType In lstModInfo
-                If String.Equals(modDef.ModName, modName, StringComparison.CurrentCultureIgnoreCase) Then
+                If String.Equals(modDef.ModName, modName, StringComparison.InvariantCultureIgnoreCase) Then
 
                     Dim intResidueLocInPeptide As Integer
                     If Not Integer.TryParse(residueNumber, intResidueLocInPeptide) Then
@@ -318,7 +319,7 @@ Public Class clsMSPathFinderResultsProcessor
             Dim modName = reMatch.Groups(1).Value
 
             For Each modDef As clsMSGFPlusParamFileModExtractor.udtModInfoType In lstModInfo
-                If String.Equals(modDef.ModName, modName, StringComparison.CurrentCultureIgnoreCase) Then
+                If String.Equals(modDef.ModName, modName, StringComparison.InvariantCultureIgnoreCase) Then
                     dblTotalModMass += modDef.ModMassVal
                     matchFound = True
                     Exit For
@@ -806,7 +807,7 @@ Public Class clsMSPathFinderResultsProcessor
                         Double.TryParse(.SpecEValue, .SpecEValueNum)
                     End If
                     GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.EValue), .EValue)
-                    
+
                     If GetColumnValue(strSplitLine, intColumnMapping(eMSPathFinderResultsFileColumns.QValue), .QValue) Then
                         Double.TryParse(.QValue, .QValueNum)
                     End If
@@ -842,11 +843,11 @@ Public Class clsMSPathFinderResultsProcessor
         ' Parse the header line
 
         ' The expected column order from MassMSPathFinder:
-        '   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	SpecEValue    EValue    QValue    PepQValue
+        '   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	Probability SpecEValue    EValue    QValue    PepQValue
 
 
         Dim lstColumnNames As SortedDictionary(Of String, eMSPathFinderResultsFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMSPathFinderResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMSPathFinderResultsFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MSPathFinderResultsFileColCount - 1)
 
@@ -865,6 +866,7 @@ Public Class clsMSPathFinderResultsProcessor
         lstColumnNames.Add("MostAbundantIsotopeMz", eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz)
         lstColumnNames.Add("Mass", eMSPathFinderResultsFileColumns.CalculatedMonoMass)
         lstColumnNames.Add("#MatchedFragments", eMSPathFinderResultsFileColumns.NumMatchedFragments)
+        lstColumnNames.Add("Probability", eMSPathFinderResultsFileColumns.Probability)
         lstColumnNames.Add("SpecEValue", eMSPathFinderResultsFileColumns.SpecEValue)
         lstColumnNames.Add("EValue", eMSPathFinderResultsFileColumns.EValue)
         lstColumnNames.Add("QValue", eMSPathFinderResultsFileColumns.QValue)
@@ -930,7 +932,7 @@ Public Class clsMSPathFinderResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eMSPathFinderSynFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eMSPathFinderSynFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMSPathFinderSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMSPathFinderSynFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MSPathFinderSynFileColCount - 1)
 
@@ -1139,7 +1141,7 @@ Public Class clsMSPathFinderResultsProcessor
                 Dim fiInputFile = New FileInfo(strInputFilePath)
 
                 ' Load the MSPathFinder Parameter File so that we can determine the modification names and masses
-                ' Note that this call will intialize lstModInfo
+                ' Note that this call will initialize lstModInfo
                 Dim success = ExtractModInfoFromParamFile(mSearchToolParameterFilePath, lstModInfo)
                 If Not success Then
                     Return False

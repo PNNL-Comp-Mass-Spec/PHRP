@@ -1010,7 +1010,7 @@ Public Class clsMODPlusResultsProcessor
         '   SpectrumFile   Index   ScanNo   ObservedMW   Charge   CalculatedMW   DeltaMass   Score   Probability   Peptide   NTT    Protein   ModificationAnnotation
 
         Dim lstColumnNames As SortedDictionary(Of String, eMODPlusResultsFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMODPlusResultsFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMODPlusResultsFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MODPlusResultsFileColCount - 1)
 
@@ -1088,7 +1088,7 @@ Public Class clsMODPlusResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eMODPlusSynFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eMODPlusSynFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eMODPlusSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eMODPlusSynFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(MODPlusSynFileColCount - 1)
 

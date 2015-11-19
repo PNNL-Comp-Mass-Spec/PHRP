@@ -110,6 +110,13 @@ Public Class clsMSGFPlusParamFileModExtractor
         Dim intCount As Integer
         Dim dblMass As Double = 0
 
+        If String.Equals(strEmpiricalformula, "HexNAc", StringComparison.InvariantCultureIgnoreCase) Then
+            ' This is a special-case modification that MSGF+ and MSPathFinder recognize
+            ' It is listed in DMS as Hexosam, which means N-Acetylhexosamine
+            ' It is tracked by UniMod as HexNAc
+            Return 203.079376
+        End If
+
         reMatches = reAtomicFormulaRegEx.Matches(strEmpiricalformula)
 
         If reMatches.Count > 0 Then

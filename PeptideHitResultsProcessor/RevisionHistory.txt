@@ -1,5 +1,10 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.5800; November 18, 2015
+	- Now recognizes that HexNAc is Hexosam, which is 203.079376 Da
+	- Added column Probability for MSPathFinder results
+	- Change from CurrentCultureIgnoreCase to InvariantCultureIgnoreCase
+
 Version 1.5.5714; August 24, 2015
 	- Add columns SpecEValue and EValue for MSPathfinder
 

@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.1.5800; November 18, 2015
+	- PHRP now recognizes that HexNAc is Hexosam, which is 203.079376 Da
+
 Version 1.1.5792; November 10, 2015
 	- Updated clsParseCommandLine, clsProcessFilesOrFoldersBase, and clsXmlSettingsFileAccessor
 

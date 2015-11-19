@@ -1,6 +1,6 @@
 Option Strict On
 
-' This program processes XTandem search results or Sequest search results to
+' This program processes search results from several LC-MS/MS search engines to
 ' determine the modifications present, determine the cleaveage and terminus state
 ' of each peptide, and compute the monoisotopic mass of each peptide.  See 
 ' clsSequestSynopsisFileProcessor and clsXTandemResultsConverter for 
@@ -16,10 +16,10 @@ Option Strict On
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "November 10, 2015"
+    Public Const PROGRAM_DATE As String = "November 18, 2015"
 
 	Private mInputFilePath As String
-	Private mOutputFolderPath As String							' Optional
+    Private mOutputFolderPath As String                         ' Optional
 	Private mParameterFilePath As String						' Optional
 
 	Private mMassCorrectionTagsFilePath As String				' Optional

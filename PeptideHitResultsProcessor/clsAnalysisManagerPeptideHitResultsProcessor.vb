@@ -413,31 +413,31 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         m_SettingsFilePath = Path.Combine(m_SourceFolderPath, m_SettingsFileName)
 
         'Define the peptide hit results format based on the analysis tool name
-        If m_AnalysisToolName.IndexOf("xtandem", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        If m_AnalysisToolName.IndexOf("xtandem", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
 
-        ElseIf m_AnalysisToolName.IndexOf("sequest", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        ElseIf m_AnalysisToolName.IndexOf("sequest", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
 
-        ElseIf m_AnalysisToolName.IndexOf("inspect", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        ElseIf m_AnalysisToolName.IndexOf("inspect", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
-        ElseIf m_AnalysisToolName.IndexOf("msgfdb", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        ElseIf m_AnalysisToolName.IndexOf("msgfdb", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
-        ElseIf m_AnalysisToolName.IndexOf("msalign", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        ElseIf m_AnalysisToolName.IndexOf("msalign", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 
-        ElseIf m_AnalysisToolName.IndexOf("moda", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        ElseIf m_AnalysisToolName.IndexOf("moda", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile
 
-        ElseIf m_AnalysisToolName.IndexOf("modplus", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        ElseIf m_AnalysisToolName.IndexOf("modplus", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
 
-        ElseIf m_AnalysisToolName.IndexOf("mspathfinder", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        ElseIf m_AnalysisToolName.IndexOf("mspathfinder", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
 
-        ElseIf m_AnalysisToolName.IndexOf("dataextractor", StringComparison.CurrentCultureIgnoreCase) >= 0 Then
+        ElseIf m_AnalysisToolName.IndexOf("dataextractor", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
             ' Data Extractor step-tool; we'll need to auto-determine the results format
             m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
 

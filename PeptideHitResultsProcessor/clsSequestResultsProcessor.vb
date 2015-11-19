@@ -618,7 +618,7 @@ Public Class clsSequestResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eSequestSynopsisFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eSequestSynopsisFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eSequestSynopsisFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(SequestSynopsisFileColCount - 1)
 

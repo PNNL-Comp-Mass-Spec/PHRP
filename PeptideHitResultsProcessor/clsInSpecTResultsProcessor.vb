@@ -873,7 +873,7 @@ Public Class clsInSpecTResultsProcessor
         Dim strSplitLine() As String
         Dim eResultFileColumn As eInspectSynFileColumns
         Dim lstColumnNames As SortedDictionary(Of String, eInspectSynFileColumns)
-        lstColumnNames = New SortedDictionary(Of String, eInspectSynFileColumns)(StringComparer.CurrentCultureIgnoreCase)
+        lstColumnNames = New SortedDictionary(Of String, eInspectSynFileColumns)(StringComparer.InvariantCultureIgnoreCase)
 
         ReDim intColumnMapping(InspectSynopsisFileColCount - 1)
 
