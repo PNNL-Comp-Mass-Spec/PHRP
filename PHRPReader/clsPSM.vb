@@ -263,7 +263,7 @@ Public Class clsPSM
 	''' </summary>
 	''' <value></value>
 	''' <returns></returns>
-	''' <remarks></remarks>
+    ''' <remarks>This mass is computed by PHRP using the PrecursorNeutralMass plus any modification masses associated with the peptide's residues</remarks>
 	Public Property PeptideMonoisotopicMass As Double
 		Get
 			Return mPeptideMonoisotopicMass
@@ -314,7 +314,7 @@ Public Class clsPSM
 	''' </summary>
 	''' <value></value>
 	''' <returns></returns>
-	''' <remarks></remarks>
+    ''' <remarks>This mass is based on the mass or m/z value reported by the search engine</remarks>
 	Public Property PrecursorNeutralMass As Double
 		Get
 			Return mPrecursorNeutralMass

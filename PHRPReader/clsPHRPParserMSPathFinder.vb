@@ -289,7 +289,6 @@ Public Class clsPHRPParserMSPathFinder
 
                     ' Thus collision mode, precursor neutral mass, etc. are not applicable
                     ' .CollisionMode =
-                    ' .PrecursorNeutralMass = 
                     ' .MassErrorDa =
                     ' .MassErrorPPM = 
 
