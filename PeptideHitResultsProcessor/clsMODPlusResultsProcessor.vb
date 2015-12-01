@@ -158,7 +158,7 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <remarks></remarks>
     Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMODPlus, blnUpdateModOccurrenceCounts As Boolean)
-        Const NO_RESIDUE As Char = "-"c
+        Const NO_RESIDUE = "-"c
 
         Dim intIndex As Integer, intModIndex As Integer
         Dim chChar As Char
@@ -232,7 +232,7 @@ Public Class clsMODPlusResultsProcessor
     End Sub
 
     Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsMODPlus, blnUpdateModOccurrenceCounts As Boolean) As Boolean
-        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
+        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS = True
 
         Dim blnSuccess As Boolean
 
@@ -1030,12 +1030,12 @@ Public Class clsMODPlusResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
-            Dim blnUseDefaultHeaders As Boolean = False
+            Dim blnUseDefaultHeaders = False
 
             Dim value As Integer
             If strSplitLine.Length >= 2 Then
@@ -1044,7 +1044,7 @@ Public Class clsMODPlusResultsProcessor
                     blnUseDefaultHeaders = True
                 Else
 
-                    For intIndex As Integer = 0 To strSplitLine.Length - 1
+                    For intIndex = 0 To strSplitLine.Length - 1
                         Dim eResultFileColumn As eMODPlusResultsFileColumns
 
                         If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
@@ -1063,7 +1063,7 @@ Public Class clsMODPlusResultsProcessor
 
             If blnUseDefaultHeaders Then
                 ' Use default column mappings
-                For intIndex As Integer = 0 To intColumnMapping.Length - 1
+                For intIndex = 0 To intColumnMapping.Length - 1
                     intColumnMapping(intIndex) = intIndex
                 Next
 
@@ -1112,12 +1112,12 @@ Public Class clsMODPlusResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             strSplitLine = strLineIn.Split(ControlChars.Tab)
-            For intIndex As Integer = 0 To strSplitLine.Length - 1
+            For intIndex = 0 To strSplitLine.Length - 1
                 If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
                     ' Recognized column name; update intColumnMapping
                     intColumnMapping(eResultFileColumn) = intIndex

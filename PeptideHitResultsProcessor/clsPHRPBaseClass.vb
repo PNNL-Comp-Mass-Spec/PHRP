@@ -1029,12 +1029,12 @@ Public MustInherit Class clsPHRPBaseClass
 
         Dim strMTSPepToProteinMapFilePath As String
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
             Dim fiInputFile = New FileInfo(strPHRPDataFilePath)
 
-            Dim lstSourcePHRPDataFiles As List(Of String) = New List(Of String)
+            Dim lstSourcePHRPDataFiles = New List(Of String)
             lstSourcePHRPDataFiles.Add(fiInputFile.FullName)
 
             strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
@@ -1075,7 +1075,7 @@ Public MustInherit Class clsPHRPBaseClass
         Dim sngProgressAtStart As Single
 
         Dim blnSkipProtein As Boolean
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
             Console.WriteLine()
@@ -1279,14 +1279,14 @@ Public MustInherit Class clsPHRPBaseClass
         End If
     End Sub
 
-    Protected Function FindFirstMatchInPepToProteinMapping(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), strPeptideToFind As String) As Integer
+    Protected Function FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping As List(Of udtPepToProteinMappingType), strPeptideToFind As String) As Integer
 
-        Static objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer()
+        Static objPeptideSearchComparer As IComparer(Of udtPepToProteinMappingType) = New PepToProteinMappingPeptideSearchComparer()
 
         Dim intPepToProteinMapIndex As Integer
 
         ' Use binary search to find this peptide in lstPepToProteinMapping
-        Dim udtItemToFind As udtPepToProteinMappingType = New udtPepToProteinMappingType
+        Dim udtItemToFind = New udtPepToProteinMappingType
         udtItemToFind.Peptide = strPeptideToFind
 
         intPepToProteinMapIndex = lstPepToProteinMapping.BinarySearch(udtItemToFind, objPeptideSearchComparer)
@@ -1568,7 +1568,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
     Public Shared Function IsLetterAtoZ(chChar As Char) As Boolean
 
-        Static reIsLetter As Regex = New Regex("[A-Za-z]", RegexOptions.Compiled)
+        Static reIsLetter as Regex = New Regex("[A-Za-z]", RegexOptions.Compiled)
 
         If reIsLetter.IsMatch(chChar) Then
             Return True
@@ -1934,7 +1934,7 @@ Public MustInherit Class clsPHRPBaseClass
         Dim intIndex As Integer
 
         Try
-            Using swOutFile As StreamWriter = New StreamWriter(strModificationSummaryFilePath, False)
+            Using swOutFile = New StreamWriter(strModificationSummaryFilePath, False)
 
                 ' Write the header line
                 swOutFile.WriteLine(
@@ -2082,7 +2082,7 @@ Public MustInherit Class clsPHRPBaseClass
 
     End Function
 
-    Protected Sub UpdatePepToProteinMapPeptide(ByRef lstPepToProteinMapping As List(Of udtPepToProteinMappingType), intIndex As Integer, strPeptide As String)
+    Protected Sub UpdatePepToProteinMapPeptide(lstPepToProteinMapping As List(Of udtPepToProteinMappingType), intIndex As Integer, strPeptide As String)
         Dim udtItem As udtPepToProteinMappingType
         udtItem = lstPepToProteinMapping(intIndex)
         udtItem.Peptide = strPeptide
@@ -2111,14 +2111,14 @@ Public MustInherit Class clsPHRPBaseClass
 
     Private Function ValidatePeptideToProteinMapResults(strPeptideToProteinMapFilePath As String, blnIgnorePeptideToProteinMapperErrors As Boolean) As Boolean
 
-        Const PROTEIN_NAME_NO_MATCH As String = "__NoMatch__"
+        Const PROTEIN_NAME_NO_MATCH = "__NoMatch__"
 
         Dim blnSuccess = False
 
-        Dim intPeptideCount As Integer = 0
-        Dim intPeptideCountNoMatch As Integer = 0
-        Dim intLinesRead As Integer = 0
-        Dim chSplitChars() As Char = New Char() {ControlChars.Tab}
+        Dim intPeptideCount = 0
+        Dim intPeptideCountNoMatch = 0
+        Dim intLinesRead = 0
+        Dim chSplitChars = New Char() {ControlChars.Tab}
 
         Try
             ' Validate that none of the results in strPeptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH
@@ -2238,20 +2238,20 @@ Public MustInherit Class clsPHRPBaseClass
         Dim objFastaFile As ProteinFileReader.FastaFileReader
 
         ' This RegEx looks for standard amino acids, skipping A, T, C, and G
-        Dim reDefiniteAminoAcid As Regex = New Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+        Dim reDefiniteAminoAcid = New Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
         ' This RegEx looks for A, T, C, and G
-        Dim rePotentialNucleicAcid As Regex = New Regex("[ATCG]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+        Dim rePotentialNucleicAcid = New Regex("[ATCG]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
         ' This matches any letter
-        Dim reLetter As Regex = New Regex("[A-Z]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
+        Dim reLetter = New Regex("[A-Z]", RegexOptions.IgnoreCase Or RegexOptions.Compiled)
 
         Dim intDefiniteAminoAcidCount As Integer
         Dim intPotentialNucleicAcidCount As Integer
         Dim intLetterCount As Integer
 
-        Dim intValidProteinCount As Integer = 0
-        Dim intInvalidProteinCount As Integer = 0
+        Dim intValidProteinCount = 0
+        Dim intInvalidProteinCount = 0
 
         Try
             strWarningMessage = String.Empty

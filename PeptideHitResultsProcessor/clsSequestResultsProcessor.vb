@@ -271,7 +271,7 @@ Public Class clsSequestResultsProcessor
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
-                Using srDataFile As StreamReader = New StreamReader(strInputFilePath)
+                Using srDataFile = New StreamReader(strInputFilePath)
 
                     strErrorLog = String.Empty
                     intResultsProcessed = 0
@@ -365,7 +365,7 @@ Public Class clsSequestResultsProcessor
 
                 If mCreateModificationSummaryFile Then
                     ' Create the modification summary file
-                    Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
+                    Dim fiInputFile = New FileInfo(strInputFilePath)
                     strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
                     strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
 
@@ -654,12 +654,12 @@ Public Class clsSequestResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             strSplitLine = strLineIn.Split(ControlChars.Tab)
-            For intIndex As Integer = 0 To strSplitLine.Length - 1
+            For intIndex = 0 To strSplitLine.Length - 1
                 If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
                     ' Recognized column name; update intColumnMapping
                     intColumnMapping(eResultFileColumn) = intIndex

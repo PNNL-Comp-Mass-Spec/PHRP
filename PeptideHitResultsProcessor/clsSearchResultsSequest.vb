@@ -89,7 +89,7 @@ Public Class clsSearchResultsSequest
         Dim sngDelCN2 As Single
 
         Try
-            If Single.TryParse(PeptideXCorr, sngXCorr) AndAlso _
+            If Single.TryParse(PeptideXCorr, sngXCorr) AndAlso
                Single.TryParse(PeptideDeltaCn2, sngDelCN2) Then
                 mPeptideXCorrNext = (sngXCorr - sngDelCN2 * sngXCorr).ToString
             Else

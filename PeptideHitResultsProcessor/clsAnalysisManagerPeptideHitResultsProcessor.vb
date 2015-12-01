@@ -534,7 +534,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         Static strProgressStepDescriptionSaved As String = String.Empty
         Static sngProgressPercentComplete As Single = 0
 
-        Dim blnDescriptionChanged As Boolean = False
+        Dim blnDescriptionChanged = False
 
         If strProgressStepDescription <> strProgressStepDescriptionSaved Then
             blnDescriptionChanged = True

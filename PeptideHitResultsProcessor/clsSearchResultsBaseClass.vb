@@ -411,7 +411,7 @@ Public MustInherit Class clsSearchResultsBaseClass
       blnAdjustPrecursorMassForC13 As Boolean,
       dblPeptideMonoisotopicMass As Double) As Double
 
-        Dim intCorrectionCount As Integer = 0
+        Dim intCorrectionCount = 0
 
         ' Examine dblDelM to determine which isotope was chosen
         If dblDelM >= -0.5 Then
@@ -585,7 +585,7 @@ Public MustInherit Class clsSearchResultsBaseClass
 
         Dim objModificationDefinition As clsModificationDefinition
         Dim blnExistingModFound As Boolean
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         blnExistingModFound = False
 
@@ -658,7 +658,7 @@ Public MustInherit Class clsSearchResultsBaseClass
 
         Dim objModificationDefinition As clsModificationDefinition
         Dim blnExistingModFound As Boolean
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         If intResidueLocInPeptide < 1 Then
             ' Invalid position; ignore this modification
@@ -703,7 +703,7 @@ Public MustInherit Class clsSearchResultsBaseClass
        eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
        blnUpdateModOccurrenceCounts As Boolean) As Boolean
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         If intResidueLocInPeptide < 1 And objModificationDefinition.ModificationType <> clsModificationDefinition.eModificationTypeConstants.IsotopicMod Then
             ' Invalid position; ignore this modification
@@ -730,11 +730,11 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <remarks></remarks>
     Public Function SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Dim intIndex As Integer
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         For intIndex = 0 To mPeptideMods.ModificationCount - 1
             If mPeptideMods.GetModificationTypeByIndex(intIndex) = clsModificationDefinition.eModificationTypeConstants.IsotopicMod Then
-                Dim intResidueLocInPeptide As Integer = 0
+                Dim intResidueLocInPeptide = 0
 
                 blnSuccess = SearchResultAddModification(
                   mPeptideMods.GetModificationByIndex(intIndex),
@@ -978,50 +978,50 @@ Public MustInherit Class clsSearchResultsBaseClass
         mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(eStandardCleavageAgent)
     End Sub
 
-	Public Sub UpdateModDescription()
-		' Generate a comma separated list of the modifications present and the residue modified, with a colon separating the mod name and residue location
-		' For example:
-		'  Acetyl:1
-		'  MinusH2O:1,Plus1Oxy:4,Plus1Oxy:19
-		' The description is stored in mPeptideModDescription
+    Public Sub UpdateModDescription()
+        ' Generate a comma separated list of the modifications present and the residue modified, with a colon separating the mod name and residue location
+        ' For example:
+        '  Acetyl:1
+        '  MinusH2O:1,Plus1Oxy:4,Plus1Oxy:19
+        ' The description is stored in mPeptideModDescription
 
-		Const MOD_LIST_SEP_CHAR As Char = ","c
-		Dim intIndex As Integer
+        Const MOD_LIST_SEP_CHAR = ","c
+        Dim intIndex As Integer
 
-		Dim udtModNameAndResidueLoc() As clsPHRPBaseClass.udtModNameAndResidueLocType
-		Dim intPointerArray() As Integer
+        Dim udtModNameAndResidueLoc() As clsPHRPBaseClass.udtModNameAndResidueLocType
+        Dim intPointerArray() As Integer
 
-		mPeptideModDescription = String.Empty
+        mPeptideModDescription = String.Empty
 
-		If mSearchResultModifications.Count > 0 Then
-			ReDim udtModNameAndResidueLoc(mSearchResultModifications.Count - 1)
-			ReDim intPointerArray(mSearchResultModifications.Count - 1)
+        If mSearchResultModifications.Count > 0 Then
+            ReDim udtModNameAndResidueLoc(mSearchResultModifications.Count - 1)
+            ReDim intPointerArray(mSearchResultModifications.Count - 1)
 
-			If mSearchResultModifications.Count = 1 Then
-				intPointerArray(0) = 0
-			Else
-				' Construct a pointer array so that we can search the modifications by .ResidueLocInPeptide
-				For intIndex = 0 To mSearchResultModifications.Count - 1
-					udtModNameAndResidueLoc(intIndex).ResidueLocInPeptide = mSearchResultModifications(intIndex).ResidueLocInPeptide
-					udtModNameAndResidueLoc(intIndex).ModName = mSearchResultModifications(intIndex).ModDefinition.MassCorrectionTag
-					intPointerArray(intIndex) = intIndex
-				Next intIndex
+            If mSearchResultModifications.Count = 1 Then
+                intPointerArray(0) = 0
+            Else
+                ' Construct a pointer array so that we can search the modifications by .ResidueLocInPeptide
+                For intIndex = 0 To mSearchResultModifications.Count - 1
+                    udtModNameAndResidueLoc(intIndex).ResidueLocInPeptide = mSearchResultModifications(intIndex).ResidueLocInPeptide
+                    udtModNameAndResidueLoc(intIndex).ModName = mSearchResultModifications(intIndex).ModDefinition.MassCorrectionTag
+                    intPointerArray(intIndex) = intIndex
+                Next intIndex
 
-				Array.Sort(udtModNameAndResidueLoc, intPointerArray, New clsPHRPBaseClass.IModNameAndResidueLocComparer)
-			End If
+                Array.Sort(udtModNameAndResidueLoc, intPointerArray, New clsPHRPBaseClass.IModNameAndResidueLocComparer)
+            End If
 
-			' Step through the modifications and add the modification name and residue position to mPeptideModDescription
-			' Note that mods of type IsotopicMod will have .ResidueLocInPeptide = 0; other mods will have positive .ResidueLocInPeptide values
-			For intIndex = 0 To mSearchResultModifications.Count - 1
-				With mSearchResultModifications(intPointerArray(intIndex))
-					If intIndex > 0 Then mPeptideModDescription &= MOD_LIST_SEP_CHAR
-					mPeptideModDescription &= .ModDefinition.MassCorrectionTag.Trim & ":"c & .ResidueLocInPeptide
-				End With
-			Next intIndex
+            ' Step through the modifications and add the modification name and residue position to mPeptideModDescription
+            ' Note that mods of type IsotopicMod will have .ResidueLocInPeptide = 0; other mods will have positive .ResidueLocInPeptide values
+            For intIndex = 0 To mSearchResultModifications.Count - 1
+                With mSearchResultModifications(intPointerArray(intIndex))
+                    If intIndex > 0 Then mPeptideModDescription &= MOD_LIST_SEP_CHAR
+                    mPeptideModDescription &= .ModDefinition.MassCorrectionTag.Trim & ":"c & .ResidueLocInPeptide
+                End With
+            Next intIndex
 
-		End If
+        End If
 
-	End Sub
+    End Sub
 
 	Protected Class IGenericResidueModificationInfoComparer
 		Implements IComparer(Of clsAminoAcidModInfo)

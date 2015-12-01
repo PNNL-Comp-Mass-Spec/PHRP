@@ -874,12 +874,12 @@ Public Class clsMSPathFinderResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
-            Dim blnUseDefaultHeaders As Boolean = False
+            Dim blnUseDefaultHeaders = False
 
             Dim value As Integer
             If strSplitLine.Length >= 2 Then
@@ -888,7 +888,7 @@ Public Class clsMSPathFinderResultsProcessor
                     blnUseDefaultHeaders = True
                 Else
 
-                    For intIndex As Integer = 0 To strSplitLine.Length - 1
+                    For intIndex = 0 To strSplitLine.Length - 1
                         Dim eResultFileColumn As eMSPathFinderResultsFileColumns
 
                         If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
@@ -907,7 +907,7 @@ Public Class clsMSPathFinderResultsProcessor
 
             If blnUseDefaultHeaders Then
                 ' Use default column mappings
-                For intIndex As Integer = 0 To intColumnMapping.Length - 1
+                For intIndex = 0 To intColumnMapping.Length - 1
                     intColumnMapping(intIndex) = intIndex
                 Next
 
@@ -957,12 +957,12 @@ Public Class clsMSPathFinderResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             strSplitLine = strLineIn.Split(ControlChars.Tab)
-            For intIndex As Integer = 0 To strSplitLine.Length - 1
+            For intIndex = 0 To strSplitLine.Length - 1
                 If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
                     ' Recognized column name; update intColumnMapping
                     intColumnMapping(eResultFileColumn) = intIndex

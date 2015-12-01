@@ -111,7 +111,7 @@ Public Class clsXTandemResultsProcessor
 #End Region
 
     Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsXTandem, blnUpdateModOccurrenceCounts As Boolean) As Boolean
-        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = False
+        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS = False
         Dim blnSuccess As Boolean
 
         Try
@@ -119,7 +119,7 @@ Public Class clsXTandemResultsProcessor
             ' However, since X!Tandem doesn't support Isotopic Mods, this step is currently skipped
             '
             ' objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
-  
+
             ' Add the protein terminus static mods (if defined and if the peptide is at a protein terminus)
             ' Function .SearchResultAddStaticTerminusMods() will only add the terminus mod if the terminus
             '  is not already modified by the given terminus mod mass
@@ -199,7 +199,7 @@ Public Class clsXTandemResultsProcessor
         ' Add each entry to udtModInfo
         ' If blnParsingMotifDef = True, then do not try to determine .TargetResidues
 
-        Const MOD_LIST_SEP_CHAR As Char = ","c
+        Const MOD_LIST_SEP_CHAR = ","c
 
         Dim intIndex As Integer
         Dim intColonIndex As Integer
@@ -408,32 +408,32 @@ Public Class clsXTandemResultsProcessor
                 ' Open the input file and parse it
 
                 ' Initialize the stream reader and the XML Text Reader
-                Using srDataFile As StreamReader = New StreamReader(strInputFilePath)
-                    Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(srDataFile)
+                Using srDataFile = New StreamReader(strInputFilePath)
+                    Using objXMLReader = New System.Xml.XmlTextReader(srDataFile)
                         strErrorLog = String.Empty
                         intResultsProcessed = 0
 
                         ' Create the output file
-                        Using swPeptideResultsFile As StreamWriter = New StreamWriter(strOutputFilePath, False)
+                        Using swPeptideResultsFile = New StreamWriter(strOutputFilePath, False)
 
                             ' Write the header line to swPeptideResultsFile
-                            swPeptideResultsFile.WriteLine( _
-                              "Result_ID" & SEP_CHAR & _
-                              "Group_ID" & SEP_CHAR & _
-                              "Scan" & SEP_CHAR & _
-                              "Charge" & SEP_CHAR & _
-                              "Peptide_MH" & SEP_CHAR & _
-                              "Peptide_Hyperscore" & SEP_CHAR & _
-                              "Peptide_Expectation_Value_Log(e)" & SEP_CHAR & _
-                              "Multiple_Protein_Count" & SEP_CHAR & _
-                              "Peptide_Sequence" & SEP_CHAR & _
-                              "DeltaCn2" & SEP_CHAR & _
-                              "y_score" & SEP_CHAR & _
-                              "y_ions" & SEP_CHAR & _
-                              "b_score" & SEP_CHAR & _
-                              "b_ions" & SEP_CHAR & _
-                              "Delta_Mass" & SEP_CHAR & _
-                              "Peptide_Intensity_Log(I)" & SEP_CHAR & _
+                            swPeptideResultsFile.WriteLine(
+                              "Result_ID" & SEP_CHAR &
+                              "Group_ID" & SEP_CHAR &
+                              "Scan" & SEP_CHAR &
+                              "Charge" & SEP_CHAR &
+                              "Peptide_MH" & SEP_CHAR &
+                              "Peptide_Hyperscore" & SEP_CHAR &
+                              "Peptide_Expectation_Value_Log(e)" & SEP_CHAR &
+                              "Multiple_Protein_Count" & SEP_CHAR &
+                              "Peptide_Sequence" & SEP_CHAR &
+                              "DeltaCn2" & SEP_CHAR &
+                              "y_score" & SEP_CHAR &
+                              "y_ions" & SEP_CHAR &
+                              "b_score" & SEP_CHAR &
+                              "b_ions" & SEP_CHAR &
+                              "Delta_Mass" & SEP_CHAR &
+                              "Peptide_Intensity_Log(I)" & SEP_CHAR &
                               "DelM_PPM")
 
                             ' Create the additional output files
@@ -492,8 +492,8 @@ Public Class clsXTandemResultsProcessor
                 Else
                     If mCreateModificationSummaryFile Then
                         ' Create the modification summary file
-                        Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
-                        Dim fiOutputFile As FileInfo = New FileInfo(strOutputFilePath)
+                        Dim fiInputFile = New FileInfo(strInputFilePath)
+                        Dim fiOutputFile = New FileInfo(strOutputFilePath)
 
                         strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
                         strModificationSummaryFilePath = Path.Combine(fiOutputFile.DirectoryName, strModificationSummaryFilePath)
@@ -531,8 +531,8 @@ Public Class clsXTandemResultsProcessor
         ' Note: The number of valid entries in objSearchResults() is given by intSearchResultCount; objSearchResults() is expanded but never shrunk
         ' There is a separate entry in objSearchResults() for each protein encountered
 
-        Const GROUP_LABEL_PROTEIN As String = "protein"
-        Const GROUP_LABEL_FRAG_ION As String = "fragment ion mass spectrum"
+        Const GROUP_LABEL_PROTEIN = "protein"
+        Const GROUP_LABEL_FRAG_ION = "fragment ion mass spectrum"
 
         ' The following are static to avoid re-reserving space for them for every XTandem results file entry
         Static htSeqsWithMods As Hashtable
@@ -754,7 +754,7 @@ Public Class clsXTandemResultsProcessor
                             End If
 
                         Case XTANDEM_XML_ELEMENT_NAME_NOTE
-                            If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL AndAlso _
+                            If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL AndAlso
                                strCurrentGroupLabel = GROUP_LABEL_PROTEIN AndAlso mLookForReverseSequenceTag Then
                                 ' Examine the label attribute of this note
 
@@ -777,7 +777,7 @@ Public Class clsXTandemResultsProcessor
                                     End If
                                 End If
 
-                            ElseIf strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_SUPPORT AndAlso _
+                            ElseIf strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_SUPPORT AndAlso
                                strCurrentGroupLabel = GROUP_LABEL_FRAG_ION Then
                                 ' This note should contain the scan number
                                 ' For _Dta.txt files created at PNNL, it should look something like: "   scan=15118 cs=3"
@@ -986,7 +986,7 @@ Public Class clsXTandemResultsProcessor
         ' Pre-read the XML file and look for the Input Parameters section
         ' Read the parameters and validate that each of the mods defined is present in mPeptideMods
 
-        Const GROUP_LABEL_INPUT_PARAMETERS As String = "input parameters"
+        Const GROUP_LABEL_INPUT_PARAMETERS = "input parameters"
 
         Dim eCurrentXMLDataFileSection As eCurrentXMLDataFileSectionConstants
 
@@ -1000,7 +1000,7 @@ Public Class clsXTandemResultsProcessor
         Try
             ' Open the input file and parse it
             ' Initialize the stream reader and the XML Text Reader
-            Using objXMLReader As System.Xml.XmlTextReader = New System.Xml.XmlTextReader(strInputFilePath)
+            Using objXMLReader = New System.Xml.XmlTextReader(strInputFilePath)
 
                 ' Parse the file
                 eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile
@@ -1071,10 +1071,10 @@ Public Class clsXTandemResultsProcessor
         ' Each parameter is an element with name "note" with attributes "type" and "label"
         ' The parameter value is the text between within the element
 
-        Const NOTE_TYPE_INPUT As String = "input"
-        Const CLEAVAGE_SPEC_SEP As Char = "|"c
-        Const XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START As Char = "{"c
-        Const XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END As Char = "}"c
+        Const NOTE_TYPE_INPUT = "input"
+        Const CLEAVAGE_SPEC_SEP = "|"c
+        Const XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START = "{"c
+        Const XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END = "}"c
 
         Dim intIndex As Integer
         Dim intIndexCompare As Integer
@@ -1331,11 +1331,11 @@ Public Class clsXTandemResultsProcessor
                                     intResidueLocInPeptide = intModifiedResiduePosInProtein - .PeptideLocInProteinStart + 1
                                     eResidueTerminusState = .DetermineResidueTerminusState(intResidueLocInPeptide)
 
-                                    .SearchResultAddModification( _
-                                                        dblModificationMass, _
-                                                        chTargetResidue, _
-                                                        intResidueLocInPeptide, _
-                                                        eResidueTerminusState, _
+                                    .SearchResultAddModification(
+                                                        dblModificationMass,
+                                                        chTargetResidue,
+                                                        intResidueLocInPeptide,
+                                                        eResidueTerminusState,
                                                         blnUpdateModOccurrenceCounts)
                                 End With
                             End If
@@ -1464,23 +1464,23 @@ Public Class clsXTandemResultsProcessor
             mNextResultID += 1
 
             ' Write the results to the output file
-            swPeptideResultsFile.WriteLine( _
-              .ResultID & SEP_CHAR & _
-              .GroupID & SEP_CHAR & _
-              .Scan & SEP_CHAR & _
-              .Charge & SEP_CHAR & _
-              .PeptideMH & SEP_CHAR & _
-              .PeptideHyperscore & SEP_CHAR & _
-              .PeptideExpectationValue & SEP_CHAR & _
-              .MultipleProteinCount & SEP_CHAR & _
-              .SequenceWithPrefixAndSuffix(True) & SEP_CHAR & _
-              Math.Round(.PeptideDeltaCn2, 4).ToString & SEP_CHAR & _
-              .PeptideYScore & SEP_CHAR & _
-              .PeptideYIons & SEP_CHAR & _
-              .PeptideBScore & SEP_CHAR & _
-              .PeptideBIons & SEP_CHAR & _
-              .PeptideDeltaMass & SEP_CHAR & _
-              .PeptideIntensity & SEP_CHAR & _
+            swPeptideResultsFile.WriteLine(
+              .ResultID & SEP_CHAR &
+              .GroupID & SEP_CHAR &
+              .Scan & SEP_CHAR &
+              .Charge & SEP_CHAR &
+              .PeptideMH & SEP_CHAR &
+              .PeptideHyperscore & SEP_CHAR &
+              .PeptideExpectationValue & SEP_CHAR &
+              .MultipleProteinCount & SEP_CHAR &
+              .SequenceWithPrefixAndSuffix(True) & SEP_CHAR &
+              Math.Round(.PeptideDeltaCn2, 4).ToString & SEP_CHAR &
+              .PeptideYScore & SEP_CHAR &
+              .PeptideYIons & SEP_CHAR &
+              .PeptideBScore & SEP_CHAR &
+              .PeptideBIons & SEP_CHAR &
+              .PeptideDeltaMass & SEP_CHAR &
+              .PeptideIntensity & SEP_CHAR &
               MyBase.NumToString(.PeptideDeltaMassCorrectedPpm, 4, True))
         End With
 

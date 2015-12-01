@@ -174,7 +174,7 @@ Public Class clsMSAlignResultsProcessor
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <remarks></remarks>
     Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMSAlign, blnUpdateModOccurrenceCounts As Boolean)
-        Const NO_RESIDUE As Char = "-"c
+        Const NO_RESIDUE = "-"c
 
         Dim intIndex As Integer, intModIndex As Integer
         Dim chChar As Char
@@ -305,7 +305,7 @@ Public Class clsMSAlignResultsProcessor
     End Sub
 
     Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsMSAlign, blnUpdateModOccurrenceCounts As Boolean) As Boolean
-        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
+        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS = True
 
         Dim blnSuccess As Boolean
 
@@ -548,7 +548,7 @@ Public Class clsMSAlignResultsProcessor
                 ' Now filter the data
 
                 ' Initialize variables
-                Dim intStartIndex As Integer = 0
+                Dim intStartIndex = 0
 
                 Do While intStartIndex < lstSearchResultsUnfiltered.Count
                     Dim intEndIndex = intStartIndex
@@ -589,7 +589,7 @@ Public Class clsMSAlignResultsProcessor
 
         Dim objModDef As clsModificationDefinition
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
             ' Initialize the modification list
@@ -725,7 +725,7 @@ Public Class clsMSAlignResultsProcessor
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
-                Using srDataFile As StreamReader = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                     strErrorLog = String.Empty
                     intResultsProcessed = 0
@@ -834,7 +834,7 @@ Public Class clsMSAlignResultsProcessor
 
                 If mCreateModificationSummaryFile Then
                     ' Create the modification summary file
-                    Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
+                    Dim fiInputFile = New FileInfo(strInputFilePath)
                     strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
                     strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
 
@@ -1094,12 +1094,12 @@ Public Class clsMSAlignResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             strSplitLine = strLineIn.Split(ControlChars.Tab)
-            For intIndex As Integer = 0 To strSplitLine.Length - 1
+            For intIndex = 0 To strSplitLine.Length - 1
                 If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
                     ' Recognized column name; update intColumnMapping
                     intColumnMapping(eResultFileColumn) = intIndex
@@ -1154,12 +1154,12 @@ Public Class clsMSAlignResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             strSplitLine = strLineIn.Split(ControlChars.Tab)
-            For intIndex As Integer = 0 To strSplitLine.Length - 1
+            For intIndex = 0 To strSplitLine.Length - 1
                 If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
                     ' Recognized column name; update intColumnMapping
                     intColumnMapping(eResultFileColumn) = intIndex

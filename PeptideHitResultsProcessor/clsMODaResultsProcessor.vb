@@ -145,7 +145,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <remarks></remarks>
     Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMODa, blnUpdateModOccurrenceCounts As Boolean)
-        Const NO_RESIDUE As Char = "-"c
+        Const NO_RESIDUE = "-"c
 
         Dim intIndex As Integer, intModIndex As Integer
         Dim chChar As Char
@@ -219,7 +219,7 @@ Public Class clsMODaResultsProcessor
     End Sub
 
     Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsMODa, blnUpdateModOccurrenceCounts As Boolean) As Boolean
-        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
+        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS = True
 
         Dim blnSuccess As Boolean
 
@@ -600,7 +600,7 @@ Public Class clsMODaResultsProcessor
                   swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
                 strErrorLog = String.Empty
-                Dim intResultsProcessed As Integer = 0
+                Dim intResultsProcessed = 0
 
                 ' Initialize the list that will hold all of the records in the MODa result file
                 Dim lstSearchResultsUnfiltered = New List(Of udtMODaSearchResultType)
@@ -706,7 +706,7 @@ Public Class clsMODaResultsProcessor
 
         Dim objModDef As clsModificationDefinition
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
             ' Initialize the modification list
@@ -807,7 +807,7 @@ Public Class clsMODaResultsProcessor
             ' Look for the IndexToScanMap file that corresponds to fiInputFile
             Dim lstScanMapFiles As List(Of FileInfo)
             Dim matchIndex = fiInputFile.Name.LastIndexOf("_moda", System.StringComparison.Ordinal)
-            Dim sourceFileDescription As String = ""
+            Dim sourceFileDescription = ""
 
             If matchIndex > 0 Then
                 Dim datasetName = fiInputFile.Name.Substring(0, matchIndex)
@@ -1248,12 +1248,12 @@ Public Class clsMODaResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             Dim strSplitLine = strLineIn.Split(ControlChars.Tab)
-            Dim blnUseDefaultHeaders As Boolean = False
+            Dim blnUseDefaultHeaders = False
 
             Dim value As Integer
             If strSplitLine.Length >= 2 Then
@@ -1262,7 +1262,7 @@ Public Class clsMODaResultsProcessor
                     blnUseDefaultHeaders = True
                 Else
 
-                    For intIndex As Integer = 0 To strSplitLine.Length - 1
+                    For intIndex = 0 To strSplitLine.Length - 1
                         Dim eResultFileColumn As eMODaResultsFileColumns
 
                         If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
@@ -1281,7 +1281,7 @@ Public Class clsMODaResultsProcessor
 
             If blnUseDefaultHeaders Then
                 ' Use default column mappings
-                For intIndex As Integer = 0 To intColumnMapping.Length - 1
+                For intIndex = 0 To intColumnMapping.Length - 1
                     intColumnMapping(intIndex) = intIndex
                 Next
 
@@ -1328,12 +1328,12 @@ Public Class clsMODaResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             strSplitLine = strLineIn.Split(ControlChars.Tab)
-            For intIndex As Integer = 0 To strSplitLine.Length - 1
+            For intIndex = 0 To strSplitLine.Length - 1
                 If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
                     ' Recognized column name; update intColumnMapping
                     intColumnMapping(eResultFileColumn) = intIndex

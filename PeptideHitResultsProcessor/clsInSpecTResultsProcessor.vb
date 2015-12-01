@@ -387,7 +387,7 @@ Public Class clsInSpecTResultsProcessor
     End Sub
 
     Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsInSpecT, blnUpdateModOccurrenceCounts As Boolean) As Boolean
-        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS As Boolean = True
+        Const ALLOW_DUPLICATE_MOD_ON_TERMINUS = True
 
         Dim blnSuccess As Boolean
 
@@ -439,7 +439,7 @@ Public Class clsInSpecTResultsProcessor
 
         Dim strLineIn As String
 
-        Dim udtSearchResult As udtInspectSearchResultType = New udtInspectSearchResultType
+        Dim udtSearchResult = New udtInspectSearchResultType
 
         Dim intCurrentScanResultsCount As Integer
         Dim udtSearchResultsCurrentScan() As udtInspectSearchResultType
@@ -448,7 +448,7 @@ Public Class clsInSpecTResultsProcessor
         Dim udtFilteredSearchResults() As udtInspectSearchResultType
 
         Dim intResultsProcessed As Integer
-        Dim intResultID As Integer = 0
+        Dim intResultID = 0
 
         Dim blnSuccess As Boolean
         Dim blnValidSearchResult As Boolean
@@ -649,7 +649,7 @@ Public Class clsInSpecTResultsProcessor
         Dim intModCount As Integer
         Dim intUnnamedModID As Integer
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
             ' Initialize udtModList and intUnnamedModID
@@ -802,7 +802,7 @@ Public Class clsInSpecTResultsProcessor
         Dim strHeaderLine As String = String.Empty
         Dim strMTSCompatiblePeptide As String
 
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
             strMTSPepToProteinMapFilePath = String.Empty
@@ -826,13 +826,13 @@ Public Class clsInSpecTResultsProcessor
             If blnSuccess Then
                 strMTSPepToProteinMapFilePath = Path.Combine(strOutputFolderPath, Path.GetFileNameWithoutExtension(strPepToProteinMapFilePath) & "MTS.txt")
 
-                Using swOutFile As StreamWriter = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                Using swOutFile = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
                     If Not String.IsNullOrEmpty(strHeaderLine) Then
                         ' Header line
                         swOutFile.WriteLine(strHeaderLine)
                     End If
 
-                    For intIndex As Integer = 0 To lstPepToProteinMapping.Count - 1
+                    For intIndex = 0 To lstPepToProteinMapping.Count - 1
                         ' Replace any mod text names in the peptide sequence with the appropriate mod symbols
                         ' In addition, replace the * terminus symbols with dashes
                         strMTSCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(lstPepToProteinMapping(intIndex).Peptide), udtInspectModInfo)
@@ -907,12 +907,12 @@ Public Class clsInSpecTResultsProcessor
 
         Try
             ' Initialize each entry in intColumnMapping to -1
-            For intIndex As Integer = 0 To intColumnMapping.Length - 1
+            For intIndex = 0 To intColumnMapping.Length - 1
                 intColumnMapping(intIndex) = -1
             Next
 
             strSplitLine = strLineIn.Split(ControlChars.Tab)
-            For intIndex As Integer = 0 To strSplitLine.Length - 1
+            For intIndex = 0 To strSplitLine.Length - 1
                 If lstColumnNames.TryGetValue(strSplitLine(intIndex), eResultFileColumn) Then
                     ' Recognized column name; update intColumnMapping
                     intColumnMapping(eResultFileColumn) = intIndex
@@ -1107,7 +1107,7 @@ Public Class clsInSpecTResultsProcessor
 
                 If mCreateModificationSummaryFile Then
                     ' Create the modification summary file
-                    Dim fiInputFile As FileInfo = New FileInfo(strInputFilePath)
+                    Dim fiInputFile = New FileInfo(strInputFilePath)
                     strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
                     strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath)
 

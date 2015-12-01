@@ -319,7 +319,7 @@ Public Class XmlSettingsFileAccessor
     ''' <return>The function returns boolean True if the "value" attribute is "true".  Otherwise, returns boolean False.</return>
     Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Boolean, Optional ByRef valueNotPresent As Boolean = False) As Boolean
         Dim strResult As String
-        Dim blnNotFound As Boolean = False
+        Dim blnNotFound = False
 
         strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
         If strResult Is Nothing OrElse blnNotFound Then
@@ -345,7 +345,7 @@ Public Class XmlSettingsFileAccessor
     ''' <return>The function returns the name of the "value" attribute as a Short.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
     Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Short, Optional ByRef valueNotPresent As Boolean = False) As Short
         Dim strResult As String
-        Dim blnNotFound As Boolean = False
+        Dim blnNotFound = False
         Dim intValue As Short
 
         strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
@@ -383,7 +383,7 @@ Public Class XmlSettingsFileAccessor
     ''' <return>The function returns the name of the "value" attribute as an Integer.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
     Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Integer, Optional ByRef valueNotPresent As Boolean = False) As Integer
         Dim strResult As String
-        Dim blnNotFound As Boolean = False
+        Dim blnNotFound = False
         Dim intValue As Integer
 
         strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
@@ -421,7 +421,7 @@ Public Class XmlSettingsFileAccessor
     ''' <return>The function returns the name of the "value" attribute as a Long.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
     Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Long, Optional ByRef valueNotPresent As Boolean = False) As Int64
         Dim strResult As String
-        Dim blnNotFound As Boolean = False
+        Dim blnNotFound = False
         Dim intValue As Int64
 
         strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
@@ -459,7 +459,7 @@ Public Class XmlSettingsFileAccessor
     ''' <return>The function returns the name of the "value" attribute as a Single.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
     Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Single, Optional ByRef valueNotPresent As Boolean = False) As Single
         Dim strResult As String
-        Dim blnNotFound As Boolean = False
+        Dim blnNotFound = False
         Dim sngValue As Single
 
         strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
@@ -497,7 +497,7 @@ Public Class XmlSettingsFileAccessor
     ''' <return>The function returns the name of the "value" attribute as a Double.  If "value" is "true" returns -1.  If "value" is "false" returns 0.</return>
     Public Function GetParam(sectionName As String, keyName As String, valueIfMissing As Double, Optional ByRef valueNotPresent As Boolean = False) As Double
         Dim strResult As String
-        Dim blnNotFound As Boolean = False
+        Dim blnNotFound = False
         Dim dblValue As Double
 
         strResult = Me.GetParam(sectionName, keyName, valueIfMissing.ToString, blnNotFound)
@@ -1014,7 +1014,7 @@ Public Class XmlSettingsFileAccessor
         '''<return>The function returns a string collection with comments</return>
         Public Function GetXmlSectionComments(sectionName As String) As System.Collections.Specialized.StringCollection
             If Not Initialized Then Throw New XMLFileReaderNotInitializedException
-            Dim sc As System.Collections.Specialized.StringCollection = New System.Collections.Specialized.StringCollection
+            Dim sc = New System.Collections.Specialized.StringCollection
             Dim target As System.Xml.XmlNode
             Dim nodes As System.Xml.XmlNodeList
             Dim N As System.Xml.XmlNode
@@ -1111,7 +1111,7 @@ Public Class XmlSettingsFileAccessor
         ''' <return>The function returns a string colection of items in a section.</return>
         Private Function GetItemsInSection(sectionName As String, itemType As XMLItemTypeEnum) As System.Collections.Specialized.StringCollection
             Dim nodes As System.Xml.XmlNodeList
-            Dim items As System.Collections.Specialized.StringCollection = New System.Collections.Specialized.StringCollection
+            Dim items = New System.Collections.Specialized.StringCollection
             Dim section As System.Xml.XmlNode = GetSection(sectionName)
             Dim N As System.Xml.XmlNode
             If section Is Nothing Then
@@ -1292,7 +1292,7 @@ Public Class XmlSettingsFileAccessor
                     '     <item key="Setting1" value="ValueA" />
                     '   </section>
 
-                    Using srInFile As System.IO.StreamReader = New System.IO.StreamReader(New System.IO.FileStream(fi.FullName, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
+                    Using srInFile = New System.IO.StreamReader(New System.IO.FileStream(fi.FullName, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.ReadWrite))
 
                         Do While srInFile.Peek() > -1
                             s = srInFile.ReadLine()
@@ -1334,9 +1334,9 @@ Public Class XmlSettingsFileAccessor
         ''' <returns>True if success, false if not a recognized line format</returns>
         ''' <remarks>Returns True for blank lines</remarks>
         Private Function ParseLineManual(strLine As String, ByRef doc As System.Xml.XmlDocument) As Boolean
-            Const SECTION_NAME_TAG As String = "<section name="
-            Const KEY_TAG As String = "key="
-            Const VALUE_TAG As String = "value="
+            Const SECTION_NAME_TAG = "<section name="
+            Const KEY_TAG = "key="
+            Const VALUE_TAG = "value="
 
             Dim strKey As String = String.Empty
             Dim strValue As String = String.Empty
@@ -1498,7 +1498,7 @@ Public Class XmlSettingsFileAccessor
         Public Sub Save()
             If Not Initialized Then Throw New XMLFileReaderNotInitializedException
             If Not OutputFilename Is Nothing AndAlso Not m_XmlDoc Is Nothing Then
-                Dim fi As System.IO.FileInfo = New System.IO.FileInfo(OutputFilename)
+                Dim fi = New System.IO.FileInfo(OutputFilename)
                 If Not fi.Directory.Exists Then
                     If NotifyOnException Then
                         Throw New System.Exception("Invalid path.")
@@ -1540,9 +1540,9 @@ Public Class XmlSettingsFileAccessor
                     Return String.Empty
                 End If
 
-                Dim sb As System.Text.StringBuilder = New System.Text.StringBuilder
-                Using sw As System.IO.StringWriter = New System.IO.StringWriter(sb)
-                    Using xw As System.Xml.XmlTextWriter = New System.Xml.XmlTextWriter(sw)
+                Dim sb = New System.Text.StringBuilder
+                Using sw = New System.IO.StringWriter(sb)
+                    Using xw = New System.Xml.XmlTextWriter(sw)
                         xw.Indentation = 3
                         xw.Formatting = System.Xml.Formatting.Indented
                         m_XmlDoc.WriteContentTo(xw)
