@@ -1,9 +1,12 @@
 Peptide Hit Results Proc Runner Revision History
 
-Version 1.1.5800; November 18, 2015
+Version 1.5.5813; December 1, 2015
+	- Fixed a bug that affected modification parsing when the same modification is defined in the MSGF+ search parameters as both a static and a dynamic modification (but for different target residues)
+
+Version 1.5.5800; November 18, 2015
 	- PHRP now recognizes that HexNAc is Hexosam, which is 203.079376 Da
 
-Version 1.1.5792; November 10, 2015
+Version 1.5.5792; November 10, 2015
 	- Updated clsParseCommandLine, clsProcessFilesOrFoldersBase, and clsXmlSettingsFileAccessor
 
 Version 1.5.5717; August 27, 2015

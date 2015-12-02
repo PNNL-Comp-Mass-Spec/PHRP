@@ -63,7 +63,11 @@ Public Class clsMSGFPlusParamFileModExtractor
         Public ModMassVal As Double
         Public Residues As String
         Public ModType As eMSGFDBModType
-        Public ModSymbol As Char
+        Public ModSymbol As Char            ' Modification symbol: *, #, @, ... ; dash if a static mod
+
+        Public Overrides Function ToString() As String
+            Return ModType.ToString() & " " & ModName & ", " & ModMass & "; " & Residues
+        End Function
     End Structure
 #End Region
 
@@ -347,7 +351,7 @@ Public Class clsMSGFPlusParamFileModExtractor
         If Not lstMSGFDBModInfo Is Nothing Then
 
             ' Call .LookupModificationDefinitionByMass for each entry in lstMSGFDBModInfo
-            For intIndex As Integer = 0 To lstMSGFDBModInfo.Count - 1
+            For intIndex = 0 To lstMSGFDBModInfo.Count - 1
 
                 Dim udtModInfo As udtModInfoType
                 udtModInfo = lstMSGFDBModInfo(intIndex)

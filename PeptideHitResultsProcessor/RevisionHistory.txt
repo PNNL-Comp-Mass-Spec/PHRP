@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.5813; December 1, 2015
+	- Fixed a bug that affected modification parsing when the same modification is defined in the MSGF+ search parameters as both a static and a dynamic modification (but for different target residues)
+
 Version 1.5.5800; November 18, 2015
 	- Now recognizes that HexNAc is Hexosam, which is 203.079376 Da
 	- Added column Probability for MSPathFinder results
@@ -16,10 +19,10 @@ Version 1.5.5683; July 24, 2015
 	- Added support for MSPathFinder
 	- Breaking change for C#: GetProteinMapping arguments are now "out" parameters
 
-Version 1.1.5617; May 19, 2015
+Version 1.5.5617; May 19, 2015
 	- Added QValue column to MODPlus result files
 
-Version 1.1.5616; May 18, 2015
+Version 1.5.5616; May 18, 2015
 	- Added support for MODPlus
 
 Version 1.5.5359; September 3, 2014
