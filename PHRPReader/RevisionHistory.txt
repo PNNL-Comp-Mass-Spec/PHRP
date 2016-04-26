@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5959; April 25, 2016
+	- Updated to .NET 4.5.1
+
 Version 1.1.5792; November 10, 2015
 	- Added descriptions to public properties and methods in clsModificationDefinition
 

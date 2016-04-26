@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5959; April 25, 2016
+	- Updated to System.Data.SQLite v1.0.97
+	- Updated to .NET 4.5.1
+
 Version 1.5.5813; December 1, 2015
 	- Fixed a bug that affected modification parsing when the same modification is defined in the MSGF+ search parameters as both a static and a dynamic modification (but for different target residues)
 
