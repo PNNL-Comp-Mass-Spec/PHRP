@@ -634,7 +634,7 @@ Public MustInherit Class clsProcessFilesOrFoldersBase
             ' Sort by date
             lstDates.Sort()
 
-            Dim intThresholdIndex As Integer = CInt(Math.Floor(mLogDataCache.Count - MAX_LOGDATA_CACHE_SIZE * 0.8))
+            Dim intThresholdIndex = CInt(Math.Floor(mLogDataCache.Count - MAX_LOGDATA_CACHE_SIZE * 0.8))
             If intThresholdIndex < 0 Then intThresholdIndex = 0
 
             Dim dtThreshold = lstDates(intThresholdIndex)

@@ -183,8 +183,7 @@ Public Class clsMSAlignResultsProcessor
         Dim strSequence As String
 
         Dim blnParsingModMass As Boolean
-        Dim strModMassDigits As String = String.Empty
-
+        
         Dim chMostRecentResidue As Char
         Dim intResidueLocInPeptide As Integer
 
@@ -197,7 +196,7 @@ Public Class clsMSAlignResultsProcessor
         Dim blnSuccess As Boolean
 
         blnParsingModMass = False
-        strModMassDigits = String.Empty
+        Dim strModMassDigits = String.Empty
 
         chMostRecentResidue = NO_RESIDUE
         intResidueLocInPeptide = 0
@@ -444,9 +443,7 @@ Public Class clsMSAlignResultsProcessor
     End Function
 
     Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
-        Dim strPepToProteinMapFilePath As String = String.Empty
-
-        strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+        Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
         If strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_fht") Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
@@ -482,16 +479,15 @@ Public Class clsMSAlignResultsProcessor
         Dim blnSuccess As Boolean
         Dim blnValidSearchResult As Boolean
 
-        Dim strErrorLog As String = String.Empty
-
         Try
+
+            Dim strErrorLog As String = String.Empty
 
             ' Open the input file and parse it
             ' Initialize the stream reader and the stream Text writer
             Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)),
                   swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
-                strErrorLog = String.Empty
                 intResultsProcessed = 0
                 blnHeaderParsed = False
 
@@ -538,7 +534,6 @@ Public Class clsMSAlignResultsProcessor
                     UpdateProgress(sngPercentComplete)
 
                     intResultsProcessed += 1
-
 
                 Loop
 
@@ -620,7 +615,7 @@ Public Class clsMSAlignResultsProcessor
                                 ' Comment line; skip it
                             Else
                                 ' Split the line on the equals sign
-                                kvSetting = PHRPReader.clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
+                                kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
 
                                 If kvSetting.Key.ToLower() = "cysteineProtection".ToLower() Then
 
@@ -697,8 +692,6 @@ Public Class clsMSAlignResultsProcessor
         Dim blnValidSearchResult As Boolean
         Dim blnFirstMatchForGroup As Boolean
 
-        Dim strErrorLog As String = String.Empty
-
         Try
             ' Possibly reset the mass correction tags and Mod Definitions
             If blnResetMassCorrectionTagsAndModificationDefinitions Then
@@ -723,11 +716,12 @@ Public Class clsMSAlignResultsProcessor
             Try
                 objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
+                Dim strErrorLog As String = String.Empty
+
                 ' Open the input file and parse it
                 ' Initialize the stream reader
                 Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                    strErrorLog = String.Empty
                     intResultsProcessed = 0
                     blnHeaderParsed = False
 
@@ -850,7 +844,7 @@ Public Class clsMSAlignResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             Finally
                 MyBase.CloseSequenceOutputFiles()
@@ -1129,28 +1123,28 @@ Public Class clsMSAlignResultsProcessor
 
         ReDim intColumnMapping(MSAlignSynFileColCount - 1)
 
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_ResultID, eMSAlignSynFileColumns.ResultID)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Scan, eMSAlignSynFileColumns.Scan)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Prsm_ID, eMSAlignSynFileColumns.Prsm_ID)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Spectrum_ID, eMSAlignSynFileColumns.Spectrum_ID)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Charge, eMSAlignSynFileColumns.Charge)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_PrecursorMZ, eMSAlignSynFileColumns.PrecursorMZ)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_DelM, eMSAlignSynFileColumns.DelM)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_DelM_PPM, eMSAlignSynFileColumns.DelMPPM)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_MH, eMSAlignSynFileColumns.MH)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Peptide, eMSAlignSynFileColumns.Peptide)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Protein, eMSAlignSynFileColumns.Protein)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Protein_Mass, eMSAlignSynFileColumns.Protein_Mass)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Unexpected_Mod_Count, eMSAlignSynFileColumns.Unexpected_Mod_Count)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Peak_Count, eMSAlignSynFileColumns.Peak_Count)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Matched_Peak_Count, eMSAlignSynFileColumns.Matched_Peak_Count)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Matched_Fragment_Ion_Count, eMSAlignSynFileColumns.Matched_Fragment_Ion_Count)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_PValue, eMSAlignSynFileColumns.PValue)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue, eMSAlignSynFileColumns.Rank_PValue)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_EValue, eMSAlignSynFileColumns.EValue)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FDR, eMSAlignSynFileColumns.FDR)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Species_ID, eMSAlignSynFileColumns.Species_ID)
-        lstColumnNames.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FragMethod, eMSAlignSynFileColumns.FragMethod)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_ResultID, eMSAlignSynFileColumns.ResultID)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Scan, eMSAlignSynFileColumns.Scan)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Prsm_ID, eMSAlignSynFileColumns.Prsm_ID)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Spectrum_ID, eMSAlignSynFileColumns.Spectrum_ID)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Charge, eMSAlignSynFileColumns.Charge)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_PrecursorMZ, eMSAlignSynFileColumns.PrecursorMZ)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_DelM, eMSAlignSynFileColumns.DelM)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_DelM_PPM, eMSAlignSynFileColumns.DelMPPM)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_MH, eMSAlignSynFileColumns.MH)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Peptide, eMSAlignSynFileColumns.Peptide)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Protein, eMSAlignSynFileColumns.Protein)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Protein_Mass, eMSAlignSynFileColumns.Protein_Mass)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Unexpected_Mod_Count, eMSAlignSynFileColumns.Unexpected_Mod_Count)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Peak_Count, eMSAlignSynFileColumns.Peak_Count)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Matched_Peak_Count, eMSAlignSynFileColumns.Matched_Peak_Count)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Matched_Fragment_Ion_Count, eMSAlignSynFileColumns.Matched_Fragment_Ion_Count)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_PValue, eMSAlignSynFileColumns.PValue)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue, eMSAlignSynFileColumns.Rank_PValue)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_EValue, eMSAlignSynFileColumns.EValue)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_FDR, eMSAlignSynFileColumns.FDR)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_Species_ID, eMSAlignSynFileColumns.Species_ID)
+        lstColumnNames.Add(clsPHRPParserMSAlign.DATA_COLUMN_FragMethod, eMSAlignSynFileColumns.FragMethod)
 
         Try
             ' Initialize each entry in intColumnMapping to -1
@@ -1312,8 +1306,6 @@ Public Class clsMSAlignResultsProcessor
 
         Dim lstMSAlignModInfo As List(Of clsModificationDefinition)
         Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType)
-        Dim strMTSPepToProteinMapFilePath As String = String.Empty
-
 
         Dim blnSuccess As Boolean
 
@@ -1391,12 +1383,12 @@ Public Class clsMSAlignResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage("Error in clsMSAlignResultsProcessor.ProcessFile (2):  " & ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
             End Try
 
         Catch ex As Exception
             SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+            SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
         End Try
 
         Return blnSuccess
@@ -1419,7 +1411,7 @@ Public Class clsMSAlignResultsProcessor
 
         If lstSourcePHRPDataFiles.Count = 0 Then
             SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         Else
             If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
@@ -1530,28 +1522,28 @@ Public Class clsMSAlignResultsProcessor
         ' Write out the header line for synopsis / first hits files
         Try
             Dim lstData As New List(Of String)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_ResultID)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Scan)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Prsm_ID)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Spectrum_ID)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Charge)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_PrecursorMZ)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_DelM)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_DelM_PPM)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_MH)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Peptide)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Protein)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Protein_Mass)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Unexpected_Mod_Count)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Peak_Count)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Matched_Peak_Count)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Matched_Fragment_Ion_Count)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_PValue)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_EValue)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FDR)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_Species_ID)
-            lstData.Add(PHRPReader.clsPHRPParserMSAlign.DATA_COLUMN_FragMethod)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_ResultID)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Scan)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Prsm_ID)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Spectrum_ID)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Charge)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_PrecursorMZ)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_DelM)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_DelM_PPM)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_MH)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Peptide)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Protein)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Protein_Mass)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Unexpected_Mod_Count)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Peak_Count)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Matched_Peak_Count)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Matched_Fragment_Ion_Count)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_PValue)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_EValue)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_FDR)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_Species_ID)
+            lstData.Add(clsPHRPParserMSAlign.DATA_COLUMN_FragMethod)
 
             swResultFile.WriteLine(CollapseList(lstData))
 

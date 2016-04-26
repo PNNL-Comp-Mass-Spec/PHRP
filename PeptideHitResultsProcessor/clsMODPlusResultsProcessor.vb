@@ -167,13 +167,12 @@ Public Class clsMODPlusResultsProcessor
         Dim strSequence As String
 
         Dim blnParsingModMass As Boolean
-        Dim strModMassDigits As String = String.Empty
 
         Dim chMostRecentResidue As Char
         Dim intResidueLocInPeptide As Integer
 
         blnParsingModMass = False
-        strModMassDigits = String.Empty
+        Dim strModMassDigits = String.Empty
 
         chMostRecentResidue = NO_RESIDUE
         intResidueLocInPeptide = 0
@@ -542,7 +541,6 @@ Public Class clsMODPlusResultsProcessor
                 Dim intStartIndex = 0
                 Dim intEndIndex As Integer
 
-                intStartIndex = 0
                 Do While intStartIndex < lstSearchResultsUnfiltered.Count
                     intEndIndex = intStartIndex
                     Do While intEndIndex + 1 < lstSearchResultsUnfiltered.Count AndAlso lstSearchResultsUnfiltered(intEndIndex + 1).ScanNum = lstSearchResultsUnfiltered(intStartIndex).ScanNum
@@ -810,7 +808,7 @@ Public Class clsMODPlusResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             Finally
                 MyBase.CloseSequenceOutputFiles()
@@ -1330,12 +1328,12 @@ Public Class clsMODPlusResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage("Error in clsMODPlusResultsProcessor.ProcessFile (2):  " & ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
             End Try
 
         Catch ex As Exception
             SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+            SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
         End Try
 
         Return blnSuccess
@@ -1363,7 +1361,7 @@ Public Class clsMODPlusResultsProcessor
 
         If lstSourcePHRPDataFiles.Count = 0 Then
             SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         Else
             If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
@@ -1381,7 +1379,7 @@ Public Class clsMODPlusResultsProcessor
 
         If blnSuccess Then
             ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+            MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
             ' Create the Protein Mods file
             blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus)

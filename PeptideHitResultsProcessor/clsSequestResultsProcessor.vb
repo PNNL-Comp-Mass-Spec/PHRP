@@ -202,9 +202,7 @@ Public Class clsSequestResultsProcessor
     End Function
 
     Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
-        Dim strPepToProteinMapFilePath As String = String.Empty
-
-        strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+        Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
         If strPepToProteinMapFilePath.ToLower().EndsWith("_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_fht") Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
@@ -248,8 +246,6 @@ Public Class clsSequestResultsProcessor
         Dim blnHeaderParsed As Boolean
         Dim intColumnMapping() As Integer = Nothing
 
-        Dim strErrorLog As String = String.Empty
-
         Try
             ' Possibly reset the mass correction tags and Mod Definitions
             If blnResetMassCorrectionTagsAndModificationDefinitions Then
@@ -269,11 +265,12 @@ Public Class clsSequestResultsProcessor
             Try
                 objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
+                Dim strErrorLog As String = String.Empty
+
                 ' Open the input file and parse it
                 ' Initialize the stream reader
                 Using srDataFile = New StreamReader(strInputFilePath)
 
-                    strErrorLog = String.Empty
                     intResultsProcessed = 0
                     blnHeaderParsed = False
 
@@ -382,7 +379,7 @@ Public Class clsSequestResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             Finally
                 MyBase.CloseSequenceOutputFiles()
@@ -407,7 +404,6 @@ Public Class clsSequestResultsProcessor
         Dim strPeptideSequenceWithMods As String = String.Empty
 
         Dim blnValidSearchResult As Boolean
-        blnValidSearchResult = False
 
         Try
             ' Set this to False for now
@@ -533,7 +529,7 @@ Public Class clsSequestResultsProcessor
                 blnSuccess = ParseSynopsisOrFirstHitsFile(fiInputFile.FullName, strOutputFolderPath, False)
             Catch ex As Exception
                 SetErrorMessage("Error calling ParseSynopsisOrFirstHitsFile" & ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             End Try
 
@@ -547,7 +543,7 @@ Public Class clsSequestResultsProcessor
 
         Catch ex As Exception
             SetErrorMessage("Error in clsSequestResultsProcessor.ProcessFile:  " & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+            SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
         End Try
 
         Return blnSuccess
@@ -561,7 +557,6 @@ Public Class clsSequestResultsProcessor
         ' Will also look for the first hits or synopsis file and use that too if it is present
 
         Dim lstSourcePHRPDataFiles = New List(Of String)
-        Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
         Dim strAdditionalFile As String
         Dim strInputFileBaseName As String = Path.GetFileNameWithoutExtension(fiInputFile.Name)
@@ -580,7 +575,7 @@ Public Class clsSequestResultsProcessor
             End If
         End If
 
-        strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
+        Dim strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
 
         If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
             blnSuccess = True

@@ -154,13 +154,12 @@ Public Class clsMODaResultsProcessor
         Dim strSequence As String
 
         Dim blnParsingModMass As Boolean
-        Dim strModMassDigits As String = String.Empty
 
         Dim chMostRecentResidue As Char
         Dim intResidueLocInPeptide As Integer
 
         blnParsingModMass = False
-        strModMassDigits = String.Empty
+        Dim strModMassDigits = String.Empty
 
         chMostRecentResidue = NO_RESIDUE
         intResidueLocInPeptide = 0
@@ -375,7 +374,7 @@ Public Class clsMODaResultsProcessor
 
     '	Catch ex As Exception
     '		SetErrorMessage(ex.Message)
-    '		SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+    '		SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
     '		blnSuccess = False
     '	End Try
 
@@ -599,7 +598,6 @@ Public Class clsMODaResultsProcessor
             Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)),
                   swResultFile = New StreamWriter(New FileStream(strOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
-                strErrorLog = String.Empty
                 Dim intResultsProcessed = 0
 
                 ' Initialize the list that will hold all of the records in the MODa result file
@@ -659,7 +657,6 @@ Public Class clsMODaResultsProcessor
                 Dim intStartIndex = 0
                 Dim intEndIndex As Integer
 
-                intStartIndex = 0
                 Do While intStartIndex < lstSearchResultsUnfiltered.Count
                     intEndIndex = intStartIndex
                     Do While intEndIndex + 1 < lstSearchResultsUnfiltered.Count AndAlso lstSearchResultsUnfiltered(intEndIndex + 1).ScanNum = lstSearchResultsUnfiltered(intStartIndex).ScanNum
@@ -806,8 +803,8 @@ Public Class clsMODaResultsProcessor
 
             ' Look for the IndexToScanMap file that corresponds to fiInputFile
             Dim lstScanMapFiles As List(Of FileInfo)
-            Dim matchIndex = fiInputFile.Name.LastIndexOf("_moda", System.StringComparison.Ordinal)
-            Dim sourceFileDescription = ""
+            Dim matchIndex = fiInputFile.Name.LastIndexOf("_moda", StringComparison.Ordinal)
+            Dim sourceFileDescription As String
 
             If matchIndex > 0 Then
                 Dim datasetName = fiInputFile.Name.Substring(0, matchIndex)
@@ -914,8 +911,6 @@ Public Class clsMODaResultsProcessor
             Dim htPeptidesFoundForProbabilityLevel = New Hashtable
             strPreviousProbability = String.Empty
 
-            Dim strErrorLog = String.Empty
-
             ' Assure that lstPepToProteinMapping is sorted on peptide
             If lstPepToProteinMapping.Count > 1 Then
                 lstPepToProteinMapping.Sort(New PepToProteinMappingComparer)
@@ -924,11 +919,12 @@ Public Class clsMODaResultsProcessor
             Try
                 objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
+                Dim strErrorLog = String.Empty
+
                 ' Open the input file and parse it
                 ' Initialize the stream reader
                 Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                    strErrorLog = String.Empty
                     Dim intResultsProcessed = 0
                     Dim blnHeaderParsed = False
 
@@ -1056,7 +1052,7 @@ Public Class clsMODaResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             Finally
                 MyBase.CloseSequenceOutputFiles()
@@ -1363,8 +1359,6 @@ Public Class clsMODaResultsProcessor
         Dim strSplitLine() As String = Nothing
 
         Try
-            ' Set this to False for now
-            Dim blnValidSearchResult = False
 
             ' Reset objSearchResult
             objSearchResult.Clear()
@@ -1474,8 +1468,6 @@ Public Class clsMODaResultsProcessor
 
         Dim lstMODaModInfo As List(Of clsModificationDefinition)
         Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType)
-        Dim strMTSPepToProteinMapFilePath As String = String.Empty
-
 
         Dim blnSuccess As Boolean
 
@@ -1561,12 +1553,12 @@ Public Class clsMODaResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage("Error in clsMODaResultsProcessor.ProcessFile (2):  " & ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
             End Try
 
         Catch ex As Exception
             SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+            SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
         End Try
 
         Return blnSuccess
@@ -1594,7 +1586,7 @@ Public Class clsMODaResultsProcessor
 
         If lstSourcePHRPDataFiles.Count = 0 Then
             SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         Else
             If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
@@ -1612,7 +1604,7 @@ Public Class clsMODaResultsProcessor
 
         If blnSuccess Then
             ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+            MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
             ' Create the Protein Mods file
             blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MODa)

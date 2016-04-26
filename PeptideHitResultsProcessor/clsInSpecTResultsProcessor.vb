@@ -530,7 +530,6 @@ Public Class clsInSpecTResultsProcessor
 
                     Loop
 
-
                     ' Store the last record
                     If intCurrentScanResultsCount > 0 Then
                         If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
@@ -557,7 +556,7 @@ Public Class clsInSpecTResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             End Try
         Catch ex As Exception
@@ -586,7 +585,7 @@ Public Class clsInSpecTResultsProcessor
 
     Private Function ComputeDeltaNormScore(sngCurrentScore As Single, sngNextScore As Single, sngValueIfCurrentScoreZero As Single) As Single
         Try
-            If sngCurrentScore <> 0 Then
+            If Math.Abs(sngCurrentScore) > Single.Epsilon Then
                 Return Math.Abs((sngCurrentScore - sngNextScore) / sngCurrentScore)
             Else
                 Return sngValueIfCurrentScoreZero
@@ -629,9 +628,7 @@ Public Class clsInSpecTResultsProcessor
     End Function
 
     Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
-        Dim strPepToProteinMapFilePath As String = String.Empty
-
-        strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
+        Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
         If strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_fht") Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
@@ -648,8 +645,6 @@ Public Class clsInSpecTResultsProcessor
 
         Dim intModCount As Integer
         Dim intUnnamedModID As Integer
-
-        Dim blnSuccess = False
 
         Try
             ' Initialize udtModList and intUnnamedModID
@@ -744,15 +739,13 @@ Public Class clsInSpecTResultsProcessor
 
             Console.WriteLine()
 
-            blnSuccess = True
+            Return True
 
         Catch ex As Exception
             SetErrorMessage("Error reading the Inspect parameter file (" & Path.GetFileName(strInspectParameterFilePath) & "): " & ex.Message)
             SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
-            blnSuccess = False
+            Return False
         End Try
-
-        Return blnSuccess
 
     End Function
 
@@ -848,7 +841,6 @@ Public Class clsInSpecTResultsProcessor
                           lstPepToProteinMapping(intIndex).ResidueEnd)
 
                     Next
-
 
                 End Using
 
@@ -961,10 +953,6 @@ Public Class clsInSpecTResultsProcessor
         Dim blnHeaderParsed As Boolean
         Dim intColumnMapping() As Integer = Nothing
 
-        Dim strErrorLog As String = String.Empty
-
-        Dim objPeptideSearchComparer As PepToProteinMappingPeptideSearchComparer
-
         Try
             ' Possibly reset the mass correction tags and Mod Definitions
             If blnResetMassCorrectionTagsAndModificationDefinitions Then
@@ -981,9 +969,6 @@ Public Class clsInSpecTResultsProcessor
             htPeptidesFoundForTotalPRMScoreLevel = New Hashtable
             strPreviousTotalPRMScore = String.Empty
 
-            ' Initialize objPeptideSearchComparer
-            objPeptideSearchComparer = New PepToProteinMappingPeptideSearchComparer
-
             ' Assure that lstPepToProteinMapping is sorted on peptide
             If lstPepToProteinMapping.Count > 1 Then
                 lstPepToProteinMapping.Sort(New PepToProteinMappingComparer)
@@ -992,11 +977,12 @@ Public Class clsInSpecTResultsProcessor
             Try
                 objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
+                Dim strErrorLog As String = String.Empty
+
                 ' Open the input file and parse it
                 ' Initialize the stream reader
                 Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                    strErrorLog = String.Empty
                     intResultsProcessed = 0
                     blnHeaderParsed = False
 
@@ -1123,7 +1109,7 @@ Public Class clsInSpecTResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             Finally
                 MyBase.CloseSequenceOutputFiles()
@@ -1168,9 +1154,10 @@ Public Class clsInSpecTResultsProcessor
                 If intResultsProcessed = 0 Then
                     ' This is the first line of the file; it may be a header row
                     ' Determine this by seeing if any of the first three columns contains a number
-                    If Not (clsPHRPBaseClass.IsNumber(strSplitLine(0)) OrElse
-                      clsPHRPBaseClass.IsNumber(strSplitLine(1)) OrElse
-                      clsPHRPBaseClass.IsNumber(strSplitLine(2))) Then
+                    If Not (
+                       clsPHRPBaseClass.IsNumber(strSplitLine(0)) OrElse
+                       clsPHRPBaseClass.IsNumber(strSplitLine(1)) OrElse
+                       clsPHRPBaseClass.IsNumber(strSplitLine(2))) Then
                         ' This is a header line; ignore it
                         blnValidSearchResult = False
                         Exit Try
@@ -1508,7 +1495,7 @@ Public Class clsInSpecTResultsProcessor
 
                     If blnSuccess AndAlso mCreateProteinModsFile Then
                         ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                        MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+                        MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
                         ' Create the Protein Mods file
                         blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect)
@@ -1522,12 +1509,12 @@ Public Class clsInSpecTResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " & ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
             End Try
 
         Catch ex As Exception
             SetErrorMessage("Error in ProcessFile:" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+            SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
         End Try
 
         Return blnSuccess
@@ -1579,8 +1566,6 @@ Public Class clsInSpecTResultsProcessor
         Dim intIndex As Integer
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
-
-        Dim strPeptideNew As String = String.Empty
 
         Dim intModMass As Integer
 
@@ -1634,6 +1619,8 @@ Public Class clsInSpecTResultsProcessor
                                     If Math.Abs(intModMass - CDbl(udtInspectModInfo(intIndex).ModMass)) <= 0.5 Then
                                         ' Match found
                                         ' Replace the matched region with .ModSymbol
+
+                                        Dim strPeptideNew As String
 
                                         If .Groups(0).Index > 0 Then
                                             strPeptideNew = strPeptide.Substring(0, .Groups(0).Index)
@@ -1818,7 +1805,6 @@ Public Class clsInSpecTResultsProcessor
      ByRef objSortComparer As IComparer(Of udtInspectSearchResultType))
 
         Dim intIndex As Integer
-        Dim intCurrentCharge As Short = Short.MinValue
 
         AssignRankAndDeltaNormValues(udtSearchResultsCurrentScan, intCurrentScanResultsCount)
 

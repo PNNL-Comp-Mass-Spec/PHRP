@@ -256,7 +256,7 @@ Public MustInherit Class clsPHRPParser
         mMaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM
 
         Dim fiFileInfo As FileInfo
-        Dim blnIsSynopsisFile As Boolean = False
+        Dim blnIsSynopsisFile = False
 
         If String.IsNullOrEmpty(strInputFilePath) Then
             ' User instantiated the class without a filename
@@ -307,7 +307,7 @@ Public MustInherit Class clsPHRPParser
                 ' Only continue if the fht versions exists
 
                 Dim strResultToSeqMapFilePath As String = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName)
-                Dim blnSeqInfoLoaded As Boolean = False
+                Dim blnSeqInfoLoaded = False
 
                 If Not String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
                     strResultToSeqMapFilePath = Path.Combine(mInputFolderPath, strResultToSeqMapFilePath)
@@ -462,7 +462,7 @@ Public MustInherit Class clsPHRPParser
     End Sub
 
     Protected Sub AddScore(objPSM As clsPSM, strColumns() As String, strScoreColumnName As String)
-        Const NOT_FOUND As String = "==SCORE_NOT_FOUND=="
+        Const NOT_FOUND = "==SCORE_NOT_FOUND=="
 
         Dim strValue As String
         strValue = clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders, NOT_FOUND)
@@ -531,8 +531,8 @@ Public MustInherit Class clsPHRPParser
 
         Dim lstAmbiguousMods = New SortedList(Of Integer, udtAmbiguousModInfo)
 
-        Dim intResidueNumber As Integer = 0
-        Dim blnParsingAmbiguousMod As Boolean = False
+        Dim intResidueNumber = 0
+        Dim blnParsingAmbiguousMod = False
         Dim udtCurrentMod As udtAmbiguousModInfo
 
         For intCharIndex = 0 To strPrimarySequence.Length - 1
@@ -773,7 +773,7 @@ Public MustInherit Class clsPHRPParser
     ''' <remarks></remarks>
     Public Shared Function NumToStringPlusMinus(Value As Double, DigitsOfPrecision As Integer) As String
 
-        Dim strFormatString As String = "+0;-0"
+        Dim strFormatString = "+0;-0"
         If DigitsOfPrecision > 0 Then
             strFormatString = "+0." & New String("0"c, DigitsOfPrecision) & ";-0." & New String("0"c, DigitsOfPrecision)
         End If
@@ -925,7 +925,7 @@ Public MustInherit Class clsPHRPParser
 
         Dim blnValidDate As Boolean
         Dim blnValidVersion As Boolean
-        Dim blnSuccess As Boolean = False
+        Dim blnSuccess = False
 
         Try
             ' Read the Tool_Version_Info file to determine the analysis time and the tool version
@@ -1038,6 +1038,7 @@ Public MustInherit Class clsPHRPParser
 
                 Dim lstAmbiguousMods = ExtractAmbiguousMods(objPSM.Peptide)
 
+                ' ReSharper disable once UseImplicitlyTypedVariableEvident
                 For intModIndex As Integer = 0 To strMods.Count - 1
 
                     ' Split strMods on the colon characters
@@ -1242,7 +1243,7 @@ Public MustInherit Class clsPHRPParser
         Dim lstMatchedDefs = New List(Of clsModificationDefinition)
 
         For Each objMod In mModInfo
-            If strMassCorrectionTag.ToLower() = objMod.MassCorrectionTag.ToLower() Then
+            If String.Equals(strMassCorrectionTag, objMod.MassCorrectionTag, StringComparison.InvariantCultureIgnoreCase) Then
                 lstMatchedDefs.Add(objMod)
             End If
         Next

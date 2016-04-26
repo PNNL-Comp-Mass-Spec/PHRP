@@ -587,7 +587,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         Dim strKey As String
 
-        Dim blnExistingMapFound = False
+        Dim blnExistingMapFound As Boolean
 
         Try
             If strProteinName Is Nothing Then strProteinName = String.Empty

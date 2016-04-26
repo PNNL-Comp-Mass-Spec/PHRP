@@ -252,7 +252,7 @@ Public Class clsXTandemResultsProcessor
                             End If
                         End If
 
-                        If dblModificationMass <> 0 Then
+                        If Math.Abs(dblModificationMass) > Single.Epsilon Then
                             ' Valid mass found; now extract the target residues
                             If Not blnParsingMotifDef AndAlso intAtSignIndex + 1 < strModDefs(intIndex).Length Then
                                 strTargetResidues = strModDefs(intIndex).Substring(intAtSignIndex + 1)
@@ -319,7 +319,7 @@ Public Class clsXTandemResultsProcessor
                     dblModificationMass = Double.Parse(strParamValue)
                 End If
 
-                If dblModificationMass <> 0 Then
+                If Math.Abs(dblModificationMass) > Single.Epsilon Then
                     ' Append the new mod information to udtModInfo
                     If intModInfoCount >= udtModInfo.Length Then
                         ReDim Preserve udtModInfo(udtModInfo.Length * 2 - 1)
@@ -362,7 +362,6 @@ Public Class clsXTandemResultsProcessor
         Dim objSearchResults() As clsSearchResultsXTandem
 
         Dim eCurrentXMLDataFileSection As eCurrentXMLDataFileSectionConstants
-        Dim strCurrentGroupType As String = String.Empty
 
         Dim intGroupElementReaderDepth As Integer
 
@@ -371,8 +370,6 @@ Public Class clsXTandemResultsProcessor
         Dim sngPercentComplete As Single
 
         Dim blnSuccess As Boolean
-
-        Dim strErrorLog As String = String.Empty
 
         Try
             ' Possibly reset the mass correction tags and Mod Definitions
@@ -397,7 +394,7 @@ Public Class clsXTandemResultsProcessor
                 ' Read the input parameters from the end of the X!Tandem results file (strInputFilePath)
                 blnSuccess = ParseXTandemResultsFileInputParameters(strInputFilePath)
                 If Not blnSuccess Then
-                    SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile, True)
+                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile, True)
                     Return False
                 End If
 
@@ -405,12 +402,14 @@ Public Class clsXTandemResultsProcessor
                     objSearchResults(intSearchResultIndex).UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
                 Next intSearchResultIndex
 
+                Dim strErrorLog = String.Empty
+
                 ' Open the input file and parse it
 
                 ' Initialize the stream reader and the XML Text Reader
                 Using srDataFile = New StreamReader(strInputFilePath)
-                    Using objXMLReader = New System.Xml.XmlTextReader(srDataFile)
-                        strErrorLog = String.Empty
+                    Using objXMLReader = New Xml.XmlTextReader(srDataFile)
+
                         intResultsProcessed = 0
 
                         ' Create the output file
@@ -456,7 +455,7 @@ Public Class clsXTandemResultsProcessor
                                                     intGroupElementReaderDepth = objXMLReader.Depth
 
                                                     ' See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
-                                                    strCurrentGroupType = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty)
+                                                    Dim strCurrentGroupType = XMLTextReaderGetAttributeValue(objXMLReader, "type", String.Empty)
                                                     If strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL Then
                                                         eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults
 
@@ -512,7 +511,7 @@ Public Class clsXTandemResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             Finally
                 MyBase.CloseSequenceOutputFiles()
@@ -527,7 +526,7 @@ Public Class clsXTandemResultsProcessor
 
     End Function
 
-    Private Function ParseXTandemResultsFileEntry(ByRef objXMLReader As System.Xml.XmlTextReader, ByRef swPeptideResultsFile As StreamWriter, ByRef intSearchResultCount As Integer, ByRef objSearchResults() As clsSearchResultsXTandem, ByRef strErrorLog As String, intGroupElementReaderDepth As Integer) As Boolean
+    Private Function ParseXTandemResultsFileEntry(ByRef objXMLReader As Xml.XmlTextReader, ByRef swPeptideResultsFile As StreamWriter, ByRef intSearchResultCount As Integer, ByRef objSearchResults() As clsSearchResultsXTandem, ByRef strErrorLog As String, intGroupElementReaderDepth As Integer) As Boolean
         ' Note: The number of valid entries in objSearchResults() is given by intSearchResultCount; objSearchResults() is expanded but never shrunk
         ' There is a separate entry in objSearchResults() for each protein encountered
 
@@ -563,8 +562,6 @@ Public Class clsXTandemResultsProcessor
         ' Scan: <xsl:value-of select="substring-before(concat(substring-after(./group/note,'scan='),' '), ' ')" />
 
         Dim strGroupIDInXMLFile As String = String.Empty
-        Dim strCurrentGroupType As String = String.Empty
-        Dim strCurrentGroupLabel As String = String.Empty
 
         Dim intIndex As Integer
         Dim intSearchResultIndex As Integer
@@ -586,8 +583,8 @@ Public Class clsXTandemResultsProcessor
         blnDomainParsed = False
         blnSuccess = False
 
-        strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL
-        strCurrentGroupLabel = GROUP_LABEL_PROTEIN
+        Dim strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL
+        Dim strCurrentGroupLabel = GROUP_LABEL_PROTEIN
 
         Try
             ' Reset the first entry in objSearchResults
@@ -1000,7 +997,7 @@ Public Class clsXTandemResultsProcessor
         Try
             ' Open the input file and parse it
             ' Initialize the stream reader and the XML Text Reader
-            Using objXMLReader = New System.Xml.XmlTextReader(strInputFilePath)
+            Using objXMLReader = New Xml.XmlTextReader(strInputFilePath)
 
                 ' Parse the file
                 eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile
@@ -1065,7 +1062,7 @@ Public Class clsXTandemResultsProcessor
         Return blnSuccess
     End Function
 
-    Private Sub ParseXTandemResultsFileInputParametersWork(ByRef objXMLReader As System.Xml.XmlTextReader, intParametersGroupDepth As Integer)
+    Private Sub ParseXTandemResultsFileInputParametersWork(ByRef objXMLReader As Xml.XmlTextReader, intParametersGroupDepth As Integer)
 
         ' Read the input parameters
         ' Each parameter is an element with name "note" with attributes "type" and "label"
@@ -1255,7 +1252,7 @@ Public Class clsXTandemResultsProcessor
                     Do While intIndexCompare < intModInfoCount
                         If intIndexCompare <> intIndex AndAlso udtModInfo(intIndexCompare).ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod Then
                             ' See if this modification has a similar mass (within MASS_DIGITS_OF_PRECISION digits of precision)
-                            If Math.Round(Math.Abs(udtModInfo(intIndexCompare).ModificationMass - udtModInfo(intIndex).ModificationMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) = 0 Then
+                            If Math.Abs(Math.Round(Math.Abs(udtModInfo(intIndexCompare).ModificationMass - udtModInfo(intIndex).ModificationMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)) < Single.Epsilon Then
                                 ' Matching mass
                                 ' Compare .TargetResidues
                                 If clsModificationDefinition.EquivalentTargetResidues(udtModInfo(intIndexCompare).TargetResidues, udtModInfo(intIndex).TargetResidues, True) Then
@@ -1295,7 +1292,7 @@ Public Class clsXTandemResultsProcessor
 
     End Sub
 
-    Private Sub ParseXTandemResultsFileReadDomainMods(ByRef objXMLReader As System.Xml.XmlTextReader, objSearchResult As clsSearchResultsXTandem, intDomainElementReaderDepth As Integer, blnUpdateModOccurrenceCounts As Boolean)
+    Private Sub ParseXTandemResultsFileReadDomainMods(ByRef objXMLReader As Xml.XmlTextReader, objSearchResult As clsSearchResultsXTandem, intDomainElementReaderDepth As Integer, blnUpdateModOccurrenceCounts As Boolean)
 
         Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
         Dim chTargetResidue As Char
@@ -1408,12 +1405,12 @@ Public Class clsXTandemResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (2): " & ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
             End Try
 
         Catch ex As Exception
             SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (1):" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+            SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
         End Try
 
         Return blnSuccess
@@ -1426,11 +1423,10 @@ Public Class clsXTandemResultsProcessor
 
         ' First create the MTS PepToProteinMap file using fiInputFile
         Dim lstSourcePHRPDataFiles = New List(Of String)
-        Dim strMTSPepToProteinMapFilePath As String = String.Empty
 
         lstSourcePHRPDataFiles.Add(strXtandemXTFilePath)
 
-        strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
+        Dim strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
 
         If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
             blnSuccess = True
@@ -1443,7 +1439,7 @@ Public Class clsXTandemResultsProcessor
 
         If blnSuccess Then
             ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath)
+            MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath)
 
             ' Now create the Protein Mods file
             blnSuccess = MyBase.CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem)
@@ -1506,7 +1502,7 @@ Public Class clsXTandemResultsProcessor
 
     End Function
 
-    Private Function XMLTextReaderGetAttributeValue(ByRef objXMLReader As System.Xml.XmlTextReader, strAttributeName As String, strValueIfMissing As String) As String
+    Private Function XMLTextReaderGetAttributeValue(ByRef objXMLReader As Xml.XmlTextReader, strAttributeName As String, strValueIfMissing As String) As String
         objXMLReader.MoveToAttribute(strAttributeName)
         If objXMLReader.ReadAttributeValue() Then
             Return objXMLReader.Value
@@ -1515,7 +1511,7 @@ Public Class clsXTandemResultsProcessor
         End If
     End Function
 
-    Private Function XMLTextReaderGetAttributeValue(ByRef objXMLReader As System.Xml.XmlTextReader, strAttributeName As String, intValueIfMissing As Integer) As Integer
+    Private Function XMLTextReaderGetAttributeValue(ByRef objXMLReader As Xml.XmlTextReader, strAttributeName As String, intValueIfMissing As Integer) As Integer
         objXMLReader.MoveToAttribute(strAttributeName)
         If objXMLReader.ReadAttributeValue() Then
             If clsPHRPBaseClass.IsNumber(objXMLReader.Value) Then
@@ -1528,7 +1524,7 @@ Public Class clsXTandemResultsProcessor
         End If
     End Function
 
-    Private Function XMLTextReaderGetAttributeValueDbl(ByRef objXMLReader As System.Xml.XmlTextReader, strAttributeName As String, dblValueIfMissing As Double) As Double
+    Private Function XMLTextReaderGetAttributeValueDbl(ByRef objXMLReader As Xml.XmlTextReader, strAttributeName As String, dblValueIfMissing As Double) As Double
         objXMLReader.MoveToAttribute(strAttributeName)
         If objXMLReader.ReadAttributeValue() Then
             If clsPHRPBaseClass.IsNumber(objXMLReader.Value) Then
@@ -1541,7 +1537,7 @@ Public Class clsXTandemResultsProcessor
         End If
     End Function
 
-    Private Function XMLTextReaderGetInnerText(ByRef objXMLReader As System.Xml.XmlTextReader) As String
+    Private Function XMLTextReaderGetInnerText(ByRef objXMLReader As Xml.XmlTextReader) As String
         Dim strValue As String = String.Empty
         Dim blnSuccess As Boolean
 
@@ -1559,7 +1555,7 @@ Public Class clsXTandemResultsProcessor
         Return strValue
     End Function
 
-    Private Sub XMLTextReaderSkipWhitespace(ByRef objXMLReader As System.Xml.XmlTextReader)
+    Private Sub XMLTextReaderSkipWhitespace(ByRef objXMLReader As Xml.XmlTextReader)
         If objXMLReader.NodeType = Xml.XmlNodeType.Whitespace Then
             ' Whitspace; read the next node
             objXMLReader.Read()

@@ -571,7 +571,6 @@ Public Class clsMSGFDBResultsProcessor
             blnMatchFound = False
             Do
                 intBestMatchIndex = -1
-                Dim dblCandidateMassDiff As Double = Double.MaxValue
 
                 ' Step through the known modifications to find the closest match
                 For intIndex = 0 To lstMSGFDBModInfo.Count - 1
@@ -596,7 +595,7 @@ Public Class clsMSGFDBResultsProcessor
                     End If
 
                     If blnTestMod Then
-                        dblCandidateMassDiff = Math.Abs(lstMSGFDBModInfo(intIndex).ModMassVal - dblModMass)
+                        Dim dblCandidateMassDiff = Math.Abs(lstMSGFDBModInfo(intIndex).ModMassVal - dblModMass)
                         If dblCandidateMassDiff < 0.25 Then
                             ' Possible match found
                             Dim updateCandidate = False
@@ -804,7 +803,7 @@ Public Class clsMSGFDBResultsProcessor
 
                     ' Initialize variables
                     Dim intStartIndex = 0
-                    Dim intEndIndex = 0
+                    Dim intEndIndex As Integer
 
                     Do While intStartIndex < lstSearchResultsUnfiltered.Count
                         intEndIndex = intStartIndex
@@ -875,7 +874,7 @@ Public Class clsMSGFDBResultsProcessor
         If Not success OrElse mErrorCode <> ePHRPErrorCodes.NoError Then
             If mErrorCode = ePHRPErrorCodes.NoError Then
                 SetErrorMessage("Unknown error extracting the modification definitions from the MSGF+ parameter file")
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
             End If
             Return False
         End If
@@ -1126,8 +1125,6 @@ Public Class clsMSGFDBResultsProcessor
         Dim blnValidSearchResult As Boolean
         Dim blnFirstMatchForGroup As Boolean
 
-        Dim strErrorLog As String = String.Empty
-
         Try
             ' Possibly reset the mass correction tags and Mod Definitions
             If blnResetMassCorrectionTagsAndModificationDefinitions Then
@@ -1152,11 +1149,12 @@ Public Class clsMSGFDBResultsProcessor
             Try
                 objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
 
+                Dim strErrorLog As String = String.Empty
+
                 ' Open the input file and parse it
                 ' Initialize the stream reader
                 Using srDataFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                    strErrorLog = String.Empty
                     intResultsProcessed = 0
                     blnHeaderParsed = False
 
@@ -1312,7 +1310,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim udtSearchResult = New udtMSGFDBSearchResultType
         Dim strSplitLine() As String = Nothing
 
-        Dim intScanCount = 1
+        Dim intScanCount As Integer
         Dim strSplitResult() As String = Nothing
 
         Dim udtMergedScanInfo() As udtMSGFDBSearchResultType = Nothing
@@ -1938,7 +1936,6 @@ Public Class clsMSGFDBResultsProcessor
     ''' <returns>True if success, False if failure</returns>
     Public Overloads Overrides Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
-        Dim strBaseName As String = String.Empty
         Dim strFhtOutputFilePath As String = String.Empty
         Dim strSynOutputFilePath As String = String.Empty
         Dim strPepToProteinMapFilePath As String
@@ -1995,7 +1992,7 @@ Public Class clsMSGFDBResultsProcessor
                 mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(mSearchToolParameterFilePath)
 
                 ' Define the base output filename using strInputFilePath
-                strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
+                Dim strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
                 ' Auto-replace "_msgfplus" with "_msgfdb"
                 If strBaseName.ToLower().EndsWith("_msgfplus") Then

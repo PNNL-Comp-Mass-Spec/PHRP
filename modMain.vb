@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "December 1, 2015"
+    Public Const PROGRAM_DATE As String = "April 25, 2016"
 
 	Private mInputFilePath As String
     Private mOutputFolderPath As String                         ' Optional
@@ -356,7 +356,7 @@ Module modMain
     End Function
 
     Private Sub ShowErrorMessage(strMessage As String)
-        Const strSeparator As String = "------------------------------------------------------------------------------"
+        Const strSeparator = "------------------------------------------------------------------------------"
 
         Console.WriteLine()
         Console.WriteLine(strSeparator)
@@ -368,7 +368,7 @@ Module modMain
     End Sub
 
     Private Sub ShowErrorMessage(strTitle As String, items As IEnumerable(Of String))
-        Const strSeparator As String = "------------------------------------------------------------------------------"
+        Const strSeparator = "------------------------------------------------------------------------------"
         Dim strMessage As String
 
         Console.WriteLine()
@@ -464,7 +464,7 @@ Module modMain
 
     Private Sub WriteToErrorStream(strErrorMessage As String)
         Try
-            Using swErrorStream As IO.StreamWriter = New IO.StreamWriter(Console.OpenStandardError())
+            Using swErrorStream = New IO.StreamWriter(Console.OpenStandardError())
                 swErrorStream.WriteLine(strErrorMessage)
             End Using
         Catch ex As Exception
@@ -481,9 +481,9 @@ Module modMain
     End Sub
 
     Private Sub mPeptideHitResultsProcRunner_ProgressChanged(taskDescription As String, percentComplete As Single) Handles mPeptideHitResultsProcRunner.ProgressChanged
-        Const PERCENT_REPORT_INTERVAL As Integer = 25
-        Const PROGRESS_DOT_INTERVAL_MSEC As Integer = 250
-        Const PROGRESS_VALUE_INTERVAL_SEC As Integer = 60
+        Const PERCENT_REPORT_INTERVAL = 25
+        Const PROGRESS_DOT_INTERVAL_MSEC = 250
+        Const PROGRESS_VALUE_INTERVAL_SEC = 60
 
         If percentComplete >= mLastProgressReportValue Then
             If mLastProgressReportValue > 0 Then

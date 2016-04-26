@@ -355,7 +355,7 @@ Public Class clsMSPathFinderResultsProcessor
 
         If lstSourcePHRPDataFiles.Count = 0 Then
             SetErrorMessage("Cannot call CreatePepToProteinMapFile since lstSourcePHRPDataFiles is empty")
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorCreatingOutputFiles)
+            SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         Else
             If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
@@ -370,7 +370,7 @@ Public Class clsMSPathFinderResultsProcessor
 
         If blnSuccess Then
             ' If necessary, copy various PHRPReader support files to the output folder
-            MyBase.ValidatePHRPReaderSupportFiles(IO.Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
+            MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
             ' Create the Protein Mods file
             blnSuccess = MyBase.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSPathFinder)
@@ -469,7 +469,6 @@ Public Class clsMSPathFinderResultsProcessor
                 Dim intStartIndex = 0
                 Dim intEndIndex As Integer
 
-                intStartIndex = 0
                 Do While intStartIndex < lstSearchResultsUnfiltered.Count
                     intEndIndex = intStartIndex
                     Do While intEndIndex + 1 < lstSearchResultsUnfiltered.Count AndAlso
@@ -520,7 +519,7 @@ Public Class clsMSPathFinderResultsProcessor
         If Not success OrElse mErrorCode <> ePHRPErrorCodes.NoError Then
             If mErrorCode = ePHRPErrorCodes.NoError Then
                 SetErrorMessage("Unknown error extracting the modification definitions from the MSPathFinder parameter file")
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
             End If
             Return False
         End If
@@ -712,7 +711,7 @@ Public Class clsMSPathFinderResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
                 blnSuccess = False
             Finally
                 MyBase.CloseSequenceOutputFiles()
@@ -1181,12 +1180,12 @@ Public Class clsMSPathFinderResultsProcessor
 
             Catch ex As Exception
                 SetErrorMessage("Error in clsMSPathFinderResultsProcessor.ProcessFile (2):  " & ex.Message)
-                SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.ErrorReadingInputFile)
+                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile)
             End Try
 
         Catch ex As Exception
             SetErrorMessage("Error in ProcessFile (1):" & ex.Message)
-            SetErrorCode(clsPHRPBaseClass.ePHRPErrorCodes.UnspecifiedError)
+            SetErrorCode(ePHRPErrorCodes.UnspecifiedError)
         End Try
 
         Return blnSuccess
