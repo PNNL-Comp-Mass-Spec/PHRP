@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.5973; May 9, 2016
+	- Added ConvertElementalCompositionToAtomCounts and ResetAminoAcidToDefault to clsPeptideMassCalculator
+
 Version 1.1.5959; April 25, 2016
 	- Updated to .NET 4.5.1
 
