@@ -36,7 +36,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
-        mFileDate = "August 6, 2015"
+        mFileDate = "May 9, 2016"
         InitializeLocalVariables()
     End Sub
 

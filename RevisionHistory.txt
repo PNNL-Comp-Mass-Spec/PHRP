@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5973; May 9, 2016
+	- Added support for custom amino acid definitions in MSGF+ parameter files
+
 Version 1.5.5959; April 25, 2016
 	- Updated to System.Data.SQLite v1.0.97
 	- Updated to .NET 4.5.1

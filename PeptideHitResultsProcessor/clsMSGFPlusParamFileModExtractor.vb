@@ -34,7 +34,6 @@
 
 Imports System.IO
 Imports System.Runtime.InteropServices
-Imports System.Text.RegularExpressions
 Imports PHRPReader
 
 Public Class clsMSGFPlusParamFileModExtractor
@@ -42,8 +41,6 @@ Public Class clsMSGFPlusParamFileModExtractor
 #Region "Constants and Enums"
 
     Public Const UNKNOWN_MSGFDB_MOD_SYMBOL As Char = "?"c
-
-    Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
     Public Enum eMSGFDBModType As Integer
         Unknown = 0
@@ -53,13 +50,28 @@ Public Class clsMSGFPlusParamFileModExtractor
         DynCTermPeptide = 4
         DynNTermProtein = 5
         DynCTermProtein = 6
+        CustomAA = 7
     End Enum
 #End Region
 
 #Region "Structures"
+
+    ''' <summary>
+    ''' Tracks dynamic and static modification details
+    ''' Also tracks Custom amino acids
+    ''' </summary>
+    ''' <remarks>
+    ''' Notes when tracking information for custom amino acids
+    '''   ModName:    Name associated with the custom amino acid
+    '''   ModMass:    Composition string, for example C5H7N1O2S0 for Hydroxyproline
+    '''   ModMassVal: Computed mass of the composition string
+    '''   Residues:   Single letter abbreviation for the custom amino acid, for example J or X
+    '''   ModType:    eMSGFDBModType.CustomAA
+    '''   ModSymbol:  ?   (a question mark; not used)
+    ''' </remarks>
     Public Structure udtModInfoType
         Public ModName As String            ' Mod name (read from the parameter file) isn't used by MSGF+, but it is used by MSPathFinder
-        Public ModMass As String            ' Storing as a string since reading from a text file and writing to a text file
+        Public ModMass As String            ' Storing as a string since reading from a text file and writing to a text file.  Also, can be a mass or an empirical formula
         Public ModMassVal As Double
         Public Residues As String
         Public ModType As eMSGFDBModType
@@ -103,16 +115,14 @@ Public Class clsMSGFPlusParamFileModExtractor
     Private Function ComputeMass(strEmpiricalformula As String) As Double
         ' CompositionStr (C[Num]H[Num]N[Num]O[Num]S[Num]P[Num])
         ' 	- C (Carbon), H (Hydrogen), N (Nitrogen), O (Oxygen), S (Sulfer) and P (Phosphorus) are allowed.
-        ' 	- Atom can be omitted. The sequence of atoms must be followed. 
+        ' 	- Atom can be omitted.
         ' 	- Negative numbers are allowed.
-        ' 	- E.g. C2H2O1 (valid), H2C1O1 (invalid) 
-
-        Static reAtomicFormulaRegEx As New Regex("[CHNOSP][+-]?\d*", REGEX_OPTIONS)
-
-        Dim reMatches As MatchCollection
-        Dim strElement As String
-        Dim intCount As Integer
-        Dim dblMass As Double = 0
+        ' 	- Examples: 
+        '     C2H2O1 
+        '     C+2H+3N+1O+1
+        '     H2C1O1
+        '     H-1N-1O
+        '     C3H6N2O0S1
 
         If String.Equals(strEmpiricalformula, "HexNAc", StringComparison.InvariantCultureIgnoreCase) Then
             ' This is a special-case modification that MSGF+ and MSPathFinder recognize
@@ -121,38 +131,34 @@ Public Class clsMSGFPlusParamFileModExtractor
             Return 203.079376
         End If
 
-        reMatches = reAtomicFormulaRegEx.Matches(strEmpiricalformula)
+        Dim elementalComposition As Dictionary(Of Char, Integer)
 
-        If reMatches.Count > 0 Then
+        Try
+            elementalComposition = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(strEmpiricalformula)
+        Catch ex As Exception
+            ReportError(ex.Message)
+            Return 0
+        End Try
 
-            For Each reMatch As Match In reMatches
+        Dim dblMass As Double = 0
 
-                strElement = reMatch.Value.Chars(0)
-                If reMatch.Value.Length > 1 Then
-                    If Not Integer.TryParse(reMatch.Value.Substring(1), intCount) Then
-                        ReportError("Error parsing empirical formula '" & strEmpiricalformula & "', number not found in " & reMatch.Value)
-                        dblMass = 0
-                        Exit For
-                    End If
-                Else
-                    intCount = 1
-                End If
+        For Each elementItem In elementalComposition
 
-                Select Case strElement.ToUpper()
-                    Case "C" : dblMass += intCount * 12
-                    Case "H" : dblMass += intCount * clsPeptideMassCalculator.MASS_HYDROGEN
-                    Case "N" : dblMass += intCount * 14.003074
-                    Case "O" : dblMass += intCount * 15.994915
-                    Case "S" : dblMass += intCount * 31.972072
-                    Case "P" : dblMass += intCount * 30.973763
-                    Case Else
-                        ' Unknown element
-                        ReportError("Error parsing empirical formula '" & strEmpiricalformula & "', unknown element " & strElement)
-                        dblMass = 0
-                        Exit For
-                End Select
-            Next
-        End If
+            Dim elementSymbol As Char = elementItem.Key
+
+            Select Case Char.ToUpper(elementSymbol)
+                Case "C"c : dblMass += elementItem.Value * 12
+                Case "H"c : dblMass += elementItem.Value * clsPeptideMassCalculator.MASS_HYDROGEN
+                Case "N"c : dblMass += elementItem.Value * 14.003074
+                Case "O"c : dblMass += elementItem.Value * 15.994915
+                Case "S"c : dblMass += elementItem.Value * 31.972072
+                Case "P"c : dblMass += elementItem.Value * 30.973763
+                Case Else
+                    ' Unknown element
+                    ReportError("Error parsing empirical formula '" & strEmpiricalformula & "', unknown element " & elementItem.Key & "; must be C, H, N, O, S, or P")
+                    Return 0
+            End Select
+        Next
 
         Return dblMass
 
@@ -167,18 +173,15 @@ Public Class clsMSGFPlusParamFileModExtractor
     ''' <remarks></remarks>
     Public Function ExtractModInfoFromParamFile(paramFilePath As String, <Out()> ByRef lstModInfo As List(Of udtModInfoType)) As Boolean
 
-        Const STATIC_MOD_TAG = "StaticMod"
-        Const DYNAMIC_MOD_TAG = "DynamicMod"
-
-        Dim strLineIn As String
-        Dim strSplitLine As String()
-
-        Dim intUnnamedModID As Integer
+        Dim tagNamesToFind = New List(Of String)
+        tagNamesToFind.Add("StaticMod")
+        tagNamesToFind.Add("DynamicMod")
+        tagNamesToFind.Add("CustomAA")
 
         ' Initialization
         lstModInfo = New List(Of udtModInfoType)
 
-        intUnnamedModID = 0
+        Dim intUnnamedModID = 0
         mErrorMessage = String.Empty
 
         Try
@@ -198,7 +201,7 @@ Public Class clsMSGFPlusParamFileModExtractor
             Using srInFile = New StreamReader(New FileStream(fiParamFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
-                    strLineIn = srInFile.ReadLine().Trim()
+                    Dim strLineIn = srInFile.ReadLine().Trim()
 
                     If String.IsNullOrWhiteSpace(strLineIn) Then Continue Do
 
@@ -208,17 +211,26 @@ Public Class clsMSGFPlusParamFileModExtractor
                         ' Comment line; skip it
                         Continue Do
                     Else
-                        strModSpec = ValidateIsValidModSpec(strLineIn, STATIC_MOD_TAG)
-                        If Not String.IsNullOrEmpty(strModSpec) Then
-                            ' Line resembles StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
-                        Else
-                            strModSpec = ValidateIsValidModSpec(strLineIn, DYNAMIC_MOD_TAG)
+                        For Each tagName In tagNamesToFind
+                            strModSpec = ValidateIsValidModSpec(strLineIn, tagName)
                             If Not String.IsNullOrEmpty(strModSpec) Then
-                                ' Line resembles DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
-                            Else
-                                If strLineIn.Contains(",opt,") OrElse strLineIn.Contains(",fix,") Then
-                                    strModSpec = strLineIn
-                                End If
+                                ' Known tag found; strLineIn was something like this:
+                                '   StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
+                                '   DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
+                                '   CustomAA=C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
+                                '
+                                ' And strModSpec will now be something like this:
+                                '   C2H3N1O1,C,fix,any,Carbamidomethylation
+                                '   C2H3NO, *,  opt, N-term,   Carbamidomethylation
+                                '   C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
+
+                                Exit For
+                            End If
+                        Next
+
+                        If String.IsNullOrEmpty(strModSpec) Then
+                            If strLineIn.Contains(",opt,") OrElse strLineIn.Contains(",fix,") OrElse strLineIn.Contains(",custom,") Then
+                                strModSpec = strLineIn
                             End If
                         End If
 
@@ -231,7 +243,7 @@ Public Class clsMSGFPlusParamFileModExtractor
                     ' Modification definition line found
 
                     ' Split the line on commas
-                    strSplitLine = strModSpec.Split(","c)
+                    Dim strSplitLine = strModSpec.Split(","c)
 
                     If strSplitLine.Length < 5 Then
                         Continue Do
@@ -239,11 +251,19 @@ Public Class clsMSGFPlusParamFileModExtractor
 
                     Dim udtModInfo = New udtModInfoType
 
+                    ' Notes when tracking information for custom amino acids
+                    '   ModName:    Name associated with the custom amino acid
+                    '   ModMass:    Composition string, for example C5H7N1O2S0 for Hydroxyproline
+                    '   ModMassVal: Computed mass of the composition string
+                    '   Residues:   Single letter abbreviation for the custom amino acid, for example J or X
+                    '   ModType:    eMSGFDBModType.CustomAA
+                    '   ModSymbol:  ?   (a question mark; not used)
+
                     With udtModInfo
                         .ModMass = strSplitLine(0).Trim()
 
                         If Not Double.TryParse(.ModMass, .ModMassVal) Then
-                            ' Mod is specified as an empirical formula
+                            ' Mod (or custom AA) is specified as an empirical formula
                             ' Compute the mass
                             .ModMassVal = ComputeMass(.ModMass)
                         End If
@@ -256,51 +276,56 @@ Public Class clsMSGFPlusParamFileModExtractor
                                 .ModType = eMSGFDBModType.DynamicMod
                             Case "fix"
                                 .ModType = eMSGFDBModType.StaticMod
+                            Case "custom"
+                                .ModType = eMSGFDBModType.CustomAA
                             Case Else
                                 ReportWarning("Unrecognized Mod Type in the " & mToolName & " parameter file; should be 'opt' or 'fix'")
                                 .ModType = eMSGFDBModType.DynamicMod
                         End Select
 
-                        Select Case strSplitLine(3).Trim().ToLower().Replace("-", String.Empty)
-                            Case "any"
-                                ' Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
-                            Case "nterm"
-                                If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
-                                    ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                    .ModType = eMSGFDBModType.DynamicMod
-                                End If
-                                .Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
-                                If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermPeptide
+                        If .ModType <> eMSGFDBModType.CustomAA Then
 
-                            Case "cterm"
-                                If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
-                                    ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                    .ModType = eMSGFDBModType.DynamicMod
-                                End If
-                                .Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
-                                If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermPeptide
+                            Select Case strSplitLine(3).Trim().ToLower().Replace("-", String.Empty)
+                                Case "any"
+                                    ' Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
+                                Case "nterm"
+                                    If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+                                        ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                        .ModType = eMSGFDBModType.DynamicMod
+                                    End If
+                                    .Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS
+                                    If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermPeptide
 
-                            Case "protnterm"
-                                ' Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
-                                If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
-                                    ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                    .ModType = eMSGFDBModType.DynamicMod
-                                End If
-                                .Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
-                                If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermProtein
+                                Case "cterm"
+                                    If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+                                        ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                        .ModType = eMSGFDBModType.DynamicMod
+                                    End If
+                                    .Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+                                    If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermPeptide
 
-                            Case "protcterm"
-                                ' Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
-                                If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
-                                    ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                    .ModType = eMSGFDBModType.DynamicMod
-                                End If
-                                .Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
-                                If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
+                                Case "protnterm"
+                                    ' Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
+                                    If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+                                        ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                        .ModType = eMSGFDBModType.DynamicMod
+                                    End If
+                                    .Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS
+                                    If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynNTermProtein
 
-                            Case Else
-                                ReportWarning("Unrecognized Mod Type in the " & mToolName & " parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
-                        End Select
+                                Case "protcterm"
+                                    ' Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
+                                    If .ModType = eMSGFDBModType.StaticMod AndAlso .Residues <> "*" Then
+                                        ' This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                        .ModType = eMSGFDBModType.DynamicMod
+                                    End If
+                                    .Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS
+                                    If .ModType = eMSGFDBModType.DynamicMod Then .ModType = eMSGFDBModType.DynCTermProtein
+
+                                Case Else
+                                    ReportWarning("Unrecognized Mod Type in the " & mToolName & " parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'")
+                            End Select
+                        End If
 
                         .ModName = strSplitLine(4).Trim()
                         If String.IsNullOrEmpty(.ModName) Then

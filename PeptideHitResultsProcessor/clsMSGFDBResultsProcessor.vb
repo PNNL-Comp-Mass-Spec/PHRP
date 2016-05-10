@@ -23,7 +23,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "December 1, 2015"
+        MyBase.mFileDate = "May 9, 2016"
         InitializeLocalVariables()
     End Sub
 
@@ -720,6 +720,26 @@ Public Class clsMSGFDBResultsProcessor
             htScanGroupCombo = New Dictionary(Of String, Boolean)
 
             mPrecursorMassErrorWarningCount = 0
+
+            ' Look for custom amino acids
+            Dim lstCustomAA = (From item In lstMSGFDBModInfo Where item.ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.CustomAA Select item).ToList()
+            For Each customAADef In lstCustomAA
+                Dim aminoAcidSymbol = customAADef.Residues(0)
+                Dim empiricalFormula = customAADef.ModMass
+                Dim aminoAcidMass = customAADef.ModMassVal
+
+                Try
+                    Dim elementalComposition = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalFormula)
+                    Dim atomCounts = clsPeptideMassCalculator.ConvertElementalCompositionToAtomCounts(elementalComposition)
+
+                    mPeptideSeqMassCalculator.SetAminoAcidMass(aminoAcidSymbol, aminoAcidMass)
+                    mPeptideSeqMassCalculator.SetAminoAcidAtomCounts(aminoAcidSymbol, atomCounts)
+
+                Catch ex As Exception
+                    ReportError(ex.Message)
+                End Try
+
+            Next
 
             Try
                 ' Open the input file and parse it
