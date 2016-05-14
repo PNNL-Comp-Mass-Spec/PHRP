@@ -12,119 +12,120 @@ Option Strict On
 
 Imports System.Runtime.InteropServices
 Imports PHRPReader.clsPHRPReader
+Imports PHRPReader.clsMSGFPlusParamFileModExtractor
 Imports System.Text.RegularExpressions
 
 Public Class clsPHRPParserMSGFDB
 	Inherits clsPHRPParser
 
 #Region "Constants"
-	Public Const DATA_COLUMN_ResultID As String = "ResultID"
-	Public Const DATA_COLUMN_Scan As String = "Scan"
-	Public Const DATA_COLUMN_FragMethod As String = "FragMethod"
-	Public Const DATA_COLUMN_SpecIndex As String = "SpecIndex"
-	Public Const DATA_COLUMN_Charge As String = "Charge"
-	Public Const DATA_COLUMN_PrecursorMZ As String = "PrecursorMZ"
-	Public Const DATA_COLUMN_DelM As String = "DelM"
-	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
-	Public Const DATA_COLUMN_MH As String = "MH"
-	Public Const DATA_COLUMN_Peptide As String = "Peptide"
-	Public Const DATA_COLUMN_Protein As String = "Protein"
-	Public Const DATA_COLUMN_NTT As String = "NTT"
-	Public Const DATA_COLUMN_DeNovoScore As String = "DeNovoScore"
-	Public Const DATA_COLUMN_MSGFScore As String = "MSGFScore"
+    Public Const DATA_COLUMN_ResultID = "ResultID"
+    Public Const DATA_COLUMN_Scan = "Scan"
+    Public Const DATA_COLUMN_FragMethod = "FragMethod"
+    Public Const DATA_COLUMN_SpecIndex = "SpecIndex"
+    Public Const DATA_COLUMN_Charge = "Charge"
+    Public Const DATA_COLUMN_PrecursorMZ = "PrecursorMZ"
+    Public Const DATA_COLUMN_DelM = "DelM"
+    Public Const DATA_COLUMN_DelM_PPM = "DelM_PPM"
+    Public Const DATA_COLUMN_MH = "MH"
+    Public Const DATA_COLUMN_Peptide = "Peptide"
+    Public Const DATA_COLUMN_Protein = "Protein"
+    Public Const DATA_COLUMN_NTT = "NTT"
+    Public Const DATA_COLUMN_DeNovoScore = "DeNovoScore"
+    Public Const DATA_COLUMN_MSGFScore = "MSGFScore"
 
-	Public Const DATA_COLUMN_MSGFDB_SpecProb As String = "MSGFDB_SpecProb"					' MSGFDB
-	Public Const DATA_COLUMN_Rank_MSGFDB_SpecProb As String = "Rank_MSGFDB_SpecProb"		' MSGFDB
+    Public Const DATA_COLUMN_MSGFDB_SpecProb = "MSGFDB_SpecProb"                    ' MSGFDB
+    Public Const DATA_COLUMN_Rank_MSGFDB_SpecProb = "Rank_MSGFDB_SpecProb"      ' MSGFDB
 
-	Public Const DATA_COLUMN_MSGFDB_SpecEValue As String = "MSGFDB_SpecEValue"				' MSGF+
-	Public Const DATA_COLUMN_Rank_MSGFDB_SpecEValue As String = "Rank_MSGFDB_SpecEValue"	' MSGF+
+    Public Const DATA_COLUMN_MSGFDB_SpecEValue = "MSGFDB_SpecEValue"                ' MSGF+
+    Public Const DATA_COLUMN_Rank_MSGFDB_SpecEValue = "Rank_MSGFDB_SpecEValue"  ' MSGF+
 
-	Public Const DATA_COLUMN_PValue As String = "PValue"		' MSGFDB
-	Public Const DATA_COLUMN_EValue As String = "EValue"		' MSGF+
+    Public Const DATA_COLUMN_PValue = "PValue"      ' MSGFDB
+    Public Const DATA_COLUMN_EValue = "EValue"      ' MSGF+
 
-	Public Const DATA_COLUMN_FDR As String = "FDR"							' MSGFDB; Only present if a Target/Decoy (TDA) search was used
-	Public Const DATA_COLUMN_PepFDR As String = "PepFDR"					' MSGFDB; Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
+    Public Const DATA_COLUMN_FDR = "FDR"                            ' MSGFDB; Only present if a Target/Decoy (TDA) search was used
+    Public Const DATA_COLUMN_PepFDR = "PepFDR"                  ' MSGFDB; Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
 
-	Public Const DATA_COLUMN_QValue As String = "QValue"					' MSGF+ reports QValue instead of FDR
-	Public Const DATA_COLUMN_PepQValue As String = "PepQValue"				' MSGF+ reports pepQValue instead of PepFDR
+    Public Const DATA_COLUMN_QValue = "QValue"                  ' MSGF+ reports QValue instead of FDR
+    Public Const DATA_COLUMN_PepQValue = "PepQValue"                ' MSGF+ reports pepQValue instead of PepFDR
 
-	Public Const DATA_COLUMN_EFDR As String = "EFDR"						' Only present if a Target/Decoy (TDA) search was not used
+    Public Const DATA_COLUMN_EFDR = "EFDR"                      ' Only present if a Target/Decoy (TDA) search was not used
 
-	Public Const DATA_COLUMN_IMS_Scan As String = "IMS_Scan"
-	Public Const DATA_COLUMN_IMS_Drift_Time As String = "IMS_Drift_Time"
+    Public Const DATA_COLUMN_IMS_Scan = "IMS_Scan"
+    Public Const DATA_COLUMN_IMS_Drift_Time = "IMS_Drift_Time"
 
-	Public Const DATA_COLUMN_Isotope_Error As String = "IsotopeError"		' Only reported by MSGF+
+    Public Const DATA_COLUMN_Isotope_Error = "IsotopeError"     ' Only reported by MSGF+
 
-	Public Const FILENAME_SUFFIX_SYN As String = "_msgfdb_syn.txt"
-	Public Const FILENAME_SUFFIX_FHT As String = "_msgfdb_fht.txt"
+    Public Const FILENAME_SUFFIX_SYN = "_msgfdb_syn.txt"
+    Public Const FILENAME_SUFFIX_FHT = "_msgfdb_fht.txt"
 
-	Protected Const MSGFDB_SEARCH_ENGINE_NAME As String = "MS-GFDB"
+    Private Const MSGFDB_SEARCH_ENGINE_NAME = "MS-GFDB"
 #End Region
 
 #Region "Properties"
 
-	Public Overrides ReadOnly Property PHRPFirstHitsFileName() As String
-		Get
-			Return GetPHRPFirstHitsFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPFirstHitsFileName() As String
+        Get
+            Return GetPHRPFirstHitsFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPModSummaryFileName() As String
-		Get
-			Return GetPHRPModSummaryFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPModSummaryFileName() As String
+        Get
+            Return GetPHRPModSummaryFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPPepToProteinMapFileName() As String
-		Get
-			Return GetPHRPPepToProteinMapFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPPepToProteinMapFileName() As String
+        Get
+            Return GetPHRPPepToProteinMapFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPProteinModsFileName() As String
-		Get
-			Return GetPHRPProteinModsFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPProteinModsFileName() As String
+        Get
+            Return GetPHRPProteinModsFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPSynopsisFileName() As String
-		Get
-			Return GetPHRPSynopsisFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPSynopsisFileName() As String
+        Get
+            Return GetPHRPSynopsisFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPResultToSeqMapFileName() As String
-		Get
-			Return GetPHRPResultToSeqMapFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPResultToSeqMapFileName() As String
+        Get
+            Return GetPHRPResultToSeqMapFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPSeqInfoFileName() As String
-		Get
-			Return GetPHRPSeqInfoFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPSeqInfoFileName() As String
+        Get
+            Return GetPHRPSeqInfoFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPSeqToProteinMapFileName() As String
-		Get
-			Return GetPHRPSeqToProteinMapFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPSeqToProteinMapFileName() As String
+        Get
+            Return GetPHRPSeqToProteinMapFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property SearchEngineName() As String
-		Get
-			Return GetSearchEngineName()
-		End Get
-	End Property
+    Public Overrides ReadOnly Property SearchEngineName() As String
+        Get
+            Return GetSearchEngineName()
+        End Get
+    End Property
 
 #End Region
 
-	''' <summary>
-	''' Constructor; assumes blnLoadModsAndSeqInfo=True
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <remarks></remarks>
+    ''' <summary>
+    ''' Constructor; assumes blnLoadModsAndSeqInfo=True
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <remarks></remarks>
     Public Sub New(strDatasetName As String, strInputFilePath As String)
         Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
     End Sub
@@ -203,7 +204,7 @@ Public Class clsPHRPParserMSGFDB
         <Out()> ByRef dblTolerancePPM As Double,
         resultType As ePeptideHitResultType) As Double
 
-        Dim strTolerance As String = String.Empty
+        Dim strTolerance = String.Empty
         Dim strToleranceSplit As String()
 
         Dim reMatch As Match
@@ -226,7 +227,7 @@ Public Class clsPHRPParserMSGFDB
             Return dblToleranceDa
         End If
 
-        For Each strItem As String In strToleranceSplit
+        For Each strItem In strToleranceSplit
             If strItem.Trim.StartsWith("#") Then Continue For
 
             If resultType = ePeptideHitResultType.MSPathFinder Then
@@ -323,85 +324,102 @@ Public Class clsPHRPParserMSGFDB
 
     End Function
 
-    Protected Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
-        Dim strSettingValue As String = String.Empty
-        Dim intValue As Integer
-        Dim blnSuccess As Boolean
+    Private Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Try
-            blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSGFDB_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MSGFDB, objSearchEngineParams)
+            mPeptideMassCalculator.ResetAminoAcidMasses()
 
-            If blnSuccess Then
+            Dim success = ReadKeyValuePairSearchEngineParamFile(MSGFDB_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MSGFDB, objSearchEngineParams)
 
-                ' Determine the enzyme name
-                If objSearchEngineParams.Parameters.TryGetValue("enzymeid", strSettingValue) Then
-                    If Integer.TryParse(strSettingValue, intValue) Then
-                        Select Case intValue
-                            Case 0 : objSearchEngineParams.Enzyme = "no_enzyme"
-                            Case 1 : objSearchEngineParams.Enzyme = "trypsin"
-                            Case 2 : objSearchEngineParams.Enzyme = "Chymotrypsin"
-                            Case 3 : objSearchEngineParams.Enzyme = "Lys-C "
-                            Case 4 : objSearchEngineParams.Enzyme = "Lys-N  "
-                            Case 5 : objSearchEngineParams.Enzyme = "Glu-C  "
-                            Case 6 : objSearchEngineParams.Enzyme = "Arg-C "
-                            Case 7 : objSearchEngineParams.Enzyme = "Asp-N"
-                        End Select
-                    End If
+            If Not success Then
+                Return False
+            End If
+
+            Dim strSettingValue = String.Empty
+            Dim intValue As Integer
+
+            ' Determine the enzyme name
+            If objSearchEngineParams.Parameters.TryGetValue("enzymeid", strSettingValue) Then
+                If Integer.TryParse(strSettingValue, intValue) Then
+                    Select Case intValue
+                        Case 0 : objSearchEngineParams.Enzyme = "no_enzyme"
+                        Case 1 : objSearchEngineParams.Enzyme = "trypsin"
+                        Case 2 : objSearchEngineParams.Enzyme = "Chymotrypsin"
+                        Case 3 : objSearchEngineParams.Enzyme = "Lys-C"
+                        Case 4 : objSearchEngineParams.Enzyme = "Lys-N"
+                        Case 5 : objSearchEngineParams.Enzyme = "Glu-C"
+                        Case 6 : objSearchEngineParams.Enzyme = "Arg-C"
+                        Case 7 : objSearchEngineParams.Enzyme = "Asp-N"
+                        Case 8 : objSearchEngineParams.Enzyme = "alphaLP"
+                        Case 9 : objSearchEngineParams.Enzyme = "no_enzyme_peptidomics"
+                        Case Else : objSearchEngineParams.Enzyme = "unknown_enzyme"
+                    End Select
                 End If
+            End If
 
-                ' Determine the cleavage specificity
-                If objSearchEngineParams.Parameters.TryGetValue("nnet", strSettingValue) Then
-                    ' NNET means number of non-enzymatic terminii
+            ' Determine the cleavage specificity
+            If objSearchEngineParams.Parameters.TryGetValue("nnet", strSettingValue) Then
+                ' NNET means number of non-enzymatic terminii
+
+                If Integer.TryParse(strSettingValue, intValue) Then
+                    Select Case intValue
+                        Case 0
+                            ' Fully-tryptic
+                            objSearchEngineParams.MinNumberTermini = 2
+                        Case 1
+                            ' Partially-tryptic
+                            objSearchEngineParams.MinNumberTermini = 1
+                        Case Else
+                            ' No-enzyme search
+                            objSearchEngineParams.MinNumberTermini = 0
+                    End Select
+
+                End If
+            Else
+                ' MSGF+ uses ntt instead of nnet; thus look for ntt
+
+                If objSearchEngineParams.Parameters.TryGetValue("ntt", strSettingValue) Then
+                    ' NTT means number of tolerable terminii
 
                     If Integer.TryParse(strSettingValue, intValue) Then
                         Select Case intValue
                             Case 0
-                                ' Fully-tryptic
-                                objSearchEngineParams.MinNumberTermini = 2
+                                ' No-enzyme search
+                                objSearchEngineParams.MinNumberTermini = 0
                             Case 1
                                 ' Partially-tryptic
                                 objSearchEngineParams.MinNumberTermini = 1
                             Case Else
-                                ' No-enzyme search
-                                objSearchEngineParams.MinNumberTermini = 0
+                                ' Fully-tryptic
+                                objSearchEngineParams.MinNumberTermini = 2
                         End Select
 
                     End If
-                Else
-                    ' MSGF+ uses ntt instead of nnet; thus look for ntt
-
-                    If objSearchEngineParams.Parameters.TryGetValue("ntt", strSettingValue) Then
-                        ' NTT means number of tolerable terminii
-
-                        If Integer.TryParse(strSettingValue, intValue) Then
-                            Select Case intValue
-                                Case 0
-                                    ' No-enzyme search
-                                    objSearchEngineParams.MinNumberTermini = 0
-                                Case 1
-                                    ' Partially-tryptic
-                                    objSearchEngineParams.MinNumberTermini = 1
-                                Case Else
-                                    ' Fully-tryptic
-                                    objSearchEngineParams.MinNumberTermini = 2
-                            End Select
-
-                        End If
-                    End If
-
                 End If
 
-                ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                Dim dblTolerancePPM As Double
-                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM, ePeptideHitResultType.MSGFDB)
-                objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
             End If
+
+            ' Determine the precursor mass tolerance (will store 0 if a problem or not found)
+            Dim dblTolerancePPM As Double
+            objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, dblTolerancePPM, ePeptideHitResultType.MSGFDB)
+            objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM
+
+            ' Look for Custom Amino Acid definitions
+            If Not objSearchEngineParams.Parameters.Any(Function(paramEntry) paramEntry.Key = PARAM_TAG_CUSTOMAA) Then
+                ' No custom amino acid entries
+                Return True
+            End If
+
+            ' Store the Custom Amino Acid info
+            ' Need to use a different parsing function to extract it
+            success = UpdateMassCalculatorMasses(strSearchEngineParamFileName)
+
+            Return success
 
         Catch ex As Exception
             ReportError("Error in ReadSearchEngineParamFile: " & ex.Message)
+            Return False
         End Try
-
-        Return blnSuccess
 
     End Function
 
@@ -416,7 +434,7 @@ Public Class clsPHRPParserMSGFDB
     ''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
     Public Overrides Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
 
-        Dim strColumns() As String = strLine.Split(ControlChars.Tab)
+        Dim strColumns() = strLine.Split(ControlChars.Tab)
         Dim strPeptide As String
         Dim strProtein As String
 
@@ -502,17 +520,17 @@ Public Class clsPHRPParserMSGFDB
                     AddScore(objPSM, strColumns, DATA_COLUMN_Isotope_Error)
 
                     ' Duplicate the score values to provide backwards compatibility
-                    Dim strValue As String = String.Empty
+                    Dim strValue = String.Empty
 
                     If objPSM.TryGetScore(DATA_COLUMN_MSGFDB_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_MSGFDB_SpecProb, strValue)
                     If objPSM.TryGetScore(DATA_COLUMN_Rank_MSGFDB_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, strValue)
                     If objPSM.TryGetScore(DATA_COLUMN_QValue, strValue) Then objPSM.SetScore(DATA_COLUMN_FDR, strValue)
                     If objPSM.TryGetScore(DATA_COLUMN_PepQValue, strValue) Then objPSM.SetScore(DATA_COLUMN_PepFDR, strValue)
 
-                    Dim strEValue As String = String.Empty
+                    Dim strEValue = String.Empty
                     Dim dblEValue As Double
 
-                    Dim strSpecEValue As String = String.Empty
+                    Dim strSpecEValue = String.Empty
                     Dim dblSpecEValue As Double
 
                     Dim blnPValueStored As Boolean = False
@@ -567,5 +585,93 @@ Public Class clsPHRPParserMSGFDB
         Return blnSuccess
 
     End Function
+
+    Private Function UpdateMassCalculatorMasses(strSearchEngineParamFileName As String) As Boolean
+
+        Dim localErrorMsg As String = String.Empty
+        Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor("MSGF+")
+
+        AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
+        AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
+
+        Dim success = UpdateMassCalculatorMasses(strSearchEngineParamFileName, modFileProcessor, mPeptideMassCalculator, localErrorMsg)
+
+        If Not String.IsNullOrWhiteSpace(localErrorMsg) AndAlso String.IsNullOrWhiteSpace(mErrorMessage) Then
+            ReportError(localErrorMsg)
+        End If
+
+        Return success
+
+    End Function
+
+    ''' <summary>
+    ''' Look for custom amino acid definitions in the MSGF+ parameter file
+    ''' If any are found, update the amino acid mass values in the PeptideMassCalculator instance
+    ''' </summary>
+    ''' <param name="strSearchEngineParamFileName"></param>
+    ''' <param name="modFileProcessor"></param>
+    ''' <param name="peptideMassCalculator"></param>
+    ''' <param name="errorMessage"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function UpdateMassCalculatorMasses(
+       strSearchEngineParamFileName As String,
+       modFileProcessor As clsMSGFPlusParamFileModExtractor,
+       peptideMassCalculator As clsPeptideMassCalculator,
+       <Out()> ByRef errorMessage As String) As Boolean
+
+        If modFileProcessor Is Nothing Then
+            Throw New ObjectDisposedException("modFileProcessor is not initialized")
+        End If
+
+        errorMessage = String.Empty
+
+        Dim lstModInfo As List(Of udtModInfoType) = Nothing
+
+        ' Note that this call will initialize lstModInfo
+        Dim success = modFileProcessor.ExtractModInfoFromParamFile(strSearchEngineParamFileName, lstModInfo)
+        If Not success Then
+            errorMessage = modFileProcessor.ErrorMessage
+            Return False
+        End If
+
+        Dim customAminoAcidDefs = (From item In lstModInfo Where item.ModType = eMSGFDBModType.CustomAA Select item).ToList()
+        If customAminoAcidDefs.Count = 0 Then
+            ' There are no custom amino acids
+            Return True
+        End If
+
+        For Each customAADef In customAminoAcidDefs
+
+            Dim aminoAcidSymbol = customAADef.Residues(0)
+            Dim empiricalFormula = customAADef.ModMass
+            Dim aminoAcidMass = customAADef.ModMassVal
+
+            Try
+                Dim elementalComposition = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalFormula)
+                Dim atomCounts = clsPeptideMassCalculator.ConvertElementalCompositionToAtomCounts(elementalComposition)
+
+                peptideMassCalculator.SetAminoAcidMass(aminoAcidSymbol, aminoAcidMass)
+                peptideMassCalculator.SetAminoAcidAtomCounts(aminoAcidSymbol, atomCounts)
+
+            Catch ex As Exception
+                errorMessage = ex.Message
+                Return False
+            End Try
+        Next
+
+        Return True
+
+    End Function
+
+#Region "Event Handlers"
+    Private Sub ModExtractorErrorHandler(errMsg As String)
+        ReportError(errMsg)
+    End Sub
+
+    Private Sub ModExtractorWarningHandler(warningMsg As String)
+        ReportError(warningMsg)
+    End Sub
+#End Region
 
 End Class

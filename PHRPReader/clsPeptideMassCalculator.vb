@@ -69,7 +69,7 @@ Public Class clsPeptideMassCalculator
     ' Invalid/Undefined letters (J and U) have values of 0 for the mass and atom counts
     ' The values can be customized using SetAminoAcidMass and SetAminoAcidAtomCounts
 
-    Private Const AMINO_ACID_LIST_MAX_INDEX As Integer = 25
+    Private Const AMINO_ACID_LIST_MAX_INDEX As Byte = 25
     Private mAminoAcidMasses() As Double
     Private mAminoAcidAtomCounts() As udtAtomCountsType
 
@@ -139,10 +139,10 @@ Public Class clsPeptideMassCalculator
     ''' </summary>
     ''' <param name="intIndex"></param>
     ''' <remarks></remarks>
-    Private Sub AddAminoAcidStatEntry(intIndex As Integer)
+    Private Sub AddAminoAcidStatEntry(intIndex As Byte)
 
         ' Use Convert.ToChar to convert from Ascii code to the letter
-        Dim aminoAcidSymbol As Char = Convert.ToChar(intIndex + ASCII_VAL_LETTER_A)
+        Dim aminoAcidSymbol As Char = ConvertAminoAcidIndexToChar(intIndex)
 
         Dim udtAtomCounts As udtAtomCountsType = Nothing
         Dim monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, udtAtomCounts)
@@ -153,14 +153,14 @@ Public Class clsPeptideMassCalculator
     End Sub
 
     ''' <summary>
-    ''' Compute the mass of peptide sequence strSequence.  If modification symbols are present, returns -1
+    ''' Compute the mass of peptide sequence strSequence (it cannot contain modification symbols)
     ''' </summary>
     ''' <param name="strSequence"></param>
-    ''' <returns></returns>
-    ''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+    ''' <returns>Monoisotopic mass, or -1 if an error</returns>
+    ''' <remarks>
+    ''' Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True
+    ''' If modification symbols are present, returns -1</remarks>
     Public Function ComputeSequenceMass(strSequence As String) As Double
-        ' Computes the mass for sequence strSequence
-        ' Returns -1 if an error
 
         Dim strPrimarySequence As String = String.Empty
         Dim dblMass As Double = 0
@@ -169,18 +169,18 @@ Public Class clsPeptideMassCalculator
         If mRemovePrefixAndSuffixIfPresent Then
             If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, strPrimarySequence, Nothing, Nothing) Then
                 ' Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
-                strPrimarySequence = String.Copy(strSequence)
+                strPrimarySequence = strSequence
             End If
         End If
 
         mErrorMessage = String.Empty
-        For Each chChar As Char In strSequence
+        For Each chChar As Char In strPrimarySequence
             ' Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
-            Dim aminoAcidIndex = Convert.ToInt32(chChar) - ASCII_VAL_LETTER_A
+            Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chChar)
 
             Try
                 If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
-                    mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strSequence
+                    mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strPrimarySequence
                     intValidResidueCount = 0
                     dblMass = -1
                     Exit For
@@ -201,65 +201,87 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
+
     ''' <summary>
     ''' Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
     ''' </summary>
     ''' <param name="strSequence"></param>
-    ''' <returns></returns>
+    ''' <param name="intModCount"></param>
+    ''' <param name="udtResidueModificationInfo">Array of modified residues; index 0 to intModCount-1</param>
+    ''' <returns>The computed mass, or -1 if an error</returns>
     ''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+    <Obsolete("This version uses an array for modified residues; use the version that takes a list")>
     Public Function ComputeSequenceMass(strSequence As String, intModCount As Integer, ByRef udtResidueModificationInfo() As udtPeptideSequenceModInfoType) As Double
-        ' Computes the mass for sequence strSequence using the mods in udtResidueModificationInfo()
-        ' Returns -1 if an error
+
+        Dim modifiedResidues = New List(Of udtPeptideSequenceModInfoType)
+
+        If intModCount > 0 Then
+            For intIndex = 0 To intModCount - 1
+                modifiedResidues.Add(udtResidueModificationInfo(intIndex))
+            Next
+        End If
+
+        Return ComputeSequenceMass(strSequence, modifiedResidues)
+
+    End Function
+
+    ''' <summary>
+    ''' Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
+    ''' </summary>
+    ''' <param name="strSequence"></param>
+    ''' <param name="modifiedResidues">List of modified residues</param>
+    ''' <returns>The computed mass, or -1 if an error</returns>
+    ''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+    Public Function ComputeSequenceMass(strSequence As String, modifiedResidues As List(Of udtPeptideSequenceModInfoType)) As Double
 
         ' Note that ComputeSequenceMass will reset mErorMessage
         Dim dblMass = ComputeSequenceMass(strSequence)
 
-        If intModCount > 0 AndAlso dblMass >= 0 Then
+        If dblMass >= 0 AndAlso Not modifiedResidues Is Nothing AndAlso modifiedResidues.Count > 0 Then
 
             Dim blnAtomCountsDefined = False
             Dim udtAtomCounts As udtAtomCountsType
 
-            For intIndex = 0 To intModCount - 1
-                With udtResidueModificationInfo(intIndex)
+            For Each modifiedResidue In modifiedResidues
 
-                    If .AffectedAtom = Nothing OrElse .AffectedAtom = NO_AFFECTED_ATOM_SYMBOL Then
-                        ' Positional modification (static or dynamic mod)
-                        ' Simply add the modification mass to dblMass
-                        dblMass += .ModificationMass
-                    Else
-                        
-                        ' Isotopic modification
-                        If Not blnAtomCountsDefined Then
-                            udtAtomCounts = CountAtoms(strSequence)
-                            blnAtomCountsDefined = True
-                        End If
+                ' Note: do not use String.IsNullOrWhiteSpace(modifiedResidue.AffectedAtom) since that does not work on a char
 
-                        Select Case Char.ToUpper(.AffectedAtom)
-                            Case "C"c
-                                dblMass += (udtAtomCounts.CountC * .ModificationMass)
-                            Case "H"c
-                                dblMass += (udtAtomCounts.CountH * .ModificationMass)
-                            Case "N"c
-                                dblMass += (udtAtomCounts.CountN * .ModificationMass)
-                            Case "O"c
-                                dblMass += (udtAtomCounts.CountO * .ModificationMass)
-                            Case "S"c
-                                dblMass += (udtAtomCounts.CountS * .ModificationMass)
-                            Case Else
-                                mErrorMessage = "Unknown Affected Atom '" & .AffectedAtom & "'"
-                                dblMass = -1
-                                Exit For
-                        End Select
+                If modifiedResidue.AffectedAtom = Nothing OrElse modifiedResidue.AffectedAtom = NO_AFFECTED_ATOM_SYMBOL Then
+                    ' Positional modification (static or dynamic mod)
+                    ' Simply add the modification mass to dblMass
+                    dblMass += modifiedResidue.ModificationMass
+                Else
+
+                    ' Isotopic modification
+                    If Not blnAtomCountsDefined Then
+                        udtAtomCounts = CountAtoms(strSequence)
+                        blnAtomCountsDefined = True
                     End If
 
-                End With
-            Next intIndex
+                    Select Case Char.ToUpper(modifiedResidue.AffectedAtom)
+                        Case "C"c
+                            dblMass += (udtAtomCounts.CountC * modifiedResidue.ModificationMass)
+                        Case "H"c
+                            dblMass += (udtAtomCounts.CountH * modifiedResidue.ModificationMass)
+                        Case "N"c
+                            dblMass += (udtAtomCounts.CountN * modifiedResidue.ModificationMass)
+                        Case "O"c
+                            dblMass += (udtAtomCounts.CountO * modifiedResidue.ModificationMass)
+                        Case "S"c
+                            dblMass += (udtAtomCounts.CountS * modifiedResidue.ModificationMass)
+                        Case Else
+                            mErrorMessage = "Unknown Affected Atom '" & modifiedResidue.AffectedAtom & "'"
+                            dblMass = -1
+                            Exit For
+                    End Select
+                End If
+
+            Next
         End If
 
         Return dblMass
 
     End Function
-
 
     ''' <summary>
     ''' Compute the mass of peptide sequence strSequence.  Supports peptide sequences with with numeric mod masses
@@ -319,6 +341,14 @@ Public Class clsPeptideMassCalculator
             Return dblPeptideMass + dblModMassTotal
         End If
 
+    End Function
+
+    Private Function ConvertAminoAcidCharToIndex(aminoAcidSymbol As Char) As Byte
+        Return Convert.ToByte(aminoAcidSymbol) - ASCII_VAL_LETTER_A
+    End Function
+
+    Private Function ConvertAminoAcidIndexToChar(aminoAcidIndex As Byte) As Char
+        Return Convert.ToChar(aminoAcidIndex + ASCII_VAL_LETTER_A)
     End Function
 
     ''' <summary>
@@ -408,13 +438,13 @@ Public Class clsPeptideMassCalculator
 
         Dim atomCounts = New udtAtomCountsType()
 
-        For Each chChar As Char In strSequence
+        For Each chAminoAcidSymbol As Char In strSequence
             ' Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
-            Dim aminoAcidIndex = Convert.ToInt32(chChar) - ASCII_VAL_LETTER_A
+            Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
 
             Try
                 If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
-                    mErrorMessage = "Unknown symbol " & chChar & " in sequence " & strSequence
+                    mErrorMessage = "Unknown symbol " & chAminoAcidSymbol & " in sequence " & strSequence
                     Exit For
                 Else
                     With atomCounts
@@ -428,7 +458,7 @@ Public Class clsPeptideMassCalculator
             Catch ex As Exception
                 ' Invalid value; ignore
             End Try
-        Next chChar
+        Next
 
         Return atomCounts
 
@@ -443,10 +473,8 @@ Public Class clsPeptideMassCalculator
     Public Function GetAminoAcidAtomCounts(chAminoAcidSymbol As Char) As udtAtomCountsType
         ' Returns the atom counts if success, 0 if an error
 
-        Dim aminoAcidIndex As Integer
-
         If Not chAminoAcidSymbol = Nothing Then
-            aminoAcidIndex = Convert.ToInt32(chAminoAcidSymbol) - ASCII_VAL_LETTER_A
+            Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
             If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
                 ' Invalid Index
                 Return New udtAtomCountsType
@@ -468,10 +496,8 @@ Public Class clsPeptideMassCalculator
     Public Function GetAminoAcidMass(chAminoAcidSymbol As Char) As Double
         ' Returns the mass if success, 0 if an error
 
-        Dim aminoAcidIndex As Integer
-
         If Not chAminoAcidSymbol = Nothing Then
-            aminoAcidIndex = Convert.ToInt32(chAminoAcidSymbol) - ASCII_VAL_LETTER_A
+            Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
             If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
                 ' Invalid Index
                 Return 0
@@ -517,7 +543,7 @@ Public Class clsPeptideMassCalculator
 
         ' These monoisotopic masses come from those traditionally used in DMS
         ' They were originally assembled by Gordon Anderson for use in ICR-2LS
-        
+
         Dim monoMass As Double
 
         Select Case aminoAcidSymbol
@@ -542,7 +568,7 @@ Public Class clsPeptideMassCalculator
             Case "I"c
                 monoMass = 113.084058046341 : udtAtomCounts = GetAtomCountsStruct(6, 11, 1, 1, 0)
             Case "J"c
-                ' Could use mass of Ile/Leu, but we're using ""
+                ' Could use mass of Ile/Leu, but we're instead treating this as an invalid, massless amino acid
                 monoMass = 0 : udtAtomCounts = GetAtomCountsStruct(0, 0, 0, 0, 0)
             Case "K"c
                 monoMass = 128.094955444336 : udtAtomCounts = GetAtomCountsStruct(6, 12, 2, 1, 0)
@@ -586,7 +612,7 @@ Public Class clsPeptideMassCalculator
         Return monoMass
 
     End Function
-    
+
     Public Shared Function GetEmpiricalFormulaComponents(strEmpiricalformula As String) As Dictionary(Of Char, Integer)
 
         Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
@@ -624,10 +650,10 @@ Public Class clsPeptideMassCalculator
         ReDim mAminoAcidMasses(AMINO_ACID_LIST_MAX_INDEX)
         ReDim mAminoAcidAtomCounts(AMINO_ACID_LIST_MAX_INDEX)
 
-        For index = 0 To AMINO_ACID_LIST_MAX_INDEX
+        For index As Byte = 0 To AMINO_ACID_LIST_MAX_INDEX
             AddAminoAcidStatEntry(index)
         Next
-        
+
         ResetTerminusMasses()
     End Sub
 
@@ -677,13 +703,25 @@ Public Class clsPeptideMassCalculator
     End Function
 
     ''' <summary>
+    ''' Reset all of the amino acid masses and atom counts to default values
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub ResetAminoAcidMasses()
+
+        For aminoAcidIndex As Byte = 0 To AMINO_ACID_LIST_MAX_INDEX
+            Dim aminoAcidSymbol As Char = ConvertAminoAcidIndexToChar(aminoAcidIndex)
+            ResetAminoAcidToDefault(aminoAcidSymbol)
+        Next
+    End Sub
+
+    ''' <summary>
     ''' Reset the mass and atom counts of the given amino acid to use default values
     ''' </summary>
     ''' <param name="aminoAcidSymbol">Letter between A and Z</param>
     ''' <remarks></remarks>
     Public Sub ResetAminoAcidToDefault(aminoAcidSymbol As Char)
 
-        Dim aminoAcidIndex = Convert.ToInt32(aminoAcidSymbol) - ASCII_VAL_LETTER_A
+        Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(aminoAcidSymbol)
         If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
             ' Invalid Index
             Return
@@ -718,10 +756,8 @@ Public Class clsPeptideMassCalculator
     Public Function SetAminoAcidAtomCounts(chAminoAcidSymbol As Char, udtAtomCounts As udtAtomCountsType) As Boolean
         ' Returns True if success, False if an invalid amino acid symbol
 
-        Dim aminoAcidIndex As Integer
-
         If Not chAminoAcidSymbol = Nothing Then
-            aminoAcidIndex = Convert.ToInt32(chAminoAcidSymbol) - ASCII_VAL_LETTER_A
+            Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
             If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
                 ' Invalid Index
                 Return False
@@ -745,10 +781,8 @@ Public Class clsPeptideMassCalculator
     Public Function SetAminoAcidMass(chAminoAcidSymbol As Char, dblMass As Double) As Boolean
         ' Returns True if success, False if an invalid amino acid symbol
 
-        Dim aminoAcidIndex As Integer
-
         If Not chAminoAcidSymbol = Nothing Then
-            aminoAcidIndex = Convert.ToInt32(chAminoAcidSymbol) - ASCII_VAL_LETTER_A
+            Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
             If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
                 ' Invalid Index
                 Return False

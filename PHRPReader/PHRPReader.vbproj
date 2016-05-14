@@ -72,9 +72,11 @@
   <ItemGroup>
     <Compile Include="clsAminoAcidModInfo.vb" />
     <Compile Include="clsModificationDefinition.vb" />
+    <Compile Include="clsMSGFPlusParamFileModExtractor.vb" />
     <Compile Include="clsMSGFResultsReader.vb" />
     <Compile Include="clsPeptideCleavageStateCalculator.vb" />
     <Compile Include="clsPeptideMassCalculator.vb" />
+    <Compile Include="clsPeptideModificationContainer.vb" />
     <Compile Include="clsPepToProteinMapInfo.vb" />
     <Compile Include="clsPHRPModSummaryReader.vb" />
     <Compile Include="clsPHRPParser.vb" />
