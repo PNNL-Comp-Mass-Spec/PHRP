@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5977; May 13, 2016
+	- Improved support for custom amino acid definitions in MSGF+ parameter files
+
 Version 1.5.5973; May 9, 2016
 	- Added support for custom amino acid definitions in MSGF+ parameter files
 

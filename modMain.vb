@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "May 9, 2016"
+    Public Const PROGRAM_DATE As String = "May 13, 2016"
 
 	Private mInputFilePath As String
     Private mOutputFolderPath As String                         ' Optional
@@ -256,7 +256,7 @@ Module modMain
             ' Make sure no invalid parameters are present
             If objParseCommandLine.InvalidParametersPresent(lstValidParameters) Then
                 ShowErrorMessage("Invalid commmand line parameters",
-                  (From item In objParseCommandLine.InvalidParameters(lstValidParameters) Select "/" + item).ToList())
+                  (From item In objParseCommandLine.InvalidParameters(lstValidParameters) Select "/" & item).ToList())
                 Return False
             Else
                 With objParseCommandLine
@@ -377,7 +377,7 @@ Module modMain
         strMessage = strTitle & ":"
 
         For Each item As String In items
-            Console.WriteLine("   " + item)
+            Console.WriteLine("   " & item)
             strMessage &= " " & item
         Next
         Console.WriteLine(strSeparator)
