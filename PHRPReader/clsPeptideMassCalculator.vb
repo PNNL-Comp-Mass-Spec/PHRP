@@ -162,7 +162,7 @@ Public Class clsPeptideMassCalculator
     ''' If modification symbols are present, returns -1</remarks>
     Public Function ComputeSequenceMass(strSequence As String) As Double
 
-        Dim strPrimarySequence As String = String.Empty
+        Dim strPrimarySequence As String = strSequence
         Dim dblMass As Double = 0
         Dim intValidResidueCount As Short = 0
 
@@ -171,6 +171,11 @@ Public Class clsPeptideMassCalculator
                 ' Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
                 strPrimarySequence = strSequence
             End If
+        End If
+
+        If String.IsNullOrWhiteSpace(strPrimarySequence) Then
+            ' This code should never be reached; including this as a fail-safe
+            strPrimarySequence = strSequence
         End If
 
         mErrorMessage = String.Empty
