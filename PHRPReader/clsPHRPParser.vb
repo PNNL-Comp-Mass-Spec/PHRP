@@ -17,44 +17,44 @@ Imports System.Runtime.InteropServices
 Public MustInherit Class clsPHRPParser
 
 #Region "Structures"
-	Protected Structure udtAmbiguousModInfo
-		Public ResidueStart As Integer
-		Public ResidueEnd As Integer
-		Public ModMassString As String
-	End Structure
+    Protected Structure udtAmbiguousModInfo
+        Public ResidueStart As Integer
+        Public ResidueEnd As Integer
+        Public ModMassString As String
+    End Structure
 #End Region
 
 #Region "Module variables"
 
-	Protected mDatasetName As String
-	Protected mInputFilePath As String
-	Protected mInputFolderPath As String
-	Protected mInitialized As Boolean
+    Protected mDatasetName As String
+    Private mInputFilePath As String
+    Protected mInputFolderPath As String
+    Private mInitialized As Boolean
 
-	Protected mMaxProteinsPerPSM As Integer
+    Private mMaxProteinsPerPSM As Integer
 
-	' Column headers in the synopsis file and first hits file
-	Protected mColumnHeaders As SortedDictionary(Of String, Integer)
+    ' Column headers in the synopsis file and first hits file
+    Protected mColumnHeaders As SortedDictionary(Of String, Integer)
 
-	Protected mErrorMessage As String = String.Empty
+    Protected mErrorMessage As String = String.Empty
 
-	Protected mCleavageStateCalculator As clsPeptideCleavageStateCalculator
-	Protected mPeptideMassCalculator As clsPeptideMassCalculator
+    Protected mCleavageStateCalculator As clsPeptideCleavageStateCalculator
+    Protected mPeptideMassCalculator As clsPeptideMassCalculator
 
-	Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
+    Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 
-	Protected mModInfo As List(Of clsModificationDefinition)
+    Protected mModInfo As List(Of clsModificationDefinition)
 
-	Protected mResultToSeqMap As SortedList(Of Integer, Integer)
-	Protected mSeqInfo As SortedList(Of Integer, clsSeqInfo)
-	Protected mSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
-	Protected mPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
+    Private mResultToSeqMap As SortedList(Of Integer, Integer)
+    Private mSeqInfo As SortedList(Of Integer, clsSeqInfo)
+    Private mSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
+    Private mPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
 
-	' This List tracks the Protein Names for each ResultID
-	Protected mResultIDToProteins As SortedList(Of Integer, List(Of String))
+    ' This List tracks the Protein Names for each ResultID
+    Protected mResultIDToProteins As SortedList(Of Integer, List(Of String))
 
-	Protected mErrorMessages As List(Of String)
-	Protected mWarningMessages As List(Of String)
+    Private mErrorMessages As List(Of String)
+    Private mWarningMessages As List(Of String)
 
 #End Region
 
@@ -243,7 +243,7 @@ Public MustInherit Class clsPHRPParser
     ''' startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
     ''' Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
     ''' </remarks>
-    Protected Sub InitializeParser(strDatasetName As String, strInputFilePath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, startupOptions As clsPHRPStartupOptions)
+    Private Sub InitializeParser(strDatasetName As String, strInputFilePath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, startupOptions As clsPHRPStartupOptions)
 
         mErrorMessages = New List(Of String)
         mWarningMessages = New List(Of String)
@@ -489,7 +489,7 @@ Public MustInherit Class clsPHRPParser
         mWarningMessages.Clear()
     End Sub
 
-    Protected Function ConvertModsToNumericMods(strCleanSequence As String, lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
+    Private Function ConvertModsToNumericMods(strCleanSequence As String, lstModifiedResidues As List(Of clsAminoAcidModInfo)) As String
         Static sbNewPeptide As New Text.StringBuilder
 
         sbNewPeptide.Length = 0
@@ -519,7 +519,7 @@ Public MustInherit Class clsPHRPParser
     ''' <param name="strSequenceWithMods"></param>
     ''' <returns></returns>
     ''' <remarks>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</remarks>
-    Protected Function ExtractAmbiguousMods(strSequenceWithMods As String) As SortedList(Of Integer, udtAmbiguousModInfo)
+    Private Function ExtractAmbiguousMods(strSequenceWithMods As String) As SortedList(Of Integer, udtAmbiguousModInfo)
 
         Dim strPrimarySequence As String = String.Empty
         Dim strPrefix As String = String.Empty
@@ -628,10 +628,29 @@ Public MustInherit Class clsPHRPParser
     End Sub
 
     ''' <summary>
+    ''' Examines the string to determine if it is numeric
+    ''' </summary>
+    ''' <param name="strData"></param>
+    ''' <returns>True if a number, otherwise false</returns>
+    Public Shared Function IsNumber(strData As String) As Boolean
+        Try
+            If Double.TryParse(strData, 0) Then
+                Return True
+            ElseIf Integer.TryParse(strData, 0) Then
+                Return True
+            End If
+        Catch ex As Exception
+            ' Ignore errors here
+        End Try
+
+        Return False
+    End Function
+
+    ''' <summary>
     ''' Reads the data in strModSummaryFilePath.  Populates mModInfo with the modification names, masses, and affected residues
     ''' </summary>
     ''' <returns>True if success; false if an error</returns>
-    Protected Function LoadModSummary() As Boolean
+    Private Function LoadModSummary() As Boolean
 
         Dim objModSummaryReader As clsPHRPModSummaryReader
 
@@ -676,7 +695,7 @@ Public MustInherit Class clsPHRPParser
 
     End Function
 
-    Protected Function LoadSeqInfo() As Boolean
+    Private Function LoadSeqInfo() As Boolean
 
         Dim blnSuccess As Boolean
         Dim objReader As clsPHRPSeqMapReader
@@ -832,11 +851,10 @@ Public MustInherit Class clsPHRPParser
 
                     If Not String.IsNullOrEmpty(strCommentChar) Then
                         ' Look for the comment character
-                        Dim intCommentCharIndex As Integer
-                        intCommentCharIndex = strValue.IndexOf(strCommentChar, StringComparison.Ordinal)
-                        If intCommentCharIndex > 0 Then
+                        Dim commentCharIndex = strValue.IndexOf(strCommentChar, StringComparison.Ordinal)
+                        If commentCharIndex > 0 Then
                             ' Trim off the comment
-                            strValue = strValue.Substring(0, intCommentCharIndex).Trim()
+                            strValue = strValue.Substring(0, commentCharIndex).Trim()
                         End If
                     End If
 
@@ -1002,11 +1020,11 @@ Public MustInherit Class clsPHRPParser
         RaiseEvent WarningEvent(strWarningMessage)
     End Sub
 
-    Protected Sub ShowMessage(strMessage As String)
+    Private Sub ShowMessage(strMessage As String)
         RaiseEvent MessageEvent(strMessage)
     End Sub
 
-    Protected Sub StoreModInfo(objPSM As clsPSM, objSeqInfo As clsSeqInfo)
+    Private Sub StoreModInfo(objPSM As clsPSM, objSeqInfo As clsSeqInfo)
 
         Dim strMods() As String
         Dim kvModDetails As KeyValuePair(Of String, String)
@@ -1226,7 +1244,7 @@ Public MustInherit Class clsPHRPParser
         Return blnSuccess
     End Function
 
-    Protected Function UpdatePSMFindMatchingModInfo(
+    Private Function UpdatePSMFindMatchingModInfo(
       strMassCorrectionTag As String,
       blnFavorTerminalMods As Boolean,
       eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
@@ -1303,5 +1321,4 @@ Public MustInherit Class clsPHRPParser
         Return blnMatchFound
 
     End Function
-
 End Class

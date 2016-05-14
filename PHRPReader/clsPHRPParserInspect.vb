@@ -49,73 +49,73 @@ Public Class clsPHRPParserInspect
 	Public Const FILENAME_SUFFIX_SYN As String = "_inspect_syn.txt"
 	Public Const FILENAME_SUFFIX_FHT As String = "_inspect_fht.txt"
 
-	Protected Const INS_SEARCH_ENGINE_NAME As String = "Inspect"
+    Private Const INS_SEARCH_ENGINE_NAME As String = "Inspect"
 #End Region
 
 #Region "Properties"
 
-	Public Overrides ReadOnly Property PHRPFirstHitsFileName() As String
-		Get
-			Return GetPHRPFirstHitsFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPFirstHitsFileName() As String
+        Get
+            Return GetPHRPFirstHitsFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPModSummaryFileName() As String
-		Get
-			Return GetPHRPModSummaryFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPModSummaryFileName() As String
+        Get
+            Return GetPHRPModSummaryFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPPepToProteinMapFileName() As String
-		Get
-			Return GetPHRPPepToProteinMapFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPPepToProteinMapFileName() As String
+        Get
+            Return GetPHRPPepToProteinMapFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPProteinModsFileName() As String
-		Get
-			Return GetPHRPProteinModsFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPProteinModsFileName() As String
+        Get
+            Return GetPHRPProteinModsFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPSynopsisFileName() As String
-		Get
-			Return GetPHRPSynopsisFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPSynopsisFileName() As String
+        Get
+            Return GetPHRPSynopsisFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPResultToSeqMapFileName() As String
-		Get
-			Return GetPHRPResultToSeqMapFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPResultToSeqMapFileName() As String
+        Get
+            Return GetPHRPResultToSeqMapFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPSeqInfoFileName() As String
-		Get
-			Return GetPHRPSeqInfoFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPSeqInfoFileName() As String
+        Get
+            Return GetPHRPSeqInfoFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property PHRPSeqToProteinMapFileName() As String
-		Get
-			Return GetPHRPSeqToProteinMapFileName(mDatasetName)
-		End Get
-	End Property
+    Public Overrides ReadOnly Property PHRPSeqToProteinMapFileName() As String
+        Get
+            Return GetPHRPSeqToProteinMapFileName(mDatasetName)
+        End Get
+    End Property
 
-	Public Overrides ReadOnly Property SearchEngineName() As String
-		Get
-			Return GetSearchEngineName()
-		End Get
-	End Property
+    Public Overrides ReadOnly Property SearchEngineName() As String
+        Get
+            Return GetSearchEngineName()
+        End Get
+    End Property
 
 #End Region
 
-	''' <summary>
-	''' Constructor; assumes blnLoadModsAndSeqInfo=True
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFilePath">Input file path</param>
-	''' <remarks></remarks>
+    ''' <summary>
+    ''' Constructor; assumes blnLoadModsAndSeqInfo=True
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFilePath">Input file path</param>
+    ''' <remarks></remarks>
     Public Sub New(strDatasetName As String, strInputFilePath As String)
         Me.New(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo:=True)
     End Sub
@@ -185,7 +185,7 @@ Public Class clsPHRPParserInspect
     ''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
     ''' <returns>Precursor tolerance, in Da</returns>
     ''' <remarks></remarks>
-    Protected Function DeterminePrecursorMassTolerance(objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+    Private Function DeterminePrecursorMassTolerance(objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
         Dim strTolerance As String = String.Empty
 
         Dim dblToleranceDa As Double = 0
@@ -271,7 +271,7 @@ Public Class clsPHRPParserInspect
 
     End Function
 
-    Protected Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Private Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Dim strSettingValue As String = String.Empty
         Dim blnSuccess As Boolean

@@ -3,13 +3,13 @@
 Imports PHRPReader.clsPeptideCleavageStateCalculator
 
 Public Class clsProteinInfo
-	Protected mProteinName As String
-	Protected mProteinDescription As String
-	Protected mSeqID As Integer
-	Protected mCleavageState As ePeptideCleavageStateConstants
-	Protected mTerminusState As ePeptideTerminusStateConstants
-	Protected mResidueStart As Integer							 ' Residue number in the protein at which this sequence starts
-	Protected mResidueEnd As Integer							 ' Residue number in the protein at which this sequence ends
+    Private ReadOnly mProteinName As String
+    Private mProteinDescription As String
+    Private ReadOnly mSeqID As Integer
+    Private ReadOnly mCleavageState As ePeptideCleavageStateConstants
+    Private ReadOnly mTerminusState As ePeptideTerminusStateConstants
+    Private mResidueStart As Integer                        ' Residue number in the protein at which this sequence starts
+    Private mResidueEnd As Integer                          ' Residue number in the protein at which this sequence ends
 
 	Public ReadOnly Property ProteinName As String
 		Get
@@ -17,11 +17,12 @@ Public Class clsProteinInfo
 		End Get
 	End Property
 
-	Public ReadOnly Property CleavageState As ePeptideCleavageStateConstants
-		Get
-			Return mCleavageState
-		End Get
-	End Property
+    ' ReSharper disable once ConvertToVbAutoProperty
+    Public ReadOnly Property CleavageState As ePeptideCleavageStateConstants
+        Get
+            Return mCleavageState
+        End Get
+    End Property
 
 	Public ReadOnly Property ResidueStart As Integer
 		Get
@@ -35,18 +36,28 @@ Public Class clsProteinInfo
 		End Get
 	End Property
 
+    ' ReSharper disable once ConvertToVbAutoProperty
 	Public ReadOnly Property SeqID As Integer
 		Get
 			Return mSeqID
 		End Get
 	End Property
 
+    ' ReSharper disable once ConvertToVbAutoProperty
 	Public ReadOnly Property TerminusState As ePeptideTerminusStateConstants
 		Get
 			Return mTerminusState
 		End Get
 	End Property
 
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="ProteinName"></param>
+    ''' <param name="SeqID"></param>
+    ''' <param name="CleavageState"></param>
+    ''' <param name="TerminusState"></param>
+    ''' <remarks></remarks>
     Public Sub New(
       ProteinName As String,
       SeqID As Integer,

@@ -18,7 +18,6 @@ Imports System.Runtime.InteropServices
 Imports PHRPReader.clsModificationDefinition
 Imports System.Collections.Generic
 Imports System.IO
-Imports System.Security.Cryptography
 Imports System.Text.RegularExpressions
 
 Public Class clsPHRPReader
@@ -71,67 +70,67 @@ Public Class clsPHRPReader
 #End Region
 
 #Region "Module variables"
-    Protected mDatasetName As String
-    Protected mInputFilePath As String
-    Protected mInputFolderPath As String
+    Private mDatasetName As String
+    Private mInputFilePath As String
+    Private mInputFolderPath As String
 
-    Protected mSkipDuplicatePSMs As Boolean
+    Private mSkipDuplicatePSMs As Boolean
 
-    Protected mStartupOptions As clsPHRPStartupOptions
+    Private mStartupOptions As clsPHRPStartupOptions
 
-    Protected mEchoMessagesToConsole As Boolean
+    Private mEchoMessagesToConsole As Boolean
 
-    Protected mCanRead As Boolean
-    Protected mInitialized As Boolean
-    Protected mModSummaryFileLoaded As Boolean
+    Private mCanRead As Boolean
+    Private mInitialized As Boolean
+    Private mModSummaryFileLoaded As Boolean
 
     ''' <summary>
     ''' When set to true, then calls to MoveNext will read the next data line, but will skip several additional processing steps for performance reasons
     ''' </summary>
     ''' <remarks>If the peptide is a peptide of interest, then call FinalizeCurrentPSM</remarks>
-    Protected mFastReadMode As Boolean
+    Private mFastReadMode As Boolean
 
-    Protected mSourceFile As StreamReader
-    Protected mSourceFileLineCount As Integer
-    Protected mSourceFileLinesRead As Integer
+    Private mSourceFile As StreamReader
+    Private mSourceFileLineCount As Integer
+    Private mSourceFileLinesRead As Integer
 
-    Protected WithEvents mPHRPParser As clsPHRPParser
-    Protected mPeptideMassCalculator As clsPeptideMassCalculator
+    Private WithEvents mPHRPParser As clsPHRPParser
+    Private mPeptideMassCalculator As clsPeptideMassCalculator
 
     ' This dictionary contains mod symbols as the key and modification definition as the values
-    Protected mDynamicMods As SortedDictionary(Of Char, clsModificationDefinition)
+    Private mDynamicMods As SortedDictionary(Of Char, clsModificationDefinition)
 
     ' This dictionary contains amino acid names as the key and the corresponding mod modification (or mod modifications) 
-    Protected mStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))
+    Private mStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))
 
     ' This dictionary tracks the MSGFSpecProb values for each entry in the source file
     ' The keys are Result_ID and the string is MSGFSpecProb (stored as string to preserve formatting)
-    Protected mMSGFCachedResults As Dictionary(Of Integer, String)
+    Private mMSGFCachedResults As Dictionary(Of Integer, String)
 
     ' This dictionary tracks scan stats values, in particular elution time
     'The keys are ScanNumber and values are clsScanStatsInfo objects
-    Protected mScanStats As Dictionary(Of Integer, clsScanStatsInfo)
+    Private mScanStats As Dictionary(Of Integer, clsScanStatsInfo)
 
     ' This dictionary tracks extended scan stats values, including parent ion mz (via MonoisotopicMZ)and collision mode
     'The keys are ScanNumber and values are clsScanStatsExInfo objects
-    Protected mScanStatsEx As Dictionary(Of Integer, clsScanStatsExInfo)
+    Private mScanStatsEx As Dictionary(Of Integer, clsScanStatsExInfo)
 
-    Protected mPSMCurrent As clsPSM
-    Protected mPSMCurrentFinalized As Boolean
+    Private mPSMCurrent As clsPSM
+    Private mPSMCurrentFinalized As Boolean
 
-    Protected mExtendedScanStatsValid As Boolean
-    Protected mExtendedScanStatsInfo As clsScanStatsExInfo
+    Private mExtendedScanStatsValid As Boolean
+    Private mExtendedScanStatsInfo As clsScanStatsExInfo
 
-    Protected mHeaderLineParsed As Boolean
-    Protected mCachedLineAvailable As Boolean
-    Protected mCachedLine As String
-    Protected mCachedPSM As clsPSM
+    Private mHeaderLineParsed As Boolean
+    Private mCachedLineAvailable As Boolean
+    Private mCachedLine As String
+    Private mCachedPSM As clsPSM
 
-    Protected mErrorMessages As List(Of String)
-    Protected mWarningMessages As List(Of String)
+    Private mErrorMessages As List(Of String)
+    Private mWarningMessages As List(Of String)
 
-    Protected mErrorMessage As String = String.Empty
-    Protected mLocalErrorCode As ePHRPReaderErrorCodes
+    Private mErrorMessage As String = String.Empty
+    Private mLocalErrorCode As ePHRPReaderErrorCodes
 
 #End Region
 
@@ -593,7 +592,7 @@ Public Class clsPHRPReader
         End If
     End Sub
 
-    Protected Function CountLines(strTextFilePath As String) As Integer
+    Private Function CountLines(strTextFilePath As String) As Integer
 
         Dim intTotalLines As Integer
 
@@ -678,7 +677,7 @@ Public Class clsPHRPReader
 
     End Sub
 
-    Protected Function InitializeReader(strInputFilePath As String, eResultType As ePeptideHitResultType) As Boolean
+    Private Function InitializeReader(strInputFilePath As String, eResultType As ePeptideHitResultType) As Boolean
 
         Dim strModSummaryFilePath As String = String.Empty
 
@@ -753,7 +752,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Function InitializeParser(eResultType As ePeptideHitResultType) As Boolean
+    Private Function InitializeParser(eResultType As ePeptideHitResultType) As Boolean
 
         Dim blnSuccess = True
         Dim strDatasetName As String = String.Copy(mDatasetName)
@@ -1085,7 +1084,7 @@ Public Class clsPHRPReader
 
         If String.IsNullOrWhiteSpace(kvBestSynOrFHTFile.Key) Then
             If lstDatasetNames.Count = 1 Then
-                Console.WriteLine("Could not find a Synopsis or First Hits file for dataset " + lstDatasetNames.First())
+                Console.WriteLine("Could not find a Synopsis or First Hits file for dataset " & lstDatasetNames.First())
             Else
                 Console.WriteLine("Could not find a Synopsis or First Hits file for any of the candidate datasets")
             End If
@@ -1289,7 +1288,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Shared Function AutoTrimExtraSuffix(strFilePath As String, ByRef strFilePathTrimmed As String) As Boolean
+    Private Shared Function AutoTrimExtraSuffix(strFilePath As String, ByRef strFilePathTrimmed As String) As Boolean
 
         ' Check whether strfilePathLCase ends in other known PHRP extensions
         Dim lstExtraSuffixes As List(Of String)
@@ -1317,7 +1316,7 @@ Public Class clsPHRPReader
     ''' <param name="lstPeptideMods">List of modified amino acids (output)</param>
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks>strPeptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
-    Protected Function ConvertModsToNumericMods(
+    Private Function ConvertModsToNumericMods(
       strPeptide As String,
       <Out()> ByRef strPeptideWithNumericMods As String,
       <Out()> ByRef lstPeptideMods As List(Of clsAminoAcidModInfo)) As Boolean
@@ -1437,7 +1436,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Sub AddDynamicModIfPresent(
+    Private Sub AddDynamicModIfPresent(
       objMods As SortedDictionary(Of Char, clsModificationDefinition),
       chResidue As Char,
       chModSymbol As Char,
@@ -1456,7 +1455,7 @@ Public Class clsPHRPReader
 
     End Sub
 
-    Protected Sub AddStaticModIfPresent(
+    Private Sub AddStaticModIfPresent(
        objMods As SortedDictionary(Of String, List(Of clsModificationDefinition)),
        chResidue As Char,
        ResidueLocInPeptide As Integer,
@@ -1484,7 +1483,7 @@ Public Class clsPHRPReader
     ''' <param name="strScanTypeName"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function GetCollisionMode(strScanTypeName As String) As String
+    Private Function GetCollisionMode(strScanTypeName As String) As String
         ' Typical scan types, along with DMS usage count as of 4/26/2012
 
         ' Scan Type     Usage Count
@@ -1602,7 +1601,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Shared Function GetPHRPFileFreeParser(eResultType As ePeptideHitResultType, strDatasetName As String) As clsPHRPParser
+    Private Shared Function GetPHRPFileFreeParser(eResultType As ePeptideHitResultType, strDatasetName As String) As clsPHRPParser
 
         Static oCachedParser As clsPHRPParser
 
@@ -1842,7 +1841,7 @@ Public Class clsPHRPReader
         Return strToolVersionInfoFilename
     End Function
 
-    Protected Sub HandleException(strBaseMessage As String, ex As Exception)
+    Private Sub HandleException(strBaseMessage As String, ex As Exception)
         If String.IsNullOrEmpty(strBaseMessage) Then
             strBaseMessage = "Error"
         End If
@@ -1888,7 +1887,7 @@ Public Class clsPHRPReader
         Return False
     End Function
 
-    Protected Shared Function LineContainsValues(strDataLine As String, ParamArray lstValuesToFind As String()) As Boolean
+    Private Shared Function LineContainsValues(strDataLine As String, ParamArray lstValuesToFind As String()) As Boolean
         Dim intMatchCount = 0
 
         For Each item In lstValuesToFind
@@ -2300,7 +2299,7 @@ Public Class clsPHRPReader
 
     End Sub
 
-    Protected Function ReadAndCacheMSGFData() As Boolean
+    Private Function ReadAndCacheMSGFData() As Boolean
 
         Dim strMSGFFilePath As String
         Dim blnSuccess = False
@@ -2319,7 +2318,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Function ReadAndCacheMSGFData(strMSGFFilePath As String) As Boolean
+    Private Function ReadAndCacheMSGFData(strMSGFFilePath As String) As Boolean
         Dim blnSuccess = False
 
         Try
@@ -2353,7 +2352,7 @@ Public Class clsPHRPReader
     ''' <param name="objDynamicMods">List with mod symbols as the key and the corresponding mod mass</param>
     ''' <param name="objStaticMods">List with amino acid names as the key and the corresponding mod mass</param>
     ''' <returns>True if success; false if an error</returns>
-    Protected Function ReadModSummaryFile(
+    Private Function ReadModSummaryFile(
       strModSummaryFilePath As String,
       objDynamicMods As SortedDictionary(Of Char, clsModificationDefinition),
       objStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))) As Boolean
@@ -2460,7 +2459,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Function ReadScanStatsData() As Boolean
+    Private Function ReadScanStatsData() As Boolean
 
         Dim strScanStatsFilePath As String
         Dim blnSuccess = False
@@ -2479,7 +2478,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Function ReadScanStatsData(strScanStatsFilePath As String) As Boolean
+    Private Function ReadScanStatsData(strScanStatsFilePath As String) As Boolean
 
         Dim blnSuccess = False
 
@@ -2506,7 +2505,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Function ReadExtendedScanStatsData() As Boolean
+    Private Function ReadExtendedScanStatsData() As Boolean
 
         Dim strExtendedScanStatsFilePath As String
         Dim blnSuccess = False
@@ -2525,7 +2524,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Function ReadExtendedScanStatsData(strExtendedScanStatsFilePath As String) As Boolean
+    Private Function ReadExtendedScanStatsData(strExtendedScanStatsFilePath As String) As Boolean
 
         Dim blnSuccess = False
 
@@ -2555,7 +2554,7 @@ Public Class clsPHRPReader
 
     End Function
 
-    Protected Sub ReportError(strErrorMessage As String)
+    Private Sub ReportError(strErrorMessage As String)
         mErrorMessage = strErrorMessage
         If mEchoMessagesToConsole Then Console.WriteLine(strErrorMessage)
         mErrorMessages.Add(strErrorMessage)
@@ -2563,7 +2562,7 @@ Public Class clsPHRPReader
         RaiseEvent ErrorEvent(strErrorMessage)
     End Sub
 
-    Protected Sub ReportWarning(strWarningMessage As String)
+    Private Sub ReportWarning(strWarningMessage As String)
         If mEchoMessagesToConsole Then Console.WriteLine(strWarningMessage)
         mWarningMessages.Add(strWarningMessage)
 
@@ -2584,12 +2583,12 @@ Public Class clsPHRPReader
 
     End Sub
 
-    Protected Sub ShowMessage(strMessage As String)
+    Private Sub ShowMessage(strMessage As String)
         If mEchoMessagesToConsole Then Console.WriteLine(strMessage)
         RaiseEvent MessageEvent(strMessage)
     End Sub
 
-    Protected Function TryGetScanStats(intScanNumber As Integer, <Out()> ByRef objScanStatsInfo As clsScanStatsInfo) As Boolean
+    Private Function TryGetScanStats(intScanNumber As Integer, <Out()> ByRef objScanStatsInfo As clsScanStatsInfo) As Boolean
         If Not mScanStats Is Nothing AndAlso mScanStats.Count > 0 Then
             If mScanStats.TryGetValue(intScanNumber, objScanStatsInfo) Then
                 Return True
@@ -2599,7 +2598,7 @@ Public Class clsPHRPReader
         Return False
     End Function
 
-    Protected Function TryGetExtendedScanStats(intScanNumber As Integer, <Out()> ByRef objExtendedScanStatsInfo As clsScanStatsExInfo) As Boolean
+    Private Function TryGetExtendedScanStats(intScanNumber As Integer, <Out()> ByRef objExtendedScanStatsInfo As clsScanStatsExInfo) As Boolean
         If Not mScanStatsEx Is Nothing AndAlso mScanStats.Count > 0 Then
             If mScanStatsEx.TryGetValue(intScanNumber, objExtendedScanStatsInfo) Then
                 Return True

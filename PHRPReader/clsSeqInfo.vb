@@ -11,10 +11,10 @@
 Option Strict On
 
 Public Class clsSeqInfo
-	Protected mSeqID As Integer
-	Protected mModCount As Integer
-	Protected mModDescription As String
-	Protected mMonoisotopicMass As Double
+    Private ReadOnly mSeqID As Integer
+    Private ReadOnly mModCount As Integer
+    Private ReadOnly mModDescription As String
+    Private mMonoisotopicMass As Double
 
 	''' <summary>
 	''' Sequence ID
@@ -95,9 +95,9 @@ Public Class clsSeqInfo
     ''' <summary>
     ''' Update the monoisotopic mass for this sequence
     ''' </summary>
-    ''' <param name="MonoisotopicMass"></param>
+    ''' <param name="monoMass"></param>
     ''' <remarks></remarks>
-    Public Sub UpdateMonoisotopicMass(MonoisotopicMass As Double)
-        mMonoisotopicMass = MonoisotopicMass
+    Public Sub UpdateMonoisotopicMass(monoMass As Double)
+        mMonoisotopicMass = monoMass
     End Sub
 End Class

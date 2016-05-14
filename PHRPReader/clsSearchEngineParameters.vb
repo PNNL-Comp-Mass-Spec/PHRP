@@ -5,25 +5,25 @@ Public Class clsSearchEngineParameters
 	Public Const MASS_TYPE_MONOISOTOPIC As String = "monoisotopic"
 	Public Const MASS_TYPE_AVERAGE As String = "average"
 
-	Protected mSearchEngineName As String
-	Protected mSearchEngineVersion As String
-	Protected mSearchDate As DateTime
+    Private mSearchEngineName As String
+    Private mSearchEngineVersion As String
+    Private mSearchDate As DateTime
 
-	Protected mFastaFilePath As String
+    Private mFastaFilePath As String
 
-	Protected mPrecursorMassToleranceDa As Double	' Precursor mass tolerance, in Da; 0 if unknown
-	Protected mPrecursorMassTolerancePpm As Double	' Precursor mass tolerance, in ppm; 0 if unknown
+    Private mPrecursorMassToleranceDa As Double     ' Precursor mass tolerance, in Da; 0 if unknown
+    Private mPrecursorMassTolerancePpm As Double    ' Precursor mass tolerance, in ppm; 0 if unknown
 
-	Protected mPrecursorMassType As String			' Typically "monoisotopic" or "average"
-	Protected mFragmentMassType As String
+    Private mPrecursorMassType As String            ' Typically "monoisotopic" or "average"
+    Private mFragmentMassType As String
 
-	Protected mEnzyme As String
-	Protected mMaxNumberInternalCleavages As Integer
-	Protected mMinNumberTermini As Integer						' 0 means no-enzyme, 1 means partially tryptic, 2 means fully tryptic
+    Private mEnzyme As String
+    Private mMaxNumberInternalCleavages As Integer
+    Private mMinNumberTermini As Integer                        ' 0 means no-enzyme, 1 means partially tryptic, 2 means fully tryptic
 
-	Protected mModInfo As List(Of clsModificationDefinition)
+    Private ReadOnly mModInfo As List(Of clsModificationDefinition)
 
-	Protected mParameters As Dictionary(Of String, String)
+    Private ReadOnly mParameters As Dictionary(Of String, String)
 
 #Region "Properties"
 	Public Property Enzyme As String
@@ -133,18 +133,18 @@ Public Class clsSearchEngineParameters
 
 #End Region
 
-    Public Sub New(SearchEngineName As String)
-        Me.New(SearchEngineName, New List(Of clsModificationDefinition), Nothing)
+    Public Sub New(searchEngineName As String)
+        Me.New(searchEngineName, New List(Of clsModificationDefinition), Nothing)
     End Sub
 
-    Public Sub New(SearchEngineName As String, objModInfo As List(Of clsModificationDefinition))
-        Me.New(SearchEngineName, objModInfo, Nothing)
+    Public Sub New(searchEngineName As String, objModInfo As List(Of clsModificationDefinition))
+        Me.New(searchEngineName, objModInfo, Nothing)
     End Sub
 
-    Public Sub New(SearchEngineName As String, objModInfo As List(Of clsModificationDefinition), Parameters As Dictionary(Of String, String))
+    Public Sub New(searchEngineName As String, objModInfo As List(Of clsModificationDefinition), Parameters As Dictionary(Of String, String))
         Me.InitializeDefaults()
 
-        mSearchEngineName = SearchEngineName
+        mSearchEngineName = searchEngineName
 
         mModInfo = objModInfo
 
@@ -186,7 +186,7 @@ Public Class clsSearchEngineParameters
         mParameters.Clear()
     End Sub
 
-    Protected Sub InitializeDefaults()
+    Private Sub InitializeDefaults()
         mSearchEngineName = "Unknown"
         mSearchEngineVersion = "Unknown"
         mSearchDate = New DateTime(1980, 1, 1)

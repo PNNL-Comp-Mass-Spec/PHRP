@@ -16,46 +16,46 @@ Public Class clsPSM
 
 	Public Const UNKNOWN_COLLISION_MODE As String = "n/a"
 
-	Protected mDataLineText As String = String.Empty
+    Private mDataLineText As String = String.Empty
 
-	' Note: Be sure to update the Clone() function if you add new class-wide variables
-	Protected mResultID As Integer
-	Protected mScoreRank As Integer					' Top scoring peptide is rank 1, next lowest score is rank 2, etc.
+    ' Note: Be sure to update the Clone() function if you add new class-wide variables
+    Private mResultID As Integer
+    Private mScoreRank As Integer                   ' Top scoring peptide is rank 1, next lowest score is rank 2, etc.
 
-	Protected mScanNumber As Integer
-	Protected mElutionTimeMinutes As Single
-	Protected mScanList As SortedSet(Of Integer)			' List of scans that were combined prior to identifying this peptide
+    Private mScanNumber As Integer
+    Private mElutionTimeMinutes As Single
+    Private ReadOnly mScanList As SortedSet(Of Integer)          ' List of scans that were combined prior to identifying this peptide
 
-	Protected mPeptide As String					' Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
-	Protected mPeptideWithNumericMods As String		' Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
-	Protected mPeptideCleanSequence As String
-	Protected mSeqID As Integer
+    Private mPeptide As String                  ' Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
+    Private mPeptideWithNumericMods As String       ' Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
+    Private mPeptideCleanSequence As String
+    Private mSeqID As Integer
 
-	Protected mModifiedPeptideResidues As List(Of clsAminoAcidModInfo)
+    Private ReadOnly mModifiedPeptideResidues As List(Of clsAminoAcidModInfo)
 
-	Protected mCharge As Short
-	Protected mCollisionMode As String		' CID, ETD, HCD, or n/a
-	Protected mMSGFSpecProb As String		' MSGF SpecProb; stored as string to preserve formatting
+    Private mCharge As Short
+    Private mCollisionMode As String        ' CID, ETD, HCD, or n/a
+    Private mMSGFSpecProb As String     ' MSGF SpecProb; stored as string to preserve formatting
 
-	' The following are typically populated using UpdateCleavageInfo
-	Protected mCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
-	Protected mNumMissedCleavages As Short
-	Protected mNumTrypticTerminii As Short
+    ' The following are typically populated using UpdateCleavageInfo
+    Private mCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
+    Private mNumMissedCleavages As Short
+    Private mNumTrypticTerminii As Short
 
-	Protected mPrecursorNeutralMass As Double		' Uncharged monoisotopic mass of the observed precursor
-	Protected mMassErrorDa As String
-	Protected mMassErrorPPM As String
+    Private mPrecursorNeutralMass As Double     ' Uncharged monoisotopic mass of the observed precursor
+    Private mMassErrorDa As String
+    Private mMassErrorPPM As String
 
-	Protected mPeptideMonoisotopicMass As Double	' Theoretical (computed) monoisotopic mass
+    Private mPeptideMonoisotopicMass As Double  ' Theoretical (computed) monoisotopic mass
 
-	' Note that protein names are case-sensitive
-	Protected mProteins As List(Of String)
+    ' Note that protein names are case-sensitive
+    Private ReadOnly mProteins As List(Of String)
 
-	' Lists protein name, description, cleavage state, terminus state, residue start, and residue end
-	Protected mProteinDetails As Dictionary(Of String, clsProteinInfo)
+    ' Lists protein name, description, cleavage state, terminus state, residue start, and residue end
+    Private ReadOnly mProteinDetails As Dictionary(Of String, clsProteinInfo)
 
-	' This dictionary tracks additional, tool-specific scores
-	Protected mAdditionalScores As Dictionary(Of String, String)
+    ' This dictionary tracks additional, tool-specific scores
+    Private ReadOnly mAdditionalScores As Dictionary(Of String, String)
 
 #Region "Properties"
 
@@ -614,7 +614,7 @@ Public Class clsPSM
         UpdateCleanSequence(mPeptide)
     End Sub
 
-    Protected Sub UpdateCleanSequence(strPeptide As String)
+    Private Sub UpdateCleanSequence(strPeptide As String)
         If String.IsNullOrEmpty(strPeptide) Then
             mPeptideCleanSequence = String.Empty
         Else

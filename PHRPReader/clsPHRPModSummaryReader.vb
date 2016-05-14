@@ -10,12 +10,12 @@ Public Class clsPHRPModSummaryReader
 	Public Const MOD_SUMMARY_COLUMN_Mass_Correction_Tag As String = "Mass_Correction_Tag"
 	Public Const MOD_SUMMARY_COLUMN_Occurrence_Count As String = "Occurrence_Count"
 
-	Protected mModificationDefs As List(Of clsModificationDefinition)
+    Private ReadOnly mModificationDefs As List(Of clsModificationDefinition)
 
 	' The keys in this dictionary are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
-	Protected mModDefMassesAsText As Dictionary(Of String, String)
+    Private ReadOnly mModDefMassesAsText As Dictionary(Of String, String)
 
-	Protected mSuccess As Boolean
+    Private ReadOnly mSuccess As Boolean
 
 	Public ReadOnly Property ModificationDefs() As List(Of clsModificationDefinition)
 		Get
@@ -23,11 +23,12 @@ Public Class clsPHRPModSummaryReader
 		End Get
 	End Property
 
-	Public ReadOnly Property Success() As Boolean
-		Get
-			Return mSuccess
-		End Get
-	End Property
+    ' ReSharper disable once ConvertToVbAutoProperty
+    Public ReadOnly Property Success() As Boolean
+        Get
+            Return mSuccess
+        End Get
+    End Property
 
     Public Sub New(strModSummaryFilePath As String)
 
@@ -62,7 +63,7 @@ Public Class clsPHRPModSummaryReader
         End If
     End Function
 
-    Protected Function ReadModSummaryFile(strModSummaryFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
+    Private Function ReadModSummaryFile(strModSummaryFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
 
         Dim strLineIn As String
         Dim strSplitLine() As String

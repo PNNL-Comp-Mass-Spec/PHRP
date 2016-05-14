@@ -48,8 +48,8 @@ Public Class clsPeptideCleavageStateCalculator
 	Public Const TERMINUS_SYMBOL_XTANDEM_NTerminus As Char = "["c
 	Public Const TERMINUS_SYMBOL_XTANDEM_CTerminus As Char = "]"c
 
-	Protected Const TRYPSIN_LEFT_RESIDUE_REGEX As String = "[KR]"
-	Protected Const TRYPSIN_RIGHT_RESIDUE_REGEX As String = "[^P]"
+    Private Const TRYPSIN_LEFT_RESIDUE_REGEX As String = "[KR]"
+    Private Const TRYPSIN_RIGHT_RESIDUE_REGEX As String = "[^P]"
 
 	Public Enum ePeptideCleavageStateConstants As Integer
         Unknown = -1
@@ -554,13 +554,11 @@ Public Class clsPeptideCleavageStateCalculator
 
         Dim intPeriodLoc1 As Integer
         Dim intPeriodLoc2 As Integer
-        Dim blnSuccess As Boolean
+        Dim blnSuccess = False
 
         strPrefix = String.Empty
         strSuffix = String.Empty
         strPrimarySequence = String.Empty
-
-        blnSuccess = False
 
         If strSequenceIn Is Nothing OrElse strSequenceIn.Length = 0 Then
             Return False

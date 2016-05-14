@@ -40,10 +40,10 @@ Public Class clsPHRPParserMODPlus
     Public Const FILENAME_SUFFIX_SYN As String = "_modp_syn.txt"
     Public Const FILENAME_SUFFIX_FHT As String = "_modp_fht.txt"
 
-    Protected Const MODplus_SEARCH_ENGINE_NAME As String = "MODplus"
+    Private Const MODplus_SEARCH_ENGINE_NAME As String = "MODplus"
 
-    Protected Const PEPTIDE_MASS_TOL_PPM As String = "PeptideMassTolPPM"
-    Protected Const PEPTIDE_MASS_TOL_DA As String = "PeptideMassTolDa"
+    Private Const PEPTIDE_MASS_TOL_PPM As String = "PeptideMassTolPPM"
+    Private Const PEPTIDE_MASS_TOL_DA As String = "PeptideMassTolDa"
 #End Region
 
 #Region "Properties"
@@ -219,7 +219,7 @@ Public Class clsPHRPParserMODPlus
 
     End Function
 
-    Protected Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Private Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Try
 

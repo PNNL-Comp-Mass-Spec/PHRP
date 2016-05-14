@@ -39,7 +39,7 @@ Public Class clsPHRPParserMSPathFinder
     Public Const FILENAME_SUFFIX_SYN As String = "_mspath_syn.txt"
     Public Const FILENAME_SUFFIX_FHT As String = "_mspath_fht.txt"
 
-    Protected Const MSPathFinder_SEARCH_ENGINE_NAME As String = "MSPathFinder"
+    Private Const MSPathFinder_SEARCH_ENGINE_NAME As String = "MSPathFinder"
 
 #End Region
 
@@ -219,7 +219,7 @@ Public Class clsPHRPParserMSPathFinder
 
     End Function
 
-    Protected Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters, resultType As ePeptideHitResultType) As Boolean
+    Private Function ReadSearchEngineParamFile(strSearchEngineParamFileName As String, objSearchEngineParams As clsSearchEngineParameters, resultType As ePeptideHitResultType) As Boolean
 
         Try
             Dim blnSuccess = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, strSearchEngineParamFileName, ePeptideHitResultType.MSGFDB, objSearchEngineParams)

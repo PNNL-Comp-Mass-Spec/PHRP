@@ -2,7 +2,7 @@
 
 Public Class clsPHRPStartupOptions
 
-	Protected mMaxProteinsPerPSM As Integer
+    Private mMaxProteinsPerPSM As Integer
 
 	Public Property LoadModsAndSeqInfo As Boolean
 	Public Property LoadMSGFResults As Boolean

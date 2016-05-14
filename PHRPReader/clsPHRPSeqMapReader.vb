@@ -22,85 +22,85 @@ Public Class clsPHRPSeqMapReader
 #End Region
 
 #Region "Module-wide variables"
-	Protected ReadOnly mDatasetName As String
-	Protected ReadOnly mInputFolderPath As String
+    Private ReadOnly mDatasetName As String
+    Private ReadOnly mInputFolderPath As String
 
-	Protected ReadOnly mResultToSeqMapFilename As String
-	Protected ReadOnly mSeqToProteinMapFilename As String
-	Protected ReadOnly mSeqInfoFilename As String
-	Protected ReadOnly mPepToProteinMapFilename As String
+    Private ReadOnly mResultToSeqMapFilename As String
+    Private ReadOnly mSeqToProteinMapFilename As String
+    Private ReadOnly mSeqInfoFilename As String
+    Private ReadOnly mPepToProteinMapFilename As String
 
-	Protected ReadOnly mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
+    Private ReadOnly mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 
-	Protected mMaxProteinsPerSeqID As Integer
+    Private mMaxProteinsPerSeqID As Integer
 
-	Protected mErrorMessage As String = String.Empty
+    Private mErrorMessage As String = String.Empty
 #End Region
 
 #Region "Properties"
 
-	Public ReadOnly Property DatasetName As String
-		Get
-			Return mDatasetName
-		End Get
-	End Property
+    Public ReadOnly Property DatasetName As String
+        Get
+            Return mDatasetName
+        End Get
+    End Property
 
-	Public ReadOnly Property ErrorMessage As String
-		Get
-			Return mErrorMessage
-		End Get
-	End Property
+    Public ReadOnly Property ErrorMessage As String
+        Get
+            Return mErrorMessage
+        End Get
+    End Property
 
-	Public ReadOnly Property InputFolderPath As String
-		Get
-			Return mInputFolderPath
-		End Get
-	End Property
+    Public ReadOnly Property InputFolderPath As String
+        Get
+            Return mInputFolderPath
+        End Get
+    End Property
 
-	Public Property MaxProteinsPerSeqID As Integer
-		Get
-			Return mMaxProteinsPerSeqID
-		End Get
-		Set(value As Integer)
-			mMaxProteinsPerSeqID = value
-		End Set
-	End Property
+    Public Property MaxProteinsPerSeqID As Integer
+        Get
+            Return mMaxProteinsPerSeqID
+        End Get
+        Set(value As Integer)
+            mMaxProteinsPerSeqID = value
+        End Set
+    End Property
 
-	Public ReadOnly Property PeptideHitResultType As clsPHRPReader.ePeptideHitResultType
-		Get
-			Return mPeptideHitResultType
-		End Get
-	End Property
+    Public ReadOnly Property PeptideHitResultType As clsPHRPReader.ePeptideHitResultType
+        Get
+            Return mPeptideHitResultType
+        End Get
+    End Property
 
-	Public ReadOnly Property PepToProteinMapFilename As String
-		Get
-			Return mPepToProteinMapFilename
-		End Get
-	End Property
+    Public ReadOnly Property PepToProteinMapFilename As String
+        Get
+            Return mPepToProteinMapFilename
+        End Get
+    End Property
 
-	Public ReadOnly Property ResultToSeqMapFilename As String
-		Get
-			Return mResultToSeqMapFilename
-		End Get
-	End Property
+    Public ReadOnly Property ResultToSeqMapFilename As String
+        Get
+            Return mResultToSeqMapFilename
+        End Get
+    End Property
 
-	Public ReadOnly Property SeqToProteinMapFilename As String
-		Get
-			Return mSeqToProteinMapFilename
-		End Get
-	End Property
+    Public ReadOnly Property SeqToProteinMapFilename As String
+        Get
+            Return mSeqToProteinMapFilename
+        End Get
+    End Property
 
 #End Region
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <param name="strDatasetName">Dataset name</param>
-	''' <param name="strInputFolderPath">Input file path</param>
-	''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
-	''' <remarks></remarks>
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="strDatasetName">Dataset name</param>
+    ''' <param name="strInputFolderPath">Input file path</param>
+    ''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
+    ''' <remarks></remarks>
     Public Sub New(strDatasetName As String, strInputFolderPath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType)
-        Me.New(strDatasetName, strInputFolderPath, ePeptideHitResultType, PHRPReader.clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, strDatasetName))
+        Me.New(strDatasetName, strInputFolderPath, ePeptideHitResultType, clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, strDatasetName))
     End Sub
 
     ''' <summary>
@@ -291,9 +291,9 @@ Public Class clsPHRPSeqMapReader
     ''' <param name="lstPepToProteinMap">Peptide to protein mapping</param>
     ''' <returns></returns>
     ''' <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
-    Protected Function LoadPepToProtMapData(strFilePath As String, ByVal lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
+    Private Function LoadPepToProtMapData(strFilePath As String, lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
 
-        Dim linesRead As Integer = 0
+        Dim linesRead = 0
         Dim dtLastProgress As DateTime = DateTime.UtcNow()
         Dim blnNotifyComplete As Boolean
 
@@ -371,7 +371,7 @@ Public Class clsPHRPSeqMapReader
     ''' <param name="lstResultToSeqMap">Result to sequence mapping</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function LoadResultToSeqMapping(strFilePath As String, ByVal lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
+    Private Function LoadResultToSeqMapping(strFilePath As String, lstResultToSeqMap As SortedList(Of Integer, Integer)) As Boolean
 
         Dim strLineIn As String
         Dim strSplitLine() As String
@@ -382,7 +382,7 @@ Public Class clsPHRPSeqMapReader
         Try
 
             ' Read the data from the result to sequence map file
-            Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
                     strLineIn = srInFile.ReadLine
@@ -425,7 +425,7 @@ Public Class clsPHRPSeqMapReader
     ''' <param name="lstSeqInfo">Sequences</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function LoadSeqInfo(strFilePath As String, ByVal lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
+    Private Function LoadSeqInfo(strFilePath As String, lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
         Dim objColumnHeaders As SortedDictionary(Of String, Integer)
 
@@ -453,7 +453,7 @@ Public Class clsPHRPSeqMapReader
             objColumnHeaders.Add(SEQ_INFO_COLUMN_Monoisotopic_Mass, 3)
 
             ' Read the data from the sequence info file
-            Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
                     strLineIn = srInFile.ReadLine
@@ -509,9 +509,9 @@ Public Class clsPHRPSeqMapReader
     ''' <param name="lstSeqToProteinMap">Sequence to protein map</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function LoadSeqToProteinMapping(
+    Private Function LoadSeqToProteinMapping(
       strFilePath As String,
-      ByVal lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
+      lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))) As Boolean
 
         Dim lstProteins As List(Of clsProteinInfo) = Nothing
 
@@ -545,7 +545,7 @@ Public Class clsPHRPSeqMapReader
             objColumnHeaders.Add(SEQ_PROT_MAP_COLUMN_Protein_Intensity, 5)
 
             ' Read the data from the sequence to protein map file
-            Using srInFile As StreamReader = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            Using srInFile = New StreamReader(New FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
                 Do While Not srInFile.EndOfStream
                     strLineIn = srInFile.ReadLine

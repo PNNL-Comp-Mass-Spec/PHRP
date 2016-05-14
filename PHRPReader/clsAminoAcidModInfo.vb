@@ -19,11 +19,11 @@ Public Class clsAminoAcidModInfo
 	End Enum
 #End Region
 
-	Protected mModDefinition As clsModificationDefinition
-	Protected mResidue As Char
-    Protected mResidueLocInPeptide As Integer
-    Protected mEndResidueLocInPeptide As Integer
-	Protected mResidueTerminusState As eResidueTerminusStateConstants
+    Private ReadOnly mModDefinition As clsModificationDefinition
+    Private ReadOnly mResidue As Char
+    Private ReadOnly mResidueLocInPeptide As Integer
+    Private ReadOnly mEndResidueLocInPeptide As Integer
+    Private ReadOnly mResidueTerminusState As eResidueTerminusStateConstants
 
     ''' <summary>
     ''' True if the location of the modification is ambiguous

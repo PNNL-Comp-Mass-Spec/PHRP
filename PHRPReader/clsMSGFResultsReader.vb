@@ -25,8 +25,8 @@ Public Class clsMSGFResultsReader
 
 #Region "Class-wide variables"
 	' Column headers
-	Protected mColumnHeaders As SortedDictionary(Of String, Integer)
-	Protected mErrorMessage As String = String.Empty
+    Private ReadOnly mColumnHeaders As SortedDictionary(Of String, Integer)
+    Private mErrorMessage As String = String.Empty
 #End Region
 
 	''' <summary>
@@ -50,11 +50,11 @@ Public Class clsMSGFResultsReader
 		mColumnHeaders = New SortedDictionary(Of String, Integer)
 	End Sub
 
-    Protected Sub AddHeaderColumn(strColumnName As String)
+    Private Sub AddHeaderColumn(strColumnName As String)
         mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
     End Sub
 
-    Protected Sub DefineColumnHeaders()
+    Private Sub DefineColumnHeaders()
 
         mColumnHeaders.Clear()
 

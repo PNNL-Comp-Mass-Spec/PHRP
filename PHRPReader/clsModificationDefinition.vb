@@ -74,20 +74,18 @@ Public Class clsModificationDefinition
         ProteinTerminusStaticMod = 5
     End Enum
 
-	Protected Const MASS_DIGITS_OF_PRECISION As Integer = 3
-
 #End Region
 
 #Region "Classwide Variables"
-	Protected mModificationSymbol As Char				' One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
-	Protected mModificationMass As Double				' Monoisotopic modification mass
-	Protected mModificationMassAsText As String			' Modification mass, stored as text
-	Protected mTargetResidues As String					' If this string is empty, then the given modification can apply to any residue or terminus; Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to; Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols (< and > for the peptide terminii; [ and ] for the protein terminii)
-	Protected mModificationType As eModificationTypeConstants
-	Protected mMassCorrectionTag As String				' Name associated with the given ModificationMass; maximum length is 8 characters; cannot contain a colon, comma, or space
-	Protected mAffectedAtom As Char						' Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications); for Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
-	Protected mOccurrenceCount As Integer				' Number of times this modification was observed in the given XML file
-	Protected mUnknownModAutoDefined As Boolean			' True if this was an unknown mass that was auto defined
+    Private mModificationSymbol As Char                 ' One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
+    Private mModificationMass As Double                 ' Monoisotopic modification mass
+    Private mModificationMassAsText As String           ' Modification mass, stored as text
+    Private mTargetResidues As String                   ' If this string is empty, then the given modification can apply to any residue or terminus; Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to; Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols (< and > for the peptide terminii; [ and ] for the protein terminii)
+    Private mModificationType As eModificationTypeConstants
+    Private mMassCorrectionTag As String                ' Name associated with the given ModificationMass; maximum length is 8 characters; cannot contain a colon, comma, or space
+    Private mAffectedAtom As Char                       ' Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications); for Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
+    Private mOccurrenceCount As Integer                 ' Number of times this modification was observed in the given XML file
+    Private mUnknownModAutoDefined As Boolean           ' True if this was an unknown mass that was auto defined
 #End Region
 
 #Region "Properties"
@@ -335,7 +333,7 @@ Public Class clsModificationDefinition
 
         blnEquivalent = False
         With objA
-            If Math.Abs(Math.Round(.ModificationMass - objB.ModificationMass, MASS_DIGITS_OF_PRECISION) - 0) < Single.Epsilon AndAlso
+            If Math.Abs(Math.Round(.ModificationMass - objB.ModificationMass, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < Single.Epsilon AndAlso
                .ModificationType = objB.ModificationType AndAlso
                .MassCorrectionTag = objB.MassCorrectionTag AndAlso
                .AffectedAtom = objB.AffectedAtom Then
@@ -546,15 +544,15 @@ Public Class clsModificationDefinition
     ''' <remarks></remarks>
     Public Shared Function ModificationTypeToModificationSymbol(eModificationType As clsModificationDefinition.eModificationTypeConstants) As Char
         Select Case eModificationType
-            Case clsModificationDefinition.eModificationTypeConstants.DynamicMod
+            Case eModificationTypeConstants.DynamicMod
                 Return "D"c
-            Case clsModificationDefinition.eModificationTypeConstants.StaticMod
+            Case eModificationTypeConstants.StaticMod
                 Return "S"c
-            Case clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod
+            Case eModificationTypeConstants.TerminalPeptideStaticMod
                 Return "T"c
-            Case clsModificationDefinition.eModificationTypeConstants.IsotopicMod
+            Case eModificationTypeConstants.IsotopicMod
                 Return "I"c
-            Case clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod
+            Case eModificationTypeConstants.ProteinTerminusStaticMod
                 Return "P"c
             Case Else
                 Return "?"c
