@@ -36,23 +36,24 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
-        mFileDate = "May 9, 2016"
+        mFileDate = "May 13, 2016"
         InitializeLocalVariables()
     End Sub
 
 #Region "Constants and Enums"
-	Protected Const SEP_CHAR As Char = ControlChars.Tab
-	Protected Const UNIQUE_SEQ_TO_PROTEIN_MAP_SEP As String = "_"c
 
-	Protected Const COLUMN_NAME_UNIQUE_SEQ_ID As String = "Unique_Seq_ID"
-	Protected Const COLUMN_NAME_PROTEIN_NAME As String = "Protein_Name"
-	Protected Const COLUMN_NAME_RESULTID As String = "ResultID"
-	Protected Const COLUMN_NAME_PEPTIDE As String = "Peptide"
-	Protected Const COLUMN_NAME_RESIDUE As String = "Residue"
-	Protected Const COLUMN_NAME_PROTEIN_RESIDUE_NUMBER As String = "Protein_Residue_Num"
-	Protected Const COLUMN_NAME_RESIDUE_MOD_NAME As String = "Mod_Name"
-	Protected Const COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER As String = "Peptide_Residue_Num"
-	Protected Const COLUMN_NAME_MSGF_SPECPROB As String = "MSGF_SpecProb"
+    Protected Const SEP_CHAR As Char = ControlChars.Tab
+    Private Const UNIQUE_SEQ_TO_PROTEIN_MAP_SEP As String = "_"c
+
+    Private Const COLUMN_NAME_UNIQUE_SEQ_ID As String = "Unique_Seq_ID"
+    Private Const COLUMN_NAME_PROTEIN_NAME As String = "Protein_Name"
+    Protected Const COLUMN_NAME_RESULTID As String = "ResultID"
+    Protected Const COLUMN_NAME_PEPTIDE As String = "Peptide"
+    Private Const COLUMN_NAME_RESIDUE As String = "Residue"
+    Private Const COLUMN_NAME_PROTEIN_RESIDUE_NUMBER As String = "Protein_Residue_Num"
+    Private Const COLUMN_NAME_RESIDUE_MOD_NAME As String = "Mod_Name"
+    Private Const COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER As String = "Peptide_Residue_Num"
+    Private Const COLUMN_NAME_MSGF_SPECPROB As String = "MSGF_SpecProb"
 
 	Public Const XTANDEM_RESULTS_FILE_SUFFIX As String = "_xt.xml"
 	Public Const SEQUEST_SYNOPSIS_FILE_SUFFIX As String = "_syn.txt"
@@ -81,8 +82,10 @@ Public MustInherit Class clsPHRPBaseClass
 	Public Const FILENAME_SUFFIX_PROTEIN_MODS As String = "_ProteinMods.txt"
 	Public Const FILENAME_SUFFIX_MSGF As String = "_MSGF.txt"
 
-	Protected Const PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE As Single = 90
-	Protected Const PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE As Single = 95
+    Protected Const PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE As Single = 90
+    Private Const PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE As Single = 95
+
+    Private Const PROTEIN_NAME_NO_MATCH = "__NoMatch__"
 
 	Public Enum ePeptideHitResultsFileFormatConstants As Integer
 		AutoDetermine = 0
@@ -142,27 +145,27 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected mErrorCode As ePHRPErrorCodes = ePHRPErrorCodes.NoError
     Protected mErrorMessage As String = String.Empty
-    Protected mWarnMissingParameterFileSection As Boolean
+    Private mWarnMissingParameterFileSection As Boolean
 
     Protected mFileDate As String = String.Empty
-    Protected mAbortProcessing As Boolean
+    Private mAbortProcessing As Boolean
 
     Protected mCreateModificationSummaryFile As Boolean
 
     ' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
     Protected mCreateProteinModsFile As Boolean
-    Protected mFastaFilePath As String
+    Private mFastaFilePath As String
     Protected mIgnorePeptideToProteinMapperErrors As Boolean
-    Protected mProteinModsFileIncludesReversedProteins As Boolean
+    Private mProteinModsFileIncludesReversedProteins As Boolean
     Protected mUseExistingMTSPepToProteinMapFile As Boolean
 
     ' The following two options are only used by the clsInSpecTResultsProcessor
     Protected mCreateInspectOrMSGFDbSynopsisFile As Boolean
     Protected mCreateInspectOrMSGFDbFirstHitsFile As Boolean
 
-    Protected mMassCorrectionTagsFilePath As String
-    Protected mModificationDefinitionsFilePath As String
-    Protected mSearchToolParameterFilePath As String            ' Used by clsInSpecTResultsProcessor and clsMSGFDBResultsProcessor
+    Private mMassCorrectionTagsFilePath As String
+    Private mModificationDefinitionsFilePath As String
+    Protected mSearchToolParameterFilePath As String            ' Used by clsInSpecTResultsProcessor and clsMSGFDBResultsProcessor (aka SearchEngineParamFileName)
 
     Protected mInspectSynopsisFilePValueThreshold As Single     ' Only used by clsInSpecTResultsProcessor; note that lower p-values are higher confidence results
 
@@ -180,19 +183,19 @@ Public MustInherit Class clsPHRPBaseClass
     Protected mPeptideSeqMassCalculator As clsPeptideMassCalculator
 
     Protected mPeptideMods As clsPeptideModificationContainer
-    Protected mUniqueSequences As clsUniqueSequencesContainer
-    Protected mSeqToProteinMap As Hashtable
+    Private mUniqueSequences As clsUniqueSequencesContainer
+    Private mSeqToProteinMap As Hashtable
 
-    Protected mResultToSeqMapFile As StreamWriter
-    Protected mSeqInfoFile As StreamWriter
-    Protected mModDetailsFile As StreamWriter
-    Protected mSeqToProteinMapFile As StreamWriter
+    Private mResultToSeqMapFile As StreamWriter
+    Private mSeqInfoFile As StreamWriter
+    Private mModDetailsFile As StreamWriter
+    Private mSeqToProteinMapFile As StreamWriter
 
-    Protected mNextPeptideToProteinMapperLevel As Integer = 0
+    Private mNextPeptideToProteinMapperLevel As Integer = 0
 
     Protected mProteinNameOrder As Dictionary(Of String, Integer)
 
-    Protected mReplaceSymbols As Regex
+    Private mReplaceSymbols As Regex
 #End Region
 
 #Region "Progress Events and Variables"
@@ -575,7 +578,7 @@ Public MustInherit Class clsPHRPBaseClass
             Return True
 
         Catch ex As Exception
-            ReportError("Error caching protein names from fasta file " + Path.GetFileName(mFastaFilePath) + ex.Message, False)
+            ReportError("Error caching protein names from fasta file " & Path.GetFileName(mFastaFilePath) & ": " & ex.Message, False)
             Return False
         End Try
 
@@ -1201,7 +1204,7 @@ Public MustInherit Class clsPHRPBaseClass
 
                                         End If
 
-                                        If lstPepToProteinMapping(intPepToProteinMapIndex).Protein = "__NoMatch__" AndAlso IsReversedProtein(objReader.CurrentPSM.ProteinFirst) Then
+                                        If lstPepToProteinMapping(intPepToProteinMapIndex).Protein = PROTEIN_NAME_NO_MATCH AndAlso IsReversedProtein(objReader.CurrentPSM.ProteinFirst) Then
                                             ' Skip this result
                                             intPSMCountSkippedSinceReversedOrScrambledProtein += 1
                                         Else
@@ -1576,25 +1579,6 @@ Public MustInherit Class clsPHRPBaseClass
             Return False
         End If
 
-    End Function
-
-    ''' <summary>
-    ''' Examines the string to determine if it is numeric
-    ''' </summary>
-    ''' <param name="strData"></param>
-    ''' <returns>True if a number, otherwise false</returns>
-    Public Shared Function IsNumber(strData As String) As Boolean
-        Try
-            If Double.TryParse(strData, 0) Then
-                Return True
-            ElseIf Integer.TryParse(strData, 0) Then
-                Return True
-            End If
-        Catch ex As Exception
-            ' Ignore errors here
-        End Try
-
-        Return False
     End Function
 
     Protected Function IsReversedProtein(strProteinName As String) As Boolean
@@ -2111,8 +2095,6 @@ Public MustInherit Class clsPHRPBaseClass
 
     Private Function ValidatePeptideToProteinMapResults(strPeptideToProteinMapFilePath As String, blnIgnorePeptideToProteinMapperErrors As Boolean) As Boolean
 
-        Const PROTEIN_NAME_NO_MATCH = "__NoMatch__"
-
         Dim blnSuccess = False
 
         Dim intPeptideCount = 0
@@ -2121,7 +2103,7 @@ Public MustInherit Class clsPHRPBaseClass
         Dim chSplitChars = New Char() {ControlChars.Tab}
 
         Try
-            ' Validate that none of the results in strPeptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH
+            ' Validate that none of the results in strPeptideToProteinMapFilePath has protein name PROTEIN_NAME_NO_MATCH ( __NoMatch__ )
 
             Dim strLineIn As String
             Dim strLastPeptide As String = String.Empty
@@ -2420,5 +2402,4 @@ Public MustInherit Class clsPHRPBaseClass
 	End Class
 
 #End Region
-
 End Class

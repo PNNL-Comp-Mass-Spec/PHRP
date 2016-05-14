@@ -42,7 +42,7 @@ Public Class clsMODaResultsProcessor
     Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
     ' These columns correspond to the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
-    Protected Const MODaResultsFileColCount As Integer = 11
+    Private Const MODaResultsFileColCount As Integer = 11
     Public Enum eMODaResultsFileColumns As Integer
         SpectrumFileName = 0
         SpectrumIndex = 1
@@ -58,7 +58,7 @@ Public Class clsMODaResultsProcessor
     End Enum
 
     ' These columns correspond to the Synopsis file created by this class
-    Protected Const MODaSynFileColCount As Integer = 15
+    Private Const MODaSynFileColCount As Integer = 15
     Public Enum eMODaSynFileColumns As Integer
         ResultID = 0
         Scan = 1
@@ -81,7 +81,7 @@ Public Class clsMODaResultsProcessor
 
 #Region "Structures"
     ' This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
-    Protected Structure udtMODaSearchResultType
+    Private Structure udtMODaSearchResultType
 
         Public SpectrumFileName As String
         Public SpectrumIndex As String
@@ -133,7 +133,7 @@ Public Class clsMODaResultsProcessor
 #End Region
 
 #Region "Classwide Variables"
-    Protected mSpectrumIndexToScanMap As Dictionary(Of Integer, Integer)
+    Private mSpectrumIndexToScanMap As Dictionary(Of Integer, Integer)
 #End Region
 
     ''' <summary>
@@ -463,7 +463,7 @@ Public Class clsMODaResultsProcessor
 
     End Sub
 
-    Protected Function AssureInteger(strInteger As String, intDefaultValue As Integer) As String
+    Private Function AssureInteger(strInteger As String, intDefaultValue As Integer) As String
 
         Dim intValue As Integer
         Dim dblValue As Double
@@ -480,7 +480,7 @@ Public Class clsMODaResultsProcessor
 
     End Function
 
-    Protected Function ComputePeptideMass(strPeptide As String, dblTotalModMass As Double) As Double
+    Private Function ComputePeptideMass(strPeptide As String, dblTotalModMass As Double) As Double
 
         Dim strCleanSequence = GetCleanSequence(strPeptide)
 
@@ -500,7 +500,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="strPeptide">Peptide sequence, with mod masses in the form +53.8 or -23</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function ComputeTotalModMass(strPeptide As String) As Double
+    Private Function ComputeTotalModMass(strPeptide As String) As Double
 
         Static reModMassRegEx As New Regex(MODA_MOD_MASS_REGEX, REGEX_OPTIONS)
 
@@ -585,7 +585,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="strOutputFilePath"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function CreateSynResultsFile(
+    Private Function CreateSynResultsFile(
       strInputFilePath As String,
       strOutputFilePath As String) As Boolean
 
@@ -696,7 +696,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="lstModInfo"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function ExtractModInfoFromMODaParamFile(strMODaParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
+    Private Function ExtractModInfoFromMODaParamFile(strMODaParamFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
 
         Dim strLineIn As String
         Dim kvSetting As KeyValuePair(Of String, String)
@@ -794,7 +794,7 @@ Public Class clsMODaResultsProcessor
         mSpectrumIndexToScanMap = New Dictionary(Of Integer, Integer)
     End Sub
 
-    Protected Function LoadMGFIndexToScanMapFile(fiInputFile As FileInfo) As Boolean
+    Private Function LoadMGFIndexToScanMapFile(fiInputFile As FileInfo) As Boolean
 
         Dim indexToScanMapFilePath As String = String.Empty
 
@@ -869,7 +869,7 @@ Public Class clsMODaResultsProcessor
 
     End Function
 
-    Protected Function LookupScanBySpectrumIndex(spectrumIndex As Integer) As Integer
+    Private Function LookupScanBySpectrumIndex(spectrumIndex As Integer) As Integer
 
         Dim scanNumber As Integer
         If mSpectrumIndexToScanMap.TryGetValue(spectrumIndex, scanNumber) Then
@@ -879,7 +879,7 @@ Public Class clsMODaResultsProcessor
         Return 0
     End Function
 
-    Protected Function ParseMODaSynopsisFile(
+    Private Function ParseMODaSynopsisFile(
       strInputFilePath As String,
       strOutputFolderPath As String,
       lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
@@ -1617,7 +1617,7 @@ Public Class clsMODaResultsProcessor
         Return blnSuccess
     End Function
 
-    Protected Sub ResolveMODaModsWithModDefinitions(ByRef lstMODaModInfo As List(Of clsModificationDefinition))
+    Private Sub ResolveMODaModsWithModDefinitions(ByRef lstMODaModInfo As List(Of clsModificationDefinition))
 
         Dim blnExistingModFound As Boolean
         Dim objModDef As clsModificationDefinition
@@ -1839,7 +1839,7 @@ Public Class clsMODaResultsProcessor
 
 #Region "IComparer Classes"
 
-    Protected Class MODaSearchResultsComparerScanChargeProbabilityPeptide
+    Private Class MODaSearchResultsComparerScanChargeProbabilityPeptide
         Implements IComparer(Of udtMODaSearchResultType)
 
         Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare
@@ -1884,7 +1884,7 @@ Public Class clsMODaResultsProcessor
 
     End Class
 
-    Protected Class MODaSearchResultsComparerProbabilityScanChargePeptide
+    Private Class MODaSearchResultsComparerProbabilityScanChargePeptide
         Implements IComparer(Of udtMODaSearchResultType)
 
         Public Function Compare(x As udtMODaSearchResultType, y As udtMODaSearchResultType) As Integer Implements IComparer(Of udtMODaSearchResultType).Compare

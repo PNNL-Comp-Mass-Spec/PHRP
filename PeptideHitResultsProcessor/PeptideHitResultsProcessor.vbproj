@@ -116,11 +116,7 @@
     <Compile Include="clsMODPlusResultsProcessor.vb" />
     <Compile Include="clsMSAlignResultsProcessor.vb" />
     <Compile Include="clsMSGFDBResultsProcessor.vb" />
-    <Compile Include="clsMSGFPlusParamFileModExtractor.vb" />
     <Compile Include="clsMSPathFinderResultsProcessor.vb" />
-    <Compile Include="clsPeptideModificationContainer.vb">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="clsPHRPBaseClass.vb">
       <SubType>Code</SubType>
     </Compile>

@@ -1466,10 +1466,10 @@ Public Class clsMSAlignResultsProcessor
             ' Call .LookupModificationDefinitionByMass for each entry in lstMSAlignModInfo
             For Each objModInfo As clsModificationDefinition In lstMSAlignModInfo
                 If String.IsNullOrEmpty(objModInfo.TargetResidues) Then
-                    objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+                    objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, Nothing, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)
                 Else
                     For Each chTargetResidue As Char In objModInfo.TargetResidues
-                        objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+                        objModDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(objModInfo.ModificationMass, objModInfo.ModificationType, chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, blnExistingModFound, True, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)
                     Next
                 End If
             Next

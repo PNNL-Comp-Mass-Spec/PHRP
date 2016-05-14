@@ -513,7 +513,7 @@ Public Class clsMSPathFinderResultsProcessor
         AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
         AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
 
-        ' Note that this call will intialize lstModInfo
+        ' Note that this call will initialize lstModInfo
         Dim success = modFileProcessor.ExtractModInfoFromParamFile(strMSGFDBParamFilePath, lstModInfo)
 
         If Not success OrElse mErrorCode <> ePHRPErrorCodes.NoError Then
@@ -1335,8 +1335,7 @@ Public Class clsMSPathFinderResultsProcessor
         ReportWarning(warningMsg)
     End Sub
 #End Region
-
-
+    
 #Region "IComparer Classes"
 
     Protected Class MSPathFinderSearchResultsComparerScanChargeScorePeptide

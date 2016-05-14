@@ -15,46 +15,47 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
 
 #Region "Constants and enums"
-    Protected Const DEFAULT_MASS_CORRECTION_TAGS_FILENAME As String = "Mass_Correction_Tags.txt"
-    Protected Const MODIFICATION_DEFINITIONS_FILE_SUFFIX As String = "_ModDefs.txt"
+    Private Const DEFAULT_MASS_CORRECTION_TAGS_FILENAME As String = "Mass_Correction_Tags.txt"
+    Private Const MODIFICATION_DEFINITIONS_FILE_SUFFIX As String = "_ModDefs.txt"
 #End Region
 
 #Region "Classwide variables"
 
-    Protected m_SourceFolderPath As String = String.Empty
-    Protected m_OutFolderPath As String = String.Empty
-    Protected m_PeptideHitResultsFileName As String = String.Empty
-    Protected m_PeptideHitResultsFileFormat As clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
+    Private m_SourceFolderPath As String = String.Empty
+    Private m_OutFolderPath As String = String.Empty
+    Private m_PeptideHitResultsFileName As String = String.Empty
+    Private m_PeptideHitResultsFileFormat As clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
 
-    Protected m_MassCorrectionTagsFileName As String = String.Empty
-    Protected m_ModificationDefinitionsFileName As String = String.Empty
+    Private m_MassCorrectionTagsFileName As String = String.Empty
+    Private m_ModificationDefinitionsFileName As String = String.Empty
 
-	Protected m_MiscParams As Dictionary(Of String, String)
-    Protected m_DebugLevel As Integer = 0
+    ' This is unused and thus obsolete
+    Private m_MiscParams As Dictionary(Of String, String)
+    Private m_DebugLevel As Integer = 0
 
-    Protected m_AnalysisToolName As String = String.Empty
-    Protected m_DSName As String = String.Empty
-    Protected m_ParameterFileName As String = String.Empty      ' Peptide search tool parameter file name
-    Protected m_SettingsFileName As String = String.Empty       ' XML settings file with section PeptideHitResultsProcessorOptions
+    Private m_AnalysisToolName As String = String.Empty
+    Private m_DSName As String = String.Empty
+    Private m_ParameterFileName As String = String.Empty      ' Peptide search tool parameter file name
+    Private m_SettingsFileName As String = String.Empty       ' XML settings file with section PeptideHitResultsProcessorOptions
 
-    Protected m_ParameterFilePath As String = String.Empty      ' Peptide search tool parameter file name
-    Protected m_SettingsFilePath As String = String.Empty       ' XML settings file with section PeptideHitResultsProcessorOptions
+    Private m_ParameterFilePath As String = String.Empty      ' Peptide search tool parameter file name
+    Private m_SettingsFilePath As String = String.Empty       ' XML settings file with section PeptideHitResultsProcessorOptions
 
-    Protected m_CreateInspectFirstHitsFile As Boolean
-    Protected m_CreateInspectSynopsisFile As Boolean
+    Private m_CreateInspectFirstHitsFile As Boolean
+    Private m_CreateInspectSynopsisFile As Boolean
 
-    Protected m_PeptideHitResultsFilePath As String = String.Empty
-    Protected m_MassCorrectionTagsFilePath As String = String.Empty
-    Protected m_ModificationDefinitionsFilePath As String = String.Empty
+    Private m_PeptideHitResultsFilePath As String = String.Empty
+    Private m_MassCorrectionTagsFilePath As String = String.Empty
+    Private m_ModificationDefinitionsFilePath As String = String.Empty
 
-    Protected m_ErrMsg As String = String.Empty
+    Private m_ErrMsg As String = String.Empty
 
-    Protected m_Status As IPeptideHitResultsProcessor.ProcessStatus
-    Protected m_Results As IPeptideHitResultsProcessor.ProcessResults
+    Private m_Status As IPeptideHitResultsProcessor.ProcessStatus
+    Private m_Results As IPeptideHitResultsProcessor.ProcessResults
 
-    Protected WithEvents m_PeptideHitResultsProcessor As clsPHRPBaseClass
+    Private WithEvents m_PeptideHitResultsProcessor As clsPHRPBaseClass
 
-	Protected m_thThread As Threading.Thread
+    Private m_thThread As Threading.Thread
 
 #End Region
 
@@ -128,6 +129,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
         End Set
     End Property
 
+    ' This is unused and thus obsolete
     Public WriteOnly Property MiscParams() As Dictionary(Of String, String) Implements IPeptideHitResultsProcessor.MiscParams
         Set(Value As Dictionary(Of String, String))
             m_MiscParams = Value
@@ -227,7 +229,9 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
             m_MassCorrectionTagsFileName = .MassCorrectionTagsFileName
             m_ModificationDefinitionsFileName = .ModificationDefinitionsFileName
 
+            ' This is unused and thus obsolete
             m_MiscParams = .MiscParams
+
             m_DebugLevel = .DebugLevel
 
             m_AnalysisToolName = .AnalysisToolName
@@ -530,7 +534,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     End Sub
 
-    Protected Sub UpdateProgress(strProgressStepDescription As String, sngPercentComplete As Single)
+    Private Sub UpdateProgress(strProgressStepDescription As String, sngPercentComplete As Single)
         Static strProgressStepDescriptionSaved As String = String.Empty
         Static sngProgressPercentComplete As Single = 0
 
