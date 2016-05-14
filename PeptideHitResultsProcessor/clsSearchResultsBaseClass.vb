@@ -34,79 +34,78 @@ Imports PHRPReader.clsPeptideCleavageStateCalculator
 Public MustInherit Class clsSearchResultsBaseClass
 
 #Region "Constants and Enums"
-	Public Const MASS_DIGITS_OF_PRECISION As Integer = 2
     Public Const MASS_C13 As Double = 1.00335483
 #End Region
 
 #Region "Structures"
-	' Unused structure; deprecated in April 2012
-	'Public Structure udtSearchResultModificationsType
-	'    Public ModDefinition As clsModificationDefinition
-	'    Public Residue As Char
-	'    Public ResidueLocInPeptide As Integer                               ' Indicates the residue number modified; the first residue is at position 1
-	'    Public ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
-	'End Structure
+    ' Unused structure; deprecated in April 2012
+    'Public Structure udtSearchResultModificationsType
+    '    Public ModDefinition As clsModificationDefinition
+    '    Public Residue As Char
+    '    Public ResidueLocInPeptide As Integer                               ' Indicates the residue number modified; the first residue is at position 1
+    '    Public ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
+    'End Structure
 #End Region
 
 #Region "Classwide Variables"
-	' Note: Many of these variables typically hold numbers but we're storing the numbers as strings
-	'       to prevent the numeric representation from changing when converting to a number then back to a string
-	Protected mResultID As Integer								' RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MSGFDB, and MODa
-	Protected mGroupID As Integer								' Group ID assigned by XTandem
-	Protected mScan As String
-	Protected mCharge As String
-	Protected mParentIonMH As String							' Observed precursor m/z value converted to M+H
+    ' Note: Many of these variables typically hold numbers but we're storing the numbers as strings
+    '       to prevent the numeric representation from changing when converting to a number then back to a string
+    Protected mResultID As Integer                              ' RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MSGFDB, and MODa
+    Protected mGroupID As Integer                               ' Group ID assigned by XTandem
+    Protected mScan As String
+    Protected mCharge As String
+    Protected mParentIonMH As String                            ' Observed precursor m/z value converted to M+H
 
-	Protected mMultipleProteinCount As String					' Multiple protein count: 0 if the peptide is only in 1 protein; 1 if the protein is in 2 proteins, etc.
-	Protected mProteinName As String
-	Protected mProteinSeqResidueNumberStart As Integer			' Typically always 1
-	Protected mProteinSeqResidueNumberEnd As Integer			' The residue number of the last residue in the protein's sequence; e.g. 100 if the protein has 100 residues total
+    Protected mMultipleProteinCount As String                   ' Multiple protein count: 0 if the peptide is only in 1 protein; 1 if the protein is in 2 proteins, etc.
+    Protected mProteinName As String
+    Protected mProteinSeqResidueNumberStart As Integer          ' Typically always 1
+    Protected mProteinSeqResidueNumberEnd As Integer            ' The residue number of the last residue in the protein's sequence; e.g. 100 if the protein has 100 residues total
 
-	Protected mProteinExpectationValue As String				 ' Typically only used by XTandem; actually holds the Log of the expectation value
-	Protected mProteinIntensity As String						 ' Typically only used by XTandem; actually holds the Log of the intensity
+    Protected mProteinExpectationValue As String                 ' Typically only used by XTandem; actually holds the Log of the expectation value
+    Protected mProteinIntensity As String                        ' Typically only used by XTandem; actually holds the Log of the intensity
 
-	Protected mPeptideLocInProteinStart As Integer				' Position in the protein's residues of the first residue in the peptide
-	Protected mPeptideLocInProteinEnd As Integer				' Position in the protein's residues of the last residue in the peptide
+    Protected mPeptideLocInProteinStart As Integer              ' Position in the protein's residues of the first residue in the peptide
+    Protected mPeptideLocInProteinEnd As Integer                ' Position in the protein's residues of the last residue in the peptide
 
-	Protected mPeptidePreResidues As String						' Residue or residues before the start of the peptide sequence
-	Protected mPeptidePostResidues As String					' Residue or residues after the end of the peptide sequence
-	Protected mPeptideCleanSequence As String					' Peptide sequence without any modification symbols
-	Protected mPeptideSequenceWithMods As String				' Peptide sequence with modification symbols
+    Protected mPeptidePreResidues As String                     ' Residue or residues before the start of the peptide sequence
+    Protected mPeptidePostResidues As String                    ' Residue or residues after the end of the peptide sequence
+    Protected mPeptideCleanSequence As String                   ' Peptide sequence without any modification symbols
+    Protected mPeptideSequenceWithMods As String                ' Peptide sequence with modification symbols
 
-	Protected mPeptideCleavageState As ePeptideCleavageStateConstants
-	Protected mPeptideTerminusState As ePeptideTerminusStateConstants
+    Protected mPeptideCleavageState As ePeptideCleavageStateConstants
+    Protected mPeptideTerminusState As ePeptideTerminusStateConstants
 
-	Protected mPeptideMH As String					' In XTandem this is the theoretical monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, MSGFDB, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
-	Protected mPeptideDeltaMass As String			' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation); in Sequest this is Theoretical Mass - Observed Mass.  In XTandem, Inspect, MSGFDB, and MSAlign the DelM value is listed as Observed - Theoretical, however, PHRP negates while reading the synopsis file to match Sequest
+    Protected mPeptideMH As String                  ' In XTandem this is the theoretical monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, MSGFDB, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
+    Protected mPeptideDeltaMass As String           ' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation); in Sequest this is Theoretical Mass - Observed Mass.  In XTandem, Inspect, MSGFDB, and MSAlign the DelM value is listed as Observed - Theoretical, however, PHRP negates while reading the synopsis file to match Sequest
 
-	'Protected mPeptideDeltaMassCorrectedPpm As Double         ' Computed using either mPeptideDeltaMass (negating to bring back to Observed minus Theoretical) or using PrecursorMass - mPeptideMonoisotopicMass; In either case, we must add/subtract 1 until value is between -0.5 and 0.5, then convert to ppm (using mPeptideMonoisotopicMass for ppm basis)
+    'Protected mPeptideDeltaMassCorrectedPpm As Double         ' Computed using either mPeptideDeltaMass (negating to bring back to Observed minus Theoretical) or using PrecursorMass - mPeptideMonoisotopicMass; In either case, we must add/subtract 1 until value is between -0.5 and 0.5, then convert to ppm (using mPeptideMonoisotopicMass for ppm basis)
 
-	Protected mPeptideModDescription As String
-	Protected mPeptideMonoisotopicMass As Double				' Theoretical (computed) monoisotopic mass for a given peptide sequence, including any modified residues
+    Protected mPeptideModDescription As String
+    Protected mPeptideMonoisotopicMass As Double                ' Theoretical (computed) monoisotopic mass for a given peptide sequence, including any modified residues
 
-	' List of modifications present in the current peptide
-	Protected mSearchResultModifications As List(Of clsAminoAcidModInfo)
+    ' List of modifications present in the current peptide
+    Protected mSearchResultModifications As List(Of clsAminoAcidModInfo)
 
-	' Possible modifications that the peptide could have
-	Protected mPeptideMods As clsPeptideModificationContainer
+    ' Possible modifications that the peptide could have
+    Protected mPeptideMods As clsPeptideModificationContainer
 
-	Protected mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
-	Protected mPeptideSeqMassCalculator As clsPeptideMassCalculator
+    Protected mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
+    Protected mPeptideSeqMassCalculator As clsPeptideMassCalculator
 
-	Protected mErrorMessage As String = ""
+    Protected mErrorMessage As String = ""
 #End Region
 
 #Region "Properties"
 
-	Public ReadOnly Property ErrorMessage() As String
-		Get
-			Return mErrorMessage
-		End Get
-	End Property
-	Public Property ResultID() As Integer
-		Get
-			Return mResultID
-		End Get
+    Public ReadOnly Property ErrorMessage() As String
+        Get
+            Return mErrorMessage
+        End Get
+    End Property
+    Public Property ResultID() As Integer
+        Get
+            Return mResultID
+        End Get
         Set(Value As Integer)
             mResultID = Value
         End Set
@@ -449,33 +448,20 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub ComputeMonoisotopicMass()
-        Dim intIndex As Integer
 
-        ' Ths array is static to avoid re-reserving memory for it on every function call
-        Static udtPeptideSequenceModInfo() As clsPeptideMassCalculator.udtPeptideSequenceModInfoType
-        If udtPeptideSequenceModInfo Is Nothing Then
-            ' Initially reserve space for 50 modifications
-            ReDim udtPeptideSequenceModInfo(49)
-        End If
+        Dim modifiedResidues = New List(Of clsPeptideMassCalculator.udtPeptideSequenceModInfoType)
 
-        If mSearchResultModifications.Count >= udtPeptideSequenceModInfo.Length Then
-            ReDim udtPeptideSequenceModInfo(mSearchResultModifications.Count - 1)
-        End If
+        ' Copy the mod info from mSearchResultModifications to list modifiedResidues
+        For Each searchResultMod In mSearchResultModifications
+            Dim modifiedResidue = New clsPeptideMassCalculator.udtPeptideSequenceModInfoType
+            modifiedResidue.ResidueLocInPeptide = searchResultMod.ResidueLocInPeptide
+            modifiedResidue.ModificationMass = searchResultMod.ModDefinition.ModificationMass
+            modifiedResidue.AffectedAtom = searchResultMod.ModDefinition.AffectedAtom
 
-        ' Copy the mod info from mPeptideMods to udtPeptideSequenceModInfo
-        For intIndex = 0 To mSearchResultModifications.Count - 1
-            With udtPeptideSequenceModInfo(intIndex)
-                .ResidueLocInPeptide = mSearchResultModifications(intIndex).ResidueLocInPeptide
-                .ModificationMass = mSearchResultModifications(intIndex).ModDefinition.ModificationMass
-                .AffectedAtom = mSearchResultModifications(intIndex).ModDefinition.AffectedAtom
-            End With
-        Next intIndex
+            modifiedResidues.Add(modifiedResidue)
+        Next
 
-        mPeptideMonoisotopicMass = mPeptideSeqMassCalculator.ComputeSequenceMass(mPeptideCleanSequence, mSearchResultModifications.Count, udtPeptideSequenceModInfo)
-
-        '' Unused
-        ' Update mPeptideDeltaMassCorrectedPpm
-        ''ComputeDelMCorrected()
+        mPeptideMonoisotopicMass = mPeptideSeqMassCalculator.ComputeSequenceMass(mPeptideCleanSequence, modifiedResidues)
 
     End Sub
 
@@ -632,7 +618,7 @@ Public MustInherit Class clsSearchResultsBaseClass
       eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
       blnUpdateModOccurrenceCounts As Boolean) As Boolean
 
-        Return SearchResultAddModification(dblModificationMass, chTargetResidue, intResidueLocInPeptide, eResidueTerminusState, blnUpdateModOccurrenceCounts, MASS_DIGITS_OF_PRECISION)
+        Return SearchResultAddModification(dblModificationMass, chTargetResidue, intResidueLocInPeptide, eResidueTerminusState, blnUpdateModOccurrenceCounts, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)
 
     End Function
 
@@ -828,7 +814,7 @@ Public MustInherit Class clsSearchResultsBaseClass
                                 Exit For
                             Else
                                 dblMassDifference = Math.Abs(mSearchResultModifications(intIndexCompare).ModDefinition.ModificationMass - objModificationDefinition.ModificationMass)
-                                If Math.Abs(Math.Round(dblMassDifference, MASS_DIGITS_OF_PRECISION)) < Single.Epsilon Then
+                                If Math.Abs(Math.Round(dblMassDifference, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)) < Single.Epsilon Then
                                     blnAddModification = False
                                     Exit For
                                 End If
@@ -854,7 +840,7 @@ Public MustInherit Class clsSearchResultsBaseClass
     Public Sub UpdatePeptideNTerminusMass(dblNTerminalMassChange As Double)
         ' Updates the N-Terminal mass applied to peptides when computing their mass if it is significantly different than the
         '  currently defined N-terminal peptide mass
-        If Math.Round(Math.Abs(dblNTerminalMassChange - mPeptideSeqMassCalculator.PeptideNTerminusMass), MASS_DIGITS_OF_PRECISION) > 0 Then
+        If Math.Round(Math.Abs(dblNTerminalMassChange - mPeptideSeqMassCalculator.PeptideNTerminusMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) > 0 Then
             mPeptideSeqMassCalculator.PeptideNTerminusMass = dblNTerminalMassChange
         End If
     End Sub
@@ -862,7 +848,7 @@ Public MustInherit Class clsSearchResultsBaseClass
     Public Sub UpdatePeptideCTerminusMass(dblCTerminalMassChange As Double)
         ' Updates the C-Terminal mass applied to peptides when computing their mass if significantly different than the
         '  currently defined C-terminal peptide mass
-        If Math.Round(Math.Abs(dblCTerminalMassChange - mPeptideSeqMassCalculator.PeptideCTerminusMass), MASS_DIGITS_OF_PRECISION) > 0 Then
+        If Math.Round(Math.Abs(dblCTerminalMassChange - mPeptideSeqMassCalculator.PeptideCTerminusMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) > 0 Then
             mPeptideSeqMassCalculator.PeptideCTerminusMass = dblCTerminalMassChange
         End If
     End Sub

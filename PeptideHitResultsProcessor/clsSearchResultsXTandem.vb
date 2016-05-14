@@ -24,6 +24,8 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
+Imports PHRPReader
+
 Public Class clsSearchResultsXTandem
     Inherits clsSearchResultsBaseClass
 
@@ -210,7 +212,7 @@ Public Class clsSearchResultsXTandem
 
     Protected Sub ComputePeptideDeltaCn2()
         Try
-            If clsPHRPBaseClass.IsNumber(mPeptideHyperscore) And clsPHRPBaseClass.IsNumber(mPeptideNextScore) Then
+            If clsPHRPParser.IsNumber(mPeptideHyperscore) And clsPHRPParser.IsNumber(mPeptideNextScore) Then
                 mPeptideDeltaCn2 = (CSng(mPeptideHyperscore) - CSng(mPeptideNextScore)) / CSng(mPeptideHyperscore)
             Else
                 mPeptideDeltaCn2 = 0

@@ -1155,9 +1155,9 @@ Public Class clsInSpecTResultsProcessor
                     ' This is the first line of the file; it may be a header row
                     ' Determine this by seeing if any of the first three columns contains a number
                     If Not (
-                       clsPHRPBaseClass.IsNumber(strSplitLine(0)) OrElse
-                       clsPHRPBaseClass.IsNumber(strSplitLine(1)) OrElse
-                       clsPHRPBaseClass.IsNumber(strSplitLine(2))) Then
+                       clsPHRPParser.IsNumber(strSplitLine(0)) OrElse
+                       clsPHRPParser.IsNumber(strSplitLine(1)) OrElse
+                       clsPHRPParser.IsNumber(strSplitLine(2))) Then
                         ' This is a header line; ignore it
                         blnValidSearchResult = False
                         Exit Try
@@ -1712,7 +1712,7 @@ Public Class clsInSpecTResultsProcessor
                             End If
                             blnExistingModFound = False
 
-                            objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(dblModMass, chTargetResidue, eResidueTerminusState, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+                            objModificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(dblModMass, chTargetResidue, eResidueTerminusState, blnExistingModFound, True, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)
 
                             If intResidueIndex = intResIndexStart Then
                                 .ModSymbol = objModificationDefinition.ModificationSymbol

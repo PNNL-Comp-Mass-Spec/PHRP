@@ -11,6 +11,8 @@
 ' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
 
+Imports PHRPReader
+
 Public Class clsSearchResultsMODPlus
     Inherits clsSearchResultsBaseClass
 

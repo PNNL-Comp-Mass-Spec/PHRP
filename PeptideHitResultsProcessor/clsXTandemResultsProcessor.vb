@@ -242,12 +242,12 @@ Public Class clsXTandemResultsProcessor
 
                         If intColonIndex > 0 Then
                             ' Colon found; see if the text up to intColonIndex is a number
-                            If clsPHRPBaseClass.IsNumber(strModDefs(intIndex).Substring(0, intColonIndex)) Then
+                            If clsPHRPParser.IsNumber(strModDefs(intIndex).Substring(0, intColonIndex)) Then
                                 dblModificationMass = Double.Parse(strModDefs(intIndex).Substring(0, intColonIndex))
                             End If
                         Else
                             ' Colon not found; see if the text up to intAtSignIndex is a number
-                            If clsPHRPBaseClass.IsNumber(strModDefs(intIndex).Substring(0, intAtSignIndex)) Then
+                            If clsPHRPParser.IsNumber(strModDefs(intIndex).Substring(0, intAtSignIndex)) Then
                                 dblModificationMass = Double.Parse(strModDefs(intIndex).Substring(0, intAtSignIndex))
                             End If
                         End If
@@ -315,7 +315,7 @@ Public Class clsXTandemResultsProcessor
                 ' See if strParamValue is a non-zero number
 
                 dblModificationMass = 0
-                If clsPHRPBaseClass.IsNumber(strParamValue) Then
+                If clsPHRPParser.IsNumber(strParamValue) Then
                     dblModificationMass = Double.Parse(strParamValue)
                 End If
 
@@ -1173,11 +1173,11 @@ Public Class clsXTandemResultsProcessor
                                         blnSuccess = ParseXTandemInputParameterProteinTerminusMod(CInt(eInputParamLabelNames.Protein_CTerminal_ResidueModMass), False, strValue, intModInfoCount, udtModInfo)
 
                                     Case udtParamLabels(eInputParamLabelNames.Protein_Cleavage_NTerminalMassChange)
-                                        If clsPHRPBaseClass.IsNumber(strValue) Then
+                                        If clsPHRPParser.IsNumber(strValue) Then
                                             mPeptideNTerminusMassChange = Double.Parse(strValue)
                                         End If
                                     Case udtParamLabels(eInputParamLabelNames.Protein_Cleavage_CTerminalMassChange)
-                                        If clsPHRPBaseClass.IsNumber(strValue) Then
+                                        If clsPHRPParser.IsNumber(strValue) Then
                                             mPeptideCTerminusMassChange = Double.Parse(strValue)
                                         End If
 
@@ -1514,7 +1514,7 @@ Public Class clsXTandemResultsProcessor
     Private Function XMLTextReaderGetAttributeValue(ByRef objXMLReader As Xml.XmlTextReader, strAttributeName As String, intValueIfMissing As Integer) As Integer
         objXMLReader.MoveToAttribute(strAttributeName)
         If objXMLReader.ReadAttributeValue() Then
-            If clsPHRPBaseClass.IsNumber(objXMLReader.Value) Then
+            If clsPHRPParser.IsNumber(objXMLReader.Value) Then
                 Return CInt(objXMLReader.Value)
             Else
                 Return intValueIfMissing
@@ -1527,7 +1527,7 @@ Public Class clsXTandemResultsProcessor
     Private Function XMLTextReaderGetAttributeValueDbl(ByRef objXMLReader As Xml.XmlTextReader, strAttributeName As String, dblValueIfMissing As Double) As Double
         objXMLReader.MoveToAttribute(strAttributeName)
         If objXMLReader.ReadAttributeValue() Then
-            If clsPHRPBaseClass.IsNumber(objXMLReader.Value) Then
+            If clsPHRPParser.IsNumber(objXMLReader.Value) Then
                 Return CDbl(objXMLReader.Value)
             Else
                 Return dblValueIfMissing
