@@ -34,13 +34,18 @@
 
 Imports System.IO
 Imports System.Runtime.InteropServices
-Imports PHRPReader
 
 Public Class clsMSGFPlusParamFileModExtractor
 
 #Region "Constants and Enums"
 
     Public Const UNKNOWN_MSGFDB_MOD_SYMBOL As Char = "?"c
+
+    Public Const PARAM_TAG_MOD_STATIC = "StaticMod"
+    Public Const PARAM_TAG_MOD_DYNAMIC = "DynamicMod"
+    Public Const PARAM_TAG_CUSTOMAA = "CustomAA"
+
+    Private Const MSGFPLUS_COMMENT_CHAR = "#"c
 
     Public Enum eMSGFDBModType As Integer
         Unknown = 0
@@ -52,6 +57,7 @@ Public Class clsMSGFPlusParamFileModExtractor
         DynCTermProtein = 6
         CustomAA = 7
     End Enum
+
 #End Region
 
 #Region "Structures"
@@ -106,10 +112,19 @@ Public Class clsMSGFPlusParamFileModExtractor
     ''' <summary>
     ''' Constructor
     ''' </summary>
+    ''' <param name="toolName">
+    ''' Search engine name, typically MSGF+
+    ''' This name is only used in log messages
+    ''' </param>
     ''' <remarks></remarks>
     Public Sub New(toolName As String)
         mErrorMessage = String.Empty
-        mToolName = toolName
+        If String.IsNullOrWhiteSpace(toolName) Then
+            mToolName = "Search engine"
+        Else
+            mToolName = toolName
+        End If
+
     End Sub
 
     Private Function ComputeMass(strEmpiricalformula As String) As Double
@@ -174,9 +189,9 @@ Public Class clsMSGFPlusParamFileModExtractor
     Public Function ExtractModInfoFromParamFile(paramFilePath As String, <Out()> ByRef lstModInfo As List(Of udtModInfoType)) As Boolean
 
         Dim tagNamesToFind = New List(Of String)
-        tagNamesToFind.Add("StaticMod")
-        tagNamesToFind.Add("DynamicMod")
-        tagNamesToFind.Add("CustomAA")
+        tagNamesToFind.Add(PARAM_TAG_MOD_STATIC)
+        tagNamesToFind.Add(PARAM_TAG_MOD_DYNAMIC)
+        tagNamesToFind.Add(PARAM_TAG_CUSTOMAA)
 
         ' Initialization
         lstModInfo = New List(Of udtModInfoType)
@@ -207,8 +222,9 @@ Public Class clsMSGFPlusParamFileModExtractor
 
                     Dim strModSpec As String = String.Empty
 
-                    If strLineIn.StartsWith("#"c) Then
-                        ' Comment line; skip it
+                    If strLineIn.StartsWith(MSGFPLUS_COMMENT_CHAR) Then
+                        ' Comment line (starts with #) 
+                        ' Skip it
                         Continue Do
                     Else
                         For Each tagName In tagNamesToFind
@@ -229,8 +245,9 @@ Public Class clsMSGFPlusParamFileModExtractor
                         Next
 
                         If String.IsNullOrEmpty(strModSpec) Then
-                            If strLineIn.Contains(",opt,") OrElse strLineIn.Contains(",fix,") OrElse strLineIn.Contains(",custom,") Then
-                                strModSpec = strLineIn
+                            Dim lineInNoSpaces = TrimComment(strLineIn).Replace(" ", "")
+                            If lineInNoSpaces.Contains(",opt,") OrElse lineInNoSpaces.Contains(",fix,") OrElse lineInNoSpaces.Contains(",custom,") Then
+                                strModSpec = lineInNoSpaces
                             End If
                         End If
 
@@ -356,7 +373,7 @@ Public Class clsMSGFPlusParamFileModExtractor
         RaiseEvent ErrorOccurred(errMsg)
     End Sub
 
-    Protected Sub ReportWarning(warningMsg As String)
+    Private Sub ReportWarning(warningMsg As String)
         RaiseEvent WarningMessageEvent(warningMsg)
     End Sub
 
@@ -436,7 +453,7 @@ Public Class clsMSGFPlusParamFileModExtractor
 
                         blnExistingModFound = False
 
-                        objModificationDefinition = oPeptideMods.LookupModificationDefinitionByMassAndModType(.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, blnExistingModFound, True, clsSearchResultsBaseClass.MASS_DIGITS_OF_PRECISION)
+                        objModificationDefinition = oPeptideMods.LookupModificationDefinitionByMassAndModType(.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, blnExistingModFound, True, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)
 
                         If intResidueIndex = intResIndexStart Then
                             ' Update the Mod Symbol
@@ -452,6 +469,20 @@ Public Class clsMSGFPlusParamFileModExtractor
         End If
 
     End Sub
+    
+    Private Shared Function TrimComment(value As String) As String
+
+        ' Look for the MSGF+ comment character
+        Dim commentCharIndex = value.IndexOf(MSGFPLUS_COMMENT_CHAR)
+
+        If commentCharIndex > 0 Then
+            ' Trim off the comment
+            Return value.Substring(0, commentCharIndex).Trim()
+        End If
+
+        Return value.Trim()
+
+    End Function
 
     Private Function ValidateIsValidModSpec(strLineIn As String, strModTag As String) As String
 
@@ -467,6 +498,7 @@ Public Class clsMSGFPlusParamFileModExtractor
                 strModSpec = String.Empty
             Else
                 ' Mod spec found
+                ' Note that there may be spaces before or after the commas separating the mod spec fields
                 strModSpec = kvSetting.Value
             End If
 

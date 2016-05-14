@@ -27,7 +27,6 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
-Imports PHRPReader
 Imports PHRPReader.clsAminoAcidModInfo
 Imports System.IO
 
@@ -36,7 +35,7 @@ Public Class clsPeptideModificationContainer
 #Region "Constants and Enums"
 	Public Const DEFAULT_MODIFICATION_SYMBOLS As String = "*#@$&!%~†‡¤º^`×÷+=ø¢"		 ' A few other possibilities: €£¥§
 
-	Public Const MASS_DIGITS_OF_PRECISION As Byte = 3
+    Public Const MASS_DIGITS_OF_PRECISION As Byte = 3
 
 	Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "["c
 	Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "]"c
@@ -51,23 +50,23 @@ Public Class clsPeptideModificationContainer
 
 #Region "Classwide Variables"
 	' List of available modification symbols
-	Protected mDefaultModificationSymbols As Queue
+    Private mDefaultModificationSymbols As Queue
 
 	' List of known mass correction tags
-	Protected mMassCorrectionTags As Hashtable
+    Private mMassCorrectionTags As Hashtable
 
 	' List of known modifications
-	Protected mModifications As List(Of clsModificationDefinition)
+    Private mModifications As List(Of clsModificationDefinition)
 
-	Protected mErrorMessage As String
+    Private mErrorMessage As String
 
 	' This array holds modifications that Sequest or XTandem will often use but for 
 	' which the auto-addition method sometimes incorrectly notes
-	Protected mStandardRefinementModifications As List(Of clsModificationDefinition)
+    Private mStandardRefinementModifications As List(Of clsModificationDefinition)
 
-	Protected mConsiderModSymbolWhenFindingIdenticalMods As Boolean
+    Private mConsiderModSymbolWhenFindingIdenticalMods As Boolean
 
-	Protected mIntegerMassCorrectionTagLookup As Dictionary(Of Integer, String)
+    Private mIntegerMassCorrectionTagLookup As Dictionary(Of Integer, String)
 
 #End Region
 
@@ -270,7 +269,7 @@ Public Class clsPeptideModificationContainer
     ''' <param name="dblModificationMass"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function GenerateGenericModMassName(dblModificationMass As Double) As String
+    Private Function GenerateGenericModMassName(dblModificationMass As Double) As String
 
         Dim strModMassName As String
         Dim strFormatString As String
@@ -345,7 +344,7 @@ Public Class clsPeptideModificationContainer
     ''' <param name="dblModificationMass"></param>
     ''' <returns>The mass correction tag name if a match, otherwise nothing</returns>
     ''' <remarks></remarks>
-    Protected Function GetBestIntegerBasedMassCorrectionTag(dblModificationMass As Double) As String
+    Private Function GetBestIntegerBasedMassCorrectionTag(dblModificationMass As Double) As String
 
         Dim strClosestMassCorrectionTag As String = String.Empty
 
@@ -947,7 +946,7 @@ Public Class clsPeptideModificationContainer
                             If Not strSplitLine Is Nothing AndAlso strSplitLine.Length >= 2 Then
                                 ' See if the first column contains 1 or more characters and if the second column contains a number
                                 ' Note that StoreMassCorrectionTag() will trim spaces from the end of the mass correction tag names
-                                If strSplitLine(0).Trim.Length >= 1 AndAlso clsPHRPBaseClass.IsNumber(strSplitLine(1)) Then
+                                If strSplitLine(0).Trim.Length >= 1 AndAlso clsPHRPParser.IsNumber(strSplitLine(1)) Then
                                     StoreMassCorrectionTag(strSplitLine(0), Double.Parse(strSplitLine(1)))
                                 End If
                             End If
@@ -1016,7 +1015,7 @@ Public Class clsPeptideModificationContainer
 
                             If Not strSplitLine Is Nothing AndAlso strSplitLine.Length >= 2 Then
                                 ' See if the first column contains a single character and if the second column contains a number
-                                If strSplitLine(0).Trim.Length = 1 AndAlso clsPHRPBaseClass.IsNumber(strSplitLine(1)) Then
+                                If strSplitLine(0).Trim.Length = 1 AndAlso clsPHRPParser.IsNumber(strSplitLine(1)) Then
 
                                     objModificationDefinition = New clsModificationDefinition(
                                        strSplitLine(0).Trim.Chars(0),
@@ -1031,10 +1030,10 @@ Public Class clsPeptideModificationContainer
                                             For Each chChar In strResidues
                                                 If Char.IsUpper(chChar) Then
                                                     strResiduesClean &= chChar
-                                                ElseIf chChar = N_TERMINAL_PEPTIDE_SYMBOL_DMS Or
-                                                 chChar = C_TERMINAL_PEPTIDE_SYMBOL_DMS Or
-                                                 chChar = N_TERMINAL_PROTEIN_SYMBOL_DMS Or
-                                                 chChar = C_TERMINAL_PROTEIN_SYMBOL_DMS Then
+                                                ElseIf chChar = N_TERMINAL_PEPTIDE_SYMBOL_DMS OrElse
+                                                       chChar = C_TERMINAL_PEPTIDE_SYMBOL_DMS OrElse
+                                                       chChar = N_TERMINAL_PROTEIN_SYMBOL_DMS OrElse
+                                                       chChar = C_TERMINAL_PROTEIN_SYMBOL_DMS Then
                                                     strResiduesClean &= chChar
                                                 End If
                                             Next chChar
