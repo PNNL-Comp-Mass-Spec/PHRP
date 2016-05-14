@@ -23,7 +23,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "May 9, 2016"
+        MyBase.mFileDate = "May 13, 2016"
         InitializeLocalVariables()
     End Sub
 
@@ -889,6 +889,7 @@ Public Class clsMSGFDBResultsProcessor
         AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
         AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
 
+        ' Note that this call will initialize lstModInfo
         Dim success = modFileProcessor.ExtractModInfoFromParamFile(strMSGFDBParamFilePath, lstModInfo)
 
         If Not success OrElse mErrorCode <> ePHRPErrorCodes.NoError Then
@@ -1478,8 +1479,7 @@ Public Class clsMSGFDBResultsProcessor
                     .Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
 
                     ' Compute monoisotopic mass of the peptide
-                    Dim dblPeptideMonoisotopicMass As Double
-                    dblPeptideMonoisotopicMass = ComputePeptideMass(.Peptide, dblTotalModMass)
+                    Dim dblPeptideMonoisotopicMass = ComputePeptideMass(.Peptide, dblTotalModMass)
 
                     ' Store the monoisotopic MH value in .MH; note that this is (M+H)+
                     .MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
@@ -1498,7 +1498,8 @@ Public Class clsMSGFDBResultsProcessor
                             If Double.TryParse(.PMErrorPPM, dblPMErrorPPM) Then
 
                                 If mParentMassToleranceInfo.IsPPM AndAlso
-                                  (dblPMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 OrElse dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
+                                  (dblPMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 OrElse
+                                   dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
 
                                     ' PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
 
@@ -1952,8 +1953,9 @@ Public Class clsMSGFDBResultsProcessor
     ''' </summary>
     ''' <param name="strInputFilePath">MSGFDB results file</param>
     ''' <param name="strOutputFolderPath">Output folder</param>
-    ''' <param name="strParameterFilePath">Parameter file</param>
+    ''' <param name="strParameterFilePath">Parameter file for data processing</param>
     ''' <returns>True if success, False if failure</returns>
+    ''' <remarks>Use SearchToolParameterFilePath to define the search engine parameter file</remarks>
     Public Overloads Overrides Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
         Dim strFhtOutputFilePath As String = String.Empty
@@ -1987,6 +1989,8 @@ Public Class clsMSGFDBResultsProcessor
                 Return False
             End If
 
+            mPeptideSeqMassCalculator.ResetAminoAcidMasses()
+
             lstSpecIdToIndex = New Dictionary(Of String, Integer)
 
             MyBase.ResetProgress("Parsing " & Path.GetFileName(strInputFilePath))
@@ -2010,6 +2014,24 @@ Public Class clsMSGFDBResultsProcessor
                 End If
 
                 mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(mSearchToolParameterFilePath)
+
+                Dim query = From item In lstMSGFDBModInfo Where item.ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.CustomAA
+                If query.Any() Then
+                    ' Custom amino acids are defined; read their values and update the mass calculator
+
+                    Dim localErrorMsg As String = String.Empty
+                    Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor("MSGF+")
+
+                    AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
+                    AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
+
+                    clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(mSearchToolParameterFilePath, modFileProcessor, mPeptideSeqMassCalculator, localErrorMsg)
+
+                    If Not String.IsNullOrWhiteSpace(localErrorMsg) AndAlso String.IsNullOrWhiteSpace(mErrorMessage) Then
+                        ReportError(localErrorMsg)
+                    End If
+
+                End If
 
                 ' Define the base output filename using strInputFilePath
                 Dim strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
