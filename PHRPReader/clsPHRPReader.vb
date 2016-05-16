@@ -668,7 +668,11 @@ Public Class clsPHRPReader
         mDynamicMods = New SortedDictionary(Of Char, clsModificationDefinition)
         mStaticMods = New SortedDictionary(Of String, List(Of clsModificationDefinition))
 
-        mPeptideMassCalculator = New clsPeptideMassCalculator()
+        If oStartupOptions.PeptideMassCalculator Is Nothing Then
+            mPeptideMassCalculator = New clsPeptideMassCalculator()
+        Else
+            mPeptideMassCalculator = oStartupOptions.PeptideMassCalculator
+        End If
 
         mErrorMessages = New List(Of String)
         mWarningMessages = New List(Of String)
@@ -692,8 +696,7 @@ Public Class clsPHRPReader
             Else
                 ' Confirm that the source file exists
                 ' Make sure strInputFilePath points to a valid file
-                Dim fiFileInfo As FileInfo
-                fiFileInfo = New FileInfo(strInputFilePath)
+                Dim fiFileInfo = New FileInfo(strInputFilePath)
 
                 mInputFolderPath = fiFileInfo.DirectoryName
                 mInputFilePath = fiFileInfo.FullName

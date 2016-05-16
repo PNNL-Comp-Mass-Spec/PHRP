@@ -283,7 +283,11 @@ Public MustInherit Class clsPHRPParser
         mColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
 
         mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
-        mPeptideMassCalculator = New clsPeptideMassCalculator()
+        If startupOptions.PeptideMassCalculator Is Nothing Then
+            mPeptideMassCalculator = New clsPeptideMassCalculator()
+        Else
+            mPeptideMassCalculator = startupOptions.PeptideMassCalculator
+        End If
 
         ' Initialize the tracking lists
         mResultToSeqMap = New SortedList(Of Integer, Integer)

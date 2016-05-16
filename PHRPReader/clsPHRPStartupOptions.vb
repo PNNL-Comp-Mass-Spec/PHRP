@@ -24,12 +24,21 @@ Public Class clsPHRPStartupOptions
 		Set(value As Integer)
 			mMaxProteinsPerPSM = value
 		End Set
-	End Property
+    End Property
 
-	Public Sub New()
-		LoadModsAndSeqInfo = True
-		LoadMSGFResults = True
-		LoadScanStatsData = False
-		mMaxProteinsPerPSM = 0		' 0 means to load all proteins
-	End Sub
+    ''' <summary>
+    ''' Use this to override the default peptide mass calculator class;
+    ''' this is useful if custom amino acids are in use
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property PeptideMassCalculator As clsPeptideMassCalculator
+
+    Public Sub New()
+        LoadModsAndSeqInfo = True
+        LoadMSGFResults = True
+        LoadScanStatsData = False
+        mMaxProteinsPerPSM = 0      ' 0 means to load all proteins
+    End Sub
 End Class

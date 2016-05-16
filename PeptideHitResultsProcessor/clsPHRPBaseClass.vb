@@ -1139,8 +1139,19 @@ Public MustInherit Class clsPHRPBaseClass
                    COLUMN_NAME_MSGF_SPECPROB)
 
                 Dim blnLoadMSGFResults = ePHRPResultType <> clsPHRPReader.ePeptideHitResultType.MSGFDB
+                
+                Dim oStartupOptions = New clsPHRPStartupOptions()
+                With oStartupOptions
+                    .LoadModsAndSeqInfo = True
+                    .LoadMSGFResults = blnLoadMSGFResults
+                    .LoadScanStatsData = False
 
-                Using objReader As New clsPHRPReader(strPHRPDataFilePath, ePHRPResultType, blnLoadModsAndSeqInfo:=True, blnLoadMSGFResults:=blnLoadMSGFResults, blnLoadScanStats:=False)
+                    ' Update the Mass Calculator to use the one tracked by this class (since this class's calculator knows about custom amino acids)
+                    ' This is probably not a necessity, but it doesn't hurt
+                    .PeptideMassCalculator = mPeptideSeqMassCalculator
+                End With
+
+                Using objReader As New clsPHRPReader(strPHRPDataFilePath, ePHRPResultType, oStartupOptions)
                     objReader.EchoMessagesToConsole = True
                     objReader.SkipDuplicatePSMs = True
 
