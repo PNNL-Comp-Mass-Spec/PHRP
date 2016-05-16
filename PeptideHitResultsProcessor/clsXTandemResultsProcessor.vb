@@ -384,7 +384,7 @@ Public Class clsXTandemResultsProcessor
             intSearchResultCount = 0
             ReDim objSearchResults(3)
             For intSearchResultIndex = 0 To objSearchResults.Length - 1
-                objSearchResults(intSearchResultIndex) = New clsSearchResultsXTandem(mPeptideMods)
+                objSearchResults(intSearchResultIndex) = New clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator)
             Next intSearchResultIndex
 
             ' Reset mNextResultID and mLookForReverseSequenceTag
@@ -630,7 +630,7 @@ Public Class clsXTandemResultsProcessor
                                 ' Double the length of objSearchResults
                                 ReDim Preserve objSearchResults(objSearchResults.Length * 2 - 1)
                                 For intSearchResultIndex = intSearchResultCount - 1 To objSearchResults.Length - 1
-                                    objSearchResults(intSearchResultIndex) = New clsSearchResultsXTandem(mPeptideMods)
+                                    objSearchResults(intSearchResultIndex) = New clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator)
                                     objSearchResults(intSearchResultIndex).UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
                                 Next intSearchResultIndex
                             End If

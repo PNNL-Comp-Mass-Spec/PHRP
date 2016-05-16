@@ -302,8 +302,9 @@ Public MustInherit Class clsSearchResultsBaseClass
     End Property
 #End Region
 
-    Public Sub New(ByRef objPeptideMods As clsPeptideModificationContainer)
+    Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
         mPeptideMods = objPeptideMods
+        mPeptideSeqMassCalculator = peptideSeqMassCalculator
 
         InitializeLocalVariables()
     End Sub

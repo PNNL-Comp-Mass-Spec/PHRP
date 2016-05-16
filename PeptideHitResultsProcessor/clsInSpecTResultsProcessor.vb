@@ -963,7 +963,7 @@ Public Class clsInSpecTResultsProcessor
             mPeptideMods.ResetOccurrenceCountStats()
 
             ' Initialize objSearchResult
-            objSearchResult = New clsSearchResultsInSpecT(mPeptideMods)
+            objSearchResult = New clsSearchResultsInSpecT(mPeptideMods, mPeptideSeqMassCalculator)
 
             ' Initialize htPeptidesFoundForTotalPRMScoreLevel
             htPeptidesFoundForTotalPRMScoreLevel = New Hashtable

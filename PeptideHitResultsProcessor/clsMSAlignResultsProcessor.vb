@@ -702,7 +702,7 @@ Public Class clsMSAlignResultsProcessor
             mPeptideMods.ResetOccurrenceCountStats()
 
             ' Initialize objSearchResult
-            objSearchResult = New clsSearchResultsMSAlign(mPeptideMods)
+            objSearchResult = New clsSearchResultsMSAlign(mPeptideMods, mPeptideSeqMassCalculator)
 
             ' Initialize htPeptidesFoundForPValueLevel
             htPeptidesFoundForPValueLevel = New Hashtable

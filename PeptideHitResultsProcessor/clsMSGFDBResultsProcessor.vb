@@ -23,7 +23,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "May 13, 2016"
+        MyBase.mFileDate = "May 14, 2016"
         InitializeLocalVariables()
     End Sub
 
@@ -1156,7 +1156,7 @@ Public Class clsMSGFDBResultsProcessor
             mPeptideMods.ResetOccurrenceCountStats()
 
             ' Initialize objSearchResult
-            objSearchResult = New clsSearchResultsMSGFDB(mPeptideMods)
+            objSearchResult = New clsSearchResultsMSGFDB(mPeptideMods, mPeptideSeqMassCalculator)
 
             ' Initialize htPeptidesFoundForSpecProbLevel
             htPeptidesFoundForSpecProbLevel = New Hashtable

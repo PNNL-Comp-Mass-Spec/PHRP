@@ -905,7 +905,7 @@ Public Class clsMODaResultsProcessor
             mPeptideMods.ResetOccurrenceCountStats()
 
             ' Initialize objSearchResult
-            Dim objSearchResult = New clsSearchResultsMODa(mPeptideMods)
+            Dim objSearchResult = New clsSearchResultsMODa(mPeptideMods, mPeptideSeqMassCalculator)
 
             ' Initialize htPeptidesFoundForProbabilityLevel
             Dim htPeptidesFoundForProbabilityLevel = New Hashtable

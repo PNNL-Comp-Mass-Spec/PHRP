@@ -239,9 +239,9 @@ Public Class clsSearchResultsInSpecT
     End Property
 #End Region
 
-    Public Sub New(ByRef objPeptideMods As clsPeptideModificationContainer)
+    Public Sub New(ByRef objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
         ' Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        MyBase.New(objPeptideMods)
+        MyBase.New(objPeptideMods, peptideSeqMassCalculator)
     End Sub
 
     Public Overrides Sub Clear()

@@ -563,7 +563,7 @@ Public Class clsMSPathFinderResultsProcessor
             mPeptideMods.ResetOccurrenceCountStats()
 
             ' Initialize objSearchResult
-            Dim objSearchResult = New clsSearchResultsMSPathFinder(mPeptideMods)
+            Dim objSearchResult = New clsSearchResultsMSPathFinder(mPeptideMods, mPeptideSeqMassCalculator)
 
             ' Initialize two hashtables
             Dim htPeptidesFoundForSpecEValue = New Hashtable

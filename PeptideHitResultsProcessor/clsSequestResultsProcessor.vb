@@ -256,7 +256,7 @@ Public Class clsSequestResultsProcessor
             mPeptideMods.ResetOccurrenceCountStats()
 
             ' Initialize objSearchResult
-            objSearchResult = New clsSearchResultsSequest(mPeptideMods)
+            objSearchResult = New clsSearchResultsSequest(mPeptideMods, mPeptideSeqMassCalculator)
 
             ' Initialize htPeptidesFoundForXCorrLevel
             htPeptidesFoundForXCorrLevel = New Hashtable
