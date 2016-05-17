@@ -21,9 +21,15 @@ Imports System.Text.RegularExpressions
 Public Class clsMSGFDBResultsProcessor
     Inherits clsPHRPBaseClass
 
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "May 14, 2016"
+        MyBase.mFileDate = "May 17, 2016"
+        mModMassRegEx = New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
+
         InitializeLocalVariables()
     End Sub
 
@@ -58,7 +64,7 @@ Public Class clsMSGFDBResultsProcessor
     Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
     ' These columns correspond to the tab-delimited file created directly by MSGF-DB
-    Protected Const MSGFDBResultsFileColCount As Integer = 20
+    Private Const MSGFDBResultsFileColCount As Integer = 20
     Public Enum eMSGFDBResultsFileColumns As Integer
         SpectrumFile = 0
         SpecIndex = 1               ' SpecID in MSGF+
@@ -83,7 +89,7 @@ Public Class clsMSGFDBResultsProcessor
     End Enum
 
     ' These columns correspond to the Synopsis and First-Hits files created by this class
-    Protected Const MSGFDBSynFileColCount As Integer = 23
+    Private Const MSGFDBSynFileColCount As Integer = 23
     Public Enum eMSFDBSynFileColumns As Integer
         ResultID = 0
         Scan = 1
@@ -91,7 +97,7 @@ Public Class clsMSGFDBResultsProcessor
         SpecIndex = 3
         Charge = 4
         PrecursorMZ = 5
-        DelM = 6                            ' Precursor error, in Da; if the search used a tolerance less than 0.5 Da or less than 500 ppm, then this value is computed from the DelMPPM value
+        DelM = 6                            ' Precursor error, in Da; if the search used a tolerance less than 0.5 Da or less than 500 ppm, this value is computed from the DelMPPM value
         DelMPPM = 7                         ' Precursor error, in ppm; corrected for isotope selection errors
         MH = 8                              ' Theoretical monoisotopic peptide mass (computed by PHRP)
         Peptide = 9                         ' This is the sequence with prefix and suffix residues and also with modification symbols
@@ -110,14 +116,14 @@ Public Class clsMSGFDBResultsProcessor
         IsotopeError = 22
     End Enum
 
-    Protected Enum eFilteredOutputFileTypeConstants As Integer
+    Private Enum eFilteredOutputFileTypeConstants As Integer
         SynFile = 0
         FHTFile = 1
     End Enum
 #End Region
 
 #Region "Structures"
-    Protected Structure udtMSGFDBSearchResultType
+    Private Structure udtMSGFDBSearchResultType
 
         Public SpectrumFileName As String
         Public SpecIndex As String
@@ -175,18 +181,18 @@ Public Class clsMSGFDBResultsProcessor
         End Sub
     End Structure
 
-    Protected Structure udtScanGroupInfoType
+    Private Structure udtScanGroupInfoType
         Public ScanGroupID As Integer
         Public Charge As Short
         Public Scan As Integer
     End Structure
 
-    Protected Structure udtTerminusCharsType
+    Private Structure udtTerminusCharsType
         Public NTerm As Char
         Public CTerm As Char
     End Structure
 
-    Protected Structure udtParentMassToleranceType
+    Private Structure udtParentMassToleranceType
         ' Given a tolerance of 20ppm, we would have ToleranceLeft=20, ToleranceRight=20, and ToleranceIsPPM=True
         ' Given a tolerance of 0.5Da,2.5Da, we would have ToleranceLeft=0.5, ToleranceRight=2.5, and ToleranceIsPPM=False
         Public ToleranceLeft As Double
@@ -203,12 +209,19 @@ Public Class clsMSGFDBResultsProcessor
 #End Region
 
 #Region "Classwide Variables"
-    Protected mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
+    Private mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
 
-    Protected mParentMassToleranceInfo As udtParentMassToleranceType
+    Private mParentMassToleranceInfo As udtParentMassToleranceType
 
-    Protected mPrecursorMassErrorWarningCount As Integer
+    Private mPrecursorMassErrorWarningCount As Integer
 
+    ''' <summary>
+    ''' Looks for numeric mods in MSGF+ results
+    ''' For example, +14.016 in K.LQVPAGK+14.016ANPSPPIGPALGQR.G
+    ''' </summary>
+    ''' <remarks></remarks>
+    Private ReadOnly mModMassRegEx As Regex
+    
 #End Region
 
     ''' <summary>
@@ -277,7 +290,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="kvProteinInfo"></param>
     ''' <returns>Peptide sequence with N-terminal and C-Terminal residues</returns>
     ''' <remarks></remarks>
-    Protected Function AddUpdatePrefixAndSuffixResidues(strPeptide As String, kvProteinInfo As KeyValuePair(Of String, udtTerminusCharsType)) As String
+    Private Function AddUpdatePrefixAndSuffixResidues(strPeptide As String, kvProteinInfo As KeyValuePair(Of String, udtTerminusCharsType)) As String
 
         If strPeptide.IndexOf("."c) < 0 Then
             Return kvProteinInfo.Value.NTerm & "." & strPeptide & "." & kvProteinInfo.Value.CTerm
@@ -317,9 +330,9 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
-    Protected Sub AppendToScanGroupDetails(
-      lstScanGroupDetails As List(Of udtScanGroupInfoType),
-      htScanGroupCombo As Dictionary(Of String, Boolean),
+    Private Sub AppendToScanGroupDetails(
+      lstScanGroupDetails As ICollection(Of udtScanGroupInfoType),
+      htScanGroupCombo As IDictionary(Of String, Boolean),
       udtScanGroupInfo As udtScanGroupInfoType,
       ByRef intCurrentScanGroupID As Integer,
       ByRef intNextScanGroupID As Integer)
@@ -343,7 +356,7 @@ Public Class clsMSGFDBResultsProcessor
     End Sub
 
     Private Sub AppendToSearchResults(
-       lstSearchResults As List(Of udtMSGFDBSearchResultType),
+       lstSearchResults As ICollection(Of udtMSGFDBSearchResultType),
        udtSearchResult As udtMSGFDBSearchResultType,
        lstProteinInfo As Dictionary(Of String, udtTerminusCharsType))
 
@@ -450,7 +463,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
-    Protected Function ComputeCleaveageState(strSequenceWithMods As String) As Short
+    Private Function ComputeCleaveageState(strSequenceWithMods As String) As Short
 
         Dim strPrefix As String = String.Empty
         Dim strSuffix As String = String.Empty
@@ -476,7 +489,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="intCharge"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function ComputeDelMCorrectedPPM(
+    Private Function ComputeDelMCorrectedPPM(
       dblPrecursorErrorDa As Double,
       dblPrecursorMZ As Double,
       intCharge As Integer,
@@ -496,7 +509,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
-    Protected Function ComputePeptideMass(strPeptide As String, dblTotalModMass As Double) As Double
+    Private Function ComputePeptideMass(strPeptide As String, dblTotalModMass As Double) As Double
 
         Dim strCleanSequence As String
         Dim dblMass As Double
@@ -530,17 +543,15 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="strModSymbols"></param>
     ''' <returns>True if success; false if a problem</returns>
     ''' <remarks></remarks>
-    Protected Function ConvertMGSFModMassesToSymbols(
+    Private Function ConvertMGSFModMassesToSymbols(
       currentResidue As String,
       strModDigits As String,
       <Out()> ByRef strModSymbols As String,
-      lstMSGFDBModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
+      lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       blnNterminalMod As Boolean,
       blnPossibleCTerminalMod As Boolean,
       <Out()> ByRef dblModMassFound As Double,
       <Out()> ByRef blnIsStaticMod As Boolean) As Boolean
-
-        Static reModMassRegEx As New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
         Dim reMatches As MatchCollection
 
@@ -557,7 +568,7 @@ Public Class clsMSGFDBResultsProcessor
         dblModMassFound = 0
         blnIsStaticMod = False
 
-        reMatches = reModMassRegEx.Matches(strModDigits)
+        reMatches = mModMassRegEx.Matches(strModDigits)
 
         For Each reMatch As Match In reMatches
             Dim strModMass As String
@@ -681,13 +692,13 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function CreateFHTorSYNResultsFile(
+    Private Function CreateFHTorSYNResultsFile(
       strInputFilePath As String,
       strOutputFilePath As String,
       strScanGroupFilePath As String,
       lstMSGFDBModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       <Out()> ByRef blnMSGFPlus As Boolean,
-      lstSpecIdToIndex As Dictionary(Of String, Integer),
+      lstSpecIdToIndex As IDictionary(Of String, Integer),
       eFilteredOutputFileType As eFilteredOutputFileTypeConstants) As Boolean
 
         Dim strLineIn As String
@@ -1022,10 +1033,10 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="strMTSPepToProteinMapFilePath"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function LoadPeptideToProteinMapInfoMSGFDB(
+    Private Function LoadPeptideToProteinMapInfoMSGFDB(
       strPepToProteinMapFilePath As String,
       strOutputFolderPath As String,
-      lstMSGFDBModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
+      lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       blnMSGFPlus As Boolean,
       lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
       <Out()> ByRef strMTSPepToProteinMapFilePath As String) As Boolean
@@ -1107,7 +1118,7 @@ Public Class clsMSGFDBResultsProcessor
         ReportWarning(warningMsg)
     End Sub
 
-    Protected Function ParseMSGFDBSynopsisFile(
+    Private Function ParseMSGFDBSynopsisFile(
       strInputFilePath As String,
       strOutputFolderPath As String,
       lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
@@ -1317,14 +1328,14 @@ Public Class clsMSGFDBResultsProcessor
     Private Function ParseMSGFDBResultsFileEntry(
       strLineIn As String,
       blnMSGFPlus As Boolean,
-      lstMSGFDBModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
-      lstSearchResultsCurrentScan As List(Of udtMSGFDBSearchResultType),
+      lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
+      lstSearchResultsCurrentScan As ICollection(Of udtMSGFDBSearchResultType),
       ByRef strErrorLog As String,
       intColumnMapping() As Integer,
       ByRef intNextScanGroupID As Integer,
-      lstScanGroupDetails As List(Of udtScanGroupInfoType),
-      htScanGroupCombo As Dictionary(Of String, Boolean),
-      lstSpecIdToIndex As Dictionary(Of String, Integer)) As Boolean
+      lstScanGroupDetails As ICollection(Of udtScanGroupInfoType),
+      htScanGroupCombo As IDictionary(Of String, Boolean),
+      lstSpecIdToIndex As IDictionary(Of String, Integer)) As Boolean
 
         ' Parses an entry from the MSGF-DB results file
 
@@ -1921,7 +1932,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
-    Protected Function ParseParentMassTolerance(strToleranceText As String, <Out()> ByRef dblTolerance As Double, <Out()> ByRef blnIsPPM As Boolean) As Boolean
+    Private Function ParseParentMassTolerance(strToleranceText As String, <Out()> ByRef dblTolerance As Double, <Out()> ByRef blnIsPPM As Boolean) As Boolean
         dblTolerance = 0
         blnIsPPM = False
 
@@ -2007,7 +2018,7 @@ Public Class clsMSGFDBResultsProcessor
                 lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
                 ' Load the MSGF-DB Parameter File so that we can determine the modification names and masses
-                ' If the MSGFDB_Mods.txt file was defined, then the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
+                ' If the MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
                 Dim success = ExtractModInfoFromParamFile(mSearchToolParameterFilePath, lstMSGFDBModInfo)
                 If Not success Then
                     Return False
@@ -2072,7 +2083,7 @@ Public Class clsMSGFDBResultsProcessor
 
                     blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, lstSpecIdToIndex, eFilteredOutputFileTypeConstants.SynFile)
 
-                    ' Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
+                    ' Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
                     ' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols							
                     strPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(strOutputFolderPath, strBaseName) & ".txt", strOutputFolderPath, MTS:=False)
 
@@ -2083,7 +2094,7 @@ Public Class clsMSGFDBResultsProcessor
                     ' Create the other PHRP-specific files
                     MyBase.ResetProgress("Creating the PHRP files for " & Path.GetFileName(strSynOutputFilePath), True)
 
-                    ' Now parse the _syn.txt file that we just created to next create the other PHRP files
+                    ' Now parse the _syn.txt file that we just created to create the other PHRP files
                     blnSuccess = ParseMSGFDBSynopsisFile(strSynOutputFilePath, strOutputFolderPath, lstPepToProteinMapping, False)
 
                     ' Remove all items from lstPepToProteinMapping to reduce memory overhead
@@ -2188,9 +2199,9 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="dblTotalModMass">Output parameter: total mass of all modifications</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Protected Function ReplaceMSGFModTextWithSymbol(
+    Private Function ReplaceMSGFModTextWithSymbol(
       strPeptide As String,
-      lstMSGFDBModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
+      lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       blnMSGFPlus As Boolean,
       <Out()> ByRef dblTotalModMass As Double) As String
 
@@ -2372,10 +2383,10 @@ Public Class clsMSGFDBResultsProcessor
         Return strPrefix & strPeptide & strSuffix
 
     End Function
-    
-    Protected Function ReplaceMSGFModTextWithMatchedSymbol(
+
+    Private Function ReplaceMSGFModTextWithMatchedSymbol(
       strPeptide As String,
-      reGroup As Group,
+      reGroup As Capture,
       strModSymbols As String,
       blnMSGFPlus As Boolean,
       blnIsStaticMod As Boolean) As String
@@ -2403,7 +2414,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
-    Protected Function ReplaceTerminus(strPeptide As String) As String
+    Private Function ReplaceTerminus(strPeptide As String) As String
 
         If strPeptide.StartsWith(N_TERMINUS_SYMBOL_MSGFDB) Then
             strPeptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST & "." & strPeptide.Substring(N_TERMINUS_SYMBOL_MSGFDB.Length)
@@ -2425,7 +2436,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="lstProteinInfo">Protein information, if it is of the form ProteinName(pre=X,post=Y)</param>
     ''' <returns>The name of the first protein</returns>
     ''' <remarks></remarks>
-    Protected Function SplitProteinList(strProteinList As String, lstProteinInfo As Dictionary(Of String, udtTerminusCharsType)) As String
+    Private Function SplitProteinList(strProteinList As String, lstProteinInfo As IDictionary(Of String, udtTerminusCharsType)) As String
 
         Static reProteinInfo As New Regex(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS)
 
@@ -2462,7 +2473,7 @@ Public Class clsMSGFDBResultsProcessor
     End Function
 
     Private Sub SortAndWriteFilteredSearchResults(
-      swResultFile As StreamWriter,
+      swResultFile As TextWriter,
       lstFilteredSearchResults As List(Of udtMSGFDBSearchResultType),
       ByRef strErrorLog As String,
       blnIncludeFDRandPepFDR As Boolean,
@@ -2594,7 +2605,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="lstFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
     ''' <remarks></remarks>
     Private Sub StoreSynMatches(
-      lstSearchResults As List(Of udtMSGFDBSearchResultType),
+      lstSearchResults As IList(Of udtMSGFDBSearchResultType),
       intStartIndex As Integer,
       intEndIndex As Integer,
       lstFilteredSearchResults As List(Of udtMSGFDBSearchResultType))
@@ -2619,7 +2630,7 @@ Public Class clsMSGFDBResultsProcessor
     End Sub
 
     Private Sub WriteSynFHTFileHeader(
-      swResultFile As StreamWriter,
+      swResultFile As TextWriter,
       ByRef strErrorLog As String,
       blnIncludeFDRandPepFDR As Boolean,
       blnIncludeEFDR As Boolean,
@@ -2703,7 +2714,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <remarks></remarks>
     Private Sub WriteSearchResultToFile(
       intResultID As Integer,
-      swResultFile As StreamWriter,
+      swResultFile As TextWriter,
       udtSearchResult As udtMSGFDBSearchResultType,
       ByRef strErrorLog As String,
       blnIncludeFDRandPepFDR As Boolean,
@@ -2769,7 +2780,7 @@ Public Class clsMSGFDBResultsProcessor
 
 #Region "IComparer Classes"
 
-    Protected Class MSGFDBSearchResultsComparerScanChargeSpecProbPeptide
+    Private Class MSGFDBSearchResultsComparerScanChargeSpecProbPeptide
         Implements IComparer(Of udtMSGFDBSearchResultType)
 
         Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
@@ -2814,7 +2825,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Class
 
-    Protected Class MSGFDBSearchResultsComparerSpecProbScanChargePeptide
+    Private Class MSGFDBSearchResultsComparerSpecProbScanChargePeptide
         Implements IComparer(Of udtMSGFDBSearchResultType)
 
         Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
