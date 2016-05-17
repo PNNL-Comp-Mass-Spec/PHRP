@@ -184,7 +184,7 @@ Public Class clsSearchResultsXTandem
 
         ' Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
         ' (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
-        If Double.TryParse(mPeptideDeltaMass, dblDelM) Then
+        If Double.TryParse(PeptideDeltaMass, dblDelM) Then
 
             ' Negate dblDelM so that it represents observed - theoretical
             dblDelM = -dblDelM
@@ -198,11 +198,11 @@ Public Class clsSearchResultsXTandem
             End If
 
             If blnParseError Then
-                dblPrecursorMonoMass = mPeptideMonoisotopicMass + dblDelM
+                dblPrecursorMonoMass = PeptideMonoisotopicMass + dblDelM
             End If
 
             Const blnAdjustPrecursorMassForC13 = True
-            mPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, mPeptideMonoisotopicMass)
+            mPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, PeptideMonoisotopicMass)
 
         Else
             mPeptideDeltaMassCorrectedPpm = 0

@@ -1,5 +1,6 @@
 Option Strict On
 
+Imports System.Windows.Forms.VisualStyles
 ' This program processes search results from several LC-MS/MS search engines to
 ' determine the modifications present, determine the cleaveage and terminus state
 ' of each peptide, and compute the monoisotopic mass of each peptide.  See 
@@ -16,114 +17,114 @@ Option Strict On
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "May 13, 2016"
+    Public Const PROGRAM_DATE As String = "May 17, 2016"
 
-	Private mInputFilePath As String
+    Private mInputFilePath As String
     Private mOutputFolderPath As String                         ' Optional
-	Private mParameterFilePath As String						' Optional
+    Private mParameterFilePath As String                        ' Optional
 
-	Private mMassCorrectionTagsFilePath As String				' Optional
-	Private mModificationDefinitionsFilePath As String			' Optional
-	Private mSearchToolParameterFilePath As String				' Optional
+    Private mMassCorrectionTagsFilePath As String               ' Optional
+    Private mModificationDefinitionsFilePath As String          ' Optional
+    Private mSearchToolParameterFilePath As String              ' Optional
 
-	' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
-	Private mCreateProteinModsFile As Boolean
-	Private mFastaFilePath As String
-	Private mIgnorePeptideToProteinMapperErrors As Boolean
-	Private mProteinModsFileIncludesReversedProteins As Boolean
-	Private mUseExistingMTSPepToProteinMapFile As Boolean
+    ' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
+    Private mCreateProteinModsFile As Boolean
+    Private mFastaFilePath As String
+    Private mIgnorePeptideToProteinMapperErrors As Boolean
+    Private mProteinModsFileIncludesReversedProteins As Boolean
+    Private mUseExistingMTSPepToProteinMapFile As Boolean
 
-	' Setting this to true assumes the input file is a valid PHRP data file
-	' Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
-	Private mCreateProteinModsUsingPHRPDataFile As Boolean
+    ' Setting this to true assumes the input file is a valid PHRP data file
+    ' Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
+    Private mCreateProteinModsUsingPHRPDataFile As Boolean
 
-	Private mCreateInspectOrMSGFDBFirstHitsFile As Boolean
-	Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
+    Private mCreateInspectOrMSGFDBFirstHitsFile As Boolean
+    Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
 
-	Private mInspectSynopsisFilePValueThreshold As Single		' Optional
+    Private mInspectSynopsisFilePValueThreshold As Single       ' Optional
 
     Private mMODaMODPlusSynopsisFileProbabilityThreshold As Single
 
-	Private mOutputFolderAlternatePath As String				' Optional
-	Private mRecreateFolderHierarchyInAlternatePath As Boolean	' Optional
+    Private mOutputFolderAlternatePath As String                ' Optional
+    Private mRecreateFolderHierarchyInAlternatePath As Boolean  ' Optional
 
-	Private mRecurseFolders As Boolean
-	Private mRecurseFoldersMaxLevels As Integer
+    Private mRecurseFolders As Boolean
+    Private mRecurseFoldersMaxLevels As Integer
 
-	Private mLogMessagesToFile As Boolean
-	Private mLogFilePath As String = String.Empty
-	Private mLogFolderPath As String = String.Empty
-	Private mQuietMode As Boolean
+    Private mLogMessagesToFile As Boolean
+    Private mLogFilePath As String = String.Empty
+    Private mLogFolderPath As String = String.Empty
+    Private mQuietMode As Boolean
 
-	Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
-	Private mLastProgressReportTime As DateTime
-	Private mLastProgressReportValue As Integer
-	Private mLastProgressReportValueTime As DateTime
+    Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
+    Private mLastProgressReportTime As DateTime
+    Private mLastProgressReportValue As Integer
+    Private mLastProgressReportValueTime As DateTime
 
-	Public Function Main() As Integer
-		' Returns 0 if no error, error code if an error
+    Public Function Main() As Integer
+        ' Returns 0 if no error, error code if an error
 
-		Dim intReturnCode As Integer
-		Dim objParseCommandLine As New clsParseCommandLine
-		Dim blnProceed As Boolean
+        Dim intReturnCode As Integer
+        Dim objParseCommandLine As New clsParseCommandLine
+        Dim blnProceed As Boolean
 
-		''Dim objTest As New PeptideHitResultsProcessor.clsPeptideCleavageStateCalculator
-		''Dim strSeq, strCleanSeq, strPrefix, strSuffix As String
-		''strSeq = "A.BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "-.BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "A.BCDE.-" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "A.B.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "A.BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "FA.BCDE.FG" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "BCDE." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = ".BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = ".F." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "F..E" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "AF..EF" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "AFF..EF" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "E.TGMLTQKFARSLGMLAVDNQARV.." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "..TGMLTQKFARSLGMLAVDNQARV.R" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''strSeq = "..TGMLTQKFARSLGMLAVDNQARV.." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-		''
-		''Return 0
+        ''Dim objTest As New PeptideHitResultsProcessor.clsPeptideCleavageStateCalculator
+        ''Dim strSeq, strCleanSeq, strPrefix, strSuffix As String
+        ''strSeq = "A.BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "-.BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "A.BCDE.-" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "A.B.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "A.BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "FA.BCDE.FG" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "BCDE." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = ".BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = ".F." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "F..E" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "AF..EF" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "AFF..EF" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "E.TGMLTQKFARSLGMLAVDNQARV.." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "..TGMLTQKFARSLGMLAVDNQARV.R" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''strSeq = "..TGMLTQKFARSLGMLAVDNQARV.." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
+        ''
+        ''Return 0
 
-		mInputFilePath = String.Empty
-		mOutputFolderPath = String.Empty
-		mParameterFilePath = String.Empty
+        mInputFilePath = String.Empty
+        mOutputFolderPath = String.Empty
+        mParameterFilePath = String.Empty
 
-		mMassCorrectionTagsFilePath = String.Empty
-		mModificationDefinitionsFilePath = String.Empty
-		mSearchToolParameterFilePath = String.Empty
+        mMassCorrectionTagsFilePath = String.Empty
+        mModificationDefinitionsFilePath = String.Empty
+        mSearchToolParameterFilePath = String.Empty
 
-		mCreateProteinModsFile = False
-		mFastaFilePath = String.Empty
-		mIgnorePeptideToProteinMapperErrors = False
-		mProteinModsFileIncludesReversedProteins = False
-		mUseExistingMTSPepToProteinMapFile = False
+        mCreateProteinModsFile = False
+        mFastaFilePath = String.Empty
+        mIgnorePeptideToProteinMapperErrors = False
+        mProteinModsFileIncludesReversedProteins = False
+        mUseExistingMTSPepToProteinMapFile = False
 
-		mCreateProteinModsUsingPHRPDataFile = False
+        mCreateProteinModsUsingPHRPDataFile = False
 
-		' These should default to True
-		mCreateInspectOrMSGFDBFirstHitsFile = True
-		mCreateInspectOrMSGFDBSynopsisFile = True
-		mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+        ' These should default to True
+        mCreateInspectOrMSGFDBFirstHitsFile = True
+        mCreateInspectOrMSGFDBSynopsisFile = True
+        mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
         mMODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
 
-		mRecurseFoldersMaxLevels = 0
+        mRecurseFoldersMaxLevels = 0
 
-		mQuietMode = False
-		mLogMessagesToFile = False
-		mLogFilePath = String.Empty
-		mLogFolderPath = String.Empty
+        mQuietMode = False
+        mLogMessagesToFile = False
+        mLogFilePath = String.Empty
+        mLogFolderPath = String.Empty
 
-		Try
-			blnProceed = False
-			If objParseCommandLine.ParseCommandLine Then
-				If SetOptionsUsingCommandLineParameters(objParseCommandLine) Then blnProceed = True
-			End If
+        Try
+            blnProceed = False
+            If objParseCommandLine.ParseCommandLine Then
+                If SetOptionsUsingCommandLineParameters(objParseCommandLine) Then blnProceed = True
+            End If
 
             If Not blnProceed OrElse
                objParseCommandLine.NeedToShowHelp OrElse
@@ -188,9 +189,9 @@ Module modMain
             intReturnCode = -1
         End Try
 
-		Return intReturnCode
+        Return intReturnCode
 
-	End Function
+    End Function
 
     Private Sub DisplayProgressPercent(intPercentComplete As Integer, blnAddCarriageReturn As Boolean)
 
@@ -507,13 +508,13 @@ Module modMain
         End If
     End Sub
 
-	Private Sub mPeptideHitResultsProcRunner_ProgressReset() Handles mPeptideHitResultsProcRunner.ProgressReset
-		mLastProgressReportTime = DateTime.UtcNow
-		mLastProgressReportValueTime = DateTime.UtcNow
-		mLastProgressReportValue = 0
-	End Sub
+    Private Sub mPeptideHitResultsProcRunner_ProgressReset() Handles mPeptideHitResultsProcRunner.ProgressReset
+        mLastProgressReportTime = DateTime.UtcNow
+        mLastProgressReportValueTime = DateTime.UtcNow
+        mLastProgressReportValue = 0
+    End Sub
 
-	Private Sub mPeptideHitResultsProcRunner_WarningEvent(strMessage As String) Handles mPeptideHitResultsProcRunner.WarningEvent
-		Console.WriteLine("Warning: " & strMessage)
-	End Sub
+    Private Sub mPeptideHitResultsProcRunner_WarningEvent(strMessage As String) Handles mPeptideHitResultsProcRunner.WarningEvent
+        Console.WriteLine("Warning: " & strMessage)
+    End Sub
 End Module

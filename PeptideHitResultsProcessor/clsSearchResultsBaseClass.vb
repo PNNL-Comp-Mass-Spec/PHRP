@@ -28,65 +28,64 @@ Option Strict On
 ' SOFTWARE.  This notice including this sentence must appear on any copies of 
 ' this computer software.
 
+Imports System.Runtime.InteropServices
 Imports PHRPReader
 Imports PHRPReader.clsPeptideCleavageStateCalculator
 
 Public MustInherit Class clsSearchResultsBaseClass
 
 #Region "Constants and Enums"
+    ''' <summary>
+    ''' Mass difference, in Da, between ^12C and ^13C
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Const MASS_C13 As Double = 1.00335483
-#End Region
-
-#Region "Structures"
-    ' Unused structure; deprecated in April 2012
-    'Public Structure udtSearchResultModificationsType
-    '    Public ModDefinition As clsModificationDefinition
-    '    Public Residue As Char
-    '    Public ResidueLocInPeptide As Integer                               ' Indicates the residue number modified; the first residue is at position 1
-    '    Public ResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
-    'End Structure
 #End Region
 
 #Region "Classwide Variables"
     ' Note: Many of these variables typically hold numbers but we're storing the numbers as strings
     '       to prevent the numeric representation from changing when converting to a number then back to a string
-    Protected mResultID As Integer                              ' RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MSGFDB, and MODa
-    Protected mGroupID As Integer                               ' Group ID assigned by XTandem
-    Protected mScan As String
-    Protected mCharge As String
-    Protected mParentIonMH As String                            ' Observed precursor m/z value converted to M+H
 
-    Protected mMultipleProteinCount As String                   ' Multiple protein count: 0 if the peptide is only in 1 protein; 1 if the protein is in 2 proteins, etc.
-    Protected mProteinName As String
-    Protected mProteinSeqResidueNumberStart As Integer          ' Typically always 1
-    Protected mProteinSeqResidueNumberEnd As Integer            ' The residue number of the last residue in the protein's sequence; e.g. 100 if the protein has 100 residues total
+    ''' <summary>
+    ''' Residue or residues before the start of the peptide sequence
+    ''' </summary>
+    ''' <remarks></remarks>
+    Protected mPeptidePreResidues As String
 
-    Protected mProteinExpectationValue As String                 ' Typically only used by XTandem; actually holds the Log of the expectation value
-    Protected mProteinIntensity As String                        ' Typically only used by XTandem; actually holds the Log of the intensity
+    ''' <summary>
+    ''' Residue or residues after the end of the peptide sequence
+    ''' </summary>
+    ''' <remarks></remarks>
+    Protected mPeptidePostResidues As String
 
-    Protected mPeptideLocInProteinStart As Integer              ' Position in the protein's residues of the first residue in the peptide
-    Protected mPeptideLocInProteinEnd As Integer                ' Position in the protein's residues of the last residue in the peptide
+    ''' <summary>
+    ''' Peptide sequence without any modification symbols
+    ''' </summary>
+    ''' <remarks></remarks>
+    Protected mPeptideCleanSequence As String
 
-    Protected mPeptidePreResidues As String                     ' Residue or residues before the start of the peptide sequence
-    Protected mPeptidePostResidues As String                    ' Residue or residues after the end of the peptide sequence
-    Protected mPeptideCleanSequence As String                   ' Peptide sequence without any modification symbols
-    Protected mPeptideSequenceWithMods As String                ' Peptide sequence with modification symbols
-
+    ''' <summary>
+    ''' Cleavage state of the peptide
+    ''' </summary>
+    ''' <remarks></remarks>
     Protected mPeptideCleavageState As ePeptideCleavageStateConstants
+
+    ''' <summary>
+    ''' Terminus state of the peptide
+    ''' </summary>
+    ''' <remarks></remarks>
     Protected mPeptideTerminusState As ePeptideTerminusStateConstants
 
-    Protected mPeptideMH As String                  ' In XTandem this is the theoretical monoisotopic MH; in Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass; in Inspect, MSGFDB, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
-    Protected mPeptideDeltaMass As String           ' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation); in Sequest this is Theoretical Mass - Observed Mass.  In XTandem, Inspect, MSGFDB, and MSAlign the DelM value is listed as Observed - Theoretical, however, PHRP negates while reading the synopsis file to match Sequest
-
-    'Protected mPeptideDeltaMassCorrectedPpm As Double         ' Computed using either mPeptideDeltaMass (negating to bring back to Observed minus Theoretical) or using PrecursorMass - mPeptideMonoisotopicMass; In either case, we must add/subtract 1 until value is between -0.5 and 0.5, then convert to ppm (using mPeptideMonoisotopicMass for ppm basis)
-
-    Protected mPeptideModDescription As String
-    Protected mPeptideMonoisotopicMass As Double                ' Theoretical (computed) monoisotopic mass for a given peptide sequence, including any modified residues
-
-    ' List of modifications present in the current peptide
+    ''' <summary>
+    ''' List of modifications present in the current peptide
+    ''' </summary>
+    ''' <remarks></remarks>
     Protected mSearchResultModifications As List(Of clsAminoAcidModInfo)
 
-    ' Possible modifications that the peptide could have
+    ''' <summary>
+    ''' Possible modifications that the peptide could have
+    ''' </summary>
+    ''' <remarks></remarks>
     Protected mPeptideMods As clsPeptideModificationContainer
 
     Protected mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
@@ -97,115 +96,129 @@ Public MustInherit Class clsSearchResultsBaseClass
 
 #Region "Properties"
 
+    ''' <summary>
+    ''' Most recent error message
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public ReadOnly Property ErrorMessage() As String
         Get
             Return mErrorMessage
         End Get
     End Property
-    Public Property ResultID() As Integer
-        Get
-            Return mResultID
-        End Get
-        Set(Value As Integer)
-            mResultID = Value
-        End Set
-    End Property
-    Public Property GroupID() As Integer
-        Get
-            Return mGroupID
-        End Get
-        Set(Value As Integer)
-            mGroupID = Value
-        End Set
-    End Property
-    Public Property Scan() As String
-        Get
-            Return mScan
-        End Get
-        Set(Value As String)
-            mScan = Value
-        End Set
-    End Property
-    Public Property Charge() As String
-        Get
-            Return mCharge
-        End Get
-        Set(Value As String)
-            mCharge = Value
-        End Set
-    End Property
-    Public Property ParentIonMH() As String
-        Get
-            Return mParentIonMH
-        End Get
-        Set(Value As String)
-            mParentIonMH = Value
-        End Set
-    End Property
-    Public Property MultipleProteinCount() As String
-        Get
-            Return mMultipleProteinCount
-        End Get
-        Set(Value As String)
-            mMultipleProteinCount = Value
-        End Set
-    End Property
-    Public Property ProteinName() As String
-        Get
-            Return mProteinName
-        End Get
-        Set(Value As String)
-            mProteinName = Value
-        End Set
-    End Property
-    Public Property ProteinExpectationValue() As String
-        Get
-            Return mProteinExpectationValue
-        End Get
-        Set(Value As String)
-            mProteinExpectationValue = Value
-        End Set
-    End Property
-    Public Property ProteinIntensity() As String
-        Get
-            Return mProteinIntensity
-        End Get
-        Set(Value As String)
-            mProteinIntensity = Value
-        End Set
-    End Property
-    Public Property ProteinSeqResidueNumberStart() As Integer
-        Get
-            Return mProteinSeqResidueNumberStart
-        End Get
-        Set(Value As Integer)
-            mProteinSeqResidueNumberStart = Value
-        End Set
-    End Property
-    Public Property ProteinSeqResidueNumberEnd() As Integer
-        Get
-            Return mProteinSeqResidueNumberEnd
-        End Get
-        Set(Value As Integer)
-            mProteinSeqResidueNumberEnd = Value
-        End Set
-    End Property
-    Public Property PeptideLocInProteinStart() As Integer
-        Get
-            Return mPeptideLocInProteinStart
-        End Get
-        Set(Value As Integer)
-            mPeptideLocInProteinStart = Value
-        End Set
-    End Property
-    Public Property PeptideLocInProteinEnd() As Integer
-        Get
-            Return mPeptideLocInProteinEnd
-        End Get
-        Set(Value As Integer)
-            mPeptideLocInProteinEnd = Value
-        End Set
-    End Property
+
+    ''' <summary>
+    ''' RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MSGFDB, and MODa
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ResultID As Integer
+
+    ''' <summary>
+    ''' Group ID assigned by XTandem
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property GroupID As Integer
+
+    ''' <summary>
+    ''' Scan number
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property Scan As String
+
+    ''' <summary>
+    ''' Charge state
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property Charge As String
+
+    ''' <summary>
+    ''' Observed precursor m/z value converted to M+H
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ParentIonMH As String
+
+    ''' <summary>
+    ''' Multiple protein count: 0 if the peptide is only in 1 protein; 1 if the protein is in 2 proteins, etc.
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property MultipleProteinCount As String
+
+    ''' <summary>
+    ''' First protein for this PSM
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ProteinName As String
+
+    ''' <summary>
+    ''' Typically only used by XTandem; actually holds the Log of the expectation value
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ProteinExpectationValue As String
+
+    ''' <summary>
+    ''' Typically only used by XTandem; actually holds the Log of the intensity
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ProteinIntensity As String
+
+    ''' <summary>
+    ''' Number of the first residue of a protein; typically always 1
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Initialized to 0 (unknown) then later changed 1 when ProteinSeqResidueNumberEnd is defined </remarks>
+    Public Property ProteinSeqResidueNumberStart As Integer
+
+    ''' <summary>
+    ''' The residue number of the last residue in the protein's sequence
+    ''' For example, 100 if the protein has 100 residues total
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>>Initialized to 0 (unknown)</remarks>
+    Public Property ProteinSeqResidueNumberEnd As Integer
+
+    ''' <summary>
+    ''' Position in the protein's residues of the first residue in the peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property PeptideLocInProteinStart As Integer
+
+    ''' <summary>
+    ''' Position in the protein's residues of the last residue in the peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property PeptideLocInProteinEnd As Integer
+
+    ''' <summary>
+    '''  Residue or residues before the start of the peptide sequence
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
     Public Property PeptidePreResidues() As String
         Get
             Return mPeptidePreResidues
@@ -216,6 +229,13 @@ Public MustInherit Class clsSearchResultsBaseClass
             ComputePeptideCleavageStateInProtein()
         End Set
     End Property
+
+    ''' <summary>
+    ''' Residue or residues after the end of the peptide sequence
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
     Public Property PeptidePostResidues() As String
         Get
             Return mPeptidePostResidues
@@ -226,6 +246,13 @@ Public MustInherit Class clsSearchResultsBaseClass
             ComputePeptideCleavageStateInProtein()
         End Set
     End Property
+
+    ''' <summary>
+    ''' Peptide sequence without any modification symbols
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
     Public Property PeptideCleanSequence() As String
         Get
             Return mPeptideCleanSequence
@@ -235,66 +262,84 @@ Public MustInherit Class clsSearchResultsBaseClass
             ComputePeptideCleavageStateInProtein()
         End Set
     End Property
-    Public Property PeptideSequenceWithMods() As String
-        Get
-            Return mPeptideSequenceWithMods
-        End Get
-        Set(Value As String)
-            mPeptideSequenceWithMods = Value
-        End Set
-    End Property
+
+    ''' <summary>
+    ''' Peptide sequence with modification symbols
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Mod symbols are single characters, like *, #, @, etc.</remarks>
+    Public Property PeptideSequenceWithMods As String
+
+    ''' <summary>
+    ''' Cleavage state of the peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public ReadOnly Property PeptideCleavageState() As ePeptideCleavageStateConstants
         Get
             Return mPeptideCleavageState
         End Get
     End Property
+
+    ''' <summary>
+    ''' Terminus state of the peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public ReadOnly Property PeptideTerminusState() As ePeptideTerminusStateConstants
         Get
             Return mPeptideTerminusState
         End Get
     End Property
-    Public Property PeptideMH() As String
-        Get
-            Return mPeptideMH
-        End Get
-        Set(Value As String)
-            mPeptideMH = Value
-        End Set
-    End Property
-    Public Property PeptideDeltaMass() As String
-        Get
-            Return mPeptideDeltaMass
-        End Get
-        Set(Value As String)
-            mPeptideDeltaMass = Value
-        End Set
-    End Property
-    '' Unused
-    ''Public Property PeptideDeltaMassCorrectedPpm() As Double
-    ''    Get
-    ''        Return mPeptideDeltaMassCorrectedPpm
-    ''    End Get
-    ''    Set(Value As Double)
-    ''        mPeptideDeltaMassCorrectedPpm = Value
-    ''    End Set
-    ''End Property
-    Public Property PeptideModDescription() As String
-        Get
-            Return mPeptideModDescription
-        End Get
-        Set(Value As String)
-            mPeptideModDescription = Value
-        End Set
-    End Property
-    Public Property PeptideMonoisotopicMass() As Double
-        Get
-            Return mPeptideMonoisotopicMass
-        End Get
-        Set(Value As Double)
-            mPeptideMonoisotopicMass = Value
-        End Set
-    End Property
 
+    ''' <summary>
+    ''' In XTandem this is the theoretical monoisotopic MH
+    ''' In Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass
+    ''' In Inspect, MSGF+, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property PeptideMH As String
+
+    ''' <summary>
+    ''' Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation)
+    ''' In Sequest this is Theoretical Mass - Observed Mass
+    ''' In XTandem, Inspect, MSGF+, and MSAlign the DelM value is listed as Observed - Theoretical, 
+    ''' however, PHRP negates that value while reading the synopsis file to match Sequest
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property PeptideDeltaMass As String
+
+    ''' <summary>
+    ''' Comma separated list of the modifications present and the residue modified, with a colon separating the mod name and residue location
+    ''' </summary>
+    ''' <remarks>
+    ''' Examples:
+    '''   Acetyl:1
+    '''   MinusH2O:1,Plus1Oxy:4,Plus1Oxy:19
+    ''' </remarks>
+    Public Property PeptideModDescription As String
+
+    ''' <summary>
+    ''' Theoretical (computed) monoisotopic mass for a given peptide sequence, including any modified residues
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property PeptideMonoisotopicMass As Double
+
+    ''' <summary>
+    ''' Number of peptide residue modifications (dynamic or static)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public ReadOnly Property SearchResultModificationCount() As Integer
         Get
             Return mSearchResultModifications.Count
@@ -302,6 +347,12 @@ Public MustInherit Class clsSearchResultsBaseClass
     End Property
 #End Region
 
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <param name="objPeptideMods"></param>
+    ''' <param name="peptideSeqMassCalculator"></param>
+    ''' <remarks></remarks>
     Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
         mPeptideMods = objPeptideMods
         mPeptideSeqMassCalculator = peptideSeqMassCalculator
@@ -351,60 +402,85 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <remarks></remarks>
     Public Sub ApplyModificationInformation()
 
-        mPeptideSequenceWithMods = AddSearchResultModificationsToCleanSequence()
+        PeptideSequenceWithMods = AddSearchResultModificationsToCleanSequence()
         UpdateModDescription()
     End Sub
 
+    ''' <summary>
+    ''' Clear all values
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Overridable Sub Clear()
-        mResultID = 0
-        mGroupID = 0
+        ResultID = 0
+        GroupID = 0
 
-        mScan = String.Empty
-        mCharge = String.Empty
-        mParentIonMH = String.Empty
+        Scan = String.Empty
+        Charge = String.Empty
+        ParentIonMH = String.Empty
 
-        mMultipleProteinCount = String.Empty
-        mProteinName = String.Empty
-        mProteinExpectationValue = String.Empty
-        mProteinIntensity = String.Empty
+        MultipleProteinCount = String.Empty
+        ProteinName = String.Empty
+        ProteinExpectationValue = String.Empty
+        ProteinIntensity = String.Empty
 
         ClearProteinSequenceInfo()
 
+        ' Note that this calls ClearSearchResultModifications()
         ClearPeptideDetailsInfo()
+
     End Sub
 
+    ''' <summary>
+    ''' Clear cached peptide information
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Sub ClearPeptideDetailsInfo()
-        mPeptideLocInProteinStart = 0
-        mPeptideLocInProteinEnd = 0
+        PeptideLocInProteinStart = 0
+        PeptideLocInProteinEnd = 0
 
         mPeptidePreResidues = String.Empty
         mPeptidePostResidues = String.Empty
         mPeptideCleanSequence = String.Empty
-        mPeptideSequenceWithMods = String.Empty
+        PeptideSequenceWithMods = String.Empty
 
         mPeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
         mPeptideTerminusState = ePeptideTerminusStateConstants.None
 
-        mPeptideMH = String.Empty
-        mPeptideDeltaMass = String.Empty
+        PeptideMH = String.Empty
+        PeptideDeltaMass = String.Empty
 
-        mPeptideModDescription = String.Empty
-        mPeptideMonoisotopicMass = 0
+        PeptideModDescription = String.Empty
+        PeptideMonoisotopicMass = 0
 
         ClearSearchResultModifications()
     End Sub
 
+    ''' <summary>
+    ''' Clear the Protein sequence start residue and end residue values (ProteinSeqResidueNumberStart and ProteinSeqResidueNumberEnd)
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Sub ClearProteinSequenceInfo()
-        mProteinSeqResidueNumberStart = 0
-        mProteinSeqResidueNumberEnd = 0
+        ProteinSeqResidueNumberStart = 0
+        ProteinSeqResidueNumberEnd = 0
     End Sub
 
+    ''' <summary>
+    ''' Clear the modifications for this peptide
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Sub ClearSearchResultModifications()
-
         mSearchResultModifications.Clear()
-
     End Sub
 
+    ''' <summary>
+    ''' Compute the delta mass, in ppm, optionally correcting for C13 isotopic selection errors
+    ''' </summary>
+    ''' <param name="dblDelM">Delta mass, in Da</param>
+    ''' <param name="dblPrecursorMonoMass">Precursor monoisotopic mass</param>
+    ''' <param name="blnAdjustPrecursorMassForC13">True to correct for C13 isotopic selection errors</param>
+    ''' <param name="dblPeptideMonoisotopicMass"></param>
+    ''' <returns>Delta mass, in ppm</returns>
+    ''' <remarks></remarks>
     Public Shared Function ComputeDelMCorrectedPPM(
       dblDelM As Double,
       dblPrecursorMonoMass As Double,
@@ -462,16 +538,26 @@ Public MustInherit Class clsSearchResultsBaseClass
             modifiedResidues.Add(modifiedResidue)
         Next
 
-        mPeptideMonoisotopicMass = mPeptideSeqMassCalculator.ComputeSequenceMass(mPeptideCleanSequence, modifiedResidues)
+        PeptideMonoisotopicMass = mPeptideSeqMassCalculator.ComputeSequenceMass(mPeptideCleanSequence, modifiedResidues)
 
     End Sub
 
+    ''' <summary>
+    ''' Update PeptideCleavageState and PeptideTerminusState based on PeptideCleanSequence, PeptidePreResidues and PeptidePostResidues
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Sub ComputePeptideCleavageStateInProtein()
         ' Determine the peptide's terminus state and cleavage state within the protein
         mPeptideCleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(mPeptideCleanSequence, mPeptidePreResidues, mPeptidePostResidues)
         mPeptideTerminusState = mPeptideCleavageStateCalculator.ComputeTerminusState(mPeptideCleanSequence, mPeptidePreResidues, mPeptidePostResidues)
     End Sub
 
+    ''' <summary>
+    ''' Determine the terminus state for the given residue in the peptide
+    ''' </summary>
+    ''' <param name="intResidueLocInPeptide">Residue number (1-based)</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
     Public Function DetermineResidueTerminusState(intResidueLocInPeptide As Integer) As clsAminoAcidModInfo.eResidueTerminusStateConstants
 
         Dim eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants
@@ -479,9 +565,9 @@ Public MustInherit Class clsSearchResultsBaseClass
         eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None
         If intResidueLocInPeptide = 1 Then
             ' Residue is at the peptide's N-terminus
-            If mPeptideLocInProteinStart = mProteinSeqResidueNumberStart Then
+            If PeptideLocInProteinStart = ProteinSeqResidueNumberStart Then
                 ' Residue is at the protein's N-terminus
-                If mPeptideLocInProteinEnd = mProteinSeqResidueNumberEnd Then
+                If PeptideLocInProteinEnd = ProteinSeqResidueNumberEnd Then
                     ' The protein only contains one Residue, and we're currently examining it
                     eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus
                 Else
@@ -491,9 +577,9 @@ Public MustInherit Class clsSearchResultsBaseClass
                 eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus
             End If
         Else
-            If intResidueLocInPeptide = mPeptideLocInProteinEnd - mPeptideLocInProteinStart + 1 Then
+            If intResidueLocInPeptide = PeptideLocInProteinEnd - PeptideLocInProteinStart + 1 Then
                 ' Residue is at the peptide's C-terminus
-                If mPeptideLocInProteinEnd = mProteinSeqResidueNumberEnd Then
+                If PeptideLocInProteinEnd = ProteinSeqResidueNumberEnd Then
                     ' Residue is at the protein's C-terminus
                     eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus
                 Else
@@ -505,8 +591,22 @@ Public MustInherit Class clsSearchResultsBaseClass
         Return eResidueTerminusState
     End Function
 
-    Public Function GetSearchResultModDetailsByIndex(intIndex As Integer, ByRef chResidue As Char, ByRef intResidueLocInPeptide As Integer, ByRef dblModificationMass As Double, ByRef chAffectedAtom As Char) As Boolean
-        ' Returns True if intIndex is valid; otherwise, returns false
+    ''' <summary>
+    ''' Get the modification info, by index
+    ''' </summary>
+    ''' <param name="intIndex">Modification entry index (0-based)</param>
+    ''' <param name="chResidue"></param>
+    ''' <param name="intResidueLocInPeptide"></param>
+    ''' <param name="dblModificationMass"></param>
+    ''' <param name="chAffectedAtom"></param>
+    ''' <returns></returns>
+    ''' <remarks>Returns True if intIndex is valid; otherwise, returns false</remarks>
+    Public Function GetSearchResultModDetailsByIndex(
+      intIndex As Integer,
+      <Out()> ByRef chResidue As Char,
+      <Out()> ByRef intResidueLocInPeptide As Integer,
+      <Out()> ByRef dblModificationMass As Double,
+      <Out()> ByRef chAffectedAtom As Char) As Boolean
 
         If intIndex >= 0 And intIndex < mSearchResultModifications.Count Then
             With mSearchResultModifications(intIndex)
@@ -516,11 +616,22 @@ Public MustInherit Class clsSearchResultsBaseClass
                 chAffectedAtom = .ModDefinition.AffectedAtom
             End With
             Return True
-        Else
-            Return False
         End If
+
+        chResidue = Convert.ToChar(0)
+        intResidueLocInPeptide = 0
+        dblModificationMass = 0
+        chAffectedAtom = Convert.ToChar(0)
+        Return False
+
     End Function
 
+    ''' <summary>
+    ''' Get the modification info, by index
+    ''' </summary>
+    ''' <param name="intIndex">Modification entry index (0-based)</param>
+    ''' <returns>Modification info details if a valid index, otherwise nothing</returns>
+    ''' <remarks></remarks>
     Public Function GetSearchResultModDetailsByIndex(intIndex As Integer) As clsAminoAcidModInfo
         If intIndex >= 0 And intIndex < mSearchResultModifications.Count Then
             Return mSearchResultModifications(intIndex)
@@ -737,12 +848,16 @@ Public MustInherit Class clsSearchResultsBaseClass
 
     End Function
 
+    ''' <summary>
+    ''' Add any protein or peptide terminus static mods that are defined
+    ''' </summary>
+    ''' <param name="blnAllowDuplicateModOnTerminus">When false, only add the modification if the terminal residue does not already have the given modification associated with it</param>
+    ''' <param name="blnUpdateModOccurrenceCounts"></param>
+    ''' <remarks>
+    ''' Peptide terminus static mods are always considered for a given peptide
+    ''' Protein terminus static mods are only considered if the peptide is at the appropriate terminus for the modification
+    ''' </remarks>
     Public Sub SearchResultAddStaticTerminusMods(blnAllowDuplicateModOnTerminus As Boolean, blnUpdateModOccurrenceCounts As Boolean)
-        ' See if any protein or peptide terminus static mods are defined
-        ' Peptide terminus static mods are always considered for a given peptide
-        ' Protein terminus static mods are only considered if the peptide is at the appropriate terminus for the modification
-        ' If blnAllowDuplicateModOnTerminus = False, then we only add the modification if the terminal residue does not already have the given modification associated with it
-
         Dim intModificationIndex As Integer
         Dim intIndexCompare As Integer
         Dim intResidueLocInPeptide As Integer
@@ -838,17 +953,23 @@ Public MustInherit Class clsSearchResultsBaseClass
 
     End Sub
 
+    ''' <summary>
+    ''' Updates the N-Terminal mass applied to peptides when computing their mass if it is significantly different than the currently defined N-terminal peptide mass
+    ''' </summary>
+    ''' <param name="dblNTerminalMassChange"></param>
+    ''' <remarks></remarks>
     Public Sub UpdatePeptideNTerminusMass(dblNTerminalMassChange As Double)
-        ' Updates the N-Terminal mass applied to peptides when computing their mass if it is significantly different than the
-        '  currently defined N-terminal peptide mass
         If Math.Round(Math.Abs(dblNTerminalMassChange - mPeptideSeqMassCalculator.PeptideNTerminusMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) > 0 Then
             mPeptideSeqMassCalculator.PeptideNTerminusMass = dblNTerminalMassChange
         End If
     End Sub
 
+    ''' <summary>
+    ''' Updates the C-Terminal mass applied to peptides when computing their mass if significantly different than the currently defined C-terminal peptide mass
+    ''' </summary>
+    ''' <param name="dblCTerminalMassChange"></param>
+    ''' <remarks></remarks>
     Public Sub UpdatePeptideCTerminusMass(dblCTerminalMassChange As Double)
-        ' Updates the C-Terminal mass applied to peptides when computing their mass if significantly different than the
-        '  currently defined C-terminal peptide mass
         If Math.Round(Math.Abs(dblCTerminalMassChange - mPeptideSeqMassCalculator.PeptideCTerminusMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) > 0 Then
             mPeptideSeqMassCalculator.PeptideCTerminusMass = dblCTerminalMassChange
         End If
@@ -915,8 +1036,8 @@ Public MustInherit Class clsSearchResultsBaseClass
             ' Ignore errors here
         End Try
 
-        If blnReturnSequenceWithMods AndAlso Not mPeptideSequenceWithMods Is Nothing Then
-            Return chPrefix & "." & mPeptideSequenceWithMods & "." & chSuffix
+        If blnReturnSequenceWithMods AndAlso Not PeptideSequenceWithMods Is Nothing Then
+            Return chPrefix & "." & PeptideSequenceWithMods & "." & chSuffix
         Else
             If mPeptideCleanSequence Is Nothing Then
                 Return String.Empty
@@ -926,14 +1047,23 @@ Public MustInherit Class clsSearchResultsBaseClass
         End If
     End Function
 
+    ''' <summary>
+    ''' Define custom RegEx specs used to find enzyme cleavage sites
+    ''' </summary>
+    ''' <param name="udtEnzymeMatchSpec"></param>
+    ''' <remarks>Define standard RegEx values using SetStandardEnzymeMatchSpec</remarks>
     Public Sub SetEnzymeMatchSpec(udtEnzymeMatchSpec As udtEnzymeMatchSpecType)
         mPeptideCleavageStateCalculator.SetEnzymeMatchSpec(udtEnzymeMatchSpec.LeftResidueRegEx, udtEnzymeMatchSpec.RightResidueRegEx)
     End Sub
 
+    ''' <summary>
+    ''' Stores strSequenceWithMods in PeptideSequenceWithMods
+    ''' </summary>
+    ''' <param name="strSequenceWithMods"></param>
+    ''' <param name="blnCheckForPrefixAndSuffixResidues"></param>
+    ''' <param name="blnAutoPopulateCleanSequence">When true, populates PeptideCleanSequence, which automatically calls ComputePeptideCleavageStateInProtein</param>
+    ''' <remarks></remarks>
     Public Sub SetPeptideSequenceWithMods(strSequenceWithMods As String, blnCheckForPrefixAndSuffixResidues As Boolean, blnAutoPopulateCleanSequence As Boolean)
-        ' Stores strSequenceWithMods in mPeptideSequenceWithMods
-        ' If blnAutoPopulateCleanSequence = True, then populates mPeptideCleanSequence, 
-        '  which automatically calls ComputePeptideCleavageStateInProtein
 
         Dim strPrimarySequence As String = String.Empty       ' Sequence with mods, but without the prefix or suffix residues
         Dim strPrefix As String = String.Empty
@@ -957,20 +1087,29 @@ Public MustInherit Class clsSearchResultsBaseClass
             Me.PeptideCleanSequence = ExtractCleanSequenceFromSequenceWithMods(strPrimarySequence, False)
         End If
 
-        mPeptideSequenceWithMods = String.Copy(strPrimarySequence)
+        PeptideSequenceWithMods = String.Copy(strPrimarySequence)
 
     End Sub
 
+    ''' <summary>
+    ''' Define standard RegEx values for finding enzyming cleavage sites
+    ''' </summary>
+    ''' <param name="eStandardCleavageAgent"></param>
+    ''' <remarks>Define custom RegEx values using SetEnzymeMatchSpec</remarks>
     Public Sub SetStandardEnzymeMatchSpec(eStandardCleavageAgent As eStandardCleavageAgentConstants)
         mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(eStandardCleavageAgent)
     End Sub
 
+    ''' <summary>
+    ''' Generate a comma separated list of the modifications present and the residue modified, with a colon separating the mod name and residue location
+    ''' Accessible via PeptideModDescription
+    ''' </summary>
+    ''' <remarks>
+    ''' Examples:
+    '''   Acetyl:1
+    '''   MinusH2O:1,Plus1Oxy:4,Plus1Oxy:19
+    ''' </remarks>
     Public Sub UpdateModDescription()
-        ' Generate a comma separated list of the modifications present and the residue modified, with a colon separating the mod name and residue location
-        ' For example:
-        '  Acetyl:1
-        '  MinusH2O:1,Plus1Oxy:4,Plus1Oxy:19
-        ' The description is stored in mPeptideModDescription
 
         Const MOD_LIST_SEP_CHAR = ","c
         Dim intIndex As Integer
@@ -978,7 +1117,7 @@ Public MustInherit Class clsSearchResultsBaseClass
         Dim udtModNameAndResidueLoc() As clsPHRPBaseClass.udtModNameAndResidueLocType
         Dim intPointerArray() As Integer
 
-        mPeptideModDescription = String.Empty
+        PeptideModDescription = String.Empty
 
         If mSearchResultModifications.Count > 0 Then
             ReDim udtModNameAndResidueLoc(mSearchResultModifications.Count - 1)
@@ -1001,8 +1140,8 @@ Public MustInherit Class clsSearchResultsBaseClass
             ' Note that mods of type IsotopicMod will have .ResidueLocInPeptide = 0; other mods will have positive .ResidueLocInPeptide values
             For intIndex = 0 To mSearchResultModifications.Count - 1
                 With mSearchResultModifications(intPointerArray(intIndex))
-                    If intIndex > 0 Then mPeptideModDescription &= MOD_LIST_SEP_CHAR
-                    mPeptideModDescription &= .ModDefinition.MassCorrectionTag.Trim & ":"c & .ResidueLocInPeptide
+                    If intIndex > 0 Then PeptideModDescription &= MOD_LIST_SEP_CHAR
+                    PeptideModDescription &= .ModDefinition.MassCorrectionTag.Trim & ":"c & .ResidueLocInPeptide
                 End With
             Next intIndex
 
@@ -1013,6 +1152,13 @@ Public MustInherit Class clsSearchResultsBaseClass
 	Protected Class IGenericResidueModificationInfoComparer
 		Implements IComparer(Of clsAminoAcidModInfo)
 
+        ''' <summary>
+        ''' Comparer
+        ''' </summary>
+        ''' <param name="x"></param>
+        ''' <param name="y"></param>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
 		Public Function Compare(x As clsAminoAcidModInfo, y As clsAminoAcidModInfo) As Integer Implements IComparer(Of clsAminoAcidModInfo).Compare
 			If x.ResidueLocInPeptide > y.ResidueLocInPeptide Then
 				Return 1
