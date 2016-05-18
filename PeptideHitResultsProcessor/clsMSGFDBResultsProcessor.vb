@@ -221,7 +221,9 @@ Public Class clsMSGFDBResultsProcessor
     ''' </summary>
     ''' <remarks></remarks>
     Private ReadOnly mModMassRegEx As Regex
-    
+
+    Private mNumericModErrors As Integer
+
 #End Region
 
     ''' <summary>
@@ -443,10 +445,18 @@ Public Class clsMSGFDBResultsProcessor
             Dim reMatch = mModMassRegEx.Match(objSearchResult.PeptideSequenceWithMods)
             If reMatch.Success Then
                 ' Modification mass did not have a symbol associated with it in the _ModDefs.txt file
-                ' We could try to handle this, listing the modification massin place of the modification symbol in the _ModDetails.txt file, but will
+                ' We could try to handle this, listing the modification mass in place of the modification symbol in the _ModDetails.txt file, but will
                 ' instead abort processing
-                Dim localErrorMessage = "Search result contains a numeric mod mass that could not be associated with a modification symbol; ResultID = " & objSearchResult.ResultID & ", ModMass = " & reMatch.Value.ToString
-                SetErrorMessage(localErrorMessage)
+
+                mNumericModErrors += 1
+
+                If mNumericModErrors < 250 Then
+                    Dim localErrorMessage = "Search result contains a numeric mod mass that could not be associated with a modification symbol; ResultID = " & objSearchResult.ResultID & ", ModMass = " & reMatch.Value.ToString
+                    SetErrorMessage(localErrorMessage)
+                ElseIf mNumericModErrors = 250 Then
+                    SetErrorMessage("Too many numeric mod mass results have been found; suppressing further logging")
+                End If
+                
                 Return False
             End If
 
@@ -1032,6 +1042,7 @@ Public Class clsMSGFDBResultsProcessor
             mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.eStandardCleavageAgentConstants.Trypsin)
         End If
 
+        mNumericModErrors = 0
     End Sub
 
     ''' <summary>
@@ -1179,6 +1190,8 @@ Public Class clsMSGFDBResultsProcessor
 
             ' Reset .OccurrenceCount
             mPeptideMods.ResetOccurrenceCountStats()
+
+            mNumericModErrors = 0
 
             ' Initialize objSearchResult
             objSearchResult = New clsSearchResultsMSGFDB(mPeptideMods, mPeptideSeqMassCalculator)
