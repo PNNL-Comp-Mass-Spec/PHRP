@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.5981; May 17, 2016
+	- Return a non-zero error code if processing an MSGF+ results file and the ModDefs file does not have a definition for a given dynamic mod
+
 Version 1.5.5978; May 14, 2016
 	- Improved support for custom amino acid definitions in MSGF+ parameter files
 

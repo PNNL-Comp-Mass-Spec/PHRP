@@ -438,6 +438,18 @@ Public Class clsMSGFDBResultsProcessor
             ' If any modifications of type IsotopicMod are defined, add them to the Search Result Mods now
             objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
 
+            ' Make sure .PeptideSequenceWithMods does not have any generic mod masses
+            ' It should only have mod symbols
+            Dim reMatch = mModMassRegEx.Match(objSearchResult.PeptideSequenceWithMods)
+            If reMatch.Success Then
+                ' Modification mass did not have a symbol associated with it in the _ModDefs.txt file
+                ' We could try to handle this, listing the modification massin place of the modification symbol in the _ModDetails.txt file, but will
+                ' instead abort processing
+                Dim localErrorMessage = "Search result contains a numeric mod mass that could not be associated with a modification symbol; ResultID = " & objSearchResult.ResultID & ", ModMass = " & reMatch.Value.ToString
+                SetErrorMessage(localErrorMessage)
+                Return False
+            End If
+
             ' Parse .PeptideSequenceWithMods to determine the modified residues present
             AddDynamicAndStaticResidueMods(objSearchResult, blnUpdateModOccurrenceCounts)
 
@@ -1157,6 +1169,8 @@ Public Class clsMSGFDBResultsProcessor
         Dim blnValidSearchResult As Boolean
         Dim blnFirstMatchForGroup As Boolean
 
+        Dim successOverall = True
+
         Try
             ' Possibly reset the mass correction tags and Mod Definitions
             If blnResetMassCorrectionTagsAndModificationDefinitions Then
@@ -1246,6 +1260,7 @@ Public Class clsMSGFDBResultsProcessor
 
                             blnSuccess = AddModificationsAndComputeMass(objSearchResult, blnFirstMatchForGroup)
                             If Not blnSuccess Then
+                                successOverall = False
                                 If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
                                     strErrorLog &= "Error adding modifications to sequence at RowIndex '" & objSearchResult.ResultID & "'" & ControlChars.NewLine
                                 End If
@@ -1305,7 +1320,7 @@ Public Class clsMSGFDBResultsProcessor
                     SetErrorMessage("Invalid Lines: " & ControlChars.NewLine & strErrorLog)
                 End If
 
-                blnSuccess = True
+                blnSuccess = successOverall
 
             Catch ex As Exception
                 SetErrorMessage(ex.Message)

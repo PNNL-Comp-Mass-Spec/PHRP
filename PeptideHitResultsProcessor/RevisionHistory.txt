@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.5981; May 17, 2016
+	- Report Success=False if processing an MSGF+ results file and the ModDefs file does not have a definition for a given dynamic mod
+
 Version 1.5.5959; April 25, 2016
 	- Updated to .NET 4.5.1
 
