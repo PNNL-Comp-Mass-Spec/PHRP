@@ -175,9 +175,17 @@ Module modMain
                         intReturnCode = 0
                     Else
                         intReturnCode = mPeptideHitResultsProcRunner.ErrorCode
-                        If intReturnCode <> 0 AndAlso Not mQuietMode Then
-                            ShowErrorMessage("Error while processing: " & mPeptideHitResultsProcRunner.GetErrorMessage())
+                        If intReturnCode = 0 Then
+                            intReturnCode = -1
+                            If Not mQuietMode Then
+                                ShowErrorMessage("ProcessFilesWildcard returned Success=False")
+                            End If
+                        Else
+                            If Not mQuietMode Then
+                                ShowErrorMessage("Error while processing: " & mPeptideHitResultsProcRunner.GetErrorMessage())
+                            End If
                         End If
+                        
                     End If
                 End If
 
