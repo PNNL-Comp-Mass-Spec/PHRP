@@ -4,19 +4,19 @@
 Public Class clsAminoAcidModInfo
 
 #Region "Constants and Enums"
-	Public Const N_TERMINAL_PEPTIDE_SYMBOL_DMS As Char = "<"c
-	Public Const C_TERMINAL_PEPTIDE_SYMBOL_DMS As Char = ">"c
-	Public Const N_TERMINAL_PROTEIN_SYMBOL_DMS As Char = "["c
-	Public Const C_TERMINAL_PROTEIN_SYMBOL_DMS As Char = "]"c
+    Public Const N_TERMINAL_PEPTIDE_SYMBOL_DMS As Char = "<"c
+    Public Const C_TERMINAL_PEPTIDE_SYMBOL_DMS As Char = ">"c
+    Public Const N_TERMINAL_PROTEIN_SYMBOL_DMS As Char = "["c
+    Public Const C_TERMINAL_PROTEIN_SYMBOL_DMS As Char = "]"c
 
-	Public Enum eResidueTerminusStateConstants As Integer
-		None = 0						' The residue is in the middle of the peptide
-		PeptideNTerminus = 1			' The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
-		PeptideCTerminus = 2			' The residue is located at the peptide's C-terminus; superseded by ProteinCTerminus if applicable
-		ProteinNTerminus = 3			' The residue is located at the protein's N-terminus
-		ProteinCTerminus = 4			' The residue is located at the protein's C-terminus
-		ProteinNandCCTerminus = 5		' The protein only has one residue 
-	End Enum
+    Public Enum eResidueTerminusStateConstants As Integer
+        None = 0                        ' The residue is in the middle of the peptide
+        PeptideNTerminus = 1            ' The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
+        PeptideCTerminus = 2            ' The residue is located at the peptide's C-terminus; superseded by ProteinCTerminus if applicable
+        ProteinNTerminus = 3            ' The residue is located at the protein's N-terminus
+        ProteinCTerminus = 4            ' The residue is located at the protein's C-terminus
+        ProteinNandCCTerminus = 5       ' The protein only has one residue 
+    End Enum
 #End Region
 
     Private ReadOnly mModDefinition As clsModificationDefinition
@@ -31,15 +31,15 @@ Public Class clsAminoAcidModInfo
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-	Public ReadOnly Property AmbiguousMod As Boolean
-		Get
-			If mEndResidueLocInPeptide > mResidueLocInPeptide Then
-				Return True
-			Else
-				Return False
-			End If
-		End Get
-	End Property
+    Public ReadOnly Property AmbiguousMod As Boolean
+        Get
+            If mEndResidueLocInPeptide > mResidueLocInPeptide Then
+                Return True
+            Else
+                Return False
+            End If
+        End Get
+    End Property
 
     ''' <summary>
     ''' For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, whill be the same as ResidueLocInPeptide
@@ -47,23 +47,23 @@ Public Class clsAminoAcidModInfo
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-	Public ReadOnly Property EndResidueLocInPeptide As Integer
-		Get
-			Return mEndResidueLocInPeptide
-		End Get
-	End Property
+    Public ReadOnly Property EndResidueLocInPeptide As Integer
+        Get
+            Return mEndResidueLocInPeptide
+        End Get
+    End Property
 
-	Public ReadOnly Property ModDefinition As clsModificationDefinition
-		Get
-			Return mModDefinition
-		End Get
-	End Property
+    Public ReadOnly Property ModDefinition As clsModificationDefinition
+        Get
+            Return mModDefinition
+        End Get
+    End Property
 
-	Public ReadOnly Property Residue As Char
-		Get
-			Return mResidue
-		End Get
-	End Property
+    Public ReadOnly Property Residue As Char
+        Get
+            Return mResidue
+        End Get
+    End Property
 
     ''' <summary>
     ''' Indicates the residue number modified; the first residue is at position 1
@@ -71,17 +71,17 @@ Public Class clsAminoAcidModInfo
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>For ambiguous mods, indicates the first residue on which the mod could appear</remarks>
-	Public ReadOnly Property ResidueLocInPeptide As Integer
-		Get
-			Return mResidueLocInPeptide
-		End Get
-	End Property
+    Public ReadOnly Property ResidueLocInPeptide As Integer
+        Get
+            Return mResidueLocInPeptide
+        End Get
+    End Property
 
-	Public ReadOnly Property ResidueTerminusState As eResidueTerminusStateConstants
-		Get
-			Return mResidueTerminusState
-		End Get
-	End Property
+    Public ReadOnly Property ResidueTerminusState As eResidueTerminusStateConstants
+        Get
+            Return mResidueTerminusState
+        End Get
+    End Property
 
     Public Sub New(
       chResidue As Char,

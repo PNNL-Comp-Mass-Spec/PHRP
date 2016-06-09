@@ -2237,7 +2237,7 @@ Public Class clsPHRPReader
         Dim intMSLevel As Integer
         Dim strCollisionMode As String = String.Empty
 
-        If ThermoRawFileReaderDLL.FinniganFileIO.XRawFileIO.ExtractParentIonMZFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
+        If ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
             If dblParentIonMZ > 0 Then
                 dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(dblParentIonMZ, mPSMCurrent.Charge, 0)
             End If
