@@ -1,5 +1,10 @@
 ﻿Option Strict On
 
+Imports System.IO
+Imports System.Reflection
+Imports System.Text
+Imports System.Text.RegularExpressions
+Imports System.Threading
 Imports PHRPReader
 
 ' This program reads a PHRP-compatible _msgfdb_fht.txt file and creates the 
@@ -15,347 +20,348 @@ Imports PHRPReader
 ' -------------------------------------------------------------------------------
 
 Module modMain
-	Public Const PROGRAM_DATE As String = "March 14, 2013"
-	Private Const MASS_C13 As Double = 1.00335483
+    Public Const PROGRAM_DATE As String = "March 14, 2013"
+    Private Const MASS_C13 As Double = 1.00335483
 
-	Private WithEvents mPHRPReader As clsPHRPReader
+    Private WithEvents mPHRPReader As clsPHRPReader
 
-	Private mInputFilePath As String
-	Private mOutputFilePath As String
+    Private mInputFilePath As String
+    Private mOutputFilePath As String
 
-	Public Function Main() As Integer
+    Public Function Main() As Integer
 
-		Dim intReturnCode As Integer
-		Dim objParseCommandLine As New clsParseCommandLine
-		Dim blnProceed As Boolean
+        Dim intReturnCode As Integer
+        Dim objParseCommandLine As New clsParseCommandLine
+        Dim blnProceed As Boolean
 
-		intReturnCode = 0
-		mInputFilePath = String.Empty
-		mOutputFilePath = String.Empty
+        intReturnCode = 0
+        mInputFilePath = String.Empty
+        mOutputFilePath = String.Empty
 
-		Try
-			blnProceed = False
-			If objParseCommandLine.ParseCommandLine Then
-				If SetOptionsUsingCommandLineParameters(objParseCommandLine) Then blnProceed = True
-			End If
+        Try
+            blnProceed = False
+            If objParseCommandLine.ParseCommandLine Then
+                If SetOptionsUsingCommandLineParameters(objParseCommandLine) Then blnProceed = True
+            End If
 
-			If Not blnProceed OrElse _
-			   objParseCommandLine.NeedToShowHelp OrElse _
-			   objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse _
-			   mInputFilePath.Length = 0 Then
-				ShowProgramHelp()
-				intReturnCode = -1
-			Else
+            If Not blnProceed OrElse _
+               objParseCommandLine.NeedToShowHelp OrElse _
+               objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse _
+               mInputFilePath.Length = 0 Then
+                ShowProgramHelp()
+                intReturnCode = -1
+            Else
 
-				ConvertFile()
+                ConvertFile()
 
-			End If
+            End If
 
-		Catch ex As Exception
-			ShowErrorMessage("Error occurred in modMain->Main: " & System.Environment.NewLine & ex.Message)
-			intReturnCode = -1
-		End Try
+        Catch ex As Exception
+            ShowErrorMessage("Error occurred in modMain->Main: " & Environment.NewLine & ex.Message)
+            intReturnCode = -1
+        End Try
 
-		Return intReturnCode
+        Return intReturnCode
 
-	End Function
+    End Function
 
-	Private Function CleanupPeptide(ByVal strPeptide As String) As String
+    Private Function CleanupPeptide(strPeptide As String) As String
 
-		Static reFindItraq As System.Text.RegularExpressions.Regex = New System.Text.RegularExpressions.Regex("^([A-Z][^A-Z]*)(\+144\.\d+)(.+)", Text.RegularExpressions.RegexOptions.Compiled Or Text.RegularExpressions.RegexOptions.IgnoreCase)
+        ' ReSharper disable once UseImplicitlyTypedVariableEvident
+        Static reFindItraq As Regex = New Regex("^([A-Z][^A-Z]*)(\+144\.\d+)(.+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
 
-		Dim strPrimarySequence As String = String.Empty
-		Dim strPrefix As String = String.Empty
-		Dim strSuffix As String = String.Empty
+        Dim strPrimarySequence As String = String.Empty
+        Dim strPrefix As String = String.Empty
+        Dim strSuffix As String = String.Empty
 
-		Dim reMatch As System.Text.RegularExpressions.Match
+        Dim reMatch As Match
 
-		If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strPeptide, strPrimarySequence, strPrefix, strSuffix) Then
-			' Look for an N-terminal iTraq mod
-			reMatch = reFindItraq.Match(strPrimarySequence)
+        If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strPeptide, strPrimarySequence, strPrefix, strSuffix) Then
+            ' Look for an N-terminal iTraq mod
+            reMatch = reFindItraq.Match(strPrimarySequence)
 
-			If reMatch.Success Then
-				strPeptide = strPrefix & "." & reMatch.Groups(2).Value & reMatch.Groups(1).Value & reMatch.Groups(3).Value & "." & strSuffix
-			End If
-		End If
+            If reMatch.Success Then
+                strPeptide = strPrefix & "." & reMatch.Groups(2).Value & reMatch.Groups(1).Value & reMatch.Groups(3).Value & "." & strSuffix
+            End If
+        End If
 
-		Return strPeptide
-	End Function
+        Return strPeptide
+    End Function
 
-	Private Function ConvertFile() As Boolean
+    Private Function ConvertFile() As Boolean
 
-		Dim fiInputFile As IO.FileInfo
+        Dim fiInputFile As FileInfo
 
-		Try
-			fiInputFile = New IO.FileInfo(mInputFilePath)
+        Try
+            fiInputFile = New FileInfo(mInputFilePath)
 
-			If Not fiInputFile.Exists Then
-				ShowErrorMessage("Input file not found: " + fiInputFile.FullName)
-				Return False
-			End If
+            If Not fiInputFile.Exists Then
+                ShowErrorMessage("Input file not found: " + fiInputFile.FullName)
+                Return False
+            End If
 
-			If String.IsNullOrEmpty(mOutputFilePath) Then
-				' Auto-define the output file
+            If String.IsNullOrEmpty(mOutputFilePath) Then
+                ' Auto-define the output file
 
-				mOutputFilePath = IO.Path.GetFileNameWithoutExtension(fiInputFile.Name)
-				If mOutputFilePath.ToLower.EndsWith("_msgfdb_fht") OrElse mOutputFilePath.EndsWith("_msgfdb_syn") Then
-					mOutputFilePath = mOutputFilePath.Substring(0, mOutputFilePath.Length - 11)
-				End If
-				mOutputFilePath = IO.Path.Combine(fiInputFile.Directory.FullName, mOutputFilePath & "_msgfplus.tsv")
-			End If
+                mOutputFilePath = Path.GetFileNameWithoutExtension(fiInputFile.Name)
+                If mOutputFilePath.ToLower.EndsWith("_msgfdb_fht") OrElse mOutputFilePath.EndsWith("_msgfdb_syn") Then
+                    mOutputFilePath = mOutputFilePath.Substring(0, mOutputFilePath.Length - 11)
+                End If
+                mOutputFilePath = Path.Combine(fiInputFile.Directory.FullName, mOutputFilePath & "_msgfplus.tsv")
+            End If
 
-			mPHRPReader = New clsPHRPReader(fiInputFile.FullName, clsPHRPReader.ePeptideHitResultType.Unknown, True, False, False)
-			mPHRPReader.EchoMessagesToConsole = False
-			mPHRPReader.SkipDuplicatePSMs = False
+            mPHRPReader = New clsPHRPReader(fiInputFile.FullName, clsPHRPReader.ePeptideHitResultType.Unknown, True, False, False)
+            mPHRPReader.EchoMessagesToConsole = False
+            mPHRPReader.SkipDuplicatePSMs = False
 
-			If Not mPHRPReader.CanRead Then
-				ShowErrorMessage("Aborting since PHRPReader is not ready: " + mPHRPReader.ErrorMessage)
-				Return False
-			End If
+            If Not mPHRPReader.CanRead Then
+                ShowErrorMessage("Aborting since PHRPReader is not ready: " + mPHRPReader.ErrorMessage)
+                Return False
+            End If
 
-			Using swOutFile As System.IO.StreamWriter = New System.IO.StreamWriter(New System.IO.FileStream(mOutputFilePath, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read))
+            Using swOutFile = New StreamWriter(New FileStream(mOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
-				Dim lstValues As Generic.List(Of String) = New Generic.List(Of String)
-				Dim intPSMsRead As Integer = 0
-
-				' Write the header line
-				swOutFile.WriteLine(FlattenList(New Generic.List(Of String) From {"#SpecFile", "SpecID", "ScanNum", "FragMethod", "Precursor", "IsotopeError", "PrecursorError(ppm)", "Charge", "Peptide", "Protein", "DeNovoScore", "MSGFScore", "SpecEValue", "EValue", "QValue", "PepQValue"}))
-
-				Dim strMassErrorPPM As String
-				Dim intIsotopeErrorComputed As Integer
-				Dim strIsotopeError As String
-
-				Do While mPHRPReader.MoveNext()
-					Dim oPsm As clsPSM = mPHRPReader.CurrentPSM
-					intPSMsRead += 1
-					lstValues.Clear()
-
-					intIsotopeErrorComputed = 0
-					strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, intIsotopeErrorComputed)
-
-					lstValues.Add(mPHRPReader.DatasetName & "_dta.txt")												' #SpecFile
-					lstValues.Add("index=" & intPSMsRead)															' SpecID
-					lstValues.Add(oPsm.ScanNumber.ToString())														' ScanNum
-					lstValues.Add(oPsm.CollisionMode)																' FragMethod
-					lstValues.Add(GetPrecursorMZ(oPsm))																' Precursor m/z
+                Dim lstValues = New List(Of String)
+                Dim intPSMsRead = 0
+
+                ' Write the header line
+                swOutFile.WriteLine(FlattenList(New List(Of String) From {"#SpecFile", "SpecID", "ScanNum", "FragMethod", "Precursor", "IsotopeError", "PrecursorError(ppm)", "Charge", "Peptide", "Protein", "DeNovoScore", "MSGFScore", "SpecEValue", "EValue", "QValue", "PepQValue"}))
+
+                Dim strMassErrorPPM As String
+                Dim intIsotopeErrorComputed As Integer
+                Dim strIsotopeError As String
+
+                Do While mPHRPReader.MoveNext()
+                    Dim oPsm As clsPSM = mPHRPReader.CurrentPSM
+                    intPSMsRead += 1
+                    lstValues.Clear()
 
-					strIsotopeError = GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_Isotope_Error, "0")
-					If strIsotopeError = "0" And intIsotopeErrorComputed <> 0 Then
-						strIsotopeError = intIsotopeErrorComputed.ToString()
-					End If
+                    intIsotopeErrorComputed = 0
+                    strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, intIsotopeErrorComputed)
 
-					lstValues.Add(strIsotopeError)																	' IsotopeError
-					lstValues.Add(strMassErrorPPM)																	' PrecursorError(ppm)
-					lstValues.Add(oPsm.Charge.ToString())															' Charge
-					lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods))										' Peptide
-					lstValues.Add(oPsm.ProteinFirst)																' Protein
-					lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore, "0"))					' DeNovoScore
-					lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, "0"))					' MSGFScore
-					lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue, "0"))			' SpecEValue
-					lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_EValue, "0"))						' EValue
-					lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_QValue, "0"))						' QValue
-					lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_PepQValue, "0"))					' PepQValue
+                    lstValues.Add(mPHRPReader.DatasetName & "_dta.txt")                                             ' #SpecFile
+                    lstValues.Add("index=" & intPSMsRead)                                                           ' SpecID
+                    lstValues.Add(oPsm.ScanNumber.ToString())                                                       ' ScanNum
+                    lstValues.Add(oPsm.CollisionMode)                                                               ' FragMethod
+                    lstValues.Add(GetPrecursorMZ(oPsm))                                                             ' Precursor m/z
 
-
-					swOutFile.WriteLine(FlattenList(lstValues))
-				Loop
-
-			End Using
-
-			Console.WriteLine("Created file " & mOutputFilePath)
-
-		Catch ex As Exception
-			ShowErrorMessage("Error occurred in modMain->ConvertFile: " & System.Environment.NewLine & ex.Message)
-			Return False
-		End Try
-
-		Return True
-	End Function
+                    strIsotopeError = GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_Isotope_Error, "0")
+                    If strIsotopeError = "0" And intIsotopeErrorComputed <> 0 Then
+                        strIsotopeError = intIsotopeErrorComputed.ToString()
+                    End If
 
-	Private Function FlattenList(ByVal lstValues As Generic.List(Of String)) As String
-		Return FlattenList(lstValues, ControlChars.Tab)
-	End Function
+                    lstValues.Add(strIsotopeError)                                                                  ' IsotopeError
+                    lstValues.Add(strMassErrorPPM)                                                                  ' PrecursorError(ppm)
+                    lstValues.Add(oPsm.Charge.ToString())                                                           ' Charge
+                    lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods))                                      ' Peptide
+                    lstValues.Add(oPsm.ProteinFirst)                                                                ' Protein
+                    lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore, "0"))                 ' DeNovoScore
+                    lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, "0"))                   ' MSGFScore
+                    lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue, "0"))           ' SpecEValue
+                    lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_EValue, "0"))                      ' EValue
+                    lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_QValue, "0"))                      ' QValue
+                    lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_PepQValue, "0"))                   ' PepQValue
 
-	Private Function FlattenList(ByVal lstValues As Generic.List(Of String), ByVal chSepChar As Char) As String
-		Dim sbOutline As System.Text.StringBuilder = New System.Text.StringBuilder()
 
-		For intIndex As Integer = 0 To lstValues.Count - 1
-			If intIndex > 0 Then
-				sbOutline.Append(chSepChar)
-			End If
-			sbOutline.Append(lstValues(intIndex))
-		Next
+                    swOutFile.WriteLine(FlattenList(lstValues))
+                Loop
+
+            End Using
+
+            Console.WriteLine("Created file " & mOutputFilePath)
+
+        Catch ex As Exception
+            ShowErrorMessage("Error occurred in modMain->ConvertFile: " & Environment.NewLine & ex.Message)
+            Return False
+        End Try
 
-		Return sbOutline.ToString()
-	End Function
+        Return True
+    End Function
 
-	Private Function GetAppVersion() As String
-		'Return System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")"
+    Private Function FlattenList(lstValues As List(Of String)) As String
+        Return FlattenList(lstValues, ControlChars.Tab)
+    End Function
 
-		Return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() & " (" & PROGRAM_DATE & ")"
-	End Function
+    Private Function FlattenList(lstValues As List(Of String), chSepChar As Char) As String
+        Dim sbOutline = New StringBuilder()
 
-	Private Function GetCorrectedMassErrorPPM(ByVal oPsm As clsPSM, ByRef intIsotopeError As Integer) As String
+        For intIndex = 0 To lstValues.Count - 1
+            If intIndex > 0 Then
+                sbOutline.Append(chSepChar)
+            End If
+            sbOutline.Append(lstValues(intIndex))
+        Next
 
-		Dim dblDelM As Double
-		Dim dblMassErrorPPM As Double = 0
-		intIsotopeError = 0
+        Return sbOutline.ToString()
+    End Function
 
-		If Double.TryParse(oPsm.MassErrorDa, dblDelM) Then
+    Private Function GetAppVersion() As String
+        'Return System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")"
 
-			' Examine dblDelM to determine which isotope was chosen
-			If dblDelM >= -0.5 Then
-				' This is the typical case
-				Do While dblDelM > 0.5
-					dblDelM -= MASS_C13
-					intIsotopeError += 1
-				Loop
-			Else
-				' This happens less often; but we'll still account for it
-				' In this case, intCorrectionCount will be negative
-				Do While dblDelM < -0.5
-					dblDelM += MASS_C13
-					intIsotopeError -= 1
-				Loop
+        Return Assembly.GetExecutingAssembly().GetName().Version.ToString() & " (" & PROGRAM_DATE & ")"
+    End Function
 
-			End If
+    Private Function GetCorrectedMassErrorPPM(oPsm As clsPSM, ByRef intIsotopeError As Integer) As String
 
-			dblMassErrorPPM = clsPeptideMassCalculator.MassToPPM(dblDelM, oPsm.PrecursorNeutralMass)
-		End If
+        Dim dblDelM As Double
+        Dim dblMassErrorPPM As Double = 0
+        intIsotopeError = 0
 
-		Return dblMassErrorPPM.ToString("0.0000")
-	End Function
+        If Double.TryParse(oPsm.MassErrorDa, dblDelM) Then
 
-	Private Function GetPrecursorMZ(ByVal oPsm As clsPSM) As String
-		Return clsPeptideMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString()
+            ' Examine dblDelM to determine which isotope was chosen
+            If dblDelM >= -0.5 Then
+                ' This is the typical case
+                Do While dblDelM > 0.5
+                    dblDelM -= MASS_C13
+                    intIsotopeError += 1
+                Loop
+            Else
+                ' This happens less often; but we'll still account for it
+                ' In this case, intCorrectionCount will be negative
+                Do While dblDelM < -0.5
+                    dblDelM += MASS_C13
+                    intIsotopeError -= 1
+                Loop
 
-	End Function
+            End If
 
-	Private Function GetScore(ByVal oPsm As clsPSM, ByVal strScoreName As String, ByVal strValueIfMissing As String) As String
-		Dim strScoreValue As String = String.Empty
+            dblMassErrorPPM = clsPeptideMassCalculator.MassToPPM(dblDelM, oPsm.PrecursorNeutralMass)
+        End If
 
-		If Not oPsm.TryGetScore(strScoreName, strScoreValue) Then
-			strScoreValue = strValueIfMissing
-		End If
+        Return dblMassErrorPPM.ToString("0.0000")
+    End Function
 
-		Return strScoreValue
+    Private Function GetPrecursorMZ(oPsm As clsPSM) As String
+        Return clsPeptideMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString()
 
-	End Function
+    End Function
 
-	Private Function SetOptionsUsingCommandLineParameters(ByVal objParseCommandLine As clsParseCommandLine) As Boolean
-		' Returns True if no problems; otherwise, returns false
+    Private Function GetScore(oPsm As clsPSM, strScoreName As String, strValueIfMissing As String) As String
+        Dim strScoreValue As String = String.Empty
 
-		Dim strValue As String = String.Empty
-		Dim lstValidParameters As Generic.List(Of String) = New Generic.List(Of String) From {"I", "O"}
+        If Not oPsm.TryGetScore(strScoreName, strScoreValue) Then
+            strScoreValue = strValueIfMissing
+        End If
 
-		Try
-			' Make sure no invalid parameters are present
-			If objParseCommandLine.InvalidParametersPresent(lstValidParameters) Then
-				ShowErrorMessage("Invalid commmand line parameters",
-				  (From item In objParseCommandLine.InvalidParameters(lstValidParameters) Select "/" + item).ToList())
-				Return False
-			Else
-				With objParseCommandLine
-					' Query objParseCommandLine to see if various parameters are present
-					If .RetrieveValueForParameter("I", strValue) Then
-						mInputFilePath = String.Copy(strValue)
-					ElseIf .NonSwitchParameterCount > 0 Then
-						mInputFilePath = .RetrieveNonSwitchParameter(0)
-					End If
+        Return strScoreValue
 
-					If .RetrieveValueForParameter("O", strValue) Then mOutputFilePath = String.Copy(strValue)
+    End Function
 
-				End With
+    Private Function SetOptionsUsingCommandLineParameters(objParseCommandLine As clsParseCommandLine) As Boolean
+        ' Returns True if no problems; otherwise, returns false
 
-				Return True
-			End If
+        Dim strValue As String = String.Empty
+        Dim lstValidParameters = New List(Of String) From {"I", "O"}
 
-		Catch ex As Exception
-			ShowErrorMessage("Error parsing the command line parameters: " & System.Environment.NewLine & ex.Message)
-		End Try
+        Try
+            ' Make sure no invalid parameters are present
+            If objParseCommandLine.InvalidParametersPresent(lstValidParameters) Then
+                ShowErrorMessage("Invalid commmand line parameters",
+                  (From item In objParseCommandLine.InvalidParameters(lstValidParameters) Select "/" + item).ToList())
+                Return False
+            Else
+                With objParseCommandLine
+                    ' Query objParseCommandLine to see if various parameters are present
+                    If .RetrieveValueForParameter("I", strValue) Then
+                        mInputFilePath = String.Copy(strValue)
+                    ElseIf .NonSwitchParameterCount > 0 Then
+                        mInputFilePath = .RetrieveNonSwitchParameter(0)
+                    End If
 
-		Return False
+                    If .RetrieveValueForParameter("O", strValue) Then mOutputFilePath = String.Copy(strValue)
 
-	End Function
+                End With
 
-	Private Sub ShowErrorMessage(ByVal strMessage As String)
-		Dim strSeparator As String = "------------------------------------------------------------------------------"
+                Return True
+            End If
 
-		Console.WriteLine()
-		Console.WriteLine(strSeparator)
-		Console.WriteLine(strMessage)
-		Console.WriteLine(strSeparator)
-		Console.WriteLine()
+        Catch ex As Exception
+            ShowErrorMessage("Error parsing the command line parameters: " & Environment.NewLine & ex.Message)
+        End Try
 
-		WriteToErrorStream(strMessage)
-	End Sub
+        Return False
 
-	Private Sub ShowErrorMessage(ByVal strTitle As String, ByVal items As List(Of String))
-		Dim strSeparator As String = "------------------------------------------------------------------------------"
-		Dim strMessage As String
+    End Function
 
-		Console.WriteLine()
-		Console.WriteLine(strSeparator)
-		Console.WriteLine(strTitle)
-		strMessage = strTitle & ":"
+    Private Sub ShowErrorMessage(strMessage As String)
+        Dim strSeparator = "------------------------------------------------------------------------------"
 
-		For Each item As String In items
-			Console.WriteLine("   " + item)
-			strMessage &= " " & item
-		Next
-		Console.WriteLine(strSeparator)
-		Console.WriteLine()
+        Console.WriteLine()
+        Console.WriteLine(strSeparator)
+        Console.WriteLine(strMessage)
+        Console.WriteLine(strSeparator)
+        Console.WriteLine()
 
-		WriteToErrorStream(strMessage)
-	End Sub
+        WriteToErrorStream(strMessage)
+    End Sub
 
-	Private Sub ShowProgramHelp()
+    Private Sub ShowErrorMessage(strTitle As String, items As List(Of String))
+        Dim strSeparator = "------------------------------------------------------------------------------"
+        Dim strMessage As String
 
-		Try
+        Console.WriteLine()
+        Console.WriteLine(strSeparator)
+        Console.WriteLine(strTitle)
+        strMessage = strTitle & ":"
 
-			Console.WriteLine("This program reads a PHRP-compatible _msgfdb_fht.txt file and creates the equivalent tab-delimited _msgfplus.tsv file that would have been created by MSGFPlus when converting the .mzIdentML file to a .tsv file")
-			Console.WriteLine()
-			Console.WriteLine("Program syntax:" & ControlChars.NewLine & System.IO.Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().Location) & _
-			 " InputFilePath [/O:OutputFilePath]")
-			Console.WriteLine()
+        For Each item As String In items
+            Console.WriteLine("   " + item)
+            strMessage &= " " & item
+        Next
+        Console.WriteLine(strSeparator)
+        Console.WriteLine()
 
-			Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006")
-			Console.WriteLine("Version: " & GetAppVersion())
+        WriteToErrorStream(strMessage)
+    End Sub
 
-			Console.WriteLine()
+    Private Sub ShowProgramHelp()
 
-			Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
-			Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/")
+        Try
 
-			' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
-			System.Threading.Thread.Sleep(750)
+            Console.WriteLine("This program reads a PHRP-compatible _msgfdb_fht.txt file and creates the equivalent tab-delimited _msgfplus.tsv file that would have been created by MSGFPlus when converting the .mzIdentML file to a .tsv file")
+            Console.WriteLine()
+            Console.WriteLine("Program syntax:" & ControlChars.NewLine & Path.GetFileName(Assembly.GetExecutingAssembly().Location) & _
+             " InputFilePath [/O:OutputFilePath]")
+            Console.WriteLine()
 
-		Catch ex As Exception
-			ShowErrorMessage("Error displaying the program syntax: " & ex.Message)
-		End Try
+            Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006")
+            Console.WriteLine("Version: " & GetAppVersion())
 
-	End Sub
+            Console.WriteLine()
 
-	Private Sub WriteToErrorStream(strErrorMessage As String)
-		Try
-			Using swErrorStream As System.IO.StreamWriter = New System.IO.StreamWriter(Console.OpenStandardError())
-				swErrorStream.WriteLine(strErrorMessage)
-				swErrorStream.WriteLine()
-			End Using
-		Catch ex As Exception
-			' Ignore errors here
-		End Try
-	End Sub
+            Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
+            Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/")
 
-	Private Sub mPHRPReader_ErrorEvent(strErrorMessage As String) Handles mPHRPReader.ErrorEvent
-		ShowErrorMessage(strErrorMessage)
-	End Sub
+            ' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
+            Thread.Sleep(750)
 
-	Private Sub mPHRPReader_MessageEvent(strMessage As String) Handles mPHRPReader.MessageEvent
-		Console.WriteLine(strMessage)
-	End Sub
+        Catch ex As Exception
+            ShowErrorMessage("Error displaying the program syntax: " & ex.Message)
+        End Try
 
-	Private Sub mPHRPReader_WarningEvent(strWarningMessage As String) Handles mPHRPReader.WarningEvent
-		Console.WriteLine("Warning: " & strWarningMessage)
-	End Sub
+    End Sub
+
+    Private Sub WriteToErrorStream(strErrorMessage As String)
+        Try
+            Using swErrorStream = New StreamWriter(Console.OpenStandardError())
+                swErrorStream.WriteLine(strErrorMessage)
+                swErrorStream.WriteLine()
+            End Using
+        Catch ex As Exception
+            ' Ignore errors here
+        End Try
+    End Sub
+
+    Private Sub mPHRPReader_ErrorEvent(strErrorMessage As String) Handles mPHRPReader.ErrorEvent
+        ShowErrorMessage(strErrorMessage)
+    End Sub
+
+    Private Sub mPHRPReader_MessageEvent(strMessage As String) Handles mPHRPReader.MessageEvent
+        Console.WriteLine(strMessage)
+    End Sub
+
+    Private Sub mPHRPReader_WarningEvent(strWarningMessage As String) Handles mPHRPReader.WarningEvent
+        Console.WriteLine("Warning: " & strWarningMessage)
+    End Sub
 End Module
