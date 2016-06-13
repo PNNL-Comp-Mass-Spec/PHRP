@@ -2234,10 +2234,12 @@ Public Class clsPHRPReader
 
         ' Try to extract out the precursor m/z value from the "Scan Filter Text" field
         Dim dblParentIonMZ As Double
-        Dim intMSLevel As Integer
-        Dim strCollisionMode As String = String.Empty
+        'Dim intMSLevel As Integer
+        'Dim strCollisionMode As String = String.Empty
 
-        If ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
+        ' Original call - requires a reference to ThermoRawFileReader, and propagation to every project that uses PHRPReader
+        'If ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
+        If ExtractParentIonMzFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ) Then
             If dblParentIonMZ > 0 Then
                 dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(dblParentIonMZ, mPSMCurrent.Charge, 0)
             End If
@@ -2257,6 +2259,52 @@ Public Class clsPHRPReader
 
     End Sub
 
+    ''' <summary>
+    ''' Non-msx scan - grouping returns the last parent ion m/z
+    ''' </summary>
+    ''' <remarks>
+    ''' This ugly regex takes advantage of greediness to grab the last number that could be the parent ion m/z
+    ''' </remarks>
+    Private ReadOnly _nonMsxRegex As Regex = New Regex(".*[Mm][Ss]\d*[^\[]* (?<ParentMZ>\d+\.?\d*)@?[A-Za-z]*\d*\.?\d* ?(\[.*\])?\s*", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+
+    ''' <summary>
+    ''' msx scan - grouping returns the first parent ion m/z
+    ''' </summary>
+    ''' <remarks>
+    ''' This ugly regex grabs the first number that could be the parent ion m/z, for use with msx scans (the first parent ion m/z corresponds to the highest peak)
+    ''' </remarks>
+    Private ReadOnly _msxRegex As Regex = New Regex(".*[Mm][Ss]\d* (?<ParentMZ>\d+\.?\d*)@?[A-Za-z]*\d*\.?\d* ?[^\[]*(\[.*\])?\s*", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+
+    ''' <summary>
+    ''' This function returns the Parent Ion m/z from the filter string.
+    ''' </summary>
+    ''' <param name="scanFilterText"></param>
+    ''' <param name="dblParentIonMZ"></param>
+    ''' <returns>True if parsing successful</returns>
+    ''' <remarks>The original version of this code (C#) is in ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(string, out double)</remarks>
+    Private Function ExtractParentIonMzFromFilterText(scanFilterText As String, <Out> ByRef dblParentIonMZ As Double) As Boolean
+        dblParentIonMZ = 0
+        Dim reg As Regex
+        Dim success As Boolean = False
+
+        If scanFilterText.ToLower().Contains("msx") Then
+            reg = _msxRegex
+        Else
+            reg = _nonMsxRegex
+        End If
+
+        Dim match As Match
+        match = reg.Match(scanFilterText)
+
+        If match.Success Then
+            Dim matchData As String
+            matchData = match.Groups("ParentMZ").Value
+            success = Double.TryParse(matchData, dblParentIonMZ)
+        End If
+
+        Return success
+    End Function
+    
     Private Sub MarkupPeptideWithMods()
         Dim blnSuccess As Boolean
 

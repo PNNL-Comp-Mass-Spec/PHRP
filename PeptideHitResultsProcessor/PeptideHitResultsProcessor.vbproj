@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
@@ -169,8 +169,6 @@ if not exist "$(TargetDir)x86" mkdir "$(TargetDir)x86"
 if not exist "$(TargetDir)x64" mkdir "$(TargetDir)x64"
 xcopy "$(ProjectDir)Lib\x86\*" "$(TargetDir)x86\" /D /Y
 xcopy "$(ProjectDir)Lib\x64\*" "$(TargetDir)x64\" /D /Y
-xcopy "$(ProjectDir)..\PHRPReader\Lib\ThermoRawFileReader.dll" "$(TargetDir)" /D /Y
-xcopy "$(ProjectDir)..\PHRPReader\Lib\ThermoRawFileReader.dll" "$(ProjectDir)\..\bin\" /D /Y
 copy "$(TargetPath)" "$(ProjectDir)\..\bin\"</PostBuildEvent>
   </PropertyGroup>
 </Project>
