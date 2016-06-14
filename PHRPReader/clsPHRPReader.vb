@@ -2280,28 +2280,28 @@ Public Class clsPHRPReader
     ''' <summary>
     ''' This function extracts the Parent Ion m/z from the filter string
     ''' </summary>
-    ''' <param name="scanFilterText"></param>
-    ''' <param name="parentIonMZ"></param>
+    ''' <param name="filterText"></param>
+    ''' <param name="parentIonMz"></param>
     ''' <returns>True if parsing successful</returns>
     ''' <remarks>The original version of this code (C#) is in ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(string, out double)</remarks>
-    Private Function ExtractParentIonMzFromFilterText(scanFilterText As String, <Out> ByRef parentIonMZ As Double) As Boolean
+    Private Function ExtractParentIonMzFromFilterText(filterText As String, <Out> ByRef parentIonMz As Double) As Boolean
         Dim matcher As Regex
 
-        If scanFilterText.ToLower().Contains("msx") Then
+        If filterText.ToLower().Contains("msx") Then
             matcher = mParentIonMzMatchMsx
         Else
             matcher = mParentIonMzMatchNonMsx
         End If
 
-        Dim reMatch = matcher.Match(scanFilterText)
+        Dim reMatch = matcher.Match(filterText)
 
         If reMatch.Success Then
             Dim parentIonMzText = reMatch.Groups("ParentMZ").Value
-            Dim success = Double.TryParse(parentIonMzText, parentIonMZ)
+            Dim success = Double.TryParse(parentIonMzText, parentIonMz)
             Return success
         End If
 
-        parentIonMZ = 0
+        parentIonMz = 0
         Return False
 
     End Function
