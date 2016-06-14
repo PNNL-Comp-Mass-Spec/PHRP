@@ -45,6 +45,16 @@ Public Class clsPHRPReader
     Public Const SCAN_STATS_FILENAME_SUFFIX As String = "_ScanStats.txt"
     Public Const EXTENDED_SCAN_STATS_FILENAME_SUFFIX As String = "_ScanStatsEx.txt"
 
+    ' This RegEx is used to extract parent ion m/z from a filter string that does not contain msx
+    ' ${ParentMZ} will hold the last parent ion m/z found
+    '  For example, 756.71 in FTMS + p NSI d Full ms3 850.70@cid35.00 756.71@cid35.00 [195.00-2000.00]
+    Private Const PARENTION_ONLY_NONMSX_REGEX As String = "[Mm][Ss]\d*[^\[\r\n]* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*(\[[^\]\r\n]\])?"
+
+    '  This RegEx is used to extract parent ion m/z from a filter string that does contain msx
+    '  ${ParentMZ} will hold the first parent ion m/z found (the first parent ion m/z corresponds to the highest peak)
+    '  For example, 636.04 in FTMS + p NSI Full msx ms2 636.04@hcd28.00 641.04@hcd28.00 654.05@hcd28.00 [88.00-1355.00]
+    Private Const PARENTION_ONLY_MSX_REGEX As String = "[Mm][Ss]\d* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*[^\[\r\n]*(\[[^\]\r\n]+\])?"
+
     Public Enum ePeptideHitResultType
         Unknown = 0
         Sequest = 1
@@ -131,6 +141,18 @@ Public Class clsPHRPReader
 
     Private mErrorMessage As String = String.Empty
     Private mLocalErrorCode As ePHRPReaderErrorCodes
+
+    ''' <summary>
+    ''' RegEx to extract parent ions from filter strings that do not have Full msx
+    ''' </summary>
+    ''' <remarks>Shared (aka static) only to speed up unit tests</remarks>
+    Private Shared ReadOnly mParentIonMzMatchNonMsx As Regex = New Regex(PARENTION_ONLY_NONMSX_REGEX, RegexOptions.Compiled Or RegexOptions.IgnoreCase)
+
+    ''' <summary>
+    ''' RegEx to extract parent ions from filter strings that have Full msx
+    ''' </summary>
+    ''' <remarks>Shared (aka static) only to speed up unit tests</remarks>
+    Private Shared ReadOnly mParentIonMzMatchMsx As Regex = New Regex(PARENTION_ONLY_MSX_REGEX, RegexOptions.Compiled Or RegexOptions.IgnoreCase)
 
 #End Region
 
@@ -1019,7 +1041,7 @@ Public Class clsPHRPReader
         End If
 
         If lstDatasetNames Is Nothing OrElse lstDatasetNames.Count = 0 Then
-            Throw New ArgumentException("list lstDatasetNames cannot be empty")
+            Throw New ArgumentException("List lstDatasetNames cannot be empty; cannot determine the best input file")
         End If
 
         ' Construct a list of the files to search for
@@ -2234,11 +2256,7 @@ Public Class clsPHRPReader
 
         ' Try to extract out the precursor m/z value from the "Scan Filter Text" field
         Dim dblParentIonMZ As Double
-        'Dim intMSLevel As Integer
-        'Dim strCollisionMode As String = String.Empty
 
-        ' Original call - requires a reference to ThermoRawFileReader, and propagation to every project that uses PHRPReader
-        'If ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ, intMSLevel, strCollisionMode) Then
         If ExtractParentIonMzFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ) Then
             If dblParentIonMZ > 0 Then
                 dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(dblParentIonMZ, mPSMCurrent.Charge, 0)
@@ -2260,51 +2278,34 @@ Public Class clsPHRPReader
     End Sub
 
     ''' <summary>
-    ''' Non-msx scan - grouping returns the last parent ion m/z
-    ''' </summary>
-    ''' <remarks>
-    ''' This ugly regex takes advantage of greediness to grab the last number that could be the parent ion m/z
-    ''' </remarks>
-    Private ReadOnly _nonMsxRegex As Regex = New Regex(".*[Mm][Ss]\d*[^\[]* (?<ParentMZ>\d+\.?\d*)@?[A-Za-z]*\d*\.?\d* ?(\[.*\])?\s*", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
-
-    ''' <summary>
-    ''' msx scan - grouping returns the first parent ion m/z
-    ''' </summary>
-    ''' <remarks>
-    ''' This ugly regex grabs the first number that could be the parent ion m/z, for use with msx scans (the first parent ion m/z corresponds to the highest peak)
-    ''' </remarks>
-    Private ReadOnly _msxRegex As Regex = New Regex(".*[Mm][Ss]\d* (?<ParentMZ>\d+\.?\d*)@?[A-Za-z]*\d*\.?\d* ?[^\[]*(\[.*\])?\s*", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
-
-    ''' <summary>
-    ''' This function returns the Parent Ion m/z from the filter string.
+    ''' This function extracts the Parent Ion m/z from the filter string
     ''' </summary>
     ''' <param name="scanFilterText"></param>
-    ''' <param name="dblParentIonMZ"></param>
+    ''' <param name="parentIonMZ"></param>
     ''' <returns>True if parsing successful</returns>
     ''' <remarks>The original version of this code (C#) is in ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(string, out double)</remarks>
-    Private Function ExtractParentIonMzFromFilterText(scanFilterText As String, <Out> ByRef dblParentIonMZ As Double) As Boolean
-        dblParentIonMZ = 0
-        Dim reg As Regex
-        Dim success As Boolean = False
+    Private Function ExtractParentIonMzFromFilterText(scanFilterText As String, <Out> ByRef parentIonMZ As Double) As Boolean
+        Dim matcher As Regex
 
         If scanFilterText.ToLower().Contains("msx") Then
-            reg = _msxRegex
+            matcher = mParentIonMzMatchMsx
         Else
-            reg = _nonMsxRegex
+            matcher = mParentIonMzMatchNonMsx
         End If
 
-        Dim match As Match
-        match = reg.Match(scanFilterText)
+        Dim reMatch = matcher.Match(scanFilterText)
 
-        If match.Success Then
-            Dim matchData As String
-            matchData = match.Groups("ParentMZ").Value
-            success = Double.TryParse(matchData, dblParentIonMZ)
+        If reMatch.Success Then
+            Dim parentIonMzText = reMatch.Groups("ParentMZ").Value
+            Dim success = Double.TryParse(parentIonMzText, parentIonMZ)
+            Return success
         End If
 
-        Return success
+        parentIonMZ = 0
+        Return False
+
     End Function
-    
+
     Private Sub MarkupPeptideWithMods()
         Dim blnSuccess As Boolean
 

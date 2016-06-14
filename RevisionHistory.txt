@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6008; June 13, 2016
+	- Remove the dependency on ThermoRawFileReader in PHRPReader
+		- Added function ExtractParentIonMzFromFilterText
+
 Version 1.5.5981; May 17, 2016
 	- Return a non-zero error code if processing an MSGF+ results file and the ModDefs file does not have a definition for a given dynamic mod
 
