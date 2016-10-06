@@ -19,29 +19,29 @@ Imports PHRPReader.clsPHRPReader
 Imports System.IO
 
 Public Class clsPHRPParserXTandem
-	Inherits clsPHRPParser
+    Inherits clsPHRPParser
 
 #Region "Constants"
-	Public Const DATA_COLUMN_Result_ID As String = "Result_ID"
-	Public Const DATA_COLUMN_Group_ID As String = "Group_ID"
-	Public Const DATA_COLUMN_Scan As String = "Scan"
-	Public Const DATA_COLUMN_Charge As String = "Charge"
-	Public Const DATA_COLUMN_Peptide_MH As String = "Peptide_MH"
-	Public Const DATA_COLUMN_Peptide_Hyperscore As String = "Peptide_Hyperscore"
-	Public Const DATA_COLUMN_Peptide_Expectation_Value_LogE As String = "Peptide_Expectation_Value_Log(e)"
-	Public Const DATA_COLUMN_Multiple_Protein_Count As String = "Multiple_Protein_Count"
-	Public Const DATA_COLUMN_Peptide_Sequence As String = "Peptide_Sequence"
-	Public Const DATA_COLUMN_DeltaCn2 As String = "DeltaCn2"
-	Public Const DATA_COLUMN_y_score As String = "y_score"
-	Public Const DATA_COLUMN_y_ions As String = "y_ions"
-	Public Const DATA_COLUMN_b_score As String = "b_score"
-	Public Const DATA_COLUMN_b_ions As String = "b_ions"
-	Public Const DATA_COLUMN_Delta_Mass As String = "Delta_Mass"
-	Public Const DATA_COLUMN_Peptide_Intensity_LogI As String = "Peptide_Intensity_Log(I)"
-	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
+    Public Const DATA_COLUMN_Result_ID As String = "Result_ID"
+    Public Const DATA_COLUMN_Group_ID As String = "Group_ID"
+    Public Const DATA_COLUMN_Scan As String = "Scan"
+    Public Const DATA_COLUMN_Charge As String = "Charge"
+    Public Const DATA_COLUMN_Peptide_MH As String = "Peptide_MH"
+    Public Const DATA_COLUMN_Peptide_Hyperscore As String = "Peptide_Hyperscore"
+    Public Const DATA_COLUMN_Peptide_Expectation_Value_LogE As String = "Peptide_Expectation_Value_Log(e)"
+    Public Const DATA_COLUMN_Multiple_Protein_Count As String = "Multiple_Protein_Count"
+    Public Const DATA_COLUMN_Peptide_Sequence As String = "Peptide_Sequence"
+    Public Const DATA_COLUMN_DeltaCn2 As String = "DeltaCn2"
+    Public Const DATA_COLUMN_y_score As String = "y_score"
+    Public Const DATA_COLUMN_y_ions As String = "y_ions"
+    Public Const DATA_COLUMN_b_score As String = "b_score"
+    Public Const DATA_COLUMN_b_ions As String = "b_ions"
+    Public Const DATA_COLUMN_Delta_Mass As String = "Delta_Mass"
+    Public Const DATA_COLUMN_Peptide_Intensity_LogI As String = "Peptide_Intensity_Log(I)"
+    Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
 
-	Public Const FILENAME_SUFFIX_SYN As String = "_xt.txt"
-	Public Const FILENAME_SUFFIX_FHT As String = "_xt.txt"
+    Public Const FILENAME_SUFFIX_SYN As String = "_xt.txt"
+    Public Const FILENAME_SUFFIX_FHT As String = "_xt.txt"
 
     Private Const XT_SEARCH_ENGINE_NAME As String = "X! Tandem"
 

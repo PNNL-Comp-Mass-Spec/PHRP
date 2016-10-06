@@ -6,18 +6,18 @@ Imports System.Runtime.InteropServices
 Public Class clsPHRPSeqMapReader
 
 #Region "Constants"
-	Public Const SEQ_PROT_MAP_COLUMN_Unique_Seq_ID As String = "Unique_Seq_ID"
-	Public Const SEQ_PROT_MAP_COLUMN_Cleavage_State As String = "Cleavage_State"
-	Public Const SEQ_PROT_MAP_COLUMN_Terminus_State As String = "Terminus_State"
-	Public Const SEQ_PROT_MAP_COLUMN_Protein_Name As String = "Protein_Name"
+    Public Const SEQ_PROT_MAP_COLUMN_Unique_Seq_ID As String = "Unique_Seq_ID"
+    Public Const SEQ_PROT_MAP_COLUMN_Cleavage_State As String = "Cleavage_State"
+    Public Const SEQ_PROT_MAP_COLUMN_Terminus_State As String = "Terminus_State"
+    Public Const SEQ_PROT_MAP_COLUMN_Protein_Name As String = "Protein_Name"
 
-	Public Const SEQ_PROT_MAP_COLUMN_Protein_EValue As String = "Protein_Expectation_Value_Log(e)"		' Only used by X!Tandem
-	Public Const SEQ_PROT_MAP_COLUMN_Protein_Intensity As String = "Protein_Intensity_Log(I)"			' Only used by X!Tandem
+    Public Const SEQ_PROT_MAP_COLUMN_Protein_EValue As String = "Protein_Expectation_Value_Log(e)"      ' Only used by X!Tandem
+    Public Const SEQ_PROT_MAP_COLUMN_Protein_Intensity As String = "Protein_Intensity_Log(I)"           ' Only used by X!Tandem
 
-	Public Const SEQ_INFO_COLUMN_Unique_Seq_ID As String = "Unique_Seq_ID"
-	Public Const SEQ_INFO_COLUMN_Mod_Count As String = "Mod_Count"
-	Public Const SEQ_INFO_COLUMN_Mod_Description As String = "Mod_Description"
-	Public Const SEQ_INFO_COLUMN_Monoisotopic_Mass As String = "Monoisotopic_Mass"
+    Public Const SEQ_INFO_COLUMN_Unique_Seq_ID As String = "Unique_Seq_ID"
+    Public Const SEQ_INFO_COLUMN_Mod_Count As String = "Mod_Count"
+    Public Const SEQ_INFO_COLUMN_Mod_Description As String = "Mod_Description"
+    Public Const SEQ_INFO_COLUMN_Monoisotopic_Mass As String = "Monoisotopic_Mass"
 
 #End Region
 

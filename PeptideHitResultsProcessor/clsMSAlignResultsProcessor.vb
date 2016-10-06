@@ -15,32 +15,32 @@ Imports System.IO
 Imports System.Text.RegularExpressions
 
 Public Class clsMSAlignResultsProcessor
-	Inherits clsPHRPBaseClass
+    Inherits clsPHRPBaseClass
 
-	Public Sub New()
-		MyBase.New()
-		MyBase.mFileDate = "September 3, 2014"
-		InitializeLocalVariables()
-	End Sub
+    Public Sub New()
+        MyBase.New()
+        MyBase.mFileDate = "September 3, 2014"
+        InitializeLocalVariables()
+    End Sub
 
 #Region "Constants and Enums"
 
-	Public Const FILENAME_SUFFIX_MSALIGN_FILE As String = "_MSAlign_ResultTable"
+    Public Const FILENAME_SUFFIX_MSALIGN_FILE As String = "_MSAlign_ResultTable"
 
-	Public Const N_TERMINUS_SYMBOL_MSALIGN As String = "."
-	Public Const C_TERMINUS_SYMBOL_MSALIGN As String = "."
+    Public Const N_TERMINUS_SYMBOL_MSALIGN As String = "."
+    Public Const C_TERMINUS_SYMBOL_MSALIGN As String = "."
 
-	Public Const DEFAULT_SYN_FILE_PVALUE_THRESHOLD As Single = 0.95
+    Public Const DEFAULT_SYN_FILE_PVALUE_THRESHOLD As Single = 0.95
 
-	Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
+    Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
-	Private Const MSALIGN_MOD_MASS_REGEX As String = "\[([+-]*[0-9\.]+)\]"
+    Private Const MSALIGN_MOD_MASS_REGEX As String = "\[([+-]*[0-9\.]+)\]"
 
-	Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
+    Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
-	' These columns correspond to the tab-delimited file created directly by MSAlign
-	Protected Const MSAlignResultsFileColCount As Integer = 23
-	Public Enum eMSAlignResultsFileColumns As Integer
+    ' These columns correspond to the tab-delimited file created directly by MSAlign
+    Protected Const MSAlignResultsFileColCount As Integer = 23
+    Public Enum eMSAlignResultsFileColumns As Integer
         SpectrumFileName = 0
         Prsm_ID = 1
         Spectrum_ID = 2
@@ -183,7 +183,7 @@ Public Class clsMSAlignResultsProcessor
         Dim strSequence As String
 
         Dim blnParsingModMass As Boolean
-        
+
         Dim chMostRecentResidue As Char
         Dim intResidueLocInPeptide As Integer
 
@@ -1612,95 +1612,95 @@ Public Class clsMSAlignResultsProcessor
 
 #Region "IComparer Classes"
 
-	Protected Class MSAlignSearchResultsComparerScanChargePValuePeptide
-		Implements IComparer(Of udtMSAlignSearchResultType)
+    Protected Class MSAlignSearchResultsComparerScanChargePValuePeptide
+        Implements IComparer(Of udtMSAlignSearchResultType)
 
-		Public Function Compare(x As udtMSAlignSearchResultType, y As udtMSAlignSearchResultType) As Integer Implements IComparer(Of udtMSAlignSearchResultType).Compare
+        Public Function Compare(x As udtMSAlignSearchResultType, y As udtMSAlignSearchResultType) As Integer Implements IComparer(Of udtMSAlignSearchResultType).Compare
 
-			If x.ScanNum > y.ScanNum Then
-				Return 1
-			ElseIf x.ScanNum < y.ScanNum Then
-				Return -1
-			Else
-				' Scan is the same, check charge
-				If x.ChargeNum > y.ChargeNum Then
-					Return 1
-				ElseIf x.ChargeNum < y.ChargeNum Then
-					Return -1
-				Else
-					' Charge is the same; check Pvalue
-					If x.Pvalue > y.Pvalue Then
-						Return 1
-					ElseIf x.Pvalue < y.Pvalue Then
-						Return -1
-					Else
-						' Pvalue is the same; check peptide
-						If x.Peptide > y.Peptide Then
-							Return 1
-						ElseIf x.Peptide < y.Peptide Then
-							Return -1
-						Else
-							' Peptide is the same, check Protein
-							If x.Protein > y.Protein Then
-								Return 1
-							ElseIf x.Protein < y.Protein Then
-								Return -1
-							Else
-								Return 0
-							End If
-						End If
-					End If
-				End If
-			End If
+            If x.ScanNum > y.ScanNum Then
+                Return 1
+            ElseIf x.ScanNum < y.ScanNum Then
+                Return -1
+            Else
+                ' Scan is the same, check charge
+                If x.ChargeNum > y.ChargeNum Then
+                    Return 1
+                ElseIf x.ChargeNum < y.ChargeNum Then
+                    Return -1
+                Else
+                    ' Charge is the same; check Pvalue
+                    If x.Pvalue > y.Pvalue Then
+                        Return 1
+                    ElseIf x.Pvalue < y.Pvalue Then
+                        Return -1
+                    Else
+                        ' Pvalue is the same; check peptide
+                        If x.Peptide > y.Peptide Then
+                            Return 1
+                        ElseIf x.Peptide < y.Peptide Then
+                            Return -1
+                        Else
+                            ' Peptide is the same, check Protein
+                            If x.Protein > y.Protein Then
+                                Return 1
+                            ElseIf x.Protein < y.Protein Then
+                                Return -1
+                            Else
+                                Return 0
+                            End If
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
-	Protected Class MSAlignSearchResultsComparerPValueScanChargePeptide
-		Implements IComparer(Of udtMSAlignSearchResultType)
+    Protected Class MSAlignSearchResultsComparerPValueScanChargePeptide
+        Implements IComparer(Of udtMSAlignSearchResultType)
 
-		Public Function Compare(x As udtMSAlignSearchResultType, y As udtMSAlignSearchResultType) As Integer Implements IComparer(Of udtMSAlignSearchResultType).Compare
+        Public Function Compare(x As udtMSAlignSearchResultType, y As udtMSAlignSearchResultType) As Integer Implements IComparer(Of udtMSAlignSearchResultType).Compare
 
-			If x.Pvalue > y.Pvalue Then
-				Return 1
-			ElseIf x.Pvalue < y.Pvalue Then
-				Return -1
-			Else
-				' Pvalue is the same; check scan number
-				If x.ScanNum > y.ScanNum Then
-					Return 1
-				ElseIf x.ScanNum < y.ScanNum Then
-					Return -1
-				Else
-					' Scan is the same, check charge
-					If x.ChargeNum > y.ChargeNum Then
-						Return 1
-					ElseIf x.ChargeNum < y.ChargeNum Then
-						Return -1
-					Else
-						' Charge is the same; check peptide
-						If x.Peptide > y.Peptide Then
-							Return 1
-						ElseIf x.Peptide < y.Peptide Then
-							Return -1
-						Else
-							' Peptide is the same, check Protein
-							If x.Protein > y.Protein Then
-								Return 1
-							ElseIf x.Protein < y.Protein Then
-								Return -1
-							Else
-								Return 0
-							End If
-						End If
-					End If
-				End If
-			End If
+            If x.Pvalue > y.Pvalue Then
+                Return 1
+            ElseIf x.Pvalue < y.Pvalue Then
+                Return -1
+            Else
+                ' Pvalue is the same; check scan number
+                If x.ScanNum > y.ScanNum Then
+                    Return 1
+                ElseIf x.ScanNum < y.ScanNum Then
+                    Return -1
+                Else
+                    ' Scan is the same, check charge
+                    If x.ChargeNum > y.ChargeNum Then
+                        Return 1
+                    ElseIf x.ChargeNum < y.ChargeNum Then
+                        Return -1
+                    Else
+                        ' Charge is the same; check peptide
+                        If x.Peptide > y.Peptide Then
+                            Return 1
+                        ElseIf x.Peptide < y.Peptide Then
+                            Return -1
+                        Else
+                            ' Peptide is the same, check Protein
+                            If x.Protein > y.Protein Then
+                                Return 1
+                            ElseIf x.Protein < y.Protein Then
+                                Return -1
+                            Else
+                                Return 0
+                            End If
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
 #End Region
 

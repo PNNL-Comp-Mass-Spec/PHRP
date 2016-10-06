@@ -43,60 +43,60 @@ Public Class clsPeptideCleavageStateCalculator
 
 #Region "Constants and Enums"
 
-	Public Const GENERIC_RESIDUE_SYMBOL As Char = "X"c
-	Public Const TERMINUS_SYMBOL_SEQUEST As Char = "-"c
-	Public Const TERMINUS_SYMBOL_XTANDEM_NTerminus As Char = "["c
-	Public Const TERMINUS_SYMBOL_XTANDEM_CTerminus As Char = "]"c
+    Public Const GENERIC_RESIDUE_SYMBOL As Char = "X"c
+    Public Const TERMINUS_SYMBOL_SEQUEST As Char = "-"c
+    Public Const TERMINUS_SYMBOL_XTANDEM_NTerminus As Char = "["c
+    Public Const TERMINUS_SYMBOL_XTANDEM_CTerminus As Char = "]"c
 
     Private Const TRYPSIN_LEFT_RESIDUE_REGEX As String = "[KR]"
     Private Const TRYPSIN_RIGHT_RESIDUE_REGEX As String = "[^P]"
 
-	Public Enum ePeptideCleavageStateConstants As Integer
+    Public Enum ePeptideCleavageStateConstants As Integer
         Unknown = -1
         NonSpecific = 0                         ' e.g. Non-tryptic
-		[Partial] = 1							' e.g. Partially tryptic
-		Full = 2								' e.g. Fully tryptic
-	End Enum
+        [Partial] = 1                           ' e.g. Partially tryptic
+        Full = 2                                ' e.g. Fully tryptic
+    End Enum
 
-	Public Enum ePeptideTerminusStateConstants As Integer
-		None = 0						' The peptide is located in the middle of the protein
-		ProteinNTerminus = 1			' The peptide is located at the protein's N-terminus
-		ProteinCTerminus = 2			' The peptide is located at the protein's C-terminus
-		ProteinNandCCTerminus = 3		' The peptide spans the entire length of the protein
-	End Enum
+    Public Enum ePeptideTerminusStateConstants As Integer
+        None = 0                        ' The peptide is located in the middle of the protein
+        ProteinNTerminus = 1            ' The peptide is located at the protein's N-terminus
+        ProteinCTerminus = 2            ' The peptide is located at the protein's C-terminus
+        ProteinNandCCTerminus = 3       ' The peptide spans the entire length of the protein
+    End Enum
 
-	Public Enum eStandardCleavageAgentConstants As Integer
-		Trypsin = 0
-		TrypsinWithoutProlineRule = 1
-		TrypsinPlusFVLEY = 2
-		Chymotrypsin = 3
-		ChymotrypsinAndTrypsin = 4
-		V8_aka_GluC = 5
-		CyanBr = 6
-		EndoArgC = 7
-		EndoLysC = 8
-		EndoAspN = 9
-		V8 = 10
-	End Enum
+    Public Enum eStandardCleavageAgentConstants As Integer
+        Trypsin = 0
+        TrypsinWithoutProlineRule = 1
+        TrypsinPlusFVLEY = 2
+        Chymotrypsin = 3
+        ChymotrypsinAndTrypsin = 4
+        V8_aka_GluC = 5
+        CyanBr = 6
+        EndoArgC = 7
+        EndoLysC = 8
+        EndoAspN = 9
+        V8 = 10
+    End Enum
 #End Region
 
 #Region "Structures"
-	' Example RegEx match strings for udtEnzymeMatchSpecType:
-	' [KR] means to match K or R
-	' [^P] means the residue cannot be P
-	' [A-Z] means to match anything; empty string also means match anything
-	' Note, this function will automatically change [X] to [A-Z] (provided GENERIC_RESIDUE_SYMBOL = "X")
-	Public Structure udtEnzymeMatchSpecType
-		Public LeftResidueRegEx As String			' RegEx match string for matching the residue to the left of the cleavage point
-		Public RightResidueRegEx As String			' RegEx match string for matching the residue to the right of the cleavage point
-	End Structure
+    ' Example RegEx match strings for udtEnzymeMatchSpecType:
+    ' [KR] means to match K or R
+    ' [^P] means the residue cannot be P
+    ' [A-Z] means to match anything; empty string also means match anything
+    ' Note, this function will automatically change [X] to [A-Z] (provided GENERIC_RESIDUE_SYMBOL = "X")
+    Public Structure udtEnzymeMatchSpecType
+        Public LeftResidueRegEx As String           ' RegEx match string for matching the residue to the left of the cleavage point
+        Public RightResidueRegEx As String          ' RegEx match string for matching the residue to the right of the cleavage point
+    End Structure
 
 #End Region
 
 #Region "Classwide Variables"
-	Private mEnzymeMatchSpec As udtEnzymeMatchSpecType
-	Private mLeftRegEx As Regex
-	Private mRightRegEx As Regex
+    Private mEnzymeMatchSpec As udtEnzymeMatchSpecType
+    Private mLeftRegEx As Regex
+    Private mRightRegEx As Regex
     Private mUsingStandardTrypsinRules As Boolean
 
     ' This array holds TERMINUS_SYMBOL_SEQUEST, TERMINUS_SYMBOL_XTANDEM_NTerminus, and TERMINUS_SYMBOL_XTANDEM_CTerminus

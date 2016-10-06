@@ -14,41 +14,41 @@ Imports System.IO
 Public Class clsMSGFResultsReader
 
 #Region "Constants"
-	Public Const DATA_COLUMN_ResultID As String = "Result_ID"
-	Public Const DATA_COLUMN_Scan As String = "Scan"
-	Public Const DATA_COLUMN_Charge As String = "Charge"
-	Public Const DATA_COLUMN_Protein As String = "Protein"
-	Public Const DATA_COLUMN_Peptide As String = "Peptide"
-	Public Const DATA_COLUMN_SpecProb As String = "SpecProb"
-	Public Const DATA_COLUMN_Notes As String = "Notes"
+    Public Const DATA_COLUMN_ResultID As String = "Result_ID"
+    Public Const DATA_COLUMN_Scan As String = "Scan"
+    Public Const DATA_COLUMN_Charge As String = "Charge"
+    Public Const DATA_COLUMN_Protein As String = "Protein"
+    Public Const DATA_COLUMN_Peptide As String = "Peptide"
+    Public Const DATA_COLUMN_SpecProb As String = "SpecProb"
+    Public Const DATA_COLUMN_Notes As String = "Notes"
 #End Region
 
 #Region "Class-wide variables"
-	' Column headers
+    ' Column headers
     Private ReadOnly mColumnHeaders As SortedDictionary(Of String, Integer)
     Private mErrorMessage As String = String.Empty
 #End Region
 
-	''' <summary>
-	''' Error message
-	''' </summary>
-	Public ReadOnly Property ErrorMessage As String
-		Get
-			If String.IsNullOrEmpty(mErrorMessage) Then
-				Return String.Empty
-			Else
-				Return mErrorMessage
-			End If
-		End Get
-	End Property
+    ''' <summary>
+    ''' Error message
+    ''' </summary>
+    Public ReadOnly Property ErrorMessage As String
+        Get
+            If String.IsNullOrEmpty(mErrorMessage) Then
+                Return String.Empty
+            Else
+                Return mErrorMessage
+            End If
+        End Get
+    End Property
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub New()
-		mColumnHeaders = New SortedDictionary(Of String, Integer)
-	End Sub
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub New()
+        mColumnHeaders = New SortedDictionary(Of String, Integer)
+    End Sub
 
     Private Sub AddHeaderColumn(strColumnName As String)
         mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)

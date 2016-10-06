@@ -16,45 +16,45 @@ Imports System.IO
 Public Class clsScanStatsReader
 
 #Region "Constants"
-	Public Const DATA_COLUMN_Dataset As String = "Dataset"
-	Public Const DATA_COLUMN_ScanNumber As String = "ScanNumber"
-	Public Const DATA_COLUMN_ScanTime As String = "ScanTime"
-	Public Const DATA_COLUMN_ScanType As String = "ScanType"
-	Public Const DATA_COLUMN_TotalIonIntensity As String = "TotalIonIntensity"
-	Public Const DATA_COLUMN_BasePeakIntensity As String = "BasePeakIntensity"
-	Public Const DATA_COLUMN_BasePeakMZ As String = "BasePeakMZ"
-	Public Const DATA_COLUMN_BasePeakSignalToNoiseRatio As String = "BasePeakSignalToNoiseRatio"
-	Public Const DATA_COLUMN_IonCount As String = "IonCount"
-	Public Const DATA_COLUMN_IonCountRaw As String = "IonCountRaw"
-	Public Const DATA_COLUMN_ScanTypeName As String = "ScanTypeName"
+    Public Const DATA_COLUMN_Dataset As String = "Dataset"
+    Public Const DATA_COLUMN_ScanNumber As String = "ScanNumber"
+    Public Const DATA_COLUMN_ScanTime As String = "ScanTime"
+    Public Const DATA_COLUMN_ScanType As String = "ScanType"
+    Public Const DATA_COLUMN_TotalIonIntensity As String = "TotalIonIntensity"
+    Public Const DATA_COLUMN_BasePeakIntensity As String = "BasePeakIntensity"
+    Public Const DATA_COLUMN_BasePeakMZ As String = "BasePeakMZ"
+    Public Const DATA_COLUMN_BasePeakSignalToNoiseRatio As String = "BasePeakSignalToNoiseRatio"
+    Public Const DATA_COLUMN_IonCount As String = "IonCount"
+    Public Const DATA_COLUMN_IonCountRaw As String = "IonCountRaw"
+    Public Const DATA_COLUMN_ScanTypeName As String = "ScanTypeName"
 #End Region
 
 #Region "Class-wide variables"
-	' Column headers
+    ' Column headers
     Private ReadOnly mColumnHeaders As SortedDictionary(Of String, Integer)
     Private mErrorMessage As String = String.Empty
 #End Region
 
-	''' <summary>
-	''' Error message
-	''' </summary>
-	Public ReadOnly Property ErrorMessage As String
-		Get
-			If String.IsNullOrEmpty(mErrorMessage) Then
-				Return String.Empty
-			Else
-				Return mErrorMessage
-			End If
-		End Get
-	End Property
+    ''' <summary>
+    ''' Error message
+    ''' </summary>
+    Public ReadOnly Property ErrorMessage As String
+        Get
+            If String.IsNullOrEmpty(mErrorMessage) Then
+                Return String.Empty
+            Else
+                Return mErrorMessage
+            End If
+        End Get
+    End Property
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub New()
-		mColumnHeaders = New SortedDictionary(Of String, Integer)
-	End Sub
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub New()
+        mColumnHeaders = New SortedDictionary(Of String, Integer)
+    End Sub
 
     Private Sub AddHeaderColumn(strColumnName As String)
         mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)

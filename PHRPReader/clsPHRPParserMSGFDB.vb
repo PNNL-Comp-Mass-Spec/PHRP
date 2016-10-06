@@ -16,7 +16,7 @@ Imports PHRPReader.clsMSGFPlusParamFileModExtractor
 Imports System.Text.RegularExpressions
 
 Public Class clsPHRPParserMSGFDB
-	Inherits clsPHRPParser
+    Inherits clsPHRPParser
 
 #Region "Constants"
     Public Const DATA_COLUMN_ResultID = "ResultID"

@@ -33,15 +33,15 @@ Imports System.IO
 Public Class clsPeptideModificationContainer
 
 #Region "Constants and Enums"
-	Public Const DEFAULT_MODIFICATION_SYMBOLS As String = "*#@$&!%~†‡¤º^`×÷+=ø¢"		 ' A few other possibilities: €£¥§
+    Public Const DEFAULT_MODIFICATION_SYMBOLS As String = "*#@$&!%~†‡¤º^`×÷+=ø¢"         ' A few other possibilities: €£¥§
 
     Public Const MASS_DIGITS_OF_PRECISION As Byte = 3
 
-	Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "["c
-	Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "]"c
+    Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "["c
+    Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM As Char = "]"c
 
-	Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "["c
-	Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "]"c
+    Public Const N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "["c
+    Public Const C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT As Char = "]"c
 
 #End Region
 
@@ -49,19 +49,19 @@ Public Class clsPeptideModificationContainer
 #End Region
 
 #Region "Classwide Variables"
-	' List of available modification symbols
+    ' List of available modification symbols
     Private mDefaultModificationSymbols As Queue
 
-	' List of known mass correction tags
+    ' List of known mass correction tags
     Private mMassCorrectionTags As Hashtable
 
-	' List of known modifications
+    ' List of known modifications
     Private mModifications As List(Of clsModificationDefinition)
 
     Private mErrorMessage As String
 
-	' This array holds modifications that Sequest or XTandem will often use but for 
-	' which the auto-addition method sometimes incorrectly notes
+    ' This array holds modifications that Sequest or XTandem will often use but for 
+    ' which the auto-addition method sometimes incorrectly notes
     Private mStandardRefinementModifications As List(Of clsModificationDefinition)
 
     Private mConsiderModSymbolWhenFindingIdenticalMods As Boolean
@@ -71,28 +71,28 @@ Public Class clsPeptideModificationContainer
 #End Region
 
 #Region "Properties"
-	Public ReadOnly Property ErrorMessage() As String
-		Get
-			Return mErrorMessage
-		End Get
-	End Property
+    Public ReadOnly Property ErrorMessage() As String
+        Get
+            Return mErrorMessage
+        End Get
+    End Property
 
-	Public ReadOnly Property ModificationCount() As Integer
-		Get
-			Return mModifications.Count
-		End Get
-	End Property
+    Public ReadOnly Property ModificationCount() As Integer
+        Get
+            Return mModifications.Count
+        End Get
+    End Property
 
-	Public ReadOnly Property Modifications As List(Of clsModificationDefinition)
-		Get
-			Return mModifications
-		End Get
-	End Property
+    Public ReadOnly Property Modifications As List(Of clsModificationDefinition)
+        Get
+            Return mModifications
+        End Get
+    End Property
 
-	Public Property ConsiderModSymbolWhenFindingIdenticalMods() As Boolean
-		Get
-			Return mConsiderModSymbolWhenFindingIdenticalMods
-		End Get
+    Public Property ConsiderModSymbolWhenFindingIdenticalMods() As Boolean
+        Get
+            Return mConsiderModSymbolWhenFindingIdenticalMods
+        End Get
         Set(value As Boolean)
             mConsiderModSymbolWhenFindingIdenticalMods = value
         End Set

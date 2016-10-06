@@ -2,8 +2,8 @@
 
 Public Class clsSearchEngineParameters
 
-	Public Const MASS_TYPE_MONOISOTOPIC As String = "monoisotopic"
-	Public Const MASS_TYPE_AVERAGE As String = "average"
+    Public Const MASS_TYPE_MONOISOTOPIC As String = "monoisotopic"
+    Public Const MASS_TYPE_AVERAGE As String = "average"
 
     Private mSearchEngineName As String
     Private mSearchEngineVersion As String
@@ -26,110 +26,110 @@ Public Class clsSearchEngineParameters
     Private ReadOnly mParameters As Dictionary(Of String, String)
 
 #Region "Properties"
-	Public Property Enzyme As String
-		Get
-			Return mEnzyme
-		End Get
-		Set(value As String)
-			If value = "" Then value = "none"
-			mEnzyme = value
-		End Set
-	End Property
+    Public Property Enzyme As String
+        Get
+            Return mEnzyme
+        End Get
+        Set(value As String)
+            If value = "" Then value = "none"
+            mEnzyme = value
+        End Set
+    End Property
 
-	Public Property FastaFilePath As String
-		Get
-			Return mFastaFilePath
-		End Get
-		Set(value As String)
-			mFastaFilePath = value
-		End Set
-	End Property
+    Public Property FastaFilePath As String
+        Get
+            Return mFastaFilePath
+        End Get
+        Set(value As String)
+            mFastaFilePath = value
+        End Set
+    End Property
 
-	Public Property FragmentMassType As String
-		Get
-			Return mFragmentMassType
-		End Get
-		Set(value As String)
-			If String.IsNullOrEmpty(value) Then value = MASS_TYPE_MONOISOTOPIC
-			mFragmentMassType = value
-		End Set
-	End Property
+    Public Property FragmentMassType As String
+        Get
+            Return mFragmentMassType
+        End Get
+        Set(value As String)
+            If String.IsNullOrEmpty(value) Then value = MASS_TYPE_MONOISOTOPIC
+            mFragmentMassType = value
+        End Set
+    End Property
 
-	Public Property MaxNumberInternalCleavages As Integer
-		Get
-			Return mMaxNumberInternalCleavages
-		End Get
-		Set(value As Integer)
-			mMaxNumberInternalCleavages = value
-		End Set
-	End Property
+    Public Property MaxNumberInternalCleavages As Integer
+        Get
+            Return mMaxNumberInternalCleavages
+        End Get
+        Set(value As Integer)
+            mMaxNumberInternalCleavages = value
+        End Set
+    End Property
 
-	Public Property MinNumberTermini As Integer
-		Get
-			Return mMinNumberTermini
-		End Get
-		Set(value As Integer)
-			mMinNumberTermini = value
-		End Set
-	End Property
+    Public Property MinNumberTermini As Integer
+        Get
+            Return mMinNumberTermini
+        End Get
+        Set(value As Integer)
+            mMinNumberTermini = value
+        End Set
+    End Property
 
-	Public ReadOnly Property ModInfo As List(Of clsModificationDefinition)
-		Get
-			Return mModInfo
-		End Get
-	End Property
+    Public ReadOnly Property ModInfo As List(Of clsModificationDefinition)
+        Get
+            Return mModInfo
+        End Get
+    End Property
 
-	Public ReadOnly Property Parameters As Dictionary(Of String, String)
-		Get
-			Return mParameters
-		End Get
-	End Property
+    Public ReadOnly Property Parameters As Dictionary(Of String, String)
+        Get
+            Return mParameters
+        End Get
+    End Property
 
-	Public Property PrecursorMassToleranceDa As Double
-		Get
-			Return mPrecursorMassToleranceDa
-		End Get
-		Set(value As Double)
-			mPrecursorMassToleranceDa = value
-		End Set
-	End Property
+    Public Property PrecursorMassToleranceDa As Double
+        Get
+            Return mPrecursorMassToleranceDa
+        End Get
+        Set(value As Double)
+            mPrecursorMassToleranceDa = value
+        End Set
+    End Property
 
-	Public Property PrecursorMassTolerancePpm As Double
-		Get
-			Return mPrecursorMassTolerancePpm
-		End Get
-		Set(value As Double)
-			mPrecursorMassTolerancePpm = value
-		End Set
-	End Property
+    Public Property PrecursorMassTolerancePpm As Double
+        Get
+            Return mPrecursorMassTolerancePpm
+        End Get
+        Set(value As Double)
+            mPrecursorMassTolerancePpm = value
+        End Set
+    End Property
 
-	Public Property PrecursorMassType As String
-		Get
-			Return mPrecursorMassType
-		End Get
-		Set(value As String)
-			If String.IsNullOrEmpty(value) Then value = MASS_TYPE_MONOISOTOPIC
-			mPrecursorMassType = value
-		End Set
-	End Property
+    Public Property PrecursorMassType As String
+        Get
+            Return mPrecursorMassType
+        End Get
+        Set(value As String)
+            If String.IsNullOrEmpty(value) Then value = MASS_TYPE_MONOISOTOPIC
+            mPrecursorMassType = value
+        End Set
+    End Property
 
-	Public ReadOnly Property SearchEngineName As String
-		Get
-			Return mSearchEngineName
-		End Get
-	End Property
+    Public ReadOnly Property SearchEngineName As String
+        Get
+            Return mSearchEngineName
+        End Get
+    End Property
 
-	Public ReadOnly Property SearchEngineVersion As String
-		Get
-			Return mSearchEngineVersion
-		End Get
-	End Property
+    Public ReadOnly Property SearchEngineVersion As String
+        Get
+            Return mSearchEngineVersion
+        End Get
+    End Property
 
-	Public ReadOnly Property SearchDate As DateTime
-		Get
-			Return mSearchDate
-		End Get
-	End Property
+    Public ReadOnly Property SearchDate As DateTime
+        Get
+            Return mSearchDate
+        End Get
+    End Property
 
 #End Region
 

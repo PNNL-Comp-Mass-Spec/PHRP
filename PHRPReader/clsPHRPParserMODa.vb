@@ -14,27 +14,27 @@ Imports System.Runtime.InteropServices
 Imports PHRPReader.clsPHRPReader
 
 Public Class clsPHRPParserMODa
-	Inherits clsPHRPParser
+    Inherits clsPHRPParser
 
 #Region "Constants"
-	Public Const DATA_COLUMN_ResultID As String = "ResultID"
-	Public Const DATA_COLUMN_Scan As String = "Scan"
-	Public Const DATA_COLUMN_Spectrum_Index As String = "Spectrum_Index"
-	Public Const DATA_COLUMN_Charge As String = "Charge"
-	Public Const DATA_COLUMN_PrecursorMZ As String = "PrecursorMZ"
-	Public Const DATA_COLUMN_DelM As String = "DelM"
-	Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
-	Public Const DATA_COLUMN_MH As String = "MH"
-	Public Const DATA_COLUMN_Peptide As String = "Peptide"
-	Public Const DATA_COLUMN_Protein As String = "Protein"
-	Public Const DATA_COLUMN_Score As String = "Score"
-	Public Const DATA_COLUMN_Probability As String = "Probability"
-	Public Const DATA_COLUMN_Rank_Probability As String = "Rank_Probability"
-	Public Const DATA_COLUMN_Peptide_Position As String = "Peptide_Position"
-	Public Const DATA_COLUMN_QValue As String = "QValue"
+    Public Const DATA_COLUMN_ResultID As String = "ResultID"
+    Public Const DATA_COLUMN_Scan As String = "Scan"
+    Public Const DATA_COLUMN_Spectrum_Index As String = "Spectrum_Index"
+    Public Const DATA_COLUMN_Charge As String = "Charge"
+    Public Const DATA_COLUMN_PrecursorMZ As String = "PrecursorMZ"
+    Public Const DATA_COLUMN_DelM As String = "DelM"
+    Public Const DATA_COLUMN_DelM_PPM As String = "DelM_PPM"
+    Public Const DATA_COLUMN_MH As String = "MH"
+    Public Const DATA_COLUMN_Peptide As String = "Peptide"
+    Public Const DATA_COLUMN_Protein As String = "Protein"
+    Public Const DATA_COLUMN_Score As String = "Score"
+    Public Const DATA_COLUMN_Probability As String = "Probability"
+    Public Const DATA_COLUMN_Rank_Probability As String = "Rank_Probability"
+    Public Const DATA_COLUMN_Peptide_Position As String = "Peptide_Position"
+    Public Const DATA_COLUMN_QValue As String = "QValue"
 
-	Public Const FILENAME_SUFFIX_SYN As String = "_moda_syn.txt"
-	Public Const FILENAME_SUFFIX_FHT As String = "_moda_fht.txt"
+    Public Const FILENAME_SUFFIX_SYN As String = "_moda_syn.txt"
+    Public Const FILENAME_SUFFIX_FHT As String = "_moda_fht.txt"
 
     Private Const MODa_SEARCH_ENGINE_NAME As String = "MODa"
 #End Region

@@ -55,46 +55,46 @@ Public MustInherit Class clsPHRPBaseClass
     Private Const COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER As String = "Peptide_Residue_Num"
     Private Const COLUMN_NAME_MSGF_SPECPROB As String = "MSGF_SpecProb"
 
-	Public Const XTANDEM_RESULTS_FILE_SUFFIX As String = "_xt.xml"
-	Public Const SEQUEST_SYNOPSIS_FILE_SUFFIX As String = "_syn.txt"
-	Public Const SEQUEST_FIRST_HITS_FILE_SUFFIX As String = "_fht.txt"
+    Public Const XTANDEM_RESULTS_FILE_SUFFIX As String = "_xt.xml"
+    Public Const SEQUEST_SYNOPSIS_FILE_SUFFIX As String = "_syn.txt"
+    Public Const SEQUEST_FIRST_HITS_FILE_SUFFIX As String = "_fht.txt"
 
-	Public Const INSPECT_RESULTS_FILE_SUFFIX As String = "_inspect.txt"
-	Public Const INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX As String = "_fht.txt"
-	Public Const INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX As String = "_Fscore_fht.txt"
+    Public Const INSPECT_RESULTS_FILE_SUFFIX As String = "_inspect.txt"
+    Public Const INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX As String = "_fht.txt"
+    Public Const INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX As String = "_Fscore_fht.txt"
 
-	Public Const MSGFDB_RESULTS_FILE_SUFFIX As String = "_msgfdb.txt"
+    Public Const MSGFDB_RESULTS_FILE_SUFFIX As String = "_msgfdb.txt"
 
-	Public Const MSALIGN_RESULTS_FILE_SUFFIX As String = "_MSAlign_ResultTable.txt"
+    Public Const MSALIGN_RESULTS_FILE_SUFFIX As String = "_MSAlign_ResultTable.txt"
 
     Public Const MODa_RESULTS_FILE_SUFFIX As String = "_moda.id.txt"
     Public Const MODPlus_RESULTS_FILE_SUFFIX As String = "_modp.id.txt"
     Public Const MSPathFinder_RESULTS_FILE_SUFFIX As String = "_IcTda.tsv"
 
-	Public Const FILENAME_SUFFIX_RESULT_TO_SEQ_MAP As String = "_ResultToSeqMap.txt"
-	Public Const FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP As String = "_SeqToProteinMap.txt"
+    Public Const FILENAME_SUFFIX_RESULT_TO_SEQ_MAP As String = "_ResultToSeqMap.txt"
+    Public Const FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP As String = "_SeqToProteinMap.txt"
 
-	Public Const FILENAME_SUFFIX_SEQ_INFO As String = "_SeqInfo.txt"
-	Public Const FILENAME_SUFFIX_MOD_DETAILS As String = "_ModDetails.txt"
-	Public Const FILENAME_SUFFIX_MOD_SUMMARY As String = "_ModSummary.txt"
+    Public Const FILENAME_SUFFIX_SEQ_INFO As String = "_SeqInfo.txt"
+    Public Const FILENAME_SUFFIX_MOD_DETAILS As String = "_ModDetails.txt"
+    Public Const FILENAME_SUFFIX_MOD_SUMMARY As String = "_ModSummary.txt"
 
-	Public Const FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING As String = "_PepToProtMap"
-	Public Const FILENAME_SUFFIX_PROTEIN_MODS As String = "_ProteinMods.txt"
-	Public Const FILENAME_SUFFIX_MSGF As String = "_MSGF.txt"
+    Public Const FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING As String = "_PepToProtMap"
+    Public Const FILENAME_SUFFIX_PROTEIN_MODS As String = "_ProteinMods.txt"
+    Public Const FILENAME_SUFFIX_MSGF As String = "_MSGF.txt"
 
     Protected Const PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE As Single = 90
     Private Const PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE As Single = 95
 
     Private Const PROTEIN_NAME_NO_MATCH = "__NoMatch__"
 
-	Public Enum ePeptideHitResultsFileFormatConstants As Integer
-		AutoDetermine = 0
-		SequestSynopsisFile = 1
-		SequestFirstHitsFile = 2
-		XTandemXMLFile = 3
-		InSpectTXTFile = 4
-		MSGFDbTXTFile = 5
-		MSAlignTXTFile = 6
+    Public Enum ePeptideHitResultsFileFormatConstants As Integer
+        AutoDetermine = 0
+        SequestSynopsisFile = 1
+        SequestFirstHitsFile = 2
+        XTandemXMLFile = 3
+        InSpectTXTFile = 4
+        MSGFDbTXTFile = 5
+        MSAlignTXTFile = 6
         MODaTXTFile = 7
         MODPlusTXTFile = 8
         MSPathFinderTSVFile = 9
@@ -732,7 +732,7 @@ Public MustInherit Class clsPHRPBaseClass
         ElseIf strBaseFileNameLCase.EndsWith(clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_File.ToLower()) Then
+        ElseIf strBaseFileNameLCase.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE.ToLower()) Then
             Return ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
 
         ElseIf strExtensionLCase = ".tsv" Then
@@ -1139,7 +1139,7 @@ Public MustInherit Class clsPHRPBaseClass
                    COLUMN_NAME_MSGF_SPECPROB)
 
                 Dim blnLoadMSGFResults = ePHRPResultType <> clsPHRPReader.ePeptideHitResultType.MSGFDB
-                
+
                 Dim oStartupOptions = New clsPHRPStartupOptions()
                 With oStartupOptions
                     .LoadModsAndSeqInfo = True
@@ -1582,7 +1582,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
     Public Shared Function IsLetterAtoZ(chChar As Char) As Boolean
 
-        Static reIsLetter as Regex = New Regex("[A-Za-z]", RegexOptions.Compiled)
+        Static reIsLetter As Regex = New Regex("[A-Za-z]", RegexOptions.Compiled)
 
         If reIsLetter.IsMatch(chChar) Then
             Return True
@@ -2325,78 +2325,78 @@ Public MustInherit Class clsPHRPBaseClass
 
 #Region "IComparer classes"
 
-	Protected Class ISearchOptionModificationInfoComparer
-		Implements IComparer(Of udtSearchOptionModificationInfoType)
+    Protected Class ISearchOptionModificationInfoComparer
+        Implements IComparer(Of udtSearchOptionModificationInfoType)
 
-		Public Function Compare(x As udtSearchOptionModificationInfoType, y As udtSearchOptionModificationInfoType) As Integer Implements IComparer(Of udtSearchOptionModificationInfoType).Compare
+        Public Function Compare(x As udtSearchOptionModificationInfoType, y As udtSearchOptionModificationInfoType) As Integer Implements IComparer(Of udtSearchOptionModificationInfoType).Compare
 
-			If x.SortOrder > y.SortOrder Then
-				Return 1
-			ElseIf x.SortOrder < y.SortOrder Then
-				Return -1
-			Else
-				If x.ModificationMass > y.ModificationMass Then
-					Return 1
-				ElseIf x.ModificationMass < y.ModificationMass Then
-					Return -1
-				Else
-					Return 0
-				End If
-			End If
-		End Function
+            If x.SortOrder > y.SortOrder Then
+                Return 1
+            ElseIf x.SortOrder < y.SortOrder Then
+                Return -1
+            Else
+                If x.ModificationMass > y.ModificationMass Then
+                    Return 1
+                ElseIf x.ModificationMass < y.ModificationMass Then
+                    Return -1
+                Else
+                    Return 0
+                End If
+            End If
+        End Function
 
-	End Class
+    End Class
 
-	Friend Class IModNameAndResidueLocComparer
-		Implements IComparer(Of udtModNameAndResidueLocType)
+    Friend Class IModNameAndResidueLocComparer
+        Implements IComparer(Of udtModNameAndResidueLocType)
 
-		Public Function Compare(x As udtModNameAndResidueLocType, y As udtModNameAndResidueLocType) As Integer Implements IComparer(Of udtModNameAndResidueLocType).Compare
+        Public Function Compare(x As udtModNameAndResidueLocType, y As udtModNameAndResidueLocType) As Integer Implements IComparer(Of udtModNameAndResidueLocType).Compare
 
-			If x.ResidueLocInPeptide > y.ResidueLocInPeptide Then
-				Return 1
-			ElseIf x.ResidueLocInPeptide < y.ResidueLocInPeptide Then
-				Return -1
-			Else
-				If x.ModName Is Nothing Then x.ModName = String.Empty
-				If y.ModName Is Nothing Then y.ModName = String.Empty
+            If x.ResidueLocInPeptide > y.ResidueLocInPeptide Then
+                Return 1
+            ElseIf x.ResidueLocInPeptide < y.ResidueLocInPeptide Then
+                Return -1
+            Else
+                If x.ModName Is Nothing Then x.ModName = String.Empty
+                If y.ModName Is Nothing Then y.ModName = String.Empty
 
-				If x.ModName > y.ModName Then
-					Return 1
-				ElseIf x.ModName < y.ModName Then
-					Return -1
-				Else
-					Return 0
-				End If
-			End If
-		End Function
+                If x.ModName > y.ModName Then
+                    Return 1
+                ElseIf x.ModName < y.ModName Then
+                    Return -1
+                Else
+                    Return 0
+                End If
+            End If
+        End Function
 
-	End Class
+    End Class
 
-	Protected Class PepToProteinMappingComparer
-		Implements IComparer(Of udtPepToProteinMappingType)
+    Protected Class PepToProteinMappingComparer
+        Implements IComparer(Of udtPepToProteinMappingType)
 
-		Public Function Compare(x As udtPepToProteinMappingType, y As udtPepToProteinMappingType) As Integer Implements IComparer(Of udtPepToProteinMappingType).Compare
+        Public Function Compare(x As udtPepToProteinMappingType, y As udtPepToProteinMappingType) As Integer Implements IComparer(Of udtPepToProteinMappingType).Compare
 
-			If x.Peptide > y.Peptide Then
-				Return 1
-			ElseIf x.Peptide < y.Peptide Then
-				Return -1
-			Else
-				If x.Protein > y.Protein Then
-					Return 1
-				ElseIf x.Protein < y.Protein Then
-					Return -1
-				Else
-					Return 0
-				End If
-			End If
+            If x.Peptide > y.Peptide Then
+                Return 1
+            ElseIf x.Peptide < y.Peptide Then
+                Return -1
+            Else
+                If x.Protein > y.Protein Then
+                    Return 1
+                ElseIf x.Protein < y.Protein Then
+                    Return -1
+                Else
+                    Return 0
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
-	Protected Class PepToProteinMappingPeptideSearchComparer
-		Implements IComparer(Of udtPepToProteinMappingType)
+    Protected Class PepToProteinMappingPeptideSearchComparer
+        Implements IComparer(Of udtPepToProteinMappingType)
 
         Public Function Compare(x As udtPepToProteinMappingType, y As udtPepToProteinMappingType) As Integer Implements IComparer(Of udtPepToProteinMappingType).Compare
 
@@ -2410,7 +2410,7 @@ Public MustInherit Class clsPHRPBaseClass
 
         End Function
 
-	End Class
+    End Class
 
 #End Region
 End Class

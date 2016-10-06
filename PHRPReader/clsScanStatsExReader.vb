@@ -15,54 +15,54 @@ Imports System.IO
 Public Class clsExtendedScanStatsReader
 
 #Region "Constants"
-	Public Const DATA_COLUMN_Dataset As String = "Dataset"
-	Public Const DATA_COLUMN_ScanNumber As String = "ScanNumber"
-	Public Const DATA_COLUMN_IonInjectionTime As String = "Ion Injection Time (ms)"
-	Public Const DATA_COLUMN_ScanEvent As String = "Scan Event"
-	Public Const DATA_COLUMN_MasterIndex As String = "Master Index"
-	Public Const DATA_COLUMN_ElapsedScanTime As String = "Elapsed Scan Time (sec)"
-	Public Const DATA_COLUMN_ChargeState As String = "Charge State"
-	Public Const DATA_COLUMN_MonoisotopicMZ As String = "Monoisotopic M/Z"
-	Public Const DATA_COLUMN_MS2IsolationWidth As String = "MS2 Isolation Width"
-	Public Const DATA_COLUMN_FTAnalyzerSettings As String = "FT Analyzer Settings"
-	Public Const DATA_COLUMN_FTAnalyzerMessage As String = "FT Analyzer Message"
-	Public Const DATA_COLUMN_FTResolution As String = "FT Resolution"
-	Public Const DATA_COLUMN_ConversionParameterB As String = "Conversion Parameter B"
-	Public Const DATA_COLUMN_ConversionParameterC As String = "Conversion Parameter C"
-	Public Const DATA_COLUMN_ConversionParameterD As String = "Conversion Parameter D"
-	Public Const DATA_COLUMN_ConversionParameterE As String = "Conversion Parameter E"
-	Public Const DATA_COLUMN_CollisionMode As String = "Collision Mode"
-	Public Const DATA_COLUMN_ScanFilterText As String = "Scan Filter Text"
-	Public Const DATA_COLUMN_SourceVoltage As String = "Source Voltage (kV)"
-	Public Const DATA_COLUMN_Source_Current As String = "Source Current (uA)"
+    Public Const DATA_COLUMN_Dataset As String = "Dataset"
+    Public Const DATA_COLUMN_ScanNumber As String = "ScanNumber"
+    Public Const DATA_COLUMN_IonInjectionTime As String = "Ion Injection Time (ms)"
+    Public Const DATA_COLUMN_ScanEvent As String = "Scan Event"
+    Public Const DATA_COLUMN_MasterIndex As String = "Master Index"
+    Public Const DATA_COLUMN_ElapsedScanTime As String = "Elapsed Scan Time (sec)"
+    Public Const DATA_COLUMN_ChargeState As String = "Charge State"
+    Public Const DATA_COLUMN_MonoisotopicMZ As String = "Monoisotopic M/Z"
+    Public Const DATA_COLUMN_MS2IsolationWidth As String = "MS2 Isolation Width"
+    Public Const DATA_COLUMN_FTAnalyzerSettings As String = "FT Analyzer Settings"
+    Public Const DATA_COLUMN_FTAnalyzerMessage As String = "FT Analyzer Message"
+    Public Const DATA_COLUMN_FTResolution As String = "FT Resolution"
+    Public Const DATA_COLUMN_ConversionParameterB As String = "Conversion Parameter B"
+    Public Const DATA_COLUMN_ConversionParameterC As String = "Conversion Parameter C"
+    Public Const DATA_COLUMN_ConversionParameterD As String = "Conversion Parameter D"
+    Public Const DATA_COLUMN_ConversionParameterE As String = "Conversion Parameter E"
+    Public Const DATA_COLUMN_CollisionMode As String = "Collision Mode"
+    Public Const DATA_COLUMN_ScanFilterText As String = "Scan Filter Text"
+    Public Const DATA_COLUMN_SourceVoltage As String = "Source Voltage (kV)"
+    Public Const DATA_COLUMN_Source_Current As String = "Source Current (uA)"
 #End Region
 
 #Region "Class-wide variables"
-	' Column headers
+    ' Column headers
     Private ReadOnly mColumnHeaders As SortedDictionary(Of String, Integer)
     Private mErrorMessage As String = String.Empty
 #End Region
 
-	''' <summary>
-	''' Error message
-	''' </summary>
-	Public ReadOnly Property ErrorMessage As String
-		Get
-			If String.IsNullOrEmpty(mErrorMessage) Then
-				Return String.Empty
-			Else
-				Return mErrorMessage
-			End If
-		End Get
-	End Property
+    ''' <summary>
+    ''' Error message
+    ''' </summary>
+    Public ReadOnly Property ErrorMessage As String
+        Get
+            If String.IsNullOrEmpty(mErrorMessage) Then
+                Return String.Empty
+            Else
+                Return mErrorMessage
+            End If
+        End Get
+    End Property
 
-	''' <summary>
-	''' Constructor
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub New()
-		mColumnHeaders = New SortedDictionary(Of String, Integer)
-	End Sub
+    ''' <summary>
+    ''' Constructor
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub New()
+        mColumnHeaders = New SortedDictionary(Of String, Integer)
+    End Sub
 
     Private Sub AddHeaderColumn(strColumnName As String)
         mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)

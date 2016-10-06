@@ -13,11 +13,11 @@ Public Class clsPepToProteinMapInfo
     ''' <remarks></remarks>
     Private ReadOnly mProteinMapInfo As Dictionary(Of String, List(Of udtProteinLocationInfo))
 
-	Public ReadOnly Property ProteinCount As Integer
-		Get
-			Return mProteinMapInfo.Count
-		End Get
-	End Property
+    Public ReadOnly Property ProteinCount As Integer
+        Get
+            Return mProteinMapInfo.Count
+        End Get
+    End Property
 
     Public ReadOnly Property ProteinMapInfo As Dictionary(Of String, List(Of udtProteinLocationInfo))
         Get

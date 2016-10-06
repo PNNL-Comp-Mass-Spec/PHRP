@@ -38,7 +38,7 @@ Public Class clsXTandemResultsProcessor
 
     Public Sub New()
         MyBase.New()
-		MyBase.mFileDate = "June 28, 2013"
+        MyBase.mFileDate = "June 28, 2013"
         InitializeLocalVariables()
     End Sub
 
@@ -101,10 +101,10 @@ Public Class clsXTandemResultsProcessor
     Protected mNextResultID As Integer
     Protected mLookForReverseSequenceTag As Boolean
 
-	Private mScanNumberRegExA As Regex
-	Private mScanNumberRegExB As Regex
-	Private mScanNumberRegExC As Regex
-	Private mScanNumberRegExD As Regex
+    Private mScanNumberRegExA As Regex
+    Private mScanNumberRegExB As Regex
+    Private mScanNumberRegExC As Regex
+    Private mScanNumberRegExD As Regex
 #End Region
 
 #Region "Properties"

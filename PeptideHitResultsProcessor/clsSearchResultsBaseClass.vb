@@ -1149,8 +1149,8 @@ Public MustInherit Class clsSearchResultsBaseClass
 
     End Sub
 
-	Protected Class IGenericResidueModificationInfoComparer
-		Implements IComparer(Of clsAminoAcidModInfo)
+    Protected Class IGenericResidueModificationInfoComparer
+        Implements IComparer(Of clsAminoAcidModInfo)
 
         ''' <summary>
         ''' Comparer
@@ -1159,21 +1159,21 @@ Public MustInherit Class clsSearchResultsBaseClass
         ''' <param name="y"></param>
         ''' <returns></returns>
         ''' <remarks></remarks>
-		Public Function Compare(x As clsAminoAcidModInfo, y As clsAminoAcidModInfo) As Integer Implements IComparer(Of clsAminoAcidModInfo).Compare
-			If x.ResidueLocInPeptide > y.ResidueLocInPeptide Then
-				Return 1
-			ElseIf x.ResidueLocInPeptide < y.ResidueLocInPeptide Then
-				Return -1
-			Else
-				If x.ModDefinition.MassCorrectionTag > y.ModDefinition.MassCorrectionTag Then
-					Return 1
-				ElseIf x.ModDefinition.MassCorrectionTag < y.ModDefinition.MassCorrectionTag Then
-					Return -1
-				Else
-					Return 0
-				End If
-			End If
-		End Function
+        Public Function Compare(x As clsAminoAcidModInfo, y As clsAminoAcidModInfo) As Integer Implements IComparer(Of clsAminoAcidModInfo).Compare
+            If x.ResidueLocInPeptide > y.ResidueLocInPeptide Then
+                Return 1
+            ElseIf x.ResidueLocInPeptide < y.ResidueLocInPeptide Then
+                Return -1
+            Else
+                If x.ModDefinition.MassCorrectionTag > y.ModDefinition.MassCorrectionTag Then
+                    Return 1
+                ElseIf x.ModDefinition.MassCorrectionTag < y.ModDefinition.MassCorrectionTag Then
+                    Return -1
+                Else
+                    Return 0
+                End If
+            End If
+        End Function
 
-	End Class
+    End Class
 End Class

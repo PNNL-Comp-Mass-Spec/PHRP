@@ -16,58 +16,58 @@ Public Class clsSeqInfo
     Private ReadOnly mModDescription As String
     Private mMonoisotopicMass As Double
 
-	''' <summary>
-	''' Sequence ID
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property SeqID As Integer
-		Get
-			Return mSeqID
-		End Get
-	End Property
+    ''' <summary>
+    ''' Sequence ID
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property SeqID As Integer
+        Get
+            Return mSeqID
+        End Get
+    End Property
 
-	''' <summary>
-	''' Number of modifications
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property ModCount As Integer
-		Get
-			Return mModCount
-		End Get
-	End Property
+    ''' <summary>
+    ''' Number of modifications
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property ModCount As Integer
+        Get
+            Return mModCount
+        End Get
+    End Property
 
-	''' <summary>
-	''' Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property ModDescription As String
-		Get
-			Return mModDescription
-		End Get
-	End Property
+    ''' <summary>
+    ''' Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property ModDescription As String
+        Get
+            Return mModDescription
+        End Get
+    End Property
 
-	''' <summary>
-	''' Theoretical, monoisotopic mass (including the modified residues)
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property MonoisotopicMass As Double
-		Get
-			Return mMonoisotopicMass
-		End Get
-	End Property
+    ''' <summary>
+    ''' Theoretical, monoisotopic mass (including the modified residues)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property MonoisotopicMass As Double
+        Get
+            Return mMonoisotopicMass
+        End Get
+    End Property
 
-	''' <summary>
-	''' Constructor using Sequence ID and mass
-	''' </summary>
-	''' <remarks></remarks>
+    ''' <summary>
+    ''' Constructor using Sequence ID and mass
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Sub New(SeqID As Integer, MonoisotopicMass As Double)
         Me.New(SeqID, MonoisotopicMass, 0, String.Empty)
     End Sub

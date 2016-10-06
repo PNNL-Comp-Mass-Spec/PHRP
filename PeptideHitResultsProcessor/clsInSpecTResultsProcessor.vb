@@ -35,7 +35,7 @@ Public Class clsInSpecTResultsProcessor
 
     Public Sub New()
         MyBase.New()
-		MyBase.mFileDate = "June 28, 2013"
+        MyBase.mFileDate = "June 28, 2013"
         InitializeLocalVariables()
     End Sub
 
@@ -62,87 +62,87 @@ Public Class clsInSpecTResultsProcessor
     Private Const INSPECT_NTERMINAL_MOD_MASS_REGEX As String = "^\+(\d+)"
     Private Const INSPECT_CTERMINAL_MOD_MASS_REGEX As String = "\+(\d+)$"
 
-	Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
+    Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
-	Private Const PHOS_MOD_NAME As String = "phos"
-	Private Const PHOS_MOD_MASS As String = "79.9663"
-	Private Const PHOS_MOD_RESIDUES As String = "STY"
+    Private Const PHOS_MOD_NAME As String = "phos"
+    Private Const PHOS_MOD_MASS As String = "79.9663"
+    Private Const PHOS_MOD_RESIDUES As String = "STY"
 
-	' These columns correspond to the tab-delimited file created directly by Inspect
-	Public Enum eInspectResultsFileColumns As Integer
-		SpectrumFile = 0
-		Scan = 1
-		Annotation = 2
-		Protein = 3
-		Charge = 4
-		MQScore = 5
-		Length = 6
-		TotalPRMScore = 7
-		MedianPRMScore = 8
-		FractionY = 9
-		FractionB = 10
-		Intensity = 11
-		NTT = 12
-		pvalue = 13
-		FScore = 14
-		DeltaScore = 15
-		DeltaScoreOther = 16
-		RecordNumber = 17
-		DBFilePos = 18
-		SpecFilePos = 19
-		PrecursorMZ = 20
-		PrecursorError = 21
-	End Enum
+    ' These columns correspond to the tab-delimited file created directly by Inspect
+    Public Enum eInspectResultsFileColumns As Integer
+        SpectrumFile = 0
+        Scan = 1
+        Annotation = 2
+        Protein = 3
+        Charge = 4
+        MQScore = 5
+        Length = 6
+        TotalPRMScore = 7
+        MedianPRMScore = 8
+        FractionY = 9
+        FractionB = 10
+        Intensity = 11
+        NTT = 12
+        pvalue = 13
+        FScore = 14
+        DeltaScore = 15
+        DeltaScoreOther = 16
+        RecordNumber = 17
+        DBFilePos = 18
+        SpecFilePos = 19
+        PrecursorMZ = 20
+        PrecursorError = 21
+    End Enum
 
-	' These columns correspond to the Synopsis and First-Hits files created by this class
-	Protected Const InspectSynopsisFileColCount As Integer = 27
-	Public Enum eInspectSynFileColumns As Integer
-		ResultID = 0
-		Scan = 1
-		Peptide = 2
-		Protein = 3
-		Charge = 4
-		MQScore = 5
-		Length = 6
-		TotalPRMScore = 7
-		MedianPRMScore = 8
-		FractionY = 9
-		FractionB = 10
-		Intensity = 11
-		NTT = 12
-		PValue = 13
-		FScore = 14
-		DeltaScore = 15
-		DeltaScoreOther = 16
-		DeltaNormMQScore = 17					' Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, then also storing 0.   This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
-		DeltaNormTotalPRMScore = 18				' Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, then also storing 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
-		RankTotalPRMScore = 19					' Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
-		RankFScore = 20							' Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
-		MH = 21									' Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
-		RecordNumber = 22
-		DBFilePos = 23
-		SpecFilePos = 24
-		PrecursorMZ = 25
-		PrecursorError = 26
-	End Enum
+    ' These columns correspond to the Synopsis and First-Hits files created by this class
+    Protected Const InspectSynopsisFileColCount As Integer = 27
+    Public Enum eInspectSynFileColumns As Integer
+        ResultID = 0
+        Scan = 1
+        Peptide = 2
+        Protein = 3
+        Charge = 4
+        MQScore = 5
+        Length = 6
+        TotalPRMScore = 7
+        MedianPRMScore = 8
+        FractionY = 9
+        FractionB = 10
+        Intensity = 11
+        NTT = 12
+        PValue = 13
+        FScore = 14
+        DeltaScore = 15
+        DeltaScoreOther = 16
+        DeltaNormMQScore = 17                   ' Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, then also storing 0.   This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
+        DeltaNormTotalPRMScore = 18             ' Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, then also storing 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
+        RankTotalPRMScore = 19                  ' Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
+        RankFScore = 20                         ' Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
+        MH = 21                                 ' Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
+        RecordNumber = 22
+        DBFilePos = 23
+        SpecFilePos = 24
+        PrecursorMZ = 25
+        PrecursorError = 26
+    End Enum
 
-	Protected Enum eInspectModType As Integer
-		Unknown = 0
-		DynamicMod = 1
-		StaticMod = 2
-		DynNTermPeptide = 3
-		DynCTermPeptide = 4
-	End Enum
+    Protected Enum eInspectModType As Integer
+        Unknown = 0
+        DynamicMod = 1
+        StaticMod = 2
+        DynNTermPeptide = 3
+        DynCTermPeptide = 4
+    End Enum
 
-	Protected Enum eFilteredOutputFileTypeConstants As Integer
-		SynFile = 0
-		FHTbyFScore = 1
-		FHTbyTotalPRM = 2
-	End Enum
+    Protected Enum eFilteredOutputFileTypeConstants As Integer
+        SynFile = 0
+        FHTbyFScore = 1
+        FHTbyTotalPRM = 2
+    End Enum
 #End Region
 
 #Region "Structures"
-	Protected Structure udtInspectSearchResultType
+    Protected Structure udtInspectSearchResultType
         Public SpectrumFileName As String
         Public Scan As String
         Public ScanNum As Integer
@@ -1916,161 +1916,161 @@ Public Class clsInSpecTResultsProcessor
 
 #Region "IComparer Classes"
 
-	Protected Class InspectSearchResultsComparerTotalPRMDescScanChargePeptide
-		Implements IComparer(Of udtInspectSearchResultType)
+    Protected Class InspectSearchResultsComparerTotalPRMDescScanChargePeptide
+        Implements IComparer(Of udtInspectSearchResultType)
 
-		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
+        Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
 
-			If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
-				Return -1
-			ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
-				Return 1
-			Else
-				' TotalPRMScore is the same; check scan number
-				If x.ScanNum > y.ScanNum Then
-					Return 1
-				ElseIf x.ScanNum < y.ScanNum Then
-					Return -1
-				Else
-					' Scan is the same, check charge
-					If x.ChargeNum > y.ChargeNum Then
-						Return 1
-					ElseIf x.ChargeNum < y.ChargeNum Then
-						Return -1
-					Else
-						' Charge is the same; check peptide
-						If x.PeptideAnnotation > y.PeptideAnnotation Then
-							Return 1
-						ElseIf x.PeptideAnnotation < y.PeptideAnnotation Then
-							Return -1
-						Else
-							' Peptide is the same, check Protein
-							If x.Protein > y.Protein Then
-								Return 1
-							ElseIf x.Protein < y.Protein Then
-								Return -1
-							Else
-								Return 0
-							End If
-						End If
-					End If
-				End If
-			End If
+            If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
+                Return -1
+            ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
+                Return 1
+            Else
+                ' TotalPRMScore is the same; check scan number
+                If x.ScanNum > y.ScanNum Then
+                    Return 1
+                ElseIf x.ScanNum < y.ScanNum Then
+                    Return -1
+                Else
+                    ' Scan is the same, check charge
+                    If x.ChargeNum > y.ChargeNum Then
+                        Return 1
+                    ElseIf x.ChargeNum < y.ChargeNum Then
+                        Return -1
+                    Else
+                        ' Charge is the same; check peptide
+                        If x.PeptideAnnotation > y.PeptideAnnotation Then
+                            Return 1
+                        ElseIf x.PeptideAnnotation < y.PeptideAnnotation Then
+                            Return -1
+                        Else
+                            ' Peptide is the same, check Protein
+                            If x.Protein > y.Protein Then
+                                Return 1
+                            ElseIf x.Protein < y.Protein Then
+                                Return -1
+                            Else
+                                Return 0
+                            End If
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
-	Protected Class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
-		Implements IComparer(Of udtInspectSearchResultType)
+    Protected Class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc
+        Implements IComparer(Of udtInspectSearchResultType)
 
-		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
+        Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
 
-			If x.ScanNum > y.ScanNum Then
-				Return 1
-			ElseIf x.ScanNum < y.ScanNum Then
-				Return -1
-			Else
-				If x.ChargeNum > y.ChargeNum Then
-					Return 1
-				ElseIf x.ChargeNum < y.ChargeNum Then
-					Return -1
-				Else
-					' Charge is the same; check TotalPRMScore (sort on descending TotalPRMScore)
-					If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
-						Return -1
-					ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
-						Return 1
-					Else
-						' TotalPRMScore is the same; check FScore (sort on descending FScore)
-						If x.FScoreNum > y.FScoreNum Then
-							Return -1
-						ElseIf x.FScoreNum < y.FScoreNum Then
-							Return 1
-						Else
-							Return 0
-						End If
-					End If
-				End If
-			End If
+            If x.ScanNum > y.ScanNum Then
+                Return 1
+            ElseIf x.ScanNum < y.ScanNum Then
+                Return -1
+            Else
+                If x.ChargeNum > y.ChargeNum Then
+                    Return 1
+                ElseIf x.ChargeNum < y.ChargeNum Then
+                    Return -1
+                Else
+                    ' Charge is the same; check TotalPRMScore (sort on descending TotalPRMScore)
+                    If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
+                        Return -1
+                    ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
+                        Return 1
+                    Else
+                        ' TotalPRMScore is the same; check FScore (sort on descending FScore)
+                        If x.FScoreNum > y.FScoreNum Then
+                            Return -1
+                        ElseIf x.FScoreNum < y.FScoreNum Then
+                            Return 1
+                        Else
+                            Return 0
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
-	Protected Class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
-		Implements IComparer(Of udtInspectSearchResultType)
+    Protected Class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc
+        Implements IComparer(Of udtInspectSearchResultType)
 
-		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
+        Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
 
-			If x.ScanNum > y.ScanNum Then
-				Return 1
-			ElseIf x.ScanNum < y.ScanNum Then
-				Return -1
-			Else
-				If x.ChargeNum > y.ChargeNum Then
-					Return 1
-				ElseIf x.ChargeNum < y.ChargeNum Then
-					Return -1
-				Else
-					' Charge is the same; check FScore (sort on descending FScore)
-					If x.FScoreNum > y.FScoreNum Then
-						Return -1
-					ElseIf x.FScoreNum < y.FScoreNum Then
-						Return 1
-					Else
-						' FScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
-						If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
-							Return -1
-						ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
-							Return 1
-						Else
-							Return 0
-						End If
-					End If
-				End If
-			End If
+            If x.ScanNum > y.ScanNum Then
+                Return 1
+            ElseIf x.ScanNum < y.ScanNum Then
+                Return -1
+            Else
+                If x.ChargeNum > y.ChargeNum Then
+                    Return 1
+                ElseIf x.ChargeNum < y.ChargeNum Then
+                    Return -1
+                Else
+                    ' Charge is the same; check FScore (sort on descending FScore)
+                    If x.FScoreNum > y.FScoreNum Then
+                        Return -1
+                    ElseIf x.FScoreNum < y.FScoreNum Then
+                        Return 1
+                    Else
+                        ' FScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
+                        If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
+                            Return -1
+                        ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
+                            Return 1
+                        Else
+                            Return 0
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
-	Protected Class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
-		Implements IComparer(Of udtInspectSearchResultType)
+    Protected Class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc
+        Implements IComparer(Of udtInspectSearchResultType)
 
-		Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
+        Public Function Compare(x As udtInspectSearchResultType, y As udtInspectSearchResultType) As Integer Implements IComparer(Of udtInspectSearchResultType).Compare
 
-			If x.ScanNum > y.ScanNum Then
-				Return 1
-			ElseIf x.ScanNum < y.ScanNum Then
-				Return -1
-			Else
-				If x.ChargeNum > y.ChargeNum Then
-					Return 1
-				ElseIf x.ChargeNum < y.ChargeNum Then
-					Return -1
-				Else
-					' Charge is the same; check MQScore (sort on descending MQScore)
-					If x.MQScoreNum > y.MQScoreNum Then
-						Return -1
-					ElseIf x.MQScoreNum < y.MQScoreNum Then
-						Return 1
-					Else
-						' MQScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
-						If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
-							Return -1
-						ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
-							Return 1
-						Else
-							Return 0
-						End If
-					End If
-				End If
-			End If
+            If x.ScanNum > y.ScanNum Then
+                Return 1
+            ElseIf x.ScanNum < y.ScanNum Then
+                Return -1
+            Else
+                If x.ChargeNum > y.ChargeNum Then
+                    Return 1
+                ElseIf x.ChargeNum < y.ChargeNum Then
+                    Return -1
+                Else
+                    ' Charge is the same; check MQScore (sort on descending MQScore)
+                    If x.MQScoreNum > y.MQScoreNum Then
+                        Return -1
+                    ElseIf x.MQScoreNum < y.MQScoreNum Then
+                        Return 1
+                    Else
+                        ' MQScore is the same; check TotalPRMScore (sort on descending TotalPRMScore)
+                        If x.TotalPRMScoreNum > y.TotalPRMScoreNum Then
+                            Return -1
+                        ElseIf x.TotalPRMScoreNum < y.TotalPRMScoreNum Then
+                            Return 1
+                        Else
+                            Return 0
+                        End If
+                    End If
+                End If
+            End If
 
-		End Function
+        End Function
 
-	End Class
+    End Class
 
 #End Region
 

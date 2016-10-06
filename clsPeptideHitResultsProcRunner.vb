@@ -59,19 +59,19 @@ Public Class clsPeptideHitResultsProcRunner
     Protected mModificationDefinitionsFilePath As String
     Protected mSearchToolParameterFilePath As String
 
-	' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
-	Protected mCreateProteinModsFile As Boolean
-	Protected mFastaFilePath As String
-	Protected mIgnorePeptideToProteinMapperErrors As Boolean
-	Protected mProteinModsFileIncludesReversedProteins As Boolean
-	Protected mUseExistingMTSPepToProteinMapFile As Boolean
+    ' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
+    Protected mCreateProteinModsFile As Boolean
+    Protected mFastaFilePath As String
+    Protected mIgnorePeptideToProteinMapperErrors As Boolean
+    Protected mProteinModsFileIncludesReversedProteins As Boolean
+    Protected mUseExistingMTSPepToProteinMapFile As Boolean
 
-	' Setting this to true assumes the input file is a valid PHRP data file
-	' Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
-	' When this is True, then mCreateProteinModsFile is assumed to be true
-	Protected mCreateProteinModsUsingPHRPDataFile As Boolean
+    ' Setting this to true assumes the input file is a valid PHRP data file
+    ' Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
+    ' When this is True, then mCreateProteinModsFile is assumed to be true
+    Protected mCreateProteinModsUsingPHRPDataFile As Boolean
 
-	' These should default to True
+    ' These should default to True
     Protected mCreateInspectOrMSGFDBFirstHitsFile As Boolean = True
     Protected mCreateInspectOrMSGFDBSynopsisFile As Boolean = True
     Protected mInspectSynopsisFilePValueThreshold As Single

@@ -37,7 +37,7 @@ Public Class clsSequestResultsProcessor
 
     Public Sub New()
         MyBase.New()
-		MyBase.mFileDate = "June 28, 2013"
+        MyBase.mFileDate = "June 28, 2013"
         InitializeLocalVariables()
     End Sub
 

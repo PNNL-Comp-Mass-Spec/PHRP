@@ -3,25 +3,25 @@ Imports System.IO
 
 Public Class clsPHRPModSummaryReader
 
-	Public Const MOD_SUMMARY_COLUMN_Modification_Symbol As String = "Modification_Symbol"
-	Public Const MOD_SUMMARY_COLUMN_Modification_Mass As String = "Modification_Mass"
-	Public Const MOD_SUMMARY_COLUMN_Target_Residues As String = "Target_Residues"
-	Public Const MOD_SUMMARY_COLUMN_Modification_Type As String = "Modification_Type"
-	Public Const MOD_SUMMARY_COLUMN_Mass_Correction_Tag As String = "Mass_Correction_Tag"
-	Public Const MOD_SUMMARY_COLUMN_Occurrence_Count As String = "Occurrence_Count"
+    Public Const MOD_SUMMARY_COLUMN_Modification_Symbol As String = "Modification_Symbol"
+    Public Const MOD_SUMMARY_COLUMN_Modification_Mass As String = "Modification_Mass"
+    Public Const MOD_SUMMARY_COLUMN_Target_Residues As String = "Target_Residues"
+    Public Const MOD_SUMMARY_COLUMN_Modification_Type As String = "Modification_Type"
+    Public Const MOD_SUMMARY_COLUMN_Mass_Correction_Tag As String = "Mass_Correction_Tag"
+    Public Const MOD_SUMMARY_COLUMN_Occurrence_Count As String = "Occurrence_Count"
 
     Private ReadOnly mModificationDefs As List(Of clsModificationDefinition)
 
-	' The keys in this dictionary are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
+    ' The keys in this dictionary are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
     Private ReadOnly mModDefMassesAsText As Dictionary(Of String, String)
 
     Private ReadOnly mSuccess As Boolean
 
-	Public ReadOnly Property ModificationDefs() As List(Of clsModificationDefinition)
-		Get
-			Return mModificationDefs
-		End Get
-	End Property
+    Public ReadOnly Property ModificationDefs() As List(Of clsModificationDefinition)
+        Get
+            Return mModificationDefs
+        End Get
+    End Property
 
     ' ReSharper disable once ConvertToVbAutoProperty
     Public ReadOnly Property Success() As Boolean

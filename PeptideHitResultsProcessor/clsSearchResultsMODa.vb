@@ -14,25 +14,25 @@
 Imports PHRPReader
 
 Public Class clsSearchResultsMODa
-	Inherits clsSearchResultsBaseClass
+    Inherits clsSearchResultsBaseClass
 
 #Region "Classwide Variables"
-	' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables 
+    ' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables 
 #End Region
 
 #Region "Properties"
 
-	' Auto-Properties	
-	Public Property Spectrum_Index As String
+    ' Auto-Properties	
+    Public Property Spectrum_Index As String
 
-	Public Property Precursor_mz As String				' Observed precursor m/z, converted to monoisotopic mass by MODa
+    Public Property Precursor_mz As String              ' Observed precursor m/z, converted to monoisotopic mass by MODa
 
-	Public Property MODaComputedDelM As String
-	Public Property MODaComputedDelMPPM As String
+    Public Property MODaComputedDelM As String
+    Public Property MODaComputedDelMPPM As String
 
-	Public Property MODaScore As String
+    Public Property MODaScore As String
 
-	Public Property Probability As String
+    Public Property Probability As String
 
 #End Region
 
@@ -41,17 +41,17 @@ Public Class clsSearchResultsMODa
         MyBase.New(objPeptideMods, peptideSeqMassCalculator)
     End Sub
 
-	Public Overrides Sub Clear()
-		MyBase.Clear()
-		Spectrum_Index = String.Empty
+    Public Overrides Sub Clear()
+        MyBase.Clear()
+        Spectrum_Index = String.Empty
 
-		Precursor_mz = String.Empty
+        Precursor_mz = String.Empty
 
-		MODaComputedDelM = String.Empty
-		MODaComputedDelMPPM = String.Empty
+        MODaComputedDelM = String.Empty
+        MODaComputedDelMPPM = String.Empty
 
-		MODaScore = String.Empty
+        MODaScore = String.Empty
 
-		Probability = String.Empty
-	End Sub
+        Probability = String.Empty
+    End Sub
 End Class

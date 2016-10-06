@@ -14,37 +14,37 @@
 Imports PHRPReader
 
 Public Class clsSearchResultsMSAlign
-	Inherits clsSearchResultsBaseClass
+    Inherits clsSearchResultsBaseClass
 
 #Region "Classwide Variables"
-	' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables 
+    ' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables 
 #End Region
 
 #Region "Properties"
 
-	' Auto-Properties
-	Public Property Prsm_ID As String
-	Public Property Spectrum_ID As String
+    ' Auto-Properties
+    Public Property Prsm_ID As String
+    Public Property Spectrum_ID As String
 
-	Public Property Protein_Mass As String
-	Public Property Unexpected_Mod_Count As String
+    Public Property Protein_Mass As String
+    Public Property Unexpected_Mod_Count As String
 
-	Public Property Peak_Count As String
-	Public Property Matched_Peak_Count As String
-	Public Property Matched_Fragment_Ion_Count As String
+    Public Property Peak_Count As String
+    Public Property Matched_Peak_Count As String
+    Public Property Matched_Fragment_Ion_Count As String
 
-	Public Property PValue As String
-	Public Property Rank_PValue As String
+    Public Property PValue As String
+    Public Property Rank_PValue As String
 
-	Public Property EValue As String
-	Public Property FDR As String
+    Public Property EValue As String
+    Public Property FDR As String
 
-	Public Property Species_ID As String
-	Public Property FragMethod As String
+    Public Property Species_ID As String
+    Public Property FragMethod As String
 
-	Public Property Precursor_mz As String				' Observed precursor_mz
-	Public Property MSAlignComputedDelM As String
-	Public Property MSAlignComputedDelMPPM As String
+    Public Property Precursor_mz As String              ' Observed precursor_mz
+    Public Property MSAlignComputedDelM As String
+    Public Property MSAlignComputedDelMPPM As String
 
 #End Region
 
@@ -53,31 +53,31 @@ Public Class clsSearchResultsMSAlign
         MyBase.New(objPeptideMods, peptideSeqMassCalculator)
     End Sub
 
-	Public Overrides Sub Clear()
-		MyBase.Clear()
+    Public Overrides Sub Clear()
+        MyBase.Clear()
 
-		Prsm_ID = String.Empty
-		Spectrum_ID = String.Empty
+        Prsm_ID = String.Empty
+        Spectrum_ID = String.Empty
 
-		Protein_Mass = String.Empty
-		Unexpected_Mod_Count = String.Empty
+        Protein_Mass = String.Empty
+        Unexpected_Mod_Count = String.Empty
 
-		Peak_Count = String.Empty
-		Matched_Peak_Count = String.Empty
-		Matched_Fragment_Ion_Count = String.Empty
+        Peak_Count = String.Empty
+        Matched_Peak_Count = String.Empty
+        Matched_Fragment_Ion_Count = String.Empty
 
-		PValue = String.Empty
-		Rank_PValue = String.Empty
+        PValue = String.Empty
+        Rank_PValue = String.Empty
 
-		EValue = String.Empty
-		FDR = String.Empty
+        EValue = String.Empty
+        FDR = String.Empty
 
-		Species_ID = String.Empty
-		FragMethod = String.Empty
+        Species_ID = String.Empty
+        FragMethod = String.Empty
 
-		Precursor_mz = String.Empty
-		MSAlignComputedDelM = String.Empty
-		MSAlignComputedDelMPPM = String.Empty
+        Precursor_mz = String.Empty
+        MSAlignComputedDelM = String.Empty
+        MSAlignComputedDelMPPM = String.Empty
 
-	End Sub
+    End Sub
 End Class

@@ -14,7 +14,7 @@ Imports System.Runtime.InteropServices
 
 Public Class clsPSM
 
-	Public Const UNKNOWN_COLLISION_MODE As String = "n/a"
+    Public Const UNKNOWN_COLLISION_MODE As String = "n/a"
 
     Private mDataLineText As String = String.Empty
 
@@ -59,392 +59,392 @@ Public Class clsPSM
 
 #Region "Properties"
 
-	''' <summary>
-	''' Returns a dictionary with additional search engine scores stored as key/value pairs
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks>Update scores using SetScore</remarks>
-	Public ReadOnly Property AdditionalScores() As Dictionary(Of String, String)
-		Get
-			Return mAdditionalScores
-		End Get
-	End Property
+    ''' <summary>
+    ''' Returns a dictionary with additional search engine scores stored as key/value pairs
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Update scores using SetScore</remarks>
+    Public ReadOnly Property AdditionalScores() As Dictionary(Of String, String)
+        Get
+            Return mAdditionalScores
+        End Get
+    End Property
 
-	''' <summary>
-	''' Assumed charge of the spectrum in which this peptide was identified
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property Charge As Short
-		Get
-			Return mCharge
-		End Get
-		Set(value As Short)
-			mCharge = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Assumed charge of the spectrum in which this peptide was identified
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property Charge As Short
+        Get
+            Return mCharge
+        End Get
+        Set(value As Short)
+            mCharge = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Peptide cleavage state (with regards to ProteinFirst)
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property CleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
-		Get
-			Return mCleavageState
-		End Get
-		Set(value As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants)
-			mCleavageState = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Peptide cleavage state (with regards to ProteinFirst)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
+        Get
+            Return mCleavageState
+        End Get
+        Set(value As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants)
+            mCleavageState = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Collision mode (CID, ETD, HCD)
-	''' PepXML allows this to be CID, ETD, ECD, ETD/CID, or HCD
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property CollisionMode As String
-		Get
-			Return mCollisionMode
-		End Get
-		Set(value As String)
-			mCollisionMode = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Collision mode (CID, ETD, HCD)
+    ''' PepXML allows this to be CID, ETD, ECD, ETD/CID, or HCD
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property CollisionMode As String
+        Get
+            Return mCollisionMode
+        End Get
+        Set(value As String)
+            mCollisionMode = value
+        End Set
+    End Property
 
-	Public Property DataLineText As String
-		Get
-			Return mDataLineText
-		End Get
-		Set(value As String)
-			If String.IsNullOrEmpty(value) Then
-				mDataLineText = String.Empty
-			Else
-				mDataLineText = value
-			End If
+    Public Property DataLineText As String
+        Get
+            Return mDataLineText
+        End Get
+        Set(value As String)
+            If String.IsNullOrEmpty(value) Then
+                mDataLineText = String.Empty
+            Else
+                mDataLineText = value
+            End If
 
-		End Set
-	End Property
-	''' <summary>
-	''' Elution time (in minutes) of the spectrum
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property ElutionTimeMinutes As Single
-		Get
-			Return mElutionTimeMinutes
-		End Get
-		Set(value As Single)
-			mElutionTimeMinutes = value
-		End Set
-	End Property
+        End Set
+    End Property
+    ''' <summary>
+    ''' Elution time (in minutes) of the spectrum
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ElutionTimeMinutes As Single
+        Get
+            Return mElutionTimeMinutes
+        End Get
+        Set(value As Single)
+            mElutionTimeMinutes = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Mass difference, in daltons, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property MassErrorDa As String
-		Get
-			Return mMassErrorDa
-		End Get
-		Set(value As String)
-			mMassErrorDa = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Mass difference, in daltons, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property MassErrorDa As String
+        Get
+            Return mMassErrorDa
+        End Get
+        Set(value As String)
+            mMassErrorDa = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Mass difference, in ppm, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property MassErrorPPM As String
-		Get
-			Return mMassErrorPPM
-		End Get
-		Set(value As String)
-			mMassErrorPPM = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Mass difference, in ppm, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property MassErrorPPM As String
+        Get
+            Return mMassErrorPPM
+        End Get
+        Set(value As String)
+            mMassErrorPPM = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' List of modified residues
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks>A given residue is allowed to have more than one modification</remarks>
-	Public ReadOnly Property ModifiedResidues As List(Of clsAminoAcidModInfo)
-		Get
-			Return mModifiedPeptideResidues
-		End Get
-	End Property
+    ''' <summary>
+    ''' List of modified residues
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>A given residue is allowed to have more than one modification</remarks>
+    Public ReadOnly Property ModifiedResidues As List(Of clsAminoAcidModInfo)
+        Get
+            Return mModifiedPeptideResidues
+        End Get
+    End Property
 
-	''' <summary>
-	''' MSGF Spectral Probability associated with this peptide
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks>Ranges from 0 to 1, where 0 is the best score and 1 is the worse score</remarks>
-	Public Property MSGFSpecProb As String
-		Get
-			Return mMSGFSpecProb
-		End Get
-		Set(value As String)
-			mMSGFSpecProb = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' MSGF Spectral Probability associated with this peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Ranges from 0 to 1, where 0 is the best score and 1 is the worse score</remarks>
+    Public Property MSGFSpecProb As String
+        Get
+            Return mMSGFSpecProb
+        End Get
+        Set(value As String)
+            mMSGFSpecProb = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Number of missed cleavages (internal K or R)
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property NumMissedCleavages As Short
-		Get
-			Return mNumMissedCleavages
-		End Get
-		Set(value As Short)
-			mNumMissedCleavages = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Number of missed cleavages (internal K or R)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property NumMissedCleavages As Short
+        Get
+            Return mNumMissedCleavages
+        End Get
+        Set(value As Short)
+            mNumMissedCleavages = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Number of tryptic terminii (or similar if not using trypsin)
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks>2 means fully tryptic, 1 means partially tryptic, 0 means non-tryptic</remarks>
-	Public Property NumTrypticTerminii As Short
-		Get
-			Return mNumTrypticTerminii
-		End Get
-		Set(value As Short)
-			mNumTrypticTerminii = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Number of tryptic terminii (or similar if not using trypsin)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>2 means fully tryptic, 1 means partially tryptic, 0 means non-tryptic</remarks>
+    Public Property NumTrypticTerminii As Short
+        Get
+            Return mNumTrypticTerminii
+        End Get
+        Set(value As Short)
+            mNumTrypticTerminii = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Peptide sequence, including any modification symbols that were assigned by the search engine
-	''' For example, R.AAS*PQDLAGGYTSSLACHR.A
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property Peptide() As String
-		Get
-			Return mPeptide
-		End Get
-	End Property
+    ''' <summary>
+    ''' Peptide sequence, including any modification symbols that were assigned by the search engine
+    ''' For example, R.AAS*PQDLAGGYTSSLACHR.A
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property Peptide() As String
+        Get
+            Return mPeptide
+        End Get
+    End Property
 
-	''' <summary>
-	''' Peptide residues without any modification symbols or flanking residues
-	''' For example, AASPQDLAGGYTSSLACHR
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property PeptideCleanSequence() As String
-		Get
-			Return mPeptideCleanSequence
-		End Get
-	End Property
+    ''' <summary>
+    ''' Peptide residues without any modification symbols or flanking residues
+    ''' For example, AASPQDLAGGYTSSLACHR
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property PeptideCleanSequence() As String
+        Get
+            Return mPeptideCleanSequence
+        End Get
+    End Property
 
-	''' <summary>
-	''' Computed monoisotopic mass (uncharged, theoretical mass, including mods)
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
+    ''' <summary>
+    ''' Computed monoisotopic mass (uncharged, theoretical mass, including mods)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
     ''' <remarks>This mass is computed by PHRP using the PrecursorNeutralMass plus any modification masses associated with the peptide's residues</remarks>
-	Public Property PeptideMonoisotopicMass As Double
-		Get
-			Return mPeptideMonoisotopicMass
-		End Get
-		Set(value As Double)
-			mPeptideMonoisotopicMass = value
-		End Set
-	End Property
+    Public Property PeptideMonoisotopicMass As Double
+        Get
+            Return mPeptideMonoisotopicMass
+        End Get
+        Set(value As Double)
+            mPeptideMonoisotopicMass = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Peptide sequence where all modified residues have the modification masses displayed as numeric values
-	''' For example, R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property PeptideWithNumericMods() As String
-		Get
-			Return mPeptideWithNumericMods
-		End Get
-		Set(value As String)
-			If String.IsNullOrEmpty(value) Then
-				mPeptideWithNumericMods = String.Empty
-			Else
-				mPeptideWithNumericMods = value
-			End If
-		End Set
-	End Property
+    ''' <summary>
+    ''' Peptide sequence where all modified residues have the modification masses displayed as numeric values
+    ''' For example, R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property PeptideWithNumericMods() As String
+        Get
+            Return mPeptideWithNumericMods
+        End Get
+        Set(value As String)
+            If String.IsNullOrEmpty(value) Then
+                mPeptideWithNumericMods = String.Empty
+            Else
+                mPeptideWithNumericMods = value
+            End If
+        End Set
+    End Property
 
-	''' <summary>
-	''' First protein associated with this peptide
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks>Retrieve full list of proteins using the Proteins property</remarks>
-	Public ReadOnly Property ProteinFirst() As String
-		Get
-			If mProteins.Count = 0 Then
-				Return String.Empty
-			Else
-				Return mProteins(0)
-			End If
-		End Get
-	End Property
+    ''' <summary>
+    ''' First protein associated with this peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Retrieve full list of proteins using the Proteins property</remarks>
+    Public ReadOnly Property ProteinFirst() As String
+        Get
+            If mProteins.Count = 0 Then
+                Return String.Empty
+            Else
+                Return mProteins(0)
+            End If
+        End Get
+    End Property
 
-	''' <summary>
-	''' Uncharged monoisotopic mass of the precursor (observed mass based on m/z and charge)
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
+    ''' <summary>
+    ''' Uncharged monoisotopic mass of the precursor (observed mass based on m/z and charge)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
     ''' <remarks>This mass is based on the mass or m/z value reported by the search engine</remarks>
-	Public Property PrecursorNeutralMass As Double
-		Get
-			Return mPrecursorNeutralMass
-		End Get
-		Set(value As Double)
-			mPrecursorNeutralMass = value
-		End Set
-	End Property
+    Public Property PrecursorNeutralMass As Double
+        Get
+            Return mPrecursorNeutralMass
+        End Get
+        Set(value As Double)
+            mPrecursorNeutralMass = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' List of proteins associated with this peptide
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property Proteins() As List(Of String)
-		Get
-			Return mProteins
-		End Get
-	End Property
+    ''' <summary>
+    ''' List of proteins associated with this peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property Proteins() As List(Of String)
+        Get
+            Return mProteins
+        End Get
+    End Property
 
-	Public ReadOnly Property ProteinDetails() As Dictionary(Of String, clsProteinInfo)
-		Get
-			Return mProteinDetails
-		End Get
-	End Property
+    Public ReadOnly Property ProteinDetails() As Dictionary(Of String, clsProteinInfo)
+        Get
+            Return mProteinDetails
+        End Get
+    End Property
 
-	''' <summary>
-	''' ResultID of this peptide (typically assigned by the search engine)
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property ResultID As Integer
-		Get
-			Return mResultID
-		End Get
-		Set(value As Integer)
-			mResultID = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' ResultID of this peptide (typically assigned by the search engine)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ResultID As Integer
+        Get
+            Return mResultID
+        End Get
+        Set(value As Integer)
+            mResultID = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' List of scans that were combined prior to identifying this peptide
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public ReadOnly Property ScanList() As SortedSet(Of Integer)
-		Get
-			Return mScanList
-		End Get
-	End Property
+    ''' <summary>
+    ''' List of scans that were combined prior to identifying this peptide
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property ScanList() As SortedSet(Of Integer)
+        Get
+            Return mScanList
+        End Get
+    End Property
 
-	''' <summary>
-	''' Scan number of the mass spectrum in which this peptide was identified
-	''' Will automatically update ScanList if it does not yet contain this scan number
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property ScanNumber As Integer
-		Get
-			Return mScanNumber
-		End Get
-		Set(value As Integer)
-			mScanNumber = value
-			If Not mScanList.Contains(value) Then
-				mScanList.Add(value)
-			End If
-		End Set
-	End Property
+    ''' <summary>
+    ''' Scan number of the mass spectrum in which this peptide was identified
+    ''' Will automatically update ScanList if it does not yet contain this scan number
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property ScanNumber As Integer
+        Get
+            Return mScanNumber
+        End Get
+        Set(value As Integer)
+            mScanNumber = value
+            If Not mScanList.Contains(value) Then
+                mScanList.Add(value)
+            End If
+        End Set
+    End Property
 
-	Public ReadOnly Property ScanNumberStart As Integer
-		Get
-			Return mScanList.Min()
-		End Get
-	End Property
+    Public ReadOnly Property ScanNumberStart As Integer
+        Get
+            Return mScanList.Min()
+        End Get
+    End Property
 
-	Public ReadOnly Property ScanNumberEnd As Integer
-		Get
-			Return mScanList.Max()
-		End Get
-	End Property
+    Public ReadOnly Property ScanNumberEnd As Integer
+        Get
+            Return mScanList.Max()
+        End Get
+    End Property
 
-	''' <summary>
-	''' Rank of this peptide in the given spectrum
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks>Top scoring peptide is rank 1, next lowest score is rank 2, etc.</remarks>
-	Public Property ScoreRank As Integer
-		Get
-			Return mScoreRank
-		End Get
-		Set(value As Integer)
-			mScoreRank = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Rank of this peptide in the given spectrum
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>Top scoring peptide is rank 1, next lowest score is rank 2, etc.</remarks>
+    Public Property ScoreRank As Integer
+        Get
+            Return mScoreRank
+        End Get
+        Set(value As Integer)
+            mScoreRank = value
+        End Set
+    End Property
 
-	''' <summary>
-	''' Sequence ID value assigned by PHRP
-	''' Required for looking up information from the SeqInfo files
-	''' </summary>
-	''' <value></value>
-	''' <returns></returns>
-	''' <remarks></remarks>
-	Public Property SeqID As Integer
-		Get
-			Return mSeqID
-		End Get
-		Set(value As Integer)
-			mSeqID = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' Sequence ID value assigned by PHRP
+    ''' Required for looking up information from the SeqInfo files
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property SeqID As Integer
+        Get
+            Return mSeqID
+        End Get
+        Set(value As Integer)
+            mSeqID = value
+        End Set
+    End Property
 
 #End Region
 
-	''' <summary>
-	''' Constructor; auto-calls Clear()
-	''' </summary>
-	''' <remarks></remarks>
-	Public Sub New()
-		mScanList = New SortedSet(Of Integer)
-		mProteins = New List(Of String)
-		mProteinDetails = New Dictionary(Of String, clsProteinInfo)(StringComparer.CurrentCultureIgnoreCase)
-		mModifiedPeptideResidues = New List(Of clsAminoAcidModInfo)
-		mAdditionalScores = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
-		Me.Clear()
-	End Sub
+    ''' <summary>
+    ''' Constructor; auto-calls Clear()
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub New()
+        mScanList = New SortedSet(Of Integer)
+        mProteins = New List(Of String)
+        mProteinDetails = New Dictionary(Of String, clsProteinInfo)(StringComparer.CurrentCultureIgnoreCase)
+        mModifiedPeptideResidues = New List(Of clsAminoAcidModInfo)
+        mAdditionalScores = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
+        Me.Clear()
+    End Sub
 
     Public Sub AddCombinedScan(intScanNumber As Integer)
         If Not mScanList.Contains(intScanNumber) Then
@@ -761,25 +761,25 @@ Public Class clsPSM
 
     End Function
 
-	''' <summary>
-	''' Auto-determine the number of missed cleavages, cleavage state, and number of tryptic terminii based on the peptide sequence
-	''' </summary>
-	''' <param name="objCleavageStateCalculator"></param>
-	''' <remarks></remarks>
-	Public Sub UpdateCleavageInfo(objCleavageStateCalculator As clsPeptideCleavageStateCalculator)
+    ''' <summary>
+    ''' Auto-determine the number of missed cleavages, cleavage state, and number of tryptic terminii based on the peptide sequence
+    ''' </summary>
+    ''' <param name="objCleavageStateCalculator"></param>
+    ''' <remarks></remarks>
+    Public Sub UpdateCleavageInfo(objCleavageStateCalculator As clsPeptideCleavageStateCalculator)
 
-		mNumMissedCleavages = objCleavageStateCalculator.ComputeNumberOfMissedCleavages(mPeptide)
+        mNumMissedCleavages = objCleavageStateCalculator.ComputeNumberOfMissedCleavages(mPeptide)
 
-		mCleavageState = objCleavageStateCalculator.ComputeCleavageState(mPeptide)
+        mCleavageState = objCleavageStateCalculator.ComputeCleavageState(mPeptide)
 
-		If mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full Then
-			mNumTrypticTerminii = 2
-		ElseIf mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial Then
-			mNumTrypticTerminii = 1
-		Else
-			mNumTrypticTerminii = 0
-		End If
+        If mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full Then
+            mNumTrypticTerminii = 2
+        ElseIf mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial Then
+            mNumTrypticTerminii = 1
+        Else
+            mNumTrypticTerminii = 0
+        End If
 
-	End Sub
+    End Sub
 
 End Class

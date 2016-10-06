@@ -31,10 +31,10 @@ Option Strict On
 Public Class clsModificationDefinition
 
 #Region "Constants and Enums"
-	Public Const LAST_RESORT_MODIFICATION_SYMBOL As Char = "_"c							 ' The underscore is used if all of the DEFAULT_MODIFICATION_SYMBOLS are used up
-	Public Const NO_SYMBOL_MODIFICATION_SYMBOL As Char = "-"c
-	Public Const UNKNOWN_MOD_BASE_NAME As String = "UnkMod"
-	Public Const INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME As String = UNKNOWN_MOD_BASE_NAME & "00"
+    Public Const LAST_RESORT_MODIFICATION_SYMBOL As Char = "_"c                          ' The underscore is used if all of the DEFAULT_MODIFICATION_SYMBOLS are used up
+    Public Const NO_SYMBOL_MODIFICATION_SYMBOL As Char = "-"c
+    Public Const UNKNOWN_MOD_BASE_NAME As String = "UnkMod"
+    Public Const INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME As String = UNKNOWN_MOD_BASE_NAME & "00"
 
     Public Enum eModificationTypeConstants As Integer
         ''' <summary>

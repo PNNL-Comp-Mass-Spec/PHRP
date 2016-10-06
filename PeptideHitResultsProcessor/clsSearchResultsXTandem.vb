@@ -173,9 +173,9 @@ Public Class clsSearchResultsXTandem
         mPeptideDeltaMassCorrectedPpm = 0
     End Sub
 
-	Public Sub ComputeDelMCorrectedXT()
+    Public Sub ComputeDelMCorrectedXT()
 
-		Dim dblDelM As Double
+        Dim dblDelM As Double
         Dim intCorrectionCount = 0
 
         Dim dblPrecursorMonoMass As Double
@@ -208,7 +208,7 @@ Public Class clsSearchResultsXTandem
             mPeptideDeltaMassCorrectedPpm = 0
         End If
 
-	End Sub
+    End Sub
 
     Protected Sub ComputePeptideDeltaCn2()
         Try

@@ -11,11 +11,11 @@ Public Class clsProteinInfo
     Private mResidueStart As Integer                        ' Residue number in the protein at which this sequence starts
     Private mResidueEnd As Integer                          ' Residue number in the protein at which this sequence ends
 
-	Public ReadOnly Property ProteinName As String
-		Get
-			Return mProteinName
-		End Get
-	End Property
+    Public ReadOnly Property ProteinName As String
+        Get
+            Return mProteinName
+        End Get
+    End Property
 
     ' ReSharper disable once ConvertToVbAutoProperty
     Public ReadOnly Property CleavageState As ePeptideCleavageStateConstants
@@ -24,31 +24,31 @@ Public Class clsProteinInfo
         End Get
     End Property
 
-	Public ReadOnly Property ResidueStart As Integer
-		Get
-			Return mResidueStart
-		End Get
-	End Property
+    Public ReadOnly Property ResidueStart As Integer
+        Get
+            Return mResidueStart
+        End Get
+    End Property
 
-	Public ReadOnly Property ResidueEnd As Integer
-		Get
-			Return mResidueEnd
-		End Get
-	End Property
-
-    ' ReSharper disable once ConvertToVbAutoProperty
-	Public ReadOnly Property SeqID As Integer
-		Get
-			Return mSeqID
-		End Get
-	End Property
+    Public ReadOnly Property ResidueEnd As Integer
+        Get
+            Return mResidueEnd
+        End Get
+    End Property
 
     ' ReSharper disable once ConvertToVbAutoProperty
-	Public ReadOnly Property TerminusState As ePeptideTerminusStateConstants
-		Get
-			Return mTerminusState
-		End Get
-	End Property
+    Public ReadOnly Property SeqID As Integer
+        Get
+            Return mSeqID
+        End Get
+    End Property
+
+    ' ReSharper disable once ConvertToVbAutoProperty
+    Public ReadOnly Property TerminusState As ePeptideTerminusStateConstants
+        Get
+            Return mTerminusState
+        End Get
+    End Property
 
     ''' <summary>
     ''' Constructor
