@@ -41,10 +41,23 @@ Public Class clsMSGFDBResultsProcessor
     Public Const N_TERMINUS_SYMBOL_MSGFDB As String = "_."
     Public Const C_TERMINUS_SYMBOL_MSGFDB As String = "._"
 
-    ' Filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_PVALUE_THRESHOLD
-    ' These filters are also used by MSPathFinder
+    <Obsolete("Used by MSGF-DB; renamed to SpecEValue in MSGF+")>
     Public Const DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD As Single = 0.0001
+
+    <Obsolete("Used by MSGF-DB; renamed to EValue in MSGF+")>
     Public Const DEFAULT_SYN_FILE_PVALUE_THRESHOLD As Single = 0.95
+
+    ''' <summary>
+    ''' Filter passing peptides have MSGFDB_SpecEValue less than 0.0001 Or EValue less than DEFAULT_SYN_FILE_EVALUE_THRESHOLD
+    ''' This filter is also used by MSPathFinder
+    ''' </summary>
+    Public Const DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD As Single = 0.0001
+
+    ''' <summary>
+    ''' Filter passing peptides have MSGFDB_SpecEValue less than 0.0001 Or EValue less than DEFAULT_SYN_FILE_EVALUE_THRESHOLD
+    ''' This filter is also used by MSPathFinder
+    ''' </summary>
+    Public Const DEFAULT_SYN_FILE_EVALUE_THRESHOLD As Single = 0.95
 
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
@@ -142,9 +155,9 @@ Public Class clsMSGFDBResultsProcessor
         Public DeNovoScore As String
         Public MSGFScore As String
         Public SpecProb As String                   ' Smaller values are better scores (e.g. 1E-9 is better than 1E-6); holds SpecEValue for MSGF+
-        Public SpecProbNum As Double
+        Public SpecProbNum As Double                ' Holds SpecEValue for MSGF+
         Public PValue As String                     ' Smaller values are better scores (e.g. 1E-7 is better than 1E-3); holds EValue for MSGF+
-        Public PValueNum As Double
+        Public PValueNum As Double                  ' Holds EValue for MSGF+
         Public FDR As String                    ' Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MSGF+
         Public PepFDR As String                 ' Only used when target/decoy search was used; holds PepQValue for MSGF+
         Public RankSpecProb As Integer
@@ -2647,10 +2660,10 @@ Public Class clsMSGFDBResultsProcessor
         ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
 
         ' Now store or write out the matches that pass the filters
-        ' By default, filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+        ' By default, filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_EVALUE_THRESHOLD
         For intIndex = intStartIndex To intEndIndex
-            If lstSearchResults(intIndex).PValueNum <= mMSGFDBSynopsisFilePValueThreshold OrElse
-               lstSearchResults(intIndex).SpecProbNum <= mMSGFDBSynopsisFileSpecProbThreshold Then
+            If lstSearchResults(intIndex).PValueNum <= MSGFDBSynopsisFileEValueThreshold OrElse
+               lstSearchResults(intIndex).SpecProbNum <= MSGFDBSynopsisFileSpecEValueThreshold Then
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If
         Next intIndex
