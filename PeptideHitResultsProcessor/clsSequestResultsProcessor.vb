@@ -48,7 +48,7 @@ Public Class clsSequestResultsProcessor
     Private Const SEQUEST_SYN_FILE_MIN_COL_COUNT As Integer = 5
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
-    ' These columns correspond to the tab-delimited file created directly by MSGF-DB
+    ' These columns correspond to the tab-delimited file created directly by SEQUEST
     Protected Const SequestSynopsisFileColCount As Integer = 27
     Public Enum eSequestSynopsisFileColumns As Integer
         RowIndex = 0

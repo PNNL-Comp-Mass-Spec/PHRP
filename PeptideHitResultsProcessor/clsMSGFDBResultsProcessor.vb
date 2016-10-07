@@ -4,7 +4,7 @@ Option Strict On
 ' a tab-delimited text file with the data.  It will insert modification symbols
 ' into the peptide sequences for modified peptides.
 '
-' The modification definition information is determined from the MSGF-DB parameter file
+' The modification definition information is determined from the MSGF+ parameter file
 '
 ' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -76,7 +76,7 @@ Public Class clsMSGFDBResultsProcessor
 
     Private Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
 
-    ' These columns correspond to the tab-delimited file created directly by MSGF-DB
+    ' These columns correspond to the tab-delimited file created directly by MSGF+
     Private Const MSGFDBResultsFileColCount As Integer = 20
     Public Enum eMSGFDBResultsFileColumns As Integer
         SpectrumFile = 0
@@ -715,7 +715,7 @@ Public Class clsMSGFDBResultsProcessor
     End Function
 
     ''' <summary>
-    ''' This routine creates a first hits file or synopsis file from the output from MSGF-DB
+    ''' This routine creates a first hits file or synopsis file from the output from MSGF+
     ''' The synopsis file includes every result with a p-value below a set threshold or a SpecProb below a certain threshold
     ''' The first-hits file includes the results with the lowest SpecProb (for each scan and charge)
     ''' </summary>
@@ -920,7 +920,7 @@ Public Class clsMSGFDBResultsProcessor
     End Function
 
     ''' <summary>
-    ''' Extracts mod info from either a MSGF-DB param file or from a MSGFDB_Mods.txt file
+    ''' Extracts mod info from either a MSGF+ param file or from a MSGFDB_Mods.txt file
     ''' </summary>
     ''' <param name="strMSGFDBParamFilePath"></param>
     ''' <param name="lstModInfo"></param>
@@ -953,7 +953,7 @@ Public Class clsMSGFDBResultsProcessor
     End Function
 
     ''' <summary>
-    ''' Extracts parent mass tolerance from a MSGF-DB parameter file
+    ''' Extracts parent mass tolerance from a MSGF+ parameter file
     ''' </summary>
     ''' <param name="strMSGFDBParamFilePath"></param>	
     ''' <returns>Parent mass tolerance info.  Tolerances will be 0 if an error occurs</returns>
@@ -1039,7 +1039,7 @@ Public Class clsMSGFDBResultsProcessor
             Console.WriteLine()
 
         Catch ex As Exception
-            SetErrorMessage("Error reading ParentMass tolerance from the MSGF-DB parameter file (" & Path.GetFileName(strMSGFDBParamFilePath) & "): " & ex.Message)
+            SetErrorMessage("Error reading ParentMass tolerance from the MSGF+ parameter file (" & Path.GetFileName(strMSGFDBParamFilePath) & "): " & ex.Message)
             SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
         End Try
 
@@ -1164,10 +1164,10 @@ Public Class clsMSGFDBResultsProcessor
 
         Dim strPreviousSpecProb As String
 
-        ' Note that MSGF-DB synopsis files are normally sorted on SpecProb value, ascending
+        ' Note that MSGF+ synopsis files are normally sorted on SpecProb value, ascending
         ' In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
         '  we will keep track of the scan, charge, and peptide information parsed for each unique SpecProb encountered
-        ' Although this was a possiblity with Inspect, it likely never occurs for MSGF-DB
+        ' Although this was a possiblity with Inspect, it likely never occurs for MSGF+
         '  But, we'll keep the check in place just in case
 
         Dim htPeptidesFoundForSpecProbLevel As Hashtable
@@ -1378,7 +1378,7 @@ Public Class clsMSGFDBResultsProcessor
       htScanGroupCombo As IDictionary(Of String, Boolean),
       lstSpecIdToIndex As IDictionary(Of String, Integer)) As Boolean
 
-        ' Parses an entry from the MSGF-DB results file
+        ' Parses an entry from the MSGF+ results file
 
         Dim udtSearchResult = New udtMSGFDBSearchResultType
         Dim strSplitLine() As String = Nothing
@@ -1663,12 +1663,12 @@ Public Class clsMSGFDBResultsProcessor
             End If
 
         Catch ex As Exception
-            ' Error parsing this row from the MSGF-DB results file
+            ' Error parsing this row from the MSGF+ results file
             If strErrorLog.Length < MAX_ERROR_LOG_LENGTH Then
                 If Not strSplitLine Is Nothing AndAlso strSplitLine.Length > 0 Then
-                    strErrorLog &= "Error parsing MSGF-DB Results in ParseMSGFDBResultsFileEntry for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
+                    strErrorLog &= "Error parsing MSGF+ Results in ParseMSGFDBResultsFileEntry for RowIndex '" & strSplitLine(0) & "'" & ControlChars.NewLine
                 Else
-                    strErrorLog &= "Error parsing MSGF-DB Results in ParseMSGFDBResultsFileEntry" & ControlChars.NewLine
+                    strErrorLog &= "Error parsing MSGF+ Results in ParseMSGFDBResultsFileEntry" & ControlChars.NewLine
                 End If
             End If
             blnValidSearchResult = False
@@ -1891,7 +1891,7 @@ Public Class clsMSGFDBResultsProcessor
 
                     .PeptideDeltaMass = .MSGFPlusComputedDelM
 
-                    ' Note: .PeptideDeltaMass is stored in the MSGF-DB results file as "Observed_Mass - Theoretical_Mass"
+                    ' Note: .PeptideDeltaMass is stored in the MSGF+ results file as "Observed_Mass - Theoretical_Mass"
                     ' However, in MTS .peptideDeltaMass is "Theoretical - Observed"
                     ' Therefore, we will negate .peptideDeltaMass
                     Try
@@ -2058,7 +2058,7 @@ Public Class clsMSGFDBResultsProcessor
                 lstMSGFDBModInfo = New List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)
                 lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
-                ' Load the MSGF-DB Parameter File so that we can determine the modification names and masses
+                ' Load the MSGF+ Parameter File so that we can determine the modification names and masses
                 ' If the MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
                 Dim success = ExtractModInfoFromParamFile(SearchToolParameterFilePath, lstMSGFDBModInfo)
                 If Not success Then
