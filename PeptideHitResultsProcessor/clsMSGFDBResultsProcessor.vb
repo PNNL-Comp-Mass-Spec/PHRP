@@ -158,8 +158,9 @@ Public Class clsMSGFDBResultsProcessor
         Public SpecEValueNum As Double
         Public EValue As String                     ' Smaller values are better scores (e.g. 1E-7 is better than 1E-3); MSGF+ renamed this from PValue to EValue
         Public EValueNum As Double
-        Public QValue As String                    ' Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MSGF+
-        Public PepQValue As String                 ' Only used when target/decoy search was used; holds PepQValue for MSGF+
+        Public QValue As String                     ' Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MSGF+
+        Public QValueNum As Double                  ' Numeric equivalent of QValue
+        Public PepQValue As String                  ' Only used when target/decoy search was used; holds PepQValue for MSGF+
         Public RankSpecProb As Integer
         Public IMSScan As Integer
         Public IMSDriftTime As String
@@ -186,6 +187,7 @@ Public Class clsMSGFDBResultsProcessor
             EValue = String.Empty
             EValueNum = 0
             QValue = String.Empty
+            QValueNum = 0
             PepQValue = String.Empty
             RankSpecProb = 0
             IMSScan = 0
@@ -1614,6 +1616,8 @@ Public Class clsMSGFDBResultsProcessor
                     If Not Double.TryParse(.EValue, .EValueNum) Then .EValueNum = 0
 
                     blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue), .QValue)
+                    If Not Double.TryParse(.QValue, .QValueNum) Then .QValueNum = 0
+
                     If blnTargetDecoyFDRValid Then
                         GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue), .PepQValue)
                     Else
@@ -2663,7 +2667,8 @@ Public Class clsMSGFDBResultsProcessor
         ' By default, filter passing peptides have MSGFDB_SpecEValue <= 5E-7 Or EValue less than 0.75 or QValue less than 1% (but not 0)
         For intIndex = intStartIndex To intEndIndex
             If lstSearchResults(intIndex).EValueNum <= MSGFDBSynopsisFileEValueThreshold OrElse
-               lstSearchResults(intIndex).SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold Then
+               lstSearchResults(intIndex).SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold OrElse
+               lstSearchResults(intIndex).QValueNum > 0 AndAlso lstSearchResults(intIndex).QValueNum < 0.01 Then
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If
         Next intIndex
@@ -2837,13 +2842,13 @@ Public Class clsMSGFDBResultsProcessor
                 ElseIf x.ChargeNum < y.ChargeNum Then
                     Return -1
                 Else
-                    ' Charge is the same; check SpecProb
+                    ' Charge is the same; check SpecEValue
                     If x.SpecEValueNum > y.SpecEValueNum Then
                         Return 1
                     ElseIf x.SpecEValueNum < y.SpecEValueNum Then
                         Return -1
                     Else
-                        ' SpecProb is the same; check peptide
+                        ' SpecEValue is the same; check peptide
                         If x.Peptide > y.Peptide Then
                             Return 1
                         ElseIf x.Peptide < y.Peptide Then
@@ -2876,7 +2881,7 @@ Public Class clsMSGFDBResultsProcessor
             ElseIf x.SpecEValueNum < y.SpecEValueNum Then
                 Return -1
             Else
-                ' SpecProbNum is the same; check scan number
+                ' SpecEValueNum is the same; check scan number
                 If x.ScanNum > y.ScanNum Then
                     Return 1
                 ElseIf x.ScanNum < y.ScanNum Then
