@@ -154,12 +154,12 @@ Public Class clsMSGFDBResultsProcessor
         Public NTT As String
         Public DeNovoScore As String
         Public MSGFScore As String
-        Public SpecProb As String                   ' Smaller values are better scores (e.g. 1E-9 is better than 1E-6); holds SpecEValue for MSGF+
-        Public SpecProbNum As Double                ' Holds SpecEValue for MSGF+
-        Public PValue As String                     ' Smaller values are better scores (e.g. 1E-7 is better than 1E-3); holds EValue for MSGF+
-        Public PValueNum As Double                  ' Holds EValue for MSGF+
-        Public FDR As String                    ' Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MSGF+
-        Public PepFDR As String                 ' Only used when target/decoy search was used; holds PepQValue for MSGF+
+        Public SpecEValue As String              ' Smaller values are better scores (e.g. 1E-9 is better than 1E-6); MSGF+ renamed this from SpecProb to SpecEValue
+        Public SpecEValueNum As Double
+        Public EValue As String                     ' Smaller values are better scores (e.g. 1E-7 is better than 1E-3); MSGF+ renamed this from PValue to EValue
+        Public EValueNum As Double
+        Public QValue As String                    ' Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MSGF+
+        Public PepQValue As String                 ' Only used when target/decoy search was used; holds PepQValue for MSGF+
         Public RankSpecProb As Integer
         Public IMSScan As Integer
         Public IMSDriftTime As String
@@ -181,12 +181,12 @@ Public Class clsMSGFDBResultsProcessor
             NTT = String.Empty
             DeNovoScore = String.Empty
             MSGFScore = String.Empty
-            SpecProb = String.Empty
-            SpecProbNum = 0
-            PValue = String.Empty
-            PValueNum = 0
-            FDR = String.Empty
-            PepFDR = String.Empty
+            SpecEValue = String.Empty
+            SpecEValueNum = 0
+            EValue = String.Empty
+            EValueNum = 0
+            QValue = String.Empty
+            PepQValue = String.Empty
             RankSpecProb = 0
             IMSScan = 0
             IMSDriftTime = String.Empty
@@ -418,7 +418,7 @@ Public Class clsMSGFDBResultsProcessor
             dctResultsSubset.Add(intIndex, lstSearchResults(intIndex))
         Next
 
-        Dim lstResultsBySpecProb = (From item In dctResultsSubset Select item Order By item.Value.SpecProbNum).ToList()
+        Dim lstResultsBySpecProb = (From item In dctResultsSubset Select item Order By item.Value.SpecEValueNum).ToList()
 
         Dim dblLastValue As Double
         Dim intCurrentRank As Integer = -1
@@ -427,11 +427,11 @@ Public Class clsMSGFDBResultsProcessor
             Dim currentResult = lstSearchResults(entry.Key)
 
             If intCurrentRank < 0 Then
-                dblLastValue = currentResult.SpecProbNum
+                dblLastValue = currentResult.SpecEValueNum
                 intCurrentRank = 1
             Else
-                If Math.Abs(currentResult.SpecProbNum - dblLastValue) > Double.Epsilon Then
-                    dblLastValue = currentResult.SpecProbNum
+                If Math.Abs(currentResult.SpecEValueNum - dblLastValue) > Double.Epsilon Then
+                    dblLastValue = currentResult.SpecEValueNum
                     intCurrentRank += 1
                 End If
             End If
@@ -469,7 +469,7 @@ Public Class clsMSGFDBResultsProcessor
                 ElseIf mNumericModErrors = 250 Then
                     SetErrorMessage("Too many numeric mod mass results have been found; suppressing further logging")
                 End If
-                
+
                 Return False
             End If
 
@@ -1260,7 +1260,7 @@ Public Class clsMSGFDBResultsProcessor
                         If blnValidSearchResult Then
                             strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.Charge
 
-                            If objSearchResult.SpecProb = strPreviousSpecProb Then
+                            If objSearchResult.SpecEValue = strPreviousSpecProb Then
                                 ' New result has the same SpecProb as the previous result
                                 ' See if htPeptidesFoundForSpecProbLevel contains the peptide, scan and charge
 
@@ -1277,7 +1277,7 @@ Public Class clsMSGFDBResultsProcessor
                                 htPeptidesFoundForSpecProbLevel.Clear()
 
                                 ' Update strPreviousSpecProb
-                                strPreviousSpecProb = objSearchResult.SpecProb
+                                strPreviousSpecProb = objSearchResult.SpecEValue
 
                                 ' Append a new entry to htPeptidesFoundForSpecProbLevel
                                 htPeptidesFoundForSpecProbLevel.Add(strKey, 1)
@@ -1607,17 +1607,17 @@ Public Class clsMSGFDBResultsProcessor
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.DeNovoScore), .DeNovoScore)
                     GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.MSGFScore), .MSGFScore)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecProb_EValue), .SpecProb)
-                    If Not Double.TryParse(.SpecProb, .SpecProbNum) Then .SpecProbNum = 0
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecProb_EValue), .SpecEValue)
+                    If Not Double.TryParse(.SpecEValue, .SpecEValueNum) Then .SpecEValueNum = 0
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue_EValue), .PValue)
-                    If Not Double.TryParse(.PValue, .PValueNum) Then .PValueNum = 0
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue_EValue), .EValue)
+                    If Not Double.TryParse(.EValue, .EValueNum) Then .EValueNum = 0
 
-                    blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue), .FDR)
+                    blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue), .QValue)
                     If blnTargetDecoyFDRValid Then
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue), .PepFDR)
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue), .PepQValue)
                     Else
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.EFDR), .FDR)
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.EFDR), .QValue)
                     End If
 
                     GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IsotopeError), .IsotopeError)
@@ -1886,10 +1886,10 @@ Public Class clsMSGFDBResultsProcessor
                     GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.Protein), .ProteinName)
                     .MultipleProteinCount = "0"
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.DelM), .MSGFDbComputedDelM)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.DelMPPM), .MSGFDbComputedDelMPPM)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.DelM), .MSGFPlusComputedDelM)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.DelMPPM), .MSGFPlusComputedDelMPPM)
 
-                    .PeptideDeltaMass = .MSGFDbComputedDelM
+                    .PeptideDeltaMass = .MSGFPlusComputedDelM
 
                     ' Note: .PeptideDeltaMass is stored in the MSGF-DB results file as "Observed_Mass - Theoretical_Mass"
                     ' However, in MTS .peptideDeltaMass is "Theoretical - Observed"
@@ -1925,15 +1925,15 @@ Public Class clsMSGFDBResultsProcessor
                     GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.NTT), .NTT)
                     GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.DeNovoScore), .DeNovoScore)
                     GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.MSGFScore), .MSGFScore)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.SpecProb_EValue), .SpecProb)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.RankSpecProb), .RankSpecProb)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.PValue_EValue), .PValue)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.SpecProb_EValue), .SpecEValue)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.RankSpecProb), .RankSpecEValue)
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.PValue_EValue), .EValue)
 
-                    blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.FDR_QValue), .FDR)
+                    blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.FDR_QValue), .QValue)
                     If blnTargetDecoyFDRValid Then
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.PepFDR_PepQValue), .PepFDR)
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.PepFDR_PepQValue), .PepQValue)
                     Else
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.EFDR), .FDR)
+                        GetColumnValue(strSplitLine, intColumnMapping(eMSFDBSynFileColumns.EFDR), .QValue)
                     End If
 
                     If intColumnMapping(eMSFDBSynFileColumns.IsotopeError) >= 0 Then
@@ -2662,8 +2662,8 @@ Public Class clsMSGFDBResultsProcessor
         ' Now store or write out the matches that pass the filters
         ' By default, filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_EVALUE_THRESHOLD
         For intIndex = intStartIndex To intEndIndex
-            If lstSearchResults(intIndex).PValueNum <= MSGFDBSynopsisFileEValueThreshold OrElse
-               lstSearchResults(intIndex).SpecProbNum <= MSGFDBSynopsisFileSpecEValueThreshold Then
+            If lstSearchResults(intIndex).EValueNum <= MSGFDBSynopsisFileEValueThreshold OrElse
+               lstSearchResults(intIndex).SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold Then
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If
         Next intIndex
@@ -2788,15 +2788,15 @@ Public Class clsMSGFDBResultsProcessor
             lstData.Add(udtSearchResult.NTT)
             lstData.Add(udtSearchResult.DeNovoScore)
             lstData.Add(udtSearchResult.MSGFScore)
-            lstData.Add(udtSearchResult.SpecProb)
+            lstData.Add(udtSearchResult.SpecEValue)
             lstData.Add(udtSearchResult.RankSpecProb.ToString)
-            lstData.Add(udtSearchResult.PValue)
+            lstData.Add(udtSearchResult.EValue)
 
             If blnIncludeFDRandPepFDR Then
-                lstData.Add(udtSearchResult.FDR)
-                lstData.Add(udtSearchResult.PepFDR)
+                lstData.Add(udtSearchResult.QValue)
+                lstData.Add(udtSearchResult.PepQValue)
             ElseIf blnIncludeEFDR Then
-                lstData.Add(udtSearchResult.FDR)
+                lstData.Add(udtSearchResult.QValue)
                 lstData.Add("1")
             End If
 
@@ -2838,9 +2838,9 @@ Public Class clsMSGFDBResultsProcessor
                     Return -1
                 Else
                     ' Charge is the same; check SpecProb
-                    If x.SpecProbNum > y.SpecProbNum Then
+                    If x.SpecEValueNum > y.SpecEValueNum Then
                         Return 1
-                    ElseIf x.SpecProbNum < y.SpecProbNum Then
+                    ElseIf x.SpecEValueNum < y.SpecEValueNum Then
                         Return -1
                     Else
                         ' SpecProb is the same; check peptide
@@ -2871,9 +2871,9 @@ Public Class clsMSGFDBResultsProcessor
 
         Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
 
-            If x.SpecProbNum > y.SpecProbNum Then
+            If x.SpecEValueNum > y.SpecEValueNum Then
                 Return 1
-            ElseIf x.SpecProbNum < y.SpecProbNum Then
+            ElseIf x.SpecEValueNum < y.SpecEValueNum Then
                 Return -1
             Else
                 ' SpecProbNum is the same; check scan number
