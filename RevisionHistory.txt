@@ -1,5 +1,13 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6124; October 7, 2016
+	- Add properties MsgfPlusSpecEValueThreshold and MsgfPlusEValueThreshold to clsPeptideHitResultsProcRunner
+		- When running the executable, customize the filter thresholds using /MSGFPlusSpecEValue and /MSGFPlusEValue
+	- Use stricter data filters when creating synopsis files from MSGF+ and MSPathFinder results
+		- SpecEValue threshold changed from 1E-4 to 5E-7
+		- EValue threshold changed from 0.95 to 0.75
+	- Store results in the MSGF+ synopsis file if QValue is less than 1%, regardless of SpecEValue or EValue
+
 Version 1.5.6008; June 13, 2016
 	- Remove the dependency on ThermoRawFileReader in PHRPReader
 		- Added function ExtractParentIonMzFromFilterText

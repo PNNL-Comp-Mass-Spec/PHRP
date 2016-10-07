@@ -27,12 +27,12 @@ Public Class clsSearchResultsMSGFDB
 
     Public Property DeNovoScore As String
     Public Property MSGFScore As String
-    Public Property SpecEValue As String          ' SpecProb in MSGFDB; SpecEValue in MSGF+
+    Public Property SpecEValue As String        ' SpecProb in MSGFDB; SpecEValue in MSGF+
     Public Property RankSpecEValue As String
     Public Property EValue As String            ' PValue in MSGFDB; EValue in MSGF+
 
-    Public Property QValue As String           ' Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
-    Public Property PepQValue As String        ' Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+
+    Public Property QValue As String            ' Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
+    Public Property PepQValue As String         ' Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+
 
     Public Property PrecursorMZ As String
     Public Property MSGFPlusComputedDelM As String
