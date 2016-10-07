@@ -16,7 +16,7 @@ Option Strict On
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "October 6, 2016"
+    Public Const PROGRAM_DATE As String = "October 7, 2016"
 
     Private mInputFilePath As String
     Private mOutputFolderPath As String                         ' Optional
@@ -412,7 +412,7 @@ Module modMain
             Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]")
             Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]")
             Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]")
-            Console.WriteLine(" [/MSGFPlusSpecEValue:0.0001] [/MSGFPlusEValue:0.95]")
+            Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]")
             Console.WriteLine(" [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]")
             Console.WriteLine(" [/SynProb:0.05]")
             Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")

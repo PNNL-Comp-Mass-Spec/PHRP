@@ -27,7 +27,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "May 17, 2016"
+        MyBase.mFileDate = "October 7, 2016"
         mModMassRegEx = New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
         InitializeLocalVariables()
@@ -42,22 +42,22 @@ Public Class clsMSGFDBResultsProcessor
     Public Const C_TERMINUS_SYMBOL_MSGFDB As String = "._"
 
     <Obsolete("Used by MSGF-DB; renamed to SpecEValue in MSGF+")>
-    Public Const DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD As Single = 0.0001
+    Public Const DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD As Single = 0.0000005
 
     <Obsolete("Used by MSGF-DB; renamed to EValue in MSGF+")>
-    Public Const DEFAULT_SYN_FILE_PVALUE_THRESHOLD As Single = 0.95
+    Public Const DEFAULT_SYN_FILE_PVALUE_THRESHOLD As Single = 0.75
 
     ''' <summary>
-    ''' Filter passing peptides have MSGFDB_SpecEValue less than 0.0001 Or EValue less than DEFAULT_SYN_FILE_EVALUE_THRESHOLD
+    ''' Filter passing peptides have MSGFDB_SpecEValue less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
     ''' This filter is also used by MSPathFinder
     ''' </summary>
-    Public Const DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD As Single = 0.0001
+    Public Const DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD As Single = 0.0000005
 
     ''' <summary>
-    ''' Filter passing peptides have MSGFDB_SpecEValue less than 0.0001 Or EValue less than DEFAULT_SYN_FILE_EVALUE_THRESHOLD
+    ''' Filter passing peptides have MSGFDB_SpecEValue less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
     ''' This filter is also used by MSPathFinder
     ''' </summary>
-    Public Const DEFAULT_SYN_FILE_EVALUE_THRESHOLD As Single = 0.95
+    Public Const DEFAULT_SYN_FILE_EVALUE_THRESHOLD As Single = 0.75
 
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
@@ -2660,7 +2660,7 @@ Public Class clsMSGFDBResultsProcessor
         ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
 
         ' Now store or write out the matches that pass the filters
-        ' By default, filter passing peptides have MSGFDB_SpecEValue <= 0.0001 Or EValue <= DEFAULT_SYN_FILE_EVALUE_THRESHOLD
+        ' By default, filter passing peptides have MSGFDB_SpecEValue <= 5E-7 Or EValue less than 0.75 or QValue less than 1% (but not 0)
         For intIndex = intStartIndex To intEndIndex
             If lstSearchResults(intIndex).EValueNum <= MSGFDBSynopsisFileEValueThreshold OrElse
                lstSearchResults(intIndex).SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold Then

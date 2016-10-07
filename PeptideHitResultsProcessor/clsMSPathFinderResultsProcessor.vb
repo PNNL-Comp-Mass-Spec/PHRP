@@ -1232,8 +1232,8 @@ Public Class clsMSPathFinderResultsProcessor
         ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
 
         ' Now store the matches that pass the filters
-        '  Either SpecEValue < 0.0001
-        '  or     QValue < 5%
+        '  Either SpecEValue < 5E-07 (0.0000005)
+        '  or     QValue < 10
         For intIndex = intStartIndex To intEndIndex
             If lstSearchResults(intIndex).SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold OrElse
                lstSearchResults(intIndex).QValueNum < 0.1 Then
