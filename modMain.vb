@@ -40,8 +40,9 @@ Module modMain
     Private mCreateInspectOrMSGFDBFirstHitsFile As Boolean
     Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
 
-    Private mMsgfPlusSpecEValueThreshold As Single              ' Optional
-    Private mInspectSynopsisFilePValueThreshold As Single       ' Optional
+    Private mMsgfPlusEValueThreshold As Single
+    Private mMsgfPlusSpecEValueThreshold As Single
+    Private mInspectSynopsisFilePValueThreshold As Single
 
     Private mMODaMODPlusSynopsisFileProbabilityThreshold As Single
 
@@ -84,6 +85,7 @@ Module modMain
 
         mCreateProteinModsUsingPHRPDataFile = False
 
+        mMsgfPlusEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD
         mMsgfPlusSpecEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD
 
         ' These should default to True
@@ -136,6 +138,7 @@ Module modMain
 
                     .CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile
 
+                    .MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold
                     .MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold
 
                     .CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
@@ -240,7 +243,7 @@ Module modMain
         Dim lstValidParameters = New List(Of String) From {
             "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods", "F", "Fasta",
             "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
-            "SpecEValue", "SynPvalue", "InsFHT", "InsSyn", "SynProb",
+            "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPvalue", "InsFHT", "InsSyn", "SynProb",
             "S", "A", "R", "L", "Q"}
 
         Try
@@ -296,7 +299,15 @@ Module modMain
                         End If
                     End If
 
-                    If .RetrieveValueForParameter("SpecEValue", strValue) Then
+
+
+                    If .RetrieveValueForParameter("MSGFPlusEValue", strValue) Then
+                        If Single.TryParse(strValue, sngValue) Then
+                            mMsgfPlusEValueThreshold = sngValue
+                        End If
+                    End If
+
+                    If .RetrieveValueForParameter("MSGFPlusSpecEValue", strValue) Then
                         If Single.TryParse(strValue, sngValue) Then
                             mMsgfPlusSpecEValueThreshold = sngValue
                         End If
@@ -387,7 +398,7 @@ Module modMain
 
         Try
 
-            Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF-DB search result file, MSGF+ search result file, or MSAlign results file then creates a tab-delimited text file with the data in a standard format used at PNNL.")
+            Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF+ search result file, or MSAlign results file then creates a tab-delimited text file with the data in a standard format used at PNNL.")
             Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides. Parallel files will be created containing sequence info and modification details.")
             Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
             Console.WriteLine()
@@ -401,6 +412,7 @@ Module modMain
             Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]")
             Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]")
             Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]")
+            Console.WriteLine(" [/MSGFPlusSpecEValue:0.0001] [/MSGFPlusEValue:0.95]")
             Console.WriteLine(" [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]")
             Console.WriteLine(" [/SynProb:0.05]")
             Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
@@ -425,13 +437,16 @@ Module modMain
             Console.WriteLine("Use /UseExistingPepToProteinMapFile to use an existing _PepToProtMapMTS.txt file if it exists")
             Console.WriteLine()
             Console.WriteLine("Use /T to specify the file containing the mass correction tag info. This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).")
-            Console.WriteLine("Use /N to specify the parameter file provided to the search tool. This is only used when processing Inspect or MSGF-DB files.")
+            Console.WriteLine("Use /N to specify the parameter file provided to the search tool. This is only used when processing Inspect or MSGF+ files.")
             Console.WriteLine()
-            Console.WriteLine("When processing an MSGF+ results file, use /SpecEValue to customize the SpecEValue threshold used to determine which peptides are written to the the synopsis file. The default is /SpecEValue:0 (no filter)")
+
+            Console.WriteLine("When processing an MSGF+ results file, use /MSGFPlusSpecEValue and /MSGFPlusEValue to customize the thresholds used to determine which peptides are written to the the synopsis file")
+            Console.WriteLine("Defaults are /MSGFPlusSpecEValue:" & PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD &
+                              " and /MSGFPlusEValue:" & PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD)
             Console.WriteLine()
-            Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file. The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD.ToString() & " or an FScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD & " will also be included in the synopsis file.")
-            Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when processing Inspect or MSGF-DB results (default is /InsFHT:True)")
-            Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when processing Inspect or MSGF-DB results (default is /InsSyn:True)")
+            Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file. The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD & " or an FScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD & " will also be included in the synopsis file.")
+            Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when processing Inspect or MSGF+ results (default is /InsFHT:True)")
+            Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when processing Inspect or MSGF+ results (default is /InsSyn:True)")
             Console.WriteLine()
             Console.WriteLine("When processing a MODPlus or MODa results file, use /SynProb to customize the Probability threshold used to determine which peptides are written to the the synopsis file. The default is /Synprob:0.05")
             Console.WriteLine()

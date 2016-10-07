@@ -99,6 +99,8 @@ Public Class clsPeptideHitResultsProcRunner
 
     Public Property MODaMODPlusSynopsisFileProbabilityThreshold As Single
 
+    Public Property MsgfPlusEValueThreshold As Single
+
     Public Property MsgfPlusSpecEValueThreshold As Single
 
     Public Property ProteinModsFileIncludesReversedProteins As Boolean
@@ -175,6 +177,8 @@ Public Class clsPeptideHitResultsProcRunner
         InspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
         MODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+
+        MsgfPlusEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD
         MsgfPlusSpecEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD
 
         WarnMissingParameterFileSection = True
@@ -209,6 +213,7 @@ Public Class clsPeptideHitResultsProcRunner
 
             .MODaMODPlusSynopsisFileProbabilityThreshold = MODaMODPlusSynopsisFileProbabilityThreshold
 
+            .MSGFDBSynopsisFileEValueThreshold = MsgfPlusEValueThreshold
             .MSGFDBSynopsisFileSpecEValueThreshold = MsgfPlusSpecEValueThreshold
 
             .WarnMissingParameterFileSection = WarnMissingParameterFileSection
