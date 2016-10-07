@@ -1,9 +1,8 @@
 Option Strict On
 
-Imports System.Windows.Forms.VisualStyles
 ' This program processes search results from several LC-MS/MS search engines to
 ' determine the modifications present, determine the cleaveage and terminus state
-' of each peptide, and compute the monoisotopic mass of each peptide.  See 
+' of each peptide, and compute the monoisotopic mass of each peptide. See 
 ' clsSequestSynopsisFileProcessor and clsXTandemResultsConverter for 
 ' additional information
 '
@@ -17,7 +16,7 @@ Imports System.Windows.Forms.VisualStyles
 ' 
 
 Module modMain
-    Public Const PROGRAM_DATE As String = "June 13, 2016"
+    Public Const PROGRAM_DATE As String = "October 6, 2016"
 
     Private mInputFilePath As String
     Private mOutputFolderPath As String                         ' Optional
@@ -41,6 +40,7 @@ Module modMain
     Private mCreateInspectOrMSGFDBFirstHitsFile As Boolean
     Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
 
+    Private mMsgfPlusSpecEValueThreshold As Single              ' Optional
     Private mInspectSynopsisFilePValueThreshold As Single       ' Optional
 
     Private mMODaMODPlusSynopsisFileProbabilityThreshold As Single
@@ -68,28 +68,6 @@ Module modMain
         Dim objParseCommandLine As New clsParseCommandLine
         Dim blnProceed As Boolean
 
-        ''Dim objTest As New PeptideHitResultsProcessor.clsPeptideCleavageStateCalculator
-        ''Dim strSeq, strCleanSeq, strPrefix, strSuffix As String
-        ''strSeq = "A.BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "-.BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "A.BCDE.-" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "A.B.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "A.BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "BCDE.F" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "FA.BCDE.FG" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "BCDE." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = ".BCDE" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = ".F." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "F..E" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "AF..EF" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "AFF..EF" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "E.TGMLTQKFARSLGMLAVDNQARV.." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "..TGMLTQKFARSLGMLAVDNQARV.R" : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''strSeq = "..TGMLTQKFARSLGMLAVDNQARV.." : objTest.SplitPrefixAndSuffixFromSequence(strSeq, strCleanSeq, strPrefix, strSuffix) : Console.WriteLine(strSeq & " -> " & strPrefix & "." & strCleanSeq & "." & strSuffix)
-        ''
-        ''Return 0
-
         mInputFilePath = String.Empty
         mOutputFolderPath = String.Empty
         mParameterFilePath = String.Empty
@@ -105,6 +83,8 @@ Module modMain
         mUseExistingMTSPepToProteinMapFile = False
 
         mCreateProteinModsUsingPHRPDataFile = False
+
+        mMsgfPlusSpecEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD
 
         ' These should default to True
         mCreateInspectOrMSGFDBFirstHitsFile = True
@@ -155,6 +135,8 @@ Module modMain
                     .UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile
 
                     .CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile
+
+                    .MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold
 
                     .CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
                     .CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
@@ -258,7 +240,7 @@ Module modMain
         Dim lstValidParameters = New List(Of String) From {
             "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods", "F", "Fasta",
             "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
-            "SynPvalue", "InsFHT", "InsSyn", "SynProb",
+            "SpecEValue", "SynPvalue", "InsFHT", "InsSyn", "SynProb",
             "S", "A", "R", "L", "Q"}
 
         Try
@@ -311,6 +293,12 @@ Module modMain
                     If .RetrieveValueForParameter("InsSyn", strValue) Then
                         If ParseBoolean(strValue, blnValue) Then
                             mCreateInspectOrMSGFDBSynopsisFile = blnValue
+                        End If
+                    End If
+
+                    If .RetrieveValueForParameter("SpecEValue", strValue) Then
+                        If Single.TryParse(strValue, sngValue) Then
+                            mMsgfPlusSpecEValueThreshold = sngValue
                         End If
                     End If
 
@@ -399,8 +387,8 @@ Module modMain
 
         Try
 
-            Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF-DB search result file, MSGF+ search result file, or MSAlign results file then creates a tab-delimited text file with the data in a standard format used at PNNL.  ")
-            Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides.  Parallel files will be created containing sequence info and modification details.  ")
+            Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF-DB search result file, MSGF+ search result file, or MSAlign results file then creates a tab-delimited text file with the data in a standard format used at PNNL.")
+            Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides. Parallel files will be created containing sequence info and modification details.")
             Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
             Console.WriteLine()
             Console.WriteLine("Program syntax:" & Environment.NewLine &
@@ -418,38 +406,40 @@ Module modMain
             Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
             Console.WriteLine()
             Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)")
-            Console.WriteLine("The output folder switch is optional.  If omitted, the output file will be created in the same folder as the input file.")
+            Console.WriteLine("The output folder switch is optional. If omitted, the output file will be created in the same folder as the input file.")
             Console.WriteLine()
             ' Future: 
             ' Console.WriteLine("As an alternative to specifying an input file, you can specify an input folder. In this case the program will look for the best file to process from that folder, and will auto-determine /T and /N")
             ' 
             Console.WriteLine()
-            Console.WriteLine("The parameter file path is optional.  If included, it should point to a valid XML parameter file.")
+            Console.WriteLine("The parameter file path is optional. If included, it should point to a valid XML parameter file.")
             Console.WriteLine()
-            Console.WriteLine("Use /M to specify the file containing the modification definitions.  This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).")
+            Console.WriteLine("Use /M to specify the file containing the modification definitions. This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).")
             Console.WriteLine()
-            Console.WriteLine("Use /ProteinMods to indicate that the _ProteinMods.txt file should be created.  This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F")
-            Console.WriteLine("Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file and thus the PHRP data files should not be re-created; only the _ProteinMods.txt file should be created.  This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F")
-            Console.WriteLine("Use /F to specify the path to the fasta file.  When provided, the order of the proteins in the FASTA file dictates which protein is listed for each peptide in the First Hits file")
+            Console.WriteLine("Use /ProteinMods to indicate that the _ProteinMods.txt file should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F")
+            Console.WriteLine("Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file and thus the PHRP data files should not be re-created; only the _ProteinMods.txt file should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F")
+            Console.WriteLine("Use /F to specify the path to the fasta file. When provided, the order of the proteins in the FASTA file dictates which protein is listed for each peptide in the First Hits file")
             Console.WriteLine()
             Console.WriteLine("Use /IgnorePepToProtMapErrors to ignore peptide to protein mapping errors that occur when creating a missing _PepToProtMapMTS.txt file")
             Console.WriteLine("Use /ProteinModsIncludeReversed to include Reversed proteins in the _ProteinMods.txt file")
             Console.WriteLine("Use /UseExistingPepToProteinMapFile to use an existing _PepToProtMapMTS.txt file if it exists")
             Console.WriteLine()
-            Console.WriteLine("Use /T to specify the file containing the mass correction tag info.  This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).")
-            Console.WriteLine("Use /N to specify the parameter file provided to the search tool.  This is only used when processing Inspect or MSGF-DB files.")
+            Console.WriteLine("Use /T to specify the file containing the mass correction tag info. This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).")
+            Console.WriteLine("Use /N to specify the parameter file provided to the search tool. This is only used when processing Inspect or MSGF-DB files.")
             Console.WriteLine()
-            Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file.  The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD.ToString() & " or an FScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD & " will also be included in the synopsis file.")
+            Console.WriteLine("When processing an MSGF+ results file, use /SpecEValue to customize the SpecEValue threshold used to determine which peptides are written to the the synopsis file. The default is /SpecEValue:0 (no filter)")
+            Console.WriteLine()
+            Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file. The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD.ToString() & " or an FScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD & " will also be included in the synopsis file.")
             Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when processing Inspect or MSGF-DB results (default is /InsFHT:True)")
             Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when processing Inspect or MSGF-DB results (default is /InsSyn:True)")
             Console.WriteLine()
-            Console.WriteLine("When processing a MODPlus or MODa results file, use /SynProb to customize the Probability threshold used to determine which peptides are written to the the synopsis file.  The default is /Synprob:0.05")
+            Console.WriteLine("When processing a MODPlus or MODa results file, use /SynProb to customize the Probability threshold used to determine which peptides are written to the the synopsis file. The default is /Synprob:0.05")
             Console.WriteLine()
             Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
             Console.WriteLine("When using /S, you can redirect the output of the results using /A.")
             Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).")
             Console.WriteLine()
-            Console.WriteLine("Use /L to specify that a log file should be created.  Use /L:LogFilePath to specify the name (or full path) for the log file.")
+            Console.WriteLine("Use /L to specify that a log file should be created. Use /L:LogFilePath to specify the name (or full path) for the log file.")
             Console.WriteLine("Use the optional /Q switch will suppress all error messages.")
             Console.WriteLine()
 
