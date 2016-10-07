@@ -840,7 +840,7 @@ Public Class clsMSGFDBResultsProcessor
 
                         ' Update the progress
                         sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -1206,7 +1206,7 @@ Public Class clsMSGFDBResultsProcessor
             End If
 
             Try
-                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
 
                 Dim strErrorLog As String = String.Empty
 
@@ -1308,7 +1308,7 @@ Public Class clsMSGFDBResultsProcessor
 
                         ' Update the progress
                         sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -1319,7 +1319,7 @@ Public Class clsMSGFDBResultsProcessor
 
                 End Using
 
-                If mCreateModificationSummaryFile Then
+                If CreateModificationSummaryFile Then
                     ' Create the modification summary file
                     Dim fiInputFile = New FileInfo(strInputFilePath)
                     strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
@@ -2047,12 +2047,12 @@ Public Class clsMSGFDBResultsProcessor
 
                 ' Load the MSGF-DB Parameter File so that we can determine the modification names and masses
                 ' If the MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
-                Dim success = ExtractModInfoFromParamFile(mSearchToolParameterFilePath, lstMSGFDBModInfo)
+                Dim success = ExtractModInfoFromParamFile(SearchToolParameterFilePath, lstMSGFDBModInfo)
                 If Not success Then
                     Return False
                 End If
 
-                mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(mSearchToolParameterFilePath)
+                mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(SearchToolParameterFilePath)
 
                 Dim query = From item In lstMSGFDBModInfo Where item.ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.CustomAA
                 If query.Any() Then
@@ -2064,7 +2064,7 @@ Public Class clsMSGFDBResultsProcessor
                     AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
                     AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
 
-                    clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(mSearchToolParameterFilePath, modFileProcessor, mPeptideSeqMassCalculator, localErrorMsg)
+                    clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(SearchToolParameterFilePath, modFileProcessor, mPeptideSeqMassCalculator, localErrorMsg)
 
                     If Not String.IsNullOrWhiteSpace(localErrorMsg) AndAlso String.IsNullOrWhiteSpace(mErrorMessage) Then
                         ReportError(localErrorMsg)
@@ -2080,7 +2080,7 @@ Public Class clsMSGFDBResultsProcessor
                     strBaseName = strBaseName.Substring(0, strBaseName.Length - "_msgfplus".Length) & "_msgfdb"
                 End If
 
-                If MyBase.mCreateInspectOrMSGFDbFirstHitsFile Then
+                If MyBase.CreateInspectFirstHitsFile Then
 
                     ' Read the FASTA file to cache the protein names in memory
                     ' These will be used when creating the first hits file
@@ -2099,7 +2099,7 @@ Public Class clsMSGFDBResultsProcessor
 
                 End If
 
-                If MyBase.mCreateInspectOrMSGFDbSynopsisFile Then
+                If MyBase.CreateInspectSynopsisFile Then
 
                     ' Create the synopsis output file
                     MyBase.ResetProgress("Creating the SYN file", True)
@@ -2129,7 +2129,7 @@ Public Class clsMSGFDBResultsProcessor
                     lstPepToProteinMapping.Clear()
                     lstPepToProteinMapping.TrimExcess()
 
-                    If blnSuccess AndAlso mCreateProteinModsFile Then
+                    If blnSuccess AndAlso CreateProteinModsFile Then
                         blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strFhtOutputFilePath, strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath)
                     End If
 
@@ -2186,12 +2186,12 @@ Public Class clsMSGFDBResultsProcessor
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
                 blnSuccess = False
             Else
-                If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+                If File.Exists(strMTSPepToProteinMapFilePath) AndAlso UseExistingMTSPepToProteinMapFile Then
                     blnSuccess = True
                 Else
                     ' Auto-change mIgnorePeptideToProteinMapperErrors to True
                     ' We only do this for MSGFDB since it often includes reverse protein peptides in the results even though the FASTA file often does not have reverse proteins
-                    mIgnorePeptideToProteinMapperErrors = True
+                    IgnorePeptideToProteinMapperErrors = True
                     blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
                     If Not blnSuccess Then
                         ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")

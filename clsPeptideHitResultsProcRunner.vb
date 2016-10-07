@@ -55,99 +55,37 @@ Public Class clsPeptideHitResultsProcRunner
 
     Protected mObtainModificationDefinitionsFromDMS As Boolean
 
-    Protected mMassCorrectionTagsFilePath As String
-    Protected mModificationDefinitionsFilePath As String
-    Protected mSearchToolParameterFilePath As String
-
-    ' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
-    Protected mCreateProteinModsFile As Boolean
-    Protected mFastaFilePath As String
-    Protected mIgnorePeptideToProteinMapperErrors As Boolean
-    Protected mProteinModsFileIncludesReversedProteins As Boolean
     Protected mUseExistingMTSPepToProteinMapFile As Boolean
-
-    ' Setting this to true assumes the input file is a valid PHRP data file
-    ' Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
-    ' When this is True, then mCreateProteinModsFile is assumed to be true
-    Protected mCreateProteinModsUsingPHRPDataFile As Boolean
-
-    ' These should default to True
-    Protected mCreateInspectOrMSGFDBFirstHitsFile As Boolean = True
-    Protected mCreateInspectOrMSGFDBSynopsisFile As Boolean = True
-    Protected mInspectSynopsisFilePValueThreshold As Single
-
-    Protected mMODaMODPlusSynopsisFileProbabilityThreshold As Single
 
     Protected WithEvents mPeptideHitResultsProcessor As PeptideHitResultsProcessor.clsPHRPBaseClass
 
-    Protected mWarnMissingParameterFileSection As Boolean
     Protected mLocalErrorCode As eResultsProcessorErrorCodes
 #End Region
 
 #Region "Properties"
 
-    Public Property CreateInspectOrMSGFDbFirstHitsFile() As Boolean
-        Get
-            Return mCreateInspectOrMSGFDBFirstHitsFile
-        End Get
-        Set(value As Boolean)
-            mCreateInspectOrMSGFDBFirstHitsFile = value
-        End Set
-    End Property
+    Public Property CreateInspectOrMSGFDbFirstHitsFile As Boolean = True
 
-    Public Property CreateInspectOrMSGFDbSynopsisFile() As Boolean
-        Get
-            Return mCreateInspectOrMSGFDBSynopsisFile
-        End Get
-        Set(value As Boolean)
-            mCreateInspectOrMSGFDBSynopsisFile = value
-        End Set
-    End Property
+    Public Property CreateInspectOrMSGFDbSynopsisFile As Boolean = True
 
     Public Property CreateProteinModsFile As Boolean
-        Get
-            Return mCreateProteinModsFile
-        End Get
-        Set(value As Boolean)
-            mCreateProteinModsFile = value
-        End Set
-    End Property
 
-    Public Property CreateProteinModsUsingPHRPDataFile() As Boolean
-        Get
-            Return mCreateProteinModsUsingPHRPDataFile
-        End Get
-        Set(value As Boolean)
-            mCreateProteinModsUsingPHRPDataFile = value
-        End Set
-    End Property
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>
+    ''' Setting this to true assumes the input file is a valid PHRP data file
+    ''' Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
+    ''' When this is True, then mCreateProteinModsFile is assumed to be true
+    ''' </remarks>
+    Public Property CreateProteinModsUsingPHRPDataFile As Boolean
 
     Public Property FastaFilePath As String
-        Get
-            Return mFastaFilePath
-        End Get
-        Set(value As String)
-            mFastaFilePath = value
-        End Set
-    End Property
 
     Public Property IgnorePeptideToProteinMapperErrors As Boolean
-        Get
-            Return mIgnorePeptideToProteinMapperErrors
-        End Get
-        Set(value As Boolean)
-            mIgnorePeptideToProteinMapperErrors = value
-        End Set
-    End Property
 
-    Public Property InspectSynopsisFilePValueThreshold() As Single
-        Get
-            Return mInspectSynopsisFilePValueThreshold
-        End Get
-        Set(value As Single)
-            mInspectSynopsisFilePValueThreshold = value
-        End Set
-    End Property
+    Public Property InspectSynopsisFilePValueThreshold As Single
 
     Public ReadOnly Property LocalErrorCode() As eResultsProcessorErrorCodes
         Get
@@ -155,77 +93,27 @@ Public Class clsPeptideHitResultsProcRunner
         End Get
     End Property
 
-    Public Property MassCorrectionTagsFilePath() As String
-        Get
-            Return mMassCorrectionTagsFilePath
-        End Get
-        Set(Value As String)
-            mMassCorrectionTagsFilePath = Value
-        End Set
-    End Property
+    Public Property MassCorrectionTagsFilePath As String
 
-    Public Property ModificationDefinitionsFilePath() As String
-        Get
-            Return mModificationDefinitionsFilePath
-        End Get
-        Set(Value As String)
-            mModificationDefinitionsFilePath = Value
-        End Set
-    End Property
+    Public Property ModificationDefinitionsFilePath As String
 
     Public Property MODaMODPlusSynopsisFileProbabilityThreshold As Single
-        Get
-            Return mMODaMODPlusSynopsisFileProbabilityThreshold
-        End Get
-        Set(value As Single)
-            mMODaMODPlusSynopsisFileProbabilityThreshold = value
-        End Set
-    End Property
 
-    Public Property PeptideHitResultsFileFormat() As ePeptideHitResultsFileFormatConstants
-        Get
-            Return mPeptideHitResultsFileFormat
-        End Get
-        Set(Value As ePeptideHitResultsFileFormatConstants)
-            mPeptideHitResultsFileFormat = Value
-        End Set
-    End Property
+    Public Property MsgfPlusSpecEValueThreshold As Single
 
     Public Property ProteinModsFileIncludesReversedProteins As Boolean
-        Get
-            Return mProteinModsFileIncludesReversedProteins
-        End Get
-        Set(value As Boolean)
-            mProteinModsFileIncludesReversedProteins = value
-        End Set
-    End Property
 
-    Public Property SearchToolParameterFilePath() As String
-        Get
-            Return mSearchToolParameterFilePath
-        End Get
-        Set(value As String)
-            mSearchToolParameterFilePath = value
-        End Set
-    End Property
+    Public Property SearchToolParameterFilePath As String
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath</remarks>
     Public Property UseExistingMTSPepToProteinMapFile As Boolean
-        Get
-            Return mUseExistingMTSPepToProteinMapFile
-        End Get
-        Set(value As Boolean)
-            mUseExistingMTSPepToProteinMapFile = False
-        End Set
-    End Property
 
-    Public Property WarnMissingParameterFileSection() As Boolean
-        Get
-            Return mWarnMissingParameterFileSection
-        End Get
-        Set(Value As Boolean)
-            mWarnMissingParameterFileSection = Value
-        End Set
-    End Property
+    Public Property WarnMissingParameterFileSection As Boolean
+
 #End Region
 
     Public Overrides Function GetDefaultExtensionsToParse() As String()
@@ -272,23 +160,24 @@ Public Class clsPeptideHitResultsProcRunner
 
         mPeptideHitResultsFileFormat = ePeptideHitResultsFileFormatConstants.AutoDetermine
 
-        mMassCorrectionTagsFilePath = String.Empty
-        mModificationDefinitionsFilePath = String.Empty
-        mSearchToolParameterFilePath = String.Empty
+        MassCorrectionTagsFilePath = String.Empty
+        ModificationDefinitionsFilePath = String.Empty
+        SearchToolParameterFilePath = String.Empty
 
-        mCreateProteinModsFile = False
-        mFastaFilePath = String.Empty
-        mIgnorePeptideToProteinMapperErrors = False
-        mProteinModsFileIncludesReversedProteins = False
+        CreateProteinModsFile = False
+        FastaFilePath = String.Empty
+        IgnorePeptideToProteinMapperErrors = False
+        ProteinModsFileIncludesReversedProteins = False
         mUseExistingMTSPepToProteinMapFile = False
 
-        mCreateInspectOrMSGFDBFirstHitsFile = False
-        mCreateInspectOrMSGFDBSynopsisFile = False
-        mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+        CreateInspectOrMSGFDbFirstHitsFile = False
+        CreateInspectOrMSGFDbSynopsisFile = False
+        InspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
-        mMODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+        MODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+        MsgfPlusSpecEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD
 
-        mWarnMissingParameterFileSection = True
+        WarnMissingParameterFileSection = True
 
         mLocalErrorCode = eResultsProcessorErrorCodes.NoError
 
@@ -304,26 +193,25 @@ Public Class clsPeptideHitResultsProcRunner
         fiSourceFile = New FileInfo(strInputFilePath)
 
         With mPeptideHitResultsProcessor
-            .MassCorrectionTagsFilePath = ResolveFilePath(fiSourceFile.DirectoryName, mMassCorrectionTagsFilePath)
-            .ModificationDefinitionsFilePath = ResolveFilePath(fiSourceFile.DirectoryName, mModificationDefinitionsFilePath)
-            .SearchToolParameterFilePath = ResolveFilePath(fiSourceFile.DirectoryName, mSearchToolParameterFilePath)
+            .MassCorrectionTagsFilePath = ResolveFilePath(fiSourceFile.DirectoryName, MassCorrectionTagsFilePath)
+            .ModificationDefinitionsFilePath = ResolveFilePath(fiSourceFile.DirectoryName, ModificationDefinitionsFilePath)
+            .SearchToolParameterFilePath = ResolveFilePath(fiSourceFile.DirectoryName, SearchToolParameterFilePath)
 
-            .CreateProteinModsFile = mCreateProteinModsFile
-            .FastaFilePath = mFastaFilePath
-            .IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors
-            .ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins
+            .CreateProteinModsFile = CreateProteinModsFile
+            .FastaFilePath = FastaFilePath
+            .IgnorePeptideToProteinMapperErrors = IgnorePeptideToProteinMapperErrors
+            .ProteinModsFileIncludesReversedProteins = ProteinModsFileIncludesReversedProteins
             .UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile
 
-            .CreateInspectFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
-            .CreateInspectSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
-            .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
+            .CreateInspectFirstHitsFile = CreateInspectOrMSGFDbFirstHitsFile
+            .CreateInspectSynopsisFile = CreateInspectOrMSGFDbSynopsisFile
+            .InspectSynopsisFilePValueThreshold = InspectSynopsisFilePValueThreshold
 
-            .MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
+            .MODaMODPlusSynopsisFileProbabilityThreshold = MODaMODPlusSynopsisFileProbabilityThreshold
 
-            .CreateMSGFDBFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
-            .CreateMSGFDBSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
+            .MSGFDBSynopsisFileSpecEValueThreshold = MsgfPlusSpecEValueThreshold
 
-            .WarnMissingParameterFileSection = mWarnMissingParameterFileSection
+            .WarnMissingParameterFileSection = WarnMissingParameterFileSection
         End With
     End Sub
 
@@ -446,7 +334,7 @@ Public Class clsPeptideHitResultsProcRunner
                     LogMessage(MyBase.mProgressStepDescription)
                     MyBase.ResetProgress()
 
-                    If mCreateProteinModsUsingPHRPDataFile Then
+                    If CreateProteinModsUsingPHRPDataFile Then
                         blnSuccess = StartCreateProteinModsViaPHRPData(strInputFilePath, strOutputFolderPath)
                     Else
                         blnSuccess = StartPHRP(strInputFilePath, strOutputFolderPath, strParameterFilePath)

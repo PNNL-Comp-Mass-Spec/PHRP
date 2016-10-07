@@ -263,7 +263,7 @@ Public Class clsSequestResultsProcessor
             strPreviousXCorr = String.Empty
 
             Try
-                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
 
                 Dim strErrorLog As String = String.Empty
 
@@ -349,7 +349,7 @@ Public Class clsSequestResultsProcessor
 
                         ' Update the progress
                         sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -360,7 +360,7 @@ Public Class clsSequestResultsProcessor
 
                 End Using
 
-                If mCreateModificationSummaryFile Then
+                If CreateModificationSummaryFile Then
                     ' Create the modification summary file
                     Dim fiInputFile = New FileInfo(strInputFilePath)
                     strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
@@ -533,7 +533,7 @@ Public Class clsSequestResultsProcessor
                 blnSuccess = False
             End Try
 
-            If blnSuccess AndAlso mCreateProteinModsFile Then
+            If blnSuccess AndAlso CreateProteinModsFile Then
                 blnSuccess = CreateProteinModsFileWork(fiInputFile, strOutputFolderPath)
             End If
 
@@ -577,7 +577,7 @@ Public Class clsSequestResultsProcessor
 
         Dim strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
 
-        If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+        If File.Exists(strMTSPepToProteinMapFilePath) AndAlso UseExistingMTSPepToProteinMapFile Then
             blnSuccess = True
         Else
             ' Mapping file does not exist

@@ -399,7 +399,7 @@ Public Class clsXTandemResultsProcessor
                 End If
 
                 For intSearchResultIndex = 0 To objSearchResults.Length - 1
-                    objSearchResults(intSearchResultIndex).UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                    objSearchResults(intSearchResultIndex).UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
                 Next intSearchResultIndex
 
                 Dim strErrorLog = String.Empty
@@ -464,7 +464,7 @@ Public Class clsXTandemResultsProcessor
 
                                                         ' Update the progress
                                                         sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                                                        If mCreateProteinModsFile Then
+                                                        If CreateProteinModsFile Then
                                                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                                                         End If
                                                         UpdateProgress(sngPercentComplete)
@@ -489,7 +489,7 @@ Public Class clsXTandemResultsProcessor
                 If eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile Then
                     mErrorMessage = "Root element '" & XTANDEM_XML_ROOT_ELEMENT & "' not found in the input file: " & ControlChars.NewLine & strInputFilePath
                 Else
-                    If mCreateModificationSummaryFile Then
+                    If CreateModificationSummaryFile Then
                         ' Create the modification summary file
                         Dim fiInputFile = New FileInfo(strInputFilePath)
                         Dim fiOutputFile = New FileInfo(strOutputFilePath)
@@ -631,7 +631,7 @@ Public Class clsXTandemResultsProcessor
                                 ReDim Preserve objSearchResults(objSearchResults.Length * 2 - 1)
                                 For intSearchResultIndex = intSearchResultCount - 1 To objSearchResults.Length - 1
                                     objSearchResults(intSearchResultIndex) = New clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator)
-                                    objSearchResults(intSearchResultIndex).UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                                    objSearchResults(intSearchResultIndex).UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
                                 Next intSearchResultIndex
                             End If
 
@@ -1174,11 +1174,11 @@ Public Class clsXTandemResultsProcessor
 
                                     Case udtParamLabels(eInputParamLabelNames.Protein_Cleavage_NTerminalMassChange)
                                         If clsPHRPParser.IsNumber(strValue) Then
-                                            mPeptideNTerminusMassChange = Double.Parse(strValue)
+                                            PeptideNTerminusMassChange = Double.Parse(strValue)
                                         End If
                                     Case udtParamLabels(eInputParamLabelNames.Protein_Cleavage_CTerminalMassChange)
                                         If clsPHRPParser.IsNumber(strValue) Then
-                                            mPeptideCTerminusMassChange = Double.Parse(strValue)
+                                            PeptideCTerminusMassChange = Double.Parse(strValue)
                                         End If
 
                                     Case udtParamLabels(eInputParamLabelNames.Protein_Cleavage_Site)
@@ -1202,10 +1202,8 @@ Public Class clsXTandemResultsProcessor
                                                 strRightSpec = strRightSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END, "]")
                                             End If
 
-                                            With mEnzymeMatchSpec
-                                                .LeftResidueRegEx = strLeftSpec
-                                                .RightResidueRegEx = strRightSpec
-                                            End With
+                                            EnzymeMatchSpec = New clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType(strLeftSpec, strRightSpec)
+
                                         End If
                                     Case udtParamLabels(eInputParamLabelNames.Refine_ModificationMass)
                                         If Not strValue Is Nothing AndAlso strValue.Trim.Length > 0 Then
@@ -1395,7 +1393,7 @@ Public Class clsXTandemResultsProcessor
                 strXtandemXTFilePath = Path.Combine(strOutputFolderPath, strXtandemXTFilePath)
                 blnSuccess = ParseXTandemResultsFile(fiInputFile.FullName, strXtandemXTFilePath, False)
 
-                If blnSuccess AndAlso mCreateProteinModsFile Then
+                If blnSuccess AndAlso CreateProteinModsFile Then
                     blnSuccess = CreateProteinModsFileWork(fiInputFile, strOutputFolderPath, strXtandemXTFilePath)
                 End If
 
@@ -1428,7 +1426,7 @@ Public Class clsXTandemResultsProcessor
 
         Dim strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(fiInputFile.FullName, strOutputFolderPath, MTS:=True)
 
-        If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+        If File.Exists(strMTSPepToProteinMapFilePath) AndAlso UseExistingMTSPepToProteinMapFile Then
             blnSuccess = True
         Else
             blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)

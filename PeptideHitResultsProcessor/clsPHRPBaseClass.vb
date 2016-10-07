@@ -145,40 +145,8 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected mErrorCode As ePHRPErrorCodes = ePHRPErrorCodes.NoError
     Protected mErrorMessage As String = String.Empty
-    Private mWarnMissingParameterFileSection As Boolean
 
     Protected mFileDate As String = String.Empty
-    Private mAbortProcessing As Boolean
-
-    Protected mCreateModificationSummaryFile As Boolean
-
-    ' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
-    Protected mCreateProteinModsFile As Boolean
-    Private mFastaFilePath As String
-    Protected mIgnorePeptideToProteinMapperErrors As Boolean
-    Private mProteinModsFileIncludesReversedProteins As Boolean
-    Protected mUseExistingMTSPepToProteinMapFile As Boolean
-
-    ' The following two options are only used by the clsInSpecTResultsProcessor
-    Protected mCreateInspectOrMSGFDbSynopsisFile As Boolean
-    Protected mCreateInspectOrMSGFDbFirstHitsFile As Boolean
-
-    Private mMassCorrectionTagsFilePath As String
-    Private mModificationDefinitionsFilePath As String
-    Protected mSearchToolParameterFilePath As String            ' Used by clsInSpecTResultsProcessor and clsMSGFDBResultsProcessor (aka SearchEngineParamFileName)
-
-    Protected mInspectSynopsisFilePValueThreshold As Single     ' Only used by clsInSpecTResultsProcessor; note that lower p-values are higher confidence results
-
-    Protected mMODaMODPlusSynopsisFileProbabilityThreshold As Single   ' Used by clsMODaResultsProcessor and clsMODPlusResultsProcessor; note that higher probability are higher confidence results
-
-    Protected mMSAlignSynopsisFilePValueThreshold As Single     ' Only used by clsMSAlignResultsProcessor; note that lower p-values are higher confidence results
-
-    Protected mMSGFDBSynopsisFilePValueThreshold As Single      ' Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor; note that lower p-values are higher confidence results
-    Protected mMSGFDBSynopsisFileSpecProbThreshold As Single    ' Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor; note that lower SpecProb values are higher confidence results
-
-    Protected mEnzymeMatchSpec As udtEnzymeMatchSpecType
-    Protected mPeptideNTerminusMassChange As Double             ' This is ignored if equal to 0; typical non-zero value is 1.0078246
-    Protected mPeptideCTerminusMassChange As Double             ' This is ignored if equal to 0; typical non-zero value is 17.0027387
 
     Protected mPeptideSeqMassCalculator As clsPeptideMassCalculator
 
@@ -201,88 +169,43 @@ Public MustInherit Class clsPHRPBaseClass
 #Region "Progress Events and Variables"
     Public Event MessageEvent(message As String)
     Public Event ProgressReset()
-    Public Event ProgressChanged(taskDescription As String, percentComplete As Single)     ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
+
+    ''' <summary>
+    ''' Progress changed
+    ''' </summary>
+    ''' <param name="taskDescription"></param>
+    ''' <param name="percentComplete">Ranges from 0 to 100, but can contain decimal percentage values</param>
+    Public Event ProgressChanged(taskDescription As String, percentComplete As Single)
     Public Event ProgressComplete()
 
     Public Event ErrorOccurred(ErrMessage As String)
     Public Event WarningMessageEvent(WarningMessage As String)
 
     Protected mProgressStepDescription As String = String.Empty
-    Protected mProgressPercentComplete As Single        ' Ranges from 0 to 100, but can contain decimal percentage values
+
+    ''' <summary>
+    ''' Ranges from 0 to 100, but can contain decimal percentage values
+    ''' </summary>
+    Protected mProgressPercentComplete As Single
 #End Region
 
 #Region "Properties"
-    Public Property AbortProcessing() As Boolean
-        Get
-            Return mAbortProcessing
-        End Get
-        Set(Value As Boolean)
-            mAbortProcessing = Value
-        End Set
-    End Property
+    Public Property AbortProcessing As Boolean
 
-    Public Property CreateModificationSummaryFile() As Boolean
-        Get
-            Return mCreateModificationSummaryFile
-        End Get
-        Set(Value As Boolean)
-            mCreateModificationSummaryFile = Value
-        End Set
-    End Property
+    Public Property CreateModificationSummaryFile As Boolean
 
-    Public Property CreateInspectFirstHitsFile() As Boolean
-        Get
-            Return mCreateInspectOrMSGFDbFirstHitsFile
-        End Get
-        Set(value As Boolean)
-            mCreateInspectOrMSGFDbFirstHitsFile = value
-        End Set
-    End Property
+    Public Property CreateInspectFirstHitsFile As Boolean
 
-    Public Property CreateInspectSynopsisFile() As Boolean
-        Get
-            Return mCreateInspectOrMSGFDbSynopsisFile
-        End Get
-        Set(value As Boolean)
-            mCreateInspectOrMSGFDbSynopsisFile = value
-        End Set
-    End Property
+    Public Property CreateInspectSynopsisFile As Boolean
 
-    Public Property CreateMSGFDBFirstHitsFile() As Boolean
-        Get
-            Return mCreateInspectOrMSGFDbFirstHitsFile
-        End Get
-        Set(value As Boolean)
-            mCreateInspectOrMSGFDbFirstHitsFile = value
-        End Set
-    End Property
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath</remarks>
+    Public Property CreateProteinModsFile As Boolean
 
-    Public Property CreateMSGFDBSynopsisFile() As Boolean
-        Get
-            Return mCreateInspectOrMSGFDbSynopsisFile
-        End Get
-        Set(value As Boolean)
-            mCreateInspectOrMSGFDbSynopsisFile = value
-        End Set
-    End Property
-
-    Public Property CreateProteinModsFile() As Boolean
-        Get
-            Return mCreateProteinModsFile
-        End Get
-        Set(value As Boolean)
-            mCreateProteinModsFile = value
-        End Set
-    End Property
-
-    Public Property EnzymeMatchSpec() As udtEnzymeMatchSpecType
-        Get
-            Return mEnzymeMatchSpec
-        End Get
-        Set(Value As udtEnzymeMatchSpecType)
-            mEnzymeMatchSpec = Value
-        End Set
-    End Property
+    Public Property EnzymeMatchSpec As udtEnzymeMatchSpecType
 
     Public ReadOnly Property ErrorCode() As ePHRPErrorCodes
         Get
@@ -296,14 +219,7 @@ Public MustInherit Class clsPHRPBaseClass
         End Get
     End Property
 
-    Public Property FastaFilePath() As String
-        Get
-            Return mFastaFilePath
-        End Get
-        Set(value As String)
-            mFastaFilePath = value
-        End Set
-    End Property
+    Public Property FastaFilePath As String
 
     Public ReadOnly Property FileVersion() As String
         Get
@@ -318,105 +234,93 @@ Public MustInherit Class clsPHRPBaseClass
     End Property
 
     Public Property IgnorePeptideToProteinMapperErrors As Boolean
-        Get
-            Return mIgnorePeptideToProteinMapperErrors
-        End Get
-        Set(value As Boolean)
-            mIgnorePeptideToProteinMapperErrors = value
-        End Set
-    End Property
 
-    Public Property InspectSynopsisFilePValueThreshold() As Single
-        Get
-            Return mInspectSynopsisFilePValueThreshold
-        End Get
-        Set(value As Single)
-            mInspectSynopsisFilePValueThreshold = value
-        End Set
-    End Property
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Lower p-values are higher confidence results</remarks>
+    Public Property InspectSynopsisFilePValueThreshold As Single
 
-    Public Property MassCorrectionTagsFilePath() As String
-        Get
-            Return mMassCorrectionTagsFilePath
-        End Get
-        Set(Value As String)
-            mMassCorrectionTagsFilePath = Value
-        End Set
-    End Property
+    Public Property MassCorrectionTagsFilePath As String
 
-    Public Property ModificationDefinitionsFilePath() As String
-        Get
-            Return mModificationDefinitionsFilePath
-        End Get
-        Set(Value As String)
-            mModificationDefinitionsFilePath = Value
-        End Set
-    End Property
+    Public Property ModificationDefinitionsFilePath As String
 
+    ''' <summary>
+    ''' Used by clsMODaResultsProcessor and clsMODPlusResultsProcessor
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Higher probability are higher confidence results</remarks>
     Public Property MODaMODPlusSynopsisFileProbabilityThreshold As Single
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Lower p-values are higher confidence results</remarks>
+    Public Property MSAlignSynopsisFilePValueThreshold As Single
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Lower p-values are higher confidence results; renamed to EValue in MSGF+</remarks>
+    <Obsolete("Use MSGFDBSynopsisFileEValueThreshold")>
+    Public Property MSGFDBSynopsisFilePValueThreshold As Single
         Get
-            Return mMODaMODPlusSynopsisFileProbabilityThreshold
+            Return MSGFDBSynopsisFileEValueThreshold
         End Get
         Set(value As Single)
-            mMODaMODPlusSynopsisFileProbabilityThreshold = value
+            MSGFDBSynopsisFileEValueThreshold = value
         End Set
     End Property
 
-    Public Property MSAlignSynopsisFilePValueThreshold() As Single
-        Get
-            Return mMSAlignSynopsisFilePValueThreshold
-        End Get
-        Set(value As Single)
-            mMSAlignSynopsisFilePValueThreshold = value
-        End Set
-    End Property
-
-    Public Property MSGFDBSynopsisFilePValueThreshold() As Single
-        Get
-            Return mMSGFDBSynopsisFilePValueThreshold
-        End Get
-        Set(value As Single)
-            mMSGFDBSynopsisFilePValueThreshold = value
-        End Set
-    End Property
-
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Lower SpecProb values are higher confidence results; renamed to SpecEValue in MSGF+</remarks>
+    <Obsolete("Use MSGFDBSynopsisFileSpecEValueThreshold")>
     Public Property MSGFDBSynopsisFileSpecProbThreshold As Single
         Get
-            Return mMSGFDBSynopsisFileSpecProbThreshold
+            Return MSGFDBSynopsisFileSpecEValueThreshold
         End Get
         Set(value As Single)
-            mMSGFDBSynopsisFileSpecProbThreshold = value
+            MSGFDBSynopsisFileSpecEValueThreshold = value
         End Set
     End Property
 
-    Public Property PeptideCTerminusMassChange() As Double
-        Get
-            Return mPeptideCTerminusMassChange
-        End Get
-        Set(Value As Double)
-            mPeptideCTerminusMassChange = Value
-        End Set
-    End Property
+    ''' <summary>
+    ''' Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Lower e-values are higher confidence results</remarks>
+    Public Property MSGFDBSynopsisFileEValueThreshold As Single
 
-    Public Property PeptideNTerminusMassChange() As Double
-        Get
-            Return mPeptideNTerminusMassChange
-        End Get
-        Set(Value As Double)
-            mPeptideNTerminusMassChange = Value
-        End Set
-    End Property
+    ''' <summary>
+    ''' clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Lower SpecEValue values are higher confidence results</remarks>
+    Public Property MSGFDBSynopsisFileSpecEValueThreshold As Single
 
-    Public Property ProteinModsFileIncludesReversedProteins() As Boolean
-        Get
-            Return mProteinModsFileIncludesReversedProteins
-        End Get
-        Set(value As Boolean)
-            mProteinModsFileIncludesReversedProteins = value
-        End Set
-    End Property
+    ''' <summary>
+    ''' Typical non-zero value is 17.0027387
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Ignored if equal to 0</remarks>
+    Public Property PeptideCTerminusMassChange As Double
 
-    Public Overridable ReadOnly Property ProgressStepDescription() As String
+    ''' <summary>
+    '''  typical non-zero value is 1.0078246
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Ignored if equal to 0</remarks>
+    Public Property PeptideNTerminusMassChange As Double
+
+    Public Property ProteinModsFileIncludesReversedProteins As Boolean
+
+    Public ReadOnly Property ProgressStepDescription() As String
         Get
             Return mProgressStepDescription
         End Get
@@ -429,36 +333,21 @@ Public MustInherit Class clsPHRPBaseClass
         End Get
     End Property
 
-    Public Property SearchToolParameterFilePath() As String
-        Get
-            Return mSearchToolParameterFilePath
-        End Get
-        Set(value As String)
-            mSearchToolParameterFilePath = value
-        End Set
-    End Property
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>Used by clsInSpecTResultsProcessor and clsMSGFDBResultsProcessor (aka SearchEngineParamFileName)</remarks>
+    Public Property SearchToolParameterFilePath As String
 
     Public Property UseExistingMTSPepToProteinMapFile As Boolean
-        Get
-            Return mUseExistingMTSPepToProteinMapFile
-        End Get
-        Set(value As Boolean)
-            mUseExistingMTSPepToProteinMapFile = False
-        End Set
-    End Property
 
-    Public Property WarnMissingParameterFileSection() As Boolean
-        Get
-            Return mWarnMissingParameterFileSection
-        End Get
-        Set(Value As Boolean)
-            mWarnMissingParameterFileSection = Value
-        End Set
-    End Property
+    Public Property WarnMissingParameterFileSection As Boolean
+
 #End Region
 
     Public Sub AbortProcessingNow()
-        mAbortProcessing = True
+        AbortProcessing = True
     End Sub
 
     Public Shared Function AutoDefinePeptideHitResultsFilePath(ePeptideHitResultFileFormat As ePeptideHitResultsFileFormatConstants,
@@ -542,7 +431,7 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected Function CacheProteinNamesFromFasta() As Boolean
 
-        If String.IsNullOrWhiteSpace(mFastaFilePath) Then
+        If String.IsNullOrWhiteSpace(FastaFilePath) Then
             ' Nothing to do
             Return True
         End If
@@ -555,7 +444,7 @@ Public MustInherit Class clsPHRPBaseClass
         Try
             Dim proteinNumber = 0
 
-            Using reader = New StreamReader(New FileStream(mFastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            Using reader = New StreamReader(New FileStream(FastaFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 While Not reader.EndOfStream
                     Dim lineIn = reader.ReadLine()
                     If String.IsNullOrWhiteSpace(lineIn) Then Continue While
@@ -578,7 +467,7 @@ Public MustInherit Class clsPHRPBaseClass
             Return True
 
         Catch ex As Exception
-            ReportError("Error caching protein names from fasta file " & Path.GetFileName(mFastaFilePath) & ": " & ex.Message, False)
+            ReportError("Error caching protein names from fasta file " & Path.GetFileName(FastaFilePath) & ": " & ex.Message, False)
             Return False
         End Try
 
@@ -875,18 +764,18 @@ Public MustInherit Class clsPHRPBaseClass
                 Return False
             End If
 
-            If String.IsNullOrEmpty(mFastaFilePath) Then
+            If String.IsNullOrEmpty(FastaFilePath) Then
                 SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File Path is not defined")
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
                 Return False
-            ElseIf Not File.Exists(mFastaFilePath) Then
-                SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File was not found: " & mFastaFilePath)
+            ElseIf Not File.Exists(FastaFilePath) Then
+                SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File was not found: " & FastaFilePath)
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
                 Return False
             End If
 
             ' Verify that the fasta file is not a DNA-sequence based fasta file
-            blnSuccess = ValidateProteinFastaFile(mFastaFilePath)
+            blnSuccess = ValidateProteinFastaFile(FastaFilePath)
             If Not blnSuccess Then
                 Return False
             End If
@@ -913,7 +802,7 @@ Public MustInherit Class clsPHRPBaseClass
                 .PeptideInputFileFormat = PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.ePeptideInputFileFormatConstants.PHRPFile
                 .PeptideFileSkipFirstLine = False
                 .ProteinDataRemoveSymbolCharacters = True
-                .ProteinInputFilePath = mFastaFilePath
+                .ProteinInputFilePath = FastaFilePath
                 .SaveProteinToPeptideMappingFile = True
                 .SearchAllProteinsForPeptideSequence = True
                 .SearchAllProteinsSkipCoverageComputationSteps = True
@@ -945,7 +834,7 @@ Public MustInherit Class clsPHRPBaseClass
                             blnSuccess = False
                             Exit For
                         Else
-                            blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, mIgnorePeptideToProteinMapperErrors)
+                            blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, IgnorePeptideToProteinMapperErrors)
                         End If
                     Else
                         If String.IsNullOrWhiteSpace(objPeptideToProteinMapper.GetErrorMessage) AndAlso objPeptideToProteinMapper.StatusMessage.ToLower().Contains("error") Then
@@ -957,12 +846,12 @@ Public MustInherit Class clsPHRPBaseClass
                             SetErrorMessage("Error running clsPeptideToProteinMapEngine: " & objPeptideToProteinMapper.GetErrorMessage())
                         End If
 
-                        If mIgnorePeptideToProteinMapperErrors Then
+                        If IgnorePeptideToProteinMapperErrors Then
 
                             ReportWarning("Ignoring protein mapping error since 'IgnorePeptideToProteinMapperErrors' = True")
 
                             If File.Exists(strResultsFilePath) Then
-                                blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, mIgnorePeptideToProteinMapperErrors)
+                                blnSuccess = ValidatePeptideToProteinMapResults(strResultsFilePath, IgnorePeptideToProteinMapperErrors)
                             Else
                                 mErrorMessage = String.Empty
                                 mErrorCode = ePHRPErrorCodes.NoError
@@ -1183,7 +1072,7 @@ Public MustInherit Class clsPHRPBaseClass
                                 intPSMCount += 1
 
                                 blnSkipProtein = False
-                                If Not mProteinModsFileIncludesReversedProteins Then
+                                If Not ProteinModsFileIncludesReversedProteins Then
                                     blnSkipProtein = IsReversedProtein(lstPepToProteinMapping(intPepToProteinMapIndex).Protein)
                                     If blnSkipProtein Then
                                         intPSMCountSkippedSinceReversedOrScrambledProtein += 1
@@ -1470,35 +1359,35 @@ Public MustInherit Class clsPHRPBaseClass
 
         mErrorCode = ePHRPErrorCodes.NoError
         mErrorMessage = String.Empty
-        mWarnMissingParameterFileSection = False
+        WarnMissingParameterFileSection = False
 
-        mCreateModificationSummaryFile = True
-        mCreateProteinModsFile = False
-        mFastaFilePath = String.Empty
-        mIgnorePeptideToProteinMapperErrors = False
-        mProteinModsFileIncludesReversedProteins = False
-        mUseExistingMTSPepToProteinMapFile = False
+        CreateModificationSummaryFile = True
+        CreateProteinModsFile = False
+        FastaFilePath = String.Empty
+        IgnorePeptideToProteinMapperErrors = False
+        ProteinModsFileIncludesReversedProteins = False
+        UseExistingMTSPepToProteinMapFile = False
 
-        mCreateInspectOrMSGFDbFirstHitsFile = True
-        mCreateInspectOrMSGFDbSynopsisFile = True
+        CreateInspectFirstHitsFile = True
+        CreateInspectSynopsisFile = True
 
-        mMassCorrectionTagsFilePath = String.Empty
-        mModificationDefinitionsFilePath = String.Empty
-        mSearchToolParameterFilePath = String.Empty
+        MassCorrectionTagsFilePath = String.Empty
+        ModificationDefinitionsFilePath = String.Empty
+        SearchToolParameterFilePath = String.Empty
 
-        mInspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+        InspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
-        mMODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+        MODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
 
-        mMSAlignSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+        MSAlignSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
 
-        mMSGFDBSynopsisFilePValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
-        mMSGFDBSynopsisFileSpecProbThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD
+        MSGFDBSynopsisFileEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD
+        MSGFDBSynopsisFileSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD
 
-        mEnzymeMatchSpec = GetDefaultEnzymeMatchSpec()
+        EnzymeMatchSpec = GetDefaultEnzymeMatchSpec()
 
-        mPeptideNTerminusMassChange = clsPeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE
-        mPeptideCTerminusMassChange = clsPeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE
+        PeptideNTerminusMassChange = clsPeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE
+        PeptideCTerminusMassChange = clsPeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE
 
         mPeptideSeqMassCalculator = New clsPeptideMassCalculator()
 
@@ -1648,7 +1537,7 @@ Public MustInherit Class clsPHRPBaseClass
             If objSettingsFile.LoadSettings(strParameterFilePath) Then
                 If Not objSettingsFile.SectionPresent(OPTIONS_SECTION) Then
                     ' Section OPTIONS_SECTION was not found in the parameter file; warn the user if mWarnMissingParameterFileSection = True
-                    If mWarnMissingParameterFileSection Then
+                    If WarnMissingParameterFileSection Then
                         SetErrorMessage("The node '<section name=""" & OPTIONS_SECTION & """> was not found in the parameter file: " & strParameterFilePath)
                         SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile)
                         Return False
@@ -1656,18 +1545,18 @@ Public MustInherit Class clsPHRPBaseClass
                         Return True
                     End If
                 Else
-                    mMassCorrectionTagsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", mMassCorrectionTagsFilePath)
-                    mModificationDefinitionsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", mModificationDefinitionsFilePath)
-                    mSearchToolParameterFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", mSearchToolParameterFilePath)
+                    MassCorrectionTagsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", MassCorrectionTagsFilePath)
+                    ModificationDefinitionsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", ModificationDefinitionsFilePath)
+                    SearchToolParameterFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", SearchToolParameterFilePath)
 
-                    mCreateModificationSummaryFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", mCreateModificationSummaryFile)
+                    CreateModificationSummaryFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", CreateModificationSummaryFile)
 
-                    mCreateProteinModsFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", mCreateProteinModsFile)
-                    mFastaFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", mFastaFilePath)
-                    mProteinModsFileIncludesReversedProteins = objSettingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", mProteinModsFileIncludesReversedProteins)
-                    mUseExistingMTSPepToProteinMapFile = objSettingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", mUseExistingMTSPepToProteinMapFile)
+                    CreateProteinModsFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", CreateProteinModsFile)
+                    FastaFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", FastaFilePath)
+                    ProteinModsFileIncludesReversedProteins = objSettingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", ProteinModsFileIncludesReversedProteins)
+                    UseExistingMTSPepToProteinMapFile = objSettingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", UseExistingMTSPepToProteinMapFile)
 
-                    With mEnzymeMatchSpec
+                    With EnzymeMatchSpec
                         strLeftResidueRegEx = String.Copy(.LeftResidueRegEx)
                         strRightResidueRegEx = String.Copy(.RightResidueRegEx)
                     End With
@@ -1677,15 +1566,12 @@ Public MustInherit Class clsPHRPBaseClass
                         strRightResidueRegEx = objSettingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecRightResidue", strRightResidueRegEx, blnValueNotPresent)
 
                         If Not blnValueNotPresent Then
-                            With mEnzymeMatchSpec
-                                .LeftResidueRegEx = strLeftResidueRegEx
-                                .RightResidueRegEx = strRightResidueRegEx
-                            End With
+                            EnzymeMatchSpec = New udtEnzymeMatchSpecType(strLeftResidueRegEx, strRightResidueRegEx)
                         End If
                     End If
 
-                    mPeptideNTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", mPeptideNTerminusMassChange)
-                    mPeptideCTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", mPeptideCTerminusMassChange)
+                    PeptideNTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", PeptideNTerminusMassChange)
+                    PeptideCTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", PeptideCTerminusMassChange)
 
                 End If
             End If
@@ -1884,7 +1770,7 @@ Public MustInherit Class clsPHRPBaseClass
         Dim blnFileNotFound As Boolean
 
         ' Note: If mMassCorrectionTagsFilePath is blank then the mass correction tags will be reset to the defaults and blnSuccess will be True
-        blnSuccess = mPeptideMods.ReadMassCorrectionTagsFile(mMassCorrectionTagsFilePath, blnFileNotFound)
+        blnSuccess = mPeptideMods.ReadMassCorrectionTagsFile(MassCorrectionTagsFilePath, blnFileNotFound)
         If Not blnSuccess Then
             If blnFileNotFound Then
                 SetErrorCode(ePHRPErrorCodes.MassCorrectionTagsFileNotFound)
@@ -1894,11 +1780,11 @@ Public MustInherit Class clsPHRPBaseClass
         End If
 
         ' Note: If mModificationDefinitionsFilePath is blank, then the modifications will be cleared and blnSuccess will be True
-        blnSuccess = mPeptideMods.ReadModificationDefinitionsFile(mModificationDefinitionsFilePath, blnFileNotFound)
+        blnSuccess = mPeptideMods.ReadModificationDefinitionsFile(ModificationDefinitionsFilePath, blnFileNotFound)
         If Not blnSuccess Then
             If blnFileNotFound Then
                 SetErrorCode(ePHRPErrorCodes.ModificationDefinitionFileNotFound)
-                ReportWarning("File not found: " & mModificationDefinitionsFilePath)
+                ReportWarning("File not found: " & ModificationDefinitionsFilePath)
             Else
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
             End If
@@ -2158,7 +2044,7 @@ Public MustInherit Class clsPHRPBaseClass
                 dblErrorPercent = intPeptideCountNoMatch / intPeptideCount * 100.0
 
                 Dim strErrorMessage As String
-                strErrorMessage = dblErrorPercent.ToString("0.00") & "% of the entries (" & intPeptideCountNoMatch & " / " & intPeptideCount & ") in the peptide to protein map file (" & Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & Path.GetFileName(mFastaFilePath) & ")"
+                strErrorMessage = dblErrorPercent.ToString("0.00") & "% of the entries (" & intPeptideCountNoMatch & " / " & intPeptideCount & ") in the peptide to protein map file (" & Path.GetFileName(strPeptideToProteinMapFilePath) & ") did not match to a protein in the FASTA file (" & Path.GetFileName(FastaFilePath) & ")"
 
                 If blnIgnorePeptideToProteinMapperErrors OrElse dblErrorPercent < 0.1 Then
                     ReportWarning(strErrorMessage)

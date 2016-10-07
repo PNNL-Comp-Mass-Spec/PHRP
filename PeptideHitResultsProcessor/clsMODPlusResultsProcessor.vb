@@ -525,7 +525,7 @@ Public Class clsMODPlusResultsProcessor
 
                     ' Update the progress
                     Dim sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                    If mCreateProteinModsFile Then
+                    If CreateProteinModsFile Then
                         sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                     End If
                     UpdateProgress(sngPercentComplete)
@@ -698,7 +698,7 @@ Public Class clsMODPlusResultsProcessor
             Dim strErrorLog = String.Empty
 
             Try
-                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
@@ -779,7 +779,7 @@ Public Class clsMODPlusResultsProcessor
 
                         ' Update the progress
                         Dim sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -790,7 +790,7 @@ Public Class clsMODPlusResultsProcessor
 
                 End Using
 
-                If mCreateModificationSummaryFile Then
+                If CreateModificationSummaryFile Then
                     ' Create the modification summary file
                     Dim fiInputFile = New FileInfo(strInputFilePath)
                     Dim strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
@@ -1289,7 +1289,7 @@ Public Class clsMODPlusResultsProcessor
                 lstMODPlusModInfo = New List(Of clsModificationDefinition)
 
                 ' Load the MODPlus Parameter File to look for any static mods
-                ExtractModInfoFromMODPlusParamFile(mSearchToolParameterFilePath, lstMODPlusModInfo)
+                ExtractModInfoFromMODPlusParamFile(SearchToolParameterFilePath, lstMODPlusModInfo)
 
                 ' Resolve the mods in lstMODPlusModInfo with the ModDefs mods
                 ResolveMODPlusModsWithModDefinitions(lstMODPlusModInfo)
@@ -1318,7 +1318,7 @@ Public Class clsMODPlusResultsProcessor
                 ' Now parse the _syn.txt file that we just created to next create the other PHRP files
                 blnSuccess = ParseMODPlusSynopsisFile(strSynOutputFilePath, strOutputFolderPath, False)
 
-                If blnSuccess AndAlso mCreateProteinModsFile Then
+                If blnSuccess AndAlso CreateProteinModsFile Then
                     blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strSynOutputFilePath, strOutputFolderPath)
                 End If
 
@@ -1364,12 +1364,12 @@ Public Class clsMODPlusResultsProcessor
             SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         Else
-            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso UseExistingMTSPepToProteinMapFile Then
                 blnSuccess = True
             Else
                 ' Auto-change mIgnorePeptideToProteinMapperErrors to True
                 ' We only do this because some peptides reported by MODPlus may not match the fasta file (due to amino acid substitutions)
-                mIgnorePeptideToProteinMapperErrors = True
+                IgnorePeptideToProteinMapperErrors = True
                 blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
                 If Not blnSuccess Then
                     ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
@@ -1557,7 +1557,7 @@ Public Class clsMODPlusResultsProcessor
 
         ' Now store or write out the matches that pass the filters
         For intIndex = intStartIndex To intEndIndex
-            If lstSearchResults(intIndex).ProbabilityNum >= mMODaMODPlusSynopsisFileProbabilityThreshold Then
+            If lstSearchResults(intIndex).ProbabilityNum >= MODaMODPlusSynopsisFileProbabilityThreshold Then
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If
         Next intIndex

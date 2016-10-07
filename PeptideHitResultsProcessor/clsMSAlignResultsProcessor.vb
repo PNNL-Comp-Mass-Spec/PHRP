@@ -528,7 +528,7 @@ Public Class clsMSAlignResultsProcessor
 
                     ' Update the progress
                     sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                    If mCreateProteinModsFile Then
+                    If CreateProteinModsFile Then
                         sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                     End If
                     UpdateProgress(sngPercentComplete)
@@ -714,7 +714,7 @@ Public Class clsMSAlignResultsProcessor
             End If
 
             Try
-                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
 
                 Dim strErrorLog As String = String.Empty
 
@@ -815,7 +815,7 @@ Public Class clsMSAlignResultsProcessor
 
                         ' Update the progress
                         sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -826,7 +826,7 @@ Public Class clsMSAlignResultsProcessor
 
                 End Using
 
-                If mCreateModificationSummaryFile Then
+                If CreateModificationSummaryFile Then
                     ' Create the modification summary file
                     Dim fiInputFile = New FileInfo(strInputFilePath)
                     strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
@@ -1340,7 +1340,7 @@ Public Class clsMSAlignResultsProcessor
                 lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
                 ' Load the MSAlign Parameter File so that we can determine whether Cysteine residues are statically modified
-                ExtractModInfoFromMSAlignParamFile(mSearchToolParameterFilePath, lstMSAlignModInfo)
+                ExtractModInfoFromMSAlignParamFile(SearchToolParameterFilePath, lstMSAlignModInfo)
 
                 ' Resolve the mods in lstMSAlignModInfo with the ModDefs mods
                 ResolveMSAlignModsWithModDefinitions(lstMSAlignModInfo)
@@ -1373,7 +1373,7 @@ Public Class clsMSAlignResultsProcessor
                 lstPepToProteinMapping.Clear()
                 lstPepToProteinMapping.TrimExcess()
 
-                If blnSuccess AndAlso mCreateProteinModsFile Then
+                If blnSuccess AndAlso CreateProteinModsFile Then
                     blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strSynOutputFilePath, strOutputFolderPath)
                 End If
 
@@ -1414,12 +1414,12 @@ Public Class clsMSAlignResultsProcessor
             SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         Else
-            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso UseExistingMTSPepToProteinMapFile Then
                 blnSuccess = True
             Else
                 ' Auto-change mIgnorePeptideToProteinMapperErrors to True
                 ' We only do this since a small number of peptides reported by MSAlign don't perfectly match the fasta file
-                mIgnorePeptideToProteinMapperErrors = True
+                IgnorePeptideToProteinMapperErrors = True
                 blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
                 If Not blnSuccess Then
                     ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
@@ -1508,7 +1508,7 @@ Public Class clsMSAlignResultsProcessor
 
         ' Now store or write out the matches that pass the filters
         For intIndex = intStartIndex To intEndIndex
-            If lstSearchResults(intIndex).PValueNum <= mMSAlignSynopsisFilePValueThreshold Then
+            If lstSearchResults(intIndex).PValueNum <= MSAlignSynopsisFilePValueThreshold Then
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If
         Next intIndex

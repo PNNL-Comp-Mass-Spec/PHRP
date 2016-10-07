@@ -89,6 +89,11 @@ Public Class clsPeptideCleavageStateCalculator
     Public Structure udtEnzymeMatchSpecType
         Public LeftResidueRegEx As String           ' RegEx match string for matching the residue to the left of the cleavage point
         Public RightResidueRegEx As String          ' RegEx match string for matching the residue to the right of the cleavage point
+
+        Public Sub New(strLeftResidueRegEx As String, strRightResidueRegEx As String)
+            LeftResidueRegEx = strLeftResidueRegEx
+            RightResidueRegEx = strRightResidueRegEx
+        End Sub
     End Structure
 
 #End Region

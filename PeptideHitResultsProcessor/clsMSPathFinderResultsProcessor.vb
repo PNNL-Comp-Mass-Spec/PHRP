@@ -358,7 +358,7 @@ Public Class clsMSPathFinderResultsProcessor
             SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         Else
-            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso UseExistingMTSPepToProteinMapFile Then
                 blnSuccess = True
             Else
                 blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
@@ -453,7 +453,7 @@ Public Class clsMSPathFinderResultsProcessor
 
                     ' Update the progress
                     Dim sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                    If mCreateProteinModsFile Then
+                    If CreateProteinModsFile Then
                         sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                     End If
                     UpdateProgress(sngPercentComplete)
@@ -577,7 +577,7 @@ Public Class clsMSPathFinderResultsProcessor
             Dim strErrorLog = String.Empty
 
             Try
-                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
 
                 ' Open the input file and parse it
                 ' Initialize the stream reader
@@ -682,7 +682,7 @@ Public Class clsMSPathFinderResultsProcessor
 
                         ' Update the progress
                         Dim sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -693,7 +693,7 @@ Public Class clsMSPathFinderResultsProcessor
 
                 End Using
 
-                If mCreateModificationSummaryFile Then
+                If CreateModificationSummaryFile Then
                     ' Create the modification summary file
                     Dim fiInputFile = New FileInfo(strInputFilePath)
                     Dim strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
@@ -1141,7 +1141,7 @@ Public Class clsMSPathFinderResultsProcessor
 
                 ' Load the MSPathFinder Parameter File so that we can determine the modification names and masses
                 ' Note that this call will initialize lstModInfo
-                Dim success = ExtractModInfoFromParamFile(mSearchToolParameterFilePath, lstModInfo)
+                Dim success = ExtractModInfoFromParamFile(SearchToolParameterFilePath, lstModInfo)
                 If Not success Then
                     Return False
                 End If
@@ -1170,7 +1170,7 @@ Public Class clsMSPathFinderResultsProcessor
                 ' Now parse the _syn.txt file that we just created to next create the other PHRP files
                 blnSuccess = ParseMSPathfinderSynopsisFile(strSynOutputFilePath, strOutputFolderPath, False, lstModInfo)
 
-                If blnSuccess AndAlso mCreateProteinModsFile Then
+                If blnSuccess AndAlso CreateProteinModsFile Then
                     blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strSynOutputFilePath, strOutputFolderPath)
                 End If
 
@@ -1235,7 +1235,7 @@ Public Class clsMSPathFinderResultsProcessor
         '  Either SpecEValue < 0.0001
         '  or     QValue < 5%
         For intIndex = intStartIndex To intEndIndex
-            If lstSearchResults(intIndex).SpecEValueNum <= mMSGFDBSynopsisFileSpecProbThreshold OrElse
+            If lstSearchResults(intIndex).SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold OrElse
                lstSearchResults(intIndex).QValueNum < 0.1 Then
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If

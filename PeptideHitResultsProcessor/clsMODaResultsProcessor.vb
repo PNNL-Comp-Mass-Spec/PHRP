@@ -637,7 +637,7 @@ Public Class clsMODaResultsProcessor
 
                         ' Update the progress
                         Dim sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -917,7 +917,7 @@ Public Class clsMODaResultsProcessor
             End If
 
             Try
-                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
 
                 Dim strErrorLog = String.Empty
 
@@ -1023,7 +1023,7 @@ Public Class clsMODaResultsProcessor
 
                         ' Update the progress
                         Dim sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -1034,7 +1034,7 @@ Public Class clsMODaResultsProcessor
 
                 End Using
 
-                If mCreateModificationSummaryFile Then
+                If CreateModificationSummaryFile Then
                     ' Create the modification summary file
                     Dim fiInputFile = New FileInfo(strInputFilePath)
                     Dim strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
@@ -1502,7 +1502,7 @@ Public Class clsMODaResultsProcessor
                 lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
                 ' Load the MODa Parameter File to look for any static mods
-                ExtractModInfoFromMODaParamFile(mSearchToolParameterFilePath, lstMODaModInfo)
+                ExtractModInfoFromMODaParamFile(SearchToolParameterFilePath, lstMODaModInfo)
 
                 ' Resolve the mods in lstMODaModInfo with the ModDefs mods
                 ResolveMODaModsWithModDefinitions(lstMODaModInfo)
@@ -1543,7 +1543,7 @@ Public Class clsMODaResultsProcessor
                 lstPepToProteinMapping.Clear()
                 lstPepToProteinMapping.TrimExcess()
 
-                If blnSuccess AndAlso mCreateProteinModsFile Then
+                If blnSuccess AndAlso CreateProteinModsFile Then
                     blnSuccess = CreateProteinModsFileWork(strBaseName, fiInputFile, strSynOutputFilePath, strOutputFolderPath)
                 End If
 
@@ -1589,12 +1589,12 @@ Public Class clsMODaResultsProcessor
             SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles)
             blnSuccess = False
         Else
-            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso mUseExistingMTSPepToProteinMapFile Then
+            If File.Exists(strMTSPepToProteinMapFilePath) AndAlso UseExistingMTSPepToProteinMapFile Then
                 blnSuccess = True
             Else
                 ' Auto-change mIgnorePeptideToProteinMapperErrors to True
                 ' We only do this since a small number of peptides reported by MODa don't perfectly match the fasta file
-                mIgnorePeptideToProteinMapperErrors = True
+                IgnorePeptideToProteinMapperErrors = True
                 blnSuccess = MyBase.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath)
                 If Not blnSuccess Then
                     ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False")
@@ -1749,7 +1749,7 @@ Public Class clsMODaResultsProcessor
 
         ' Now store or write out the matches that pass the filters
         For intIndex = intStartIndex To intEndIndex
-            If lstSearchResults(intIndex).ProbabilityNum >= mMODaMODPlusSynopsisFileProbabilityThreshold Then
+            If lstSearchResults(intIndex).ProbabilityNum >= MODaMODPlusSynopsisFileProbabilityThreshold Then
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If
         Next intIndex

@@ -227,18 +227,12 @@ Public Class clsInSpecTResultsProcessor
 #End Region
 
 #Region "Classwide Variables"
-    Protected mSortFHTandSynFiles As Boolean
+
 #End Region
 
 #Region "Properties"
-    Public Property SortFHTandSynFiles() As Boolean
-        Get
-            Return mSortFHTandSynFiles
-        End Get
-        Set(value As Boolean)
-            mSortFHTandSynFiles = value
-        End Set
-    End Property
+    Public Property SortFHTandSynFiles As Boolean
+
 #End Region
 
     Private Sub AddCurrentRecordToSearchResults(ByRef intCurrentScanResultsCount As Integer,
@@ -540,7 +534,7 @@ Public Class clsInSpecTResultsProcessor
                         intCurrentScanResultsCount = 0
                     End If
 
-                    If mSortFHTandSynFiles Then
+                    If SortFHTandSynFiles Then
                         ' Sort the data in udtFilteredSearchResults then write out to disk
                         SortAndWriteFilteredSearchResults(swResultFile, intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
                     End If
@@ -773,7 +767,7 @@ Public Class clsInSpecTResultsProcessor
     End Function
 
     Private Sub InitializeLocalVariables()
-        mSortFHTandSynFiles = True
+        SortFHTandSynFiles = True
     End Sub
 
     ''' <summary>
@@ -975,7 +969,7 @@ Public Class clsInSpecTResultsProcessor
             End If
 
             Try
-                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(mEnzymeMatchSpec, mPeptideNTerminusMassChange, mPeptideCTerminusMassChange)
+                objSearchResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange)
 
                 Dim strErrorLog As String = String.Empty
 
@@ -1081,7 +1075,7 @@ Public Class clsInSpecTResultsProcessor
 
                         ' Update the progress
                         sngPercentComplete = CSng(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100)
-                        If mCreateProteinModsFile Then
+                        If CreateProteinModsFile Then
                             sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100)
                         End If
                         UpdateProgress(sngPercentComplete)
@@ -1091,7 +1085,7 @@ Public Class clsInSpecTResultsProcessor
                     Loop
                 End Using
 
-                If mCreateModificationSummaryFile Then
+                If CreateModificationSummaryFile Then
                     ' Create the modification summary file
                     Dim fiInputFile = New FileInfo(strInputFilePath)
                     strModificationSummaryFilePath = Path.GetFileName(MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_MOD_SUMMARY))
@@ -1428,7 +1422,7 @@ Public Class clsInSpecTResultsProcessor
                 lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
                 ' Load the Inspect Parameter File so that we can determine the modification names and masses
-                If Not ExtractModInfoFromInspectParamFile(mSearchToolParameterFilePath, udtInspectModInfo) Then
+                If Not ExtractModInfoFromInspectParamFile(SearchToolParameterFilePath, udtInspectModInfo) Then
                     If udtInspectModInfo Is Nothing OrElse udtInspectModInfo.Length = 0 Then
                         ReDim udtInspectModInfo(0)
                         With udtInspectModInfo(0)
@@ -1444,7 +1438,7 @@ Public Class clsInSpecTResultsProcessor
                 ' Resolve the mods in mInspectModInfo with the ModDefs mods
                 ResolveInspectModsWithModDefinitions(udtInspectModInfo)
 
-                If MyBase.mCreateInspectOrMSGFDbFirstHitsFile Then
+                If MyBase.CreateInspectFirstHitsFile Then
 
                     ' Create the first hits output file
                     MyBase.ResetProgress("Creating the FHT file (top TotalPRMScore)", True)
@@ -1465,7 +1459,7 @@ Public Class clsInSpecTResultsProcessor
 
                 End If
 
-                If MyBase.mCreateInspectOrMSGFDbSynopsisFile Then
+                If MyBase.CreateInspectSynopsisFile Then
 
                     ' Create the synopsis output file
                     MyBase.ResetProgress("Creating the SYN file", True)
@@ -1493,7 +1487,7 @@ Public Class clsInSpecTResultsProcessor
                     lstPepToProteinMapping.Clear()
                     lstPepToProteinMapping.TrimExcess()
 
-                    If blnSuccess AndAlso mCreateProteinModsFile Then
+                    If blnSuccess AndAlso CreateProteinModsFile Then
                         ' If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
                         MyBase.ValidatePHRPReaderSupportFiles(Path.Combine(fiInputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath)
 
@@ -1735,7 +1729,7 @@ Public Class clsInSpecTResultsProcessor
       ByRef udtFilteredSearchResults() As udtInspectSearchResultType,
       ByRef strErrorLog As String)
 
-        If mSortFHTandSynFiles Then
+        If SortFHTandSynFiles Then
             If intFilteredSearchResultCount = udtFilteredSearchResults.Length Then
                 ReDim Preserve udtFilteredSearchResults(udtFilteredSearchResults.Length * 2 - 1)
             End If
@@ -1814,7 +1808,7 @@ Public Class clsInSpecTResultsProcessor
 
         ' Now store or write out the matches that pass the filters
         For intIndex = 0 To intCurrentScanResultsCount - 1
-            If udtSearchResultsCurrentScan(intIndex).PValueNum <= mInspectSynopsisFilePValueThreshold OrElse
+            If udtSearchResultsCurrentScan(intIndex).PValueNum <= InspectSynopsisFilePValueThreshold OrElse
                udtSearchResultsCurrentScan(intIndex).TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD OrElse
                udtSearchResultsCurrentScan(intIndex).FScoreNum >= FSCORE_THRESHOLD Then
                 StoreOrWriteSearchResult(swResultFile, intResultID, udtSearchResultsCurrentScan(intIndex), intFilteredSearchResultCount, udtFilteredSearchResults, strErrorLog)
