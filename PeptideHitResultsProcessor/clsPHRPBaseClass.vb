@@ -27,6 +27,7 @@ Option Strict On
 Imports PHRPReader
 Imports PHRPReader.clsPeptideCleavageStateCalculator
 Imports System.IO
+Imports System.Runtime.InteropServices
 Imports System.Text.RegularExpressions
 
 Public MustInherit Class clsPHRPBaseClass
@@ -36,7 +37,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
-        mFileDate = "June 13, 2016"
+        mFileDate = "October 7, 2016"
         InitializeLocalVariables()
     End Sub
 
@@ -1212,7 +1213,7 @@ Public MustInherit Class clsPHRPBaseClass
         Return GetCleanSequence(strSequenceWithMods, strPrefix, strSuffix)
     End Function
 
-    Protected Function GetCleanSequence(strSequenceWithMods As String, ByRef strPrefix As String, ByRef strSuffix As String) As String
+    Protected Function GetCleanSequence(strSequenceWithMods As String, <Out()> ByRef strPrefix As String, <Out()> ByRef strSuffix As String) As String
 
         Dim strPrimarySequence As String = String.Empty
         strPrefix = String.Empty
@@ -1239,7 +1240,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(ByRef strSplitLine() As String, intColumnIndex As Integer, ByRef strValue As String) As Boolean
+    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out()> ByRef strValue As String) As Boolean
         Return GetColumnValue(strSplitLine, intColumnIndex, strValue, String.Empty)
     End Function
 
@@ -1249,7 +1250,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(ByRef strSplitLine() As String, intColumnIndex As Integer, ByRef intValue As Integer) As Boolean
+    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out()> ByRef intValue As Integer) As Boolean
         Return GetColumnValue(strSplitLine, intColumnIndex, intValue, 0)
     End Function
 
@@ -1259,7 +1260,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(ByRef strSplitLine() As String, intColumnIndex As Integer, ByRef strValue As String, strValueIfMissing As String) As Boolean
+    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out()> ByRef strValue As String, strValueIfMissing As String) As Boolean
         If intColumnIndex >= 0 AndAlso intColumnIndex < strSplitLine.Length Then
             strValue = String.Copy(strSplitLine(intColumnIndex))
             Return True
@@ -1275,7 +1276,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(ByRef strSplitLine() As String, intColumnIndex As Integer, ByRef intValue As Integer, intValueIfMissing As Integer) As Boolean
+    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out()> ByRef intValue As Integer, intValueIfMissing As Integer) As Boolean
         Dim strValue As String = String.Empty
 
         If GetColumnValue(strSplitLine, intColumnIndex, strValue, intValueIfMissing.ToString) Then
@@ -1597,7 +1598,7 @@ Public MustInherit Class clsPHRPBaseClass
     Protected Function LoadPeptideToProteinMapInfo(
        strPepToProteinMapFilePath As String,
        lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
-       ByRef strHeaderLine As String) As Boolean
+       <Out()> ByRef strHeaderLine As String) As Boolean
 
         Dim strLineIn As String
         Dim strSplitLine As String()
@@ -2112,7 +2113,7 @@ Public MustInherit Class clsPHRPBaseClass
         Return blnSuccess
     End Function
 
-    Public Shared Function ValidateProteinFastaFile(strFastaFilePath As String, ByRef strWarningMessage As String) As Boolean
+    Public Shared Function ValidateProteinFastaFile(strFastaFilePath As String, <Out()> ByRef strWarningMessage As String) As Boolean
 
         Dim objFastaFile As ProteinFileReader.FastaFileReader
 
