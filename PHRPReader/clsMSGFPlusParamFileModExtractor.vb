@@ -257,6 +257,11 @@ Public Class clsMSGFPlusParamFileModExtractor
                         Continue Do
                     End If
 
+                    If strModSpec.Contains("=") Then
+                        ' Unrecognized tag name
+                        ReportError("Mod spec '" & strModSpec & "' contains an unknown keyword before the equals sign; see parameter file " & Path.GetFileName(paramFilePath))
+                        Return False
+                    End If
                     ' Modification definition line found
 
                     ' Split the line on commas
