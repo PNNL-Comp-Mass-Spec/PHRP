@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6125; October 8, 2016
+	- Check for a dynamic or static mod specification having an unrecognized keyword before the equals sign
+	- Update GetEmpiricalFormulaComponents to allow for duplicate elements in the empirical formula
+
 Version 1.5.6124; October 7, 2016
 	- Add properties MsgfPlusSpecEValueThreshold and MsgfPlusEValueThreshold to clsPeptideHitResultsProcRunner
 		- When running the executable, customize the filter thresholds using /MSGFPlusSpecEValue and /MSGFPlusEValue

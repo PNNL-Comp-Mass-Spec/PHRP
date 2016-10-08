@@ -284,9 +284,13 @@ Public Class clsMSGFPlusParamFileModExtractor
                     With udtModInfo
                         .ModMass = strSplitLine(0).Trim()
 
+                        ' .ModMass could be a number, or could be an empirical formula
+                        ' First try to parse out a number
                         If Not Double.TryParse(.ModMass, .ModMassVal) Then
+                            ' Not a number
                             ' Mod (or custom AA) is specified as an empirical formula
                             ' Compute the mass
+                            ' Note that ComputeMass only supports C, H, N, O, S, and P
                             .ModMassVal = ComputeMass(.ModMass)
                         End If
 

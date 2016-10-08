@@ -618,10 +618,18 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
+    ''' <summary>
+    ''' Parse the given empirical formula to return a dictionary of the elements
+    ''' IMPORTANT: Only supports C, H, N, O, S, and P
+    ''' </summary>
+    ''' <param name="strEmpiricalformula"></param>
+    ''' <returns>Dictionary where keys are element symbols and values are the element counts</returns>
     Public Shared Function GetEmpiricalFormulaComponents(strEmpiricalformula As String) As Dictionary(Of Char, Integer)
 
-        Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline Or RegexOptions.IgnoreCase
+        Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline
 
+        ' Originally MSGF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
+        ' It now allows for any element, but this function still only supports C, H, N, O, S, and P
         Static reAtomicFormulaRegEx As New Regex("[CHNOSP][+-]?\d*", REGEX_OPTIONS)
         Dim reMatches As MatchCollection = reAtomicFormulaRegEx.Matches(strEmpiricalformula)
 
@@ -642,7 +650,13 @@ Public Class clsPeptideMassCalculator
                     intCount = 1
                 End If
 
-                elementalComposition.Add(strElement, intCount)
+                Dim intExistingCount As Integer
+                If elementalComposition.TryGetValue(strElement, intExistingCount) Then
+                    elementalComposition(strElement) = intExistingCount + intCount
+                Else
+                    elementalComposition.Add(strElement, intCount)
+                End If
+
             Next
         End If
 
