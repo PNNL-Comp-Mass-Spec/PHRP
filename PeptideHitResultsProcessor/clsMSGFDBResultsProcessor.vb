@@ -537,7 +537,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim dblPrecursorMonoMass As Double
 
         ' Compute the original value for the precursor monoisotopic mass
-        dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, intCharge, 0)
+        dblPrecursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(dblPrecursorMZ, intCharge, 0)
 
         dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, dblPeptideMonoisotopicMass)
 
@@ -1656,8 +1656,9 @@ Public Class clsMSGFDBResultsProcessor
                 ' Compute monoisotopic mass of the peptide
                 Dim dblPeptideMonoisotopicMass = ComputePeptideMass(udtSearchResult.Peptide, dblTotalModMass)
 
-                ' Store the monoisotopic MH value in .MH; note that this is (M+H)+
-                udtSearchResult.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
+                ' Store the monoisotopic MH value in .MH
+                ' This is (M+H)+ when the charge carrier is a proton
+                udtSearchResult.MH = NumToString(mPeptideSeqMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
 
                 If Not String.IsNullOrEmpty(udtSearchResult.PMErrorPPM) Then
 
@@ -1688,7 +1689,7 @@ Public Class clsMSGFDBResultsProcessor
 
 
                                 Dim dblPrecursorMonoMass As Double
-                                dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, udtSearchResult.ChargeNum, 0)
+                                dblPrecursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(dblPrecursorMZ, udtSearchResult.ChargeNum, 0)
 
                                 dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
 
@@ -2072,7 +2073,7 @@ Public Class clsMSGFDBResultsProcessor
                     Dim intCharge As Integer
                     If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
                         If Integer.TryParse(.Charge, intCharge) Then
-                            .ParentIonMH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, intCharge, 1), 6, True)
+                            .ParentIonMH = NumToString(mPeptideSeqMassCalculator.ConvoluteMass(dblPrecursorMZ, intCharge, 1), 6, True)
                         End If
                     End If
 

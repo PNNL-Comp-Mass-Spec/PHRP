@@ -609,12 +609,12 @@ Public Class clsPHRPParserXTandem
                     ' We'll update this value below using dblMassErrorDa
                     ' We'll further update this value using the ScanStatsEx data
                     dblPeptideMH = LookupColumnValue(strColumns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0#)
-                    .PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPeptideMH, 1, 0)
+                    .PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPeptideMH, 1, 0)
 
                     .MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_Delta_Mass, mColumnHeaders)
                     If Double.TryParse(.MassErrorDa, dblMassErrorDa) Then
                         ' Adjust the precursor mass
-                        .PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPeptideMH - dblMassErrorDa, 1, 0)
+                        .PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPeptideMH - dblMassErrorDa, 1, 0)
                     End If
 
                     .MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)

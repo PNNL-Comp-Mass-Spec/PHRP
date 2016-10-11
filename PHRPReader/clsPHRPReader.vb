@@ -2270,14 +2270,14 @@ Public Class clsPHRPReader
 
         If ExtractParentIonMzFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ) Then
             If dblParentIonMZ > 0 Then
-                dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(dblParentIonMZ, mPSMCurrent.Charge, 0)
+                dblMonoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(dblParentIonMZ, mPSMCurrent.Charge, 0)
             End If
         End If
 
         If Math.Abs(dblMonoisotopicPrecursorMass) < Double.Epsilon Then
             If mExtendedScanStatsInfo.MonoisotopicMZ > 0 Then
                 ' Determine the precursor m/z value using the Monoisotopic m/z value reported by the instrument
-                dblMonoisotopicPrecursorMass = clsPeptideMassCalculator.ConvoluteMass(mExtendedScanStatsInfo.MonoisotopicMZ,
+                dblMonoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(mExtendedScanStatsInfo.MonoisotopicMZ,
                  mPSMCurrent.Charge, 0)
             End If
         End If

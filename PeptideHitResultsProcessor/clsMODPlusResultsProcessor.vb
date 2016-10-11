@@ -884,7 +884,7 @@ Public Class clsMODPlusResultsProcessor
 
                     If Double.TryParse(.Precursor_mass, dblPrecursorMonoMass) Then
                         If .ChargeNum > 0 Then
-                            dblPrecursorMZ = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMonoMass, 0, .ChargeNum)
+                            dblPrecursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(dblPrecursorMonoMass, 0, .ChargeNum)
                             .PrecursorMZ = NumToString(dblPrecursorMZ, 6, True)
                         End If
                     End If
@@ -962,7 +962,7 @@ Public Class clsMODPlusResultsProcessor
                     End If
 
                     ' Store the monoisotopic MH value in .MH; note that this is (M+H)+
-                    .MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoMassPHRP, 0, 1), 6, True)
+                    .MH = NumToString(mPeptideSeqMassCalculator.ConvoluteMass(dblPeptideMonoMassPHRP, 0, 1), 6, True)
 
                     Dim dblProbability As Double
 

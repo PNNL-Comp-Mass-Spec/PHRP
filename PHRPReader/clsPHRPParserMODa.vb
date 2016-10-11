@@ -352,7 +352,7 @@ Public Class clsPHRPParserMODa
                     .AddProtein(strProtein)
 
                     dblPrecursorMZ = LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0#)
-                    .PrecursorNeutralMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .Charge, 0)
+                    .PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .Charge, 0)
 
                     .MassErrorDa = LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders)
                     .MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)

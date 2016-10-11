@@ -1219,7 +1219,7 @@ Public Class clsInSpecTResultsProcessor
 
                         If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
 
-                            dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .ChargeNum, 0)
+                            dblPrecursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(dblPrecursorMZ, .ChargeNum, 0)
                             dblPeptideMonoisotopicMass = .MH - clsPeptideMassCalculator.MASS_PROTON
 
                             dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
