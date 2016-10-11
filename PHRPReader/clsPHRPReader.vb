@@ -86,7 +86,7 @@ Public Class clsPHRPReader
 
     Private mSkipDuplicatePSMs As Boolean
 
-    Private mStartupOptions As clsPHRPStartupOptions
+    Private ReadOnly mStartupOptions As clsPHRPStartupOptions
 
     Private mEchoMessagesToConsole As Boolean
 
@@ -104,14 +104,14 @@ Public Class clsPHRPReader
     Private mSourceFileLineCount As Integer
     Private mSourceFileLinesRead As Integer
 
-    Private WithEvents mPHRPParser As clsPHRPParser
-    Private mPeptideMassCalculator As clsPeptideMassCalculator
+    Private mPHRPParser As clsPHRPParser
+    Private ReadOnly mPeptideMassCalculator As clsPeptideMassCalculator
 
     ' This dictionary contains mod symbols as the key and modification definition as the values
-    Private mDynamicMods As SortedDictionary(Of Char, clsModificationDefinition)
+    Private ReadOnly mDynamicMods As SortedDictionary(Of Char, clsModificationDefinition)
 
     ' This dictionary contains amino acid names as the key and the corresponding mod modification (or mod modifications) 
-    Private mStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))
+    Private ReadOnly mStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))
 
     ' This dictionary tracks the MSGFSpecProb values for each entry in the source file
     ' The keys are Result_ID and the string is MSGFSpecProb (stored as string to preserve formatting)
@@ -129,15 +129,15 @@ Public Class clsPHRPReader
     Private mPSMCurrentFinalized As Boolean
 
     Private mExtendedScanStatsValid As Boolean
-    Private mExtendedScanStatsInfo As clsScanStatsExInfo
+    Private ReadOnly mExtendedScanStatsInfo As clsScanStatsExInfo
 
     Private mHeaderLineParsed As Boolean
     Private mCachedLineAvailable As Boolean
     Private mCachedLine As String
     Private mCachedPSM As clsPSM
 
-    Private mErrorMessages As List(Of String)
-    Private mWarningMessages As List(Of String)
+    Private ReadOnly mErrorMessages As List(Of String)
+    Private ReadOnly mWarningMessages As List(Of String)
 
     Private mErrorMessage As String = String.Empty
     Private mLocalErrorCode As ePHRPReaderErrorCodes
@@ -543,8 +543,19 @@ Public Class clsPHRPReader
             .LoadMSGFResults = blnLoadMSGFResults
             .LoadScanStatsData = blnLoadScanStats
         End With
+        mStartupOptions = oStartupOptions
 
-        InitializeClass(strInputFilePath, eResultType, oStartupOptions)
+        mMSGFCachedResults = New Dictionary(Of Integer, String)
+
+        mDynamicMods = New SortedDictionary(Of Char, clsModificationDefinition)
+        mStaticMods = New SortedDictionary(Of String, List(Of clsModificationDefinition))
+
+        mPeptideMassCalculator = New clsPeptideMassCalculator()
+
+        mErrorMessages = New List(Of String)
+        mWarningMessages = New List(Of String)
+
+        InitializeClass(strInputFilePath, eResultType, mStartupOptions)
 
     End Sub
 
@@ -557,7 +568,27 @@ Public Class clsPHRPReader
     ''' <remarks></remarks>
     Public Sub New(strInputFilePath As String, eResultType As ePeptideHitResultType, oStartupOptions As clsPHRPStartupOptions)
 
-        InitializeClass(strInputFilePath, eResultType, oStartupOptions)
+        If oStartupOptions Is Nothing Then
+            Throw New ArgumentNullException(NameOf(oStartupOptions))
+        End If
+
+        mStartupOptions = oStartupOptions
+
+        mMSGFCachedResults = New Dictionary(Of Integer, String)
+
+        mDynamicMods = New SortedDictionary(Of Char, clsModificationDefinition)
+        mStaticMods = New SortedDictionary(Of String, List(Of clsModificationDefinition))
+
+        If oStartupOptions.PeptideMassCalculator Is Nothing Then
+            mPeptideMassCalculator = New clsPeptideMassCalculator()
+        Else
+            mPeptideMassCalculator = oStartupOptions.PeptideMassCalculator
+        End If
+
+        mErrorMessages = New List(Of String)
+        mWarningMessages = New List(Of String)
+
+        InitializeClass(strInputFilePath, eResultType, mStartupOptions)
 
     End Sub
 
@@ -676,28 +707,8 @@ Public Class clsPHRPReader
 
         mEchoMessagesToConsole = False
 
-        If oStartupOptions Is Nothing Then
-            mStartupOptions = New clsPHRPStartupOptions()
-        Else
-            mStartupOptions = oStartupOptions
-        End If
-
         mErrorMessage = String.Empty
         mLocalErrorCode = ePHRPReaderErrorCodes.NoError
-
-        mMSGFCachedResults = New Dictionary(Of Integer, String)
-
-        mDynamicMods = New SortedDictionary(Of Char, clsModificationDefinition)
-        mStaticMods = New SortedDictionary(Of String, List(Of clsModificationDefinition))
-
-        If oStartupOptions.PeptideMassCalculator Is Nothing Then
-            mPeptideMassCalculator = New clsPeptideMassCalculator()
-        Else
-            mPeptideMassCalculator = oStartupOptions.PeptideMassCalculator
-        End If
-
-        mErrorMessages = New List(Of String)
-        mWarningMessages = New List(Of String)
 
         mSourceFileLineCount = 0
 

@@ -38,23 +38,23 @@ Public MustInherit Class clsPHRPParser
 
     Protected mErrorMessage As String = String.Empty
 
-    Protected mCleavageStateCalculator As clsPeptideCleavageStateCalculator
-    Protected mPeptideMassCalculator As clsPeptideMassCalculator
+    Protected ReadOnly mCleavageStateCalculator As clsPeptideCleavageStateCalculator
+    Protected ReadOnly mPeptideMassCalculator As clsPeptideMassCalculator
 
     Protected mPeptideHitResultType As clsPHRPReader.ePeptideHitResultType
 
     Protected mModInfo As List(Of clsModificationDefinition)
 
-    Private mResultToSeqMap As SortedList(Of Integer, Integer)
-    Private mSeqInfo As SortedList(Of Integer, clsSeqInfo)
-    Private mSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
-    Private mPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
+    Private ReadOnly mResultToSeqMap As SortedList(Of Integer, Integer)
+    Private ReadOnly mSeqInfo As SortedList(Of Integer, clsSeqInfo)
+    Private ReadOnly mSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
+    Private ReadOnly mPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
 
     ' This List tracks the Protein Names for each ResultID
-    Protected mResultIDToProteins As SortedList(Of Integer, List(Of String))
+    Protected ReadOnly mResultIDToProteins As SortedList(Of Integer, List(Of String))
 
-    Private mErrorMessages As List(Of String)
-    Private mWarningMessages As List(Of String)
+    Private ReadOnly mErrorMessages As List(Of String)
+    Private ReadOnly mWarningMessages As List(Of String)
 
 #End Region
 
@@ -216,8 +216,26 @@ Public MustInherit Class clsPHRPParser
     ''' <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
     ''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
     Protected Sub New(strDatasetName As String, strInputFilePath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, blnLoadModsAndSeqInfo As Boolean)
-        Dim startupOptions = New clsPHRPStartupOptions
-        startupOptions.LoadModsAndSeqInfo = blnLoadModsAndSeqInfo
+
+        mErrorMessages = New List(Of String)
+        mWarningMessages = New List(Of String)
+
+        ' Initialize the tracking lists
+        mResultToSeqMap = New SortedList(Of Integer, Integer)
+        mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
+        mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
+        mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
+
+        mResultIDToProteins = New SortedList(Of Integer, List(Of String))
+
+        mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
+
+        mPeptideMassCalculator = New clsPeptideMassCalculator()
+
+        Dim startupOptions = New clsPHRPStartupOptions() With {
+            .LoadModsAndSeqInfo = blnLoadModsAndSeqInfo
+        }
+
         InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions)
     End Sub
 
@@ -229,6 +247,26 @@ Public MustInherit Class clsPHRPParser
     ''' <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
     ''' <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
     Protected Sub New(strDatasetName As String, strInputFilePath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, startupOptions As clsPHRPStartupOptions)
+
+        mErrorMessages = New List(Of String)
+        mWarningMessages = New List(Of String)
+
+        ' Initialize the tracking lists
+        mResultToSeqMap = New SortedList(Of Integer, Integer)
+        mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
+        mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
+        mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
+
+        mResultIDToProteins = New SortedList(Of Integer, List(Of String))
+
+        mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
+
+        If startupOptions.PeptideMassCalculator Is Nothing Then
+            mPeptideMassCalculator = New clsPeptideMassCalculator()
+        Else
+            mPeptideMassCalculator = startupOptions.PeptideMassCalculator
+        End If
+
         InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions)
     End Sub
 
@@ -244,9 +282,6 @@ Public MustInherit Class clsPHRPParser
     ''' Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
     ''' </remarks>
     Private Sub InitializeParser(strDatasetName As String, strInputFilePath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, startupOptions As clsPHRPStartupOptions)
-
-        mErrorMessages = New List(Of String)
-        mWarningMessages = New List(Of String)
 
         If String.IsNullOrWhiteSpace(strDatasetName) Then strDatasetName = "Undefined"
         mDatasetName = strDatasetName
@@ -281,21 +316,6 @@ Public MustInherit Class clsPHRPParser
         ' Initialize the column mapping object
         ' Using a case-insensitive comparer
         mColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
-
-        mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
-        If startupOptions.PeptideMassCalculator Is Nothing Then
-            mPeptideMassCalculator = New clsPeptideMassCalculator()
-        Else
-            mPeptideMassCalculator = startupOptions.PeptideMassCalculator
-        End If
-
-        ' Initialize the tracking lists
-        mResultToSeqMap = New SortedList(Of Integer, Integer)
-        mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
-        mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
-        mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
-
-        mResultIDToProteins = New SortedList(Of Integer, List(Of String))
 
         If startupOptions.LoadModsAndSeqInfo Then
             ' Read the ModSummary file (if it exists)
@@ -583,10 +603,6 @@ Public MustInherit Class clsPHRPParser
     End Function
 
     Public Sub FinalizePSM(objPSM As clsPSM)
-
-        If mCleavageStateCalculator Is Nothing Then
-            mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
-        End If
 
         objPSM.UpdateCleanSequence()
 
