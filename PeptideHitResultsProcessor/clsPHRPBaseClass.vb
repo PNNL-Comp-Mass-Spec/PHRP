@@ -37,7 +37,26 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
-        mFileDate = "October 7, 2016"
+        mFileDate = "October 11, 2016"
+
+        mPeptideSeqMassCalculator = New clsPeptideMassCalculator() With {
+            .ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON
+        }
+
+        ' Initialize mPeptideMods
+        mPeptideMods = New clsPeptideModificationContainer
+
+        ' Initialize mUniqueSequences
+        mUniqueSequences = New clsUniqueSequencesContainer
+
+        ' Initialize mSeqToProteinMap
+        mSeqToProteinMap = New Hashtable
+
+        ' Define a RegEx to replace all of the non-letter characters
+        mReplaceSymbols = New Regex("[^A-Za-z]", RegexOptions.Compiled)
+
+        mProteinNameOrder = New Dictionary(Of String, Integer)
+
         InitializeLocalVariables()
     End Sub
 
@@ -149,11 +168,11 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected mFileDate As String = String.Empty
 
-    Protected mPeptideSeqMassCalculator As clsPeptideMassCalculator
+    Protected ReadOnly mPeptideSeqMassCalculator As clsPeptideMassCalculator
 
-    Protected mPeptideMods As clsPeptideModificationContainer
-    Private mUniqueSequences As clsUniqueSequencesContainer
-    Private mSeqToProteinMap As Hashtable
+    Protected ReadOnly mPeptideMods As clsPeptideModificationContainer
+    Private ReadOnly mUniqueSequences As clsUniqueSequencesContainer
+    Private ReadOnly mSeqToProteinMap As Hashtable
 
     Private mResultToSeqMapFile As StreamWriter
     Private mSeqInfoFile As StreamWriter
@@ -166,9 +185,9 @@ Public MustInherit Class clsPHRPBaseClass
     ''' Tracks the protein names in the order that they are listed in the FASTA file
     ''' Keys are protein Names, values are a sequentially assigned integer
     ''' </summary>
-    Protected mProteinNameOrder As Dictionary(Of String, Integer)
+    Protected ReadOnly mProteinNameOrder As Dictionary(Of String, Integer)
 
-    Private mReplaceSymbols As Regex
+    Private ReadOnly mReplaceSymbols As Regex
 #End Region
 
 #Region "Progress Events and Variables"
@@ -1389,22 +1408,6 @@ Public MustInherit Class clsPHRPBaseClass
 
         PeptideNTerminusMassChange = clsPeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE
         PeptideCTerminusMassChange = clsPeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE
-
-        mPeptideSeqMassCalculator = New clsPeptideMassCalculator()
-
-        ' Initialize mPeptideMods
-        mPeptideMods = New clsPeptideModificationContainer
-
-        ' Initialize mUniqueSequences
-        mUniqueSequences = New clsUniqueSequencesContainer
-
-        ' Initialize mSeqToProteinMap
-        mSeqToProteinMap = New Hashtable
-
-        ' Define a RegEx to replace all of the non-letter characters
-        mReplaceSymbols = New Regex("[^A-Za-z]", RegexOptions.Compiled)
-
-        mProteinNameOrder = New Dictionary(Of String, Integer)
 
     End Sub
 
