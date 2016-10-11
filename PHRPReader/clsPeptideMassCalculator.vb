@@ -84,6 +84,8 @@ Public Class clsPeptideMassCalculator
 
 #Region "Properties"
 
+    Public Property ChargeCarrierMass As Double
+
     ''' <summary>
     ''' Most recent error message
     ''' </summary>
@@ -129,6 +131,7 @@ Public Class clsPeptideMassCalculator
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
+        ChargeCarrierMass = MASS_PROTON
         mErrorMessage = String.Empty
         mRemovePrefixAndSuffixIfPresent = True
         InitializeAminoAcidData()
@@ -393,13 +396,40 @@ Public Class clsPeptideMassCalculator
     ''' <param name="intCurrentCharge"></param>
     ''' <param name="intDesiredCharge"></param>
     ''' <returns></returns>
+    ''' <remarks>Uses the charge carrier mass defined by ChargeCarrierMass</remarks>
+    Public Function ConvoluteMass(
+      dblMassMZ As Double,
+      intCurrentCharge As Integer,
+      Optional intDesiredCharge As Integer = 1
+      ) As Double
+
+        Return ConvoluteMass(dblMassMZ, intCurrentCharge, intDesiredCharge, ChargeCarrierMass)
+    End Function
+
+    ''' <summary>
+    ''' Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
+    ''' </summary>
+    ''' <param name="dblMassMZ">m/z</param>
+    ''' <param name="intCurrentCharge">Current charge</param>
+    ''' <param name="intDesiredCharge">Desired charge</param>
+    ''' <param name="dblChargeCarrierMass">Charge carrier mass (Default is the mass of a proton)</param>
+    ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function ConvoluteMass(dblMassMZ As Double, intCurrentCharge As Integer, Optional intDesiredCharge As Integer = 1) As Double
+    Public Function ConvoluteMass(
+      dblMassMZ As Double,
+      intCurrentCharge As Integer,
+      intDesiredCharge As Integer,
+      dblChargeCarrierMass As Double) As Double
+
         ' Converts dblMassMZ to the MZ that would appear at the given intDesiredCharge
         ' If intCurrentCharge = 0, then assumes dblMassMZ is the neutral, monoisotopic mass
         ' To return the neutral mass, set intDesiredCharge to 0
 
         Dim dblNewMZ As Double
+
+        If Math.Abs(dblChargeCarrierMass) < Single.Epsilon Then
+            dblChargeCarrierMass = MASS_PROTON
+        End If
 
         Try
             If intCurrentCharge = intDesiredCharge Then
@@ -409,22 +439,22 @@ Public Class clsPeptideMassCalculator
                     dblNewMZ = dblMassMZ
                 ElseIf intCurrentCharge > 1 Then
                     ' Convert dblMassMZ to M+H
-                    dblNewMZ = (dblMassMZ * intCurrentCharge) - MASS_PROTON * (intCurrentCharge - 1)
+                    dblNewMZ = (dblMassMZ * intCurrentCharge) - dblChargeCarrierMass * (intCurrentCharge - 1)
                 ElseIf intCurrentCharge = 0 Then
                     ' Convert dblMassMZ (which is neutral) to M+H and store in dblNewMZ
-                    dblNewMZ = dblMassMZ + MASS_PROTON
+                    dblNewMZ = dblMassMZ + dblChargeCarrierMass
                 Else
                     ' Negative charges are not supported; return 0
                     Return 0
                 End If
 
                 If intDesiredCharge > 1 Then
-                    dblNewMZ = (dblNewMZ + MASS_PROTON * (intDesiredCharge - 1)) / intDesiredCharge
+                    dblNewMZ = (dblNewMZ + dblChargeCarrierMass * (intDesiredCharge - 1)) / intDesiredCharge
                 ElseIf intDesiredCharge = 1 Then
                     ' Return M+H, which is currently stored in dblNewMZ
                 ElseIf intDesiredCharge = 0 Then
                     ' Return the neutral mass
-                    dblNewMZ -= MASS_PROTON
+                    dblNewMZ -= dblChargeCarrierMass
                 Else
                     ' Negative charges are not supported; return 0
                     dblNewMZ = 0
@@ -693,7 +723,7 @@ Public Class clsPeptideMassCalculator
     ''' <param name="dblMH"></param>
     ''' <returns></returns>
     ''' <remarks>Equivalent to ConvoluteMass(dblMH, 1, 0)</remarks>
-    Public Shared Function MHToMonoisotopicMass(dblMH As Double) As Double
+    Public Function MHToMonoisotopicMass(dblMH As Double) As Double
         Return ConvoluteMass(dblMH, 1, 0)
     End Function
 
@@ -704,7 +734,7 @@ Public Class clsPeptideMassCalculator
     ''' <param name="intDesiredCharge"></param>
     ''' <returns></returns>
     ''' <remarks>Equivalent to ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)</remarks>
-    Public Shared Function MonoisotopicMassToMZ(dblMonoisotopicMass As Double, intDesiredCharge As Integer) As Double
+    Public Function MonoisotopicMassToMZ(dblMonoisotopicMass As Double, intDesiredCharge As Integer) As Double
         Return ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)
     End Function
 
