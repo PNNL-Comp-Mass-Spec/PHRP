@@ -27,7 +27,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "October 7, 2016"
+        MyBase.mFileDate = "October 10, 2016"
         mModMassRegEx = New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
         InitializeLocalVariables()
@@ -402,7 +402,7 @@ Public Class clsMSGFDBResultsProcessor
       intStartIndex As Integer,
       intEndIndex As Integer)
 
-        ' Prior to September 2014 ranks were assign per charge state per scan; 
+        ' Prior to September 2014 ranks were assigned per charge state per scan; 
         ' Ranks are now assigned per scan (across all charge states)
 
         If intStartIndex = intEndIndex Then
@@ -741,7 +741,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim strLineIn As String
 
         Dim lstSearchResultsCurrentScan As New List(Of udtMSGFDBSearchResultType)
-        Dim lstSearchResultsUnfiltered As New List(Of udtMSGFDBSearchResultType)
+        Dim lstSearchResultsPrefiltered As New List(Of udtMSGFDBSearchResultType)
 
         Dim sngPercentComplete As Single
 
@@ -805,6 +805,11 @@ Public Class clsMSGFDBResultsProcessor
                     ' Initialize the array that will hold all of the records that will ultimately be written out to disk
                     Dim lstFilteredSearchResults = New List(Of udtMSGFDBSearchResultType)
 
+                    ' Initialize a dictionary that tracks the peptide sequence for each combo of scan and charge
+                    ' Keys are Scan_Charge, values track the clean sequence, the associated protein name, and the protein number for that name
+                    ' Note that we can only track protein numbers if the FASTA file path was provided at the command line
+                    Dim scanChargeFirstHit = New Dictionary(Of String, clsFirstHitInfo)
+
                     ' Parse the input file
                     Do While Not srDataFile.EndOfStream And Not MyBase.AbortProcessing
                         strLineIn = srDataFile.ReadLine()
@@ -848,9 +853,48 @@ Public Class clsMSGFDBResultsProcessor
                             lstSearchResultsCurrentScan, strErrorLog,
                             intColumnMapping, intNextScanGroupID, lstScanGroupDetails, htScanGroupCombo, lstSpecIdToIndex)
 
-                        If blnValidSearchResult Then
-                            ExpandListIfRequired(lstSearchResultsUnfiltered, lstSearchResultsCurrentScan.Count)
-                            lstSearchResultsUnfiltered.AddRange(lstSearchResultsCurrentScan)
+                        If blnValidSearchResult AndAlso lstSearchResultsCurrentScan.Count > 0 Then
+                            If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
+                                ' Synopsis file
+                                blnValidSearchResult = MSGFPlusResultPassesSynFilter(lstSearchResultsCurrentScan(0))
+                            Else
+                                ' First Hits file
+                                Dim scanChargeKey = lstSearchResultsCurrentScan(0).Scan & "_" & lstSearchResultsCurrentScan(0).Charge
+                                Dim firstHitPeptide As clsFirstHitInfo = Nothing
+
+                                If scanChargeFirstHit.TryGetValue(scanChargeKey, firstHitPeptide) Then
+                                    ' A result has already been stored for this scan/charge combo
+                                    blnValidSearchResult = False
+
+                                    ' Possibly update the associated protein name
+                                    If firstHitPeptide.CleanSequence.Equals(GetCleanSequence(lstSearchResultsCurrentScan(0).Peptide)) Then
+                                        Dim bestProtein = GetBestProteinName(firstHitPeptide.ProteinName, firstHitPeptide.ProteinNumber, lstSearchResultsCurrentScan(0).Protein)
+                                        If bestProtein.Value < firstHitPeptide.ProteinNumber Then
+                                            firstHitPeptide.ProteinName = bestProtein.Key
+                                            firstHitPeptide.ProteinNumber = bestProtein.Value
+                                        End If
+                                    End If
+
+                                Else
+                                    firstHitPeptide = New clsFirstHitInfo(GetCleanSequence(lstSearchResultsCurrentScan(0).Peptide)) With {
+                                        .ProteinName = lstSearchResultsCurrentScan(0).Protein,
+                                        .ProteinNumber = Int32.MaxValue
+                                    }
+
+                                    Dim proteinNumber As Integer
+                                    If mProteinNameOrder.TryGetValue(lstSearchResultsCurrentScan(0).Protein, proteinNumber) Then
+                                        firstHitPeptide.ProteinNumber = proteinNumber
+                                    End If
+
+                                    scanChargeFirstHit.Add(scanChargeKey, firstHitPeptide)
+                                End If
+                            End If
+
+                            If blnValidSearchResult Then
+                                ExpandListIfRequired(lstSearchResultsPrefiltered, lstSearchResultsCurrentScan.Count)
+                                lstSearchResultsPrefiltered.AddRange(lstSearchResultsCurrentScan)
+                            End If
+
                         End If
 
                         ' Update the progress
@@ -862,29 +906,56 @@ Public Class clsMSGFDBResultsProcessor
 
                     Loop
 
-                    lstSearchResultsUnfiltered.TrimExcess()
+                    lstSearchResultsPrefiltered.TrimExcess()
 
                     ' Sort the SearchResults by scan, charge, and ascending SpecProb
-                    lstSearchResultsUnfiltered.Sort(New MSGFDBSearchResultsComparerScanChargeSpecProbPeptide)
+                    lstSearchResultsPrefiltered.Sort(New MSGFDBSearchResultsComparerScanChargeSpecProbPeptide)
+
+                    If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.FHTFile Then
+
+                        ' Update the protein names in lstSearchResultsPrefiltered using scanChargeFirstHit
+                        For intIndex = 0 To lstSearchResultsPrefiltered.Count - 1
+
+                            Dim scanChargeKey = lstSearchResultsPrefiltered(intIndex).Scan & "_" & lstSearchResultsPrefiltered(intIndex).Charge
+                            Dim firstHitPeptide As clsFirstHitInfo = Nothing
+
+                            If scanChargeFirstHit.TryGetValue(scanChargeKey, firstHitPeptide) Then
+                                If Not lstSearchResultsPrefiltered(intIndex).Protein.Equals(firstHitPeptide.ProteinName) Then
+                                    If firstHitPeptide.CleanSequence.Equals(GetCleanSequence(lstSearchResultsPrefiltered(intIndex).Peptide)) Then
+                                        Dim updatedSearchResult = lstSearchResultsPrefiltered(intIndex)
+                                        updatedSearchResult.Protein = String.Copy(firstHitPeptide.ProteinName)
+                                        lstSearchResultsPrefiltered(intIndex) = updatedSearchResult
+                                    Else
+                                        Console.WriteLine(String.Format("Possible programming bug; " &
+                                                                        "mix of peptides tracked for a given scan/charge combo when caching data for First Hits files; " &
+                                                                        "see scan_charge {0}", scanChargeKey))
+                                    End If
+
+                                End If
+                            End If
+
+                        Next
+
+                    End If
 
                     ' Now filter the data
-
                     ' Initialize variables
                     Dim intStartIndex = 0
                     Dim intEndIndex As Integer
 
-                    Do While intStartIndex < lstSearchResultsUnfiltered.Count
+                    Do While intStartIndex < lstSearchResultsPrefiltered.Count
                         intEndIndex = intStartIndex
-                        Do While intEndIndex + 1 < lstSearchResultsUnfiltered.Count AndAlso
-                            lstSearchResultsUnfiltered(intEndIndex + 1).ScanNum = lstSearchResultsUnfiltered(intStartIndex).ScanNum
+                        ' Find all of the peptides with the same scan number
+                        Do While intEndIndex + 1 < lstSearchResultsPrefiltered.Count AndAlso
+                            lstSearchResultsPrefiltered(intEndIndex + 1).ScanNum = lstSearchResultsPrefiltered(intStartIndex).ScanNum
                             intEndIndex += 1
                         Loop
 
                         ' Store the results for this scan
                         If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.SynFile Then
-                            StoreSynMatches(lstSearchResultsUnfiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
+                            StoreSynMatches(lstSearchResultsPrefiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
                         Else
-                            StoreTopFHTMatch(lstSearchResultsUnfiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
+                            StoreTopFHTMatch(lstSearchResultsPrefiltered, intStartIndex, intEndIndex, lstFilteredSearchResults)
                         End If
 
                         intStartIndex = intEndIndex + 1
@@ -1049,6 +1120,40 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
+    ''' <summary>
+    ''' Look for candidateProteinName in mProteinNameOrder
+    ''' If found, and if the proteinNumber for that protein is less than currentProteinNumber, 
+    ''' return a KeyValuePair with candidateProteinName and the proteinNumber for that protein
+    ''' Otherwise, return a KeyValuePair with currentProteinName and currentProteinNumber
+    ''' </summary>
+    ''' <param name="currentProteinName"></param>
+    ''' <param name="currentProteinNumber"></param>
+    ''' <param name="candidateProteinName"></param>
+    ''' <returns></returns>
+    Private Function GetBestProteinName(currentProteinName As String, currentProteinNumber As Integer, candidateProteinName As String) As KeyValuePair(Of String, Integer)
+
+        If mProteinNameOrder.Count > 0 Then
+
+            ' Lookup the protein number (to make sure we use the protein name that occurs first in the FASTA file)
+            ' Only possible if the user provided the path to the FASTA file
+            Dim proteinNumber As Integer
+
+            If mProteinNameOrder.TryGetValue(candidateProteinName, proteinNumber) Then
+                If proteinNumber < currentProteinNumber Then
+                    ' A better protein name has been found (or this is the first protein and we just determined the protein number to associate with it)
+                    Return New KeyValuePair(Of String, Integer)(candidateProteinName, proteinNumber)
+                End If
+            Else
+                ' Protein not found in mProteinNameOrder
+                ' It's likely a reverse-hit protein
+            End If
+        End If
+
+        ' A better protein name was not found; return the current info
+        Return New KeyValuePair(Of String, Integer)(currentProteinName, currentProteinNumber)
+
+    End Function
+
     Private Sub InitializeLocalVariables()
 
         ' Initialize mPeptideCleavageStateCalculator
@@ -1155,6 +1260,16 @@ Public Class clsMSGFDBResultsProcessor
     Private Sub ModExtractorWarningHandler(warningMsg As String)
         ReportWarning(warningMsg)
     End Sub
+
+    Private Function MSGFPlusResultPassesSynFilter(udtMsgfdbSearchResultType As udtMSGFDBSearchResultType) As Boolean
+        If udtMsgfdbSearchResultType.EValueNum <= MSGFDBSynopsisFileEValueThreshold OrElse
+               udtMsgfdbSearchResultType.SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold OrElse
+               udtMsgfdbSearchResultType.QValueNum > 0 AndAlso udtMsgfdbSearchResultType.QValueNum < 0.01 Then
+            Return True
+        End If
+
+        Return False
+    End Function
 
     Private Function ParseMSGFDBSynopsisFile(
       strInputFilePath As String,
@@ -1386,7 +1501,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim strSplitLine() As String = Nothing
 
         Dim intScanCount As Integer
-        Dim strSplitResult() As String = Nothing
+        Dim strSplitResult() As String
 
         Dim udtMergedScanInfo() As udtMSGFDBSearchResultType = Nothing
 
@@ -2015,7 +2130,7 @@ Public Class clsMSGFDBResultsProcessor
     Public Overloads Overrides Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
         Dim strFhtOutputFilePath As String = String.Empty
-        Dim strSynOutputFilePath As String = String.Empty
+        Dim strSynOutputFilePath As String
         Dim strPepToProteinMapFilePath As String
         Dim strScanGroupFilePath As String
 
@@ -2580,7 +2695,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="lstSearchResults">Search results</param>
     ''' <param name="intStartIndex">Start index for data in this scan</param>
     ''' <param name="intEndIndex">End index for data in this scan</param>
-    ''' <param name="lstFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
+    ''' <param name="lstFilteredSearchResults">Filtered search results</param>
     ''' <remarks></remarks>
     Private Sub StoreTopFHTMatch(
       lstSearchResults As IList(Of udtMSGFDBSearchResultType),
@@ -2600,6 +2715,7 @@ Public Class clsMSGFDBResultsProcessor
         Dim udtCurrentResult = lstSearchResults(intStartIndex)
         Dim intCurrentCharge As Short = udtCurrentResult.ChargeNum
         Dim currentProteinNumber = Int32.MaxValue
+        Dim currentPeptide = GetCleanSequence(udtCurrentResult.Peptide)
 
         For intIndex = intStartIndex To intEndIndex
             If intCurrentCharge <> lstSearchResults(intIndex).ChargeNum Then
@@ -2610,20 +2726,16 @@ Public Class clsMSGFDBResultsProcessor
                 udtCurrentResult = lstSearchResults(intIndex)
                 intCurrentCharge = udtCurrentResult.ChargeNum
                 currentProteinNumber = Int32.MaxValue
+                currentPeptide = GetCleanSequence(udtCurrentResult.Peptide)
             End If
 
-            ' Lookup the protein number (to make sure we use the protein name that occurs first in the FASTA file)
-            Dim proteinNumber As Integer
-            Dim candidateName = lstSearchResults(intIndex).Protein
-
-            If mProteinNameOrder.TryGetValue(candidateName, proteinNumber) Then
-                If proteinNumber < currentProteinNumber Then
-                    currentProteinNumber = proteinNumber
-                    udtCurrentResult.Protein = candidateName
+            Dim newPeptide = GetCleanSequence(lstSearchResults(intIndex).Peptide)
+            If currentPeptide.Equals(newPeptide) Then
+                Dim bestProtein = GetBestProteinName(udtCurrentResult.Protein, currentProteinNumber, lstSearchResults(intIndex).Protein)
+                If bestProtein.Value < currentProteinNumber Then
+                    currentProteinNumber = bestProtein.Value
+                    udtCurrentResult.Protein = bestProtein.Key
                 End If
-            Else
-                ' Protein not found in mProteinNameOrder
-                ' It's likely a reverse-hit protein
             End If
 
         Next intIndex
@@ -2631,15 +2743,7 @@ Public Class clsMSGFDBResultsProcessor
         ' Store udtCurrentResult (from the previous charge state)
         lstFilteredSearchResults.Add(udtCurrentResult)
 
-        ' Alternative method using clsEngineResultsMSGFDB
-        ' Dim lstFilteredSearchResultsNew = clsEngineResultUtilities.StoreTopFHTMatch(mProteinNameOrder, lstSearchResults, intStartIndex, intEndIndex)
-
-        ' For Each newResult In lstFilteredSearchResultsNew
-        '     lstFilteredSearchResults.Add(CType(lstFilteredSearchResultsNew, clsEngineResultsMSGFDB))
-        ' Next
-
     End Sub
-
 
     ''' <summary>
     ''' Stores the synopsis file matches for a single scan
@@ -2647,7 +2751,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="lstSearchResults">Search results</param>
     ''' <param name="intStartIndex">Start index for data in this scan</param>
     ''' <param name="intEndIndex">End index for data in this scan</param>
-    ''' <param name="lstFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
+    ''' <param name="lstFilteredSearchResults">Filtered search results</param>
     ''' <remarks></remarks>
     Private Sub StoreSynMatches(
       lstSearchResults As IList(Of udtMSGFDBSearchResultType),
@@ -2666,9 +2770,7 @@ Public Class clsMSGFDBResultsProcessor
         ' Now store or write out the matches that pass the filters
         ' By default, filter passing peptides have MSGFDB_SpecEValue <= 5E-7 Or EValue less than 0.75 or QValue less than 1% (but not 0)
         For intIndex = intStartIndex To intEndIndex
-            If lstSearchResults(intIndex).EValueNum <= MSGFDBSynopsisFileEValueThreshold OrElse
-               lstSearchResults(intIndex).SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold OrElse
-               lstSearchResults(intIndex).QValueNum > 0 AndAlso lstSearchResults(intIndex).QValueNum < 0.01 Then
+            If MSGFPlusResultPassesSynFilter(lstSearchResults(intIndex)) Then
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If
         Next intIndex

@@ -162,6 +162,10 @@ Public MustInherit Class clsPHRPBaseClass
 
     Private mNextPeptideToProteinMapperLevel As Integer = 0
 
+    ''' <summary>
+    ''' Tracks the protein names in the order that they are listed in the FASTA file
+    ''' Keys are protein Names, values are a sequentially assigned integer
+    ''' </summary>
     Protected mProteinNameOrder As Dictionary(Of String, Integer)
 
     Private mReplaceSymbols As Regex

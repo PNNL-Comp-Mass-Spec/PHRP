@@ -111,6 +111,7 @@
     <Compile Include="clsAnalysisManagerPeptideHitResultsProcessor.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="clsFirstHitInfo.vb" />
     <Compile Include="clsInSpecTResultsProcessor.vb" />
     <Compile Include="clsMODaResultsProcessor.vb" />
     <Compile Include="clsMODPlusResultsProcessor.vb" />
