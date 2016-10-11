@@ -27,7 +27,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "October 10, 2016"
+        MyBase.mFileDate = "October 11, 2016"
         mModMassRegEx = New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
         InitializeLocalVariables()
@@ -149,7 +149,7 @@ Public Class clsMSGFDBResultsProcessor
         Public MH As String
         Public Charge As String
         Public ChargeNum As Short
-        Public Peptide As String
+        Public Peptide As String                ' Peptide sequence, including prefix, suffix, and any mod symbols or mod masses
         Public Protein As String
         Public NTT As String
         Public DeNovoScore As String
@@ -858,6 +858,7 @@ Public Class clsMSGFDBResultsProcessor
                                 ' Synopsis file
                                 blnValidSearchResult = MSGFPlusResultPassesSynFilter(lstSearchResultsCurrentScan(0))
                             Else
+
                                 ' First Hits file
                                 Dim scanChargeKey = lstSearchResultsCurrentScan(0).Scan & "_" & lstSearchResultsCurrentScan(0).Charge
                                 Dim firstHitPeptide As clsFirstHitInfo = Nothing
@@ -867,16 +868,19 @@ Public Class clsMSGFDBResultsProcessor
                                     blnValidSearchResult = False
 
                                     ' Possibly update the associated protein name
-                                    If firstHitPeptide.CleanSequence.Equals(GetCleanSequence(lstSearchResultsCurrentScan(0).Peptide)) Then
+                                    Dim strNewPrefix As String = Nothing
+                                    Dim strNewSuffix As String = Nothing
+                                    If firstHitPeptide.CleanSequence.Equals(GetCleanSequence(lstSearchResultsCurrentScan(0).Peptide, strNewPrefix, strNewSuffix)) Then
                                         Dim bestProtein = GetBestProteinName(firstHitPeptide.ProteinName, firstHitPeptide.ProteinNumber, lstSearchResultsCurrentScan(0).Protein)
                                         If bestProtein.Value < firstHitPeptide.ProteinNumber Then
                                             firstHitPeptide.ProteinName = bestProtein.Key
                                             firstHitPeptide.ProteinNumber = bestProtein.Value
+                                            firstHitPeptide.UpdatePrefixAndSuffix(strNewPrefix, strNewSuffix)
                                         End If
                                     End If
 
                                 Else
-                                    firstHitPeptide = New clsFirstHitInfo(GetCleanSequence(lstSearchResultsCurrentScan(0).Peptide)) With {
+                                    firstHitPeptide = New clsFirstHitInfo(lstSearchResultsCurrentScan(0).Peptide, GetCleanSequence(lstSearchResultsCurrentScan(0).Peptide)) With {
                                         .ProteinName = lstSearchResultsCurrentScan(0).Protein,
                                         .ProteinNumber = Int32.MaxValue
                                     }
@@ -914,6 +918,7 @@ Public Class clsMSGFDBResultsProcessor
                     If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.FHTFile Then
 
                         ' Update the protein names in lstSearchResultsPrefiltered using scanChargeFirstHit
+                        ' This step is likely unnecessary, thus the "Unexpected code reached" message below
                         For intIndex = 0 To lstSearchResultsPrefiltered.Count - 1
 
                             Dim scanChargeKey = lstSearchResultsPrefiltered(intIndex).Scan & "_" & lstSearchResultsPrefiltered(intIndex).Charge
@@ -921,8 +926,11 @@ Public Class clsMSGFDBResultsProcessor
 
                             If scanChargeFirstHit.TryGetValue(scanChargeKey, firstHitPeptide) Then
                                 If Not lstSearchResultsPrefiltered(intIndex).Protein.Equals(firstHitPeptide.ProteinName) Then
+                                    Console.WriteLine("Unexpected code reached; possible logic error in clsMSGFDBResultsProcessor.CreateFHTorSYNCResultsFile")
+
                                     If firstHitPeptide.CleanSequence.Equals(GetCleanSequence(lstSearchResultsPrefiltered(intIndex).Peptide)) Then
                                         Dim updatedSearchResult = lstSearchResultsPrefiltered(intIndex)
+                                        updatedSearchResult.Peptide = firstHitPeptide.SequenceWithModsAndContext
                                         updatedSearchResult.Protein = String.Copy(firstHitPeptide.ProteinName)
                                         lstSearchResultsPrefiltered(intIndex) = updatedSearchResult
                                     Else
@@ -938,8 +946,8 @@ Public Class clsMSGFDBResultsProcessor
 
                     End If
 
-                    ' Now filter the data
-                    ' Initialize variables
+                    ' Now filter the data and store in lstFilteredSearchResults
+                    ' Due to code updates in October 2016, lstSearchResultsPrefiltered already has filtered data
                     Dim intStartIndex = 0
                     Dim intEndIndex As Integer
 
@@ -2734,7 +2742,9 @@ Public Class clsMSGFDBResultsProcessor
                 Dim bestProtein = GetBestProteinName(udtCurrentResult.Protein, currentProteinNumber, lstSearchResults(intIndex).Protein)
                 If bestProtein.Value < currentProteinNumber Then
                     currentProteinNumber = bestProtein.Value
-                    udtCurrentResult.Protein = bestProtein.Key
+                    If Not udtCurrentResult.Protein.Equals(bestProtein.Key) Then
+                        udtCurrentResult.Protein = bestProtein.Key
+                    End If
                 End If
             End If
 

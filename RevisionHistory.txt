@@ -1,5 +1,9 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6128; October 11, 2016
+	- Filter MSGF+ results while reading the .TSV file to create synopsis and first hits files
+		- Greatly reduces memory usage for result files that have a large number of low scoring peptides and/or peptides with a large number of parent proteins
+
 Version 1.5.6125; October 8, 2016
 	- Check for a dynamic or static mod specification having an unrecognized keyword before the equals sign
 	- Update GetEmpiricalFormulaComponents to allow for duplicate elements in the empirical formula
