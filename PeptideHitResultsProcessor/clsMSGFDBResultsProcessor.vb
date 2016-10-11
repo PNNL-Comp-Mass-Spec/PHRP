@@ -262,42 +262,41 @@ Public Class clsMSGFDBResultsProcessor
         chMostRecentLetter = "-"c
         intResidueLocInPeptide = 0
 
-        With objSearchResult
-            strSequence = .PeptideSequenceWithMods
+        strSequence = objSearchResult.PeptideSequenceWithMods
 
-            For intIndex = 0 To strSequence.Length - 1
-                chChar = strSequence.Chars(intIndex)
+        For intIndex = 0 To strSequence.Length - 1
+            chChar = strSequence.Chars(intIndex)
 
-                If IsLetterAtoZ(chChar) Then
-                    chMostRecentLetter = chChar
-                    intResidueLocInPeptide += 1
+            If IsLetterAtoZ(chChar) Then
+                chMostRecentLetter = chChar
+                intResidueLocInPeptide += 1
 
-                    For intModIndex = 0 To mPeptideMods.ModificationCount - 1
-                        If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
-                            objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
+                For intModIndex = 0 To mPeptideMods.ModificationCount - 1
+                    If mPeptideMods.GetModificationTypeByIndex(intModIndex) = clsModificationDefinition.eModificationTypeConstants.StaticMod Then
+                        objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex)
 
-                            If objModificationDefinition.TargetResiduesContain(chChar) Then
-                                ' Match found; add this modification
-                                .SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
-                            End If
+                        If objModificationDefinition.TargetResiduesContain(chChar) Then
+                            ' Match found; add this modification
+                            objSearchResult.SearchResultAddModification(objModificationDefinition, chChar, intResidueLocInPeptide, objSearchResult.DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
                         End If
-                    Next intModIndex
-                ElseIf IsLetterAtoZ(chMostRecentLetter) Then
-                    blnSuccess = .SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, .DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
-                    If Not blnSuccess Then
-                        Dim strErrorMessage As String = .ErrorMessage
-                        If String.IsNullOrEmpty(strErrorMessage) Then
-                            strErrorMessage = "SearchResultAddDynamicModification returned false for symbol " & chChar
-                        End If
-                        SetErrorMessage(strErrorMessage & "; ResultID = " & .ResultID)
                     End If
-                Else
-                    ' We found a modification symbol but chMostRecentLetter is not a letter
-                    ' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
+                Next intModIndex
+            ElseIf IsLetterAtoZ(chMostRecentLetter) Then
+                blnSuccess = objSearchResult.SearchResultAddDynamicModification(chChar, chMostRecentLetter, intResidueLocInPeptide, objSearchResult.DetermineResidueTerminusState(intResidueLocInPeptide), blnUpdateModOccurrenceCounts)
+                If Not blnSuccess Then
+                    Dim strErrorMessage As String = objSearchResult.ErrorMessage
+                    If String.IsNullOrEmpty(strErrorMessage) Then
+                        strErrorMessage = "SearchResultAddDynamicModification returned false for symbol " & chChar
+                    End If
+                    SetErrorMessage(strErrorMessage & "; ResultID = " & objSearchResult.ResultID)
                 End If
+            Else
+                ' We found a modification symbol but chMostRecentLetter is not a letter
+                ' Therefore, this modification symbol is at the beginning of the string; ignore the symbol
+            End If
 
-            Next intIndex
-        End With
+        Next intIndex
+
     End Sub
 
     ''' <summary>
@@ -1533,227 +1532,225 @@ Public Class clsMSGFDBResultsProcessor
 
             If strSplitLine.Length >= 13 Then
 
-                With udtSearchResult
-                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpectrumFile), .SpectrumFileName) Then
-                        ReportError("SpectrumFile column is missing or invalid", True)
-                    End If
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecIndex), .SpecIndex)
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpectrumFile), udtSearchResult.SpectrumFileName) Then
+                    ReportError("SpectrumFile column is missing or invalid", True)
+                End If
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecIndex), udtSearchResult.SpecIndex)
 
-                    If blnMSGFPlus Then
-                        Dim intSpecIndex As Integer
-                        Dim blnGenerateSpecIndex = True
+                If blnMSGFPlus Then
+                    Dim intSpecIndex As Integer
+                    Dim blnGenerateSpecIndex = True
 
-                        If Not Integer.TryParse(.SpecIndex, intSpecIndex) Then
-                            ' MSGF+ includes text in the SpecID column, for example: "controllerType=0 controllerNumber=1 scan=6390" or "index=4323"
-                            ' Need to convert these to an integer
+                    If Not Integer.TryParse(udtSearchResult.SpecIndex, intSpecIndex) Then
+                        ' MSGF+ includes text in the SpecID column, for example: "controllerType=0 controllerNumber=1 scan=6390" or "index=4323"
+                        ' Need to convert these to an integer
 
-                            If .SpecIndex.StartsWith("index=") Then
-                                .SpecIndex = .SpecIndex.Substring("index=".Length)
-                                If Integer.TryParse(.SpecIndex, intSpecIndex) Then
-                                    blnGenerateSpecIndex = False
-                                End If
+                        If udtSearchResult.SpecIndex.StartsWith("index=") Then
+                            udtSearchResult.SpecIndex = udtSearchResult.SpecIndex.Substring("index=".Length)
+                            If Integer.TryParse(udtSearchResult.SpecIndex, intSpecIndex) Then
+                                blnGenerateSpecIndex = False
                             End If
-
-                            If blnGenerateSpecIndex Then
-                                If Not lstSpecIdToIndex.TryGetValue(.SpecIndex, intSpecIndex) Then
-                                    intSpecIndex = lstSpecIdToIndex.Count + 1
-                                    lstSpecIdToIndex.Add(.SpecIndex, intSpecIndex)
-                                End If
-
-                                .SpecIndex = intSpecIndex.ToString()
-                            End If
-
                         End If
-                    End If
 
-                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Scan), .Scan) Then
-                        ReportError("Scan column is missing or invalid", True)
-                    End If
-
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FragMethod), .FragMethod)
-
-                    intSlashIndex = .Scan.IndexOf("/"c)
-                    If intSlashIndex > 0 Then
-                        ' This is a merged spectrum and thus scan number looks like: 3010/3011/3012
-                        ' Split the Scan list on the slash
-                        ' Later in this function, we'll append lstSearchResults with this scan plus the other scans
-
-                        strSplitResult = .Scan.Split("/"c)
-                        intScanCount = strSplitResult.Length
-                        ReDim udtMergedScanInfo(intScanCount - 1)
-
-                        For intIndex = 0 To intScanCount - 1
-                            udtMergedScanInfo(intIndex) = New udtMSGFDBSearchResultType
-                            udtMergedScanInfo(intIndex).Clear()
-                            udtMergedScanInfo(intIndex).Scan = strSplitResult(intIndex)
-                            udtMergedScanInfo(intIndex).ScanNum = CIntSafe(strSplitResult(intIndex), 0)
-                        Next
-
-                        ' Now split SpecIndex and store in udtMergedScanInfo
-                        strSplitResult = .SpecIndex.Split("/"c)
-
-                        For intIndex = 0 To strSplitResult.Length - 1
-                            If intIndex >= udtMergedScanInfo.Length Then
-                                ' There are more entries for SpecIndex than there are for Scan#; this is unexpected
-                                Exit For
+                        If blnGenerateSpecIndex Then
+                            If Not lstSpecIdToIndex.TryGetValue(udtSearchResult.SpecIndex, intSpecIndex) Then
+                                intSpecIndex = lstSpecIdToIndex.Count + 1
+                                lstSpecIdToIndex.Add(udtSearchResult.SpecIndex, intSpecIndex)
                             End If
-                            udtMergedScanInfo(intIndex).SpecIndex = strSplitResult(intIndex)
-                        Next
 
-                        ' Now split FragMethod and store in udtMergedScanInfo
-                        strSplitResult = .FragMethod.Split("/"c)
+                            udtSearchResult.SpecIndex = intSpecIndex.ToString()
+                        End If
 
-                        For intIndex = 0 To strSplitResult.Length - 1
-                            If intIndex >= udtMergedScanInfo.Length Then
-                                ' There are more entries for FragMethod than there are for Scan#; this is unexpected
-                                Exit For
-                            End If
-                            udtMergedScanInfo(intIndex).FragMethod = strSplitResult(intIndex)
-                        Next
-
-                    Else
-                        .ScanNum = CIntSafe(.Scan, 0)
-                        intScanCount = 1
                     End If
+                End If
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PrecursorMZ), .PrecursorMZ)
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Scan), udtSearchResult.Scan) Then
+                    ReportError("Scan column is missing or invalid", True)
+                End If
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Charge), .Charge)
-                    .ChargeNum = CShort(CIntSafe(.Charge, 0))
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FragMethod), udtSearchResult.FragMethod)
 
-                    ' Precursor mass error could be in PPM or Da
-                    '   In MSGFDB, the header line will have PMError(ppm)        or PMError(Da)
-                    '   In MSGF+,  the header line will have PrecursorError(ppm) or PrecursorError(Da)
-                    Dim dblPrecursorErrorDa As Double
+                intSlashIndex = udtSearchResult.Scan.IndexOf("/"c)
+                If intSlashIndex > 0 Then
+                    ' This is a merged spectrum and thus scan number looks like: 3010/3011/3012
+                    ' Split the Scan list on the slash
+                    ' Later in this function, we'll append lstSearchResults with this scan plus the other scans
 
-                    If intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM) >= 0 Then
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM), .PMErrorPPM)
-                    Else
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorDa), .PMErrorDa)
-                        dblPrecursorErrorDa = CDblSafe(.PMErrorDa, 0)
-                        .PMErrorPPM = String.Empty              ' We'll populate this column later in this function
-                    End If
+                    strSplitResult = udtSearchResult.Scan.Split("/"c)
+                    intScanCount = strSplitResult.Length
+                    ReDim udtMergedScanInfo(intScanCount - 1)
+
+                    For intIndex = 0 To intScanCount - 1
+                        udtMergedScanInfo(intIndex) = New udtMSGFDBSearchResultType
+                        udtMergedScanInfo(intIndex).Clear()
+                        udtMergedScanInfo(intIndex).Scan = strSplitResult(intIndex)
+                        udtMergedScanInfo(intIndex).ScanNum = CIntSafe(strSplitResult(intIndex), 0)
+                    Next
+
+                    ' Now split SpecIndex and store in udtMergedScanInfo
+                    strSplitResult = udtSearchResult.SpecIndex.Split("/"c)
+
+                    For intIndex = 0 To strSplitResult.Length - 1
+                        If intIndex >= udtMergedScanInfo.Length Then
+                            ' There are more entries for SpecIndex than there are for Scan#; this is unexpected
+                            Exit For
+                        End If
+                        udtMergedScanInfo(intIndex).SpecIndex = strSplitResult(intIndex)
+                    Next
+
+                    ' Now split FragMethod and store in udtMergedScanInfo
+                    strSplitResult = udtSearchResult.FragMethod.Split("/"c)
+
+                    For intIndex = 0 To strSplitResult.Length - 1
+                        If intIndex >= udtMergedScanInfo.Length Then
+                            ' There are more entries for FragMethod than there are for Scan#; this is unexpected
+                            Exit For
+                        End If
+                        udtMergedScanInfo(intIndex).FragMethod = strSplitResult(intIndex)
+                    Next
+
+                Else
+                    udtSearchResult.ScanNum = CIntSafe(udtSearchResult.Scan, 0)
+                    intScanCount = 1
+                End If
+
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PrecursorMZ), udtSearchResult.PrecursorMZ)
+
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Charge), udtSearchResult.Charge)
+                udtSearchResult.ChargeNum = CShort(CIntSafe(udtSearchResult.Charge, 0))
+
+                ' Precursor mass error could be in PPM or Da
+                '   In MSGFDB, the header line will have PMError(ppm)        or PMError(Da)
+                '   In MSGF+,  the header line will have PrecursorError(ppm) or PrecursorError(Da)
+                Dim dblPrecursorErrorDa As Double
+
+                If intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM) >= 0 Then
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorPPM), udtSearchResult.PMErrorPPM)
+                Else
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PMErrorDa), udtSearchResult.PMErrorDa)
+                    dblPrecursorErrorDa = CDblSafe(udtSearchResult.PMErrorDa, 0)
+                    udtSearchResult.PMErrorPPM = String.Empty              ' We'll populate this column later in this function
+                End If
 
 
-                    If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Peptide), .Peptide) Then
-                        ReportError("Peptide column is missing or invalid", True)
-                    End If
+                If Not GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Peptide), udtSearchResult.Peptide) Then
+                    ReportError("Peptide column is missing or invalid", True)
+                End If
 
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Protein), .Protein)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.Protein), udtSearchResult.Protein)
 
-                    ' MSGF+ .tsv files may have a semicolon separated list of protein names; check for this
-                    .Protein = SplitProteinList(.Protein, lstProteinInfo)
+                ' MSGF+ .tsv files may have a semicolon separated list of protein names; check for this
+                udtSearchResult.Protein = SplitProteinList(udtSearchResult.Protein, lstProteinInfo)
 
-                    If lstProteinInfo.Count > 0 Then
-                        ' Need to add the prefix and suffix residues
-                        .Peptide = AddUpdatePrefixAndSuffixResidues(.Peptide, lstProteinInfo.First)
-                    End If
+                If lstProteinInfo.Count > 0 Then
+                    ' Need to add the prefix and suffix residues
+                    udtSearchResult.Peptide = AddUpdatePrefixAndSuffixResidues(udtSearchResult.Peptide, lstProteinInfo.First)
+                End If
 
-                    ' Replace any mod text values in the peptide sequence with the appropriate mod symbols
-                    ' In addition, replace the terminus symbols with dashes
-                    Dim dblTotalModMass As Double
-                    .Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(.Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
+                ' Replace any mod text values in the peptide sequence with the appropriate mod symbols
+                ' In addition, replace the terminus symbols with dashes
+                Dim dblTotalModMass As Double
+                udtSearchResult.Peptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(udtSearchResult.Peptide), lstMSGFDBModInfo, blnMSGFPlus, dblTotalModMass)
 
-                    ' Compute monoisotopic mass of the peptide
-                    Dim dblPeptideMonoisotopicMass = ComputePeptideMass(.Peptide, dblTotalModMass)
+                ' Compute monoisotopic mass of the peptide
+                Dim dblPeptideMonoisotopicMass = ComputePeptideMass(udtSearchResult.Peptide, dblTotalModMass)
 
-                    ' Store the monoisotopic MH value in .MH; note that this is (M+H)+
-                    .MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
+                ' Store the monoisotopic MH value in .MH; note that this is (M+H)+
+                udtSearchResult.MH = NumToString(clsPeptideMassCalculator.ConvoluteMass(dblPeptideMonoisotopicMass, 0, 1), 6, True)
 
-                    If Not String.IsNullOrEmpty(.PMErrorPPM) Then
+                If Not String.IsNullOrEmpty(udtSearchResult.PMErrorPPM) Then
 
-                        ' Convert the ppm-based PM Error to Da-based
+                    ' Convert the ppm-based PM Error to Da-based
 
-                        Dim dblPMErrorPPM As Double
-                        Dim dblPrecursorMZ As Double
+                    Dim dblPMErrorPPM As Double
+                    Dim dblPrecursorMZ As Double
 
-                        If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
-                            ' Note that since .PMErrorPPM is present, the Precursor m/z is a C13-corrected m/z value
-                            ' In other words, it may not be the actual m/z selected for fragmentation.
+                    If Double.TryParse(udtSearchResult.PrecursorMZ, dblPrecursorMZ) Then
+                        ' Note that since .PMErrorPPM is present, the Precursor m/z is a C13-corrected m/z value
+                        ' In other words, it may not be the actual m/z selected for fragmentation.
 
-                            If Double.TryParse(.PMErrorPPM, dblPMErrorPPM) Then
+                        If Double.TryParse(udtSearchResult.PMErrorPPM, dblPMErrorPPM) Then
 
-                                If mParentMassToleranceInfo.IsPPM AndAlso
-                                  (dblPMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 OrElse
-                                   dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
+                            If mParentMassToleranceInfo.IsPPM AndAlso
+                                (dblPMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 OrElse
+                                dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
 
-                                    ' PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
+                                ' PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
 
-                                    mPrecursorMassErrorWarningCount += 1
-                                    If mPrecursorMassErrorWarningCount <= 10 Then
-                                        ReportWarning("Precursor mass error computed by MSGF+ is 1.5-fold larger than search tolerance: " & .PMErrorPPM & " vs. " & mParentMassToleranceInfo.ToleranceLeft.ToString("0") & "ppm," & mParentMassToleranceInfo.ToleranceRight.ToString("0") & "ppm")
-                                        If mPrecursorMassErrorWarningCount = 10 Then
-                                            ReportWarning("Additional mass errors will not be reported")
-                                        End If
+                                mPrecursorMassErrorWarningCount += 1
+                                If mPrecursorMassErrorWarningCount <= 10 Then
+                                    ReportWarning("Precursor mass error computed by MSGF+ is 1.5-fold larger than search tolerance: " & udtSearchResult.PMErrorPPM & " vs. " & mParentMassToleranceInfo.ToleranceLeft.ToString("0") & "ppm," & mParentMassToleranceInfo.ToleranceRight.ToString("0") & "ppm")
+                                    If mPrecursorMassErrorWarningCount = 10 Then
+                                        ReportWarning("Additional mass errors will not be reported")
                                     End If
-
-
-                                    Dim dblPrecursorMonoMass As Double
-                                    dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, .ChargeNum, 0)
-
-                                    dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
-
-                                    .PMErrorPPM = String.Empty
-
-                                Else
-
-                                    dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
-
-                                    ' Note that this will be a C13-corrected precursor error; not the true precursor error
-                                    .PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
                                 End If
 
-                            End If
-                        End If
-                    End If
 
-                    If String.IsNullOrEmpty(.PMErrorPPM) Then
+                                Dim dblPrecursorMonoMass As Double
+                                dblPrecursorMonoMass = clsPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, udtSearchResult.ChargeNum, 0)
 
-                        Dim dblPrecursorMZ As Double
-                        If Double.TryParse(.PrecursorMZ, dblPrecursorMZ) Then
-                            Dim dblPeptideDeltaMassCorrectedPpm As Double
+                                dblPrecursorErrorDa = dblPrecursorMonoMass - dblPeptideMonoisotopicMass
 
-                            dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMZ,
-                             .ChargeNum, dblPeptideMonoisotopicMass, True)
+                                udtSearchResult.PMErrorPPM = String.Empty
 
-                            .PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 5, True)
+                            Else
 
-                            If String.IsNullOrEmpty(.PMErrorDa) Then
-                                dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPeptideDeltaMassCorrectedPpm, dblPeptideMonoisotopicMass)
+                                dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass)
 
                                 ' Note that this will be a C13-corrected precursor error; not the true precursor error
-                                .PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
+                                udtSearchResult.PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
                             End If
 
+                        End If
+                    End If
+                End If
+
+                If String.IsNullOrEmpty(udtSearchResult.PMErrorPPM) Then
+
+                    Dim dblPrecursorMZ As Double
+                    If Double.TryParse(udtSearchResult.PrecursorMZ, dblPrecursorMZ) Then
+                        Dim dblPeptideDeltaMassCorrectedPpm As Double
+
+                        dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMZ,
+                            udtSearchResult.ChargeNum, dblPeptideMonoisotopicMass, True)
+
+                        udtSearchResult.PMErrorPPM = NumToString(dblPeptideDeltaMassCorrectedPpm, 5, True)
+
+                        If String.IsNullOrEmpty(udtSearchResult.PMErrorDa) Then
+                            dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPeptideDeltaMassCorrectedPpm, dblPeptideMonoisotopicMass)
+
+                            ' Note that this will be a C13-corrected precursor error; not the true precursor error
+                            udtSearchResult.PMErrorDa = NumToString(dblPrecursorErrorDa, 6, True)
                         End If
 
                     End If
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.DeNovoScore), .DeNovoScore)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.MSGFScore), .MSGFScore)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecProb_EValue), .SpecEValue)
-                    If Not Double.TryParse(.SpecEValue, .SpecEValueNum) Then .SpecEValueNum = 0
+                End If
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue_EValue), .EValue)
-                    If Not Double.TryParse(.EValue, .EValueNum) Then .EValueNum = 0
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.DeNovoScore), udtSearchResult.DeNovoScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.MSGFScore), udtSearchResult.MSGFScore)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.SpecProb_EValue), udtSearchResult.SpecEValue)
+                If Not Double.TryParse(udtSearchResult.SpecEValue, udtSearchResult.SpecEValueNum) Then udtSearchResult.SpecEValueNum = 0
 
-                    blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue), .QValue)
-                    If Not Double.TryParse(.QValue, .QValueNum) Then .QValueNum = 0
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PValue_EValue), udtSearchResult.EValue)
+                If Not Double.TryParse(udtSearchResult.EValue, udtSearchResult.EValueNum) Then udtSearchResult.EValueNum = 0
 
-                    If blnTargetDecoyFDRValid Then
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue), .PepQValue)
-                    Else
-                        GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.EFDR), .QValue)
-                    End If
+                blnTargetDecoyFDRValid = GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.FDR_QValue), udtSearchResult.QValue)
+                If Not Double.TryParse(udtSearchResult.QValue, udtSearchResult.QValueNum) Then udtSearchResult.QValueNum = 0
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IsotopeError), .IsotopeError)
+                If blnTargetDecoyFDRValid Then
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.PepFDR_PepQValue), udtSearchResult.PepQValue)
+                Else
+                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.EFDR), udtSearchResult.QValue)
+                End If
 
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IMSScan), .IMSScan)
-                    GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IMSDriftTime), .IMSDriftTime)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IsotopeError), udtSearchResult.IsotopeError)
 
-                    .NTT = ComputeCleaveageState(.Peptide).ToString()
-                End With
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IMSScan), udtSearchResult.IMSScan)
+                GetColumnValue(strSplitLine, intColumnMapping(eMSGFDBResultsFileColumns.IMSDriftTime), udtSearchResult.IMSDriftTime)
+
+                udtSearchResult.NTT = ComputeCleaveageState(udtSearchResult.Peptide).ToString()
 
                 Dim udtScanGroupInfo As udtScanGroupInfoType
                 Dim intCurrentScanGroupID As Integer = -1

@@ -795,24 +795,22 @@ Public MustInherit Class clsPHRPBaseClass
 
             htPeptideToProteinMapResults = New Collections.Hashtable
 
-            objPeptideToProteinMapper = New PeptideToProteinMapEngine.clsPeptideToProteinMapEngine
-
-            With objPeptideToProteinMapper
-                .DeleteTempFiles = True
-                .IgnoreILDifferences = False
-                .InspectParameterFilePath = String.Empty
-                .LogMessagesToFile = False
-                .MatchPeptidePrefixAndSuffixToProtein = False
-                .OutputProteinSequence = False
-                .PeptideInputFileFormat = PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.ePeptideInputFileFormatConstants.PHRPFile
-                .PeptideFileSkipFirstLine = False
-                .ProteinDataRemoveSymbolCharacters = True
-                .ProteinInputFilePath = FastaFilePath
-                .SaveProteinToPeptideMappingFile = True
-                .SearchAllProteinsForPeptideSequence = True
-                .SearchAllProteinsSkipCoverageComputationSteps = True
+            objPeptideToProteinMapper = New PeptideToProteinMapEngine.clsPeptideToProteinMapEngine() With {
+                .DeleteTempFiles = True,
+                .IgnoreILDifferences = False,
+                .InspectParameterFilePath = String.Empty,
+                .LogMessagesToFile = False,
+                .MatchPeptidePrefixAndSuffixToProtein = False,
+                .OutputProteinSequence = False,
+                .PeptideInputFileFormat = PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.ePeptideInputFileFormatConstants.PHRPFile,
+                .PeptideFileSkipFirstLine = False,
+                .ProteinDataRemoveSymbolCharacters = True,
+                .ProteinInputFilePath = FastaFilePath,
+                .SaveProteinToPeptideMappingFile = True,
+                .SearchAllProteinsForPeptideSequence = True,
+                .SearchAllProteinsSkipCoverageComputationSteps = True,
                 .ShowMessages = True
-            End With
+            }
 
             Using swMTSpepToProteinMapFile = New StreamWriter(New FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
@@ -1034,16 +1032,14 @@ Public MustInherit Class clsPHRPBaseClass
 
                 Dim blnLoadMSGFResults = ePHRPResultType <> clsPHRPReader.ePeptideHitResultType.MSGFDB
 
-                Dim oStartupOptions = New clsPHRPStartupOptions()
-                With oStartupOptions
-                    .LoadModsAndSeqInfo = True
-                    .LoadMSGFResults = blnLoadMSGFResults
-                    .LoadScanStatsData = False
-
-                    ' Update the Mass Calculator to use the one tracked by this class (since this class's calculator knows about custom amino acids)
-                    ' This is probably not a necessity, but it doesn't hurt
+                ' Update the Mass Calculator to use the one tracked by this class 
+                ' (since this class's calculator knows about custom amino acids and custom charge carriers)
+                Dim oStartupOptions = New clsPHRPStartupOptions() With {
+                    .LoadModsAndSeqInfo = True,
+                    .LoadMSGFResults = blnLoadMSGFResults,
+                    .LoadScanStatsData = False,
                     .PeptideMassCalculator = mPeptideSeqMassCalculator
-                End With
+                }
 
                 Using objReader As New clsPHRPReader(strPHRPDataFilePath, ePHRPResultType, oStartupOptions)
                     objReader.EchoMessagesToConsole = True

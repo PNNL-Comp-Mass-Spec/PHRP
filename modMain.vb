@@ -115,39 +115,29 @@ Module modMain
                 ShowProgramHelp()
                 intReturnCode = -1
             Else
-                mPeptideHitResultsProcRunner = New clsPeptideHitResultsProcRunner
-
-                With mPeptideHitResultsProcRunner
-                    .ShowMessages = Not mQuietMode
-                    .LogMessagesToFile = mLogMessagesToFile
-                    .LogFilePath = mLogFilePath
-                    .LogFolderPath = mLogFolderPath
-
-                    ' Note: These options will get overridden if defined in the parameter file
-                    .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath
-                    .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath
-                    .SearchToolParameterFilePath = mSearchToolParameterFilePath
-
-                    .WarnMissingParameterFileSection = True
-
-                    .CreateProteinModsFile = mCreateProteinModsFile
-                    .FastaFilePath = mFastaFilePath
-                    .IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors
-                    .ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins
-                    .UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile
-
-                    .CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile
-
-                    .MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold
-                    .MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold
-
-                    .CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile
-                    .CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile
-                    .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold
-
+                ' Note: Most of the options will get overridden if defined in the parameter file
+                mPeptideHitResultsProcRunner = New clsPeptideHitResultsProcRunner() With {
+                   .ShowMessages = Not mQuietMode,
+                    .LogMessagesToFile = mLogMessagesToFile,
+                    .LogFilePath = mLogFilePath,
+                    .LogFolderPath = mLogFolderPath,
+                    .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath,
+                    .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath,
+                    .SearchToolParameterFilePath = mSearchToolParameterFilePath,
+                    .WarnMissingParameterFileSection = True,
+                    .CreateProteinModsFile = mCreateProteinModsFile,
+                    .FastaFilePath = mFastaFilePath,
+                    .IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors,
+                    .ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins,
+                    .UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile,
+                    .CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile,
+                    .MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold,
+                    .MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold,
+                    .CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile,
+                    .CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile,
+                    .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold,
                     .MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
-
-                End With
+                }
 
                 If mRecurseFolders Then
                     If mPeptideHitResultsProcRunner.ProcessFilesAndRecurseFolders(mInputFilePath, mOutputFolderPath, mOutputFolderAlternatePath, mRecreateFolderHierarchyInAlternatePath, mParameterFilePath, mRecurseFoldersMaxLevels) Then
