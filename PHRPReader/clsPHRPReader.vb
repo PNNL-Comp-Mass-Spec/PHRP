@@ -16,7 +16,6 @@ Option Strict On
 
 Imports System.Runtime.InteropServices
 Imports PHRPReader.clsModificationDefinition
-Imports System.Collections.Generic
 Imports System.IO
 Imports System.Text.RegularExpressions
 
@@ -854,6 +853,11 @@ Public Class clsPHRPReader
             End Select
 
             If blnSuccess Then
+
+                ' Attach the event handlers
+                AddHandler mPHRPParser.ErrorEvent, AddressOf mPHRPParser_ErrorEvent
+                AddHandler mPHRPParser.MessageEvent, AddressOf mPHRPParser_MessageEvent
+                AddHandler mPHRPParser.WarningEvent, AddressOf mPHRPParser_WarningEvent
 
                 ' Report any errors cached during instantiation of mPHRPParser
                 For Each strMessage In mPHRPParser.ErrorMessages
@@ -2270,15 +2274,16 @@ Public Class clsPHRPReader
 
         If ExtractParentIonMzFromFilterText(mExtendedScanStatsInfo.ScanFilterText, dblParentIonMZ) Then
             If dblParentIonMZ > 0 Then
-                dblMonoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(dblParentIonMZ, mPSMCurrent.Charge, 0)
+                dblMonoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(
+                    dblParentIonMZ, mPSMCurrent.Charge, 0)
             End If
         End If
 
         If Math.Abs(dblMonoisotopicPrecursorMass) < Double.Epsilon Then
             If mExtendedScanStatsInfo.MonoisotopicMZ > 0 Then
                 ' Determine the precursor m/z value using the Monoisotopic m/z value reported by the instrument
-                dblMonoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(mExtendedScanStatsInfo.MonoisotopicMZ,
-                 mPSMCurrent.Charge, 0)
+                dblMonoisotopicPrecursorMass = mPeptideMassCalculator.ConvoluteMass(
+                    mExtendedScanStatsInfo.MonoisotopicMZ, mPSMCurrent.Charge, 0)
             End If
         End If
 
@@ -2754,15 +2759,15 @@ Public Class clsPHRPReader
 
     End Function
 
-    Private Sub mPHRPParser_ErrorEvent(strErrorMessage As String) Handles mPHRPParser.ErrorEvent
+    Private Sub mPHRPParser_ErrorEvent(strErrorMessage As String)
         ReportError(strErrorMessage)
     End Sub
 
-    Private Sub mPHRPParser_MessageEvent(strMessage As String) Handles mPHRPParser.MessageEvent
+    Private Sub mPHRPParser_MessageEvent(strMessage As String)
         ShowMessage(strMessage)
     End Sub
 
-    Private Sub mPHRPParser_WarningEvent(strWarningMessage As String) Handles mPHRPParser.WarningEvent
+    Private Sub mPHRPParser_WarningEvent(strWarningMessage As String)
         ReportWarning(strWarningMessage)
     End Sub
 
