@@ -612,7 +612,7 @@ Public MustInherit Class clsPHRPParser
 
     End Sub
 
-    Private Function GetMODaStaticModSetting(kvSetting As KeyValuePair(Of String, String)) As KeyValuePair(Of String, String)
+    Private Shared Function GetMODaStaticModSetting(kvSetting As KeyValuePair(Of String, String), <Out()> warningMessage As String) As KeyValuePair(Of String, String)
 
         Dim strKey = kvSetting.Key
         Dim strValue = kvSetting.Value
@@ -631,8 +631,9 @@ Public MustInherit Class clsPHRPParser
             strKey = strKey & "_" & strResidue
 
             kvSetting = New KeyValuePair(Of String, String)(strKey, strValue)
+            warningMessage = String.Empty
         Else
-            ReportWarning("Value for MODa keyword ADD does not contain a comma")
+            warningMessage = "Value for MODa keyword ADD does not contain a comma"
         End If
 
         Return kvSetting
@@ -891,60 +892,115 @@ Public MustInherit Class clsPHRPParser
 
     End Function
 
+    ''' <summary>
+    ''' Read a Search Engine parameter file where settings are stored as key/value pairs
+    ''' </summary>
+    ''' <param name="strSearchEngineName">Search engine name (e.g. MSGF+)</param>
+    ''' <param name="strSearchEngineParamFileName">Search engine parameter file name (must exist in mInputFolderPath)</param>
+    ''' <param name="ePeptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
+    ''' <param name="objSearchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
+    ''' <returns>True if success, false if an error</returns>
     Protected Function ReadKeyValuePairSearchEngineParamFile(
       strSearchEngineName As String,
       strSearchEngineParamFileName As String,
       ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
       objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
-        Dim strParamFilePath As String
-        Dim blnSuccess As Boolean
+        Dim paramFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
 
-        Dim strLineIn As String
+        Dim errorMessage As String = Nothing
+        Dim warningMessage As String = Nothing
+        Dim success = ReadKeyValuePairSearchEngineParamFile(
+            strSearchEngineName, paramFilePath, ePeptideHitResultType,
+            objSearchEngineParams, errorMessage, warningMessage)
 
-        Dim kvSetting As KeyValuePair(Of String, String)
+        If Not String.IsNullOrWhiteSpace(errorMessage) Then
+            ReportError(errorMessage)
+        End If
+
+        If Not String.IsNullOrWhiteSpace(warningMessage) Then
+            ReportWarning(warningMessage)
+        End If
+
+        Return success
+
+    End Function
+
+    ''' <summary>
+    ''' Read a Search Engine parameter file where settings are stored as key/value pairs
+    ''' </summary>
+    ''' <param name="searchEngineName">Search engine name (e.g. MSGF+)</param>
+    ''' <param name="paramFilePath">Search engine parameter file path</param>
+    ''' <param name="ePeptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
+    ''' <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
+    ''' <param name="errorMessage">Output: error message</param>
+    ''' <param name="warningMessage">Output: warning message</param>
+    ''' <returns>True if success, false if an error</returns>
+    Public Shared Function ReadKeyValuePairSearchEngineParamFile(
+      searchEngineName As String,
+      paramFilePath As String,
+      ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
+      searchEngineParams As clsSearchEngineParameters,
+      <Out()> errorMessage As String,
+      <Out()> warningMessage As String) As Boolean
+
+        errorMessage = String.Empty
+        warningMessage = String.Empty
 
         Try
-            If String.IsNullOrWhiteSpace(strSearchEngineName) Then strSearchEngineName = "?? Unknown tool ??"
+            If String.IsNullOrWhiteSpace(searchEngineName) Then searchEngineName = "?? Unknown tool ??"
 
-            strParamFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName)
+            If Not File.Exists(paramFilePath) Then
+                errorMessage = searchEngineName & " param file not found: " & paramFilePath
+                Return False
+            End If
 
-            If Not File.Exists(strParamFilePath) Then
-                ReportError(strSearchEngineName & " param file not found: " & strParamFilePath)
-            Else
-                Using srInFile = New StreamReader(New FileStream(strParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            searchEngineParams.UpdateSearchEngineParamFilePath(paramFilePath)
 
-                    While Not srInFile.EndOfStream
-                        strLineIn = srInFile.ReadLine().TrimStart()
+            Using srInFile = New StreamReader(New FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 
-                        If Not String.IsNullOrWhiteSpace(strLineIn) AndAlso Not strLineIn.StartsWith("#") AndAlso strLineIn.Contains("="c) Then
+                While Not srInFile.EndOfStream
+                    Dim strLineIn = srInFile.ReadLine().TrimStart()
 
-                            ' Split the line on the equals sign
-                            kvSetting = ParseKeyValueSetting(strLineIn, "="c, "#")
+                    If String.IsNullOrWhiteSpace(strLineIn) OrElse strLineIn.StartsWith("#") OrElse Not strLineIn.Contains("="c) Then
+                        Continue While
+                    End If
 
-                            If Not String.IsNullOrEmpty(kvSetting.Key) Then
-                                If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MODa AndAlso
-                                   String.Equals(kvSetting.Key, "add", StringComparison.CurrentCultureIgnoreCase) Then
-                                    ' ModA defines all of its static modifications with the ADD keyword
-                                    ' Split the value at the comma and create a new setting entry with the residue name
-                                    kvSetting = GetMODaStaticModSetting(kvSetting)
-                                End If
 
-                                objSearchEngineParams.AddUpdateParameter(kvSetting)
+                    ' Split the line on the equals sign
+                    Dim kvSetting = ParseKeyValueSetting(strLineIn, "="c, "#")
+
+                    If String.IsNullOrEmpty(kvSetting.Key) Then
+                        Continue While
+                    End If
+
+                    If ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MODa AndAlso
+                       String.Equals(kvSetting.Key, "add", StringComparison.CurrentCultureIgnoreCase) Then
+                        ' ModA defines all of its static modifications with the ADD keyword
+                        ' Split the value at the comma and create a new setting entry with the residue name
+                        Dim warningMessageAddon As String = Nothing
+                        kvSetting = GetMODaStaticModSetting(kvSetting, warningMessageAddon)
+                        If Not String.IsNullOrWhiteSpace(warningMessageAddon) Then
+                            If String.IsNullOrWhiteSpace(warningMessage) Then
+                                warningMessage = String.Copy(warningMessageAddon)
+                            ElseIf Not warningMessage.Contains(warningMessageAddon) Then
+                                warningMessage &= "; " & String.Copy(warningMessageAddon)
                             End If
                         End If
+                    End If
 
-                    End While
-                End Using
+                    searchEngineParams.AddUpdateParameter(kvSetting)
 
-                blnSuccess = True
+                End While
+            End Using
 
-            End If
+            Return True
+
         Catch ex As Exception
-            ReportError("Error in ReadKeyValuePairSearchEngineParamFile for " & strSearchEngineName & ": " & ex.Message)
+            errorMessage = String.Format("Error in ReadKeyValuePairSearchEngineParamFile for {0}, param file {1}: {2}",
+                                         searchEngineName, Path.GetFileName(paramFilePath), ex.Message)
+            Return False
         End Try
-
-        Return blnSuccess
 
     End Function
 
@@ -1040,7 +1096,7 @@ Public MustInherit Class clsPHRPParser
         RaiseEvent WarningEvent(strWarningMessage)
     End Sub
 
-    Private Sub ShowMessage(strMessage As String)
+    Protected Sub ShowMessage(strMessage As String)
         RaiseEvent MessageEvent(strMessage)
     End Sub
 
