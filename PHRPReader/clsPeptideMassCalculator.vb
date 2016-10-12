@@ -724,7 +724,7 @@ Public Class clsPeptideMassCalculator
         End Select
 
         Dim computedMass = ComputeMonoistopicMass(empiricalFormula)
-        If Math.Abs(computedMass - monoMass) > 0.01 Then
+        If Math.Abs(computedMass - monoMass) > 0.00001 Then
             Console.WriteLine("Mass discrepancy for amino acid {0}. DMS uses {1:F4} but this class computed {2:F4}", aminoAcidSymbol, monoMass, computedMass)
         End If
 

@@ -73,7 +73,7 @@ Public Class PeptideMassCalculatorUnitTests
 
         Console.WriteLine("{0,-30} is {1:F5}; expected {2:F5}", strSequence, computedMass, expectedMass)
 
-        Assert.AreEqual(expectedMass, computedMass, 0.001, "Unexpected mass for the amino acid sequence")
+        Assert.AreEqual(expectedMass, computedMass, 0.0001, "Unexpected mass for the amino acid sequence")
     End Sub
 
     <Test()>
@@ -104,9 +104,9 @@ Public Class PeptideMassCalculatorUnitTests
 
         Console.WriteLine("{0,-30} is {1:F5}; expected {2:F5}", strEmpiricalFormula, computedMass, expectedMass)
 
-        Assert.AreEqual(computedMass, computedMassAlt, 0.0001, "The two overloads ComputeMonoistopicMass reported conflicting mass values")
+        Assert.AreEqual(computedMass, computedMassAlt, 0.00001, "The two overloads ComputeMonoistopicMass reported conflicting mass values")
 
-        Assert.AreEqual(expectedMass, computedMass, 0.001, "Unexpected mass for the empirical formula")
+        Assert.AreEqual(expectedMass, computedMass, 0.0001, "Unexpected mass for the empirical formula")
     End Sub
 
     <Test()>
@@ -121,9 +121,9 @@ Public Class PeptideMassCalculatorUnitTests
 
         Console.WriteLine("{0} from {1}+ to {2}+ is {3:F5}; expected {4:F5}", massMz, currentCharge, newCharge, newMz, expectedMz)
 
-        Assert.AreEqual(newMz, newMzAlt, 0.0001, "The two overloads of ConvoluteMass reported conflicting mass values")
+        Assert.AreEqual(newMz, newMzAlt, 0.00001, "The two overloads of ConvoluteMass reported conflicting mass values")
 
-        Assert.AreEqual(expectedMz, newMz, 0.001, "Unexpected convoluted m/z")
+        Assert.AreEqual(expectedMz, newMz, 0.0001, "Unexpected convoluted m/z")
 
     End Sub
 
@@ -142,9 +142,9 @@ Public Class PeptideMassCalculatorUnitTests
 
         Console.WriteLine("{0} from {1}+ to {2}+ is {3:F5}; expected {4:F5}", massMz, currentCharge, newCharge, newMz, expectedMz)
 
-        Assert.AreEqual(newMz, newMzAlt, 0.0001, "The two overloads of ConvoluteMass reported conflicting mass values")
+        Assert.AreEqual(newMz, newMzAlt, 0.00001, "The two overloads of ConvoluteMass reported conflicting mass values")
 
-        Assert.AreEqual(expectedMz, newMz, 0.001, "Unexpected convoluted m/z")
+        Assert.AreEqual(expectedMz, newMz, 0.0001, "Unexpected convoluted m/z")
 
     End Sub
 
@@ -184,9 +184,9 @@ Public Class PeptideMassCalculatorUnitTests
 
         Dim computedMassAlt = clsPeptideMassCalculator.ComputeMonoistopicMass(empiricalFormula)
 
-        Assert.AreEqual(expectedMass, computedMass, 0.01, "Amino acid does not match the expected value")
+        Assert.AreEqual(expectedMass, computedMass, 0.0001, "Amino acid does not match the expected value")
 
-        Assert.AreEqual(computedMass, computedMassAlt, 0.01, "GetAminoAcidMass and ComputeMonoistopicMass do not agree on the mass for the amino acid")
+        Assert.AreEqual(computedMass, computedMassAlt, 0.00001, "GetAminoAcidMass and ComputeMonoistopicMass do not agree on the mass for the amino acid")
 
     End Sub
 
@@ -205,9 +205,9 @@ Public Class PeptideMassCalculatorUnitTests
 
         Console.WriteLine("DelM of {0} Da converts to {1:F5} ppm at {2:F5} m/z ", massToConvert, convertedPPM, currentMz)
 
-        Assert.AreEqual(expectedPPM, convertedPPM, 0.001, "PPM Conversion error")
+        Assert.AreEqual(expectedPPM, convertedPPM, 0.0001, "PPM Conversion error")
 
-        Assert.AreEqual(massToConvert, reconvertedMass, 0.0001, "Da to PPM to Da round trip error")
+        Assert.AreEqual(massToConvert, reconvertedMass, 0.00001, "Da to PPM to Da round trip error")
 
     End Sub
 
@@ -222,8 +222,8 @@ Public Class PeptideMassCalculatorUnitTests
 
         Console.WriteLine("{0} MH converts to {1:F5} Da and {2:F5} m/z at charge {3}", dblMH, computedMonoMass, computedMz, chargeState)
 
-        Assert.AreEqual(expectedMonoMass, computedMonoMass, 0.001, "Monoisotopic mass mismatch")
-        Assert.AreEqual(expectedMz, computedMz, 0.001, "M/Z mismatch")
+        Assert.AreEqual(expectedMonoMass, computedMonoMass, 0.0001, "Monoisotopic mass mismatch")
+        Assert.AreEqual(expectedMz, computedMz, 0.0001, "M/Z mismatch")
 
     End Sub
 End Class
