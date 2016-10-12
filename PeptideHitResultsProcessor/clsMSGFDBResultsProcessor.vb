@@ -62,6 +62,8 @@ Public Class clsMSGFDBResultsProcessor
     ''' </summary>
     Public Const DEFAULT_SYN_FILE_EVALUE_THRESHOLD As Single = 0.75
 
+    Private Const SEARCH_ENGINE_NAME As String = "MSGF+"
+
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
     ' Match mod masses (positive or negative) at start, e.g. 
@@ -222,6 +224,26 @@ Public Class clsMSGFDBResultsProcessor
             ToleranceRight = 0
             IsPPM = False
         End Sub
+
+        Public Overrides Function ToString() As String
+            Dim units As String
+            Dim equivalenceThreshold As Double
+
+            If IsPPM Then
+                units = "ppm"
+                equivalenceThreshold = 0.01
+            Else
+                units = "Da"
+                equivalenceThreshold = 0.0001
+            End If
+
+            If Math.Abs(ToleranceLeft - ToleranceRight) < equivalenceThreshold Then
+                Return "+/-" & ToleranceLeft & " " & units
+            Else
+                Return "-" & ToleranceRight & ", +" & ToleranceLeft & " " & units
+            End If
+
+        End Function
     End Structure
 
 #End Region
@@ -548,6 +570,12 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
+    ''' <summary>
+    ''' Compute the monoisotopic mass of the peptide
+    ''' </summary>
+    ''' <param name="strPeptide"></param>
+    ''' <param name="dblTotalModMass"></param>
+    ''' <returns></returns>
     Private Function ComputePeptideMass(strPeptide As String, dblTotalModMass As Double) As Double
 
         Dim strCleanSequence As String
@@ -1013,7 +1041,7 @@ Public Class clsMSGFDBResultsProcessor
        strMSGFDBParamFilePath As String,
        <Out()> ByRef lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
 
-        Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor("MSGF+")
+        Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME)
 
         AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
         AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
@@ -1036,93 +1064,59 @@ Public Class clsMSGFDBResultsProcessor
     End Function
 
     ''' <summary>
-    ''' Extracts parent mass tolerance from a MSGF+ parameter file
+    ''' Extracts parent mass tolerance from the parameters loaded from an MSGF+ parameter file
     ''' </summary>
-    ''' <param name="strMSGFDBParamFilePath"></param>	
+    ''' <param name="objSearchEngineParams"></param>	
     ''' <returns>Parent mass tolerance info.  Tolerances will be 0 if an error occurs</returns>
     ''' <remarks></remarks>
-    Private Function ExtractParentMassToleranceFromParamFile(strMSGFDBParamFilePath As String) As udtParentMassToleranceType
+    Private Function ExtractParentMassToleranceFromParamFile(objSearchEngineParams As clsSearchEngineParameters) As udtParentMassToleranceType
 
         Const PM_TOLERANCE_TAG = "PMTolerance"
 
-        Dim strLineIn As String
-        Dim strSplitLine As String()
-
-        Dim udtParentMassToleranceInfo As udtParentMassToleranceType
+        Dim udtParentMassToleranceInfo = New udtParentMassToleranceType()
 
         Try
             udtParentMassToleranceInfo.Clear()
 
-            If String.IsNullOrEmpty(strMSGFDBParamFilePath) Then
-                SetErrorMessage("MSGFDB Parameter File name not defined; unable to extract parent mass tolerance info")
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
-                Return udtParentMassToleranceInfo
-            End If
+            Dim strValue As String = String.Empty
+            If objSearchEngineParams.Parameters.TryGetValue(PM_TOLERANCE_TAG, strValue) Then
 
-            ' Read the contents of the parameter file
-            Using srInFile = New StreamReader(New FileStream(strMSGFDBParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                ' Parent ion tolerance line found
 
-                Do While Not srInFile.EndOfStream
-                    strLineIn = srInFile.ReadLine().Trim()
+                ' Split the line on commas
+                Dim strSplitLine = strValue.Split(","c)
 
-                    If String.IsNullOrWhiteSpace(strLineIn) Then Continue Do
+                Dim dblTolerance As Double
+                Dim blnIsPPM As Boolean
 
-                    If strLineIn.StartsWith("#"c) Then
-                        ' Comment line; skip it
-                        Continue Do
+                If strSplitLine.Count = 1 Then
+
+                    If ParseParentMassTolerance(strSplitLine(0), dblTolerance, blnIsPPM) Then
+                        udtParentMassToleranceInfo.ToleranceLeft = dblTolerance
+                        udtParentMassToleranceInfo.ToleranceRight = dblTolerance
+                        udtParentMassToleranceInfo.IsPPM = blnIsPPM
                     End If
 
-                    If Not strLineIn.ToLower.StartsWith(PM_TOLERANCE_TAG.ToLower()) Then
-                        Continue Do
-                    End If
+                ElseIf strSplitLine.Count > 1 Then
+                    If ParseParentMassTolerance(strSplitLine(0), dblTolerance, blnIsPPM) Then
+                        udtParentMassToleranceInfo.ToleranceLeft = dblTolerance
+                        udtParentMassToleranceInfo.IsPPM = blnIsPPM
 
-                    Dim kvSetting As KeyValuePair(Of String, String)
-                    kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
-
-                    If String.IsNullOrEmpty(kvSetting.Value) Then
-                        Exit Do
-                    End If
-
-                    ' Parent ion tolerance line found
-
-                    ' Split the line on commas
-                    strSplitLine = kvSetting.Value.Split(","c)
-
-                    Dim dblTolerance As Double
-                    Dim blnIsPPM As Boolean
-
-                    If strSplitLine.Count = 1 Then
-
-                        If ParseParentMassTolerance(strSplitLine(0), dblTolerance, blnIsPPM) Then
-                            udtParentMassToleranceInfo.ToleranceLeft = dblTolerance
+                        If ParseParentMassTolerance(strSplitLine(1), dblTolerance, blnIsPPM) Then
                             udtParentMassToleranceInfo.ToleranceRight = dblTolerance
-                            udtParentMassToleranceInfo.IsPPM = blnIsPPM
+                        Else
+                            udtParentMassToleranceInfo.ToleranceRight = udtParentMassToleranceInfo.ToleranceLeft
                         End If
 
-                    ElseIf strSplitLine.Count > 1 Then
-                        If ParseParentMassTolerance(strSplitLine(0), dblTolerance, blnIsPPM) Then
-                            udtParentMassToleranceInfo.ToleranceLeft = dblTolerance
-                            udtParentMassToleranceInfo.IsPPM = blnIsPPM
-
-                            If ParseParentMassTolerance(strSplitLine(1), dblTolerance, blnIsPPM) Then
-                                udtParentMassToleranceInfo.ToleranceRight = dblTolerance
-                            Else
-                                udtParentMassToleranceInfo.ToleranceRight = udtParentMassToleranceInfo.ToleranceLeft
-                            End If
-
-                        End If
                     End If
-
-                    Exit Do
-
-                Loop
-
-            End Using
+                End If
+            End If
 
             Console.WriteLine()
 
         Catch ex As Exception
-            SetErrorMessage("Error reading ParentMass tolerance from the MSGF+ parameter file (" & Path.GetFileName(strMSGFDBParamFilePath) & "): " & ex.Message)
+            SetErrorMessage(String.Format("Error parsing the ParentMass tolerance from the MSGF+ parameter file ({0}): {1}",
+                                          Path.GetFileName(objSearchEngineParams.SearchEngineParamFilePath), ex.Message))
             SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
         End Try
 
@@ -1248,6 +1242,62 @@ Public Class clsMSGFDBResultsProcessor
         End Try
 
         Return blnSuccess
+
+    End Function
+
+    ''' <summary>
+    ''' Load the MSGF+ parameter file and updates settings
+    ''' </summary>
+    ''' <param name="msgfPlusParamFilePath"></param>
+    ''' <returns>
+    ''' True if success, false if an error.  
+    ''' Returns True if msgfPlusParamFilePath is empty
+    ''' Returns False if the paramFilePath is defined but the file is not found or cannot be parsed</returns>
+    Private Function LoadSearchEngineParamFile(msgfPlusParamFilePath As String) As Boolean
+
+        If String.IsNullOrWhiteSpace(msgfPlusParamFilePath) Then
+            ReportWarning("MSGF+ parameter file is not defined. Unable to extract parent mass tolerance info or custom charge carrier masses")
+            Return True
+        End If
+
+        Dim objSearchEngineParams = New clsSearchEngineParameters(SEARCH_ENGINE_NAME)
+
+        Dim localErrorMessage As String = Nothing
+        Dim localWarningMessage As String = Nothing
+
+        Dim success = clsPHRPParser.ReadKeyValuePairSearchEngineParamFile(
+            SEARCH_ENGINE_NAME, msgfPlusParamFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB,
+            objSearchEngineParams, localErrorMessage, localWarningMessage)
+
+        If Not String.IsNullOrWhiteSpace(localErrorMessage) Then
+            ReportError(localErrorMessage)
+            Return False
+        End If
+
+        If Not String.IsNullOrWhiteSpace(localWarningMessage) Then
+            ReportWarning(localWarningMessage)
+        End If
+
+        If objSearchEngineParams Is Nothing OrElse objSearchEngineParams.Parameters.Count = 0 Then
+            SetErrorMessage("MSGF+ parameter file is empty; unable to extract parent mass tolerance info")
+            SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile)
+            Return False
+        End If
+
+        ' Parse the PMTolerance setting
+        mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(objSearchEngineParams)
+
+        ' Parse the ChargeCarrierMass setting
+        Dim strValue As String = Nothing
+        Dim dblValue As Double
+        If objSearchEngineParams.Parameters.TryGetValue("ChargeCarrierMass", strValue) Then
+            If Double.TryParse(strValue, dblValue) Then
+                ReportMessage(String.Format("Using a charge carrier mass of {0:F3} Da", dblValue))
+                mPeptideSeqMassCalculator.ChargeCarrierMass = dblValue
+            End If
+        End If
+
+        Return success
 
     End Function
 
@@ -1667,7 +1717,7 @@ Public Class clsMSGFDBResultsProcessor
 
                             If mParentMassToleranceInfo.IsPPM AndAlso
                                 (dblPMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 OrElse
-                                dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
+                                 dblPMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5) Then
 
                                 ' PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
 
@@ -2182,14 +2232,17 @@ Public Class clsMSGFDBResultsProcessor
                     Return False
                 End If
 
-                mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(SearchToolParameterFilePath)
+                If Not LoadSearchEngineParamFile(SearchToolParameterFilePath) Then
+                    Return False
+                End If
+
 
                 Dim query = From item In lstMSGFDBModInfo Where item.ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.CustomAA
                 If query.Any() Then
                     ' Custom amino acids are defined; read their values and update the mass calculator
 
                     Dim localErrorMsg As String = String.Empty
-                    Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor("MSGF+")
+                    Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME)
 
                     AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
                     AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
