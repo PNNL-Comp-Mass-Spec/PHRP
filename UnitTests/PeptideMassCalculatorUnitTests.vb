@@ -15,21 +15,21 @@ Public Class PeptideMassCalculatorUnitTests
     <TestCase("A.LCDE.F", 478.17333)>
     <TestCase("-.LCDE.F", 478.17333)>
     <TestCase("A.LCDE.-", 478.17333)>
-    <TestCase("A.L.F", 131.09462)>
     <TestCase("A.LCDE", 478.17333)>
     <TestCase("LCDE.F", 478.17333)>
     <TestCase("FA.LCDE.FG", 478.17333)>
     <TestCase("LCDE", 478.17333)>
     <TestCase("LCDE.", 478.17333)>
     <TestCase(".LCDE", 478.17333)>
+    <TestCase("A.L.F", 131.09462)>
     <TestCase(".F.", 165.07897)>
     <TestCase("E.TGMLTQKFARSLGMLAVDNQARV..", 2506.3147)>
     <TestCase("..TGMLTQKFARSLGMLAVDNQARV.R", 2506.3147)>
     <TestCase("..TGMLTQKFARSLGMLAVDNQARV..", 2506.3147)>
     <TestCase("A.LCDEFGHIJK.L", 1060.50112)>
+    <TestCase("A.VCDEFGHIJK.L", 1046.48547)>
     <TestCase("A.M*CDEFGHIJK.L", -1)>
     <TestCase("A.SCDEFGHIJK*.L", -1)>
-    <TestCase("A.VCDEFGHIJK.L", 1046.48547)>
     Public Sub TestComputeAminoAcidMass(strSequence As String, expectedMass As Double)
         Dim computedMass = mPeptideMassCalculator.ComputeSequenceMass(strSequence)
 
@@ -40,9 +40,9 @@ Public Class PeptideMassCalculatorUnitTests
 
     <Test()>
     <TestCase("E.TGMLTQKFARSLGMLAVDNQARV.R", "3:15.994; 11:79.996", 2602.3047)>
-    <TestCase("E.TGMLTQKFARSLGMLAVDNQARV.R.", "3:15.994; 11:79.996", -1)>
     <TestCase("..TGMLTQKFARSLGMLAVDNQARV.R", "3:15.994; 11:79.996", 2602.3047)>
     <TestCase("..TGMLTQKFARSLGMLAVDNQARV..", "3:15.994; 11:79.996", 2602.3047)>
+    <TestCase("E.TGMLTQKFARSLGMLAVDNQARV.R.", "3:15.994; 11:79.996", -1)>
     <TestCase("A.LCDEFGHIJK.L", "6:32.5", 1093.00112)>
     <TestCase("A.MCDEFGHIJK.L", "1:15.9994", 1094.45694)>
     <TestCase("A.M*CDEFGHIJK.L", "1:15.9994; 9:138.5", -1)>
@@ -149,32 +149,32 @@ Public Class PeptideMassCalculatorUnitTests
     End Sub
 
     <Test()>
-    <TestCase("A", 71.0371100902557)>
-    <TestCase("B", 114.042921543121)>
-    <TestCase("C", 103.009180784225)>
-    <TestCase("D", 115.026938199997)>
-    <TestCase("E", 129.042587518692)>
-    <TestCase("F", 147.068408727646)>
-    <TestCase("G", 57.0214607715607)>
-    <TestCase("H", 137.058904886246)>
-    <TestCase("I", 113.084058046341)>
+    <TestCase("A", 71.03711)>
+    <TestCase("B", 114.04292)>
+    <TestCase("C", 103.00918)>
+    <TestCase("D", 115.02694)>
+    <TestCase("E", 129.04259)>
+    <TestCase("F", 147.06841)>
+    <TestCase("G", 57.02146)>
+    <TestCase("H", 137.0589)>
+    <TestCase("I", 113.08406)>
     <TestCase("J", 0)>
-    <TestCase("K", 128.094955444336)>
-    <TestCase("L", 113.084058046341)>
-    <TestCase("M", 131.040479421616)>
-    <TestCase("N", 114.042921543121)>
-    <TestCase("O", 114.079306125641)>
-    <TestCase("P", 97.0527594089508)>
-    <TestCase("Q", 128.058570861816)>
-    <TestCase("R", 156.101100921631)>
-    <TestCase("S", 87.0320241451263)>
-    <TestCase("T", 101.047673463821)>
+    <TestCase("K", 128.09496)>
+    <TestCase("L", 113.08406)>
+    <TestCase("M", 131.04048)>
+    <TestCase("N", 114.04292)>
+    <TestCase("O", 114.07931)>
+    <TestCase("P", 97.05276)>
+    <TestCase("Q", 128.05857)>
+    <TestCase("R", 156.1011)>
+    <TestCase("S", 87.03202)>
+    <TestCase("T", 101.04767)>
     <TestCase("U", 150.95363)>
-    <TestCase("V", 99.0684087276459)>
-    <TestCase("W", 186.079306125641)>
-    <TestCase("X", 113.084058046341)>
-    <TestCase("Y", 163.063322782516)>
-    <TestCase("Z", 128.058570861816)>
+    <TestCase("V", 99.06841)>
+    <TestCase("W", 186.07931)>
+    <TestCase("X", 113.08406)>
+    <TestCase("Y", 163.06332)>
+    <TestCase("Z", 128.05857)>
     Public Sub TestGetAminoAcidMass(aminoAcidSymbol As String, expectedMass As Double)
 
         Dim computedMass = mPeptideMassCalculator.GetAminoAcidMass(aminoAcidSymbol)

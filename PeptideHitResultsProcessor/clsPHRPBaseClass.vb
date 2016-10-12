@@ -37,7 +37,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
-        mFileDate = "October 11, 2016"
+        mFileDate = "October 12, 2016"
 
         mPeptideSeqMassCalculator = New clsPeptideMassCalculator() With {
             .ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON
