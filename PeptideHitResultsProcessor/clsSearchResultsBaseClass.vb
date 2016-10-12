@@ -80,16 +80,16 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' List of modifications present in the current peptide
     ''' </summary>
     ''' <remarks></remarks>
-    Protected mSearchResultModifications As List(Of clsAminoAcidModInfo)
+    Protected ReadOnly mSearchResultModifications As List(Of clsAminoAcidModInfo)
 
     ''' <summary>
     ''' Possible modifications that the peptide could have
     ''' </summary>
     ''' <remarks></remarks>
-    Protected mPeptideMods As clsPeptideModificationContainer
+    Protected ReadOnly mPeptideMods As clsPeptideModificationContainer
 
-    Protected mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
-    Protected mPeptideSeqMassCalculator As clsPeptideMassCalculator
+    Protected ReadOnly mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
+    Protected ReadOnly mPeptideSeqMassCalculator As clsPeptideMassCalculator
 
     Protected mErrorMessage As String = ""
 #End Region
@@ -354,7 +354,17 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <param name="peptideSeqMassCalculator"></param>
     ''' <remarks></remarks>
     Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
+
+        mSearchResultModifications = New List(Of clsAminoAcidModInfo)
+
         mPeptideMods = objPeptideMods
+
+        mPeptideCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
+        mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin)
+
+        If peptideSeqMassCalculator Is Nothing Then
+            Throw New Exception("peptideSeqMassCalculator instance cannot be null")
+        End If
         mPeptideSeqMassCalculator = peptideSeqMassCalculator
 
         InitializeLocalVariables()
@@ -641,23 +651,6 @@ Public MustInherit Class clsSearchResultsBaseClass
     End Function
 
     Private Sub InitializeLocalVariables()
-        mSearchResultModifications = New List(Of clsAminoAcidModInfo)
-
-        ' Initialize mPeptideCleavageStateCalculator
-        If mPeptideCleavageStateCalculator Is Nothing Then
-            mPeptideCleavageStateCalculator = New clsPeptideCleavageStateCalculator
-            mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin)
-        End If
-
-        ' Initialize mPeptideSeqMassCalculator
-        If mPeptideSeqMassCalculator Is Nothing Then
-            mPeptideSeqMassCalculator = New clsPeptideMassCalculator
-
-            ' Set this to false to speed up the mass calculation speed
-            ' It's OK to do this since this class always passes the clean sequence to .ComputeSequenceMass
-            mPeptideSeqMassCalculator.RemovePrefixAndSuffixIfPresent = False
-        End If
-
         mErrorMessage = String.Empty
 
         Me.Clear()

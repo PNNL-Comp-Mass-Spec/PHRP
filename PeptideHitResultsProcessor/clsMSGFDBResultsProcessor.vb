@@ -30,7 +30,10 @@ Public Class clsMSGFDBResultsProcessor
         MyBase.mFileDate = "October 11, 2016"
         mModMassRegEx = New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
-        InitializeLocalVariables()
+        mPeptideCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
+        mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.eStandardCleavageAgentConstants.Trypsin)
+
+        mNumericModErrors = 0
     End Sub
 
 #Region "Constants and Enums"
@@ -224,7 +227,7 @@ Public Class clsMSGFDBResultsProcessor
 #End Region
 
 #Region "Classwide Variables"
-    Private mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
+    Private ReadOnly mPeptideCleavageStateCalculator As clsPeptideCleavageStateCalculator
 
     Private mParentMassToleranceInfo As udtParentMassToleranceType
 
@@ -1160,17 +1163,6 @@ Public Class clsMSGFDBResultsProcessor
         Return New KeyValuePair(Of String, Integer)(currentProteinName, currentProteinNumber)
 
     End Function
-
-    Private Sub InitializeLocalVariables()
-
-        ' Initialize mPeptideCleavageStateCalculator
-        If mPeptideCleavageStateCalculator Is Nothing Then
-            mPeptideCleavageStateCalculator = New clsPeptideCleavageStateCalculator
-            mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.eStandardCleavageAgentConstants.Trypsin)
-        End If
-
-        mNumericModErrors = 0
-    End Sub
 
     ''' <summary>
     ''' Load the PeptideToProteinMap information; in addition, creates the _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
