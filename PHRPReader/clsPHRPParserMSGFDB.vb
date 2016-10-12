@@ -414,6 +414,15 @@ Public Class clsPHRPParserMSGFDB
             ' Need to use a different parsing function to extract it
             success = UpdateMassCalculatorMasses(strSearchEngineParamFileName)
 
+            ' Look for a custom charge carrier mass
+            If objSearchEngineParams.Parameters.TryGetValue("ChargeCarrierMass", strSettingValue) Then
+                Dim dblValue As Double
+                If Double.TryParse(strSettingValue, dblValue) Then
+                    ShowMessage(String.Format("Using a charge carrier mass of {0:F3} Da", dblValue))
+                    mPeptideMassCalculator.ChargeCarrierMass = dblValue
+                End If
+            End If
+
             Return success
 
         Catch ex As Exception

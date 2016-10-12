@@ -129,6 +129,10 @@ Public MustInherit Class clsPHRPParser
         End Get
     End Property
 
+    ''' <summary>
+    ''' Peptide to protein map file name
+    ''' </summary>
+    ''' <returns></returns>
     Public ReadOnly Property PepToProteinMap() As Dictionary(Of String, clsPepToProteinMapInfo)
         Get
             Return mPepToProteinMap
