@@ -1288,13 +1288,10 @@ Public Class clsMSGFDBResultsProcessor
         mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(objSearchEngineParams)
 
         ' Parse the ChargeCarrierMass setting
-        Dim strValue As String = Nothing
-        Dim dblValue As Double
-        If objSearchEngineParams.Parameters.TryGetValue("ChargeCarrierMass", strValue) Then
-            If Double.TryParse(strValue, dblValue) Then
-                ReportMessage(String.Format("Using a charge carrier mass of {0:F3} Da", dblValue))
-                mPeptideSeqMassCalculator.ChargeCarrierMass = dblValue
-            End If
+        Dim customChargeCarrierMass As Double
+        If clsPHRPParserMSGFDB.GetCustomChargeCarrierMass(objSearchEngineParams, customChargeCarrierMass) Then
+            ReportMessage(String.Format("Using a charge carrier mass of {0:F3} Da", customChargeCarrierMass))
+            mPeptideSeqMassCalculator.ChargeCarrierMass = customChargeCarrierMass
         End If
 
         Return success

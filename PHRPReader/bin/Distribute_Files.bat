@@ -9,16 +9,19 @@ call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Mage_PlugIn\bin\Debug"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSAlign_Plugin\bin"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\bin"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\MSGF_Results_Summarizer\bin"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\MSGFResultsSummarizerDLL\bin\Debug"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGF_PlugIn\MSGFResultsSummarizerExe\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSGFDB_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_MSXML_Gen_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Phospho_FDR_Aggregator_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_Converter_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_MzXML_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestMagePlugIn\bin\Debug"
+pause
+
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MASICResultsMerger\bin"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MASICResultsMerger\Lib"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MTDB_Creator\trunk\libs"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MTDB_Creator\libs"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\bin"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\PeptideHitResultsProcessor\bin"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideHitResultsProcessor\CreateMSGFDBResultsFileFromPHRP\bin\"
@@ -31,6 +34,7 @@ call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\Protein_Cove
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x86"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x64"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\AnyCPU"
+pause
 
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\dll"
@@ -38,8 +42,8 @@ call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\SMAQC\SMAQC\
 
 :Aldrich
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\lib"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Release"
-call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\x86\Debug"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\AnyCPU\Release"
+call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_DLL\bin\AnyCPU\Debug"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Debug"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\JoshAldrich\AScore\AScore_Console\bin\Release"
 

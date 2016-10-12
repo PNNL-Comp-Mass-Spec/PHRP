@@ -60,6 +60,10 @@ Public Class clsPHRPParserMSGFDB
     Public Const FILENAME_SUFFIX_FHT = "_msgfdb_fht.txt"
 
     Private Const MSGFDB_SEARCH_ENGINE_NAME = "MS-GFDB"
+
+    Public Const CHARGE_CARRIER_MASS_PARAM_NAME As String = "ChargeCarrierMass"
+
+
 #End Region
 
 #Region "Properties"
@@ -267,6 +271,29 @@ Public Class clsPHRPParserMSGFDB
 
     End Function
 
+    ''' <summary>
+    ''' Look for MSGF+ parameter ChargeCarrierMass
+    ''' If defined, update chargeCarrierMass with the associated mass value and return True
+    ''' Otherwise return false
+    ''' </summary>
+    ''' <param name="objSearchEngineParams"></param>
+    ''' <param name="chargeCarrierMass"></param>
+    ''' <returns></returns>
+    ''' <remarks>This function is used by clsPHRPMassErrorValidator in the Analysis Manager</remarks>
+    Public Shared Function GetCustomChargeCarrierMass(objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef chargeCarrierMass As Double) As Boolean
+
+        Dim strValue As String = Nothing
+        If objSearchEngineParams.Parameters.TryGetValue(CHARGE_CARRIER_MASS_PARAM_NAME, strValue) Then
+            If Double.TryParse(strValue, chargeCarrierMass) Then
+                Return True
+            End If
+        End If
+
+        chargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON
+        Return False
+
+    End Function
+
     Public Shared Function GetPHRPFirstHitsFileName(strDatasetName As String) As String
         Return strDatasetName & FILENAME_SUFFIX_FHT
     End Function
@@ -415,12 +442,10 @@ Public Class clsPHRPParserMSGFDB
             success = UpdateMassCalculatorMasses(strSearchEngineParamFileName)
 
             ' Look for a custom charge carrier mass
-            If objSearchEngineParams.Parameters.TryGetValue("ChargeCarrierMass", strSettingValue) Then
-                Dim dblValue As Double
-                If Double.TryParse(strSettingValue, dblValue) Then
-                    ShowMessage(String.Format("Using a charge carrier mass of {0:F3} Da", dblValue))
-                    mPeptideMassCalculator.ChargeCarrierMass = dblValue
-                End If
+            Dim customChargeCarrierMass As Double
+            If GetCustomChargeCarrierMass(objSearchEngineParams, customChargeCarrierMass) Then
+                ShowMessage(String.Format("Using a charge carrier mass of {0:F3} Da", customChargeCarrierMass))
+                mPeptideMassCalculator.ChargeCarrierMass = customChargeCarrierMass
             End If
 
             Return success
