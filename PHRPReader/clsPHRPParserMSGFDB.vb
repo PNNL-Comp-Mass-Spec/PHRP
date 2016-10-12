@@ -683,10 +683,9 @@ Public Class clsPHRPParserMSGFDB
 
             Try
                 Dim elementalComposition = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalFormula)
-                Dim atomCounts = clsPeptideMassCalculator.ConvertElementalCompositionToAtomCounts(elementalComposition)
 
                 peptideMassCalculator.SetAminoAcidMass(aminoAcidSymbol, aminoAcidMass)
-                peptideMassCalculator.SetAminoAcidAtomCounts(aminoAcidSymbol, atomCounts)
+                peptideMassCalculator.SetAminoAcidAtomCounts(aminoAcidSymbol, elementalComposition)
 
             Catch ex As Exception
                 errorMessage = ex.Message

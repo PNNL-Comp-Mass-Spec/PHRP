@@ -803,15 +803,14 @@ Public Class clsMSGFDBResultsProcessor
             Dim lstCustomAA = (From item In lstMSGFDBModInfo Where item.ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.CustomAA Select item).ToList()
             For Each customAADef In lstCustomAA
                 Dim aminoAcidSymbol = customAADef.Residues(0)
-                Dim empiricalFormula = customAADef.ModMass
+                Dim empiricalFormulaString = customAADef.ModMass
                 Dim aminoAcidMass = customAADef.ModMassVal
 
                 Try
-                    Dim elementalComposition = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalFormula)
-                    Dim atomCounts = clsPeptideMassCalculator.ConvertElementalCompositionToAtomCounts(elementalComposition)
+                    Dim elementalComposition = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalFormulaString)
 
                     mPeptideSeqMassCalculator.SetAminoAcidMass(aminoAcidSymbol, aminoAcidMass)
-                    mPeptideSeqMassCalculator.SetAminoAcidAtomCounts(aminoAcidSymbol, atomCounts)
+                    mPeptideSeqMassCalculator.SetAminoAcidAtomCounts(aminoAcidSymbol, elementalComposition)
 
                 Catch ex As Exception
                     ReportError(ex.Message)

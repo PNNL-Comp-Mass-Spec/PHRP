@@ -42,25 +42,24 @@ Public Class clsPeptideMassCalculator
 
 #Region "Structures"
     Public Structure udtPeptideSequenceModInfoType
-        Public ResidueLocInPeptide As Integer           ' Position that the modification occurs; not used by this class
+        ''' <summary>
+        ''' Position that the modification occurs; not used by clsPeptideMassCalculator
+        ''' </summary>
+        Public ResidueLocInPeptide As Integer
+
+        ''' <summary>
+        ''' Modification mass
+        ''' </summary>
         Public ModificationMass As Double
-        Public AffectedAtom As Char                     ' Set to Nothing or to NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications); for Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
-    End Structure
 
-    ''' <summary>
-    ''' Tracks elemental composition of each amino acid
-    ''' </summary>
-    ''' <remarks>In MGSF+, amino acids can only be C, H, N, O, and S</remarks>
-    Public Structure udtAtomCountsType
-        Public CountC As Integer
-        Public CountH As Integer
-        Public CountN As Integer
-        Public CountO As Integer
-        Public CountS As Integer
-
-        Public Overrides Function ToString() As String
-            Return "C" & CountC & "H" & CountH & "N" & CountN & "O" & CountO & "S" & CountS
-        End Function
+        ''' <summary>
+        ''' Affected atom
+        ''' </summary>
+        ''' <remarks>
+        ''' Set to Nothing or to NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications)
+        ''' For Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
+        ''' </remarks>
+        Public AffectedAtom As Char
     End Structure
 
 #End Region
@@ -72,9 +71,9 @@ Public Class clsPeptideMassCalculator
 
     Private Const AMINO_ACID_LIST_MAX_INDEX As Byte = 25
     Private mAminoAcidMasses() As Double
-    Private mAminoAcidAtomCounts() As udtAtomCountsType
+    Private mAminoAcidEmpiricalFormulas() As clsEmpiricalFormula
 
-    ' typically mPeptideNTerminusMass + mPeptideCTerminusMass = 18.0105633 (the mass of water)
+    ' Typically mPeptideNTerminusMass + mPeptideCTerminusMass = 18.0105633 (the mass of water)
     Private mPeptideNTerminusMass As Double
     Private mPeptideCTerminusMass As Double
 
@@ -161,22 +160,29 @@ Public Class clsPeptideMassCalculator
     End Sub
 
     ''' <summary>
-    ''' Adds a new entry to parallel arrays AminoAcidMasses and AminoAcidSymbols
+    ''' Compute the monoisotopic mass of the given empirical formula
     ''' </summary>
-    ''' <param name="intIndex"></param>
-    ''' <remarks></remarks>
-    Private Sub AddAminoAcidStatEntry(intIndex As Byte)
+    ''' <param name="empiricalFormula"></param>
+    ''' <returns></returns>
+    ''' <remarks>Throws an exception if an unknown symbol is encountered</remarks>
+    Public Shared Function ComputeMonoistopicMass(empiricalFormula As clsEmpiricalFormula) As Double
 
-        ' Use Convert.ToChar to convert from Ascii code to the letter
-        Dim aminoAcidSymbol As Char = ConvertAminoAcidIndexToChar(intIndex)
+        Dim monoisotopicMass As Double = 0
 
-        Dim udtAtomCounts As udtAtomCountsType = Nothing
-        Dim monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, udtAtomCounts)
+        For Each element In empiricalFormula.ElementCounts
 
-        mAminoAcidMasses(intIndex) = monoMass
-        mAminoAcidAtomCounts(intIndex) = udtAtomCounts
+            Dim elementMass As Double
+            If mElementMonoMasses.TryGetValue(element.Key, elementMass) Then
+                monoisotopicMass += element.Value * elementMass
+            Else
+                Throw New Exception("Unrecognized symbol " & element.Key)
+            End If
 
-    End Sub
+        Next
+
+        Return monoisotopicMass
+
+    End Function
 
     ''' <summary>
     ''' Compute the monoisotopic mass of the compound represented by elementalComposition
@@ -292,13 +298,12 @@ Public Class clsPeptideMassCalculator
     ''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
     Public Function ComputeSequenceMass(strSequence As String, modifiedResidues As List(Of udtPeptideSequenceModInfoType)) As Double
 
-        ' Note that ComputeSequenceMass will reset mErrorMessage
+        ' Note that this call to ComputeSequenceMass will reset mErrorMessage
         Dim dblMass = ComputeSequenceMass(strSequence)
 
         If dblMass >= 0 AndAlso Not modifiedResidues Is Nothing AndAlso modifiedResidues.Count > 0 Then
 
-            Dim blnAtomCountsDefined = False
-            Dim udtAtomCounts As udtAtomCountsType
+            Dim empiricalFormula = New clsEmpiricalFormula()
 
             For Each modifiedResidue In modifiedResidues
 
@@ -308,30 +313,28 @@ Public Class clsPeptideMassCalculator
                     ' Positional modification (static or dynamic mod)
                     ' Simply add the modification mass to dblMass
                     dblMass += modifiedResidue.ModificationMass
+                    Continue For
+                End If
+
+                ' Isotopic modification
+                If empiricalFormula.ElementCounts.Count = 0 Then
+                    ' Initialize empiricalFormula using the amino acid sequence
+                    Dim empiricalFormulaToAdd = ConvertAminoAcidSequenceToEmpiricalFormula(strSequence)
+                    empiricalFormula.AddElements(empiricalFormulaToAdd)
+                End If
+
+                If Not mElementMonoMasses.ContainsKey(modifiedResidue.AffectedAtom) Then
+                    mErrorMessage = "Unknown Affected Atom '" & modifiedResidue.AffectedAtom & "'"
+                    dblMass = -1
+                    Exit For
+                End If
+
+                Dim elementCount = empiricalFormula.GetElementCount(modifiedResidue.AffectedAtom)
+                If elementCount = 0 Then
+                    Console.WriteLine("Warning: no amino acids in {0} contain element {1}", strSequence,
+                                        modifiedResidue.AffectedAtom)
                 Else
-
-                    ' Isotopic modification
-                    If Not blnAtomCountsDefined Then
-                        udtAtomCounts = CountAtoms(strSequence)
-                        blnAtomCountsDefined = True
-                    End If
-
-                    Select Case Char.ToUpper(modifiedResidue.AffectedAtom)
-                        Case "C"c
-                            dblMass += (udtAtomCounts.CountC * modifiedResidue.ModificationMass)
-                        Case "H"c
-                            dblMass += (udtAtomCounts.CountH * modifiedResidue.ModificationMass)
-                        Case "N"c
-                            dblMass += (udtAtomCounts.CountN * modifiedResidue.ModificationMass)
-                        Case "O"c
-                            dblMass += (udtAtomCounts.CountO * modifiedResidue.ModificationMass)
-                        Case "S"c
-                            dblMass += (udtAtomCounts.CountS * modifiedResidue.ModificationMass)
-                        Case Else
-                            mErrorMessage = "Unknown Affected Atom '" & modifiedResidue.AffectedAtom & "'"
-                            dblMass = -1
-                            Exit For
-                    End Select
+                    dblMass += elementCount * modifiedResidue.ModificationMass
                 End If
 
             Next
@@ -401,42 +404,12 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
-    Private Function ConvertAminoAcidCharToIndex(aminoAcidSymbol As Char) As Byte
-        Return Convert.ToByte(aminoAcidSymbol) - ASCII_VAL_LETTER_A
+    Private Function ConvertAminoAcidCharToIndex(aminoAcidSymbol As Char) As Short
+        Return CShort(Convert.ToByte(aminoAcidSymbol)) - ASCII_VAL_LETTER_A
     End Function
 
     Private Function ConvertAminoAcidIndexToChar(aminoAcidIndex As Byte) As Char
         Return Convert.ToChar(aminoAcidIndex + ASCII_VAL_LETTER_A)
-    End Function
-
-    ''' <summary>
-    ''' Populate a udtAtomCountsType instance using the information in elementalComposition
-    ''' </summary>
-    ''' <param name="elementalComposition"></param>
-    ''' <returns></returns>
-    ''' <remarks>Only valid for amino acids, since udtAtomCountsType only supports C, H, N, O, and S</remarks>
-    Public Shared Function ConvertElementalCompositionToAtomCounts(elementalComposition As Dictionary(Of String, Integer)) As udtAtomCountsType
-
-        Dim atomCounts = New udtAtomCountsType()
-
-        For Each elementItem In elementalComposition
-
-            Dim elementSymbol As String = elementItem.Key
-
-            Select Case elementSymbol
-                Case "C"c : atomCounts.CountC = elementItem.Value
-                Case "H"c : atomCounts.CountH = elementItem.Value
-                Case "N"c : atomCounts.CountN = elementItem.Value
-                Case "O"c : atomCounts.CountO = elementItem.Value
-                Case "S"c : atomCounts.CountS = elementItem.Value
-                Case Else
-                    ' Unknown element
-                    Throw New Exception("Error parsing items in elementalComposition, unknown element " & elementSymbol & "; must be C, H, N, O, or S")
-            End Select
-        Next
-
-        Return atomCounts
-
     End Function
 
     ''' <summary>
@@ -460,20 +433,16 @@ Public Class clsPeptideMassCalculator
     ''' Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
     ''' </summary>
     ''' <param name="dblMassMZ">m/z</param>
-    ''' <param name="intCurrentCharge">Current charge</param>
+    ''' <param name="intCurrentCharge">Current charge; if 0, assumes dblMassMZ is the neutral, monoisotopic mass</param>
     ''' <param name="intDesiredCharge">Desired charge</param>
     ''' <param name="dblChargeCarrierMass">Charge carrier mass (Default is the mass of a proton)</param>
     ''' <returns></returns>
-    ''' <remarks></remarks>
+    ''' <remarks>To return the neutral mass, set intDesiredCharge to 0</remarks>
     Public Function ConvoluteMass(
       dblMassMZ As Double,
       intCurrentCharge As Integer,
       intDesiredCharge As Integer,
       dblChargeCarrierMass As Double) As Double
-
-        ' Converts dblMassMZ to the MZ that would appear at the given intDesiredCharge
-        ' If intCurrentCharge = 0, then assumes dblMassMZ is the neutral, monoisotopic mass
-        ' To return the neutral mass, set intDesiredCharge to 0
 
         Dim dblNewMZ As Double
 
@@ -524,9 +493,9 @@ Public Class clsPeptideMassCalculator
     ''' </summary>
     ''' <param name="strSequence">One letter amino acid symbols (no modification symbols or numbers)</param>
     ''' <returns></returns>
-    Private Function CountAtoms(strSequence As String) As udtAtomCountsType
+    Private Function ConvertAminoAcidSequenceToEmpiricalFormula(strSequence As String) As clsEmpiricalFormula
 
-        Dim atomCounts = New udtAtomCountsType()
+        Dim empiricalFormula = New clsEmpiricalFormula()
 
         For Each chAminoAcidSymbol As Char In strSequence
             ' Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
@@ -537,43 +506,14 @@ Public Class clsPeptideMassCalculator
                     mErrorMessage = "Unknown symbol " & chAminoAcidSymbol & " in sequence " & strSequence
                     Exit For
                 Else
-                    With atomCounts
-                        .CountC += mAminoAcidAtomCounts(aminoAcidIndex).CountC
-                        .CountH += mAminoAcidAtomCounts(aminoAcidIndex).CountH
-                        .CountN += mAminoAcidAtomCounts(aminoAcidIndex).CountN
-                        .CountO += mAminoAcidAtomCounts(aminoAcidIndex).CountO
-                        .CountS += mAminoAcidAtomCounts(aminoAcidIndex).CountS
-                    End With
+                    empiricalFormula.AddElements(mAminoAcidEmpiricalFormulas(aminoAcidIndex))
                 End If
             Catch ex As Exception
                 ' Invalid value; ignore
             End Try
         Next
 
-        Return atomCounts
-
-    End Function
-
-    ''' <summary>
-    ''' Returns a structure with the number of atoms of C, H, N, O, and S in the specified amino acid
-    ''' </summary>
-    ''' <param name="chAminoAcidSymbol"></param>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Public Function GetAminoAcidAtomCounts(chAminoAcidSymbol As Char) As udtAtomCountsType
-        ' Returns the atom counts if success, 0 if an error
-
-        If Not chAminoAcidSymbol = Nothing Then
-            Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
-            If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
-                ' Invalid Index
-                Return New udtAtomCountsType
-            Else
-                Return mAminoAcidAtomCounts(aminoAcidIndex)
-            End If
-        End If
-
-        Return New udtAtomCountsType
+        Return empiricalFormula
 
     End Function
 
@@ -601,7 +541,30 @@ Public Class clsPeptideMassCalculator
     End Function
 
     ''' <summary>
-    ''' Create a new udtAtomCountsType struct with the specified number of atoms
+    ''' Returns a List with the number of atoms of C, H, N, O, and S in the specified amino acid
+    ''' </summary>
+    ''' <param name="chAminoAcidSymbol"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetAminoAcidEmpiricalFormula(chAminoAcidSymbol As Char) As clsEmpiricalFormula
+        ' Returns the atom counts if success, 0 if an error
+
+        If chAminoAcidSymbol = Nothing Then
+            Return New clsEmpiricalFormula()
+        End If
+
+        Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
+        If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
+            ' Invalid Index
+            Return New clsEmpiricalFormula()
+        Else
+            Return mAminoAcidEmpiricalFormulas(aminoAcidIndex)
+        End If
+
+    End Function
+
+    ''' <summary>
+    ''' Create a new clsEmpiricalFormula instnance with the specified number of atoms
     ''' </summary>
     ''' <param name="countC"></param>
     ''' <param name="countH"></param>
@@ -610,22 +573,22 @@ Public Class clsPeptideMassCalculator
     ''' <param name="countS"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Private Function GetAtomCountsStruct(
+    Private Function GetAminoAcidEmpiricalFormula(
       countC As Integer,
       countH As Integer,
       countN As Integer,
       countO As Integer,
-      countS As Integer) As udtAtomCountsType
+      countS As Integer) As clsEmpiricalFormula
 
-        Dim atomCounts = New udtAtomCountsType()
+        Dim empiricalFormula = New clsEmpiricalFormula()
 
-        atomCounts.CountC = countC
-        atomCounts.CountH = countH
-        atomCounts.CountN = countN
-        atomCounts.CountO = countO
-        atomCounts.CountS = countS
+        empiricalFormula.AddElement("C", countC)
+        empiricalFormula.AddElement("H", countH)
+        empiricalFormula.AddElement("N", countN)
+        empiricalFormula.AddElement("O", countO)
+        empiricalFormula.AddElement("S", countS)
 
-        Return atomCounts
+        Return empiricalFormula
 
     End Function
 
@@ -663,7 +626,7 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
-    Private Function GetDefaultAminoAcidMass(aminoAcidSymbol As Char, <Out> ByRef udtAtomCounts As udtAtomCountsType) As Double
+    Private Function GetDefaultAminoAcidMass(aminoAcidSymbol As Char, <Out> ByRef empiricalFormula As clsEmpiricalFormula) As Double
 
         ' These monoisotopic masses come from those traditionally used in DMS
         ' They were originally assembled by Gordon Anderson for use in ICR-2LS
@@ -673,65 +636,98 @@ Public Class clsPeptideMassCalculator
         Select Case aminoAcidSymbol
 
             Case "A"c
-                monoMass = 71.0371100902557 : udtAtomCounts = GetAtomCountsStruct(3, 5, 1, 1, 0)
+                monoMass = 71.0371100902557
+                empiricalFormula = GetAminoAcidEmpiricalFormula(3, 5, 1, 1, 0)
             Case "B"c
                 ' Use N or D (aka Asn/Asp)
-                monoMass = 114.042921543121 : udtAtomCounts = GetAtomCountsStruct(4, 6, 2, 2, 0)
+                monoMass = 114.042921543121
+                empiricalFormula = GetAminoAcidEmpiricalFormula(4, 6, 2, 2, 0)
             Case "C"c
-                monoMass = 103.009180784225 : udtAtomCounts = GetAtomCountsStruct(3, 5, 1, 1, 1)
+                monoMass = 103.009180784225
+                empiricalFormula = GetAminoAcidEmpiricalFormula(3, 5, 1, 1, 1)
             Case "D"c
-                monoMass = 115.026938199997 : udtAtomCounts = GetAtomCountsStruct(4, 5, 1, 3, 0)
+                monoMass = 115.026938199997
+                empiricalFormula = GetAminoAcidEmpiricalFormula(4, 5, 1, 3, 0)
             Case "E"c
-                monoMass = 129.042587518692 : udtAtomCounts = GetAtomCountsStruct(5, 7, 1, 3, 0)
+                monoMass = 129.042587518692
+                empiricalFormula = GetAminoAcidEmpiricalFormula(5, 7, 1, 3, 0)
             Case "F"c
-                monoMass = 147.068408727646 : udtAtomCounts = GetAtomCountsStruct(9, 9, 1, 1, 0)
+                monoMass = 147.068408727646
+                empiricalFormula = GetAminoAcidEmpiricalFormula(9, 9, 1, 1, 0)
             Case "G"c
-                monoMass = 57.0214607715607 : udtAtomCounts = GetAtomCountsStruct(2, 3, 1, 1, 0)
+                monoMass = 57.0214607715607
+                empiricalFormula = GetAminoAcidEmpiricalFormula(2, 3, 1, 1, 0)
             Case "H"c
-                monoMass = 137.058904886246 : udtAtomCounts = GetAtomCountsStruct(6, 7, 3, 1, 0)
+                monoMass = 137.058904886246
+                empiricalFormula = GetAminoAcidEmpiricalFormula(6, 7, 3, 1, 0)
             Case "I"c
-                monoMass = 113.084058046341 : udtAtomCounts = GetAtomCountsStruct(6, 11, 1, 1, 0)
+                monoMass = 113.084058046341
+                empiricalFormula = GetAminoAcidEmpiricalFormula(6, 11, 1, 1, 0)
             Case "J"c
                 ' Could use mass of Ile/Leu, but we're instead treating this as an invalid, massless amino acid
-                monoMass = 0 : udtAtomCounts = GetAtomCountsStruct(0, 0, 0, 0, 0)
+                monoMass = 0
+                empiricalFormula = GetAminoAcidEmpiricalFormula(0, 0, 0, 0, 0)
             Case "K"c
-                monoMass = 128.094955444336 : udtAtomCounts = GetAtomCountsStruct(6, 12, 2, 1, 0)
+                monoMass = 128.094955444336
+                empiricalFormula = GetAminoAcidEmpiricalFormula(6, 12, 2, 1, 0)
             Case "L"c
-                monoMass = 113.084058046341 : udtAtomCounts = GetAtomCountsStruct(6, 11, 1, 1, 0)
+                monoMass = 113.084058046341
+                empiricalFormula = GetAminoAcidEmpiricalFormula(6, 11, 1, 1, 0)
             Case "M"c
-                monoMass = 131.040479421616 : udtAtomCounts = GetAtomCountsStruct(5, 9, 1, 1, 1)
+                monoMass = 131.040479421616
+                empiricalFormula = GetAminoAcidEmpiricalFormula(5, 9, 1, 1, 1)
             Case "N"c
-                monoMass = 114.042921543121 : udtAtomCounts = GetAtomCountsStruct(4, 6, 2, 2, 0)
+                monoMass = 114.042921543121
+                empiricalFormula = GetAminoAcidEmpiricalFormula(4, 6, 2, 2, 0)
             Case "O"c
-                monoMass = 114.079306125641 : udtAtomCounts = GetAtomCountsStruct(5, 10, 2, 1, 0)
+                monoMass = 114.079306125641
+                empiricalFormula = GetAminoAcidEmpiricalFormula(5, 10, 2, 1, 0)
             Case "P"c
-                monoMass = 97.0527594089508 : udtAtomCounts = GetAtomCountsStruct(5, 7, 1, 1, 0)
+                monoMass = 97.0527594089508
+                empiricalFormula = GetAminoAcidEmpiricalFormula(5, 7, 1, 1, 0)
             Case "Q"c
-                monoMass = 128.058570861816 : udtAtomCounts = GetAtomCountsStruct(5, 8, 2, 2, 0)
+                monoMass = 128.058570861816
+                empiricalFormula = GetAminoAcidEmpiricalFormula(5, 8, 2, 2, 0)
             Case "R"c
-                monoMass = 156.101100921631 : udtAtomCounts = GetAtomCountsStruct(6, 12, 4, 1, 0)
+                monoMass = 156.101100921631
+                empiricalFormula = GetAminoAcidEmpiricalFormula(6, 12, 4, 1, 0)
             Case "S"c
-                monoMass = 87.0320241451263 : udtAtomCounts = GetAtomCountsStruct(3, 5, 1, 2, 0)
+                monoMass = 87.0320241451263
+                empiricalFormula = GetAminoAcidEmpiricalFormula(3, 5, 1, 2, 0)
             Case "T"c
-                monoMass = 101.047673463821 : udtAtomCounts = GetAtomCountsStruct(4, 7, 1, 2, 0)
+                monoMass = 101.047673463821
+                empiricalFormula = GetAminoAcidEmpiricalFormula(4, 7, 1, 2, 0)
             Case "U"c
                 ' Corresponds to Sec = Selenocysteine (C3H5NOSe)
-                monoMass = 150.95363 : udtAtomCounts = GetAtomCountsStruct(3, 5, 1, 1, 0)
+                monoMass = 150.95363
+                empiricalFormula = GetAminoAcidEmpiricalFormula(3, 5, 1, 1, 0)
+                empiricalFormula.AddElement("Se", 1)
             Case "V"c
-                monoMass = 99.0684087276459 : udtAtomCounts = GetAtomCountsStruct(5, 9, 1, 1, 0)
+                monoMass = 99.0684087276459
+                empiricalFormula = GetAminoAcidEmpiricalFormula(5, 9, 1, 1, 0)
             Case "W"c
-                monoMass = 186.079306125641 : udtAtomCounts = GetAtomCountsStruct(11, 10, 2, 1, 0)
+                monoMass = 186.079306125641
+                empiricalFormula = GetAminoAcidEmpiricalFormula(11, 10, 2, 1, 0)
             Case "X"c
                 ' Unknown; use mass of Ile/Leu
-                monoMass = 113.084058046341 : udtAtomCounts = GetAtomCountsStruct(6, 11, 1, 1, 0)
+                monoMass = 113.084058046341
+                empiricalFormula = GetAminoAcidEmpiricalFormula(6, 11, 1, 1, 0)
             Case "Y"c
-                monoMass = 163.063322782516 : udtAtomCounts = GetAtomCountsStruct(9, 9, 1, 2, 0)
+                monoMass = 163.063322782516
+                empiricalFormula = GetAminoAcidEmpiricalFormula(9, 9, 1, 2, 0)
             Case "Z"c
                 ' use Q or E (aka Gln/Glu); note that these are 0.984 Da apart
-                monoMass = 128.058570861816 : udtAtomCounts = GetAtomCountsStruct(5, 8, 2, 2, 0)
+                monoMass = 128.058570861816
+                empiricalFormula = GetAminoAcidEmpiricalFormula(5, 8, 2, 2, 0)
             Case Else
-                monoMass = 0 : udtAtomCounts = GetAtomCountsStruct(0, 0, 0, 0, 0)
+                monoMass = 0
+                empiricalFormula = GetAminoAcidEmpiricalFormula(0, 0, 0, 0, 0)
         End Select
+
+        Dim computedMass = ComputeMonoistopicMass(empiricalFormula)
+        If Math.Abs(computedMass - monoMass) > 0.01 Then
+            Console.WriteLine("Mass discrepancy for amino acid {0}. DMS uses {1:F4} but this class computed {2:F4}", aminoAcidSymbol, monoMass, computedMass)
+        End If
 
         Return monoMass
 
@@ -782,15 +778,15 @@ Public Class clsPeptideMassCalculator
     '''  CH23NO-5S+4
     ''' </summary>
     ''' <param name="strEmpiricalformula"></param>
-    ''' <returns>Dictionary where keys are element symbols and values are the element counts</returns>
-    Public Shared Function GetEmpiricalFormulaComponents(strEmpiricalformula As String) As Dictionary(Of String, Integer)
+    ''' <returns>EmpiricalFormula instnance tracking the element symbols and counts</returns>
+    Public Shared Function GetEmpiricalFormulaComponents(strEmpiricalformula As String) As clsEmpiricalFormula
 
         ' Originally MSGF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
         ' It now allows for any element
 
         Dim reMatches As MatchCollection = mAtomicFormulaRegEx.Matches(strEmpiricalformula)
 
-        Dim elementalComposition = New Dictionary(Of String, Integer)
+        Dim empiricalFormula = New clsEmpiricalFormula()
 
         If reMatches.Count > 0 Then
 
@@ -806,27 +802,22 @@ Public Class clsPeptideMassCalculator
                     End If
                 End If
 
-                Dim intExistingCount As Integer
-                If elementalComposition.TryGetValue(elementSymbol, intExistingCount) Then
-                    elementalComposition(elementSymbol) = intExistingCount + elementCount
-                Else
-                    elementalComposition.Add(elementSymbol, elementCount)
-                End If
+                empiricalFormula.AddElement(elementSymbol, elementCount)
 
             Next
         End If
 
-        Return elementalComposition
+        Return empiricalFormula
 
     End Function
 
     Private Sub InitializeAminoAcidData()
 
         ReDim mAminoAcidMasses(AMINO_ACID_LIST_MAX_INDEX)
-        ReDim mAminoAcidAtomCounts(AMINO_ACID_LIST_MAX_INDEX)
+        ReDim mAminoAcidEmpiricalFormulas(AMINO_ACID_LIST_MAX_INDEX)
 
         For index As Byte = 0 To AMINO_ACID_LIST_MAX_INDEX
-            AddAminoAcidStatEntry(index)
+            UpdateAminoAcidStatEntry(index)
         Next
 
         ResetTerminusMasses()
@@ -902,11 +893,7 @@ Public Class clsPeptideMassCalculator
             Return
         End If
 
-        Dim udtAtomCounts As udtAtomCountsType = Nothing
-        Dim monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, udtAtomCounts)
-
-        mAminoAcidMasses(aminoAcidIndex) = monoMass
-        mAminoAcidAtomCounts(aminoAcidIndex) = udtAtomCounts
+        UpdateAminoAcidStatEntry(CByte(aminoAcidIndex))
 
     End Sub
 
@@ -922,27 +909,39 @@ Public Class clsPeptideMassCalculator
     End Sub
 
     ''' <summary>
-    ''' Defines the number of C, H, N, O, and S atoms in an amino acid
+    ''' Defines the number of C, H, N, O, S, etc. elements in an amino acid
     ''' </summary>
-    ''' <param name="chAminoAcidSymbol"></param>
-    ''' <param name="udtAtomCounts"></param>
-    ''' <returns></returns>
+    ''' <param name="chAminoAcidSymbol">Amino acid symbol</param>
+    ''' <param name="elementalComposition">Dictionary where keys are element symbols and values are the element counts</param>
+    ''' <returns>True if success, False if an invalid amino acid symbol</returns>
     ''' <remarks></remarks>
-    Public Function SetAminoAcidAtomCounts(chAminoAcidSymbol As Char, udtAtomCounts As udtAtomCountsType) As Boolean
-        ' Returns True if success, False if an invalid amino acid symbol
+    Public Function SetAminoAcidAtomCounts(chAminoAcidSymbol As Char, elementalComposition As Dictionary(Of String, Integer)) As Boolean
+        Dim empiricalFormula = New clsEmpiricalFormula(elementalComposition)
+        Dim success = SetAminoAcidAtomCounts(chAminoAcidSymbol, empiricalFormula)
+        Return success
+    End Function
 
-        If Not chAminoAcidSymbol = Nothing Then
-            Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
-            If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
-                ' Invalid Index
-                Return False
-            Else
-                mAminoAcidAtomCounts(aminoAcidIndex) = udtAtomCounts
-                Return True
-            End If
+    ''' <summary>
+    ''' Defines the number of C, H, N, O, S, etc. elements in an amino acid
+    ''' </summary>
+    ''' <param name="chAminoAcidSymbol">>Amino acid symbol</param>
+    ''' <param name="empiricalFormula">Empirical formula class</param>
+    ''' <returns>True if success, False if an invalid amino acid symbol</returns>
+    ''' <remarks></remarks>
+    Public Function SetAminoAcidAtomCounts(chAminoAcidSymbol As Char, empiricalFormula As clsEmpiricalFormula) As Boolean
+
+        If chAminoAcidSymbol = Nothing Then
+            Return False
         End If
 
-        Return False
+        Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
+        If aminoAcidIndex < 0 OrElse aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX Then
+            ' Invalid Index
+            Return False
+        Else
+            mAminoAcidEmpiricalFormulas(aminoAcidIndex) = empiricalFormula
+            Return True
+        End If
 
     End Function
 
@@ -951,10 +950,9 @@ Public Class clsPeptideMassCalculator
     ''' </summary>
     ''' <param name="chAminoAcidSymbol"></param>
     ''' <param name="dblMass"></param>
-    ''' <returns></returns>
+    ''' <returns>True if success, False if an invalid amino acid symbol</returns>
     ''' <remarks></remarks>
     Public Function SetAminoAcidMass(chAminoAcidSymbol As Char, dblMass As Double) As Boolean
-        ' Returns True if success, False if an invalid amino acid symbol
 
         If Not chAminoAcidSymbol = Nothing Then
             Dim aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol)
@@ -970,6 +968,24 @@ Public Class clsPeptideMassCalculator
         Return False
 
     End Function
+
+    ''' <summary>
+    ''' Updates an entry in parallel arrays AminoAcidMasses and AminoAcidSymbols
+    ''' </summary>
+    ''' <param name="aminoAcidIndex"></param>
+    ''' <remarks></remarks>
+    Private Sub UpdateAminoAcidStatEntry(aminoAcidIndex As Byte)
+
+        ' Use Convert.ToChar to convert from Ascii code to the letter
+        Dim aminoAcidSymbol As Char = ConvertAminoAcidIndexToChar(aminoAcidIndex)
+
+        Dim empiricalFormula As clsEmpiricalFormula = Nothing
+        Dim monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, empiricalFormula)
+
+        mAminoAcidMasses(aminoAcidIndex) = monoMass
+        mAminoAcidEmpiricalFormulas(aminoAcidIndex) = empiricalFormula
+
+    End Sub
 
 End Class
 

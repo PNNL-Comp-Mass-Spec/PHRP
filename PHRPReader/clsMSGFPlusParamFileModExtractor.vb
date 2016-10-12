@@ -128,7 +128,10 @@ Public Class clsMSGFPlusParamFileModExtractor
     End Sub
 
     Private Function ComputeMass(strEmpiricalformula As String) As Double
-        ' CompositionStr (C[Num]H[Num]N[Num]O[Num]S[Num]P[Num])
+        ' Originally only C, H, N, O, S, and P were allowed
+        ' We now support any element symbol
+        '
+        ' Format is: C[Num]H[Num]N[Num]O[Num]S[Num]P[Num]
         ' 	- C (Carbon), H (Hydrogen), N (Nitrogen), O (Oxygen), S (Sulfer) and P (Phosphorus) are allowed.
         ' 	- Atom can be omitted.
         ' 	- Negative numbers are allowed.
@@ -146,17 +149,17 @@ Public Class clsMSGFPlusParamFileModExtractor
             Return 203.079376
         End If
 
-        Dim elementalComposition As Dictionary(Of String, Integer)
+        Dim empiricalFormula As clsEmpiricalFormula
 
         Try
-            elementalComposition = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(strEmpiricalformula)
+            empiricalFormula = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(strEmpiricalformula)
         Catch ex As Exception
             ReportError(ex.Message)
             Return 0
         End Try
 
         Dim unknownSymbols As List(Of String) = Nothing
-        Dim monoisotopicMass = clsPeptideMassCalculator.ComputeMonoistopicMass(elementalComposition, unknownSymbols)
+        Dim monoisotopicMass = clsPeptideMassCalculator.ComputeMonoistopicMass(empiricalFormula.ElementCounts, unknownSymbols)
 
         If Not unknownSymbols Is Nothing AndAlso unknownSymbols.Count > 0 Then
             Dim errMsg = "Error parsing empirical formula '" & strEmpiricalformula & "', "
@@ -284,7 +287,6 @@ Public Class clsMSGFPlusParamFileModExtractor
                             ' Not a number
                             ' Mod (or custom AA) is specified as an empirical formula
                             ' Compute the mass
-                            ' Note that ComputeMass only supports C, H, N, O, S, and P
                             .ModMassVal = ComputeMass(.ModMass)
                         End If
 
