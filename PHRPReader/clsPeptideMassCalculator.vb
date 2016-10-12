@@ -26,6 +26,7 @@ Imports System.Text
 Public Class clsPeptideMassCalculator
 
 #Region "Constants and Enums"
+
     Public Const NO_AFFECTED_ATOM_SYMBOL As Char = "-"c
 
     Public Const MASS_HYDROGEN As Double = 1.0078246
@@ -80,6 +81,17 @@ Public Class clsPeptideMassCalculator
     Private mRemovePrefixAndSuffixIfPresent As Boolean
 
     Private mErrorMessage As String
+
+    ''' <summary>
+    ''' Regular expression for parsing an empirical formula
+    ''' </summary>
+    Private Shared ReadOnly mAtomicFormulaRegEx As Regex
+
+    ''' <summary>
+    ''' This dictionary tracks element symbols and monoisotopic masses
+    ''' </summary>
+    Private Shared ReadOnly mElementMonoMasses As Dictionary(Of String, Double)
+
 #End Region
 
 #Region "Properties"
@@ -127,6 +139,17 @@ Public Class clsPeptideMassCalculator
 #End Region
 
     ''' <summary>
+    ''' Constructor for shared (static) variables
+    ''' </summary>
+    Shared Sub New()
+
+        mElementMonoMasses = GetElementMonoMasses()
+
+        mAtomicFormulaRegEx = GetAtomicFormulaRegEx(mElementMonoMasses)
+
+    End Sub
+
+    ''' <summary>
     ''' Constructor
     ''' </summary>
     ''' <remarks></remarks>
@@ -156,9 +179,36 @@ Public Class clsPeptideMassCalculator
     End Sub
 
     ''' <summary>
+    ''' Compute the monoisotopic mass of the compound represented by elementalComposition
+    ''' </summary>
+    ''' <param name="elementalComposition"></param>
+    ''' <param name="unknownSymbols"></param>
+    ''' <returns></returns>
+    Public Shared Function ComputeMonoistopicMass(elementalComposition As Dictionary(Of String, Integer), <Out()> ByRef unknownSymbols As List(Of String)) As Double
+
+        Dim monoisotopicMass As Double = 0
+
+        unknownSymbols = New List(Of String)
+
+        For Each elementItem In elementalComposition
+
+            Dim elementMass As Double
+            If mElementMonoMasses.TryGetValue(elementItem.Key, elementMass) Then
+                monoisotopicMass += elementItem.Value * elementMass
+            Else
+                unknownSymbols.Add(elementItem.Key)
+            End If
+
+        Next
+
+        Return monoisotopicMass
+
+    End Function
+
+    ''' <summary>
     ''' Compute the mass of peptide sequence strSequence (it cannot contain modification symbols)
     ''' </summary>
-    ''' <param name="strSequence"></param>
+    ''' <param name="strSequence">One letter amino acid symbols (no modification symbols or numbers); can have prefix and suffix letters</param>
     ''' <returns>Monoisotopic mass, or -1 if an error</returns>
     ''' <remarks>
     ''' Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True
@@ -236,13 +286,13 @@ Public Class clsPeptideMassCalculator
     ''' <summary>
     ''' Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
     ''' </summary>
-    ''' <param name="strSequence"></param>
+    ''' <param name="strSequence">One letter amino acid symbols (no modification symbols or numbers)</param>
     ''' <param name="modifiedResidues">List of modified residues</param>
     ''' <returns>The computed mass, or -1 if an error</returns>
     ''' <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
     Public Function ComputeSequenceMass(strSequence As String, modifiedResidues As List(Of udtPeptideSequenceModInfoType)) As Double
 
-        ' Note that ComputeSequenceMass will reset mErorMessage
+        ' Note that ComputeSequenceMass will reset mErrorMessage
         Dim dblMass = ComputeSequenceMass(strSequence)
 
         If dblMass >= 0 AndAlso Not modifiedResidues Is Nothing AndAlso modifiedResidues.Count > 0 Then
@@ -365,15 +415,15 @@ Public Class clsPeptideMassCalculator
     ''' <param name="elementalComposition"></param>
     ''' <returns></returns>
     ''' <remarks>Only valid for amino acids, since udtAtomCountsType only supports C, H, N, O, and S</remarks>
-    Public Shared Function ConvertElementalCompositionToAtomCounts(elementalComposition As Dictionary(Of Char, Integer)) As udtAtomCountsType
+    Public Shared Function ConvertElementalCompositionToAtomCounts(elementalComposition As Dictionary(Of String, Integer)) As udtAtomCountsType
 
         Dim atomCounts = New udtAtomCountsType()
 
         For Each elementItem In elementalComposition
 
-            Dim elementSymbol As Char = elementItem.Key
+            Dim elementSymbol As String = elementItem.Key
 
-            Select Case Char.ToUpper(elementSymbol)
+            Select Case elementSymbol
                 Case "C"c : atomCounts.CountC = elementItem.Value
                 Case "H"c : atomCounts.CountH = elementItem.Value
                 Case "N"c : atomCounts.CountN = elementItem.Value
@@ -381,7 +431,7 @@ Public Class clsPeptideMassCalculator
                 Case "S"c : atomCounts.CountS = elementItem.Value
                 Case Else
                     ' Unknown element
-                    Throw New Exception("Error parsing items in elementalComposition, unknown element " & elementItem.Key & "; must be C, H, N, O, or S")
+                    Throw New Exception("Error parsing items in elementalComposition, unknown element " & elementSymbol & "; must be C, H, N, O, or S")
             End Select
         Next
 
@@ -469,7 +519,12 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
-    Private Function CountAtoms(ByRef strSequence As String) As udtAtomCountsType
+    ''' <summary>
+    ''' Convert an amino acid sequence into an empirical formula
+    ''' </summary>
+    ''' <param name="strSequence">One letter amino acid symbols (no modification symbols or numbers)</param>
+    ''' <returns></returns>
+    Private Function CountAtoms(strSequence As String) As udtAtomCountsType
 
         Dim atomCounts = New udtAtomCountsType()
 
@@ -574,6 +629,40 @@ Public Class clsPeptideMassCalculator
 
     End Function
 
+    ''' <summary>
+    ''' Create a regex for parsing an empirical formula that optionally contains element counts and optionally contains plus or minus signs
+    ''' Examples of supported empirical formulas:
+    '''  CHNOS
+    '''  C3H3NOS4
+    '''  CH23NO-5S+4
+    ''' </summary>
+    ''' <param name="elementMonoMasses"></param>
+    ''' <returns>RegEx with named capture groups ElementSymbol and ElementCount</returns>
+    Private Shared Function GetAtomicFormulaRegEx(elementMonoMasses As Dictionary(Of String, Double)) As Regex
+
+        Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline
+
+        Dim sbRegEx = New StringBuilder()
+
+        sbRegEx.Append("(?<ElementSymbol>")
+
+        For Each element In elementMonoMasses
+            sbRegEx.Append(element.Key & "|")
+        Next
+
+        ' Remove the trailing vertical bar
+        sbRegEx.Remove(sbRegEx.Length - 1, 1)
+
+        sbRegEx.Append(")")
+
+
+        ' RegEx will be of the form: (?<ElementSymbol>H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al)(?<ElementCount>[+-]?\d*)
+        Dim reAtomicFormulaRegEx = New Regex(sbRegEx.ToString() & "(?<ElementCount>[+-]?\d*)", REGEX_OPTIONS)
+
+        Return reAtomicFormulaRegEx
+
+    End Function
+
     Private Function GetDefaultAminoAcidMass(aminoAcidSymbol As Char, <Out> ByRef udtAtomCounts As udtAtomCountsType) As Double
 
         ' These monoisotopic masses come from those traditionally used in DMS
@@ -649,42 +738,79 @@ Public Class clsPeptideMassCalculator
     End Function
 
     ''' <summary>
+    ''' Return a dictionary of element symbols and element masses
+    ''' </summary>
+    ''' <returns></returns>
+    Private Shared Function GetElementMonoMasses() As Dictionary(Of String, Double)
+        Dim elementMonoMasses = New Dictionary(Of String, Double) From {
+            {"H", MASS_HYDROGEN}, {"He", 4.0026029}, {"Li", 7.016005}, {"Be", 9.012183},
+            {"B", 11.009305}, {"C", 12}, {"N", 14.003074}, {"O", MASS_OXYGEN},
+            {"F", 18.9984032}, {"Ne", 19.992439}, {"Na", 22.98977}, {"Mg", 23.98505},
+            {"Al", 26.981541}, {"Si", 27.976928}, {"P", 30.973763}, {"S", 31.972072},
+            {"Cl", 34.968853}, {"Ar", 39.962383}, {"K", 38.963708}, {"Ca", 39.962591},
+            {"Sc", 44.955914}, {"Ti", 47.947947}, {"V", 50.943963}, {"Cr", 51.94051},
+            {"Mn", 54.938046}, {"Fe", 55.934939}, {"Co", 58.933198}, {"Ni", 57.935347},
+            {"Cu", 62.929599}, {"Zn", 63.929145}, {"Ga", 68.925581}, {"Ge", 71.92208},
+            {"As", 74.921596}, {"Se", 79.916521}, {"Br", 78.918336}, {"Kr", 83.911506},
+            {"Rb", 84.9118}, {"Sr", 87.905625}, {"Y", 88.905856}, {"Zr", 89.904708},
+            {"Nb", 92.906378}, {"Mo", 97.905405}, {"Tc", 98}, {"Ru", 101.90434},
+            {"Rh", 102.905503}, {"Pd", 105.903475}, {"Ag", 106.905095}, {"Cd", 113.903361},
+            {"In", 114.903875}, {"Sn", 119.902199}, {"Sb", 120.903824}, {"Te", 129.906229},
+            {"I", 126.904477}, {"Xe", 131.904148}, {"Cs", 132.905433}, {"Ba", 137.905236},
+            {"La", 138.906355}, {"Ce", 139.905442}, {"Pr", 140.907657}, {"Nd", 141.907731},
+            {"Pm", 145}, {"Sm", 151.919741}, {"Eu", 152.921243}, {"Gd", 157.924111},
+            {"Tb", 158.92535}, {"Dy", 163.929183}, {"Ho", 164.930332}, {"Er", 165.930305},
+            {"Tm", 168.934225}, {"Yb", 173.938873}, {"Lu", 174.940785}, {"Hf", 179.946561},
+            {"Ta", 180.948014}, {"W", 183.950953}, {"Re", 186.955765}, {"Os", 191.960603},
+            {"Ir", 192.962942}, {"Pt", 194.964785}, {"Au", 196.96656}, {"Hg", 201.970632},
+            {"Tl", 204.97441}, {"Pb", 207.976641}, {"Bi", 208.980388}, {"Po", 209},
+            {"At", 210}, {"Rn", 222}, {"Fr", 223}, {"Ra", 227},
+            {"Ac", 227}, {"Th", 232.038054}, {"Pa", 231}, {"U", 238.050786},
+            {"Np", 237}, {"Pu", 244}, {"Am", 243}, {"Cm", 247},
+            {"Bk", 247}, {"Cf", 251}, {"Es", 252}, {"Fm", 257},
+            {"Md", 258}, {"No", 269}, {"Lr", 260}
+        }
+
+        Return elementMonoMasses
+    End Function
+
+    ''' <summary>
     ''' Parse the given empirical formula to return a dictionary of the elements
-    ''' IMPORTANT: Only supports C, H, N, O, S, and P
+    ''' Examples of supported empirical formulas:
+    '''  CHNOS
+    '''  C3H3NOS4
+    '''  CH23NO-5S+4
     ''' </summary>
     ''' <param name="strEmpiricalformula"></param>
     ''' <returns>Dictionary where keys are element symbols and values are the element counts</returns>
-    Public Shared Function GetEmpiricalFormulaComponents(strEmpiricalformula As String) As Dictionary(Of Char, Integer)
-
-        Const REGEX_OPTIONS As RegexOptions = RegexOptions.Compiled Or RegexOptions.Singleline
+    Public Shared Function GetEmpiricalFormulaComponents(strEmpiricalformula As String) As Dictionary(Of String, Integer)
 
         ' Originally MSGF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
-        ' It now allows for any element, but this function still only supports C, H, N, O, S, and P
-        Static reAtomicFormulaRegEx As New Regex("[CHNOSP][+-]?\d*", REGEX_OPTIONS)
-        Dim reMatches As MatchCollection = reAtomicFormulaRegEx.Matches(strEmpiricalformula)
+        ' It now allows for any element
 
-        Dim elementalComposition = New Dictionary(Of Char, Integer)
+        Dim reMatches As MatchCollection = mAtomicFormulaRegEx.Matches(strEmpiricalformula)
+
+        Dim elementalComposition = New Dictionary(Of String, Integer)
 
         If reMatches.Count > 0 Then
 
             For Each reMatch As Match In reMatches
-                Dim strElement = reMatch.Value.Chars(0)
-                Dim intCount As Integer
 
-                If reMatch.Value.Length > 1 Then
+                Dim elementSymbol = reMatch.Groups("ElementSymbol").ToString()
+                Dim elementCountText = reMatch.Groups("ElementCount").ToString()
 
-                    If Not Integer.TryParse(reMatch.Value.Substring(1), intCount) Then
-                        Throw New Exception("Error parsing empirical formula '" & strEmpiricalformula & "', number not found in " & reMatch.Value)
+                Dim elementCount = 1
+                If Not String.IsNullOrEmpty(elementCountText) AndAlso elementCountText.Length > 0 Then
+                    If Not Integer.TryParse(elementCountText, elementCount) Then
+                        Throw New Exception("Error parsing empirical formula '" & strEmpiricalformula & "', number not found in " & elementCountText)
                     End If
-                Else
-                    intCount = 1
                 End If
 
                 Dim intExistingCount As Integer
-                If elementalComposition.TryGetValue(strElement, intExistingCount) Then
-                    elementalComposition(strElement) = intExistingCount + intCount
+                If elementalComposition.TryGetValue(elementSymbol, intExistingCount) Then
+                    elementalComposition(elementSymbol) = intExistingCount + elementCount
                 Else
-                    elementalComposition.Add(strElement, intCount)
+                    elementalComposition.Add(elementSymbol, elementCount)
                 End If
 
             Next
@@ -844,5 +970,6 @@ Public Class clsPeptideMassCalculator
         Return False
 
     End Function
+
 End Class
 

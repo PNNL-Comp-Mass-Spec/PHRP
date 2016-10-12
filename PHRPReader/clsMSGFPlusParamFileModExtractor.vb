@@ -146,7 +146,7 @@ Public Class clsMSGFPlusParamFileModExtractor
             Return 203.079376
         End If
 
-        Dim elementalComposition As Dictionary(Of Char, Integer)
+        Dim elementalComposition As Dictionary(Of String, Integer)
 
         Try
             elementalComposition = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(strEmpiricalformula)
@@ -155,27 +155,21 @@ Public Class clsMSGFPlusParamFileModExtractor
             Return 0
         End Try
 
-        Dim dblMass As Double = 0
+        Dim unknownSymbols As List(Of String) = Nothing
+        Dim monoisotopicMass = clsPeptideMassCalculator.ComputeMonoistopicMass(elementalComposition, unknownSymbols)
 
-        For Each elementItem In elementalComposition
+        If Not unknownSymbols Is Nothing AndAlso unknownSymbols.Count > 0 Then
+            Dim errMsg = "Error parsing empirical formula '" & strEmpiricalformula & "', "
+            If unknownSymbols.Count = 1 Then
+                ReportError(errMsg & "unknown element " & unknownSymbols.First)
+            Else
+                ReportError(errMsg & "unknown elements " & String.Join(", ", unknownSymbols))
+            End If
 
-            Dim elementSymbol As Char = elementItem.Key
+            Return 0
+        End If
 
-            Select Case Char.ToUpper(elementSymbol)
-                Case "C"c : dblMass += elementItem.Value * 12
-                Case "H"c : dblMass += elementItem.Value * clsPeptideMassCalculator.MASS_HYDROGEN
-                Case "N"c : dblMass += elementItem.Value * 14.003074
-                Case "O"c : dblMass += elementItem.Value * 15.994915
-                Case "S"c : dblMass += elementItem.Value * 31.972072
-                Case "P"c : dblMass += elementItem.Value * 30.973763
-                Case Else
-                    ' Unknown element
-                    ReportError("Error parsing empirical formula '" & strEmpiricalformula & "', unknown element " & elementItem.Key & "; must be C, H, N, O, S, or P")
-                    Return 0
-            End Select
-        Next
-
-        Return dblMass
+        Return monoisotopicMass
 
     End Function
 
