@@ -110,10 +110,10 @@ Public Class PeptideMassCalculatorUnitTests
     End Sub
 
     <Test()>
-    <TestCase(1000, 1, 0, 999)>
-    <TestCase(1000, 3, 1, 331)>
-    <TestCase(700, 0, 2, 351)>
-    <TestCase(2400, 2, 5, 961)>
+    <TestCase(1000, 1, 0, 998.99272)>
+    <TestCase(1000, 3, 1, 2997.98545)>
+    <TestCase(700, 0, 2, 351.00728)>
+    <TestCase(2400, 2, 5, 960.60437)>
     Public Sub TestConvoluteMass(massMz As Double, currentCharge As Integer, newCharge As Integer, expectedMz As Double)
 
         Dim newMz = mPeptideMassCalculator.ConvoluteMass(massMz, currentCharge, newCharge)
@@ -128,10 +128,10 @@ Public Class PeptideMassCalculatorUnitTests
     End Sub
 
     <Test()>
-    <TestCase(1000, 1, 0, 999)>
-    <TestCase(1000, 3, 1, 331)>
-    <TestCase(700, 0, 2, 351)>
-    <TestCase(2400, 2, 5, 961)>
+    <TestCase(1000, 1, 0, 977.01078)>
+    <TestCase(1000, 3, 1, 2954.02156)>
+    <TestCase(700, 0, 2, 372.9892)>
+    <TestCase(2400, 2, 5, 973.79353)>
     Public Sub TestConvoluteMassNa(massMz As Double, currentCharge As Integer, newCharge As Integer, expectedMz As Double)
         Const MASS_SODIUM = 22.98922189
 
@@ -193,17 +193,17 @@ Public Class PeptideMassCalculatorUnitTests
     <Test()>
     <TestCase(0.005, 1000, 5)>
     <TestCase(0.015, 1000, 15)>
-    <TestCase(0.005, 500, 2.5)>
-    <TestCase(0.001, 500, 0.2)>
-    <TestCase(0.005, 2300, 2.17)>
-    <TestCase(0.0012, 2300, 0.52)>
+    <TestCase(0.005, 500, 10)>
+    <TestCase(0.001, 500, 2)>
+    <TestCase(0.005, 2300, 2.17391)>
+    <TestCase(0.0012, 2300, 0.52174)>
     Public Sub TestPPMConversion(massToConvert As Double, currentMz As Double, expectedPPM As Double)
 
         Dim convertedPPM = clsPeptideMassCalculator.MassToPPM(massToConvert, currentMz)
 
         Dim reconvertedMass = clsPeptideMassCalculator.PPMToMass(convertedPPM, currentMz)
 
-        Console.WriteLine("DelM of {0} Da converts to {1} ppm at {2} m/z ", massToConvert, convertedPPM, currentMz)
+        Console.WriteLine("DelM of {0} Da converts to {1:F5} ppm at {2:F5} m/z ", massToConvert, convertedPPM, currentMz)
 
         Assert.AreEqual(expectedPPM, convertedPPM, 0.001, "PPM Conversion error")
 
@@ -212,15 +212,15 @@ Public Class PeptideMassCalculatorUnitTests
     End Sub
 
     <Test()>
-    <TestCase(1200, 2, 2398, 1200)>
-    <TestCase(1200, 3, 3597, 1799.5)>
+    <TestCase(1200, 2, 1198.99272, 600.5036)>
+    <TestCase(1200, 3, 1198.99272, 400.67152)>
     Public Sub TestMassConversions(dblMH As Double, chargeState As Double, expectedMonoMass As Double, expectedMz As Double)
 
         Dim computedMonoMass = mPeptideMassCalculator.MHToMonoisotopicMass(dblMH)
 
         Dim computedMz = mPeptideMassCalculator.MonoisotopicMassToMZ(computedMonoMass, chargeState)
 
-        Console.WriteLine("{0} MH converts to {1} Da and {2} m/z at charge {3}", dblMH, computedMonoMass, computedMz, chargeState)
+        Console.WriteLine("{0} MH converts to {1:F5} Da and {2:F5} m/z at charge {3}", dblMH, computedMonoMass, computedMz, chargeState)
 
         Assert.AreEqual(expectedMonoMass, computedMonoMass, 0.001, "Monoisotopic mass mismatch")
         Assert.AreEqual(expectedMz, computedMz, 0.001, "M/Z mismatch")
