@@ -1,5 +1,9 @@
 PHRPReader.dll Revision History
 
+Version 1.1.6128; October 11, 2016
+	- Add support for option ChargeCarrierMass in the MSGF+ parameter file
+	- Filter MSGF+ results while reading the .TSV file to create synopsis and first hits files
+
 Version 1.1.5977; May 13, 2016
 	- Improved support for custom amino acid definitions in MSGF+ parameter files
 
