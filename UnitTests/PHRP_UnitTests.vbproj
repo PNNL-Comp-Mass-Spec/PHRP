@@ -81,6 +81,7 @@
   <ItemGroup>
     <Compile Include="PeptideCleavageStateCalculatorTests.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="PeptideMassCalculatorUnitTests.vb" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PeptideHitResultsProcessor\PeptideHitResultsProcessor.vbproj">
