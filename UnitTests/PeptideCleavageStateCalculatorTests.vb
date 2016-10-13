@@ -68,6 +68,23 @@ Public Class PeptideCleavageStateCalculatorTests
     <TestCase("K.RSSTFIGNSTAIQELFK.R", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
     <TestCase("K.MSSTFIGNSTAIQELFD.R", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial)>
     <TestCase("F.MSSTFIGNSTAIQELFK.R", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial)>
+    <TestCase("K.ACDEFGR.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
+    <TestCase("R.ACDEFGR.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
+    <TestCase("-.ACDEFGR.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
+    <TestCase("R.ACDEFGH.-", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
+    <TestCase("-.ACDEFG.-", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
+    <TestCase("-.ACDEFG.-", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
+    <TestCase("K.ACDEFGR*.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
+    <TestCase("-.ACDEFGR*.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)>
+    <TestCase("K.ACDEFGH.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial)>
+    <TestCase("L.ACDEFGR.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial)>
+    <TestCase("K.ACDEFGR.P", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial)>
+    <TestCase("K.PCDEFGR.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial)>
+    <TestCase("L.ACDEFGH.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific)>
+    <TestCase("-.ACDEFGH.S", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific)>
+    <TestCase("L.ACDEFGH.-", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific)>
+    <TestCase("L.ACDEFGR.P", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific)>
+    <TestCase("K.PCDEFGR.P", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific)>
     Public Sub TestComputeCleavageState(sequence As String, expectedCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants)
 
         Dim cleavageState = mCleavageStateCalculator.ComputeCleavageState(sequence)
