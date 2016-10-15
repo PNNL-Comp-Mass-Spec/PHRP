@@ -24,9 +24,9 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "November 18, 2015"
+        MyBase.mFileDate = "October 14, 2016"
 
-        mGetModName = New Regex("(.+) (\d+)", RegexOptions.Compiled)
+        mGetModName = New Regex("(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled)
     End Sub
 
 #Region "Constants and Enums"
@@ -190,12 +190,12 @@ Public Class clsMSPathFinderResultsProcessor
             Dim reMatch = mGetModName.Match(modEntry)
 
             If Not reMatch.Success Then
-                ReportError("Mod entry does not have a name separated by a number: " & modEntry, False)
+                ReportError("Invalid MSPathFinder mod entry format; must be a name then a space then a number: " & modEntry, False)
                 Continue For
             End If
 
-            Dim modName = reMatch.Groups(1).Value
-            Dim residueNumber = reMatch.Groups(2).Value
+            Dim modName = reMatch.Groups("ModName").Value
+            Dim residueNumber = reMatch.Groups("ResidueNumber").Value
 
             For Each modDef As clsMSGFPlusParamFileModExtractor.udtModInfoType In lstModInfo
                 If String.Equals(modDef.ModName, modName, StringComparison.InvariantCultureIgnoreCase) Then
@@ -316,7 +316,7 @@ Public Class clsMSPathFinderResultsProcessor
                 ReportError("Mod entry does not have a name separated by a number: " & modEntry, True)
             End If
 
-            Dim modName = reMatch.Groups(1).Value
+            Dim modName = reMatch.Groups("ModName").Value
 
             For Each modDef As clsMSGFPlusParamFileModExtractor.udtModInfoType In lstModInfo
                 If String.Equals(modDef.ModName, modName, StringComparison.InvariantCultureIgnoreCase) Then
@@ -327,7 +327,7 @@ Public Class clsMSPathFinderResultsProcessor
             Next
 
             If Not matchFound Then
-                ReportError("Mod name " & modName & " was not defined in the MSPathFinder parameter file; cannot determine mod mass", True)
+                ReportError("Mod name " & modName & " was not defined in the MSPathFinder parameter file; cannot determine the mod mass", True)
             End If
         Next
 
@@ -1030,7 +1030,7 @@ Public Class clsMSPathFinderResultsProcessor
 
                 .PeptideDeltaMass = "0"
 
-                ' Note that MSPathFinder sequences don't actually have mod symbols; that informtion is tracked via strModifications
+                ' Note that MSPathFinder sequences don't actually have mod symbols; that information is tracked via objSearchResult.Modifications
 
                 ' Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 .SetPeptideSequenceWithMods(strPeptideSequence, True, True)
@@ -1045,8 +1045,6 @@ Public Class clsMSPathFinderResultsProcessor
             With objSearchResult
 
                 ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
-                ' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
                 .ComputePeptideCleavageStateInProtein()
 
                 ' Read the remaining data values
