@@ -45,10 +45,10 @@ Public MustInherit Class clsPHRPParser
 
     Protected mModInfo As List(Of clsModificationDefinition)
 
-    Private ReadOnly mResultToSeqMap As SortedList(Of Integer, Integer)
-    Private ReadOnly mSeqInfo As SortedList(Of Integer, clsSeqInfo)
-    Private ReadOnly mSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
-    Private ReadOnly mPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
+    Private mResultToSeqMap As SortedList(Of Integer, Integer)
+    Private mSeqInfo As SortedList(Of Integer, clsSeqInfo)
+    Private mSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
+    Private mPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
 
     ' This List tracks the Protein Names for each ResultID
     Protected ReadOnly mResultIDToProteins As SortedList(Of Integer, List(Of String))
@@ -224,12 +224,6 @@ Public MustInherit Class clsPHRPParser
         mErrorMessages = New List(Of String)
         mWarningMessages = New List(Of String)
 
-        ' Initialize the tracking lists
-        mResultToSeqMap = New SortedList(Of Integer, Integer)
-        mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
-        mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
-        mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
-
         mResultIDToProteins = New SortedList(Of Integer, List(Of String))
 
         mCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
@@ -254,12 +248,6 @@ Public MustInherit Class clsPHRPParser
 
         mErrorMessages = New List(Of String)
         mWarningMessages = New List(Of String)
-
-        ' Initialize the tracking lists
-        mResultToSeqMap = New SortedList(Of Integer, Integer)
-        mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
-        mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
-        mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
 
         mResultIDToProteins = New SortedList(Of Integer, List(Of String))
 
@@ -320,6 +308,13 @@ Public MustInherit Class clsPHRPParser
         ' Initialize the column mapping object
         ' Using a case-insensitive comparer
         mColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+
+        ' Initialize the tracking lists
+        ' These will get updated via the call to objReader.GetProteinMapping
+        mResultToSeqMap = New SortedList(Of Integer, Integer)
+        mSeqInfo = New SortedList(Of Integer, clsSeqInfo)
+        mSeqToProteinMap = New SortedList(Of Integer, List(Of clsProteinInfo))
+        mPepToProteinMap = New Dictionary(Of String, clsPepToProteinMapInfo)()
 
         If startupOptions.LoadModsAndSeqInfo Then
             ' Read the ModSummary file (if it exists)
