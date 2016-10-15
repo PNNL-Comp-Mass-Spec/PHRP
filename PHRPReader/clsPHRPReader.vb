@@ -94,9 +94,9 @@ Public Class clsPHRPReader
     Private mModSummaryFileLoaded As Boolean
 
     ''' <summary>
-    ''' When set to true, then calls to MoveNext will read the next data line, but will skip several additional processing steps for performance reasons
+    ''' When set to true, calls to MoveNext will read the next data line, but will skip several additional processing steps for performance reasons
     ''' </summary>
-    ''' <remarks>If the peptide is a peptide of interest, then call FinalizeCurrentPSM</remarks>
+    ''' <remarks>If the peptide is a peptide of interest, you must call FinalizeCurrentPSM after calling .MoveNext()</remarks>
     Private mFastReadMode As Boolean
 
     Private mSourceFile As StreamReader

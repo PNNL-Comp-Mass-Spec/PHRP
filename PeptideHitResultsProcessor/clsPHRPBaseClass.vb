@@ -37,7 +37,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <remarks></remarks>
     Public Sub New()
-        mFileDate = "October 12, 2016"
+        mFileDate = "October 14, 2016"
 
         mPeptideSeqMassCalculator = New clsPeptideMassCalculator() With {
             .ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON
@@ -145,11 +145,19 @@ Public MustInherit Class clsPHRPBaseClass
         Dim ModificationMass As Double
         Dim TargetResidues As String
         Public ModificationType As clsModificationDefinition.eModificationTypeConstants
+
+        Public Overrides Function ToString() As String
+            Return ModificationType.ToString() & ": " & ModificationMass & " @ " & TargetResidues
+        End Function
     End Structure
 
     Friend Structure udtModNameAndResidueLocType
         Dim ModName As String
         Dim ResidueLocInPeptide As Integer
+
+        Public Overrides Function ToString() As String
+            Return ResidueLocInPeptide & ": " & ModName
+        End Function
     End Structure
 
     Protected Structure udtPepToProteinMappingType
@@ -157,6 +165,10 @@ Public MustInherit Class clsPHRPBaseClass
         Public Protein As String
         Public ResidueStart As Integer
         Public ResidueEnd As Integer
+
+        Public Overrides Function ToString() As String
+            Return Peptide & ", " & Protein
+        End Function
     End Structure
 
 #End Region
@@ -916,13 +928,11 @@ Public MustInherit Class clsPHRPBaseClass
                     ' Delete the interim results file
                     DeleteFileIgnoreErrors(strResultsFilePath)
 
-
                 Next
 
             End Using
 
             objPeptideToProteinMapper.CloseLogFileNow()
-
 
         Catch ex As Exception
             SetErrorMessage("Error in CreatePepToProteinMapFile:" & ex.Message)

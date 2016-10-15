@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.6131; October 14, 2016
+	- Fix bug caused by changing class level SeqInfo objects to ReadOnly
+
 Version 1.1.6128; October 11, 2016
 	- Add support for option ChargeCarrierMass in the MSGF+ parameter file
 	- Filter MSGF+ results while reading the .TSV file to create synopsis and first hits files
