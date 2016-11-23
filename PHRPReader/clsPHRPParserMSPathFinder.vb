@@ -213,7 +213,7 @@ Public Class clsPHRPParserMSPathFinder
 
         blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams, ePeptideHitResultType.MSPathFinder)
 
-        ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+        ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams)
 
         Return blnSuccess
 

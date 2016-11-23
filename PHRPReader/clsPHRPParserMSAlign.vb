@@ -242,7 +242,7 @@ Public Class clsPHRPParserMSAlign
 
         blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
 
-        ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+        ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams)
 
         Return blnSuccess
 

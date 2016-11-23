@@ -265,7 +265,7 @@ Public Class clsPHRPParserInspect
 
         blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
 
-        ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+        ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams)
 
         Return blnSuccess
 

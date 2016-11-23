@@ -429,7 +429,7 @@ Public Class clsPHRPParserXTandem
             ReportError("Error in ParseXTandemParamFile: " & ex.Message)
         End Try
 
-        ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+        ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams)
 
         Return blnSuccess
 

@@ -347,7 +347,7 @@ Public Class clsPHRPParserMSGFDB
 
         blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams)
 
-        ReadSearchEngineVersion(mInputFolderPath, mPeptideHitResultType, objSearchEngineParams)
+        ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams)
 
         Return blnSuccess
 
