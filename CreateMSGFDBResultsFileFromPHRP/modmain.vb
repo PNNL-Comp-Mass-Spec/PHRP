@@ -90,10 +90,8 @@ Module modMain
 
     Private Function ConvertFile() As Boolean
 
-        Dim fiInputFile As FileInfo
-
         Try
-            fiInputFile = New FileInfo(mInputFilePath)
+            Dim fiInputFile = New FileInfo(mInputFilePath)
 
             If Not fiInputFile.Exists Then
                 ShowErrorMessage("Input file not found: " + fiInputFile.FullName)
@@ -119,6 +117,8 @@ Module modMain
                 Return False
             End If
 
+            Dim oMassCalculator = New clsPeptideMassCalculator()
+
             Using swOutFile = New StreamWriter(New FileStream(mOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
 
                 Dim lstValues = New List(Of String)
@@ -143,7 +143,7 @@ Module modMain
                     lstValues.Add("index=" & intPSMsRead)                                                           ' SpecID
                     lstValues.Add(oPsm.ScanNumber.ToString())                                                       ' ScanNum
                     lstValues.Add(oPsm.CollisionMode)                                                               ' FragMethod
-                    lstValues.Add(GetPrecursorMZ(oPsm))                                                             ' Precursor m/z
+                    lstValues.Add(GetPrecursorMZ(oMassCalculator, oPsm))                                                             ' Precursor m/z
 
                     strIsotopeError = GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_Isotope_Error, "0")
                     If strIsotopeError = "0" And intIsotopeErrorComputed <> 0 Then
@@ -157,7 +157,7 @@ Module modMain
                     lstValues.Add(oPsm.ProteinFirst)                                                                ' Protein
                     lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore, "0"))                 ' DeNovoScore
                     lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, "0"))                   ' MSGFScore
-                    lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue, "0"))           ' SpecEValue
+                    lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue, "0"))           ' SpecEValue
                     lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_EValue, "0"))                      ' EValue
                     lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_QValue, "0"))                      ' QValue
                     lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_PepQValue, "0"))                   ' PepQValue
@@ -232,9 +232,8 @@ Module modMain
         Return dblMassErrorPPM.ToString("0.0000")
     End Function
 
-    Private Function GetPrecursorMZ(oPsm As clsPSM) As String
-        Return clsPeptideMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString()
-
+    Private Function GetPrecursorMZ(oMassCalculator As clsPeptideMassCalculator, oPsm As clsPSM) As String
+        Return oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString()
     End Function
 
     Private Function GetScore(oPsm As clsPSM, strScoreName As String, strValueIfMissing As String) As String
