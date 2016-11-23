@@ -146,6 +146,14 @@ Module modMain
         mPHRPReader.EchoMessagesToConsole = False
         mPHRPReader.SkipDuplicatePSMs = blnSkipDuplicates
 
+        ' Check for any load errors
+        If mPHRPReader.ErrorMessages.Count > 0 Then
+            Console.WriteLine("Error(s) instantiating the reader:")
+            For Each errorMessage In mPHRPReader.ErrorMessages
+                Console.WriteLine("  " & errorMessage)
+            Next
+        End If
+
         Const fastReadEnabled = True
         mPHRPReader.FastReadMode = fastReadEnabled
 
@@ -189,7 +197,7 @@ Module modMain
             lstValues.Add("index=" & intPSMsRead)                                                           ' SpecID
             lstValues.Add(oPsm.ScanNumber.ToString())                                                       ' ScanNum
             lstValues.Add(oPsm.CollisionMode)                                                               ' FragMethod
-            lstValues.Add(clsPeptideMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString())      ' Precursor m/z
+            lstValues.Add(oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString())      ' Precursor m/z
 
             lstValues.Add(strMassErrorPPM)                                                                  ' PrecursorError(ppm)
             lstValues.Add(oPsm.Charge.ToString())                                                           ' Charge
@@ -225,13 +233,13 @@ Module modMain
 
             lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_PValue, "0"))           ' PValue
             lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_EValue, "0"))           ' EValue
-            lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecEValue, "0"))           ' SpecEValue
+            lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, "0"))           ' SpecEValue
             lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_FDR, "1"))              ' FDR
 
             If oPsm.PeptideCleanSequence = "QQIEESTSDYDKEK" Then
                 Console.WriteLine(oPsm.Peptide & " in scan " & oPsm.ScanNumber)
 
-                Dim parentIonMZ = clsPeptideMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge)
+                Dim parentIonMZ = oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge)
 
                 Console.WriteLine("ParentIonMZ   = " & parentIonMZ)
                 Console.WriteLine("PeptideWithNumericMods   = " & oPsm.PeptideWithNumericMods)
