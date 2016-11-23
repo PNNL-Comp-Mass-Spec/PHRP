@@ -297,7 +297,10 @@ Public MustInherit Class clsPHRPParser
             mInputFilePath = fiFileInfo.FullName
             mInputFolderPath = fiFileInfo.DirectoryName
 
-            If String.Equals(fiFileInfo.Name, clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName), StringComparison.CurrentCultureIgnoreCase) Then
+            Dim expectedSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName)
+            expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(expectedSynopsisName, fiFileInfo.Name)
+
+            If String.Equals(fiFileInfo.Name, expectedSynopsisName, StringComparison.CurrentCultureIgnoreCase) Then
                 blnIsSynopsisFile = True
             End If
 
@@ -334,6 +337,7 @@ Public MustInherit Class clsPHRPParser
 
                 If Not String.IsNullOrEmpty(strResultToSeqMapFilePath) Then
                     strResultToSeqMapFilePath = Path.Combine(mInputFolderPath, strResultToSeqMapFilePath)
+                    strResultToSeqMapFilePath = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(strResultToSeqMapFilePath, mInputFilePath)
                     strResultToSeqMapFilePath = clsPHRPReader.AutoSwitchToFHTIfRequired(strResultToSeqMapFilePath, mInputFilePath)
 
                     If File.Exists(strResultToSeqMapFilePath) Then
@@ -687,6 +691,8 @@ Public MustInherit Class clsPHRPParser
             End If
 
             strModSummaryFilePath = Path.Combine(mInputFolderPath, strModSummaryFilePath)
+
+            strModSummaryFilePath = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(strModSummaryFilePath, mInputFilePath)
             strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, mInputFilePath)
             If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso File.Exists(strModSummaryFilePathPreferred) Then
                 strModSummaryFilePath = strModSummaryFilePathPreferred
@@ -928,7 +934,7 @@ Public MustInherit Class clsPHRPParser
     ''' <summary>
     ''' Read a Search Engine parameter file where settings are stored as key/value pairs
     ''' </summary>
-    ''' <param name="searchEngineName">Search engine name (e.g. MSGF+)</param>
+    ''' <param name="searchEngineName">Search engine name (e.g. MS-GF+)</param>
     ''' <param name="paramFilePath">Search engine parameter file path</param>
     ''' <param name="ePeptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
     ''' <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
@@ -1004,77 +1010,75 @@ Public MustInherit Class clsPHRPParser
     End Function
 
     Protected Function ReadSearchEngineVersion(
-      strFolderPath As String,
       ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
       objSearchEngineParams As clsSearchEngineParameters) As Boolean
-
-        Dim strToolVersionInfoFilePath As String
-        Dim strLineIn As String
-
-        Dim strSearchEngineVersion As String
-        Dim dtSearchDate As DateTime
-
-        Dim kvSetting As KeyValuePair(Of String, String)
-
-        Dim blnValidDate As Boolean
-        Dim blnValidVersion As Boolean
         Dim blnSuccess = False
 
         Try
             ' Read the Tool_Version_Info file to determine the analysis time and the tool version
-            strToolVersionInfoFilePath = Path.Combine(mInputFolderPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType))
+            Dim toolVersionInfoFilePath = Path.Combine(mInputFolderPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType))
 
-            If Not File.Exists(strToolVersionInfoFilePath) Then
-                ReportWarning("Tool version info file not found: " & strToolVersionInfoFilePath)
-            Else
-                strSearchEngineVersion = "Unknown"
-                dtSearchDate = New DateTime(1980, 1, 1)
-
-                Using srInFile = New StreamReader(New FileStream(strToolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-
-                    While Not srInFile.EndOfStream
-                        strLineIn = srInFile.ReadLine().TrimStart()
-
-                        ' Split the line on a colon
-                        kvSetting = ParseKeyValueSetting(strLineIn, ":"c)
-
-                        Select Case kvSetting.Key.ToLower()
-                            Case "date"
-                                blnValidDate = DateTime.TryParse(kvSetting.Value, dtSearchDate)
-
-                            Case "toolversioninfo"
-                                If Not String.IsNullOrEmpty(kvSetting.Value) Then
-                                    strSearchEngineVersion = String.Copy(kvSetting.Value)
-                                    blnValidVersion = True
-                                Else
-                                    ' The next line contains the search engine version
-                                    If Not srInFile.EndOfStream Then
-                                        strLineIn = srInFile.ReadLine().TrimStart()
-                                        strSearchEngineVersion = String.Copy(strLineIn)
-                                        blnValidVersion = True
-                                    End If
-                                End If
-                            Case Else
-                                ' Ignore the line
-                        End Select
-                    End While
-
-                End Using
-
-                If Not blnValidDate Then
-                    ReportError("Date line not found in the ToolVersionInfo file")
-                    blnSuccess = False
-                ElseIf Not blnValidVersion Then
-                    ReportError("ToolVersionInfo line not found in the ToolVersionInfo file")
-                    blnSuccess = False
-                Else
-                    blnSuccess = True
+            If Not File.Exists(toolVersionInfoFilePath) AndAlso ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSGFDB Then
+                ' This could be an older MSGF+ job; check for a _MSGFDB.txt tool version file
+                Dim alternativeVersionInfoFilePath = Path.Combine(mInputFolderPath, "Tool_Version_Info_MSGFDB.txt")
+                If File.Exists(alternativeVersionInfoFilePath) Then
+                    toolVersionInfoFilePath = alternativeVersionInfoFilePath
                 End If
-
-                objSearchEngineParams.UpdateSearchEngineVersion(strSearchEngineVersion)
-                objSearchEngineParams.UpdateSearchDate(dtSearchDate)
-
             End If
+
+            If Not File.Exists(toolVersionInfoFilePath) Then
+                ReportWarning("Tool version info file not found: " & toolVersionInfoFilePath)
+                Return False
+            End If
+
+            Dim strSearchEngineVersion = "Unknown"
+            Dim dtSearchDate = New DateTime(1980, 1, 1)
+            Dim blnValidDate = False
+            Dim blnValidVersion = False
+
+            Using srInFile = New StreamReader(New FileStream(toolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+
+                While Not srInFile.EndOfStream
+                    Dim strLineIn = srInFile.ReadLine().TrimStart()
+
+                    ' Split the line on a colon
+                    Dim kvSetting = ParseKeyValueSetting(strLineIn, ":"c)
+
+                    Select Case kvSetting.Key.ToLower()
+                        Case "date"
+                            blnValidDate = DateTime.TryParse(kvSetting.Value, dtSearchDate)
+
+                        Case "toolversioninfo"
+                            If Not String.IsNullOrEmpty(kvSetting.Value) Then
+                                strSearchEngineVersion = String.Copy(kvSetting.Value)
+                                blnValidVersion = True
+                            Else
+                                ' The next line contains the search engine version
+                                If Not srInFile.EndOfStream Then
+                                    strLineIn = srInFile.ReadLine().TrimStart()
+                                    strSearchEngineVersion = String.Copy(strLineIn)
+                                    blnValidVersion = True
+                                End If
+                            End If
+                        Case Else
+                            ' Ignore the line
+                    End Select
+                End While
+
+            End Using
+
+            If Not blnValidDate Then
+                ReportError("Date line not found in the ToolVersionInfo file")
+                blnSuccess = False
+            ElseIf Not blnValidVersion Then
+                ReportError("ToolVersionInfo line not found in the ToolVersionInfo file")
+                blnSuccess = False
+            Else
+                blnSuccess = True
+            End If
+
+            objSearchEngineParams.UpdateSearchEngineVersion(strSearchEngineVersion)
+            objSearchEngineParams.UpdateSearchDate(dtSearchDate)
 
         Catch ex As Exception
             ReportError("Error in ReadSearchEngineVersion: " & ex.Message)

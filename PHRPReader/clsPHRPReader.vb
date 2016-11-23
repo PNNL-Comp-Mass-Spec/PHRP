@@ -339,7 +339,7 @@ Public Class clsPHRPReader
     End Property
 
     ''' <summary>
-    ''' Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB
+    ''' Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB (aka MSGF+)
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
@@ -600,25 +600,21 @@ Public Class clsPHRPReader
     ''' <remarks></remarks>
     Public Shared Function AutoSwitchToFHTIfRequired(strFilePath As String, strBasePHRPFileName As String) As String
 
-        Dim fiFileInfo As FileInfo
-        Dim intSynIndex As Integer
-        Dim strFilePathFHT As String
-
         If String.IsNullOrEmpty(strBasePHRPFileName) Then
             Return strFilePath
         End If
 
-        fiFileInfo = New FileInfo(strBasePHRPFileName)
-        If fiFileInfo.Name.ToLower().IndexOf("_fht", StringComparison.Ordinal) > 0 Then
+        Dim fiBasePHRPFile = New FileInfo(strBasePHRPFileName)
+        If fiBasePHRPFile.Name.ToLower().Contains("_fht") Then
             ' strBasePHRPFileName is first-hits-file based
 
-            fiFileInfo = New FileInfo(strFilePath)
-            intSynIndex = fiFileInfo.Name.ToLower().IndexOf("_syn", StringComparison.Ordinal)
-            If intSynIndex > 0 Then
+            Dim fiFileInfo = New FileInfo(strFilePath)
+            Dim synIndex = fiFileInfo.Name.ToLower().LastIndexOf("_syn", StringComparison.Ordinal)
+            If synIndex > 0 Then
                 ' strFilePath is synopsis-file based
                 ' Change strFilePath to contain _fht instead of _syn
 
-                strFilePathFHT = fiFileInfo.Name.Substring(0, intSynIndex) & "_fht" & fiFileInfo.Name.Substring(intSynIndex + 4)
+                Dim strFilePathFHT = fiFileInfo.Name.Substring(0, synIndex) & "_fht" & fiFileInfo.Name.Substring(synIndex + "_syn".Length)
 
                 If Path.IsPathRooted(strFilePath) Then
                     Return Path.Combine(fiFileInfo.DirectoryName, strFilePathFHT)
@@ -631,6 +627,36 @@ Public Class clsPHRPReader
         End If
 
         Return strFilePath
+    End Function
+
+    ''' <summary>
+    ''' Updates strFilePath to have _msgfdb instead of _msgfplus if strBasePHRPFileName contains _msgfdb
+    ''' </summary>
+    ''' <param name="strFilePath"></param>
+    ''' <param name="strBasePHRPFileName"></param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function AutoSwitchToLegacyMSGFDBIfRequired(strFilePath As String, strBasePHRPFileName As String) As String
+
+        Dim fiBasePHRPFile = New FileInfo(strBasePHRPFileName)
+        If fiBasePHRPFile.Name.ToLower().Contains("_msgfdb") Then
+            Dim fiFileInfo = New FileInfo(strFilePath)
+            Dim charIndex = fiFileInfo.Name.ToLower().LastIndexOf("_msgfplus", StringComparison.Ordinal)
+            If charIndex > 0 Then
+                ' strFilePath has _msgfplus but should have _msgfdb
+
+                Dim strFilePathNew = fiFileInfo.Name.Substring(0, charIndex) & "_msgfdb" & fiFileInfo.Name.Substring(charIndex + "_msgfplus".Length)
+
+                If Path.IsPathRooted(strFilePath) Then
+                    Return Path.Combine(fiFileInfo.DirectoryName, strFilePathNew)
+                Else
+                    Return strFilePathNew
+                End If
+            End If
+        End If
+
+        Return strFilePath
+
     End Function
 
     ''' <summary>
@@ -832,6 +858,7 @@ Public Class clsPHRPReader
                     mPHRPParser = New clsPHRPParserInspect(strDatasetName, mInputFilePath, mStartupOptions)
 
                 Case ePeptideHitResultType.MSGFDB
+                    ' MSGF+
                     mPHRPParser = New clsPHRPParserMSGFDB(strDatasetName, mInputFilePath, mStartupOptions)
 
                 Case ePeptideHitResultType.MSAlign
@@ -894,24 +921,24 @@ Public Class clsPHRPReader
     ''' Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified folder
     ''' If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
     ''' </summary>
-    ''' <param name="strInputFolderPath">Input folder path</param>
+    ''' <param name="inputFolderPath">Input folder path</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineBestInputFile(strInputFolderPath As String) As String
+    Public Shared Function AutoDetermineBestInputFile(inputFolderPath As String) As String
         Dim eMatchedResultType = ePeptideHitResultType.Unknown
-        Return AutoDetermineBestInputFile(strInputFolderPath, eMatchedResultType)
+        Return AutoDetermineBestInputFile(inputFolderPath, eMatchedResultType)
     End Function
 
     ''' <summary>
     ''' Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified folder
     ''' If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
     ''' </summary>
-    ''' <param name="strInputFolderPath">Input folder path</param>
+    ''' <param name="inputFolderPath">Input folder path</param>
     ''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
     Public Shared Function AutoDetermineBestInputFile(
-       strInputFolderPath As String,
+       inputFolderPath As String,
        <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
 
         ' Find candidate dataset names in strInputFolderPath
@@ -923,18 +950,22 @@ Public Class clsPHRPReader
         Dim strDataset As String
         Dim intCharIndex As Integer
 
-        If String.IsNullOrWhiteSpace(strInputFolderPath) Then
+        If String.IsNullOrWhiteSpace(inputFolderPath) Then
             Throw New DirectoryNotFoundException("Input folder path is empty")
         End If
 
-        fiInputFolder = New DirectoryInfo(strInputFolderPath)
+        fiInputFolder = New DirectoryInfo(inputFolderPath)
         If Not fiInputFolder.Exists Then
-            Throw New DirectoryNotFoundException("Input folder not found: " & strInputFolderPath)
+            Throw New DirectoryNotFoundException("Input folder not found: " & inputFolderPath)
         End If
 
         ' MSGF+
         lstFileSpec.Add(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN)
         lstFileSpec.Add(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT)
+
+        ' MSGF+ prior to November 2016
+        lstFileSpec.Add(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN))
+        lstFileSpec.Add(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT))
 
         ' X!Tandem (only has _xt.txt files)
         lstFileSpec.Add(clsPHRPParserXTandem.FILENAME_SUFFIX_SYN)
@@ -984,7 +1015,17 @@ Public Class clsPHRPReader
 
         Next
 
-        Return AutoDetermineBestInputFile(strInputFolderPath, lstDatasetNames.ToList(), eMatchedResultType)
+        If lstDatasetNames.Count = 0 Then
+            Console.WriteLine("Did not find any files matching the expected filename suffixes")
+            Console.WriteLine("Looked for the following in " & inputFolderPath)
+            For Each strFileSpec In lstFileSpec
+                Console.WriteLine("  " & strFileSpec)
+            Next
+            eMatchedResultType = ePeptideHitResultType.Unknown
+            Return String.Empty
+        End If
+
+        Return AutoDetermineBestInputFile(inputFolderPath, lstDatasetNames.ToList(), eMatchedResultType)
 
     End Function
 
@@ -1066,6 +1107,10 @@ Public Class clsPHRPReader
             ' MSGF+
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSGFDB))
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.MSGFDB))
+
+            ' MSGF+ prior to November 2016
+            lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(strDataset)), ePeptideHitResultType.MSGFDB))
+            lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(strDataset)), ePeptideHitResultType.MSGFDB))
 
             ' X!Tandem
             lstFilesToFind.Add(New KeyValuePair(Of String, ePeptideHitResultType)(clsPHRPParserXTandem.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.XTandem))
@@ -1179,36 +1224,38 @@ Public Class clsPHRPReader
                  ePeptideHitResultType.MODPlus,
                  ePeptideHitResultType.MSPathFinder
 
-                If strInputFileName.ToLower.EndsWith("_fht") OrElse strInputFileName.ToLower.EndsWith("_syn") Then
+                If strInputFileName.ToLower().EndsWith("_fht") OrElse strInputFileName.ToLower().EndsWith("_syn") Then
                     strDatasetName = strInputFileName.Substring(0, strInputFileName.Length - 4)
 
                     If eResultType = ePeptideHitResultType.Inspect Then
-                        If strDatasetName.ToLower.EndsWith("_inspect") Then
+                        If strDatasetName.ToLower().EndsWith("_inspect") Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_inspect".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MSGFDB Then
-                        If strDatasetName.ToLower.EndsWith("_msgfdb") Then
+                        If strDatasetName.ToLower().EndsWith("_msgfplus") Then
+                            strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_msgfplus".Length)
+                        ElseIf strDatasetName.ToLower().EndsWith("_msgfdb") Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_msgfdb".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MSAlign Then
-                        If strDatasetName.ToLower.EndsWith("_msalign") Then
+                        If strDatasetName.ToLower().EndsWith("_msalign") Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_msalign".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MODa Then
-                        If strDatasetName.ToLower.EndsWith("_moda") Then
+                        If strDatasetName.ToLower().EndsWith("_moda") Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_moda".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MODPlus Then
-                        If strDatasetName.ToLower.EndsWith("_modp") Then
+                        If strDatasetName.ToLower().EndsWith("_modp") Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_modp".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MSPathFinder Then
-                        If strDatasetName.ToLower.EndsWith("_mspath") Then
+                        If strDatasetName.ToLower().EndsWith("_mspath") Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_mspath".Length)
                         End If
 
@@ -1216,7 +1263,7 @@ Public Class clsPHRPReader
                 End If
 
             Case ePeptideHitResultType.XTandem
-                If strInputFileName.ToLower.EndsWith("_xt") Then
+                If strInputFileName.ToLower().EndsWith("_xt") Then
                     strDatasetName = strInputFileName.Substring(0, strInputFileName.Length - 3)
                 End If
 
@@ -1244,6 +1291,9 @@ Public Class clsPHRPReader
     ''' <remarks></remarks>
     Public Shared Function AutoDetermineResultType(strFilePath As String) As ePeptideHitResultType
 
+        Const LEGACY_MSGFPLUS_SUFFIX_SYN = "_msgfdb_syn.txt"
+        Const LEGACY_MSGFPLUS_SUFFIX_FHT = "_msgfdb_fht.txt"
+
         Dim strFilePathLCase As String
 
         Dim strHeaderLine As String
@@ -1258,6 +1308,9 @@ Public Class clsPHRPReader
                 eResultType = ePeptideHitResultType.XTandem
             Else
                 If strFilePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT) Then
+                    eResultType = ePeptideHitResultType.MSGFDB
+
+                ElseIf strFilePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_FHT) Then
                     eResultType = ePeptideHitResultType.MSGFDB
 
                 ElseIf strFilePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN) OrElse strFilePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_FHT) Then
@@ -1294,7 +1347,7 @@ Public Class clsPHRPReader
 
                                 ElseIf _
                                   LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb) OrElse
-                                  LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue) OrElse
+                                  LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue) OrElse
                                   LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore) Then
 
                                     eResultType = ePeptideHitResultType.MSGFDB
@@ -1571,6 +1624,10 @@ Public Class clsPHRPReader
             Return ""
         End If
 
+    End Function
+
+    Private Shared Function GetLegacyMSGFPlusName(msgfPlusName As String) As String
+        Return msgfPlusName.Replace("_msgfplus_", "_msgfdb_")
     End Function
 
     ''' <summary>
@@ -1862,7 +1919,8 @@ Public Class clsPHRPReader
                 strToolVersionInfoFilename = "Tool_Version_Info_Inspect.txt"
 
             Case ePeptideHitResultType.MSGFDB
-                strToolVersionInfoFilename = "Tool_Version_Info_MSGFDB.txt"
+                ' Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
+                strToolVersionInfoFilename = "Tool_Version_Info_MSGFPlus.txt"
 
             Case ePeptideHitResultType.MSAlign
                 strToolVersionInfoFilename = "Tool_Version_Info_MSAlign.txt"
@@ -1949,7 +2007,7 @@ Public Class clsPHRPReader
     ''' </summary>
     ''' <param name="strColumnName"></param>
     ''' <param name="objColumnHeaders"></param>
-    ''' <returns></returns>
+    ''' <returns>Column index, or -1 if not found</returns>
     ''' <remarks></remarks>
     Public Shared Function LookupColumnIndex(strColumnName As String, objColumnHeaders As SortedDictionary(Of String, Integer)) As Integer
 
@@ -2017,12 +2075,12 @@ Public Class clsPHRPReader
       strColumns() As String,
       strColumnName As String,
       objColumnHeaders As SortedDictionary(Of String, Integer),
-      ValueIfMissing As Integer) As Integer
+      valueIfMissing As Integer) As Integer
 
         Dim strValue As String
         Dim intValue As Integer
 
-        strValue = LookupColumnValue(strColumns, strColumnName, objColumnHeaders, ValueIfMissing.ToString)
+        strValue = LookupColumnValue(strColumns, strColumnName, objColumnHeaders, valueIfMissing.ToString)
 
         Integer.TryParse(strValue, intValue)
 
@@ -2390,6 +2448,7 @@ Public Class clsPHRPReader
         Dim blnSuccess = False
 
         Try
+            strMSGFFilePath = AutoSwitchToLegacyMSGFDBIfRequired(strMSGFFilePath, mInputFilePath)
             strMSGFFilePath = AutoSwitchToFHTIfRequired(strMSGFFilePath, mInputFilePath)
 
             If File.Exists(strMSGFFilePath) Then
@@ -2717,8 +2776,8 @@ Public Class clsPHRPReader
             strModSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName)
             strModSummaryFilePath = Path.Combine(fiFileInfo.DirectoryName, strModSummaryFilePath)
 
-            Dim strModSummaryFilePathPreferred As String
-            strModSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(strModSummaryFilePath, fiFileInfo.Name)
+            strModSummaryFilePath = AutoSwitchToLegacyMSGFDBIfRequired(strModSummaryFilePath, fiFileInfo.Name)
+            Dim strModSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(strModSummaryFilePath, fiFileInfo.Name)
             If strModSummaryFilePath <> strModSummaryFilePathPreferred AndAlso File.Exists(strModSummaryFilePathPreferred) Then
                 strModSummaryFilePath = strModSummaryFilePathPreferred
             End If

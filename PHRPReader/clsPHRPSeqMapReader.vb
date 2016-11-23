@@ -109,7 +109,7 @@ Public Class clsPHRPSeqMapReader
     ''' <param name="strDatasetName">Dataset name</param>
     ''' <param name="strInputFolderPath">Input file path</param>
     ''' <param name="ePeptideHitResultType">Peptide Hit result type</param>
-    ''' <param name="strPHRPDataFileName">The base PHRP data file name; used when calling AutoSwitchToFHTIfRequired</param>
+    ''' <param name="strPHRPDataFileName">The base PHRP data file name; used when calling AutoSwitchToLegacyMSGFDBIfRequired and AutoSwitchToFHTIfRequired</param>
     ''' <remarks></remarks>
     Public Sub New(strDatasetName As String, strInputFolderPath As String, ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType, strPHRPDataFileName As String)
         mDatasetName = strDatasetName
@@ -131,6 +131,7 @@ Public Class clsPHRPSeqMapReader
             mErrorMessage = "Unable to determine ResultToSeqMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
             Throw New Exception(mErrorMessage)
         Else
+            mResultToSeqMapFilename = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(mResultToSeqMapFilename, strPHRPDataFileName)
             mResultToSeqMapFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mResultToSeqMapFilename, strPHRPDataFileName))
         End If
 
@@ -139,6 +140,7 @@ Public Class clsPHRPSeqMapReader
             mErrorMessage = "Unable to determine SeqToProteinMap filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
             Throw New Exception(mErrorMessage)
         Else
+            mSeqToProteinMapFilename = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(mSeqToProteinMapFilename, strPHRPDataFileName)
             mSeqToProteinMapFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqToProteinMapFilename, strPHRPDataFileName))
         End If
 
@@ -147,6 +149,7 @@ Public Class clsPHRPSeqMapReader
             mErrorMessage = "Unable to determine SeqInfo filename for PeptideHitResultType: " & mPeptideHitResultType.ToString()
             Throw New Exception(mErrorMessage)
         Else
+            mSeqInfoFilename = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(mSeqInfoFilename, strPHRPDataFileName)
             mSeqInfoFilename = Path.GetFileName(clsPHRPReader.AutoSwitchToFHTIfRequired(mSeqInfoFilename, strPHRPDataFileName))
         End If
 

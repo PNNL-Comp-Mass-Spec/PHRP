@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6128; November 22, 2016
+	- PHRPReader now supports MSGF+ results files named _msgfplus in addition to _msgfdb
+
 Version 1.5.6128; October 11, 2016
 	- Filter MSGF+ results while reading the .TSV file to create synopsis and first hits files
 		- Greatly reduces memory usage for result files that have a large number of low scoring peptides and/or peptides with a large number of parent proteins

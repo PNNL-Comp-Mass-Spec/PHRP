@@ -1,5 +1,9 @@
 PHRPReader.dll Revision History
 
+Version 1.1.6170; November 22, 2016
+	- Change default name for MSGF+ results files to use _msgfplus instead of _msgfdb
+		- Still supports reading files named _msgfdb
+
 Version 1.1.6131; October 14, 2016
 	- Fix bug caused by changing class level SeqInfo objects to ReadOnly
 

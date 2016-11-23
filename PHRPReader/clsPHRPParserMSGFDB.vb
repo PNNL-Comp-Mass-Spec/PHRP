@@ -56,10 +56,12 @@ Public Class clsPHRPParserMSGFDB
 
     Public Const DATA_COLUMN_Isotope_Error = "IsotopeError"     ' Only reported by MSGF+
 
-    Public Const FILENAME_SUFFIX_SYN = "_msgfdb_syn.txt"
-    Public Const FILENAME_SUFFIX_FHT = "_msgfdb_fht.txt"
+    ' These suffixes were changed from_msgfdb to _msgfplus in November 2016
+    Public Const FILENAME_SUFFIX_SYN = "_msgfplus_syn.txt"
+    Public Const FILENAME_SUFFIX_FHT = "_msgfplus_fht.txt"
 
-    Private Const MSGFDB_SEARCH_ENGINE_NAME = "MS-GFDB"
+    ' Renamed from "MS-GFDB" to "MS-GF+" in November 2016
+    Private Const MSGFDB_SEARCH_ENGINE_NAME = "MS-GF+"
 
     Public Const CHARGE_CARRIER_MASS_PARAM_NAME As String = "ChargeCarrierMass"
 
@@ -299,15 +301,15 @@ Public Class clsPHRPParserMSGFDB
     End Function
 
     Public Shared Function GetPHRPModSummaryFileName(strDatasetName As String) As String
-        Return strDatasetName & "_msgfdb_syn_ModSummary.txt"
+        Return strDatasetName & "_msgfplus_syn_ModSummary.txt"
     End Function
 
     Public Shared Function GetPHRPPepToProteinMapFileName(strDatasetName As String) As String
-        Return strDatasetName & "_msgfdb_PepToProtMapMTS.txt"
+        Return strDatasetName & "_msgfplus_PepToProtMapMTS.txt"
     End Function
 
     Public Shared Function GetPHRPProteinModsFileName(strDatasetName As String) As String
-        Return strDatasetName & "_msgfdb_syn_ProteinMods.txt"
+        Return strDatasetName & "_msgfplus_syn_ProteinMods.txt"
     End Function
 
     Public Shared Function GetPHRPSynopsisFileName(strDatasetName As String) As String
@@ -315,15 +317,15 @@ Public Class clsPHRPParserMSGFDB
     End Function
 
     Public Shared Function GetPHRPResultToSeqMapFileName(strDatasetName As String) As String
-        Return strDatasetName & "_msgfdb_syn_ResultToSeqMap.txt"
+        Return strDatasetName & "_msgfplus_syn_ResultToSeqMap.txt"
     End Function
 
     Public Shared Function GetPHRPSeqInfoFileName(strDatasetName As String) As String
-        Return strDatasetName & "_msgfdb_syn_SeqInfo.txt"
+        Return strDatasetName & "_msgfplus_syn_SeqInfo.txt"
     End Function
 
     Public Shared Function GetPHRPSeqToProteinMapFileName(strDatasetName As String) As String
-        Return strDatasetName & "_msgfdb_syn_SeqToProteinMap.txt"
+        Return strDatasetName & "_msgfplus_syn_SeqToProteinMap.txt"
     End Function
 
     Public Shared Function GetSearchEngineName() As String

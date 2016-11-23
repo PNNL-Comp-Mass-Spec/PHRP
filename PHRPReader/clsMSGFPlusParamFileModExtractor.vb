@@ -39,7 +39,7 @@ Public Class clsMSGFPlusParamFileModExtractor
 
 #Region "Constants and Enums"
 
-    Public Const UNKNOWN_MSGFDB_MOD_SYMBOL As Char = "?"c
+    Public Const UNKNOWN_MSGFPlus_MOD_SYMBOL As Char = "?"c
 
     Public Const PARAM_TAG_MOD_STATIC = "StaticMod"
     Public Const PARAM_TAG_MOD_DYNAMIC = "DynamicMod"
@@ -177,7 +177,7 @@ Public Class clsMSGFPlusParamFileModExtractor
     End Function
 
     ''' <summary>
-    ''' Extracts mod info from either a MSGF+ or MSPathFinder param file or from a MSGFDB_Mods.txt file
+    ''' Extracts mod info from either a MSGF+ or MSPathFinder param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
     ''' </summary>
     ''' <param name="paramFilePath"></param>
     ''' <param name="lstModInfo"></param>
@@ -291,7 +291,7 @@ Public Class clsMSGFPlusParamFileModExtractor
                         End If
 
                         .Residues = strSplitLine(1).Trim()
-                        .ModSymbol = UNKNOWN_MSGFDB_MOD_SYMBOL
+                        .ModSymbol = UNKNOWN_MSGFPlus_MOD_SYMBOL
 
                         Select Case strSplitLine(2).Trim().ToLower()
                             Case "opt"
@@ -494,7 +494,7 @@ Public Class clsMSGFPlusParamFileModExtractor
         Dim kvSetting As KeyValuePair(Of String, String)
         Dim strModSpec As String = String.Empty
 
-        If strLineIn.ToLower.StartsWith(strModTag.ToLower()) Then
+        If strLineIn.ToLower().StartsWith(strModTag.ToLower()) Then
 
             kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
 

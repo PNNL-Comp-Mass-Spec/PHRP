@@ -27,7 +27,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "October 12, 2016"
+        MyBase.mFileDate = "November 22, 2016"
         mModMassRegEx = New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
         mPeptideCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
@@ -594,7 +594,8 @@ Public Class clsMSGFDBResultsProcessor
 
         Dim strPepToProteinMapFilePath As String = Path.GetFileNameWithoutExtension(strInputFilePath)
 
-        If strPepToProteinMapFilePath.ToLower().EndsWith("_msgfdb_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msgfdb_fht") Then
+        If strPepToProteinMapFilePath.ToLower().EndsWith("_msgfplus_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msgfplus_fht") OrElse
+           strPepToProteinMapFilePath.ToLower().EndsWith("_msgfdb_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msgfdb_fht") Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
         End If
@@ -1030,7 +1031,7 @@ Public Class clsMSGFDBResultsProcessor
     End Function
 
     ''' <summary>
-    ''' Extracts mod info from either a MSGF+ param file or from a MSGFDB_Mods.txt file
+    ''' Extracts mod info from either a MSGF+ param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
     ''' </summary>
     ''' <param name="strMSGFDBParamFilePath"></param>
     ''' <param name="lstModInfo"></param>
@@ -1158,7 +1159,7 @@ Public Class clsMSGFDBResultsProcessor
     End Function
 
     ''' <summary>
-    ''' Load the PeptideToProteinMap information; in addition, creates the _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
+    ''' Load the PeptideToProteinMap information; in addition, creates the _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
     ''' </summary>
     ''' <param name="strPepToProteinMapFilePath"></param>
     ''' <param name="strOutputFolderPath"></param>
@@ -1955,10 +1956,10 @@ Public Class clsMSGFDBResultsProcessor
         lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, eMSFDBSynFileColumns.MSGFScore)
 
         lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb, eMSFDBSynFileColumns.SpecProb_EValue)
-        lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue, eMSFDBSynFileColumns.SpecProb_EValue)
+        lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue, eMSFDBSynFileColumns.SpecProb_EValue)
 
         lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecProb, eMSFDBSynFileColumns.RankSpecProb)
-        lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecEValue, eMSFDBSynFileColumns.RankSpecProb)
+        lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, eMSFDBSynFileColumns.RankSpecProb)
 
         lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_PValue, eMSFDBSynFileColumns.PValue_EValue)
         lstColumnNames.Add(clsPHRPParserMSGFDB.DATA_COLUMN_EValue, eMSFDBSynFileColumns.PValue_EValue)
@@ -2222,7 +2223,7 @@ Public Class clsMSGFDBResultsProcessor
                 lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
                 ' Load the MSGF+ Parameter File so that we can determine the modification names and masses
-                ' If the MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
+                ' If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
                 Dim success = ExtractModInfoFromParamFile(SearchToolParameterFilePath, lstMSGFDBModInfo)
                 If Not success Then
                     Return False
@@ -2254,9 +2255,9 @@ Public Class clsMSGFDBResultsProcessor
                 ' Define the base output filename using strInputFilePath
                 Dim strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
-                ' Auto-replace "_msgfplus" with "_msgfdb"
-                If strBaseName.ToLower().EndsWith("_msgfplus") Then
-                    strBaseName = strBaseName.Substring(0, strBaseName.Length - "_msgfplus".Length) & "_msgfdb"
+                ' Auto-replace "_msgfdb" with "_msgfplus"
+                If strBaseName.ToLower().EndsWith("_msgfdb") Then
+                    strBaseName = strBaseName.Substring(0, strBaseName.Length - "_msgfdb".Length) & "_msgfplus"
                 End If
 
                 If MyBase.CreateInspectFirstHitsFile Then
@@ -2283,7 +2284,7 @@ Public Class clsMSGFDBResultsProcessor
                     ' Create the synopsis output file
                     MyBase.ResetProgress("Creating the SYN file", True)
 
-                    ' The synopsis file name will be of the form BasePath_msgfdb_syn.txt
+                    ' The synopsis file name will be of the form BasePath_msgfplus_syn.txt
                     strSynOutputFilePath = Path.Combine(strOutputFolderPath, strBaseName & SEQUEST_SYNOPSIS_FILE_SUFFIX)
 
                     strScanGroupFilePath = Path.Combine(strOutputFolderPath, strBaseName & "_ScanGroupInfo.txt")
@@ -2291,7 +2292,7 @@ Public Class clsMSGFDBResultsProcessor
                     blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, lstSpecIdToIndex, eFilteredOutputFileTypeConstants.SynFile)
 
                     ' Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
-                    ' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfdb_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols							
+                    ' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols							
                     strPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(strOutputFolderPath, strBaseName) & ".txt", strOutputFolderPath, MTS:=False)
 
                     MyBase.ResetProgress("Loading the PepToProtein map file: " & Path.GetFileName(strPepToProteinMapFilePath), True)
@@ -2853,8 +2854,8 @@ Public Class clsMSGFDBResultsProcessor
             lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore)
 
             If blnMSGFPlus Then
-                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecEValue)
-                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecEValue)
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue)
+                lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFPlus_SpecEValue)
                 lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_EValue)
             Else
                 lstData.Add(clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb)
