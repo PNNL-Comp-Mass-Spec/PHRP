@@ -35,10 +35,10 @@ Public Class clsPHRPParserMSGFDB
     Public Const DATA_COLUMN_MSGFScore = "MSGFScore"
 
     Public Const DATA_COLUMN_MSGFDB_SpecProb = "MSGFDB_SpecProb"                    ' MSGFDB
-    Public Const DATA_COLUMN_Rank_MSGFDB_SpecProb = "Rank_MSGFDB_SpecProb"      ' MSGFDB
+    Public Const DATA_COLUMN_Rank_MSGFDB_SpecProb = "Rank_MSGFDB_SpecProb"          ' MSGFDB
 
-    Public Const DATA_COLUMN_MSGFDB_SpecEValue = "MSGFDB_SpecEValue"                ' MSGF+
-    Public Const DATA_COLUMN_Rank_MSGFDB_SpecEValue = "Rank_MSGFDB_SpecEValue"  ' MSGF+
+    Public Const DATA_COLUMN_MSGFPlus_SpecEValue = "MSGFDB_SpecEValue"              ' MSGF+
+    Public Const DATA_COLUMN_Rank_MSGFPlus_SpecEValue = "Rank_MSGFDB_SpecEValue"    ' MSGF+
 
     Public Const DATA_COLUMN_PValue = "PValue"      ' MSGFDB
     Public Const DATA_COLUMN_EValue = "EValue"      ' MSGF+
@@ -185,8 +185,8 @@ Public Class clsPHRPParserMSGFDB
         AddHeaderColumn(DATA_COLUMN_PepFDR)
 
         ' Add the MSGF+ columns
-        AddHeaderColumn(DATA_COLUMN_MSGFDB_SpecEValue)
-        AddHeaderColumn(DATA_COLUMN_Rank_MSGFDB_SpecEValue)
+        AddHeaderColumn(DATA_COLUMN_MSGFPlus_SpecEValue)
+        AddHeaderColumn(DATA_COLUMN_Rank_MSGFPlus_SpecEValue)
         AddHeaderColumn(DATA_COLUMN_EValue)
 
         AddHeaderColumn(DATA_COLUMN_QValue)
@@ -484,7 +484,7 @@ Public Class clsPHRPParserMSGFDB
 
         Try
 
-            If LookupColumnIndex(DATA_COLUMN_MSGFDB_SpecEValue, mColumnHeaders) >= 0 Then
+            If LookupColumnIndex(DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders) >= 0 Then
                 blnMSGFPlusResults = True
             Else
                 blnMSGFPlusResults = False
@@ -497,7 +497,12 @@ Public Class clsPHRPParserMSGFDB
                     ' Data line is not valid
                 Else
                     .ResultID = LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0)
-                    .ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb, mColumnHeaders, 1)
+
+                    If blnMSGFPlusResults Then
+                        .ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue, mColumnHeaders, 1)
+                    Else
+                        .ScoreRank = LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb, mColumnHeaders, 1)
+                    End If
 
                     strPeptide = LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders)
 
@@ -521,7 +526,7 @@ Public Class clsPHRPParserMSGFDB
                     .MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
                     If blnMSGFPlusResults Then
-                        .MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecEValue, mColumnHeaders)
+                        .MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders)
                     Else
                         .MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders)
                     End If
@@ -548,8 +553,8 @@ Public Class clsPHRPParserMSGFDB
 
                 If blnMSGFPlusResults Then
 
-                    AddScore(objPSM, strColumns, DATA_COLUMN_MSGFDB_SpecEValue)
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFDB_SpecEValue)
+                    AddScore(objPSM, strColumns, DATA_COLUMN_MSGFPlus_SpecEValue)
+                    AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue)
                     AddScore(objPSM, strColumns, DATA_COLUMN_EValue)
                     AddScore(objPSM, strColumns, DATA_COLUMN_QValue)
                     AddScore(objPSM, strColumns, DATA_COLUMN_PepQValue)
@@ -558,8 +563,8 @@ Public Class clsPHRPParserMSGFDB
                     ' Duplicate the score values to provide backwards compatibility
                     Dim strValue = String.Empty
 
-                    If objPSM.TryGetScore(DATA_COLUMN_MSGFDB_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_MSGFDB_SpecProb, strValue)
-                    If objPSM.TryGetScore(DATA_COLUMN_Rank_MSGFDB_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, strValue)
+                    If objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_MSGFDB_SpecProb, strValue)
+                    If objPSM.TryGetScore(DATA_COLUMN_Rank_MSGFPlus_SpecEValue, strValue) Then objPSM.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, strValue)
                     If objPSM.TryGetScore(DATA_COLUMN_QValue, strValue) Then objPSM.SetScore(DATA_COLUMN_FDR, strValue)
                     If objPSM.TryGetScore(DATA_COLUMN_PepQValue, strValue) Then objPSM.SetScore(DATA_COLUMN_PepFDR, strValue)
 
@@ -572,7 +577,7 @@ Public Class clsPHRPParserMSGFDB
                     Dim blnPValueStored As Boolean = False
 
                     If objPSM.TryGetScore(DATA_COLUMN_EValue, strEValue) Then
-                        If objPSM.TryGetScore(DATA_COLUMN_MSGFDB_SpecEValue, strSpecEValue) Then
+                        If objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, strSpecEValue) Then
                             ' Compute PValue using EValue and SpecEValue
                             If Double.TryParse(strEValue, dblEValue) Then
                                 If Double.TryParse(strSpecEValue, dblSpecEValue) Then
