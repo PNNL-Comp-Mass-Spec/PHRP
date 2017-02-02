@@ -2225,7 +2225,7 @@ Public Class clsPHRPReader
                 mPSMCurrent.CollisionMode = GetCollisionMode(objScanStatsInfo.ScanTypeName)
             End If
 
-            If String.IsNullOrEmpty(mPSMCurrent.CollisionMode) AndAlso mExtendedScanStatsValid Then
+            If String.IsNullOrEmpty(mPSMCurrent.CollisionMode) AndAlso mExtendedScanStatsValid AndAlso Not mExtendedScanStatsInfo Is Nothing Then
                 ' Scan type still not determined, but Extended Scan Stats data is available
                 If Not String.IsNullOrEmpty(mExtendedScanStatsInfo.CollisionMode) Then
                     ' Check for Collision mode being "0"
@@ -2323,7 +2323,7 @@ Public Class clsPHRPReader
     Private Sub ComputePrecursorNeutralMass()
         Dim dblMonoisotopicPrecursorMass As Double
 
-        If Not mExtendedScanStatsValid Then Exit Sub
+        If Not mExtendedScanStatsValid OrElse mExtendedScanStatsInfo Is Nothing Then Exit Sub
 
         dblMonoisotopicPrecursorMass = 0
 

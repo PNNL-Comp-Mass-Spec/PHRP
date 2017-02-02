@@ -427,7 +427,7 @@ Public Class clsPeptideHitResultsProcRunner
 
                 Case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
                     ePeptideHitResultType = PHRPReader.clsPHRPReader.ePeptideHitResultType.MSGFDB
-                    LogMessage("Detected MSGFDB (or MSGF+) results file")
+                    LogMessage("Detected MSGF+ results file")
 
                 Case ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
                     ePeptideHitResultType = PHRPReader.clsPHRPReader.ePeptideHitResultType.MSAlign

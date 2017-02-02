@@ -27,7 +27,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "November 22, 2016"
+        MyBase.mFileDate = "February 1, 2017"
         mModMassRegEx = New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
         mPeptideCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
