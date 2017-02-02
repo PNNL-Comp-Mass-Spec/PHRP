@@ -275,6 +275,13 @@ Public Class clsPHRPSeqMapReader
             If blnSuccess AndAlso Not String.IsNullOrEmpty(mPepToProteinMapFilename) Then
                 strFilePath = Path.Combine(mInputFolderPath, mPepToProteinMapFilename)
                 If Not File.Exists(strFilePath) Then
+                    Dim strFilePathAlternate = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(strFilePath, "Dataset_msgfdb.txt")
+                    If File.Exists(strFilePathAlternate) Then
+                        strFilePath = strFilePathAlternate
+                    End If
+                End If
+
+                If Not File.Exists(strFilePath) Then
                     Console.WriteLine("Warning: PepToProtMap file not found; protein residue start/end values will be zero")
                     Console.WriteLine("         " & strFilePath)
                 Else

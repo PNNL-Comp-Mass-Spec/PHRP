@@ -1193,7 +1193,16 @@ Public Class clsMSGFDBResultsProcessor
                 Console.WriteLine()
                 ReportWarning("PepToProteinMap file is not defined")
                 Return False
-            ElseIf Not File.Exists(strPepToProteinMapFilePath) Then
+            End If
+
+            If Not File.Exists(strPepToProteinMapFilePath) Then
+                Dim strPepToProteinMapAlternate = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(strPepToProteinMapFilePath, "Dataset_msgfdb.txt")
+                If File.Exists(strPepToProteinMapAlternate) Then
+                    strPepToProteinMapFilePath = strPepToProteinMapAlternate
+                End If
+            End If
+
+            If Not File.Exists(strPepToProteinMapFilePath) Then
                 Console.WriteLine()
                 ReportWarning("PepToProteinMap file does not exist: " & strPepToProteinMapFilePath)
                 Return False
