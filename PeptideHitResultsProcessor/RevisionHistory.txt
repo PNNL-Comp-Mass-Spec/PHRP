@@ -1,5 +1,27 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.6253; February 13, 2017
+	- Check for duplicate MSGF+ results from dynamically modified residues at the N-terminus being listed twice in the MSGF+ results file
+
+Version 1.5.6241; February 1, 2017
+	- Check for alternate peptide to protein map file
+
+Version 1.5.6170; November 22, 2016
+	- Change default name for MSGF+ results files to use _msgfplus instead of _msgfdb
+
+Version 1.5.6128; October 11, 2016
+	- Add GetCustomChargeCarrierMass to clsPHRPParserMSGFDB
+
+Version 1.5.6127; October 10, 2016
+	- Filter MSGF+ results while reading the .TSV file to create synopsis and first hits files
+		- Greatly reduces memory usage for result files that have a large amount of low scoring peptides and/or peptides with a large number of parent proteins
+
+Version 1.5.6124; October 7, 2016
+	- Use stricter data filters when creating synopsis files from MSGF+ and MSPathFinder results
+
+Version 1.5.6123; October 6, 2016
+	- Rename variables to use MSGF+ score names
+
 Version 1.5.5981; May 17, 2016
 	- Report Success=False if processing an MSGF+ results file and the ModDefs file does not have a definition for a given dynamic mod
 

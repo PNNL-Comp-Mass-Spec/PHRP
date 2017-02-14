@@ -27,7 +27,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <remarks></remarks>
     Public Sub New()
         MyBase.New()
-        MyBase.mFileDate = "February 1, 2017"
+        MyBase.mFileDate = "February 13, 2017"
         mModMassRegEx = New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
 
         mPeptideCleavageStateCalculator = New clsPeptideCleavageStateCalculator()
@@ -1000,7 +1000,10 @@ Public Class clsMSGFDBResultsProcessor
                     Loop
 
                     ' Sort the data in udtFilteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(swResultFile, lstFilteredSearchResults, strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
+                    SortAndWriteFilteredSearchResults(
+                        swResultFile, lstFilteredSearchResults, strErrorLog,
+                        blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
+
                 End Using
 
                 ' Write out the scan group info
@@ -2826,10 +2829,35 @@ Public Class clsMSGFDBResultsProcessor
 
         ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
 
+        Dim results = New SortedSet(Of String)
+
         ' Now store or write out the matches that pass the filters
         ' By default, filter passing peptides have MSGFDB_SpecEValue <= 5E-7 Or EValue less than 0.75 or QValue less than 1% (but not 0)
         For intIndex = intStartIndex To intEndIndex
             If MSGFPlusResultPassesSynFilter(lstSearchResults(intIndex)) Then
+
+                ' Check for identical results
+                ' This can happen if the search used an n-terminal dynamic mod that also could apply to a specific residue and that residue is at the N-terminus
+                ' For example:
+                '   R.S+229.163IGLPDVHSGYGFAIGNMAAFDMNDPEAVVSPGGVGFDINC+57.021GVR.L
+                '   R.+229.163SIGLPDVHSGYGFAIGNMAAFDMNDPEAVVSPGGVGFDINC+57.021GVR.L
+                '
+                ' This software will have turned both of these results info:
+                '  R.S#IGLPDVHSGYGFAIGNMAAFDMNDPEAVVSPGGVGFDINCGVR.L
+                ' We only want to include the result once in the _syn.txt file 
+                ' (though if the peptide maps to multiple proteins it will be listed multiple times; one line per protein)
+
+                Dim resultKey =
+                    lstSearchResults(intIndex).Peptide + "_" &
+                    lstSearchResults(intIndex).Protein + "_" &
+                    lstSearchResults(intIndex).MH + "_" &
+                    lstSearchResults(intIndex).SpecEValue
+
+                If results.Contains(resultKey) Then
+                    Continue For
+                End If
+
+                results.Add(resultKey)
                 lstFilteredSearchResults.Add(lstSearchResults(intIndex))
             End If
         Next intIndex
