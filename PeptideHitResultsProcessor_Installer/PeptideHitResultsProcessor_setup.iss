@@ -15,10 +15,9 @@ Source: ..\bin\PeptideHitResultsProcRunner.exe.config  ; DestDir: {app}
 Source: ..\bin\PeptideHitResultsProcessor.dll          ; DestDir: {app}
 Source: ..\bin\PeptideToProteinMapEngine.dll           ; DestDir: {app}
 Source: ..\bin\PHRPReader.dll                          ; DestDir: {app}
-Source: ..\bin\PeptideHitResultsProcessor.dll           ; DestDir: {app}
+Source: ..\bin\PeptideHitResultsProcessor.dll          ; DestDir: {app}
 Source: ..\bin\ProteinFileReader.dll                   ; DestDir: {app}
 Source: ..\bin\System.Data.SQLite.dll                  ; DestDir: {app}
-Source: ..\bin\ThermoRawFileReaderDLL.dll              ; DestDir: {app}
 Source: ..\bin\x64\SQLite.Interop.dll                  ; DestDir: {app}\x64
 Source: ..\bin\x86\SQLite.Interop.dll                  ; DestDir: {app}\x86
 
