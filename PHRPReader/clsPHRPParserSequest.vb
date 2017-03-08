@@ -373,7 +373,7 @@ Public Class clsPHRPParserSequest
                                         ' 
                                         objSearchEngineParams.Enzyme = "trypsin"
 
-                                        If strSettingValue.ToLower().StartsWith("no_enzyme") Then
+                                        If strSettingValue.StartsWith("no_enzyme", StringComparison.InvariantCultureIgnoreCase) Then
                                             objSearchEngineParams.MinNumberTermini = 0
                                         Else
                                             ' Parse out the cleavage specificity number

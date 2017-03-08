@@ -203,7 +203,8 @@ Public Class clsSequestResultsProcessor
 
     Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
         Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-        If strPepToProteinMapFilePath.ToLower().EndsWith("_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_fht") Then
+        If strPepToProteinMapFilePath.EndsWith("_syn", StringComparison.InvariantCultureIgnoreCase) OrElse
+            strPepToProteinMapFilePath.EndsWith("_fht", StringComparison.InvariantCultureIgnoreCase) Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
         End If
@@ -562,13 +563,13 @@ Public Class clsSequestResultsProcessor
         Dim strInputFileBaseName As String = Path.GetFileNameWithoutExtension(fiInputFile.Name)
 
         lstSourcePHRPDataFiles.Add(fiInputFile.FullName)
-        If strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE) Then
+        If strInputFileBaseName.EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             strAdditionalFile = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_FIRST_HITS_FILE)
             If File.Exists(strAdditionalFile) Then
                 lstSourcePHRPDataFiles.Add(strAdditionalFile)
             End If
 
-        ElseIf strInputFileBaseName.ToLower().EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE) Then
+        ElseIf strInputFileBaseName.EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             strAdditionalFile = MyBase.ReplaceFilenameSuffix(fiInputFile, FILENAME_SUFFIX_SYNOPSIS_FILE)
             If File.Exists(strAdditionalFile) Then
                 lstSourcePHRPDataFiles.Add(strAdditionalFile)

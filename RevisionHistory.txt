@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6274; March 6, 2017
+	- Replace ToLower and ToUpper-based string comparisons with StringComparison.InvariantCultureIgnoreCase
+
 Version 1.5.6128; November 22, 2016
 	- PHRPReader now supports MSGF+ results files named _msgfplus in addition to _msgfdb
 

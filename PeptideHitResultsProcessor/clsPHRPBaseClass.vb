@@ -624,40 +624,37 @@ Public MustInherit Class clsPHRPBaseClass
     Public Shared Function DetermineResultsFileFormat(strFilePath As String) As ePeptideHitResultsFileFormatConstants
         ' Examine the extension on strFilePath to determine the file format
 
-        Dim strExtensionLCase As String
-        Dim strBaseFileNameLCase As String
-
-        strExtensionLCase = Path.GetExtension(strFilePath).ToLower()
-        strBaseFileNameLCase = Path.GetFileNameWithoutExtension(strFilePath).ToLower()
+        Dim strExtensionLCase = Path.GetExtension(strFilePath).ToLower()
+        Dim baseFileName = Path.GetFileNameWithoutExtension(strFilePath).ToLower()
 
         If strExtensionLCase = ".xml" Then
             Return ePeptideHitResultsFileFormatConstants.XTandemXMLFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.InSpectTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.MODaTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
 
-        ElseIf strBaseFileNameLCase.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE.ToLower()) Then
+        ElseIf baseFileName.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE, StringComparison.InvariantCultureIgnoreCase) Then
             Return ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
 
         ElseIf strExtensionLCase = ".tsv" Then
@@ -1079,7 +1076,7 @@ Public MustInherit Class clsPHRPBaseClass
                     Next
 
                     For Each strWarningMessage As String In objReader.WarningMessages
-                        If strWarningMessage.StartsWith("MSGF file not found") Then
+                        If strWarningMessage.StartsWith("MSGF file not found", StringComparison.InvariantCultureIgnoreCase) Then
                             strWarningMessage = "MSGF file not found; column " & COLUMN_NAME_MSGF_SPECPROB & " will not have any data"
                         End If
                         ReportWarning(strWarningMessage)
@@ -1497,24 +1494,22 @@ Public MustInherit Class clsPHRPBaseClass
 
     Protected Function IsReversedProtein(strProteinName As String) As Boolean
 
-        Dim strProteinNameLCase As String = strProteinName.ToLower()
-
-        If strProteinNameLCase.StartsWith("reversed_") Then
+        If strProteinName.StartsWith("reversed_", StringComparison.InvariantCultureIgnoreCase) Then
             ' Used in DMS-generated protein collections
             Return True
-        ElseIf strProteinName.StartsWith("REV_") Then
+        ElseIf strProteinName.StartsWith("REV_", StringComparison.InvariantCultureIgnoreCase) Then
             ' Used by MSGFDB
             Return True
-        ElseIf strProteinNameLCase.StartsWith("scrambled_") Then
+        ElseIf strProteinName.StartsWith("scrambled_", StringComparison.InvariantCultureIgnoreCase) Then
             ' Used in DMS-generated protein collections
             Return True
-        ElseIf strProteinNameLCase.StartsWith("xxx_") Then
+        ElseIf strProteinName.StartsWith("xxx_", StringComparison.InvariantCultureIgnoreCase) Then
             ' Used by MSGF+
             Return True
-        ElseIf strProteinNameLCase.StartsWith("xxx.") Then
+        ElseIf strProteinName.StartsWith("xxx.", StringComparison.InvariantCultureIgnoreCase) Then
             ' Used by Inspect
             Return True
-        ElseIf strProteinNameLCase.EndsWith(":reversed") Then
+        ElseIf strProteinName.EndsWith(":reversed", StringComparison.InvariantCultureIgnoreCase) Then
             ' Used by X!Tandem
             Return True
         End If

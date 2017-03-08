@@ -449,7 +449,8 @@ Public Class clsMODPlusResultsProcessor
     Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
 
         Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-        If strPepToProteinMapFilePath.ToLower().EndsWith("_MODPlus_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_MODPlus_fht") Then
+        If strPepToProteinMapFilePath.EndsWith("_MODPlus_syn", StringComparison.InvariantCultureIgnoreCase) OrElse
+            strPepToProteinMapFilePath.EndsWith("_MODPlus_fht", StringComparison.InvariantCultureIgnoreCase) Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
         End If
@@ -1298,7 +1299,7 @@ Public Class clsMODPlusResultsProcessor
                 strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
                 ' Auto-replace "modp.id" with "_modp"
-                If strBaseName.ToLower().EndsWith("_modp.id") Then
+                If strBaseName.EndsWith("_modp.id", StringComparison.InvariantCultureIgnoreCase) Then
                     strBaseName = strBaseName.Substring(0, strBaseName.Length - "_modp.id".Length) & "_modp"
                 End If
 

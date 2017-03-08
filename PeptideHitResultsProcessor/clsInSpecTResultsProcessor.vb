@@ -623,7 +623,8 @@ Public Class clsInSpecTResultsProcessor
 
     Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
         Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-        If strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_inspect_fht") Then
+        If strPepToProteinMapFilePath.EndsWith("_inspect_syn", StringComparison.InvariantCultureIgnoreCase) OrElse
+            strPepToProteinMapFilePath.EndsWith("_inspect_fht", StringComparison.InvariantCultureIgnoreCase) Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
         End If
@@ -663,7 +664,7 @@ Public Class clsInSpecTResultsProcessor
 
                         If strLineIn.Chars(0) = "#"c Then
                             ' Comment line; skip it
-                        ElseIf strLineIn.ToLower.StartsWith("mod") Then
+                        ElseIf strLineIn.StartsWith("mod", StringComparison.InvariantCultureIgnoreCase) Then
                             ' Modification definition line
 
                             ' Split the line on commas

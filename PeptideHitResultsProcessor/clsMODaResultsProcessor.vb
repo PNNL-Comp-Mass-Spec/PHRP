@@ -567,7 +567,8 @@ Public Class clsMODaResultsProcessor
     Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
 
         Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-        If strPepToProteinMapFilePath.ToLower().EndsWith("_MODa_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_MODa_fht") Then
+        If strPepToProteinMapFilePath.EndsWith("_MODa_syn", StringComparison.InvariantCultureIgnoreCase) OrElse
+            strPepToProteinMapFilePath.EndsWith("_MODa_fht", StringComparison.InvariantCultureIgnoreCase) Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
         End If
@@ -803,7 +804,7 @@ Public Class clsMODaResultsProcessor
 
             ' Look for the IndexToScanMap file that corresponds to fiInputFile
             Dim lstScanMapFiles As List(Of FileInfo)
-            Dim matchIndex = fiInputFile.Name.LastIndexOf("_moda", StringComparison.Ordinal)
+            Dim matchIndex = fiInputFile.Name.LastIndexOf("_moda", StringComparison.InvariantCultureIgnoreCase)
             Dim sourceFileDescription As String
 
             If matchIndex > 0 Then
@@ -1511,7 +1512,7 @@ Public Class clsMODaResultsProcessor
                 strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
                 ' Auto-replace "_moda.id" with "_moda"
-                If strBaseName.ToLower().EndsWith("_moda.id") Then
+                If strBaseName.EndsWith("_moda.id", StringComparison.InvariantCultureIgnoreCase) Then
                     strBaseName = strBaseName.Substring(0, strBaseName.Length - "_moda.id".Length) & "_moda"
                 End If
 

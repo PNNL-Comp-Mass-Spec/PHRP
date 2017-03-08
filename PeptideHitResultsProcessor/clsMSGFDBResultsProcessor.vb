@@ -594,8 +594,10 @@ Public Class clsMSGFDBResultsProcessor
 
         Dim strPepToProteinMapFilePath As String = Path.GetFileNameWithoutExtension(strInputFilePath)
 
-        If strPepToProteinMapFilePath.ToLower().EndsWith("_msgfplus_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msgfplus_fht") OrElse
-           strPepToProteinMapFilePath.ToLower().EndsWith("_msgfdb_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msgfdb_fht") Then
+        If strPepToProteinMapFilePath.EndsWith("_msgfplus_syn", StringComparison.InvariantCultureIgnoreCase) OrElse
+           strPepToProteinMapFilePath.EndsWith("_msgfplus_fht", StringComparison.InvariantCultureIgnoreCase) OrElse
+           strPepToProteinMapFilePath.EndsWith("_msgfdb_syn", StringComparison.InvariantCultureIgnoreCase) OrElse
+           strPepToProteinMapFilePath.EndsWith("_msgfdb_fht", StringComparison.InvariantCultureIgnoreCase) Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
         End If
@@ -2268,7 +2270,7 @@ Public Class clsMSGFDBResultsProcessor
                 Dim strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
                 ' Auto-replace "_msgfdb" with "_msgfplus"
-                If strBaseName.ToLower().EndsWith("_msgfdb") Then
+                If strBaseName.EndsWith("_msgfdb", StringComparison.InvariantCultureIgnoreCase) Then
                     strBaseName = strBaseName.Substring(0, strBaseName.Length - "_msgfdb".Length) & "_msgfplus"
                 End If
 

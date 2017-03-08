@@ -494,7 +494,7 @@ Public Class clsMSGFPlusParamFileModExtractor
         Dim kvSetting As KeyValuePair(Of String, String)
         Dim strModSpec As String = String.Empty
 
-        If strLineIn.ToLower().StartsWith(strModTag.ToLower()) Then
+        If strLineIn.StartsWith(strModTag, StringComparison.InvariantCultureIgnoreCase) Then
 
             kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, "="c, "#")
 

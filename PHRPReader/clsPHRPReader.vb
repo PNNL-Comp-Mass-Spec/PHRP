@@ -609,7 +609,7 @@ Public Class clsPHRPReader
             ' strBasePHRPFileName is first-hits-file based
 
             Dim fiFileInfo = New FileInfo(strFilePath)
-            Dim synIndex = fiFileInfo.Name.ToLower().LastIndexOf("_syn", StringComparison.Ordinal)
+            Dim synIndex = fiFileInfo.Name.LastIndexOf("_syn", StringComparison.InvariantCultureIgnoreCase)
             If synIndex > 0 Then
                 ' strFilePath is synopsis-file based
                 ' Change strFilePath to contain _fht instead of _syn
@@ -641,7 +641,7 @@ Public Class clsPHRPReader
         Dim fiBasePHRPFile = New FileInfo(strBasePHRPFileName)
         If fiBasePHRPFile.Name.ToLower().Contains("_msgfdb") Then
             Dim fiFileInfo = New FileInfo(strFilePath)
-            Dim charIndex = fiFileInfo.Name.ToLower().LastIndexOf("_msgfplus", StringComparison.Ordinal)
+            Dim charIndex = fiFileInfo.Name.LastIndexOf("_msgfplus", StringComparison.InvariantCultureIgnoreCase)
             If charIndex > 0 Then
                 ' strFilePath has _msgfplus but should have _msgfdb
 
@@ -1224,38 +1224,39 @@ Public Class clsPHRPReader
                  ePeptideHitResultType.MODPlus,
                  ePeptideHitResultType.MSPathFinder
 
-                If strInputFileName.ToLower().EndsWith("_fht") OrElse strInputFileName.ToLower().EndsWith("_syn") Then
+                If strInputFileName.EndsWith("_fht", StringComparison.InvariantCultureIgnoreCase) OrElse
+                   strInputFileName.EndsWith("_syn", StringComparison.InvariantCultureIgnoreCase) Then
                     strDatasetName = strInputFileName.Substring(0, strInputFileName.Length - 4)
 
                     If eResultType = ePeptideHitResultType.Inspect Then
-                        If strDatasetName.ToLower().EndsWith("_inspect") Then
+                        If strDatasetName.EndsWith("_inspect", StringComparison.InvariantCultureIgnoreCase) Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_inspect".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MSGFDB Then
-                        If strDatasetName.ToLower().EndsWith("_msgfplus") Then
+                        If strDatasetName.EndsWith("_msgfplus", StringComparison.InvariantCultureIgnoreCase) Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_msgfplus".Length)
-                        ElseIf strDatasetName.ToLower().EndsWith("_msgfdb") Then
+                        ElseIf strDatasetName.EndsWith("_msgfdb", StringComparison.InvariantCultureIgnoreCase) Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_msgfdb".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MSAlign Then
-                        If strDatasetName.ToLower().EndsWith("_msalign") Then
+                        If strDatasetName.EndsWith("_msalign", StringComparison.InvariantCultureIgnoreCase) Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_msalign".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MODa Then
-                        If strDatasetName.ToLower().EndsWith("_moda") Then
+                        If strDatasetName.EndsWith("_moda", StringComparison.InvariantCultureIgnoreCase) Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_moda".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MODPlus Then
-                        If strDatasetName.ToLower().EndsWith("_modp") Then
+                        If strDatasetName.EndsWith("_modp", StringComparison.InvariantCultureIgnoreCase) Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_modp".Length)
                         End If
 
                     ElseIf eResultType = ePeptideHitResultType.MSPathFinder Then
-                        If strDatasetName.ToLower().EndsWith("_mspath") Then
+                        If strDatasetName.EndsWith("_mspath", StringComparison.InvariantCultureIgnoreCase) Then
                             strDatasetName = strDatasetName.Substring(0, strDatasetName.Length - "_mspath".Length)
                         End If
 
@@ -1263,7 +1264,7 @@ Public Class clsPHRPReader
                 End If
 
             Case ePeptideHitResultType.XTandem
-                If strInputFileName.ToLower().EndsWith("_xt") Then
+                If strInputFileName.EndsWith("_xt", StringComparison.InvariantCultureIgnoreCase) Then
                     strDatasetName = strInputFileName.Substring(0, strInputFileName.Length - 3)
                 End If
 
@@ -1388,7 +1389,7 @@ Public Class clsPHRPReader
         lstExtraSuffixes = GetPHRPAuxiliaryFileSuffixes()
 
         For Each strSuffix As String In lstExtraSuffixes
-            If strFilePath.ToLower().EndsWith(strSuffix.ToLower()) Then
+            If strFilePath.EndsWith(strSuffix, StringComparison.InvariantCultureIgnoreCase) Then
 
                 strFilePathTrimmed = strFilePath.Substring(0, strFilePath.Length - strSuffix.Length) & ".txt"
                 Return True

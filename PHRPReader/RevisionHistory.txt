@@ -1,5 +1,8 @@
 PHRPReader.dll Revision History
 
+Version 1.1.6274; March 6, 2017
+	- Replace ToLower and ToUpper-based string comparisons with StringComparison.InvariantCultureIgnoreCase
+
 Version 1.1.6170; November 22, 2016
 	- Change default name for MSGF+ results files to use _msgfplus instead of _msgfdb
 		- Still supports reading files named _msgfdb

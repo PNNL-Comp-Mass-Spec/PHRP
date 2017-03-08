@@ -444,7 +444,8 @@ Public Class clsMSAlignResultsProcessor
 
     Protected Overrides Function ConstructPepToProteinMapFilePath(strInputFilePath As String, strOutputFolderPath As String, MTS As Boolean) As String
         Dim strPepToProteinMapFilePath = Path.GetFileNameWithoutExtension(strInputFilePath)
-        If strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_syn") OrElse strPepToProteinMapFilePath.ToLower().EndsWith("_msalign_fht") Then
+        If strPepToProteinMapFilePath.EndsWith("_msalign_syn", StringComparison.InvariantCultureIgnoreCase) OrElse
+            strPepToProteinMapFilePath.EndsWith("_msalign_fht", StringComparison.InvariantCultureIgnoreCase) Then
             ' Remove _syn or _fht
             strPepToProteinMapFilePath = strPepToProteinMapFilePath.Substring(0, strPepToProteinMapFilePath.Length - 4)
         End If
@@ -1349,7 +1350,7 @@ Public Class clsMSAlignResultsProcessor
                 strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
                 ' Auto-replace "_MSAlign_ResultTable" with "_msalign"
-                If strBaseName.ToLower().EndsWith("_MSAlign_ResultTable".ToLower()) Then
+                If strBaseName.EndsWith("_MSAlign_ResultTable", StringComparison.InvariantCultureIgnoreCase) Then
                     strBaseName = strBaseName.Substring(0, strBaseName.Length - "_MSAlign_ResultTable".Length) & "_msalign"
                 End If
 

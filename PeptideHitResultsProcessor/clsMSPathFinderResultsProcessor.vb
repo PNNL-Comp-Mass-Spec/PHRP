@@ -1148,7 +1148,7 @@ Public Class clsMSPathFinderResultsProcessor
                 strBaseName = Path.GetFileNameWithoutExtension(strInputFilePath)
 
                 ' Auto-replace "_IcTda.tsv" with "_mspath"
-                If strBaseName.ToLower().EndsWith("_IcTda".ToLower()) Then
+                If strBaseName.EndsWith("_IcTda", StringComparison.InvariantCultureIgnoreCase) Then
                     strBaseName = strBaseName.Substring(0, strBaseName.Length - "_IcTda".Length) & "_mspath"
                 End If
 
