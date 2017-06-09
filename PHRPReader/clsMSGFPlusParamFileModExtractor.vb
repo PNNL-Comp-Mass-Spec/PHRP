@@ -1,17 +1,17 @@
 ﻿Option Strict On
 
-' This class reads a DMS-based parameter file for MSGF+ or MSPathFinder 
+' This class reads a DMS-based parameter file for MSGF+ or MSPathFinder
 ' to extract the dynamic and static modification information
 ' Example param file contents:
 '
 ' #Modifications (see below for examples)
 ' StaticMod=C2H3NO,   C,   fix, any,         Carbamidomethyl           # Fixed Carbamidomethyl C
-' 
+'
 ' DynamicMod=O1,      M,   opt, any,         Oxidation                 # Oxidation M
 ' DynamicMod=HO3P,    STY, opt, any,         Phospho                   # Phosphorylation STY
 ' DynamicMod=H-1,     C,   opt, any,         Dehydro                   # Dehydro C
 ' DynamicMod=C2H2O,   *,   opt, Prot-N-term, Acetyl                    # Acetylation Protein N-term (C2H2O can be replaced with "H(2) C(2) O")
-' 
+'
 '
 ' Note that DMS uses this information to create a Mods.txt file that is provided to MSGF+ or MSPathFinder
 ' When doing this, the static mods defs have ",fix," while the dynamic mod defs have ',opt'
@@ -19,7 +19,7 @@
 '
 ' # Static mods
 ' C2H3NO,C,fix,any,Carbamidomethyl     # Fixed Carbamidomethyl C
-' 
+'
 ' # Dynamic mods
 ' O1,M,opt,any,Oxidation             # Oxidation M
 ' HO3P,STY,opt,any,Phospho           # Phosphorylation STY
@@ -135,8 +135,8 @@ Public Class clsMSGFPlusParamFileModExtractor
         ' 	- C (Carbon), H (Hydrogen), N (Nitrogen), O (Oxygen), S (Sulfer) and P (Phosphorus) are allowed.
         ' 	- Atom can be omitted.
         ' 	- Negative numbers are allowed.
-        ' 	- Examples: 
-        '     C2H2O1 
+        ' 	- Examples:
+        '     C2H2O1
         '     C+2H+3N+1O+1
         '     H2C1O1
         '     H-1N-1O
@@ -220,7 +220,7 @@ Public Class clsMSGFPlusParamFileModExtractor
                     Dim strModSpec As String = String.Empty
 
                     If strLineIn.StartsWith(MSGFPLUS_COMMENT_CHAR) Then
-                        ' Comment line (starts with #) 
+                        ' Comment line (starts with #)
                         ' Skip it
                         Continue Do
                     Else
@@ -474,7 +474,7 @@ Public Class clsMSGFPlusParamFileModExtractor
         End If
 
     End Sub
-    
+
     Private Shared Function TrimComment(value As String) As String
 
         ' Look for the MSGF+ comment character
