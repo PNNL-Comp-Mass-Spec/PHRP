@@ -106,3 +106,4 @@ PeptideHitResultsProcessor_SourceCode/*
 .hgignore
 /PeptideHitResultsProcessor/Unused
 /PeptideHitResultsProcessor_Installer/Output
+**/.vs/
