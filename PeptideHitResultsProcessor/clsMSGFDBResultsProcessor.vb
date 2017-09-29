@@ -1,6 +1,6 @@
 Option Strict On
 
-' This class reads in an MSGF_DB results file (txt format) and creates 
+' This class reads in an MSGF_DB results file (txt format) and creates
 ' a tab-delimited text file with the data.  It will insert modification symbols
 ' into the peptide sequences for modified peptides.
 '
@@ -66,13 +66,13 @@ Public Class clsMSGFDBResultsProcessor
 
     Private Const MAX_ERROR_LOG_LENGTH As Integer = 4096
 
-    ' Match mod masses (positive or negative) at start, e.g. 
+    ' Match mod masses (positive or negative) at start, e.g.
     ' +57.021HWWTLTTDRINK         matches +57.021
     ' -57.021+42.011HWWTLTTDRINK  matches -57.021+42.011 (two separate mods)
     ' +42.011MDHTPQSQLK           matches +42.011
     Private Const MSGFDB_NTERMINAL_MOD_MASS_REGEX As String = "^([0-9\.\+\-]+)"
 
-    ' Match mod masses (positive or negative) at end, e.g. 
+    ' Match mod masses (positive or negative) at end, e.g.
     ' FAACPLTCE+14.0157VS+79.9663+14.0157   matches +79.9663+14.0157
     Private Const MSGFDB_CTERMINAL_MOD_MASS_REGEX As String = "([0-9\.\+\-]+)$"
 
@@ -426,7 +426,7 @@ Public Class clsMSGFDBResultsProcessor
       intStartIndex As Integer,
       intEndIndex As Integer)
 
-        ' Prior to September 2014 ranks were assigned per charge state per scan; 
+        ' Prior to September 2014 ranks were assigned per charge state per scan;
         ' Ranks are now assigned per scan (across all charge states)
 
         If intStartIndex = intEndIndex Then
@@ -505,7 +505,7 @@ Public Class clsMSGFDBResultsProcessor
             ' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
             ' Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
             '  even though, biologically, that's typically not possible
-            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
+            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus
             '  (where two COOH groups are present)
             objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
 
@@ -617,11 +617,12 @@ Public Class clsMSGFDBResultsProcessor
       currentResidue As String,
       strModDigits As String,
       <Out()> ByRef strModSymbols As String,
+      <Out()> ByRef strDynModSymbols As String,
       lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       blnNterminalMod As Boolean,
       blnPossibleCTerminalMod As Boolean,
       <Out()> ByRef dblModMassFound As Double,
-      <Out()> ByRef blnIsStaticMod As Boolean) As Boolean
+      <Out()> ByRef blnContainsStaticMod As Boolean) As Boolean
 
         Dim reMatches As MatchCollection
 
@@ -635,8 +636,9 @@ Public Class clsMSGFDBResultsProcessor
         Dim residuesBestBatch = String.Empty
 
         strModSymbols = String.Empty
+        strDynModSymbols = String.Empty
         dblModMassFound = 0
-        blnIsStaticMod = False
+        blnContainsStaticMod = False
 
         reMatches = mModMassRegEx.Matches(strModDigits)
 
@@ -731,7 +733,9 @@ Public Class clsMSGFDBResultsProcessor
                 intModSymbolsFound += 1
 
                 If lstMSGFDBModInfo(intBestMatchIndex).ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.StaticMod Then
-                    blnIsStaticMod = True
+                    blnContainsStaticMod = True
+                Else
+                    strDynModSymbols &= lstMSGFDBModInfo(intBestMatchIndex).ModSymbol
                 End If
             Else
                 ' Match not found; use the mass value
@@ -1071,7 +1075,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <summary>
     ''' Extracts parent mass tolerance from the parameters loaded from an MSGF+ parameter file
     ''' </summary>
-    ''' <param name="objSearchEngineParams"></param>	
+    ''' <param name="objSearchEngineParams"></param>
     ''' <returns>Parent mass tolerance info.  Tolerances will be 0 if an error occurs</returns>
     ''' <remarks></remarks>
     Private Function ExtractParentMassToleranceFromParamFile(objSearchEngineParams As clsSearchEngineParameters) As udtParentMassToleranceType
@@ -1131,7 +1135,7 @@ Public Class clsMSGFDBResultsProcessor
 
     ''' <summary>
     ''' Look for candidateProteinName in mProteinNameOrder
-    ''' If found, and if the proteinNumber for that protein is less than currentProteinNumber, 
+    ''' If found, and if the proteinNumber for that protein is less than currentProteinNumber,
     ''' return a KeyValuePair with candidateProteinName and the proteinNumber for that protein
     ''' Otherwise, return a KeyValuePair with currentProteinName and currentProteinNumber
     ''' </summary>
@@ -1264,7 +1268,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' </summary>
     ''' <param name="msgfPlusParamFilePath"></param>
     ''' <returns>
-    ''' True if success, false if an error.  
+    ''' True if success, false if an error.
     ''' Returns True if msgfPlusParamFilePath is empty
     ''' Returns False if the paramFilePath is defined but the file is not found or cannot be parsed</returns>
     Private Function LoadSearchEngineParamFile(msgfPlusParamFilePath As String) As Boolean
@@ -1862,7 +1866,7 @@ Public Class clsMSGFDBResultsProcessor
 
         ' The expected header from MSGFDB is:
         ' #SpecFile    SpecIndex    Scan#     FragMethod    Precursor                    PMError(Da)           Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecProb      P-value   FDR       PepFDR
-        ' or                                                                                                  
+        ' or
         ' #SpecFile    SpecIndex    Scan#     FragMethod    Precursor                    PMError(ppm)          Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecProb      P-value   FDR       PepFDR
 
         ' The expected header from MSGF+ is:
@@ -2091,7 +2095,7 @@ Public Class clsMSGFDBResultsProcessor
                 With objSearchResult
 
                     ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-                    ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
+                    ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
                     ' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
                     .ComputePeptideCleavageStateInProtein()
 
@@ -2237,7 +2241,7 @@ Public Class clsMSGFDBResultsProcessor
                 lstPepToProteinMapping = New List(Of udtPepToProteinMappingType)
 
                 ' Load the MSGF+ Parameter File so that we can determine the modification names and masses
-                ' If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo 
+                ' If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in lstMSGFDBModInfo
                 Dim success = ExtractModInfoFromParamFile(SearchToolParameterFilePath, lstMSGFDBModInfo)
                 If Not success Then
                     Return False
@@ -2306,7 +2310,7 @@ Public Class clsMSGFDBResultsProcessor
                     blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, strScanGroupFilePath, lstMSGFDBModInfo, blnMSGFPlus, lstSpecIdToIndex, eFilteredOutputFileTypeConstants.SynFile)
 
                     ' Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
-                    ' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols							
+                    ' LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
                     strPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(strOutputFolderPath, strBaseName) & ".txt", strOutputFolderPath, MTS:=False)
 
                     MyBase.ResetProgress("Loading the PepToProtein map file: " & Path.GetFileName(strPepToProteinMapFilePath), True)
@@ -2421,7 +2425,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="dblTotalModMass">Output parameter: total mass of all modifications</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Private Function ReplaceMSGFModTextWithSymbol(
+    Public Function ReplaceMSGFModTextWithSymbol(
       strPeptide As String,
       lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       blnMSGFPlus As Boolean,
@@ -2435,10 +2439,11 @@ Public Class clsMSGFDBResultsProcessor
         Dim strSuffix As String = String.Empty
 
         Dim strModSymbols As String = String.Empty
+        Dim strDynModSymbols As String = String.Empty
 
         Dim blnNterminalMod As Boolean
         Dim blnPossibleCTerminalMod As Boolean
-        Dim blnIsStaticMod As Boolean
+        Dim blnContainsStaticMod As Boolean
 
         Static reNTerminalModMassRegEx As New Regex(MSGFDB_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS)
         Static reModMassRegEx As New Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS)
@@ -2471,21 +2476,21 @@ Public Class clsMSGFDBResultsProcessor
 
             blnNterminalMod = True
             blnPossibleCTerminalMod = False
-            blnIsStaticMod = False
+            blnContainsStaticMod = False
 
             ' Convert the mod mass (or masses) to one or more mod symbols
-            If ConvertMGSFModMassesToSymbols("-", reMatch.Groups(1).Value, strModSymbols, lstMSGFDBModInfo, blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
+            If ConvertMGSFModMassesToSymbols("-", reMatch.Groups(1).Value, strModSymbols, strDynModSymbols, lstMSGFDBModInfo, blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnContainsStaticMod) Then
 
                 ' Replace the mod digits with the mod symbols
 
-                strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, blnMSGFPlus, blnIsStaticMod)
+                strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, strDynModSymbols, blnMSGFPlus, blnContainsStaticMod)
                 dblTotalModMass += dblModMassFound
 
             End If
         End If
 
         ' Next, step through the peptide and parse each mod mass that follows a residue
-        ' Any mod mass at the end must be considered a C-terminal mod 
+        ' Any mod mass at the end must be considered a C-terminal mod
 
         ' Need to start at the first letter
         ' If we had N-terminal mods, they're currently notated like this: _.+42.011MDHTPQSQLK.L or _.+42.011+57.021MNDR.Q
@@ -2561,13 +2566,13 @@ Public Class clsMSGFDBResultsProcessor
                 blnNterminalMod = False
 
                 ' Convert the mod mass (or masses) to one or more mod symbols
-                If ConvertMGSFModMassesToSymbols(currentResidue, reMatch.Groups(1).Value, strModSymbols, lstMSGFDBModInfo,
-                  blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnIsStaticMod) Then
+                If ConvertMGSFModMassesToSymbols(currentResidue, reMatch.Groups(1).Value, strModSymbols, strDynModSymbols, lstMSGFDBModInfo,
+                  blnNterminalMod, blnPossibleCTerminalMod, dblModMassFound, blnContainsStaticMod) Then
 
-                    strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, blnMSGFPlus, blnIsStaticMod)
+                    strPeptide = ReplaceMSGFModTextWithMatchedSymbol(strPeptide, reMatch.Groups(1), strModSymbols, strDynModSymbols, blnMSGFPlus, blnContainsStaticMod)
                     dblTotalModMass += dblModMassFound
 
-                    If blnMSGFPlus AndAlso blnIsStaticMod Then
+                    If blnMSGFPlus AndAlso blnContainsStaticMod Then
                         ' MSGF+ shows mod masses for static mods
                         ' Thus, we have removed the static mod mass and did not add a mod symbol
                         ' Therefore, leave intIndex unchanged
@@ -2610,8 +2615,9 @@ Public Class clsMSGFDBResultsProcessor
       strPeptide As String,
       reGroup As Capture,
       strModSymbols As String,
+      strDynModSymbols As String,
       blnMSGFPlus As Boolean,
-      blnIsStaticMod As Boolean) As String
+      blnContainsStaticMod As Boolean) As String
 
         Dim strPeptideNew As String
 
@@ -2621,9 +2627,13 @@ Public Class clsMSGFDBResultsProcessor
             strPeptideNew = String.Empty
         End If
 
-        If blnMSGFPlus AndAlso blnIsStaticMod Then
+        If blnMSGFPlus AndAlso blnContainsStaticMod Then
             ' MSGF+ shows mod masses for static mods
             ' However, for consistency with other PHRP results, we do not add a symbol to the peptide for this static mod
+            ' Catch: If we have a peptide/terminus affected by both a static and a dynamic mod, we still want the dynamic mod.
+            If Not String.IsNullOrWhiteSpace(strDynModSymbols)
+                strPeptideNew &= strDynModSymbols
+            End If
         Else
             strPeptideNew &= strModSymbols
         End If
@@ -2846,7 +2856,7 @@ Public Class clsMSGFDBResultsProcessor
                 '
                 ' This software will have turned both of these results info:
                 '  R.S#IGLPDVHSGYGFAIGNMAAFDMNDPEAVVSPGGVGFDINCGVR.L
-                ' We only want to include the result once in the _syn.txt file 
+                ' We only want to include the result once in the _syn.txt file
                 ' (though if the peptide maps to multiple proteins it will be listed multiple times; one line per protein)
 
                 Dim resultKey =

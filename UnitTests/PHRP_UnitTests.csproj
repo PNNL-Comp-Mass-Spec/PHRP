@@ -42,6 +42,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MSGFProcessingTests.cs" />
     <Compile Include="PeptideCleavageStateCalculatorTests.cs" />
     <Compile Include="PeptideMassCalculatorUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -52,6 +53,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PeptideHitResultsProcessor\PeptideHitResultsProcessor.vbproj">
+      <Project>{101064e4-f653-4e4e-9c61-3bd11ea0b197}</Project>
+      <Name>PeptideHitResultsProcessor</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PHRPReader\PHRPReader.vbproj">
       <Project>{81a15d6e-10c3-4f2c-bf71-6642b76753ed}</Project>
       <Name>PHRPReader</Name>
