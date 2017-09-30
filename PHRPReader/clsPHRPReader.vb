@@ -1,5 +1,5 @@
 ﻿'*********************************************************************************************************
-' Written by Matthew Monroe for the US Department of Energy 
+' Written by Matthew Monroe for the US Department of Energy
 ' Pacific Northwest National Laboratory, Richland, WA
 '
 ' Created 04/04/2012
@@ -9,7 +9,7 @@
 '
 ' It also integrates MSGF results with the peptide hit search results
 ' And, it integrates scan stats values (to determine elution time)
-' 
+'
 '*********************************************************************************************************
 
 Option Strict On
@@ -109,11 +109,11 @@ Public Class clsPHRPReader
     ' This dictionary contains mod symbols as the key and modification definition as the values
     Private ReadOnly mDynamicMods As SortedDictionary(Of Char, clsModificationDefinition)
 
-    ' This dictionary contains amino acid names as the key and the corresponding mod modification (or mod modifications) 
+    ' This dictionary contains amino acid names as the key and the corresponding mod modification (or mod modifications)
     Private ReadOnly mStaticMods As SortedDictionary(Of String, List(Of clsModificationDefinition))
 
-    ' This dictionary tracks the MSGFSpecProb values for each entry in the source file
-    ' The keys are Result_ID and the string is MSGFSpecProb (stored as string to preserve formatting)
+    ' This dictionary tracks the MSGFSpecEValue values for each entry in the source file
+    ' The keys are Result_ID and the string is MSGFSpecEValue (stored as string to preserve formatting)
     Private mMSGFCachedResults As Dictionary(Of Integer, String)
 
     ' This dictionary tracks scan stats values, in particular elution time
@@ -775,7 +775,7 @@ Public Class clsPHRPReader
                     End If
 
                     ' Open the input file for reading
-                    ' Note that this will also load the MSGFSpecProb info and ScanStats info
+                    ' Note that this will also load the MSGFSpecEValue info and ScanStats info
                     blnSuccess = InitializeParser(eResultType)
 
                     If blnSuccess AndAlso mStartupOptions.LoadModsAndSeqInfo Then
@@ -2245,15 +2245,15 @@ Public Class clsPHRPReader
         End If
 
         If Not mMSGFCachedResults Is Nothing AndAlso mMSGFCachedResults.Count > 0 Then
-            Dim strMSGFSpecProb As String = String.Empty
-            Dim dblSpecProb As Double
+            Dim specEValueText As String = String.Empty
+            Dim specEValue As Double
 
-            If mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, strMSGFSpecProb) Then
-                mPSMCurrent.MSGFSpecProb = strMSGFSpecProb
-                If strMSGFSpecProb.Length > 12 Then
-                    ' Attempt to shorten the SpecProb value
-                    If Double.TryParse(strMSGFSpecProb, dblSpecProb) Then
-                        mPSMCurrent.MSGFSpecProb = dblSpecProb.ToString("0.00000E-00")
+            If mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, specEValueText) Then
+                mPSMCurrent.MSGFSpecEValue = specEValueText
+                If specEValueText.Length > 12 Then
+                    ' Attempt to shorten the SpecEValue value
+                    If Double.TryParse(specEValueText, specEValue) Then
+                        mPSMCurrent.MSGFSpecEValue = specEValue.ToString("0.00000E-00")
                     End If
                 End If
             End If

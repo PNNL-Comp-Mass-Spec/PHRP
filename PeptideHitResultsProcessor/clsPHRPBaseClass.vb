@@ -312,7 +312,7 @@ Public MustInherit Class clsPHRPBaseClass
     End Property
 
     ''' <summary>
-    ''' 
+    ''' MSGFDB synopsis file spec EVaule threshold
     ''' </summary>
     ''' <returns></returns>
     ''' <remarks>Lower SpecProb values are higher confidence results; renamed to SpecEValue in MSGF+</remarks>
@@ -1144,7 +1144,7 @@ Public MustInherit Class clsPHRPBaseClass
                                               intResidueLocInProtein.ToString() & ControlChars.Tab &
                                               objMod.ModDefinition.MassCorrectionTag & ControlChars.Tab &
                                               objMod.ResidueLocInPeptide.ToString() & ControlChars.Tab &
-                                              objReader.CurrentPSM.MSGFSpecProb)
+                                              objReader.CurrentPSM.MSGFSpecEValue)
                                         End If
 
                                     Next

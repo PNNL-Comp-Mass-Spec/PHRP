@@ -1,5 +1,5 @@
 ﻿'*********************************************************************************************************
-' Written by Matthew Monroe for the US Department of Energy 
+' Written by Matthew Monroe for the US Department of Energy
 ' Pacific Northwest National Laboratory, Richland, WA
 '
 ' Created 04/04/2012
@@ -475,7 +475,6 @@ Public Class clsPHRPParserMSGFDB
         Dim strProtein As String
 
         Dim dblPrecursorMZ As Double
-        Dim dblSpecProb As Double
 
         Dim blnMSGFPlusResults As Boolean
         Dim blnSuccess As Boolean
@@ -526,15 +525,16 @@ Public Class clsPHRPParserMSGFDB
                     .MassErrorPPM = LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders)
 
                     If blnMSGFPlusResults Then
-                        .MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders)
+                        .MSGFSpecEValue = LookupColumnValue(strColumns, DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders)
                     Else
-                        .MSGFSpecProb = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders)
+                        .MSGFSpecEValue = LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders)
                     End If
 
-                    If .MSGFSpecProb.Length > 13 Then
-                        ' Attempt to shorten the SpecProb value
-                        If Double.TryParse(.MSGFSpecProb, dblSpecProb) Then
-                            .MSGFSpecProb = dblSpecProb.ToString("0.0000000E-00")
+                    If .MSGFSpecEValue.Length > 13 Then
+                        ' Attempt to shorten the SpecEValue value
+                        Dim dblSpecEValue As Double
+                        If Double.TryParse(.MSGFSpecEValue, dblSpecEValue) Then
+                            .MSGFSpecEValue = dblSpecEValue.ToString("0.0000000E-00")
                         End If
 
                     End If
@@ -569,17 +569,16 @@ Public Class clsPHRPParserMSGFDB
                     If objPSM.TryGetScore(DATA_COLUMN_PepQValue, strValue) Then objPSM.SetScore(DATA_COLUMN_PepFDR, strValue)
 
                     Dim strEValue = String.Empty
-                    Dim dblEValue As Double
 
-                    Dim strSpecEValue = String.Empty
-                    Dim dblSpecEValue As Double
-
-                    Dim blnPValueStored As Boolean = False
+                    Dim blnPValueStored = False
 
                     If objPSM.TryGetScore(DATA_COLUMN_EValue, strEValue) Then
+                        Dim strSpecEValue = String.Empty
                         If objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, strSpecEValue) Then
                             ' Compute PValue using EValue and SpecEValue
+                            Dim dblEValue As Double
                             If Double.TryParse(strEValue, dblEValue) Then
+                                Dim dblSpecEValue As Double
                                 If Double.TryParse(strSpecEValue, dblSpecEValue) Then
                                     If dblSpecEValue > 0 Then
                                         Dim dblN As Double = dblEValue / dblSpecEValue

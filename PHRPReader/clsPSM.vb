@@ -1,5 +1,5 @@
 ﻿'*********************************************************************************************************
-' Written by Matthew Monroe for the US Department of Energy 
+' Written by Matthew Monroe for the US Department of Energy
 ' Pacific Northwest National Laboratory, Richland, WA
 '
 ' Created 04/04/2012
@@ -130,17 +130,32 @@ Public Class clsPSM
     End Property
 
     ''' <summary>
-    ''' MSGF Spectral Probability associated with this peptide
+    ''' MSGF Spectral E-Value associated with this peptide (aka SpecEValue or SpecProb)
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
-    ''' <remarks>Ranges from 0 to 1, where 0 is the best score and 1 is the worse score</remarks>
+    ''' <remarks>
+    ''' Ranges from 0 to 1, where 0 is the best score and 1 is the worse score
+    ''' Stored as a string to preserve formatting
+    ''' </remarks>
+    Public Property MSGFSpecEValue As String
+
+    ''' <summary>
+    ''' MSGF Spectral E-Value associated with this peptide (aka SpecEValue or SpecProb)
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks>
+    ''' Ranges from 0 to 1, where 0 is the best score and 1 is the worse score
+    ''' Stored as a string to preserve formatting
+    ''' </remarks>
+    <Obsolete("Use MSGFSpecEValue")>
     Public Property MSGFSpecProb As String
         Get
-            Return mMSGFSpecProb
+            Return MSGFSpecEValue
         End Get
-        Set(value As String)
-            mMSGFSpecProb = value
+        Set
+            MSGFSpecEValue = Value
         End Set
     End Property
 
