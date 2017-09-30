@@ -169,7 +169,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns>True if the file is readable</returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property CanRead() As Boolean
+    Public ReadOnly Property CanRead As Boolean
         Get
             Return mCanRead
         End Get
@@ -227,8 +227,8 @@ Public Class clsPHRPReader
         Get
             Return mEchoMessagesToConsole
         End Get
-        Set(value As Boolean)
-            mEchoMessagesToConsole = value
+        Set
+            mEchoMessagesToConsole = Value
         End Set
     End Property
 
@@ -238,7 +238,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property ErrorMessages() As List(Of String)
+    Public ReadOnly Property ErrorMessages As List(Of String)
         Get
             Return mErrorMessages
         End Get
@@ -250,7 +250,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property ErrorMessage() As String
+    Public ReadOnly Property ErrorMessage As String
         Get
             Return mErrorMessage
         End Get
@@ -263,12 +263,12 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>Once FastReadMode is enabled it cannot be turned off (this is a safety measure due to how data is cached)</remarks>
-    Public Property FastReadMode() As Boolean
+    Public Property FastReadMode As Boolean
         Get
             Return mFastReadMode
         End Get
-        Set(value As Boolean)
-            If value Then
+        Set
+            If Value Then
                 mFastReadMode = True
             End If
         End Set
@@ -281,19 +281,19 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property LoadModsAndSeqInfo() As Boolean
+    Public ReadOnly Property LoadModsAndSeqInfo As Boolean
         Get
             Return mStartupOptions.LoadModsAndSeqInfo
         End Get
     End Property
 
     ''' <summary>
-    ''' If true, then loads the MSGF SpecProb values from the _MSGF.txt file associated with the input file
+    ''' If true, will load the MSGF SpecEValue values from the _MSGF.txt file associated with the input file
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property LoadMSGFResults() As Boolean
+    Public ReadOnly Property LoadMSGFResults As Boolean
         Get
             Return mStartupOptions.LoadMSGFResults
         End Get
@@ -305,7 +305,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property LoadScanStatsData() As Boolean
+    Public ReadOnly Property LoadScanStatsData As Boolean
         Get
             Return mStartupOptions.LoadScanStatsData
         End Get
@@ -317,12 +317,12 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Property MaxProteinsPerPSM() As Integer
+    Public Property MaxProteinsPerPSM As Integer
         Get
             Return mStartupOptions.MaxProteinsPerPSM
         End Get
-        Set(value As Integer)
-            mStartupOptions.MaxProteinsPerPSM = value
+        Set
+            mStartupOptions.MaxProteinsPerPSM = Value
         End Set
     End Property
 
@@ -360,7 +360,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property PercentComplete() As Single
+    Public ReadOnly Property PercentComplete As Single
         Get
             If mSourceFileLineCount > 0 Then
                 Return mSourceFileLinesRead / CSng(mSourceFileLineCount) * 100.0!
@@ -377,7 +377,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property PHRPParser() As clsPHRPParser
+    Public ReadOnly Property PHRPParser As clsPHRPParser
         Get
             Return mPHRPParser
         End Get
@@ -389,7 +389,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property ResultToSeqMap() As SortedList(Of Integer, Integer)
+    Public ReadOnly Property ResultToSeqMap As SortedList(Of Integer, Integer)
         Get
             If mPHRPParser Is Nothing Then
                 Return New SortedList(Of Integer, Integer)
@@ -406,7 +406,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property SeqInfo() As SortedList(Of Integer, clsSeqInfo)
+    Public ReadOnly Property SeqInfo As SortedList(Of Integer, clsSeqInfo)
         Get
             If mPHRPParser Is Nothing Then
                 Return New SortedList(Of Integer, clsSeqInfo)
@@ -422,7 +422,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property SeqToProteinMap() As SortedList(Of Integer, List(Of clsProteinInfo))
+    Public ReadOnly Property SeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
         Get
             If mPHRPParser Is Nothing Then
                 Return New SortedList(Of Integer, List(Of clsProteinInfo))
@@ -438,12 +438,12 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Property SkipDuplicatePSMs() As Boolean
+    Public Property SkipDuplicatePSMs As Boolean
         Get
             Return mSkipDuplicatePSMs
         End Get
-        Set(value As Boolean)
-            mSkipDuplicatePSMs = value
+        Set
+            mSkipDuplicatePSMs = Value
         End Set
     End Property
 
@@ -453,7 +453,7 @@ Public Class clsPHRPReader
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property WarningMessages() As List(Of String)
+    Public ReadOnly Property WarningMessages As List(Of String)
         Get
             Return mWarningMessages
         End Get
@@ -939,7 +939,7 @@ Public Class clsPHRPReader
     ''' <remarks></remarks>
     Public Shared Function AutoDetermineBestInputFile(
        inputFolderPath As String,
-       <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
+       <Out> ByRef eMatchedResultType As ePeptideHitResultType) As String
 
         ' Find candidate dataset names in strInputFolderPath
 
@@ -1051,7 +1051,7 @@ Public Class clsPHRPReader
     ''' <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
     ''' <returns>The full path to the most appropriate Synopsis or First hits file</returns>
     ''' <remarks></remarks>
-    Public Shared Function AutoDetermineBestInputFile(strInputFolderPath As String, strDatasetName As String, <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
+    Public Shared Function AutoDetermineBestInputFile(strInputFolderPath As String, strDatasetName As String, <Out> ByRef eMatchedResultType As ePeptideHitResultType) As String
         Dim lstDatasetNames = New List(Of String)
         lstDatasetNames.Add(strDatasetName)
 
@@ -1070,7 +1070,7 @@ Public Class clsPHRPReader
     Public Shared Function AutoDetermineBestInputFile(
        strInputFolderPath As String,
        lstDatasetNames As List(Of String),
-       <Out()> ByRef eMatchedResultType As ePeptideHitResultType) As String
+       <Out> ByRef eMatchedResultType As ePeptideHitResultType) As String
 
         Dim fiInputFolder As DirectoryInfo
 
@@ -1412,8 +1412,8 @@ Public Class clsPHRPReader
     ''' <remarks>strPeptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
     Private Function ConvertModsToNumericMods(
       strPeptide As String,
-      <Out()> ByRef strPeptideWithNumericMods As String,
-      <Out()> ByRef lstPeptideMods As List(Of clsAminoAcidModInfo)) As Boolean
+      <Out> ByRef strPeptideWithNumericMods As String,
+      <Out> ByRef lstPeptideMods As List(Of clsAminoAcidModInfo)) As Boolean
 
         Static sbNewPeptide As New Text.StringBuilder
 
@@ -2203,7 +2203,7 @@ Public Class clsPHRPReader
         blnMatchFound = True
 
         ' The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
-        ' If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods 
+        ' If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods
         ' by inferring the mods using mDynamicMods and mStaticMods (which were populated using the PHRP ModSummary file)
         If Not mFastReadMode AndAlso mStartupOptions.LoadModsAndSeqInfo AndAlso String.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods) Then
             MarkupPeptideWithMods()
@@ -2716,7 +2716,7 @@ Public Class clsPHRPReader
         RaiseEvent MessageEvent(strMessage)
     End Sub
 
-    Private Function TryGetScanStats(intScanNumber As Integer, <Out()> ByRef objScanStatsInfo As clsScanStatsInfo) As Boolean
+    Private Function TryGetScanStats(intScanNumber As Integer, <Out> ByRef objScanStatsInfo As clsScanStatsInfo) As Boolean
         If Not mScanStats Is Nothing AndAlso mScanStats.Count > 0 Then
             If mScanStats.TryGetValue(intScanNumber, objScanStatsInfo) Then
                 Return True
@@ -2726,7 +2726,7 @@ Public Class clsPHRPReader
         Return False
     End Function
 
-    Private Function TryGetExtendedScanStats(intScanNumber As Integer, <Out()> ByRef objExtendedScanStatsInfo As clsScanStatsExInfo) As Boolean
+    Private Function TryGetExtendedScanStats(intScanNumber As Integer, <Out> ByRef objExtendedScanStatsInfo As clsScanStatsExInfo) As Boolean
         If Not mScanStatsEx Is Nothing AndAlso mScanStats.Count > 0 Then
             If mScanStatsEx.TryGetValue(intScanNumber, objExtendedScanStatsInfo) Then
                 Return True

@@ -10,18 +10,18 @@ Option Strict On
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
 ' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
-' 
+'
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
-' in compliance with the License.  You may obtain a copy of the License at 
+' in compliance with the License.  You may obtain a copy of the License at
 ' http://www.apache.org/licenses/LICENSE-2.0
 '
-' Notice: This computer software was prepared by Battelle Memorial Institute, 
-' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
-' Department of Energy (DOE).  All rights in the computer software are reserved 
-' by DOE on behalf of the United States Government and the Contractor as 
-' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
-' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
-' SOFTWARE.  This notice including this sentence must appear on any copies of 
+' Notice: This computer software was prepared by Battelle Memorial Institute,
+' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the
+' Department of Energy (DOE).  All rights in the computer software are reserved
+' by DOE on behalf of the United States Government and the Contractor as
+' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY
+' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS
+' SOFTWARE.  This notice including this sentence must appear on any copies of
 ' this computer software.
 
 Imports PHRPReader
@@ -31,120 +31,45 @@ Public Class clsSearchResultsXTandem
 
 #Region "Classwide Variables"
     ' Note: ProteinExpectationValue and ProteinIntensity are defined in clsSearchResultsBaseClass
-    Protected mfI As String
-
-    Protected mPeptideExpectationValue As String            ' The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
-    Protected mPeptideHyperscore As String
+    ' The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
     Protected mPeptideNextScore As String
-    Protected mPeptideDeltaCn2 As Single
-
-    Protected mPeptideYScore As String
-    Protected mPeptideYIons As String
-    Protected mPeptideBScore As String
-    Protected mPeptideBIons As String
-
-    Protected mPeptideIntensity As String
-    Protected mPeptideIntensityMax As String
-
-    Protected mPeptideDeltaMassCorrectedPpm As Double
 
 #End Region
 
 #Region "Properties"
-    Public Property fI() As String
-        Get
-            Return mfI
-        End Get
-        Set(Value As String)
-            mfI = Value
-        End Set
-    End Property
-    Public Property PeptideExpectationValue() As String
-        Get
-            Return mPeptideExpectationValue
-        End Get
-        Set(Value As String)
-            mPeptideExpectationValue = Value
-        End Set
-    End Property
-    Public Property PeptideHyperscore() As String
-        Get
-            Return mPeptideHyperscore
-        End Get
-        Set(Value As String)
-            mPeptideHyperscore = Value
-        End Set
-    End Property
-    Public Property PeptideNextScore() As String
+
+    Public Property fI As String
+
+    Public Property PeptideExpectationValue As String
+
+    Public Property PeptideHyperscore As String
+
+    Public Property PeptideNextScore As String
         Get
             Return mPeptideNextScore
         End Get
-        Set(Value As String)
+        Set
             mPeptideNextScore = Value
             ComputePeptideDeltaCn2()
         End Set
     End Property
-    Public ReadOnly Property PeptideDeltaCn2() As Single
-        Get
-            Return mPeptideDeltaCn2
-        End Get
-    End Property
-    Public Property PeptideYScore() As String
-        Get
-            Return mPeptideYScore
-        End Get
-        Set(Value As String)
-            mPeptideYScore = Value
-        End Set
-    End Property
-    Public Property PeptideYIons() As String
-        Get
-            Return mPeptideYIons
-        End Get
-        Set(Value As String)
-            mPeptideYIons = Value
-        End Set
-    End Property
-    Public Property PeptideBScore() As String
-        Get
-            Return mPeptideBScore
-        End Get
-        Set(Value As String)
-            mPeptideBScore = Value
-        End Set
-    End Property
-    Public Property PeptideBIons() As String
-        Get
-            Return mPeptideBIons
-        End Get
-        Set(Value As String)
-            mPeptideBIons = Value
-        End Set
-    End Property
-    Public Property PeptideIntensity() As String
-        Get
-            Return mPeptideIntensity
-        End Get
-        Set(Value As String)
-            mPeptideIntensity = Value
-        End Set
-    End Property
-    Public Property PeptideIntensityMax() As String
-        Get
-            Return mPeptideIntensityMax
-        End Get
-        Set(Value As String)
-            mPeptideIntensityMax = Value
-        End Set
-    End Property
-    Public Property PeptideDeltaMassCorrectedPpm() As Double
-        Get
-            Return mPeptideDeltaMassCorrectedPpm
-        End Get
-        Set(value As Double)
-            mPeptideDeltaMassCorrectedPpm = value
-        End Set
-    End Property
+
+    Public Property PeptideDeltaCn2 As Single
+
+    Public Property PeptideYScore As String
+
+    Public Property PeptideYIons As String
+
+    Public Property PeptideBScore As String
+
+    Public Property PeptideBIons As String
+
+    Public Property PeptideIntensity As String
+
+    Public Property PeptideIntensityMax As String
+
+    Public Property PeptideDeltaMassCorrectedPpm As Double
+
 #End Region
 
     Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
@@ -155,22 +80,22 @@ Public Class clsSearchResultsXTandem
     Public Overrides Sub Clear()
         MyBase.Clear()
 
-        mfI = String.Empty
+        fI = String.Empty
 
-        mPeptideExpectationValue = String.Empty
-        mPeptideHyperscore = String.Empty
+        PeptideExpectationValue = String.Empty
+        PeptideHyperscore = String.Empty
         mPeptideNextScore = String.Empty
-        mPeptideDeltaCn2 = 0
+        PeptideDeltaCn2 = 0
 
-        mPeptideYScore = String.Empty
-        mPeptideYIons = String.Empty
-        mPeptideBScore = String.Empty
-        mPeptideBIons = String.Empty
+        PeptideYScore = String.Empty
+        PeptideYIons = String.Empty
+        PeptideBScore = String.Empty
+        PeptideBIons = String.Empty
 
-        mPeptideIntensity = String.Empty
-        mPeptideIntensityMax = String.Empty
+        PeptideIntensity = String.Empty
+        PeptideIntensityMax = String.Empty
 
-        mPeptideDeltaMassCorrectedPpm = 0
+        PeptideDeltaMassCorrectedPpm = 0
     End Sub
 
     Public Sub ComputeDelMCorrectedXT()
@@ -202,24 +127,22 @@ Public Class clsSearchResultsXTandem
             End If
 
             Const blnAdjustPrecursorMassForC13 = True
-            mPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, PeptideMonoisotopicMass)
+            PeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, PeptideMonoisotopicMass)
 
         Else
-            mPeptideDeltaMassCorrectedPpm = 0
+            PeptideDeltaMassCorrectedPpm = 0
         End If
-
     End Sub
 
     Protected Sub ComputePeptideDeltaCn2()
         Try
-            If clsPHRPParser.IsNumber(mPeptideHyperscore) And clsPHRPParser.IsNumber(mPeptideNextScore) Then
-                mPeptideDeltaCn2 = (CSng(mPeptideHyperscore) - CSng(mPeptideNextScore)) / CSng(mPeptideHyperscore)
+            If clsPHRPParser.IsNumber(PeptideHyperscore) And clsPHRPParser.IsNumber(mPeptideNextScore) Then
+                PeptideDeltaCn2 = (CSng(PeptideHyperscore) - CSng(mPeptideNextScore)) / CSng(PeptideHyperscore)
             Else
-                mPeptideDeltaCn2 = 0
+                PeptideDeltaCn2 = 0
             End If
         Catch ex As Exception
-            mPeptideDeltaCn2 = 0
+            PeptideDeltaCn2 = 0
         End Try
     End Sub
-
 End Class

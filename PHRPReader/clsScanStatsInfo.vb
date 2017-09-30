@@ -32,11 +32,11 @@ Public Class clsScanStatsInfo
         Get
             Return mScanTypeName
         End Get
-        Set(value As String)
-            If String.IsNullOrEmpty(value) Then
+        Set
+            If String.IsNullOrEmpty(Value) Then
                 mScanTypeName = String.Empty
             Else
-                mScanTypeName = value
+                mScanTypeName = Value
             End If
         End Set
     End Property

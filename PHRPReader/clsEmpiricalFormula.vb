@@ -5,7 +5,7 @@
     ''' Keys are element symbols, values are element counts
     ''' </summary>
     ''' <returns></returns>
-    Public ReadOnly Property ElementCounts() As Dictionary(Of String, Integer)
+    Public ReadOnly Property ElementCounts As Dictionary(Of String, Integer)
 
     ''' <summary>
     ''' Constructor

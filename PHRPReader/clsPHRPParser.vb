@@ -72,7 +72,7 @@ Public MustInherit Class clsPHRPParser
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property ErrorMessages() As List(Of String)
+    Public ReadOnly Property ErrorMessages As List(Of String)
         Get
             Return mErrorMessages
         End Get
@@ -108,12 +108,12 @@ Public MustInherit Class clsPHRPParser
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>0 means to load all proteins</remarks>
-    Public Property MaxProteinsPerPSM() As Integer
+    Public Property MaxProteinsPerPSM As Integer
         Get
             Return mMaxProteinsPerPSM
         End Get
-        Set(value As Integer)
-            mMaxProteinsPerPSM = value
+        Set
+            mMaxProteinsPerPSM = Value
         End Set
     End Property
 
@@ -133,7 +133,7 @@ Public MustInherit Class clsPHRPParser
     ''' Peptide to protein map file name
     ''' </summary>
     ''' <returns></returns>
-    Public ReadOnly Property PepToProteinMap() As Dictionary(Of String, clsPepToProteinMapInfo)
+    Public ReadOnly Property PepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)
         Get
             Return mPepToProteinMap
         End Get
@@ -145,7 +145,7 @@ Public MustInherit Class clsPHRPParser
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property ResultToSeqMap() As SortedList(Of Integer, Integer)
+    Public ReadOnly Property ResultToSeqMap As SortedList(Of Integer, Integer)
         Get
             Return mResultToSeqMap
         End Get
@@ -157,7 +157,7 @@ Public MustInherit Class clsPHRPParser
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property SeqInfo() As SortedList(Of Integer, clsSeqInfo)
+    Public ReadOnly Property SeqInfo As SortedList(Of Integer, clsSeqInfo)
         Get
             Return mSeqInfo
         End Get
@@ -169,7 +169,7 @@ Public MustInherit Class clsPHRPParser
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property SeqToProteinMap() As SortedList(Of Integer, List(Of clsProteinInfo))
+    Public ReadOnly Property SeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo))
         Get
             Return mSeqToProteinMap
         End Get
@@ -181,7 +181,7 @@ Public MustInherit Class clsPHRPParser
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property WarningMessages() As List(Of String)
+    Public ReadOnly Property WarningMessages As List(Of String)
         Get
             Return mWarningMessages
         End Get
@@ -191,23 +191,23 @@ Public MustInherit Class clsPHRPParser
 
 #Region "Properties overridden by derived classes"
 
-    Public MustOverride ReadOnly Property PHRPFirstHitsFileName() As String
+    Public MustOverride ReadOnly Property PHRPFirstHitsFileName As String
 
-    Public MustOverride ReadOnly Property PHRPModSummaryFileName() As String
+    Public MustOverride ReadOnly Property PHRPModSummaryFileName As String
 
-    Public MustOverride ReadOnly Property PHRPPepToProteinMapFileName() As String
+    Public MustOverride ReadOnly Property PHRPPepToProteinMapFileName As String
 
-    Public MustOverride ReadOnly Property PHRPProteinModsFileName() As String
+    Public MustOverride ReadOnly Property PHRPProteinModsFileName As String
 
-    Public MustOverride ReadOnly Property PHRPSynopsisFileName() As String
+    Public MustOverride ReadOnly Property PHRPSynopsisFileName As String
 
-    Public MustOverride ReadOnly Property PHRPResultToSeqMapFileName() As String
+    Public MustOverride ReadOnly Property PHRPResultToSeqMapFileName As String
 
-    Public MustOverride ReadOnly Property PHRPSeqInfoFileName() As String
+    Public MustOverride ReadOnly Property PHRPSeqInfoFileName As String
 
-    Public MustOverride ReadOnly Property PHRPSeqToProteinMapFileName() As String
+    Public MustOverride ReadOnly Property PHRPSeqToProteinMapFileName As String
 
-    Public MustOverride ReadOnly Property SearchEngineName() As String
+    Public MustOverride ReadOnly Property SearchEngineName As String
 
 #End Region
 
@@ -457,7 +457,7 @@ Public MustInherit Class clsPHRPParser
     ''' <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
     ''' <param name="objPSM">clsPSM object (output)</param>
     ''' <returns>True if success, false if an error</returns>
-    Public Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM) As Boolean
+    Public Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out> ByRef objPSM As clsPSM) As Boolean
         Return ParsePHRPDataLine(strLine, intLinesRead, objPSM, fastReadMode:=False)
     End Function
 
@@ -470,7 +470,7 @@ Public MustInherit Class clsPHRPParser
     ''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
-    Public MustOverride Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
+    Public MustOverride Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
 
     ''' <summary>
     ''' Parses the specified parameter file
@@ -480,7 +480,7 @@ Public MustInherit Class clsPHRPParser
     ''' <param name="objSearchEngineParams">Search engine parameters class (output)</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public MustOverride Function LoadSearchEngineParameters(strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Public MustOverride Function LoadSearchEngineParameters(strSearchEngineParamFileName As String, <Out> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
 #End Region
 
@@ -615,7 +615,7 @@ Public MustInherit Class clsPHRPParser
 
     End Sub
 
-    Private Shared Function GetMODaStaticModSetting(kvSetting As KeyValuePair(Of String, String), <Out()> warningMessage As String) As KeyValuePair(Of String, String)
+    Private Shared Function GetMODaStaticModSetting(kvSetting As KeyValuePair(Of String, String), <Out> warningMessage As String) As KeyValuePair(Of String, String)
 
         Dim strKey = kvSetting.Key
         Dim strValue = kvSetting.Value
@@ -946,8 +946,8 @@ Public MustInherit Class clsPHRPParser
       paramFilePath As String,
       ePeptideHitResultType As clsPHRPReader.ePeptideHitResultType,
       searchEngineParams As clsSearchEngineParameters,
-      <Out()> errorMessage As String,
-      <Out()> warningMessage As String) As Boolean
+      <Out> errorMessage As String,
+      <Out> warningMessage As String) As Boolean
 
         errorMessage = String.Empty
         warningMessage = String.Empty
@@ -1327,7 +1327,7 @@ Public MustInherit Class clsPHRPParser
       strMassCorrectionTag As String,
       blnFavorTerminalMods As Boolean,
       eResidueTerminusState As clsAminoAcidModInfo.eResidueTerminusStateConstants,
-      <Out()> ByRef objMatchedModDef As clsModificationDefinition) As Boolean
+      <Out> ByRef objMatchedModDef As clsModificationDefinition) As Boolean
 
         objMatchedModDef = New clsModificationDefinition()
 

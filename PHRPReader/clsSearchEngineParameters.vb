@@ -29,9 +29,9 @@ Public Class clsSearchEngineParameters
         Get
             Return mEnzyme
         End Get
-        Set(value As String)
-            If value = "" Then value = "none"
-            mEnzyme = value
+        Set
+            If Value = "" Then Value = "none"
+            mEnzyme = Value
         End Set
     End Property
 
@@ -50,9 +50,9 @@ Public Class clsSearchEngineParameters
         Get
             Return mFragmentMassType
         End Get
-        Set(value As String)
-            If String.IsNullOrEmpty(value) Then value = MASS_TYPE_MONOISOTOPIC
-            mFragmentMassType = value
+        Set
+            If String.IsNullOrEmpty(Value) Then Value = MASS_TYPE_MONOISOTOPIC
+            mFragmentMassType = Value
         End Set
     End Property
 
@@ -110,9 +110,9 @@ Public Class clsSearchEngineParameters
         Get
             Return mPrecursorMassType
         End Get
-        Set(value As String)
-            If String.IsNullOrWhiteSpace(value) Then value = MASS_TYPE_MONOISOTOPIC
-            mPrecursorMassType = value
+        Set
+            If String.IsNullOrWhiteSpace(Value) Then Value = MASS_TYPE_MONOISOTOPIC
+            mPrecursorMassType = Value
         End Set
     End Property
 

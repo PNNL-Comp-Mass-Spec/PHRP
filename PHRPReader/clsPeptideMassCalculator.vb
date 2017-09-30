@@ -102,35 +102,35 @@ Public Class clsPeptideMassCalculator
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property ErrorMessage() As String
+    Public ReadOnly Property ErrorMessage As String
         Get
             Return mErrorMessage
         End Get
     End Property
 
-    Public Property PeptideCTerminusMass() As Double
+    Public Property PeptideCTerminusMass As Double
         Get
             Return mPeptideCTerminusMass
         End Get
-        Set(Value As Double)
+        Set
             mPeptideCTerminusMass = Value
         End Set
     End Property
 
-    Public Property PeptideNTerminusMass() As Double
+    Public Property PeptideNTerminusMass As Double
         Get
             Return mPeptideNTerminusMass
         End Get
-        Set(Value As Double)
+        Set
             mPeptideNTerminusMass = Value
         End Set
     End Property
 
-    Public Property RemovePrefixAndSuffixIfPresent() As Boolean
+    Public Property RemovePrefixAndSuffixIfPresent As Boolean
         Get
             Return mRemovePrefixAndSuffixIfPresent
         End Get
-        Set(Value As Boolean)
+        Set
             mRemovePrefixAndSuffixIfPresent = Value
         End Set
     End Property
@@ -189,7 +189,7 @@ Public Class clsPeptideMassCalculator
     ''' <param name="elementalComposition"></param>
     ''' <param name="unknownSymbols"></param>
     ''' <returns></returns>
-    Public Shared Function ComputeMonoistopicMass(elementalComposition As Dictionary(Of String, Integer), <Out()> ByRef unknownSymbols As List(Of String)) As Double
+    Public Shared Function ComputeMonoistopicMass(elementalComposition As Dictionary(Of String, Integer), <Out> ByRef unknownSymbols As List(Of String)) As Double
 
         Dim monoisotopicMass As Double = 0
 

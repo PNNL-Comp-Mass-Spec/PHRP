@@ -1001,7 +1001,7 @@ Public Class clsMODPlusResultsProcessor
     ''' <param name="intColumnMapping"></param>
     ''' <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
     ''' <remarks></remarks>
-    Private Function ParseMODPlusResultsFileHeaderLine(strLineIn As String, <Out()> ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMODPlusResultsFileHeaderLine(strLineIn As String, <Out> ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -1080,7 +1080,7 @@ Public Class clsMODPlusResultsProcessor
 
     End Function
 
-    Private Function ParseMODPlusSynFileHeaderLine(strLineIn As String, <Out()> ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMODPlusSynFileHeaderLine(strLineIn As String, <Out> ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -1139,7 +1139,7 @@ Public Class clsMODPlusResultsProcessor
       ByRef strErrorLog As String,
       intResultsProcessed As Integer,
       ByRef intColumnMapping() As Integer,
-      <Out()> ByRef strPeptideSequenceWithMods As String) As Boolean
+      <Out> ByRef strPeptideSequenceWithMods As String) As Boolean
 
         ' Parses an entry from the MODPlus Synopsis file
 

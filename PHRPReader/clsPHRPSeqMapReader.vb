@@ -61,8 +61,8 @@ Public Class clsPHRPSeqMapReader
         Get
             Return mMaxProteinsPerSeqID
         End Get
-        Set(value As Integer)
-            mMaxProteinsPerSeqID = value
+        Set
+            mMaxProteinsPerSeqID = Value
         End Set
     End Property
 
@@ -204,9 +204,9 @@ Public Class clsPHRPSeqMapReader
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks></remarks>
     Public Function GetProteinMapping(
-      <Out()> ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
-      <Out()> ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
-      <Out()> ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
+      <Out> ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
+      <Out> ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
+      <Out> ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo)) As Boolean
 
         Dim lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo) = Nothing
 
@@ -223,10 +223,10 @@ Public Class clsPHRPSeqMapReader
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks></remarks>
     Public Function GetProteinMapping(
-      <Out()> ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
-      <Out()> ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
-      <Out()> ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo),
-      <Out()> ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
+      <Out> ByRef lstResultToSeqMap As SortedList(Of Integer, Integer),
+      <Out> ByRef lstSeqToProteinMap As SortedList(Of Integer, List(Of clsProteinInfo)),
+      <Out> ByRef lstSeqInfo As SortedList(Of Integer, clsSeqInfo),
+      <Out> ByRef lstPepToProteinMap As Dictionary(Of String, clsPepToProteinMapInfo)) As Boolean
 
         Dim blnSuccess As Boolean
         Dim strFilePath As String

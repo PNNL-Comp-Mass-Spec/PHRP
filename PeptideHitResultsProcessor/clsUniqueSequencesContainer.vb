@@ -38,7 +38,7 @@ Public Class clsUniqueSequencesContainer
 #End Region
 
 #Region "Properties"
-    Public ReadOnly Property UniqueSequenceCount() As Integer
+    Public ReadOnly Property UniqueSequenceCount As Integer
         Get
             Return htMasterSequences.Count
         End Get

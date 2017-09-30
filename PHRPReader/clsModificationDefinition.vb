@@ -9,23 +9,23 @@
 ' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
 ' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 ' -------------------------------------------------------------------------------
-' 
+'
 ' Licensed under the Apache License, Version 2.0; you may not use this file except
-' in compliance with the License.  You may obtain a copy of the License at 
+' in compliance with the License.  You may obtain a copy of the License at
 ' http://www.apache.org/licenses/LICENSE-2.0
 '
-' Notice: This computer software was prepared by Battelle Memorial Institute, 
-' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
-' Department of Energy (DOE).  All rights in the computer software are reserved 
-' by DOE on behalf of the United States Government and the Contractor as 
-' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
-' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
-' SOFTWARE.  This notice including this sentence must appear on any copies of 
+' Notice: This computer software was prepared by Battelle Memorial Institute,
+' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the
+' Department of Energy (DOE).  All rights in the computer software are reserved
+' by DOE on behalf of the United States Government and the Contractor as
+' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY
+' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS
+' SOFTWARE.  This notice including this sentence must appear on any copies of
 ' this computer software.
 
 Option Strict On
 
-<Assembly: CLSCompliant(True)> 
+<Assembly: CLSCompliant(True)>
 
 <CLSCompliant(True)>
 Public Class clsModificationDefinition
@@ -96,14 +96,14 @@ Public Class clsModificationDefinition
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>
-    ''' Use NO_SYMBOL_MODIFICATION_SYMBOL (a dash) if no symbol 
+    ''' Use NO_SYMBOL_MODIFICATION_SYMBOL (a dash) if no symbol
     ''' (necessary for isotopic mods or protein terminus static mods)
     ''' </remarks>
-    Public Property ModificationSymbol() As Char
+    Public Property ModificationSymbol As Char
         Get
             Return mModificationSymbol
         End Get
-        Set(Value As Char)
+        Set
             If Value = Nothing Then
                 mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL
             Else
@@ -118,11 +118,11 @@ Public Class clsModificationDefinition
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Property ModificationMass() As Double
+    Public Property ModificationMass As Double
         Get
             Return mModificationMass
         End Get
-        Set(Value As Double)
+        Set
             mModificationMass = Value
             mModificationMassAsText = mModificationMass.ToString()
         End Set
@@ -134,12 +134,12 @@ Public Class clsModificationDefinition
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>Represents the original string value read from the data file</remarks>
-    Public Property ModificationMassAsText() As String
+    Public Property ModificationMassAsText As String
         Get
             Return mModificationMassAsText
         End Get
-        Set(value As String)
-            mModificationMassAsText = value
+        Set
+            mModificationMassAsText = Value
         End Set
     End Property
 
@@ -149,16 +149,16 @@ Public Class clsModificationDefinition
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>
-    ''' If an empty string, then the modification can apply to any residue or terminus; 
+    ''' If an empty string, then the modification can apply to any residue or terminus;
     ''' Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to.
-    ''' Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols 
+    ''' Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols
     ''' (less than and greater than signs for the peptide terminii; [ and ] for the protein terminii)
     ''' </remarks>
-    Public Property TargetResidues() As String
+    Public Property TargetResidues As String
         Get
             Return mTargetResidues
         End Get
-        Set(Value As String)
+        Set
             If Value Is Nothing Then
                 mTargetResidues = String.Empty
             Else
@@ -173,26 +173,26 @@ Public Class clsModificationDefinition
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Property ModificationType() As eModificationTypeConstants
+    Public Property ModificationType As eModificationTypeConstants
         Get
             Return mModificationType
         End Get
-        Set(Value As eModificationTypeConstants)
+        Set
             mModificationType = Value
         End Set
     End Property
 
     ''' <summary>
-    ''' Modification name, for example Phosph, IodoAcet, Plus1Oxy, or Methyl 
+    ''' Modification name, for example Phosph, IodoAcet, Plus1Oxy, or Methyl
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>Maximum length is 8 characters; cannot contain a colon, comma, or space</remarks>
-    Public Property MassCorrectionTag() As String
+    Public Property MassCorrectionTag As String
         Get
             Return mMassCorrectionTag
         End Get
-        Set(Value As String)
+        Set
             If Value Is Nothing Then
                 mMassCorrectionTag = String.Empty
             Else
@@ -207,14 +207,14 @@ Public Class clsModificationDefinition
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>
-    ''' Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL (a dash) for positional modifications 
+    ''' Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL (a dash) for positional modifications
     ''' (including terminus modifications)
     ''' </remarks>
-    Public Property AffectedAtom() As Char
+    Public Property AffectedAtom As Char
         Get
             Return mAffectedAtom
         End Get
-        Set(Value As Char)
+        Set
             If Value = Nothing Then
                 mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL
             Else
@@ -229,11 +229,11 @@ Public Class clsModificationDefinition
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Property OccurrenceCount() As Integer
+    Public Property OccurrenceCount As Integer
         Get
             Return mOccurrenceCount
         End Get
-        Set(Value As Integer)
+        Set
             mOccurrenceCount = Value
         End Set
     End Property
@@ -244,11 +244,11 @@ Public Class clsModificationDefinition
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Property UnknownModAutoDefined() As Boolean
+    Public Property UnknownModAutoDefined As Boolean
         Get
             Return mUnknownModAutoDefined
         End Get
-        Set(Value As Boolean)
+        Set
             mUnknownModAutoDefined = Value
         End Set
     End Property

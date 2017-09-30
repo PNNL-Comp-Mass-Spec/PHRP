@@ -616,13 +616,13 @@ Public Class clsMSGFDBResultsProcessor
     Private Function ConvertMGSFModMassesToSymbols(
       currentResidue As String,
       strModDigits As String,
-      <Out()> ByRef strModSymbols As String,
-      <Out()> ByRef strDynModSymbols As String,
+      <Out> ByRef strModSymbols As String,
+      <Out> ByRef strDynModSymbols As String,
       lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       blnNterminalMod As Boolean,
       blnPossibleCTerminalMod As Boolean,
-      <Out()> ByRef dblModMassFound As Double,
-      <Out()> ByRef blnContainsStaticMod As Boolean) As Boolean
+      <Out> ByRef dblModMassFound As Double,
+      <Out> ByRef blnContainsStaticMod As Boolean) As Boolean
 
         Dim reMatches As MatchCollection
 
@@ -771,7 +771,7 @@ Public Class clsMSGFDBResultsProcessor
       strOutputFilePath As String,
       strScanGroupFilePath As String,
       lstMSGFDBModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
-      <Out()> ByRef blnMSGFPlus As Boolean,
+      <Out> ByRef blnMSGFPlus As Boolean,
       lstSpecIdToIndex As IDictionary(Of String, Integer),
       eFilteredOutputFileType As eFilteredOutputFileTypeConstants) As Boolean
 
@@ -1048,7 +1048,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <remarks></remarks>
     Private Function ExtractModInfoFromParamFile(
        strMSGFDBParamFilePath As String,
-       <Out()> ByRef lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
+       <Out> ByRef lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
 
         Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME)
 
@@ -1184,7 +1184,7 @@ Public Class clsMSGFDBResultsProcessor
       lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       blnMSGFPlus As Boolean,
       lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
-      <Out()> ByRef strMTSPepToProteinMapFilePath As String) As Boolean
+      <Out> ByRef strMTSPepToProteinMapFilePath As String) As Boolean
 
         Dim strHeaderLine As String = String.Empty
         Dim strMTSCompatiblePeptide As String
@@ -2022,7 +2022,7 @@ Public Class clsMSGFDBResultsProcessor
       ByRef strErrorLog As String,
       intResultsProcessed As Integer,
       ByRef intColumnMapping() As Integer,
-      <Out()> ByRef strPeptideSequenceWithMods As String) As Boolean
+      <Out> ByRef strPeptideSequenceWithMods As String) As Boolean
 
         ' Parses an entry from the MSGFDB Synopsis file
 
@@ -2155,7 +2155,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Function
 
-    Private Function ParseParentMassTolerance(strToleranceText As String, <Out()> ByRef dblTolerance As Double, <Out()> ByRef blnIsPPM As Boolean) As Boolean
+    Private Function ParseParentMassTolerance(strToleranceText As String, <Out> ByRef dblTolerance As Double, <Out> ByRef blnIsPPM As Boolean) As Boolean
         dblTolerance = 0
         blnIsPPM = False
 
@@ -2429,7 +2429,7 @@ Public Class clsMSGFDBResultsProcessor
       strPeptide As String,
       lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       blnMSGFPlus As Boolean,
-      <Out()> ByRef dblTotalModMass As Double) As String
+      <Out> ByRef dblTotalModMass As Double) As String
 
         Dim intIndex As Integer
         Dim intIndexFirstResidue As Integer

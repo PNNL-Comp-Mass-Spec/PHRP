@@ -50,26 +50,26 @@ Public Interface IPeptideHitResultsProcessor
 #End Region
 
 #Region "Properties"
-    Property SourceFolderPath() As String ' (in) – path to folder containing the peptide hit results file
-    Property OutputFolderPath() As String ' (in) – path to folder where processed file is to be placed
-    Property PeptideHitResultsFileName() As String ' (in) - Filename containing the peptide hit results; See comment for PeptideHitResultsFileName in Structure InitializationParams above
-    Property MassCorrectionTagsFileName() As String ' (in) - Filename containing the global mass correction tags list; See comment for PeptideHitResultsFileName in Structure InitializationParams above
-    Property ModificationDefinitionsFileName() As String ' (in) - Filename containing modification definitions for this peptide hit results file; See comment for PeptideHitResultsFileName in Structure InitializationParams above
+    Property SourceFolderPath As String ' (in) – path to folder containing the peptide hit results file
+    Property OutputFolderPath As String ' (in) – path to folder where processed file is to be placed
+    Property PeptideHitResultsFileName As String ' (in) - Filename containing the peptide hit results; See comment for PeptideHitResultsFileName in Structure InitializationParams above
+    Property MassCorrectionTagsFileName As String ' (in) - Filename containing the global mass correction tags list; See comment for PeptideHitResultsFileName in Structure InitializationParams above
+    Property ModificationDefinitionsFileName As String ' (in) - Filename containing modification definitions for this peptide hit results file; See comment for PeptideHitResultsFileName in Structure InitializationParams above
 
-    Property AnalysisToolName() As String
-    Property DatasetName() As String
-    Property ParameterFileName() As String
-    Property SettingsFileName() As String
+    Property AnalysisToolName As String
+    Property DatasetName As String
+    Property ParameterFileName As String
+    Property SettingsFileName As String
 
-    Property CreateInspectSynopsisFile() As Boolean
-    Property CreateInspectFirstHitsFile() As Boolean
+    Property CreateInspectSynopsisFile As Boolean
+    Property CreateInspectFirstHitsFile As Boolean
 
-    WriteOnly Property MiscParams() As Dictionary(Of String, String)    'For passing miscelleneous parameters (not presently used)
-    ReadOnly Property Status() As ProcessStatus 'Allows calling program to get current status
-    ReadOnly Property Results() As ProcessResults  'Allows calling program to determine if processing succeeded
-    ReadOnly Property ErrMsg() As String  'Error message describing any errors encountered
-    ReadOnly Property PercentComplete() As Single   ' Progress indicator, value between 0 and 100
-    Property DebugLevel() As Integer 'Allows control of debug information verbosity; 0=minimum, 5=maximum verbosity
+    WriteOnly Property MiscParams As Dictionary(Of String, String)    'For passing miscelleneous parameters (not presently used)
+    ReadOnly Property Status As ProcessStatus 'Allows calling program to get current status
+    ReadOnly Property Results As ProcessResults  'Allows calling program to determine if processing succeeded
+    ReadOnly Property ErrMsg As String  'Error message describing any errors encountered
+    ReadOnly Property PercentComplete As Single   ' Progress indicator, value between 0 and 100
+    Property DebugLevel As Integer 'Allows control of debug information verbosity; 0=minimum, 5=maximum verbosity
 
 #End Region
 

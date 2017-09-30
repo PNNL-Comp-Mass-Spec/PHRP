@@ -21,8 +21,8 @@ Public Class clsPHRPStartupOptions
             End If
             Return mMaxProteinsPerPSM
         End Get
-        Set(value As Integer)
-            mMaxProteinsPerPSM = value
+        Set
+            mMaxProteinsPerPSM = Value
         End Set
     End Property
 

@@ -41,55 +41,55 @@ Public Class clsPHRPParserMODa
 
 #Region "Properties"
 
-    Public Overrides ReadOnly Property PHRPFirstHitsFileName() As String
+    Public Overrides ReadOnly Property PHRPFirstHitsFileName As String
         Get
             Return GetPHRPFirstHitsFileName(mDatasetName)
         End Get
     End Property
 
-    Public Overrides ReadOnly Property PHRPModSummaryFileName() As String
+    Public Overrides ReadOnly Property PHRPModSummaryFileName As String
         Get
             Return GetPHRPModSummaryFileName(mDatasetName)
         End Get
     End Property
 
-    Public Overrides ReadOnly Property PHRPPepToProteinMapFileName() As String
+    Public Overrides ReadOnly Property PHRPPepToProteinMapFileName As String
         Get
             Return GetPHRPPepToProteinMapFileName(mDatasetName)
         End Get
     End Property
 
-    Public Overrides ReadOnly Property PHRPProteinModsFileName() As String
+    Public Overrides ReadOnly Property PHRPProteinModsFileName As String
         Get
             Return GetPHRPProteinModsFileName(mDatasetName)
         End Get
     End Property
 
-    Public Overrides ReadOnly Property PHRPSynopsisFileName() As String
+    Public Overrides ReadOnly Property PHRPSynopsisFileName As String
         Get
             Return GetPHRPSynopsisFileName(mDatasetName)
         End Get
     End Property
 
-    Public Overrides ReadOnly Property PHRPResultToSeqMapFileName() As String
+    Public Overrides ReadOnly Property PHRPResultToSeqMapFileName As String
         Get
             Return GetPHRPResultToSeqMapFileName(mDatasetName)
         End Get
     End Property
 
-    Public Overrides ReadOnly Property PHRPSeqInfoFileName() As String
+    Public Overrides ReadOnly Property PHRPSeqInfoFileName As String
         Get
             Return GetPHRPSeqInfoFileName(mDatasetName)
         End Get
     End Property
 
-    Public Overrides ReadOnly Property PHRPSeqToProteinMapFileName() As String
+    Public Overrides ReadOnly Property PHRPSeqToProteinMapFileName As String
         Get
             Return GetPHRPSeqToProteinMapFileName(mDatasetName)
         End Get
     End Property
 
-    Public Overrides ReadOnly Property SearchEngineName() As String
+    Public Overrides ReadOnly Property SearchEngineName As String
         Get
             Return GetSearchEngineName()
         End Get
@@ -159,7 +159,7 @@ Public Class clsPHRPParserMODa
     ''' <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
     ''' <returns>Precursor tolerance, in Da</returns>
     ''' <remarks></remarks>
-    Private Function DeterminePrecursorMassTolerance(objSearchEngineParams As clsSearchEngineParameters, <Out()> ByRef dblTolerancePPM As Double) As Double
+    Private Function DeterminePrecursorMassTolerance(objSearchEngineParams As clsSearchEngineParameters, <Out> ByRef dblTolerancePPM As Double) As Double
         Dim strTolerance As String = String.Empty
 
         Dim dblToleranceDa As Double = 0
@@ -227,7 +227,7 @@ Public Class clsPHRPParserMODa
     ''' <param name="objSearchEngineParams"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Overrides Function LoadSearchEngineParameters(strSearchEngineParamFileName As String, <Out()> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
+    Public Overrides Function LoadSearchEngineParameters(strSearchEngineParamFileName As String, <Out> ByRef objSearchEngineParams As clsSearchEngineParameters) As Boolean
 
         Dim blnSuccess As Boolean
 
@@ -314,7 +314,7 @@ Public Class clsPHRPParserMODa
     ''' <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
     ''' <returns>True if success, false if an error</returns>
     ''' <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-    Public Overrides Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out()> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
+    Public Overrides Function ParsePHRPDataLine(strLine As String, intLinesRead As Integer, <Out> ByRef objPSM As clsPSM, fastReadMode As Boolean) As Boolean
 
         Dim strColumns() As String = strLine.Split(ControlChars.Tab)
         Dim strPeptide As String

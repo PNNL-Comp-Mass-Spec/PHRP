@@ -65,7 +65,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     Public Property DebugLevel As Integer = 0 Implements IPeptideHitResultsProcessor.DebugLevel
 
-    Public ReadOnly Property ErrMsg() As String Implements IPeptideHitResultsProcessor.ErrMsg
+    Public ReadOnly Property ErrMsg As String Implements IPeptideHitResultsProcessor.ErrMsg
         Get
             Return m_ErrMsg
         End Get
@@ -74,8 +74,8 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
     Public Property MassCorrectionTagsFileName As String = String.Empty Implements IPeptideHitResultsProcessor.MassCorrectionTagsFileName
 
     <Obsolete("Unused")>
-    Public WriteOnly Property MiscParams() As Dictionary(Of String, String) Implements IPeptideHitResultsProcessor.MiscParams
-        Set(Value As Dictionary(Of String, String))
+    Public WriteOnly Property MiscParams As Dictionary(Of String, String) Implements IPeptideHitResultsProcessor.MiscParams
+        Set
             m_MiscParams = Value
         End Set
     End Property
@@ -92,7 +92,7 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     Public Property PeptideHitResultsFileName As String = String.Empty Implements IPeptideHitResultsProcessor.PeptideHitResultsFileName
 
-    Public ReadOnly Property PercentComplete() As Single Implements IPeptideHitResultsProcessor.PercentComplete
+    Public ReadOnly Property PercentComplete As Single Implements IPeptideHitResultsProcessor.PercentComplete
         Get
             If Not m_PeptideHitResultsProcessor Is Nothing Then
                 Return m_PeptideHitResultsProcessor.ProgressPercentComplete
@@ -109,13 +109,13 @@ Public Class clsAnalysisManagerPeptideHitResultsProcessor
 
     Public Property SourceFolderPath As String = String.Empty Implements IPeptideHitResultsProcessor.SourceFolderPath
 
-    Public ReadOnly Property Status() As IPeptideHitResultsProcessor.ProcessStatus Implements IPeptideHitResultsProcessor.Status
+    Public ReadOnly Property Status As IPeptideHitResultsProcessor.ProcessStatus Implements IPeptideHitResultsProcessor.Status
         Get
             Return m_Status
         End Get
     End Property
 
-    Public ReadOnly Property Results() As IPeptideHitResultsProcessor.ProcessResults Implements IPeptideHitResultsProcessor.Results
+    Public ReadOnly Property Results As IPeptideHitResultsProcessor.ProcessResults Implements IPeptideHitResultsProcessor.Results
         Get
             Return m_Results
         End Get

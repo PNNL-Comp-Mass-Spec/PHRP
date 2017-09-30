@@ -183,7 +183,7 @@ Public Class clsMSGFPlusParamFileModExtractor
     ''' <param name="lstModInfo"></param>
     ''' <returns>True if success; false if a problem</returns>
     ''' <remarks></remarks>
-    Public Function ExtractModInfoFromParamFile(paramFilePath As String, <Out()> ByRef lstModInfo As List(Of udtModInfoType)) As Boolean
+    Public Function ExtractModInfoFromParamFile(paramFilePath As String, <Out> ByRef lstModInfo As List(Of udtModInfoType)) As Boolean
 
         Dim tagNamesToFind = New List(Of String)
         tagNamesToFind.Add(PARAM_TAG_MOD_STATIC)

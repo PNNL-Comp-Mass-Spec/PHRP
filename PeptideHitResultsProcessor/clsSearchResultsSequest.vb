@@ -36,22 +36,22 @@ Public Class clsSearchResultsSequest
 
 #Region "Properties"
     ' Auto-properties (only work with Visual Studio 2010)
-    Public Property NumScans() As String
-    Public Property PeptideDeltaCn() As String
-    Public Property PeptideDeltaCn2() As String
-    Public Property PeptideMScore() As String
-    Public Property PeptideNTT() As String
-    Public Property PeptidePassFilt() As String
-    Public Property PeptideRankSP() As String
-    Public Property PeptideRankXC() As String
-    Public Property PeptideSp() As String
-    Public Property PeptideXCorr() As String
-    Public Property PeptideXcRatio() As String
-    Public Property IonsObserved() As String
-    Public Property IonsExpected() As String
-    Public Property DelMPPM() As String
+    Public Property NumScans As String
+    Public Property PeptideDeltaCn As String
+    Public Property PeptideDeltaCn2 As String
+    Public Property PeptideMScore As String
+    Public Property PeptideNTT As String
+    Public Property PeptidePassFilt As String
+    Public Property PeptideRankSP As String
+    Public Property PeptideRankXC As String
+    Public Property PeptideSp As String
+    Public Property PeptideXCorr As String
+    Public Property PeptideXcRatio As String
+    Public Property IonsObserved As String
+    Public Property IonsExpected As String
+    Public Property DelMPPM As String
 
-    Public ReadOnly Property PeptideXCorrNext() As String
+    Public ReadOnly Property PeptideXCorrNext As String
         Get
             Return mPeptideXCorrNext
         End Get

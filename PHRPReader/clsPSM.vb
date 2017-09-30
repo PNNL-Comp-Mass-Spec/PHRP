@@ -18,35 +18,16 @@ Public Class clsPSM
 
     Private mDataLineText As String = String.Empty
 
-    ' Note: Be sure to update the Clone() function if you add new class-wide variables
-    Private mResultID As Integer
-    Private mScoreRank As Integer                   ' Top scoring peptide is rank 1, next lowest score is rank 2, etc.
+    ' Note: Be sure to update the Clone() function if you add new class-wide variables or properties
 
     Private mScanNumber As Integer
-    Private mElutionTimeMinutes As Single
     Private ReadOnly mScanList As SortedSet(Of Integer)          ' List of scans that were combined prior to identifying this peptide
 
     Private mPeptide As String                  ' Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
     Private mPeptideWithNumericMods As String       ' Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
     Private mPeptideCleanSequence As String
-    Private mSeqID As Integer
 
     Private ReadOnly mModifiedPeptideResidues As List(Of clsAminoAcidModInfo)
-
-    Private mCharge As Short
-    Private mCollisionMode As String        ' CID, ETD, HCD, or n/a
-    Private mMSGFSpecProb As String     ' MSGF SpecProb; stored as string to preserve formatting
-
-    ' The following are typically populated using UpdateCleavageInfo
-    Private mCleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
-    Private mNumMissedCleavages As Short
-    Private mNumTrypticTerminii As Short
-
-    Private mPrecursorNeutralMass As Double     ' Uncharged monoisotopic mass of the observed precursor
-    Private mMassErrorDa As String
-    Private mMassErrorPPM As String
-
-    Private mPeptideMonoisotopicMass As Double  ' Theoretical (computed) monoisotopic mass
 
     ' Note that protein names are case-sensitive
     Private ReadOnly mProteins As List(Of String)
@@ -65,7 +46,7 @@ Public Class clsPSM
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>Update scores using SetScore</remarks>
-    Public ReadOnly Property AdditionalScores() As Dictionary(Of String, String)
+    Public ReadOnly Property AdditionalScores As Dictionary(Of String, String)
         Get
             Return mAdditionalScores
         End Get
@@ -78,28 +59,16 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks></remarks>
     Public Property Charge As Short
-        Get
-            Return mCharge
-        End Get
-        Set(value As Short)
-            mCharge = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' Peptide cleavage state (with regards to ProteinFirst)
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
-    ''' <remarks></remarks>
+    ''' <remarks>
+    ''' CleavageState, NumMissedCleavages, and NumTrypticTerminii are typically populated using UpdateCleavageInfo
+    ''' </remarks>
     Public Property CleavageState As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants
-        Get
-            Return mCleavageState
-        End Get
-        Set(value As clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants)
-            mCleavageState = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' Collision mode (CID, ETD, HCD)
@@ -109,27 +78,21 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks></remarks>
     Public Property CollisionMode As String
-        Get
-            Return mCollisionMode
-        End Get
-        Set(value As String)
-            mCollisionMode = value
-        End Set
-    End Property
 
     Public Property DataLineText As String
         Get
             Return mDataLineText
         End Get
-        Set(value As String)
-            If String.IsNullOrEmpty(value) Then
+        Set
+            If String.IsNullOrEmpty(Value) Then
                 mDataLineText = String.Empty
             Else
-                mDataLineText = value
+                mDataLineText = Value
             End If
 
         End Set
     End Property
+
     ''' <summary>
     ''' Elution time (in minutes) of the spectrum
     ''' </summary>
@@ -137,13 +100,6 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks></remarks>
     Public Property ElutionTimeMinutes As Single
-        Get
-            Return mElutionTimeMinutes
-        End Get
-        Set(value As Single)
-            mElutionTimeMinutes = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' Mass difference, in daltons, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
@@ -152,13 +108,6 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks></remarks>
     Public Property MassErrorDa As String
-        Get
-            Return mMassErrorDa
-        End Get
-        Set(value As String)
-            mMassErrorDa = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' Mass difference, in ppm, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
@@ -167,13 +116,6 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks></remarks>
     Public Property MassErrorPPM As String
-        Get
-            Return mMassErrorPPM
-        End Get
-        Set(value As String)
-            mMassErrorPPM = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' List of modified residues
@@ -207,30 +149,21 @@ Public Class clsPSM
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
-    ''' <remarks></remarks>
+    ''' <remarks>
+    ''' CleavageState, NumMissedCleavages, and NumTrypticTerminii are typically populated using UpdateCleavageInfo
+    ''' </remarks>
     Public Property NumMissedCleavages As Short
-        Get
-            Return mNumMissedCleavages
-        End Get
-        Set(value As Short)
-            mNumMissedCleavages = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' Number of tryptic terminii (or similar if not using trypsin)
     ''' </summary>
     ''' <value></value>
     ''' <returns></returns>
-    ''' <remarks>2 means fully tryptic, 1 means partially tryptic, 0 means non-tryptic</remarks>
+    ''' <remarks>
+    ''' 2 means fully tryptic, 1 means partially tryptic, 0 means non-tryptic
+    ''' CleavageState, NumMissedCleavages, and NumTrypticTerminii are typically populated using UpdateCleavageInfo
+    ''' </remarks>
     Public Property NumTrypticTerminii As Short
-        Get
-            Return mNumTrypticTerminii
-        End Get
-        Set(value As Short)
-            mNumTrypticTerminii = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' Peptide sequence, including any modification symbols that were assigned by the search engine
@@ -239,7 +172,7 @@ Public Class clsPSM
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property Peptide() As String
+    Public ReadOnly Property Peptide As String
         Get
             Return mPeptide
         End Get
@@ -252,7 +185,7 @@ Public Class clsPSM
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property PeptideCleanSequence() As String
+    Public ReadOnly Property PeptideCleanSequence As String
         Get
             Return mPeptideCleanSequence
         End Get
@@ -265,13 +198,6 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks>This mass is computed by PHRP using the PrecursorNeutralMass plus any modification masses associated with the peptide's residues</remarks>
     Public Property PeptideMonoisotopicMass As Double
-        Get
-            Return mPeptideMonoisotopicMass
-        End Get
-        Set(value As Double)
-            mPeptideMonoisotopicMass = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' Peptide sequence where all modified residues have the modification masses displayed as numeric values
@@ -280,15 +206,15 @@ Public Class clsPSM
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Property PeptideWithNumericMods() As String
+    Public Property PeptideWithNumericMods As String
         Get
             Return mPeptideWithNumericMods
         End Get
-        Set(value As String)
-            If String.IsNullOrEmpty(value) Then
+        Set
+            If String.IsNullOrEmpty(Value) Then
                 mPeptideWithNumericMods = String.Empty
             Else
-                mPeptideWithNumericMods = value
+                mPeptideWithNumericMods = Value
             End If
         End Set
     End Property
@@ -299,7 +225,7 @@ Public Class clsPSM
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>Retrieve full list of proteins using the Proteins property</remarks>
-    Public ReadOnly Property ProteinFirst() As String
+    Public ReadOnly Property ProteinFirst As String
         Get
             If mProteins.Count = 0 Then
                 Return String.Empty
@@ -316,13 +242,6 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks>This mass is based on the mass or m/z value reported by the search engine</remarks>
     Public Property PrecursorNeutralMass As Double
-        Get
-            Return mPrecursorNeutralMass
-        End Get
-        Set(value As Double)
-            mPrecursorNeutralMass = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' List of proteins associated with this peptide
@@ -330,13 +249,13 @@ Public Class clsPSM
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property Proteins() As List(Of String)
+    Public ReadOnly Property Proteins As List(Of String)
         Get
             Return mProteins
         End Get
     End Property
 
-    Public ReadOnly Property ProteinDetails() As Dictionary(Of String, clsProteinInfo)
+    Public ReadOnly Property ProteinDetails As Dictionary(Of String, clsProteinInfo)
         Get
             Return mProteinDetails
         End Get
@@ -349,13 +268,6 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks></remarks>
     Public Property ResultID As Integer
-        Get
-            Return mResultID
-        End Get
-        Set(value As Integer)
-            mResultID = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' List of scans that were combined prior to identifying this peptide
@@ -363,7 +275,7 @@ Public Class clsPSM
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property ScanList() As SortedSet(Of Integer)
+    Public ReadOnly Property ScanList As SortedSet(Of Integer)
         Get
             Return mScanList
         End Get
@@ -380,10 +292,10 @@ Public Class clsPSM
         Get
             Return mScanNumber
         End Get
-        Set(value As Integer)
-            mScanNumber = value
-            If Not mScanList.Contains(value) Then
-                mScanList.Add(value)
+        Set
+            mScanNumber = Value
+            If Not mScanList.Contains(Value) Then
+                mScanList.Add(Value)
             End If
         End Set
     End Property
@@ -407,13 +319,6 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks>Top scoring peptide is rank 1, next lowest score is rank 2, etc.</remarks>
     Public Property ScoreRank As Integer
-        Get
-            Return mScoreRank
-        End Get
-        Set(value As Integer)
-            mScoreRank = value
-        End Set
-    End Property
 
     ''' <summary>
     ''' Sequence ID value assigned by PHRP
@@ -423,13 +328,6 @@ Public Class clsPSM
     ''' <returns></returns>
     ''' <remarks></remarks>
     Public Property SeqID As Integer
-        Get
-            Return mSeqID
-        End Get
-        Set(value As Integer)
-            mSeqID = value
-        End Set
-    End Property
 
 #End Region
 
@@ -520,29 +418,29 @@ Public Class clsPSM
     Public Sub Clear()
         mDataLineText = String.Empty
         mScanNumber = 0
-        mElutionTimeMinutes = 0
+        ElutionTimeMinutes = 0
 
         mScanList.Clear()
 
         mPeptide = String.Empty
         mPeptideWithNumericMods = String.Empty
         mPeptideCleanSequence = String.Empty
-        mCharge = 0
-        mResultID = 0
-        mScoreRank = 0
+        Charge = 0
+        ResultID = 0
+        ScoreRank = 0
 
-        mCollisionMode = UNKNOWN_COLLISION_MODE
-        mMSGFSpecProb = String.Empty
+        CollisionMode = UNKNOWN_COLLISION_MODE
+        MSGFSpecEValue = String.Empty
 
-        mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Unknown
-        mNumMissedCleavages = 0
-        mNumTrypticTerminii = 0
+        CleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Unknown
+        NumMissedCleavages = 0
+        NumTrypticTerminii = 0
 
-        mPrecursorNeutralMass = 0
-        mMassErrorDa = String.Empty
-        mMassErrorPPM = String.Empty
+        PrecursorNeutralMass = 0
+        MassErrorDa = String.Empty
+        MassErrorPPM = String.Empty
 
-        mPeptideMonoisotopicMass = 0
+        PeptideMonoisotopicMass = 0
 
         mProteins.Clear()
         mProteinDetails.Clear()
@@ -566,10 +464,10 @@ Public Class clsPSM
         objNew = New clsPSM()
 
         With objNew
-            .ResultID = mResultID
-            .ScoreRank = mScoreRank
+            .ResultID = ResultID
+            .ScoreRank = ScoreRank
             .ScanNumber = mScanNumber
-            .ElutionTimeMinutes = mElutionTimeMinutes
+            .ElutionTimeMinutes = ElutionTimeMinutes
 
             For Each intScanNumber In mScanList
                 .AddCombinedScan(intScanNumber)
@@ -577,17 +475,17 @@ Public Class clsPSM
 
             .SetPeptide(mPeptide)               ' Note: this will auto-update mPeptideCleanSequence in objNew
             .PeptideWithNumericMods = mPeptideWithNumericMods
-            .Charge = mCharge
-            .CollisionMode = mCollisionMode
-            .MSGFSpecProb = mMSGFSpecProb
+            .Charge = Charge
+            .CollisionMode = CollisionMode
+            .MSGFSpecEValue = MSGFSpecEValue
 
-            .CleavageState = mCleavageState
-            .NumMissedCleavages = mNumMissedCleavages
-            .NumTrypticTerminii = mNumTrypticTerminii
+            .CleavageState = CleavageState
+            .NumMissedCleavages = NumMissedCleavages
+            .NumTrypticTerminii = NumTrypticTerminii
 
-            .PrecursorNeutralMass = mPrecursorNeutralMass
-            .MassErrorDa = mMassErrorDa
-            .MassErrorPPM = mMassErrorPPM
+            .PrecursorNeutralMass = PrecursorNeutralMass
+            .MassErrorDa = MassErrorDa
+            .MassErrorPPM = MassErrorPPM
 
             For Each strProtein In mProteins
                 .AddProtein(strProtein)
@@ -750,7 +648,7 @@ Public Class clsPSM
     ''' <param name="strScoreValue"></param>
     ''' <returns>True if the score is defined, otherwise false</returns>
     ''' <remarks></remarks>
-    Public Function TryGetScore(strScoreName As String, <Out()> ByRef strScoreValue As String) As Boolean
+    Public Function TryGetScore(strScoreName As String, <Out> ByRef strScoreValue As String) As Boolean
 
         strScoreValue = String.Empty
         If mAdditionalScores.TryGetValue(strScoreName, strScoreValue) Then
@@ -768,16 +666,16 @@ Public Class clsPSM
     ''' <remarks></remarks>
     Public Sub UpdateCleavageInfo(objCleavageStateCalculator As clsPeptideCleavageStateCalculator)
 
-        mNumMissedCleavages = objCleavageStateCalculator.ComputeNumberOfMissedCleavages(mPeptide)
+        NumMissedCleavages = objCleavageStateCalculator.ComputeNumberOfMissedCleavages(mPeptide)
 
-        mCleavageState = objCleavageStateCalculator.ComputeCleavageState(mPeptide)
+        CleavageState = objCleavageStateCalculator.ComputeCleavageState(mPeptide)
 
-        If mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full Then
-            mNumTrypticTerminii = 2
-        ElseIf mCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial Then
-            mNumTrypticTerminii = 1
+        If CleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full Then
+            NumTrypticTerminii = 2
+        ElseIf CleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial Then
+            NumTrypticTerminii = 1
         Else
-            mNumTrypticTerminii = 0
+            NumTrypticTerminii = 0
         End If
 
     End Sub

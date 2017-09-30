@@ -243,13 +243,13 @@ Public MustInherit Class clsPHRPBaseClass
 
     Public Property EnzymeMatchSpec As udtEnzymeMatchSpecType
 
-    Public ReadOnly Property ErrorCode() As ePHRPErrorCodes
+    Public ReadOnly Property ErrorCode As ePHRPErrorCodes
         Get
             Return mErrorCode
         End Get
     End Property
 
-    Public ReadOnly Property ErrorMessage() As String
+    Public ReadOnly Property ErrorMessage As String
         Get
             Return GetErrorMessage()
         End Get
@@ -257,13 +257,13 @@ Public MustInherit Class clsPHRPBaseClass
 
     Public Property FastaFilePath As String
 
-    Public ReadOnly Property FileVersion() As String
+    Public ReadOnly Property FileVersion As String
         Get
             FileVersion = GetVersionForExecutingAssembly()
         End Get
     End Property
 
-    Public ReadOnly Property FileDate() As String
+    Public ReadOnly Property FileDate As String
         Get
             FileDate = mFileDate
         End Get
@@ -306,8 +306,8 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return MSGFDBSynopsisFileEValueThreshold
         End Get
-        Set(value As Single)
-            MSGFDBSynopsisFileEValueThreshold = value
+        Set
+            MSGFDBSynopsisFileEValueThreshold = Value
         End Set
     End Property
 
@@ -321,8 +321,8 @@ Public MustInherit Class clsPHRPBaseClass
         Get
             Return MSGFDBSynopsisFileSpecEValueThreshold
         End Get
-        Set(value As Single)
-            MSGFDBSynopsisFileSpecEValueThreshold = value
+        Set
+            MSGFDBSynopsisFileSpecEValueThreshold = Value
         End Set
     End Property
 
@@ -356,14 +356,14 @@ Public MustInherit Class clsPHRPBaseClass
 
     Public Property ProteinModsFileIncludesReversedProteins As Boolean
 
-    Public ReadOnly Property ProgressStepDescription() As String
+    Public ReadOnly Property ProgressStepDescription As String
         Get
             Return mProgressStepDescription
         End Get
     End Property
 
     ' ProgressPercentComplete ranges from 0 to 100, but can contain decimal percentage values
-    Public ReadOnly Property ProgressPercentComplete() As Single
+    Public ReadOnly Property ProgressPercentComplete As Single
         Get
             Return CType(Math.Round(mProgressPercentComplete, 2), Single)
         End Get
@@ -1239,7 +1239,7 @@ Public MustInherit Class clsPHRPBaseClass
         Return GetCleanSequence(strSequenceWithMods, strPrefix, strSuffix)
     End Function
 
-    Protected Function GetCleanSequence(strSequenceWithMods As String, <Out()> ByRef strPrefix As String, <Out()> ByRef strSuffix As String) As String
+    Protected Function GetCleanSequence(strSequenceWithMods As String, <Out> ByRef strPrefix As String, <Out> ByRef strSuffix As String) As String
 
         Dim strPrimarySequence As String = String.Empty
         strPrefix = String.Empty
@@ -1266,7 +1266,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out()> ByRef strValue As String) As Boolean
+    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out> ByRef strValue As String) As Boolean
         Return GetColumnValue(strSplitLine, intColumnIndex, strValue, String.Empty)
     End Function
 
@@ -1276,7 +1276,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out()> ByRef intValue As Integer) As Boolean
+    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out> ByRef intValue As Integer) As Boolean
         Return GetColumnValue(strSplitLine, intColumnIndex, intValue, 0)
     End Function
 
@@ -1286,7 +1286,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out()> ByRef strValue As String, strValueIfMissing As String) As Boolean
+    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out> ByRef strValue As String, strValueIfMissing As String) As Boolean
         If intColumnIndex >= 0 AndAlso intColumnIndex < strSplitLine.Length Then
             strValue = String.Copy(strSplitLine(intColumnIndex))
             Return True
@@ -1302,7 +1302,7 @@ Public MustInherit Class clsPHRPBaseClass
     ''' </summary>
     ''' <returns>True if intColumnIndex >= 0</returns>
     ''' <remarks></remarks>
-    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out()> ByRef intValue As Integer, intValueIfMissing As Integer) As Boolean
+    Protected Function GetColumnValue(strSplitLine() As String, intColumnIndex As Integer, <Out> ByRef intValue As Integer, intValueIfMissing As Integer) As Boolean
         Dim strValue As String = String.Empty
 
         If GetColumnValue(strSplitLine, intColumnIndex, strValue, intValueIfMissing.ToString) Then
@@ -1606,7 +1606,7 @@ Public MustInherit Class clsPHRPBaseClass
     Protected Function LoadPeptideToProteinMapInfo(
        strPepToProteinMapFilePath As String,
        lstPepToProteinMapping As List(Of udtPepToProteinMappingType),
-       <Out()> ByRef strHeaderLine As String) As Boolean
+       <Out> ByRef strHeaderLine As String) As Boolean
 
         Dim strLineIn As String
         Dim strSplitLine As String()
@@ -2121,7 +2121,7 @@ Public MustInherit Class clsPHRPBaseClass
         Return blnSuccess
     End Function
 
-    Public Shared Function ValidateProteinFastaFile(strFastaFilePath As String, <Out()> ByRef strWarningMessage As String) As Boolean
+    Public Shared Function ValidateProteinFastaFile(strFastaFilePath As String, <Out> ByRef strWarningMessage As String) As Boolean
 
         Dim objFastaFile As ProteinFileReader.FastaFileReader
 

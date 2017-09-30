@@ -17,14 +17,14 @@ Public Class clsPHRPModSummaryReader
 
     Private ReadOnly mSuccess As Boolean
 
-    Public ReadOnly Property ModificationDefs() As List(Of clsModificationDefinition)
+    Public ReadOnly Property ModificationDefs As List(Of clsModificationDefinition)
         Get
             Return mModificationDefs
         End Get
     End Property
 
     ' ReSharper disable once ConvertToVbAutoProperty
-    Public ReadOnly Property Success() As Boolean
+    Public ReadOnly Property Success As Boolean
         Get
             Return mSuccess
         End Get

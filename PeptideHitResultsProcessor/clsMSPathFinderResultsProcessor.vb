@@ -504,7 +504,7 @@ Public Class clsMSPathFinderResultsProcessor
 
     Private Function ExtractModInfoFromParamFile(
        strMSGFDBParamFilePath As String,
-       <Out()> ByRef lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
+       <Out> ByRef lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
 
         ' The DMS-based parameter file for MSPathFinder uses the same formatting as MSGF+
 
@@ -837,7 +837,7 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <param name="intColumnMapping"></param>
     ''' <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
     ''' <remarks></remarks>
-    Private Function ParseMSPathFinderResultsFileHeaderLine(strLineIn As String, <Out()> ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMSPathFinderResultsFileHeaderLine(strLineIn As String, <Out> ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -924,7 +924,7 @@ Public Class clsMSPathFinderResultsProcessor
 
     End Function
 
-    Private Function ParseMSPathFinderSynFileHeaderLine(strLineIn As String, <Out()> ByRef intColumnMapping() As Integer) As Boolean
+    Private Function ParseMSPathFinderSynFileHeaderLine(strLineIn As String, <Out> ByRef intColumnMapping() As Integer) As Boolean
 
         ' Parse the header line
 
@@ -984,7 +984,7 @@ Public Class clsMSPathFinderResultsProcessor
       ByRef strErrorLog As String,
       intResultsProcessed As Integer,
       ByRef intColumnMapping() As Integer,
-      <Out()> ByRef strPeptideSequence As String) As Boolean
+      <Out> ByRef strPeptideSequence As String) As Boolean
 
         ' Parses an entry from the MSPathFinder Synopsis file
 

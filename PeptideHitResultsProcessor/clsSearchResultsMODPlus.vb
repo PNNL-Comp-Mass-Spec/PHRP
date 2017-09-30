@@ -17,12 +17,12 @@ Public Class clsSearchResultsMODPlus
     Inherits clsSearchResultsBaseClass
 
 #Region "Classwide Variables"
-    ' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables 
+    ' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
 #End Region
 
 #Region "Properties"
 
-    ' Auto-Properties	
+    ' Auto-Properties
     Public Property Spectrum_Index As String
 
     Public Property Precursor_mz As String              ' Observed precursor m/z, converted to monoisotopic mass by MODa

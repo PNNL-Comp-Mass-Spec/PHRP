@@ -102,7 +102,7 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property ErrorMessage() As String
+    Public ReadOnly Property ErrorMessage As String
         Get
             Return mErrorMessage
         End Get
@@ -219,11 +219,11 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
-    Public Property PeptidePreResidues() As String
+    Public Property PeptidePreResidues As String
         Get
             Return mPeptidePreResidues
         End Get
-        Set(Value As String)
+        Set
             If Value Is Nothing Then Value = String.Empty
             mPeptidePreResidues = Value
             ComputePeptideCleavageStateInProtein()
@@ -236,11 +236,11 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
-    Public Property PeptidePostResidues() As String
+    Public Property PeptidePostResidues As String
         Get
             Return mPeptidePostResidues
         End Get
-        Set(Value As String)
+        Set
             If Value Is Nothing Then Value = String.Empty
             mPeptidePostResidues = Value
             ComputePeptideCleavageStateInProtein()
@@ -253,11 +253,11 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
-    Public Property PeptideCleanSequence() As String
+    Public Property PeptideCleanSequence As String
         Get
             Return mPeptideCleanSequence
         End Get
-        Set(Value As String)
+        Set
             mPeptideCleanSequence = Value
             ComputePeptideCleavageStateInProtein()
         End Set
@@ -277,7 +277,7 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property PeptideCleavageState() As ePeptideCleavageStateConstants
+    Public ReadOnly Property PeptideCleavageState As ePeptideCleavageStateConstants
         Get
             Return mPeptideCleavageState
         End Get
@@ -289,7 +289,7 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property PeptideTerminusState() As ePeptideTerminusStateConstants
+    Public ReadOnly Property PeptideTerminusState As ePeptideTerminusStateConstants
         Get
             Return mPeptideTerminusState
         End Get
@@ -340,7 +340,7 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public ReadOnly Property SearchResultModificationCount() As Integer
+    Public ReadOnly Property SearchResultModificationCount As Integer
         Get
             Return mSearchResultModifications.Count
         End Get
@@ -613,10 +613,10 @@ Public MustInherit Class clsSearchResultsBaseClass
     ''' <remarks>Returns True if intIndex is valid; otherwise, returns false</remarks>
     Public Function GetSearchResultModDetailsByIndex(
       intIndex As Integer,
-      <Out()> ByRef chResidue As Char,
-      <Out()> ByRef intResidueLocInPeptide As Integer,
-      <Out()> ByRef dblModificationMass As Double,
-      <Out()> ByRef chAffectedAtom As Char) As Boolean
+      <Out> ByRef chResidue As Char,
+      <Out> ByRef intResidueLocInPeptide As Integer,
+      <Out> ByRef dblModificationMass As Double,
+      <Out> ByRef chAffectedAtom As Char) As Boolean
 
         If intIndex >= 0 And intIndex < mSearchResultModifications.Count Then
             With mSearchResultModifications(intIndex)

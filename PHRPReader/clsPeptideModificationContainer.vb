@@ -71,13 +71,13 @@ Public Class clsPeptideModificationContainer
 #End Region
 
 #Region "Properties"
-    Public ReadOnly Property ErrorMessage() As String
+    Public ReadOnly Property ErrorMessage As String
         Get
             Return mErrorMessage
         End Get
     End Property
 
-    Public ReadOnly Property ModificationCount() As Integer
+    Public ReadOnly Property ModificationCount As Integer
         Get
             Return mModifications.Count
         End Get
@@ -89,12 +89,12 @@ Public Class clsPeptideModificationContainer
         End Get
     End Property
 
-    Public Property ConsiderModSymbolWhenFindingIdenticalMods() As Boolean
+    Public Property ConsiderModSymbolWhenFindingIdenticalMods As Boolean
         Get
             Return mConsiderModSymbolWhenFindingIdenticalMods
         End Get
-        Set(value As Boolean)
-            mConsiderModSymbolWhenFindingIdenticalMods = value
+        Set
+            mConsiderModSymbolWhenFindingIdenticalMods = Value
         End Set
     End Property
 #End Region

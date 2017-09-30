@@ -736,7 +736,7 @@ Public Class XmlSettingsFileAccessor
         ''' <summary>
         ''' Legacy property; calls XmlFilename
         ''' </summary>
-        Public ReadOnly Property IniFilename() As String
+        Public ReadOnly Property IniFilename As String
             Get
                 Return XmlFilename()
             End Get
@@ -746,7 +746,7 @@ Public Class XmlSettingsFileAccessor
         ''' This routine returns the name of the ini file.
         ''' </summary>
         ''' <return>The function returns the name of ini file.</return>
-        Public ReadOnly Property XmlFilename() As String
+        Public ReadOnly Property XmlFilename As String
             Get
                 If Not Initialized Then
                     Return String.Empty
@@ -760,7 +760,7 @@ Public Class XmlSettingsFileAccessor
         ''' This routine returns a boolean showing if the file was initialized or not.
         ''' </summary>
         ''' <return>The function returns a Boolean.</return>
-        Public ReadOnly Property Initialized() As Boolean
+        Public ReadOnly Property Initialized As Boolean
             Get
                 Return m_initialized
             End Get
@@ -770,7 +770,7 @@ Public Class XmlSettingsFileAccessor
         ''' This routine returns a boolean showing if the name is case sensitive or not.
         ''' </summary>
         ''' <return>The function returns a Boolean.</return>
-        Public ReadOnly Property CaseSensitive() As Boolean
+        Public ReadOnly Property CaseSensitive As Boolean
             Get
                 Return m_CaseSensitive
             End Get
@@ -1097,7 +1097,7 @@ Public Class XmlSettingsFileAccessor
         ''' The subroutine gets the sections.
         ''' </summary>
         ''' <return>The subroutine returns a strin collection of sections.</return>
-        Public ReadOnly Property AllSections() As StringCollection
+        Public ReadOnly Property AllSections As StringCollection
             Get
                 If Not Initialized Then
                     Return New StringCollection()
@@ -1477,7 +1477,7 @@ Public Class XmlSettingsFileAccessor
         End Function
 
         ''' <summary>It Sets or Gets the output file name.</summary>
-        Public Property OutputFilename() As String
+        Public Property OutputFilename As String
             Get
                 If Not Initialized Then
                     Return String.Empty
@@ -1485,7 +1485,7 @@ Public Class XmlSettingsFileAccessor
                     Return m_SaveFilename
                 End If
             End Get
-            Set(Value As String)
+            Set
                 Dim fi As FileInfo
                 If Not Initialized Then Throw New XMLFileReaderNotInitializedException
                 fi = New FileInfo(Value)
@@ -1526,7 +1526,7 @@ Public Class XmlSettingsFileAccessor
         End Sub
 
         ''' <summary>It gets the System.Xml.XmlDocument.</summary>
-        Public ReadOnly Property XmlDoc() As XmlDocument
+        Public ReadOnly Property XmlDoc As XmlDocument
             Get
                 If Not Initialized Then
                     Return New XmlDocument
@@ -1538,7 +1538,7 @@ Public Class XmlSettingsFileAccessor
 
         ''' <summary>Converts an XML document to a string.</summary>
         ''' <return>It returns the XML document formatted as a string.</return>
-        Public ReadOnly Property XML() As String
+        Public ReadOnly Property XML As String
             Get
                 If Not Initialized Then
                     Return String.Empty
@@ -1561,7 +1561,7 @@ Public Class XmlSettingsFileAccessor
 
     Public Class XMLFileReaderNotInitializedException
         Inherits ApplicationException
-        Public Overrides ReadOnly Property Message() As String
+        Public Overrides ReadOnly Property Message As String
             Get
                 Return "The XMLFileReader instance has not been properly initialized."
             End Get

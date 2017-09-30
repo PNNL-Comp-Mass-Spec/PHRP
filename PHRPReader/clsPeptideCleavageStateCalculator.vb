@@ -109,16 +109,16 @@ Public Class clsPeptideCleavageStateCalculator
 #End Region
 
 #Region "Properties"
-    Public Property EnzymeMatchSpec() As udtEnzymeMatchSpecType
+    Public Property EnzymeMatchSpec As udtEnzymeMatchSpecType
         Get
             Return mEnzymeMatchSpec
         End Get
-        Set(Value As udtEnzymeMatchSpecType)
+        Set
             SetEnzymeMatchSpec(Value.LeftResidueRegEx, Value.RightResidueRegEx)
         End Set
     End Property
 
-    Public ReadOnly Property TerminusSymbols() As Char()
+    Public ReadOnly Property TerminusSymbols As Char()
         Get
             Return mTerminusSymbols
         End Get
@@ -552,9 +552,9 @@ Public Class clsPeptideCleavageStateCalculator
     ''' </remarks>
     Public Shared Function SplitPrefixAndSuffixFromSequence(
       strSequenceIn As String,
-      <Out()> ByRef strPrimarySequence As String,
-      <Out()> ByRef strPrefix As String,
-      <Out()> ByRef strSuffix As String) As Boolean
+      <Out> ByRef strPrimarySequence As String,
+      <Out> ByRef strPrefix As String,
+      <Out> ByRef strSuffix As String) As Boolean
 
         Dim intPeriodLoc1 As Integer
         Dim intPeriodLoc2 As Integer
