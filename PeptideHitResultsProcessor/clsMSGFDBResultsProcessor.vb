@@ -124,7 +124,7 @@ Public Class clsMSGFDBResultsProcessor
         DeNovoScore = 12
         MSGFScore = 13
         SpecProb_EValue = 14
-        RankSpecProb = 15                   ' Rank 1 means lowest SpecProb, 2 means next higher score, etc. (ties get the same rank)
+        RankSpecProb = 15                   ' Rank 1 means lowest SpecEValue, 2 means next higher score, etc. (ties get the same rank)
         PValue_EValue = 16
         FDR_QValue = 17                     ' Only present if searched using -tda 1
         PepFDR_PepQValue = 18               ' Only present if searched using -tda 1
@@ -159,13 +159,13 @@ Public Class clsMSGFDBResultsProcessor
         Public NTT As String
         Public DeNovoScore As String
         Public MSGFScore As String
-        Public SpecEValue As String              ' Smaller values are better scores (e.g. 1E-9 is better than 1E-6); MSGF+ renamed this from SpecProb to SpecEValue
+        Public SpecEValue As String             ' Smaller values are better scores (e.g. 1E-9 is better than 1E-6); MSGF+ renamed this from SpecProb to SpecEValue
         Public SpecEValueNum As Double
-        Public EValue As String                     ' Smaller values are better scores (e.g. 1E-7 is better than 1E-3); MSGF+ renamed this from PValue to EValue
+        Public EValue As String                 ' Smaller values are better scores (e.g. 1E-7 is better than 1E-3); MSGF+ renamed this from PValue to EValue
         Public EValueNum As Double
-        Public QValue As String                     ' Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MSGF+
-        Public QValueNum As Double                  ' Numeric equivalent of QValue
-        Public PepQValue As String                  ' Only used when target/decoy search was used; holds PepQValue for MSGF+
+        Public QValue As String                 ' Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MSGF+
+        Public QValueNum As Double              ' Numeric equivalent of QValue
+        Public PepQValue As String              ' Only used when target/decoy search was used; holds PepQValue for MSGF+
         Public RankSpecProb As Integer
         Public IMSScan As Integer
         Public IMSDriftTime As String
@@ -755,8 +755,8 @@ Public Class clsMSGFDBResultsProcessor
 
     ''' <summary>
     ''' This routine creates a first hits file or synopsis file from the output from MSGF+
-    ''' The synopsis file includes every result with a p-value below a set threshold or a SpecProb below a certain threshold
-    ''' The first-hits file includes the results with the lowest SpecProb (for each scan and charge)
+    ''' The synopsis file includes every result with a p-value below a set threshold or a SpecEValue below a certain threshold
+    ''' The first-hits file includes the results with the lowest SpecEValue (for each scan and charge)
     ''' </summary>
     ''' <param name="strInputFilePath"></param>
     ''' <param name="strOutputFilePath"></param>
@@ -2777,7 +2777,7 @@ Public Class clsMSGFDBResultsProcessor
 
         AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
 
-        ' The calling procedure should have already sorted by scan, charge, and SpecProb; no need to re-sort
+        ' The calling procedure should have already sorted by scan, charge, and SpecEValue; no need to re-sort
 
         ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
 
@@ -2837,7 +2837,7 @@ Public Class clsMSGFDBResultsProcessor
 
         AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
 
-        ' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
+        ' The calling procedure already sorted by scan, charge, and SpecEValue; no need to re-sort
 
         ExpandListIfRequired(lstFilteredSearchResults, intEndIndex - intStartIndex + 1)
 

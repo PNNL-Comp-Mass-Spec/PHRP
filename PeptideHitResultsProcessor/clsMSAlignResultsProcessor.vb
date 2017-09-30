@@ -456,8 +456,8 @@ Public Class clsMSAlignResultsProcessor
 
     ''' <summary>
     ''' This routine creates a first hits file or synopsis file from the output from MSAlign
-    ''' The synopsis file includes every result with a p-value below a set threshold or a SpecProb below a certain threshold
-    ''' The first-hits file includes the results with the lowest SpecProb (for each scan and charge)
+    ''' The synopsis file includes every result with a p-value below a set threshold or a SpecEValue below a certain threshold
+    ''' The first-hits file includes the results with the lowest SpecEValue (for each scan and charge)
     ''' </summary>
     ''' <param name="strInputFilePath"></param>
     ''' <param name="strOutputFilePath"></param>

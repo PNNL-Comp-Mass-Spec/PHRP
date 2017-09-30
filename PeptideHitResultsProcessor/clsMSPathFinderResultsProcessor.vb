@@ -1,7 +1,7 @@
 ﻿Option Strict On
 
-' This class reads in a MSPathFinder results file (_IcTda.tsv) and creates 
-' a tab-delimited text file with the data. 
+' This class reads in a MSPathFinder results file (_IcTda.tsv) and creates
+' a tab-delimited text file with the data.
 '
 ' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -119,7 +119,7 @@ Public Class clsMSPathFinderResultsProcessor
 
         ' The following are typically defined for other search engines, but are not used for MSPathFinder
         '   Public DelM As String                   ' Computed using Precursor_mass - CalculatedMonoMass
-        '   Public DelM_PPM As String               ' Computed using DelM and CalculatedMonoMass	
+        '   Public DelM_PPM As String               ' Computed using DelM and CalculatedMonoMass
 
         Public Sub Clear()
             Scan = String.Empty
@@ -254,7 +254,7 @@ Public Class clsMSPathFinderResultsProcessor
 
             ' For other tools, we would add IsotopicMods here
             ' This is not supported for MSPathFinder
-            ' 
+            '
             ' objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
 
             ' Parse .Modifications to determine the modified residues present
@@ -883,7 +883,7 @@ Public Class clsMSPathFinderResultsProcessor
             Dim value As Integer
             If strSplitLine.Length >= 2 Then
                 If Integer.TryParse(strSplitLine(1), value) Then
-                    ' Second column has a number; this is not a header line					
+                    ' Second column has a number; this is not a header line
                     blnUseDefaultHeaders = True
                 Else
 
@@ -1195,7 +1195,7 @@ Public Class clsMSPathFinderResultsProcessor
       lstFilteredSearchResults As List(Of udtMSPathFinderSearchResultType),
       ByRef strErrorLog As String)
 
-        ' Sort udtFilteredSearchResults by ascending SpecEValue, QValue, Scan, Peptide, and Protein     
+        ' Sort udtFilteredSearchResults by ascending SpecEValue, QValue, Scan, Peptide, and Protein
         Dim query = From item In lstFilteredSearchResults Order By item.SpecEValueNum, item.QValueNum, item.ScanNum, item.Sequence, item.Protein Select item
 
         Dim intIndex = 1

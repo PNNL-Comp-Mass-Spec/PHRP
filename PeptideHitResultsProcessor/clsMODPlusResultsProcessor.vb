@@ -1,7 +1,7 @@
 ﻿Option Strict On
 
-' This class reads in an MODPlus results file (txt format) and creates 
-' a tab-delimited text file with the data. 
+' This class reads in an MODPlus results file (txt format) and creates
+' a tab-delimited text file with the data.
 '
 ' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -90,7 +90,7 @@ Public Class clsMODPlusResultsProcessor
         Public SpectrumFileName As String
         Public SpectrumIndex As String
         Public ScanNum As Integer
-        Public Precursor_mass As String         ' Uncharged monoisotopic mass value of the observed precursor_mz, reported as ObservedMW by MODPlus 
+        Public Precursor_mass As String         ' Uncharged monoisotopic mass value of the observed precursor_mz, reported as ObservedMW by MODPlus
         Public PrecursorMZ As String            ' Computed by this class from ObservedMonoMass
         Public Charge As String
         Public ChargeNum As Short
@@ -98,7 +98,7 @@ Public Class clsMODPlusResultsProcessor
         Public DeltaMass As String              ' Computed by MODPlus
         Public MH As String                     ' Theoretical monoisotopic peptide MH (including mods), as computed by PHRP; note that this is (M+H)+
         Public DelM As String                   ' Computed by this class using Precursor_mass - CalculatedMonoMass
-        Public DelM_PPM As String               ' Computed by this class using DelM and CalculatedMonoMass	
+        Public DelM_PPM As String               ' Computed by this class using DelM and CalculatedMonoMass
         Public Score As String
         Public ScoreNum As Double
         Public Probability As String            ' Higher values are better
@@ -245,7 +245,7 @@ Public Class clsMODPlusResultsProcessor
             ' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
             ' Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
             '  even though, biologically, that's typically not possible
-            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
+            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus
             '  (where two COOH groups are present)
             objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
 
@@ -311,7 +311,7 @@ Public Class clsMODPlusResultsProcessor
       intStartIndex As Integer,
       intEndIndex As Integer)
 
-        ' Prior to September 2014 ranks were assign per charge state per scan; 
+        ' Prior to September 2014 ranks were assign per charge state per scan;
         ' Ranks are now assigned per scan (across all charge states)
 
         ' Duplicate a portion of lstSearchResults so that we can sort by descending Probability
@@ -403,7 +403,7 @@ Public Class clsMODPlusResultsProcessor
             End If
         Next
 
-        ' Now look for static mods 
+        ' Now look for static mods
         ' First determine the index of the last residue in strPrimarySequence
         Dim intIndexLastChar As Integer = strPrimarySequence.Length
 
@@ -995,7 +995,7 @@ Public Class clsMODPlusResultsProcessor
     End Function
 
     ''' <summary>
-    ''' 
+    '''
     ''' </summary>
     ''' <param name="strLineIn"></param>
     ''' <param name="intColumnMapping"></param>
@@ -1039,7 +1039,7 @@ Public Class clsMODPlusResultsProcessor
             Dim value As Integer
             If strSplitLine.Length >= 2 Then
                 If Integer.TryParse(strSplitLine(1), value) Then
-                    ' Second column has a number; this is not a header line					
+                    ' Second column has a number; this is not a header line
                     blnUseDefaultHeaders = True
                 Else
 
@@ -1210,7 +1210,7 @@ Public Class clsMODPlusResultsProcessor
             With objSearchResult
 
                 ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
+                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
                 ' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
                 .ComputePeptideCleavageStateInProtein()
 

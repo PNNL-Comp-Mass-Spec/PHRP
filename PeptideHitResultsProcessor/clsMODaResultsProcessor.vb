@@ -1,7 +1,7 @@
 ﻿Option Strict On
 
-' This class reads in an MODa results file (txt format) and creates 
-' a tab-delimited text file with the data. 
+' This class reads in an MODa results file (txt format) and creates
+' a tab-delimited text file with the data.
 '
 ' -------------------------------------------------------------------------------
 ' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -86,7 +86,7 @@ Public Class clsMODaResultsProcessor
         Public SpectrumFileName As String
         Public SpectrumIndex As String
         Public ScanNum As Integer               ' Determined by looking for SpectrumIndex in the _mgf_IndexToScanMap.txt file
-        Public Precursor_mass As String         ' Uncharged monoisotopic mass value of the observed precursor_mz, reported as ObservedMonoMass by MODa 
+        Public Precursor_mass As String         ' Uncharged monoisotopic mass value of the observed precursor_mz, reported as ObservedMonoMass by MODa
         Public PrecursorMZ As String            ' Computed from ObservedMonoMass
         Public Charge As String
         Public ChargeNum As Short
@@ -94,7 +94,7 @@ Public Class clsMODaResultsProcessor
         Public DeltaMass As String              ' Computed by MODa
         Public MH As String                     ' Theoretical monoisotopic peptide MH (including mods), as computed by PHRP; note that this is (M+H)+
         Public DelM As String                   ' Computed using Precursor_mass - CalculatedMonoMass
-        Public DelM_PPM As String               ' Computed using DelM and CalculatedMonoMass	
+        Public DelM_PPM As String               ' Computed using DelM and CalculatedMonoMass
         Public Score As String
         Public Probability As String            ' Higher values are better
         Public ProbabilityNum As Double         ' Higher values are better
@@ -232,7 +232,7 @@ Public Class clsMODaResultsProcessor
             ' Add the protein and peptide terminus static mods (if defined and if the peptide is at a protein terminus)
             ' Since Inspect allows a terminal peptide residue to be modified twice, we'll allow that to happen,
             '  even though, biologically, that's typically not possible
-            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus 
+            ' However, there are instances where this is possible, e.g. methylation of D or E on the C-terminus
             '  (where two COOH groups are present)
             objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts)
 
@@ -429,7 +429,7 @@ Public Class clsMODaResultsProcessor
       intStartIndex As Integer,
       intEndIndex As Integer)
 
-        ' Prior to September 2014 ranks were assign per charge state per scan; 
+        ' Prior to September 2014 ranks were assign per charge state per scan;
         ' Ranks are now assigned per scan (across all charge states)
 
         ' Duplicate a portion of lstSearchResults so that we can sort by descending Probability
@@ -521,7 +521,7 @@ Public Class clsMODaResultsProcessor
             End If
         Next
 
-        ' Now look for static mods 
+        ' Now look for static mods
         ' First determine the index of the last residue in strPrimarySequence
         Dim intIndexLastChar As Integer = strPrimarySequence.Length
 
@@ -1213,7 +1213,7 @@ Public Class clsMODaResultsProcessor
     End Function
 
     ''' <summary>
-    ''' 
+    '''
     ''' </summary>
     ''' <param name="strLineIn"></param>
     ''' <param name="intColumnMapping"></param>
@@ -1255,7 +1255,7 @@ Public Class clsMODaResultsProcessor
             Dim value As Integer
             If strSplitLine.Length >= 2 Then
                 If Integer.TryParse(strSplitLine(1), value) Then
-                    ' Second column has a number; this is not a header line					
+                    ' Second column has a number; this is not a header line
                     blnUseDefaultHeaders = True
                 Else
 
@@ -1422,7 +1422,7 @@ Public Class clsMODaResultsProcessor
             With objSearchResult
 
                 ' Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide 
+                ' If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
                 ' will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
                 .ComputePeptideCleavageStateInProtein()
 
@@ -1464,8 +1464,8 @@ Public Class clsMODaResultsProcessor
     ''' <returns>True if success, False if failure</returns>
     Public Overloads Overrides Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
-        Dim strBaseName As String = String.Empty
-        Dim strSynOutputFilePath As String = String.Empty
+        Dim strBaseName As String
+        Dim strSynOutputFilePath As String
 
         Dim lstMODaModInfo As List(Of clsModificationDefinition)
         Dim lstPepToProteinMapping As List(Of udtPepToProteinMappingType)
@@ -1746,7 +1746,7 @@ Public Class clsMODaResultsProcessor
 
         AssignRankAndDeltaNormValues(lstSearchResults, intStartIndex, intEndIndex)
 
-        ' The calling procedure already sorted by scan, charge, and SpecProb; no need to re-sort
+        ' The calling procedure already sorted by scan, charge, and SpecEValue; no need to re-sort
 
         ' Now store or write out the matches that pass the filters
         For intIndex = intStartIndex To intEndIndex
