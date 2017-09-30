@@ -144,7 +144,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="objSearchResult"></param>
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <remarks></remarks>
-    Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMODa, blnUpdateModOccurrenceCounts As Boolean)
+    Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsBaseClass, blnUpdateModOccurrenceCounts As Boolean)
         Const NO_RESIDUE = "-"c
 
         Dim intIndex As Integer, intModIndex As Integer
@@ -217,7 +217,7 @@ Public Class clsMODaResultsProcessor
 
     End Sub
 
-    Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsMODa, blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsBaseClass, blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Const ALLOW_DUPLICATE_MOD_ON_TERMINUS = True
 
         Dim blnSuccess As Boolean
@@ -383,7 +383,7 @@ Public Class clsMODaResultsProcessor
     'End Function
 
     Private Sub AssociateDynamicModWithResidue(
-      objSearchResult As clsSearchResultsMODa,
+      objSearchResult As clsSearchResultsBaseClass,
       chMostRecentResidue As Char,
       intResidueLocInPeptide As Integer,
       strModMassDigits As String,

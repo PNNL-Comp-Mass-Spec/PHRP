@@ -274,7 +274,7 @@ Public Class clsMSGFDBResultsProcessor
     ''' <param name="objSearchResult"></param>
     ''' <param name="blnUpdateModOccurrenceCounts"></param>
     ''' <remarks></remarks>
-    Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsMSGFDB, blnUpdateModOccurrenceCounts As Boolean)
+    Private Sub AddDynamicAndStaticResidueMods(objSearchResult As clsSearchResultsBaseClass, blnUpdateModOccurrenceCounts As Boolean)
         Dim intIndex As Integer, intModIndex As Integer
         Dim chChar As Char
         Dim objModificationDefinition As clsModificationDefinition
@@ -470,7 +470,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Sub
 
-    Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsMSGFDB, blnUpdateModOccurrenceCounts As Boolean) As Boolean
+    Private Function AddModificationsAndComputeMass(objSearchResult As clsSearchResultsBaseClass, blnUpdateModOccurrenceCounts As Boolean) As Boolean
         Const ALLOW_DUPLICATE_MOD_ON_TERMINUS = True
 
         Dim blnSuccess As Boolean
