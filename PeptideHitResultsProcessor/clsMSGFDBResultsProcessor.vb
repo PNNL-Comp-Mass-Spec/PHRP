@@ -948,8 +948,8 @@ Public Class clsMSGFDBResultsProcessor
 
                     lstSearchResultsPrefiltered.TrimExcess()
 
-                    ' Sort the SearchResults by scan, charge, and ascending SpecProb
-                    lstSearchResultsPrefiltered.Sort(New MSGFDBSearchResultsComparerScanChargeSpecProbPeptide)
+                    ' Sort the SearchResults by scan, charge, and ascending SpecEValue
+                    lstSearchResultsPrefiltered.Sort(New MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide)
 
                     If eFilteredOutputFileType = eFilteredOutputFileTypeConstants.FHTFile Then
 
@@ -1343,16 +1343,7 @@ Public Class clsMSGFDBResultsProcessor
 
         ' Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-        Dim strPreviousSpecProb As String
-
-        ' Note that MSGF+ synopsis files are normally sorted on SpecProb value, ascending
-        ' In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
-        '  we will keep track of the scan, charge, and peptide information parsed for each unique SpecProb encountered
-        ' Although this was a possiblity with Inspect, it likely never occurs for MSGF+
-        '  But, we'll keep the check in place just in case
-
-        Dim htPeptidesFoundForSpecProbLevel As Hashtable
-
+        Dim strPreviousSpecEValue As String
         Dim strKey As String
 
         Dim strLineIn As String
@@ -1390,9 +1381,14 @@ Public Class clsMSGFDBResultsProcessor
             ' Initialize objSearchResult
             objSearchResult = New clsSearchResultsMSGFDB(mPeptideMods, mPeptideSeqMassCalculator)
 
-            ' Initialize htPeptidesFoundForSpecProbLevel
-            htPeptidesFoundForSpecProbLevel = New Hashtable
-            strPreviousSpecProb = String.Empty
+
+            ' Note that MSGF+ synopsis files are normally sorted on SpecEValue value, ascending
+            ' In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
+            '  we will keep track of the scan, charge, and peptide information parsed for each unique SpecEValue encountered
+            ' Although this was a possiblity with Inspect, it likely never occurs for MSGF+
+            '  But, we'll keep the check in place just in case
+
+            strPreviousSpecEValue = String.Empty
 
             ' Assure that lstPepToProteinMapping is sorted on peptide
             If lstPepToProteinMapping.Count > 1 Then
@@ -1441,9 +1437,9 @@ Public Class clsMSGFDBResultsProcessor
                         If blnValidSearchResult Then
                             strKey = objSearchResult.PeptideSequenceWithMods & "_" & objSearchResult.Scan & "_" & objSearchResult.Charge
 
-                            If objSearchResult.SpecEValue = strPreviousSpecProb Then
-                                ' New result has the same SpecProb as the previous result
-                                ' See if htPeptidesFoundForSpecProbLevel contains the peptide, scan and charge
+                            If objSearchResult.SpecEValue = strPreviousSpecEValue Then
+                                ' New result has the same SpecEValue as the previous result
+                                ' See if htPeptidesFoundForSpecEValueLevel contains the peptide, scan and charge
 
                                 If htPeptidesFoundForSpecProbLevel.ContainsKey(strKey) Then
                                     blnFirstMatchForGroup = False
@@ -2713,8 +2709,8 @@ Public Class clsMSGFDBResultsProcessor
       blnIncludeIMSFields As Boolean,
       blnMSGFPlus As Boolean)
 
-        ' Sort udtFilteredSearchResults by ascending SpecProb, ascending scan, ascending charge, ascending peptide, and ascending protein
-        lstFilteredSearchResults.Sort(New MSGFDBSearchResultsComparerSpecProbScanChargePeptide)
+        ' Sort udtFilteredSearchResults by ascending SpecEValue, ascending scan, ascending charge, ascending peptide, and ascending protein
+        lstFilteredSearchResults.Sort(New MSGFDBSearchResultsComparerSpecEValueScanChargePeptide)
 
         For intIndex = 0 To lstFilteredSearchResults.Count - 1
             WriteSearchResultToFile(intIndex + 1, swResultFile, lstFilteredSearchResults(intIndex), strErrorLog, blnIncludeFDRandPepFDR, blnIncludeEFDR, blnIncludeIMSFields, blnMSGFPlus)
@@ -2995,7 +2991,7 @@ Public Class clsMSGFDBResultsProcessor
             lstData.Add(udtSearchResult.DeNovoScore)
             lstData.Add(udtSearchResult.MSGFScore)
             lstData.Add(udtSearchResult.SpecEValue)
-            lstData.Add(udtSearchResult.RankSpecProb.ToString)
+            lstData.Add(udtSearchResult.RankSpecProb.ToString())
             lstData.Add(udtSearchResult.EValue)
 
             If blnIncludeFDRandPepFDR Then
@@ -3007,11 +3003,11 @@ Public Class clsMSGFDBResultsProcessor
             End If
 
             If blnMSGFPlus Then
-                lstData.Add(udtSearchResult.IsotopeError.ToString)
+                lstData.Add(udtSearchResult.IsotopeError.ToString())
             End If
 
             If blnIncludeIMSFields Then
-                lstData.Add(udtSearchResult.IMSScan.ToString)
+                lstData.Add(udtSearchResult.IMSScan.ToString())
                 lstData.Add(udtSearchResult.IMSDriftTime)
             End If
 
@@ -3027,7 +3023,7 @@ Public Class clsMSGFDBResultsProcessor
 
 #Region "IComparer Classes"
 
-    Private Class MSGFDBSearchResultsComparerScanChargeSpecProbPeptide
+    Private Class MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide
         Implements IComparer(Of udtMSGFDBSearchResultType)
 
         Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
@@ -3072,7 +3068,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Class
 
-    Private Class MSGFDBSearchResultsComparerSpecProbScanChargePeptide
+    Private Class MSGFDBSearchResultsComparerSpecEValueScanChargePeptide
         Implements IComparer(Of udtMSGFDBSearchResultType)
 
         Public Function Compare(x As udtMSGFDBSearchResultType, y As udtMSGFDBSearchResultType) As Integer Implements IComparer(Of udtMSGFDBSearchResultType).Compare
