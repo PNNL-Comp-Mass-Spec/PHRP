@@ -425,7 +425,7 @@ Public Class clsMODaResultsProcessor
     ''' <param name="intEndIndex"></param>
     ''' <remarks></remarks>
     Private Sub AssignRankAndDeltaNormValues(
-      lstSearchResults As List(Of udtMODaSearchResultType),
+      lstSearchResults As IList(Of udtMODaSearchResultType),
       intStartIndex As Integer,
       intEndIndex As Integer)
 
@@ -1072,7 +1072,7 @@ Public Class clsMODaResultsProcessor
       strLineIn As String,
       ByRef udtSearchResult As udtMODaSearchResultType,
       ByRef strErrorLog As String,
-      intColumnMapping() As Integer) As Boolean
+      intColumnMapping As IList(Of Integer)) As Boolean
 
         ' Parses an entry from the MODa results file
 
@@ -1618,7 +1618,7 @@ Public Class clsMODaResultsProcessor
         Return blnSuccess
     End Function
 
-    Private Sub ResolveMODaModsWithModDefinitions(ByRef lstMODaModInfo As List(Of clsModificationDefinition))
+    Private Sub ResolveMODaModsWithModDefinitions(lstMODaModInfo As IReadOnlyCollection(Of clsModificationDefinition))
 
         Dim blnExistingModFound As Boolean
         Dim objModDef As clsModificationDefinition
@@ -1641,7 +1641,7 @@ Public Class clsMODaResultsProcessor
     End Sub
 
     Private Sub SortAndWriteFilteredSearchResults(
-      swResultFile As StreamWriter,
+      swResultFile As TextWriter,
       lstFilteredSearchResults As List(Of udtMODaSearchResultType),
       ByRef strErrorLog As String)
 
@@ -1664,7 +1664,7 @@ Public Class clsMODaResultsProcessor
     ''' </summary>
     ''' <param name="lstSearchResults"></param>
     ''' <remarks>Assumes the data is sorted by descending probability using MODaSearchResultsComparerProbabilityScanChargePeptide</remarks>
-    Private Sub ComputeQValues(lstSearchResults As List(Of udtMODaSearchResultType))
+    Private Sub ComputeQValues(lstSearchResults As IList(Of udtMODaSearchResultType))
 
         Dim forwardPeptideCount = 0
         Dim reversePeptideCount = 0
@@ -1737,10 +1737,10 @@ Public Class clsMODaResultsProcessor
     End Sub
 
     Private Sub StoreSynMatches(
-      lstSearchResults As List(Of udtMODaSearchResultType),
+      lstSearchResults As IList(Of udtMODaSearchResultType),
       intStartIndex As Integer,
       intEndIndex As Integer,
-      lstFilteredSearchResults As List(Of udtMODaSearchResultType))
+      lstFilteredSearchResults As ICollection(Of udtMODaSearchResultType))
 
         Dim intIndex As Integer
 
@@ -1758,7 +1758,7 @@ Public Class clsMODaResultsProcessor
     End Sub
 
     Private Sub WriteSynFHTFileHeader(
-      swResultFile As StreamWriter,
+      swResultFile As TextWriter,
       ByRef strErrorLog As String)
 
         ' Write out the header line for synopsis / first hits files
@@ -1800,7 +1800,7 @@ Public Class clsMODaResultsProcessor
     ''' <remarks></remarks>
     Private Sub WriteSearchResultToFile(
       intResultID As Integer,
-       swResultFile As StreamWriter,
+       swResultFile As TextWriter,
        udtSearchResult As udtMODaSearchResultType,
        ByRef strErrorLog As String)
 

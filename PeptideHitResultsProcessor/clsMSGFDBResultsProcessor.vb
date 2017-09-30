@@ -1553,7 +1553,7 @@ Public Class clsMSGFDBResultsProcessor
       lstMSGFDBModInfo As IReadOnlyList(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       lstSearchResultsCurrentScan As ICollection(Of udtMSGFDBSearchResultType),
       ByRef strErrorLog As String,
-      intColumnMapping() As Integer,
+      intColumnMapping As IList(Of Integer),
       ByRef intNextScanGroupID As Integer,
       lstScanGroupDetails As ICollection(Of udtScanGroupInfoType),
       htScanGroupCombo As IDictionary(Of String, Boolean),
@@ -2722,7 +2722,7 @@ Public Class clsMSGFDBResultsProcessor
 
     End Sub
 
-    Private Sub StoreScanGroupInfo(strScanGroupFilePath As String, lstScanGroupDetails As List(Of udtScanGroupInfoType))
+    Private Sub StoreScanGroupInfo(strScanGroupFilePath As String, lstScanGroupDetails As IReadOnlyCollection(Of udtScanGroupInfoType))
 
         Dim intScanGroupIDPrevious As Integer
         Dim blnCreateFile As Boolean

@@ -172,7 +172,7 @@ Public Class clsMSPathFinderResultsProcessor
     Private Sub AddModificationsToResidues(
        objSearchResult As clsSearchResultsMSPathFinder,
        blnUpdateModOccurrenceCounts As Boolean,
-       lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType))
+       lstModInfo As IReadOnlyCollection(Of clsMSGFPlusParamFileModExtractor.udtModInfoType))
 
         If String.IsNullOrWhiteSpace(objSearchResult.Modifications) Then
             Return
@@ -246,7 +246,7 @@ Public Class clsMSPathFinderResultsProcessor
     Private Function AddModificationsAndComputeMass(
        objSearchResult As clsSearchResultsMSPathFinder,
        blnUpdateModOccurrenceCounts As Boolean,
-       lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
+       lstModInfo As IReadOnlyCollection(Of clsMSGFPlusParamFileModExtractor.udtModInfoType)) As Boolean
 
         Dim blnSuccess As Boolean
 
@@ -461,7 +461,7 @@ Public Class clsMSPathFinderResultsProcessor
                 Loop
 
                 ' Sort the SearchResults by scan, charge, and ascending SpecEValue
-                lstSearchResultsUnfiltered.Sort(New MSPathFinderSearchResultsComparerScanChargeScorePeptide)
+                lstSearchResultsUnfiltered.Sort(New MSPathFinderSearchResultsComparerScanChargeScorePeptide())
 
                 ' Now filter the data
 
@@ -741,7 +741,7 @@ Public Class clsMSPathFinderResultsProcessor
       strLineIn As String,
       ByRef udtSearchResult As udtMSPathFinderSearchResultType,
       ByRef strErrorLog As String,
-      intColumnMapping() As Integer,
+      intColumnMapping As IList(Of Integer),
       lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType),
       rowNumber As Integer) As Boolean
 
@@ -1103,8 +1103,8 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <returns>True if success, False if failure</returns>
     Public Overrides Function ProcessFile(strInputFilePath As String, strOutputFolderPath As String, strParameterFilePath As String) As Boolean
 
-        Dim strBaseName As String = String.Empty
-        Dim strSynOutputFilePath As String = String.Empty
+        Dim strBaseName As String
+        Dim strSynOutputFilePath As String
 
         Dim lstModInfo As List(Of clsMSGFPlusParamFileModExtractor.udtModInfoType) = Nothing
 
@@ -1191,7 +1191,7 @@ Public Class clsMSPathFinderResultsProcessor
     End Function
 
     Private Sub SortAndWriteFilteredSearchResults(
-      swResultFile As StreamWriter,
+      swResultFile As TextWriter,
       lstFilteredSearchResults As List(Of udtMSPathFinderSearchResultType),
       ByRef strErrorLog As String)
 
@@ -1215,7 +1215,7 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <param name="lstFilteredSearchResults">Output parmaeter: the actual filtered search results</param>
     ''' <remarks></remarks>
     Private Sub StoreSynMatches(
-      lstSearchResults As List(Of udtMSPathFinderSearchResultType),
+      lstSearchResults As IReadOnlyList(Of udtMSPathFinderSearchResultType),
       intStartIndex As Integer,
       intEndIndex As Integer,
       lstFilteredSearchResults As List(Of udtMSPathFinderSearchResultType))
@@ -1242,7 +1242,7 @@ Public Class clsMSPathFinderResultsProcessor
     End Sub
 
     Private Sub WriteSynFHTFileHeader(
-      swResultFile As StreamWriter,
+      swResultFile As TextWriter,
       ByRef strErrorLog As String)
 
         ' Write out the header line for synopsis / first hits files
@@ -1287,7 +1287,7 @@ Public Class clsMSPathFinderResultsProcessor
     ''' <remarks></remarks>
     Private Sub WriteSearchResultToFile(
       intResultID As Integer,
-      swResultFile As StreamWriter,
+      swResultFile As TextWriter,
       udtSearchResult As udtMSPathFinderSearchResultType,
       ByRef strErrorLog As String)
 
@@ -1333,7 +1333,7 @@ Public Class clsMSPathFinderResultsProcessor
         ReportWarning(warningMsg)
     End Sub
 #End Region
-    
+
 #Region "IComparer Classes"
 
     Protected Class MSPathFinderSearchResultsComparerScanChargeScorePeptide
