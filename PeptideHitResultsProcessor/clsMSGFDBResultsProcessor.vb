@@ -1388,6 +1388,8 @@ Public Class clsMSGFDBResultsProcessor
             ' Although this was a possiblity with Inspect, it likely never occurs for MSGF+
             '  But, we'll keep the check in place just in case
 
+            Dim peptidesFoundForSpecEValueLevel = New SortedSet(Of String)
+
             strPreviousSpecEValue = String.Empty
 
             ' Assure that lstPepToProteinMapping is sorted on peptide
@@ -1441,23 +1443,22 @@ Public Class clsMSGFDBResultsProcessor
                                 ' New result has the same SpecEValue as the previous result
                                 ' See if htPeptidesFoundForSpecEValueLevel contains the peptide, scan and charge
 
-                                If htPeptidesFoundForSpecProbLevel.ContainsKey(strKey) Then
+                                If peptidesFoundForSpecEValueLevel.Contains(strKey) Then
                                     blnFirstMatchForGroup = False
                                 Else
-                                    htPeptidesFoundForSpecProbLevel.Add(strKey, 1)
+                                    peptidesFoundForSpecEValueLevel.Add(strKey)
                                     blnFirstMatchForGroup = True
                                 End If
 
                             Else
-                                ' New SpecProb
-                                ' Reset htPeptidesFoundForSpecProbLevel
-                                htPeptidesFoundForSpecProbLevel.Clear()
+                                ' New SpecEValue
+                                peptidesFoundForSpecEValueLevel.Clear()
 
-                                ' Update strPreviousSpecProb
-                                strPreviousSpecProb = objSearchResult.SpecEValue
+                                ' Update strPreviousSpecEValue
+                                strPreviousSpecEValue = objSearchResult.SpecEValue
 
-                                ' Append a new entry to htPeptidesFoundForSpecProbLevel
-                                htPeptidesFoundForSpecProbLevel.Add(strKey, 1)
+                                ' Append a new entry
+                                peptidesFoundForSpecEValueLevel.Add(strKey)
                                 blnFirstMatchForGroup = True
                             End If
 
