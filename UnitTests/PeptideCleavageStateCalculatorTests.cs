@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using PHRPReader;
 
-namespace PHRP_UnitTestsCS3
+namespace PHRP_UnitTests
 {
     [TestFixture()]
     public class PeptideCleavageStateCalculatorTests
