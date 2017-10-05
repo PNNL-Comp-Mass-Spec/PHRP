@@ -1,53 +1,54 @@
-﻿Option Strict On
+﻿namespace PHRPReader
+{
+    public class clsScanStatsExInfo
+    {
+        private readonly int mScanNumber;
 
-Public Class clsScanStatsExInfo
+        // ReSharper disable once ConvertToAutoProperty
+        public int ScanNumber
+        {
+            get { return mScanNumber; }
+        }
 
-    Private ReadOnly mScanNumber As Integer
+        public double IonInjectionTime { get; set; }
 
-    ' ReSharper disable once ConvertToVbAutoProperty
-    Public ReadOnly Property ScanNumber As Integer
-        Get
-            Return mScanNumber
-        End Get
-    End Property
+        public int ScanEvent { get; set; }
 
-    Public Property IonInjectionTime As Double
+        public int MasterIndex { get; set; }
 
-    Public Property ScanEvent As Integer
+        public double ElapsedScanTime { get; set; }
 
-    Public Property MasterIndex As Integer
+        public int ChargeState { get; set; }
 
-    Public Property ElapsedScanTime As Double
+        public double MonoisotopicMZ { get; set; }
 
-    Public Property ChargeState As Integer
+        public double MS2IsolationWidth { get; set; }
 
-    Public Property MonoisotopicMZ As Double
+        public string FTAnalyzerSettings { get; set; }
 
-    Public Property MS2IsolationWidth As Double
+        public string FTAnalyzerMessage { get; set; }
 
-    Public Property FTAnalyzerSettings As String
+        public double FTResolution { get; set; }
 
-    Public Property FTAnalyzerMessage As String
+        public double ConversionParameterB { get; set; }
 
-    Public Property FTResolution As Double
+        public double ConversionParameterC { get; set; }
 
-    Public Property ConversionParameterB As Double
+        public double ConversionParameterD { get; set; }
 
-    Public Property ConversionParameterC As Double
+        public double ConversionParameterE { get; set; }
 
-    Public Property ConversionParameterD As Double
+        public string CollisionMode { get; set; }
 
-    Public Property ConversionParameterE As Double
+        public string ScanFilterText { get; set; }
 
-    Public Property CollisionMode As String
+        public double SourceVoltage { get; set; }
 
-    Public Property ScanFilterText As String
+        public double Source_Current { get; set; }
 
-    Public Property SourceVoltage As Double
-
-    Public Property Source_Current As Double
-
-    Public Sub New(intScanNumber As Integer)
-        mScanNumber = intScanNumber
-    End Sub
-End Class
+        public clsScanStatsExInfo(int intScanNumber)
+        {
+            mScanNumber = intScanNumber;
+        }
+    }
+}

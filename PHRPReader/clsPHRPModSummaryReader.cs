@@ -1,184 +1,202 @@
-﻿Option Strict On
-Imports System.IO
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
-Public Class clsPHRPModSummaryReader
+namespace PHRPReader
+{
+    public class clsPHRPModSummaryReader
+    {
+        public const string MOD_SUMMARY_COLUMN_Modification_Symbol = "Modification_Symbol";
+        public const string MOD_SUMMARY_COLUMN_Modification_Mass = "Modification_Mass";
+        public const string MOD_SUMMARY_COLUMN_Target_Residues = "Target_Residues";
+        public const string MOD_SUMMARY_COLUMN_Modification_Type = "Modification_Type";
+        public const string MOD_SUMMARY_COLUMN_Mass_Correction_Tag = "Mass_Correction_Tag";
+        public const string MOD_SUMMARY_COLUMN_Occurrence_Count = "Occurrence_Count";
 
-    Public Const MOD_SUMMARY_COLUMN_Modification_Symbol As String = "Modification_Symbol"
-    Public Const MOD_SUMMARY_COLUMN_Modification_Mass As String = "Modification_Mass"
-    Public Const MOD_SUMMARY_COLUMN_Target_Residues As String = "Target_Residues"
-    Public Const MOD_SUMMARY_COLUMN_Modification_Type As String = "Modification_Type"
-    Public Const MOD_SUMMARY_COLUMN_Mass_Correction_Tag As String = "Mass_Correction_Tag"
-    Public Const MOD_SUMMARY_COLUMN_Occurrence_Count As String = "Occurrence_Count"
+        private readonly List<clsModificationDefinition> mModificationDefs;
 
-    Private ReadOnly mModificationDefs As List(Of clsModificationDefinition)
+        // The keys in this dictionary are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
+        private readonly Dictionary<string, string> mModDefMassesAsText;
 
-    ' The keys in this dictionary are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
-    Private ReadOnly mModDefMassesAsText As Dictionary(Of String, String)
+        private readonly bool mSuccess;
 
-    Private ReadOnly mSuccess As Boolean
+        public List<clsModificationDefinition> ModificationDefs
+        {
+            get { return mModificationDefs; }
+        }
 
-    Public ReadOnly Property ModificationDefs As List(Of clsModificationDefinition)
-        Get
-            Return mModificationDefs
-        End Get
-    End Property
+        // ReSharper disable once ConvertToAutoProperty
+        public bool Success
+        {
+            get { return mSuccess; }
+        }
 
-    ' ReSharper disable once ConvertToVbAutoProperty
-    Public ReadOnly Property Success As Boolean
-        Get
-            Return mSuccess
-        End Get
-    End Property
+        public clsPHRPModSummaryReader(string strModSummaryFilePath)
+        {
+            mModificationDefs = new List<clsModificationDefinition>();
+            mModDefMassesAsText = new Dictionary<string, string>();
 
-    Public Sub New(strModSummaryFilePath As String)
+            mSuccess = false;
 
-        mModificationDefs = New List(Of clsModificationDefinition)
-        mModDefMassesAsText = New Dictionary(Of String, String)
+            if (string.IsNullOrEmpty(strModSummaryFilePath))
+            {
+                throw new Exception("ModSummaryFilePath is empty; unable to continue");
+            }
+            else if (!File.Exists(strModSummaryFilePath))
+            {
+                throw new FileNotFoundException("ModSummary file not found: " + strModSummaryFilePath);
+            }
 
-        mSuccess = False
+            mSuccess = ReadModSummaryFile(strModSummaryFilePath, ref mModificationDefs);
+        }
 
-        If String.IsNullOrEmpty(strModSummaryFilePath) Then
-            Throw New Exception("ModSummaryFilePath is empty; unable to continue")
-        ElseIf Not File.Exists(strModSummaryFilePath) Then
-            Throw New FileNotFoundException("ModSummary file not found: " & strModSummaryFilePath)
-        End If
+        /// <summary>
+        /// Returns the mass value associated with the given mass correction tag
+        /// </summary>
+        /// <param name="strMassCorrectionTag"></param>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public string GetModificationMassAsText(string strMassCorrectionTag)
+        {
+            string strModMass = string.Empty;
 
-        mSuccess = ReadModSummaryFile(strModSummaryFilePath, mModificationDefs)
+            if (mModDefMassesAsText.TryGetValue(strMassCorrectionTag, out strModMass))
+            {
+                return strModMass;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
 
-    End Sub
+        private bool ReadModSummaryFile(string strModSummaryFilePath, ref List<clsModificationDefinition> lstModInfo)
+        {
+            string strLineIn = null;
+            string[] strSplitLine = null;
 
-    ''' <summary>
-    ''' Returns the mass value associated with the given mass correction tag
-    ''' </summary>
-    ''' <param name="strMassCorrectionTag"></param>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Public Function GetModificationMassAsText(strMassCorrectionTag As String) As String
-        Dim strModMass As String = String.Empty
+            SortedDictionary<string, int> objColumnHeaders = default(SortedDictionary<string, int>);
 
-        If mModDefMassesAsText.TryGetValue(strMassCorrectionTag, strModMass) Then
-            Return strModMass
-        Else
-            Return String.Empty
-        End If
-    End Function
+            string strModSymbol = null;
+            string strModMass = null;
+            string strTargetResidues = null;
+            string strModType = null;
+            string strMassCorrectionTag = null;
 
-    Private Function ReadModSummaryFile(strModSummaryFilePath As String, ByRef lstModInfo As List(Of clsModificationDefinition)) As Boolean
+            char chModSymbol = default(char);
+            double dblModificationMass = 0;
+            clsModificationDefinition.eModificationTypeConstants eModificationType = default(clsModificationDefinition.eModificationTypeConstants);
 
-        Dim strLineIn As String
-        Dim strSplitLine() As String
+            List<string> lstModMasses = null;
 
-        Dim objColumnHeaders As SortedDictionary(Of String, Integer)
+            bool blnSkipLine = false;
+            bool blnHeaderLineParsed = false;
 
-        Dim strModSymbol As String
-        Dim strModMass As String
-        Dim strTargetResidues As String
-        Dim strModType As String
-        Dim strMassCorrectionTag As String
+            if (lstModInfo == null)
+            {
+                lstModInfo = new List<clsModificationDefinition>();
+            }
+            else
+            {
+                lstModInfo.Clear();
+            }
 
-        Dim chModSymbol As Char
-        Dim dblModificationMass As Double
-        Dim eModificationType As clsModificationDefinition.eModificationTypeConstants
+            if (string.IsNullOrEmpty(strModSummaryFilePath))
+            {
+                return false;
+            }
 
-        Dim lstModMasses As List(Of String) = Nothing
+            // Initialize the column mapping
+            // Using a case-insensitive comparer
+            objColumnHeaders = new SortedDictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
 
-        Dim blnSkipLine As Boolean
-        Dim blnHeaderLineParsed As Boolean
+            // Define the default column mapping
+            objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Symbol, 0);
+            objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Mass, 1);
+            objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Target_Residues, 2);
+            objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Type, 3);
+            objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Mass_Correction_Tag, 4);
+            objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Occurrence_Count, 5);
 
+            // Read the data from the ModSummary.txt file
+            // The first line is typically a header line:
+            // Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
 
-        If lstModInfo Is Nothing Then
-            lstModInfo = New List(Of clsModificationDefinition)
-        Else
-            lstModInfo.Clear()
-        End If
+            using (StreamReader srModSummaryFile = new StreamReader(new FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            {
+                blnHeaderLineParsed = false;
 
-        If String.IsNullOrEmpty(strModSummaryFilePath) Then
-            Return False
-        End If
+                while (!srModSummaryFile.EndOfStream)
+                {
+                    strLineIn = srModSummaryFile.ReadLine();
+                    blnSkipLine = false;
 
-        ' Initialize the column mapping
-        ' Using a case-insensitive comparer
-        objColumnHeaders = New SortedDictionary(Of String, Integer)(StringComparer.CurrentCultureIgnoreCase)
+                    if (!string.IsNullOrEmpty(strLineIn))
+                    {
+                        strSplitLine = strLineIn.Split('\t');
 
-        ' Define the default column mapping
-        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Symbol, 0)
-        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Mass, 1)
-        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Target_Residues, 2)
-        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Modification_Type, 3)
-        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Mass_Correction_Tag, 4)
-        objColumnHeaders.Add(MOD_SUMMARY_COLUMN_Occurrence_Count, 5)
+                        if (!blnHeaderLineParsed)
+                        {
+                            if (strSplitLine[0].ToLower() == MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower())
+                            {
+                                // Parse the header line to confirm the column ordering
+                                // The Occurrence_Count column was mispelled prior to December 2012; need to check for this
+                                for (int intIndex = 0; intIndex <= strSplitLine.Length - 1; intIndex++)
+                                {
+                                    if (strSplitLine[intIndex] == "Occurence_Count")
+                                        strSplitLine[intIndex] = MOD_SUMMARY_COLUMN_Occurrence_Count;
+                                }
+                                clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders);
+                                blnSkipLine = true;
+                            }
 
-        ' Read the data from the ModSummary.txt file
-        ' The first line is typically a header line:
-        ' Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
+                            blnHeaderLineParsed = true;
+                        }
 
-        Using srModSummaryFile As StreamReader = New StreamReader(New FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        if (!blnSkipLine && strSplitLine.Length >= 4)
+                        {
+                            strModSymbol = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, objColumnHeaders);
+                            strModMass = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Mass, objColumnHeaders);
+                            strTargetResidues = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Target_Residues, objColumnHeaders);
+                            strModType = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Type, objColumnHeaders);
+                            strMassCorrectionTag = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, objColumnHeaders);
 
-            blnHeaderLineParsed = False
+                            if (string.IsNullOrWhiteSpace(strModSymbol))
+                            {
+                                strModSymbol = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL.ToString();
+                            }
+                            chModSymbol = strModSymbol[0];
 
-            Do While Not srModSummaryFile.EndOfStream
-                strLineIn = srModSummaryFile.ReadLine
-                blnSkipLine = False
+                            if (!double.TryParse(strModMass, out dblModificationMass))
+                            {
+                                throw new Exception("Modification mass is not numeric for MassCorrectionTag: " + strMassCorrectionTag + ": " + strModMass);
+                            }
 
-                If Not String.IsNullOrEmpty(strLineIn) Then
-                    strSplitLine = strLineIn.Split(ControlChars.Tab)
+                            if (string.IsNullOrWhiteSpace(strModType))
+                            {
+                                eModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType;
+                            }
+                            else
+                            {
+                                eModificationType = clsModificationDefinition.ModificationSymbolToModificationType(strModType[0]);
+                            }
 
-                    If Not blnHeaderLineParsed Then
-                        If strSplitLine(0).ToLower() = MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower() Then
-                            ' Parse the header line to confirm the column ordering
-                            ' The Occurrence_Count column was mispelled prior to December 2012; need to check for this
-                            For intIndex As Integer = 0 To strSplitLine.Length - 1
-                                If strSplitLine(intIndex) = "Occurence_Count" Then strSplitLine(intIndex) = MOD_SUMMARY_COLUMN_Occurrence_Count
-                            Next
-                            clsPHRPReader.ParseColumnHeaders(strSplitLine, objColumnHeaders)
-                            blnSkipLine = True
-                        End If
+                            clsModificationDefinition objModDef = default(clsModificationDefinition);
+                            objModDef = new clsModificationDefinition(chModSymbol, dblModificationMass, strTargetResidues, eModificationType, strMassCorrectionTag);
+                            objModDef.ModificationMassAsText = strModMass;
 
-                        blnHeaderLineParsed = True
-                    End If
+                            lstModInfo.Add(objModDef);
 
-                    If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
-                        strModSymbol = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, objColumnHeaders)
-                        strModMass = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Mass, objColumnHeaders)
-                        strTargetResidues = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Target_Residues, objColumnHeaders)
-                        strModType = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Modification_Type, objColumnHeaders)
-                        strMassCorrectionTag = clsPHRPReader.LookupColumnValue(strSplitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, objColumnHeaders)
+                            if (!mModDefMassesAsText.ContainsKey(strMassCorrectionTag))
+                            {
+                                mModDefMassesAsText.Add(strMassCorrectionTag, strModMass);
+                            }
+                        }
+                    }
+                }
+            }
 
-                        If String.IsNullOrWhiteSpace(strModSymbol) Then
-                            strModSymbol = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL
-                        End If
-                        chModSymbol = strModSymbol.Chars(0)
-
-                        If Not Double.TryParse(strModMass, dblModificationMass) Then
-                            Throw New Exception("Modification mass is not numeric for MassCorrectionTag: " & strMassCorrectionTag & ": " & strModMass)
-                        End If
-
-                        If String.IsNullOrWhiteSpace(strModType) Then
-                            eModificationType = clsModificationDefinition.eModificationTypeConstants.UnknownType
-                        Else
-                            eModificationType = clsModificationDefinition.ModificationSymbolToModificationType(strModType.Chars(0))
-                        End If
-
-                        Dim objModDef As clsModificationDefinition
-                        objModDef = New clsModificationDefinition(chModSymbol, dblModificationMass, strTargetResidues, eModificationType, strMassCorrectionTag)
-                        objModDef.ModificationMassAsText = strModMass
-
-                        lstModInfo.Add(objModDef)
-
-                        If Not mModDefMassesAsText.ContainsKey(strMassCorrectionTag) Then
-                            mModDefMassesAsText.Add(strMassCorrectionTag, strModMass)
-                        End If
-
-                    End If
-                End If
-
-            Loop
-
-        End Using
-
-        Return True
-
-    End Function
-
-
-End Class
+            return true;
+        }
+    }
+}

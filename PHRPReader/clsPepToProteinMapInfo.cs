@@ -1,67 +1,72 @@
-﻿Option Strict On
+﻿using System;
+using System.Collections.Generic;
 
-Public Class clsPepToProteinMapInfo
+namespace PHRPReader
+{
+    public class clsPepToProteinMapInfo
+    {
+        public class udtProteinLocationInfo
+        {
+            public int ResidueStart;
+            public int ResidueEnd;
+        }
 
-    Public Structure udtProteinLocationInfo
-        Public ResidueStart As Integer
-        Public ResidueEnd As Integer
-    End Structure
+        /// <summary>
+        /// Dictionary of protein names and residue start/end positions
+        /// </summary>
+        /// <remarks></remarks>
+        private readonly Dictionary<string, List<udtProteinLocationInfo>> mProteinMapInfo;
 
-    ''' <summary>
-    ''' Dictionary of protein names and residue start/end positions
-    ''' </summary>
-    ''' <remarks></remarks>
-    Private ReadOnly mProteinMapInfo As Dictionary(Of String, List(Of udtProteinLocationInfo))
+        public int ProteinCount
+        {
+            get { return mProteinMapInfo.Count; }
+        }
 
-    Public ReadOnly Property ProteinCount As Integer
-        Get
-            Return mProteinMapInfo.Count
-        End Get
-    End Property
+        public Dictionary<string, List<udtProteinLocationInfo>> ProteinMapInfo
+        {
+            get { return mProteinMapInfo; }
+        }
 
-    Public ReadOnly Property ProteinMapInfo As Dictionary(Of String, List(Of udtProteinLocationInfo))
-        Get
-            Return mProteinMapInfo
-        End Get
-    End Property
+        public clsPepToProteinMapInfo(string proteinName, int residueStart, int residueEnd)
+        {
+            mProteinMapInfo = new Dictionary<string, List<udtProteinLocationInfo>>(StringComparer.CurrentCultureIgnoreCase);
 
-    Public Sub New(proteinName As String, residueStart As Integer, residueEnd As Integer)
+            AddProtein(proteinName, residueStart, residueEnd);
+        }
 
-        mProteinMapInfo = New Dictionary(Of String, List(Of udtProteinLocationInfo))(StringComparer.CurrentCultureIgnoreCase)
+        public void AddProtein(string proteinName, int residueStart, int residueEnd)
+        {
+            List<udtProteinLocationInfo> lstLocations = null;
 
-        AddProtein(proteinName, residueStart, residueEnd)
-    End Sub
+            if (mProteinMapInfo.TryGetValue(proteinName, out lstLocations))
+            {
+                // Protein mapping already exists; check residueStart
+                foreach (var udtLoc in lstLocations)
+                {
+                    if (udtLoc.ResidueStart == residueStart)
+                    {
+                        // Update this entry
+                        if (udtLoc.ResidueEnd != residueEnd)
+                        {
+                            udtLoc.ResidueEnd = residueEnd;
+                        }
+                        return;
+                    }
+                }
 
-    Public Sub AddProtein(proteinName As String, residueStart As Integer, residueEnd As Integer)
+                var udtLocInfoAddnl = new udtProteinLocationInfo();
+                udtLocInfoAddnl.ResidueStart = residueStart;
+                udtLocInfoAddnl.ResidueEnd = residueEnd;
 
-        Dim lstLocations As List(Of udtProteinLocationInfo) = Nothing
+                lstLocations.Add(udtLocInfoAddnl);
+                return;
+            }
 
-        If mProteinMapInfo.TryGetValue(proteinName, lstLocations) Then
-            ' Protein mapping already exists; check residueStart
-            For Each udtLoc In lstLocations
-                If udtLoc.ResidueStart = residueStart Then
-                    ' Update this entry
-                    If udtLoc.ResidueEnd <> residueEnd Then
-                        udtLoc.ResidueEnd = residueEnd
-                    End If
-                    Exit Sub
-                End If
-            Next
+            var udtLocInfo = new udtProteinLocationInfo();
+            udtLocInfo.ResidueStart = residueStart;
+            udtLocInfo.ResidueEnd = residueEnd;
 
-            Dim udtLocInfoAddnl = New udtProteinLocationInfo
-            udtLocInfoAddnl.ResidueStart = residueStart
-            udtLocInfoAddnl.ResidueEnd = residueEnd
-
-            lstLocations.Add(udtLocInfoAddnl)
-            Exit Sub
-        End If
-
-        Dim udtLocInfo = New udtProteinLocationInfo
-        udtLocInfo.ResidueStart = residueStart
-        udtLocInfo.ResidueEnd = residueEnd
-
-        mProteinMapInfo.Add(proteinName, New List(Of udtProteinLocationInfo) From {udtLocInfo})
-
-    End Sub
-
-End Class
+            mProteinMapInfo.Add(proteinName, new List<udtProteinLocationInfo> { udtLocInfo });
+        }
+    }
+}

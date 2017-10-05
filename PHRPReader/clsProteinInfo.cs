@@ -1,116 +1,91 @@
-﻿Option Strict On
+﻿namespace PHRPReader
+{
+    public class clsProteinInfo
+    {
+        private readonly string mProteinName;
+        private string mProteinDescription;
+        private readonly int mSeqID;
+        private readonly clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants mCleavageState;
+        private readonly clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants mTerminusState;
+        private int mResidueStart;                         // Residue number in the protein at which this sequence starts
+        private int mResidueEnd;                           // Residue number in the protein at which this sequence ends
 
-Imports PHRPReader.clsPeptideCleavageStateCalculator
+        public string ProteinName
+        {
+            get { return mProteinName; }
+        }
 
-Public Class clsProteinInfo
-    Private ReadOnly mProteinName As String
-    Private mProteinDescription As String
-    Private ReadOnly mSeqID As Integer
-    Private ReadOnly mCleavageState As ePeptideCleavageStateConstants
-    Private ReadOnly mTerminusState As ePeptideTerminusStateConstants
-    Private mResidueStart As Integer                        ' Residue number in the protein at which this sequence starts
-    Private mResidueEnd As Integer                          ' Residue number in the protein at which this sequence ends
+        // ReSharper disable once ConvertToAutoProperty
+        public clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState
+        {
+            get { return mCleavageState; }
+        }
 
-    Public ReadOnly Property ProteinName As String
-        Get
-            Return mProteinName
-        End Get
-    End Property
+        public int ResidueStart
+        {
+            get { return mResidueStart; }
+        }
 
-    ' ReSharper disable once ConvertToVbAutoProperty
-    Public ReadOnly Property CleavageState As ePeptideCleavageStateConstants
-        Get
-            Return mCleavageState
-        End Get
-    End Property
+        public int ResidueEnd
+        {
+            get { return mResidueEnd; }
+        }
 
-    Public ReadOnly Property ResidueStart As Integer
-        Get
-            Return mResidueStart
-        End Get
-    End Property
+        // ReSharper disable once ConvertToAutoProperty
+        public int SeqID
+        {
+            get { return mSeqID; }
+        }
 
-    Public ReadOnly Property ResidueEnd As Integer
-        Get
-            Return mResidueEnd
-        End Get
-    End Property
+        // ReSharper disable once ConvertToAutoProperty
+        public clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState
+        {
+            get { return mTerminusState; }
+        }
 
-    ' ReSharper disable once ConvertToVbAutoProperty
-    Public ReadOnly Property SeqID As Integer
-        Get
-            Return mSeqID
-        End Get
-    End Property
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="ProteinName"></param>
+        /// <param name="SeqID"></param>
+        /// <param name="CleavageState"></param>
+        /// <param name="TerminusState"></param>
+        /// <remarks></remarks>
+        public clsProteinInfo(string ProteinName, int SeqID, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState) : this(ProteinName, string.Empty, SeqID, CleavageState, TerminusState)
+        {
+        }
 
-    ' ReSharper disable once ConvertToVbAutoProperty
-    Public ReadOnly Property TerminusState As ePeptideTerminusStateConstants
-        Get
-            Return mTerminusState
-        End Get
-    End Property
+        public clsProteinInfo(string ProteinName, string ProteinDescription, int SeqID, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState) : this(ProteinName, string.Empty, SeqID, CleavageState, TerminusState, 0, 0)
+        {
+        }
 
-    ''' <summary>
-    ''' Constructor
-    ''' </summary>
-    ''' <param name="ProteinName"></param>
-    ''' <param name="SeqID"></param>
-    ''' <param name="CleavageState"></param>
-    ''' <param name="TerminusState"></param>
-    ''' <remarks></remarks>
-    Public Sub New(
-      ProteinName As String,
-      SeqID As Integer,
-      CleavageState As ePeptideCleavageStateConstants,
-      TerminusState As ePeptideTerminusStateConstants)
+        public clsProteinInfo(string ProteinName, string ProteinDescription, int SeqID, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState, int ProteinResidueStart, int ProteinResidueEnd)
+        {
+            mProteinName = ProteinName;
+            if (string.IsNullOrEmpty(ProteinDescription))
+            {
+                mProteinDescription = string.Empty;
+            }
+            else
+            {
+                mProteinDescription = ProteinDescription;
+            }
+            mSeqID = SeqID;
+            mCleavageState = CleavageState;
+            mTerminusState = TerminusState;
 
-        Me.New(ProteinName, String.Empty, SeqID, CleavageState, TerminusState)
+            UpdateLocationInProtein(ProteinResidueStart, ProteinResidueEnd);
+        }
 
-    End Sub
+        public void UpdateLocationInProtein(int ProteinResidueStart, int ProteinResidueEnd)
+        {
+            mResidueStart = ProteinResidueStart;
+            mResidueEnd = ProteinResidueEnd;
+        }
 
-    Public Sub New(
-     ProteinName As String,
-     ProteinDescription As String,
-     SeqID As Integer,
-     CleavageState As ePeptideCleavageStateConstants,
-     TerminusState As ePeptideTerminusStateConstants)
-
-        Me.New(ProteinName, String.Empty, SeqID, CleavageState, TerminusState, 0, 0)
-
-    End Sub
-
-    Public Sub New(
-      ProteinName As String,
-      ProteinDescription As String,
-      SeqID As Integer,
-      CleavageState As ePeptideCleavageStateConstants,
-      TerminusState As ePeptideTerminusStateConstants,
-      ProteinResidueStart As Integer,
-      ProteinResidueEnd As Integer)
-
-        mProteinName = ProteinName
-        If String.IsNullOrEmpty(ProteinDescription) Then
-            mProteinDescription = String.Empty
-        Else
-            mProteinDescription = ProteinDescription
-        End If
-        mSeqID = SeqID
-        mCleavageState = CleavageState
-        mTerminusState = TerminusState
-
-        UpdateLocationInProtein(ProteinResidueStart, ProteinResidueEnd)
-
-    End Sub
-
-    Public Sub UpdateLocationInProtein(ProteinResidueStart As Integer, ProteinResidueEnd As Integer)
-
-        mResidueStart = ProteinResidueStart
-        mResidueEnd = ProteinResidueEnd
-
-    End Sub
-
-    Public Overloads Function ToString() As String
-        Return mProteinName
-    End Function
-
-End Class
+        public override string ToString()
+        {
+            return mProteinName;
+        }
+    }
+}

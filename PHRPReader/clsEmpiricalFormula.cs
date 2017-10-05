@@ -1,101 +1,123 @@
-﻿Public Class clsEmpiricalFormula
+﻿using System.Collections.Generic;
 
-    ''' <summary>
-    ''' Elements in the empirical formula
-    ''' Keys are element symbols, values are element counts
-    ''' </summary>
-    ''' <returns></returns>
-    Public ReadOnly Property ElementCounts As Dictionary(Of String, Integer)
+namespace PHRPReader
+{
+    public class clsEmpiricalFormula
+    {
+        /// <summary>
+        /// Elements in the empirical formula
+        /// Keys are element symbols, values are element counts
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, int> ElementCounts { get; }
 
-    ''' <summary>
-    ''' Constructor
-    ''' </summary>
-    Public Sub New()
-        ElementCounts() = New Dictionary(Of String, Integer)
-    End Sub
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public clsEmpiricalFormula()
+        {
+            ElementCounts = new Dictionary<string, int>();
+        }
 
-    ''' <summary>
-    ''' Constructor, initialized with an existing dictionary of element symbols and counts
-    ''' </summary>
-    Public Sub New(elementInfo As Dictionary(Of String, Integer))
-        ElementCounts() = elementInfo
-    End Sub
+        /// <summary>
+        /// Constructor, initialized with an existing dictionary of element symbols and counts
+        /// </summary>
+        public clsEmpiricalFormula(Dictionary<string, int> elementInfo)
+        {
+            ElementCounts = elementInfo;
+        }
 
-    ''' <summary>
-    ''' Constructor, initialized with a list of element symbols
-    ''' </summary>
-    Public Sub New(elementInfo As IEnumerable(Of String))
-        ElementCounts() = New Dictionary(Of String, Integer)
-        For Each element In elementInfo
-            AddElement(element, 1)
-        Next
-    End Sub
+        /// <summary>
+        /// Constructor, initialized with a list of element symbols
+        /// </summary>
+        public clsEmpiricalFormula(IEnumerable<string> elementInfo)
+        {
+            ElementCounts = new Dictionary<string, int>();
+            foreach (var element in elementInfo)
+            {
+                AddElement(element, 1);
+            }
+        }
 
-    ''' <summary>
-    ''' Constructor, initialized with a list of KeyValuePairs of element symbol and element count
-    ''' </summary>
-    Public Sub New(elementInfo As IEnumerable(Of KeyValuePair(Of String, Integer)))
-        ElementCounts() = New Dictionary(Of String, Integer)
-        For Each element In elementInfo
-            AddElement(element.Key, element.Value)
-        Next
-    End Sub
+        /// <summary>
+        /// Constructor, initialized with a list of KeyValuePairs of element symbol and element count
+        /// </summary>
+        public clsEmpiricalFormula(IEnumerable<KeyValuePair<string, int>> elementInfo)
+        {
+            ElementCounts = new Dictionary<string, int>();
+            foreach (var element in elementInfo)
+            {
+                AddElement(element.Key, element.Value);
+            }
+        }
 
-    ''' <summary>
-    ''' Add a new element to the empirical formula
-    ''' </summary>
-    ''' <param name="elementSymbol"></param>
-    ''' <param name="elementCount"></param>
-    Public Sub AddElement(elementSymbol As String, elementCount As Integer)
-        Dim existingCount As Integer
-        If ElementCounts.TryGetValue(elementSymbol, existingCount) Then
-            ElementCounts(elementSymbol) = existingCount + elementCount
-        Else
-            ElementCounts.Add(elementSymbol, elementCount)
-        End If
-    End Sub
+        /// <summary>
+        /// Add a new element to the empirical formula
+        /// </summary>
+        /// <param name="elementSymbol"></param>
+        /// <param name="elementCount"></param>
+        public void AddElement(string elementSymbol, int elementCount)
+        {
+            int existingCount = 0;
+            if (ElementCounts.TryGetValue(elementSymbol, out existingCount))
+            {
+                ElementCounts[elementSymbol] = existingCount + elementCount;
+            }
+            else
+            {
+                ElementCounts.Add(elementSymbol, elementCount);
+            }
+        }
 
-    ''' <summary>
-    ''' Adds all of the elements from the given empirical formula
-    ''' </summary>
-    ''' <param name="empiricalFormula"></param>
-    Public Sub AddElements(empiricalFormula As clsEmpiricalFormula)
-        For Each element In empiricalFormula.ElementCounts
-            AddElement(element.Key, element.Value)
-        Next
-    End Sub
+        /// <summary>
+        /// Adds all of the elements from the given empirical formula
+        /// </summary>
+        /// <param name="empiricalFormula"></param>
+        public void AddElements(clsEmpiricalFormula empiricalFormula)
+        {
+            foreach (var element in empiricalFormula.ElementCounts)
+            {
+                AddElement(element.Key, element.Value);
+            }
+        }
 
-    ''' <summary>
-    ''' Return the number of atoms of the given element in the empirical formula
-    ''' </summary>
-    ''' <param name="elementSymbol"></param>
-    ''' <returns>Element Count, or 0 if the element is not in ElementCounts</returns>
-    Public Function GetElementCount(elementSymbol As Char) As Integer
-        Dim elementCount As Integer
-        If ElementCounts.TryGetValue(elementSymbol, elementCount) Then
-            Return elementCount
-        End If
+        /// <summary>
+        /// Return the number of atoms of the given element in the empirical formula
+        /// </summary>
+        /// <param name="elementSymbol"></param>
+        /// <returns>Element Count, or 0 if the element is not in ElementCounts</returns>
+        public int GetElementCount(char elementSymbol)
+        {
+            int elementCount = 0;
+            if (ElementCounts.TryGetValue(elementSymbol.ToString(), out elementCount))
+            {
+                return elementCount;
+            }
 
-        Return 0
-    End Function
+            return 0;
+        }
 
-    Public Overrides Function ToString() As String
-        If ElementCounts.Count = 0 Then
-            Return "<Undefined>"
-        End If
+        public override string ToString()
+        {
+            if (ElementCounts.Count == 0)
+            {
+                return "<Undefined>";
+            }
 
-        Dim formulaDescription As String = String.Empty
-        For Each element In ElementCounts
-            If element.Value = 1 Then
-                formulaDescription &= element.Key
-            Else
-                formulaDescription &= element.Key & element.Value
-            End If
+            string formulaDescription = string.Empty;
+            foreach (var element in ElementCounts)
+            {
+                if (element.Value == 1)
+                {
+                    formulaDescription += element.Key;
+                }
+                else
+                {
+                    formulaDescription += element.Key + element.Value;
+                }
+            }
 
-        Next
-
-        Return formulaDescription
-
-    End Function
-
-End Class
+            return formulaDescription;
+        }
+    }
+}

@@ -1,140 +1,155 @@
-﻿'*********************************************************************************************************
-' Written by Matthew Monroe for the US Department of Energy 
-' Pacific Northwest National Laboratory, Richland, WA
-'
-' Created 04/03/2012
-'
-' This class reads MSGF scores from a tab-delimited _msgf.txt file
-'
-'*********************************************************************************************************
+﻿//*********************************************************************************************************
+// Written by Matthew Monroe for the US Department of Energy
+// Pacific Northwest National Laboratory, Richland, WA
+//
+// Created 04/03/2012
+//
+// This class reads MSGF scores from a tab-delimited _msgf.txt file
+//
+//*********************************************************************************************************
+using System;
+using System.Collections.Generic;
+using System.IO;
 
-Option Strict On
-Imports System.IO
+namespace PHRPReader
+{
+    public class clsMSGFResultsReader
+    {
+        #region "Constants"
+        public const string DATA_COLUMN_ResultID = "Result_ID";
+        public const string DATA_COLUMN_Scan = "Scan";
+        public const string DATA_COLUMN_Charge = "Charge";
+        public const string DATA_COLUMN_Protein = "Protein";
+        public const string DATA_COLUMN_Peptide = "Peptide";
+        public const string DATA_COLUMN_SpecProb = "SpecProb";
+        public const string DATA_COLUMN_Notes = "Notes";
+        #endregion
 
-Public Class clsMSGFResultsReader
+        #region "Class-wide variables"
+        // Column headers
+        private readonly SortedDictionary<string, int> mColumnHeaders;
+        private string mErrorMessage = string.Empty;
+        #endregion
 
-#Region "Constants"
-    Public Const DATA_COLUMN_ResultID As String = "Result_ID"
-    Public Const DATA_COLUMN_Scan As String = "Scan"
-    Public Const DATA_COLUMN_Charge As String = "Charge"
-    Public Const DATA_COLUMN_Protein As String = "Protein"
-    Public Const DATA_COLUMN_Peptide As String = "Peptide"
-    Public Const DATA_COLUMN_SpecProb As String = "SpecProb"
-    Public Const DATA_COLUMN_Notes As String = "Notes"
-#End Region
+        /// <summary>
+        /// Error message
+        /// </summary>
+        public string ErrorMessage
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(mErrorMessage))
+                {
+                    return string.Empty;
+                }
+                else
+                {
+                    return mErrorMessage;
+                }
+            }
+        }
 
-#Region "Class-wide variables"
-    ' Column headers
-    Private ReadOnly mColumnHeaders As SortedDictionary(Of String, Integer)
-    Private mErrorMessage As String = String.Empty
-#End Region
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <remarks></remarks>
+        public clsMSGFResultsReader()
+        {
+            mColumnHeaders = new SortedDictionary<string, int>();
+        }
 
-    ''' <summary>
-    ''' Error message
-    ''' </summary>
-    Public ReadOnly Property ErrorMessage As String
-        Get
-            If String.IsNullOrEmpty(mErrorMessage) Then
-                Return String.Empty
-            Else
-                Return mErrorMessage
-            End If
-        End Get
-    End Property
+        private void AddHeaderColumn(string strColumnName)
+        {
+            mColumnHeaders.Add(strColumnName, mColumnHeaders.Count);
+        }
 
-    ''' <summary>
-    ''' Constructor
-    ''' </summary>
-    ''' <remarks></remarks>
-    Public Sub New()
-        mColumnHeaders = New SortedDictionary(Of String, Integer)
-    End Sub
+        private void DefineColumnHeaders()
+        {
+            mColumnHeaders.Clear();
 
-    Private Sub AddHeaderColumn(strColumnName As String)
-        mColumnHeaders.Add(strColumnName, mColumnHeaders.Count)
-    End Sub
+            // Define the default column mapping
+            AddHeaderColumn(DATA_COLUMN_ResultID);
+            AddHeaderColumn(DATA_COLUMN_Scan);
+            AddHeaderColumn(DATA_COLUMN_Charge);
+            AddHeaderColumn(DATA_COLUMN_Protein);
+            AddHeaderColumn(DATA_COLUMN_Peptide);
+            AddHeaderColumn(DATA_COLUMN_SpecProb);
+            AddHeaderColumn(DATA_COLUMN_Notes);
+        }
 
-    Private Sub DefineColumnHeaders()
+        /// <summary>
+        /// Open a tab-delimited MSGF results file and read the data
+        /// </summary>
+        /// <param name="strInputFilePath">Input file path</param>
+        /// <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
+        public Dictionary<int, string> ReadMSGFData(string strInputFilePath)
+        {
+            Dictionary<int, string> lstMSGFData = default(Dictionary<int, string>);
+            lstMSGFData = new Dictionary<int, string>();
 
-        mColumnHeaders.Clear()
+            string strLineIn = null;
+            string[] strSplitLine = null;
+            bool blnHeaderLineParsed = false;
+            bool blnSkipLine = false;
 
-        ' Define the default column mapping
-        AddHeaderColumn(DATA_COLUMN_ResultID)
-        AddHeaderColumn(DATA_COLUMN_Scan)
-        AddHeaderColumn(DATA_COLUMN_Charge)
-        AddHeaderColumn(DATA_COLUMN_Protein)
-        AddHeaderColumn(DATA_COLUMN_Peptide)
-        AddHeaderColumn(DATA_COLUMN_SpecProb)
-        AddHeaderColumn(DATA_COLUMN_Notes)
+            int intLinesRead = 0;
+            int intResultID = 0;
+            string strMSGFSpecProb = null;
 
-    End Sub
+            try
+            {
+                DefineColumnHeaders();
+                intLinesRead = 0;
+                mErrorMessage = string.Empty;
 
-    ''' <summary>
-    ''' Open a tab-delimited MSGF results file and read the data
-    ''' </summary>
-    ''' <param name="strInputFilePath">Input file path</param>
-    ''' <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
-    Public Function ReadMSGFData(strInputFilePath As String) As Dictionary(Of Integer, String)
+                using (var srInFile = new StreamReader(new FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                {
+                    while (!srInFile.EndOfStream)
+                    {
+                        strLineIn = srInFile.ReadLine();
+                        intLinesRead += 1;
+                        blnSkipLine = false;
 
-        Dim lstMSGFData As Dictionary(Of Integer, String)
-        lstMSGFData = New Dictionary(Of Integer, String)
+                        if (!string.IsNullOrWhiteSpace(strLineIn))
+                        {
+                            strSplitLine = strLineIn.Split('\t');
 
-        Dim strLineIn As String
-        Dim strSplitLine() As String
-        Dim blnHeaderLineParsed As Boolean
-        Dim blnSkipLine As Boolean
+                            if (!blnHeaderLineParsed)
+                            {
+                                if (!clsPHRPReader.IsNumber(strSplitLine[0]))
+                                {
+                                    // Parse the header line to confirm the column ordering
+                                    clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders);
+                                    blnSkipLine = true;
+                                }
 
-        Dim intLinesRead As Integer
-        Dim intResultID As Integer
-        Dim strMSGFSpecProb As String
+                                blnHeaderLineParsed = true;
+                            }
 
-        Try
-            DefineColumnHeaders()
-            intLinesRead = 0
-            mErrorMessage = String.Empty
+                            if (!blnSkipLine && strSplitLine.Length >= 4)
+                            {
+                                intResultID = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
 
-            Using srInFile = New StreamReader(New FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                Do While Not srInFile.EndOfStream
-                    strLineIn = srInFile.ReadLine()
-                    intLinesRead += 1
-                    blnSkipLine = False
+                                if (intResultID >= 0)
+                                {
+                                    strMSGFSpecProb = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
 
-                    If Not String.IsNullOrWhiteSpace(strLineIn) Then
-                        strSplitLine = strLineIn.Split(ControlChars.Tab)
+                                    if (!string.IsNullOrEmpty(strMSGFSpecProb) && !lstMSGFData.ContainsKey(intResultID))
+                                    {
+                                        lstMSGFData.Add(intResultID, strMSGFSpecProb);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                mErrorMessage = "Error reading the MSGF data: " + ex.Message;
+            }
 
-                        If Not blnHeaderLineParsed Then
-                            If Not clsPHRPReader.IsNumber(strSplitLine(0)) Then
-                                ' Parse the header line to confirm the column ordering
-                                clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders)
-                                blnSkipLine = True
-                            End If
-
-                            blnHeaderLineParsed = True
-                        End If
-
-                        If Not blnSkipLine AndAlso strSplitLine.Length >= 4 Then
-
-                            intResultID = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1)
-
-                            If intResultID >= 0 Then
-                                strMSGFSpecProb = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SpecProb, mColumnHeaders)
-
-                                If Not String.IsNullOrEmpty(strMSGFSpecProb) AndAlso Not lstMSGFData.ContainsKey(intResultID) Then
-                                    lstMSGFData.Add(intResultID, strMSGFSpecProb)
-                                End If
-                            End If
-
-                        End If
-                    End If
-
-                Loop
-            End Using
-
-        Catch ex As Exception
-            mErrorMessage = "Error reading the MSGF data: " & ex.Message
-        End Try
-
-        Return lstMSGFData
-    End Function
-
-End Class
+            return lstMSGFData;
+        }
+    }
+}

@@ -1,110 +1,77 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>
-    </ProductVersion>
-    <SchemaVersion>
-    </SchemaVersion>
     <ProjectGuid>{81A15D6E-10C3-4F2C-BF71-6642B76753ED}</ProjectGuid>
     <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PHRPReader</RootNamespace>
     <AssemblyName>PHRPReader</AssemblyName>
-    <FileAlignment>512</FileAlignment>
-    <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <DefineDebug>true</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\</OutputPath>
-    <DocumentationFile>PHRPReader.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <DefineDebug>false</DefineDebug>
-    <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DocumentationFile>PHRPReader.xml</DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OptionExplicit>On</OptionExplicit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OptionCompare>Binary</OptionCompare>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OptionStrict>On</OptionStrict>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OptionInfer>On</OptionInfer>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\PHRPReader.xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Import Include="Microsoft.VisualBasic" />
-    <Import Include="System" />
-    <Import Include="System.Collections" />
-    <Import Include="System.Collections.Generic" />
-    <Import Include="System.Data" />
-    <Import Include="System.Diagnostics" />
-    <Import Include="System.Linq" />
-    <Import Include="System.Xml.Linq" />
+    <Compile Include="clsAminoAcidModInfo.cs" />
+    <Compile Include="clsEmpiricalFormula.cs" />
+    <Compile Include="clsModificationDefinition.cs" />
+    <Compile Include="clsMSGFPlusParamFileModExtractor.cs" />
+    <Compile Include="clsMSGFResultsReader.cs" />
+    <Compile Include="clsPeptideCleavageStateCalculator.cs" />
+    <Compile Include="clsPeptideMassCalculator.cs" />
+    <Compile Include="clsPeptideModificationContainer.cs" />
+    <Compile Include="clsPepToProteinMapInfo.cs" />
+    <Compile Include="clsPHRPModSummaryReader.cs" />
+    <Compile Include="clsPHRPParser.cs" />
+    <Compile Include="clsPHRPParserInspect.cs" />
+    <Compile Include="clsPHRPParserMODa.cs" />
+    <Compile Include="clsPHRPParserMODPlus.cs" />
+    <Compile Include="clsPHRPParserMSAlign.cs" />
+    <Compile Include="clsPHRPParserMSGFDB.cs" />
+    <Compile Include="clsPHRPParserMSPathFinder.cs" />
+    <Compile Include="clsPHRPParserSequest.cs" />
+    <Compile Include="clsPHRPParserXTandem.cs" />
+    <Compile Include="clsPHRPReader.cs" />
+    <Compile Include="clsPHRPSeqMapReader.cs" />
+    <Compile Include="clsPHRPStartupOptions.cs" />
+    <Compile Include="clsProteinInfo.cs" />
+    <Compile Include="clsPSM.cs" />
+    <Compile Include="clsScanStatsExInfo.cs" />
+    <Compile Include="clsScanStatsExReader.cs" />
+    <Compile Include="clsScanStatsInfo.cs" />
+    <Compile Include="clsScanStatsReader.cs" />
+    <Compile Include="clsSearchEngineParameters.cs" />
+    <Compile Include="clsSeqInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="clsAminoAcidModInfo.vb" />
-    <Compile Include="clsEmpiricalFormula.vb" />
-    <Compile Include="clsModificationDefinition.vb" />
-    <Compile Include="clsMSGFPlusParamFileModExtractor.vb" />
-    <Compile Include="clsMSGFResultsReader.vb" />
-    <Compile Include="clsPeptideCleavageStateCalculator.vb" />
-    <Compile Include="clsPeptideMassCalculator.vb" />
-    <Compile Include="clsPeptideModificationContainer.vb" />
-    <Compile Include="clsPepToProteinMapInfo.vb" />
-    <Compile Include="clsPHRPModSummaryReader.vb" />
-    <Compile Include="clsPHRPParser.vb" />
-    <Compile Include="clsPHRPParserMODa.vb" />
-    <Compile Include="clsPHRPParserMODPlus.vb" />
-    <Compile Include="clsPHRPParserMSAlign.vb" />
-    <Compile Include="clsPHRPParserMSPathFinder.vb" />
-    <Compile Include="clsPHRPReader.vb" />
-    <Compile Include="clsPHRPParserInspect.vb" />
-    <Compile Include="clsPHRPParserMSGFDB.vb" />
-    <Compile Include="clsPHRPParserSequest.vb" />
-    <Compile Include="clsPHRPParserXTandem.vb" />
-    <Compile Include="clsPHRPSeqMapReader.vb" />
-    <Compile Include="clsPHRPStartupOptions.vb" />
-    <Compile Include="clsProteinInfo.vb" />
-    <Compile Include="clsPSM.vb" />
-    <Compile Include="clsScanStatsExInfo.vb" />
-    <Compile Include="clsScanStatsExReader.vb" />
-    <Compile Include="clsScanStatsInfo.vb" />
-    <Compile Include="clsScanStatsReader.vb" />
-    <Compile Include="clsSearchEngineParameters.vb" />
-    <Compile Include="clsSeqInfo.vb" />
-    <Compile Include="My Project\AssemblyInfo.vb" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

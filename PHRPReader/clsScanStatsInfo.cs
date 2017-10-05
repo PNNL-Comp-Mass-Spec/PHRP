@@ -1,49 +1,53 @@
-﻿Option Strict On
+﻿namespace PHRPReader
+{
+    public class clsScanStatsInfo
+    {
+        private readonly int mScanNumber;
 
-Public Class clsScanStatsInfo
+        private string mScanTypeName;
+        // ReSharper disable once ConvertToAutoProperty
+        public int ScanNumber
+        {
+            get { return mScanNumber; }
+        }
 
-    Private ReadOnly mScanNumber As Integer
-    Private mScanTypeName As String
+        public float ScanTimeMinutes { get; set; }
 
-    ' ReSharper disable once ConvertToVbAutoProperty
-    Public ReadOnly Property ScanNumber As Integer
-        Get
-            Return mScanNumber
-        End Get
-    End Property
+        public int ScanType { get; set; }
 
-    Public Property ScanTimeMinutes As Single
+        public double TotalIonIntensity { get; set; }
 
-    Public Property ScanType As Integer
+        public double BasePeakIntensity { get; set; }
 
-    Public Property TotalIonIntensity As Double
+        public double BasePeakMZ { get; set; }
 
-    Public Property BasePeakIntensity As Double
+        public double BasePeakSignalToNoiseRatio { get; set; }
 
-    Public Property BasePeakMZ As Double
+        public int IonCount { get; set; }
 
-    Public Property BasePeakSignalToNoiseRatio As Double
+        public int IonCountRaw { get; set; }
 
-    Public Property IonCount As Integer
+        public string ScanTypeName
+        {
+            get { return mScanTypeName; }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    mScanTypeName = string.Empty;
+                }
+                else
+                {
+                    mScanTypeName = value;
+                }
+            }
+        }
 
-    Public Property IonCountRaw As Integer
-
-    Public Property ScanTypeName As String
-        Get
-            Return mScanTypeName
-        End Get
-        Set
-            If String.IsNullOrEmpty(Value) Then
-                mScanTypeName = String.Empty
-            Else
-                mScanTypeName = Value
-            End If
-        End Set
-    End Property
-
-    Public Sub New(intScanNumber As Integer, sngScanTimeMinutes As Single, intScanType As Integer)
-        mScanNumber = intScanNumber
-        ScanTimeMinutes = sngScanTimeMinutes
-        ScanType = intScanType
-    End Sub
-End Class
+        public clsScanStatsInfo(int intScanNumber, float sngScanTimeMinutes, int intScanType)
+        {
+            mScanNumber = intScanNumber;
+            ScanTimeMinutes = sngScanTimeMinutes;
+            ScanType = intScanType;
+        }
+    }
+}

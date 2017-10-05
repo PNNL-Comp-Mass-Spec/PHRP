@@ -1,384 +1,403 @@
-﻿Imports System.IO
-Imports System.Text
-Imports System.Text.RegularExpressions
-Imports PHRPReader
-
-Module modMain
-
-    Private WithEvents mPHRPReader As clsPHRPReader
-
-    Public Sub Main()
-
-        'Const strSequestSynFilePath = "Seq201304121552_Auto934225\Firestone_Soil_07_18_05APR13_Frodo_12-12-04_syn.txt"
-        'Const strMSGFPlusSynFilePath = "MSG201304261714_Auto938181\FSFA-299b_25Apr13_Methow_13-02-13_msgfdb_syn.txt"
-
-        Const strSequestFolder = "\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225"
-        ' 		Const strMSGFPlusFolder = "MSG201304261714_Auto938181"
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using PHRPReader;
+
+namespace Test_PHRPReader
+{
+    static class Program
+    {
+        private static clsPHRPReader withEventsField_mPHRPReader;
+        private static clsPHRPReader mPHRPReader {
+            get { return withEventsField_mPHRPReader; }
+            set {
+                if (withEventsField_mPHRPReader != null) {
+                    withEventsField_mPHRPReader.ErrorEvent -= mPHRPReader_ErrorEvent;
+                    withEventsField_mPHRPReader.MessageEvent -= mPHRPReader_MessageEvent;
+                    withEventsField_mPHRPReader.WarningEvent -= mPHRPReader_WarningEvent;
+                }
+                withEventsField_mPHRPReader = value;
+                if (withEventsField_mPHRPReader != null) {
+                    withEventsField_mPHRPReader.ErrorEvent += mPHRPReader_ErrorEvent;
+                    withEventsField_mPHRPReader.MessageEvent += mPHRPReader_MessageEvent;
+                    withEventsField_mPHRPReader.WarningEvent += mPHRPReader_WarningEvent;
+                }
+            }
+        }
+
+        public static void Main()
+        {
+            //const string strSequestSynFilePath = @"Seq201304121552_Auto934225\Firestone_Soil_07_18_05APR13_Frodo_12-12-04_syn.txt";
+            //const string strMSGFPlusSynFilePath = @"MSG201304261714_Auto938181\FSFA-299b_25Apr13_Methow_13-02-13_msgfdb_syn.txt";
+
+            const string strSequestFolder = @"\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225";
+            // const string strMSGFPlusFolder = "MSG201304261714_Auto938181"
+
+            // const string strMSGFPlusFolder = "\\proto-7\VOrbiETD03\2015_1\proteogeomics_32_crude_heavy_peptides_200f_25Feb15_Tiger_15-01-26\MSG201503091410_Auto1169297"
+            const string strMSGFPlusFolder = @"C:\DMS_WorkDir";
+
+            //const string strXTandemFolder = @"\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
+
+            //const string strMSAlignFolder = @"\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
+
+            string strSynOrFHTFile = null;
+            clsPHRPReader.ePeptideHitResultType eMatchedResultType = default(clsPHRPReader.ePeptideHitResultType);
+
+            if (false) {
+                Console.WriteLine();
+                strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, out eMatchedResultType);
+                if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                    TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: true);
+                }
+            }
+
+            var diMSGFPlusFolder = new DirectoryInfo(strMSGFPlusFolder);
+            if (!diMSGFPlusFolder.Exists) {
+                Console.WriteLine("Warning, Folder not found: " + strMSGFPlusFolder);
+            }
+
+            if (true & diMSGFPlusFolder.Exists) {
+                Console.WriteLine();
+                strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, out eMatchedResultType);
+                if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                    TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: false);
+                }
+            }
+
+            if (true & diMSGFPlusFolder.Exists) {
+                Console.WriteLine();
+                strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, out eMatchedResultType);
+                if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                    TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: true);
+                }
+            }
+
+            if (true & diMSGFPlusFolder.Exists) {
+                // Look for an MSGF+ parameter file to parse
+                var lstFiles = diMSGFPlusFolder.GetFiles("MSGFDB*.txt");
+                if (lstFiles.Length > 0) {
+                    TestMSGFPlusParamFileParsing(lstFiles.First().FullName);
+                }
+            }
+
+            var diSequestFolder = new DirectoryInfo(strSequestFolder);
+            if (!diSequestFolder.Exists) {
+                Console.WriteLine("Warning, Folder not found: " + strSequestFolder);
+            }
+
+            if (true | !diSequestFolder.Exists)
+                return;
+
+            DateTime dtStartTimeNoSkipDup = default(DateTime);
+            DateTime dtEndTimeNoSkipDup = default(DateTime);
+
+            DateTime dtStartTimeSkipDup = default(DateTime);
+            DateTime dtEndTimeSkipDup = default(DateTime);
+
+            Console.WriteLine();
+            strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder);
+            if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                dtStartTimeNoSkipDup = DateTime.UtcNow;
+                TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: false);
+                dtEndTimeNoSkipDup = DateTime.UtcNow;
+            }
 
-        ' Const strMSGFPlusFolder = "\\proto-7\VOrbiETD03\2015_1\proteogeomics_32_crude_heavy_peptides_200f_25Feb15_Tiger_15-01-26\MSG201503091410_Auto1169297"
-        Const strMSGFPlusFolder = "C:\DMS_WorkDir"
+            Console.WriteLine();
+            strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, out eMatchedResultType);
+            if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                dtStartTimeSkipDup = DateTime.UtcNow;
+                TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: true);
+                dtEndTimeSkipDup = DateTime.UtcNow;
+            }
 
-        'Const strXTandemFolder = "\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
+            Console.WriteLine();
 
-        'Const strMSAlignFolder = "\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
+            Console.WriteLine("Elapsed time (Keep Duplicates): " + dtEndTimeNoSkipDup.Subtract(dtStartTimeNoSkipDup).TotalSeconds.ToString("0.0") + " seconds");
+            Console.WriteLine("Elapsed time (Skip Duplicates): " + dtEndTimeSkipDup.Subtract(dtStartTimeSkipDup).TotalSeconds.ToString("0.0") + " seconds");
+        }
 
-        Dim strSynOrFHTFile As String
-        Dim eMatchedResultType As clsPHRPReader.ePeptideHitResultType
+        private static void TestMSGFPlusParamFileParsing(string msgfPlusParamFilePath)
+        {
+            string localErrorMsg = string.Empty;
+            var modFileProcessor = new clsMSGFPlusParamFileModExtractor("MSGF+");
 
-        If False Then
-            Console.WriteLine()
-            strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, eMatchedResultType)
-            If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> clsPHRPReader.ePeptideHitResultType.Unknown Then
-                TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
-            End If
-        End If
+            modFileProcessor.ErrorOccurred += ModExtractorErrorHandler;
+            modFileProcessor.WarningMessageEvent += ModExtractorWarningHandler;
 
-        Dim diMSGFPlusFolder = New DirectoryInfo(strMSGFPlusFolder)
-        If Not diMSGFPlusFolder.Exists Then
-            Console.WriteLine("Warning, Folder not found: " & strMSGFPlusFolder)
-        End If
+            var peptideMassCalculator = new clsPeptideMassCalculator();
+            var success = clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(msgfPlusParamFilePath, modFileProcessor, peptideMassCalculator, out localErrorMsg);
 
-        If True And diMSGFPlusFolder.Exists Then
-            Console.WriteLine()
-            strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
-            If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> clsPHRPReader.ePeptideHitResultType.Unknown Then
-                TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
-            End If
-        End If
+            var udtModInfo = new List<clsPeptideMassCalculator.udtPeptideSequenceModInfoType>();
 
-        If True And diMSGFPlusFolder.Exists Then
-            Console.WriteLine()
-            strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, eMatchedResultType)
-            If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> clsPHRPReader.ePeptideHitResultType.Unknown Then
-                TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
-            End If
-        End If
+            var monoMass = peptideMassCalculator.ComputeSequenceMass("PEPTIDE", udtModInfo);
 
-        If True And diMSGFPlusFolder.Exists Then
-            ' Look for an MSGF+ parameter file to parse
-            Dim lstFiles = diMSGFPlusFolder.GetFiles("MSGFDB*.txt")
-            If lstFiles.Count > 0 Then
-                TestMSGFPlusParamFileParsing(lstFiles.First.FullName)
-            End If
-        End If
+            Console.WriteLine("Mono mass of PEPTIDE: " + monoMass.ToString("0.0000"));
 
-        Dim diSequestFolder = New DirectoryInfo(strSequestFolder)
-        If Not diSequestFolder.Exists Then
-            Console.WriteLine("Warning, Folder not found: " & strSequestFolder)
-        End If
+            var udtModifiedResidue = new clsPeptideMassCalculator.udtPeptideSequenceModInfoType();
+            udtModifiedResidue.ResidueLocInPeptide = 4;
+            udtModifiedResidue.ModificationMass = 79.966;
+            udtModInfo.Add(udtModifiedResidue);
 
-        If True Or Not diSequestFolder.Exists Then Return
+            var monoMassModified = peptideMassCalculator.ComputeSequenceMass("PEPTIDE", udtModInfo);
 
-        Dim dtStartTimeNoSkipDup As DateTime
-        Dim dtEndTimeNoSkipDup As DateTime
+            Console.WriteLine("Mono mass of PEPT*IDE: " + monoMassModified.ToString("0.0000"));
 
-        Dim dtStartTimeSkipDup As DateTime
-        Dim dtEndTimeSkipDup As DateTime
+            Debug.Assert(Math.Abs(monoMass - 799.359926865) < 1E-07);
 
-        Console.WriteLine()
-        strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder)
-        If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> clsPHRPReader.ePeptideHitResultType.Unknown Then
-            dtStartTimeNoSkipDup = DateTime.UtcNow()
-            TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=False)
-            dtEndTimeNoSkipDup = DateTime.UtcNow()
-        End If
+            Debug.Assert(Math.Abs(monoMassModified - 879.325926865) < 1E-07);
+        }
 
-        Console.WriteLine()
-        strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, eMatchedResultType)
-        If Not String.IsNullOrEmpty(strSynOrFHTFile) AndAlso eMatchedResultType <> clsPHRPReader.ePeptideHitResultType.Unknown Then
-            dtStartTimeSkipDup = DateTime.UtcNow()
-            TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates:=True)
-            dtEndTimeSkipDup = DateTime.UtcNow()
-        End If
+        private static void TestPHRPReader(string strSynOrFHTFile, bool blnSkipDuplicates)
+        {
+            FileInfo fiInputFile = default(FileInfo);
+            fiInputFile = new FileInfo(strSynOrFHTFile);
 
-        Console.WriteLine()
+            Console.WriteLine("Instantiating reader");
+            var oStartupOptions = new clsPHRPStartupOptions();
+            oStartupOptions.LoadModsAndSeqInfo = true;
+            oStartupOptions.LoadMSGFResults = true;
+            oStartupOptions.LoadScanStatsData = false;
+            oStartupOptions.MaxProteinsPerPSM = 100;
 
-        Console.WriteLine("Elapsed time (Keep Duplicates): " & dtEndTimeNoSkipDup.Subtract(dtStartTimeNoSkipDup).TotalSeconds.ToString("0.0") & " seconds")
-        Console.WriteLine("Elapsed time (Skip Duplicates): " & dtEndTimeSkipDup.Subtract(dtStartTimeSkipDup).TotalSeconds.ToString("0.0") & " seconds")
-    End Sub
+            mPHRPReader = new clsPHRPReader(fiInputFile.FullName, clsPHRPReader.ePeptideHitResultType.Unknown, oStartupOptions);
+            mPHRPReader.EchoMessagesToConsole = false;
+            mPHRPReader.SkipDuplicatePSMs = blnSkipDuplicates;
 
-    Private Sub TestMSGFPlusParamFileParsing(msgfPlusParamFilePath As String)
+            // Check for any load errors
+            if (mPHRPReader.ErrorMessages.Count > 0) {
+                Console.WriteLine("Error(s) instantiating the reader:");
+                foreach (var errorMessage in mPHRPReader.ErrorMessages) {
+                    Console.WriteLine("  " + errorMessage);
+                }
+            }
 
-        Dim localErrorMsg As String = String.Empty
-        Dim modFileProcessor = New clsMSGFPlusParamFileModExtractor("MSGF+")
+            const bool fastReadEnabled = true;
+            mPHRPReader.FastReadMode = fastReadEnabled;
 
-        AddHandler modFileProcessor.ErrorOccurred, AddressOf ModExtractorErrorHandler
-        AddHandler modFileProcessor.WarningMessageEvent, AddressOf ModExtractorWarningHandler
+            var oMassCalculator = new clsPeptideMassCalculator();
+
+            if (!mPHRPReader.CanRead) {
+                Console.WriteLine("Aborting since PHRPReader is not ready: " + mPHRPReader.ErrorMessage);
+                return;
+            }
 
-        Dim peptideMassCalculator = New clsPeptideMassCalculator()
-        Dim success = clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(msgfPlusParamFilePath, modFileProcessor, peptideMassCalculator, localErrorMsg)
+            var lstValues = new List<string>();
+            int intIsotopeErrorComputed = 0;
+            string strMassErrorPPM = null;
 
-        Dim udtModInfo = New List(Of clsPeptideMassCalculator.udtPeptideSequenceModInfoType)
+            var intPSMsRead = 0;
+            var intModifiedPSMsRead = 0;
 
-        Dim monoMass = peptideMassCalculator.ComputeSequenceMass("PEPTIDE", udtModInfo)
+            var dctCachedValues = new Dictionary<int, clsPSM>();
 
-        Console.WriteLine("Mono mass of PEPTIDE: " & monoMass.ToString("0.0000"))
+            Console.WriteLine("Reading data");
+
+            while (mPHRPReader.MoveNext()) {
+                clsPSM oPsm = mPHRPReader.CurrentPSM;
 
-        Dim udtModifiedResidue = New clsPeptideMassCalculator.udtPeptideSequenceModInfoType
-        udtModifiedResidue.ResidueLocInPeptide = 4
-        udtModifiedResidue.ModificationMass = 79.966
-        udtModInfo.Add(udtModifiedResidue)
+                intPSMsRead += 1;
+                lstValues.Clear();
 
-        Dim monoMassModified = peptideMassCalculator.ComputeSequenceMass("PEPTIDE", udtModInfo)
+                mPHRPReader.FinalizeCurrentPSM();
+
+                var primarySequence = string.Empty;
+                var prefix = string.Empty;
+                var suffix = string.Empty;
+                clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(oPsm.Peptide, out primarySequence, out prefix, out suffix);
+
+                intIsotopeErrorComputed = 0;
+                strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, ref intIsotopeErrorComputed);
+
+                lstValues.Add(mPHRPReader.DatasetName + "_dta.txt");                                             // #SpecFile
+                lstValues.Add("index=" + intPSMsRead);                                                           // SpecID
+                lstValues.Add(oPsm.ScanNumber.ToString());                                                       // ScanNum
+                lstValues.Add(oPsm.CollisionMode);                                                               // FragMethod
+                lstValues.Add(oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString());      // Precursor m/z
 
-        Console.WriteLine("Mono mass of PEPT*IDE: " & monoMassModified.ToString("0.0000"))
+                lstValues.Add(strMassErrorPPM);                                                                  // PrecursorError(ppm)
+                lstValues.Add(oPsm.Charge.ToString());                                                           // Charge
+                lstValues.Add(oPsm.NumTrypticTerminii.ToString());                                               // Tryptic state (0, 1, or 2)
+                lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods));                                      // Peptide
 
-        Debug.Assert(Math.Abs(monoMass - 799.359926865) < 0.0000001)
-
-        Debug.Assert(Math.Abs(monoMassModified - 879.325926865) < 0.0000001)
-    End Sub
-
-    Private Sub TestPHRPReader(strSynOrFHTFile As String, blnSkipDuplicates As Boolean)
-
-        Dim fiInputFile As FileInfo
-        fiInputFile = New FileInfo(strSynOrFHTFile)
-
-        Console.WriteLine("Instantiating reader")
-        Dim oStartupOptions = New clsPHRPStartupOptions()
-        With oStartupOptions
-            .LoadModsAndSeqInfo = True
-            .LoadMSGFResults = True
-            .LoadScanStatsData = False
-            .MaxProteinsPerPSM = 100
-        End With
-
-        mPHRPReader = New clsPHRPReader(fiInputFile.FullName, clsPHRPReader.ePeptideHitResultType.Unknown, oStartupOptions)
-        mPHRPReader.EchoMessagesToConsole = False
-        mPHRPReader.SkipDuplicatePSMs = blnSkipDuplicates
-
-        ' Check for any load errors
-        If mPHRPReader.ErrorMessages.Count > 0 Then
-            Console.WriteLine("Error(s) instantiating the reader:")
-            For Each errorMessage In mPHRPReader.ErrorMessages
-                Console.WriteLine("  " & errorMessage)
-            Next
-        End If
-
-        Const fastReadEnabled = True
-        mPHRPReader.FastReadMode = fastReadEnabled
-
-        Dim oMassCalculator = New clsPeptideMassCalculator()
-
-        If Not mPHRPReader.CanRead Then
-            Console.WriteLine("Aborting since PHRPReader is not ready: " + mPHRPReader.ErrorMessage)
-            Return
-        End If
-
-        Dim lstValues = New List(Of String)
-        Dim intIsotopeErrorComputed As Integer
-        Dim strMassErrorPPM As String
-
-        Dim intPSMsRead = 0
-        Dim intModifiedPSMsRead = 0
-
-        Dim dctCachedValues = New Dictionary(Of Integer, clsPSM)
-
-        Console.WriteLine("Reading data")
-
-        Do While mPHRPReader.MoveNext()
-
-            Dim oPsm As clsPSM = mPHRPReader.CurrentPSM
-
-            intPSMsRead += 1
-            lstValues.Clear()
-
-            mPHRPReader.FinalizeCurrentPSM()
-
-            Dim primarySequence = String.Empty
-            Dim prefix = String.Empty
-            Dim suffix = String.Empty
-            clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(oPsm.Peptide, primarySequence, prefix, suffix)
-
-
-            intIsotopeErrorComputed = 0
-            strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, intIsotopeErrorComputed)
-
-            lstValues.Add(mPHRPReader.DatasetName & "_dta.txt")                                             ' #SpecFile
-            lstValues.Add("index=" & intPSMsRead)                                                           ' SpecID
-            lstValues.Add(oPsm.ScanNumber.ToString())                                                       ' ScanNum
-            lstValues.Add(oPsm.CollisionMode)                                                               ' FragMethod
-            lstValues.Add(oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString())      ' Precursor m/z
-
-            lstValues.Add(strMassErrorPPM)                                                                  ' PrecursorError(ppm)
-            lstValues.Add(oPsm.Charge.ToString())                                                           ' Charge
-            lstValues.Add(oPsm.NumTrypticTerminii.ToString())                                               ' Tryptic state (0, 1, or 2)
-            lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods))                                      ' Peptide
-
-            If oPsm.SeqID <= 0 Then
-                lstValues.Add("**" & oPsm.SeqID & "**")                                                         ' SeqID is undefined
-            Else
-                lstValues.Add(oPsm.SeqID.ToString())                                                            ' SeqID
-            End If
-
-            lstValues.Add(oPsm.ProteinFirst)                                                                ' Protein First
-
-            If oPsm.ProteinDetails.Count > 0 Then
-                Dim oFirstProteinDetail = oPsm.ProteinDetails.First                                         ' Protein Details first
-
-                If Not String.Equals(oPsm.ProteinFirst, oFirstProteinDetail.Key) Then
-                    lstValues.Add(oFirstProteinDetail.Key)
-                Else
-                    lstValues.Add("<Match>")
-                End If
-                lstValues.Add(oFirstProteinDetail.Value.ResidueStart.ToString())
-                lstValues.Add(oFirstProteinDetail.Value.ResidueEnd.ToString())
-            End If
-
-            Dim strXCorr = GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_XCorr, "0")
-            lstValues.Add(strXCorr)                                                             ' XCorr
-
-            lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_Sp, "0"))              ' SP
-            lstValues.Add(oPsm.MSGFSpecProb)                                                                ' MSGF SpecProb
-            lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_DelCn2, "0"))          ' DelCn2
-
-            lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_PValue, "0"))           ' PValue
-            lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_EValue, "0"))           ' EValue
-            lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, "0"))           ' SpecEValue
-            lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_FDR, "1"))              ' FDR
-
-            If oPsm.PeptideCleanSequence = "QQIEESTSDYDKEK" Then
-                Console.WriteLine(oPsm.Peptide & " in scan " & oPsm.ScanNumber)
-
-                Dim parentIonMZ = oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge)
-
-                Console.WriteLine("ParentIonMZ   = " & parentIonMZ)
-                Console.WriteLine("PeptideWithNumericMods   = " & oPsm.PeptideWithNumericMods)
-            End If
-
-            If oPsm.ModifiedResidues.Count > 0 Then
-                intModifiedPSMsRead += 1
-
-                If intModifiedPSMsRead Mod 500 = 0 Then
-                    Console.WriteLine("PeptideWithNumericMods   = " & oPsm.PeptideWithNumericMods)
-                    For Each modifiedResidue In oPsm.ModifiedResidues
-                        Console.WriteLine("  " & modifiedResidue.Residue & modifiedResidue.EndResidueLocInPeptide & ": " & modifiedResidue.ModDefinition.ModificationMassAsText)
-                    Next
-                End If
-
-                Dim dblPeptideMassRecomputed = oMassCalculator.ComputeSequenceMassNumericMods(oPsm.PeptideWithNumericMods)
-                If Math.Abs(oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed) > 0.1 Then
-                    Console.WriteLine("  Peptide mass disagreement: " & (oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"))
-                End If
-            End If
-
-
-            Dim strFlattened = FlattenList(lstValues)
-
-            If intPSMsRead Mod 1000 = 0 Then
-                'Console.WriteLine(intPSMsRead.ToString().PadRight(8) & " " & oPsm.Peptide.PadRight(40) & "   " & strXCorr)
-                Console.WriteLine(strFlattened)
-            End If
-
-            dctCachedValues.Add(intPSMsRead, oPsm)
-
-        Loop
-
-    End Sub
-
-    Private Function CleanupPeptide(strPeptide As String) As String
-
-        Static reFindItraq As Regex = New Regex("^([A-Z][^A-Z]*)(\+144\.\d+)(.+)", RegexOptions.Compiled Or RegexOptions.IgnoreCase)
-
-        Dim strPrimarySequence = String.Empty
-        Dim strPrefix = String.Empty
-        Dim strSuffix = String.Empty
-
-        Dim reMatch As Match
-
-        If clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strPeptide, strPrimarySequence, strPrefix, strSuffix) Then
-            ' Look for an N-terminal iTraq mod
-            reMatch = reFindItraq.Match(strPrimarySequence)
-
-            If reMatch.Success Then
-                strPeptide = strPrefix & "." & reMatch.Groups(2).Value & reMatch.Groups(1).Value & reMatch.Groups(3).Value & "." & strSuffix
-            End If
-        End If
-
-        Return strPeptide
-    End Function
-
-    Private Function FlattenList(lstValues As List(Of String)) As String
-        Return FlattenList(lstValues, ControlChars.Tab)
-    End Function
-
-    Private Function FlattenList(lstValues As List(Of String), chSepChar As Char) As String
-        Dim sbOutline = New StringBuilder()
-
-        For intIndex = 0 To lstValues.Count - 1
-            If intIndex > 0 Then
-                sbOutline.Append(chSepChar)
-            End If
-            sbOutline.Append(lstValues(intIndex))
-        Next
-
-        Return sbOutline.ToString()
-    End Function
-
-    Private Function GetCorrectedMassErrorPPM(oPsm As clsPSM, ByRef intIsotopeError As Integer) As String
-
-        Const MASS_C13 = 1.00335483
-
-        Dim dblDelM As Double
-        Dim dblMassErrorPPM As Double = 0
-        intIsotopeError = 0
-
-        If Double.TryParse(oPsm.MassErrorDa, dblDelM) Then
-
-            ' Examine dblDelM to determine which isotope was chosen
-            If dblDelM >= -0.5 Then
-                ' This is the typical case
-                Do While dblDelM > 0.5
-                    dblDelM -= MASS_C13
-                    intIsotopeError += 1
-                Loop
-            Else
-                ' This happens less often; but we'll still account for it
-                ' In this case, intCorrectionCount will be negative
-                Do While dblDelM < -0.5
-                    dblDelM += MASS_C13
-                    intIsotopeError -= 1
-                Loop
-
-            End If
-
-            dblMassErrorPPM = clsPeptideMassCalculator.MassToPPM(dblDelM, oPsm.PrecursorNeutralMass)
-        End If
-
-        Return dblMassErrorPPM.ToString("0.0000")
-
-    End Function
-
-    Private Function GetScore(oPsm As clsPSM, strScoreName As String, strValueIfMissing As String) As String
-        Dim strScoreValue = String.Empty
-
-        If Not oPsm.TryGetScore(strScoreName, strScoreValue) Then
-            strScoreValue = strValueIfMissing
-        End If
-
-        Return strScoreValue
-
-    End Function
-
-    Private Sub mPHRPReader_ErrorEvent(strErrorMessage As String) Handles mPHRPReader.ErrorEvent
-        Console.WriteLine("Error: " & strErrorMessage)
-    End Sub
-
-    Private Sub mPHRPReader_MessageEvent(strMessage As String) Handles mPHRPReader.MessageEvent
-        Console.WriteLine(strMessage)
-    End Sub
-
-    Private Sub mPHRPReader_WarningEvent(strWarningMessage As String) Handles mPHRPReader.WarningEvent
-        Console.WriteLine("Warning: " & strWarningMessage)
-    End Sub
-
-
-#Region "Event Handlers"
-    Private Sub ModExtractorErrorHandler(errMsg As String)
-        Console.WriteLine("Error: " & errMsg)
-    End Sub
-
-    Private Sub ModExtractorWarningHandler(warningMsg As String)
-        Console.WriteLine("Warning: " & warningMsg)
-    End Sub
-#End Region
-End Module
+                if (oPsm.SeqID <= 0) {
+                    lstValues.Add("**" + oPsm.SeqID + "**");                                                     // SeqID is undefined
+                } else {
+                    lstValues.Add(oPsm.SeqID.ToString());                                                        // SeqID
+                }
+
+                lstValues.Add(oPsm.ProteinFirst);                                                                // Protein First
+
+                if (oPsm.ProteinDetails.Count > 0) {
+                    var oFirstProteinDetail = oPsm.ProteinDetails.First();                                       // Protein Details first
+
+                    if (!string.Equals(oPsm.ProteinFirst, oFirstProteinDetail.Key)) {
+                        lstValues.Add(oFirstProteinDetail.Key);
+                    } else {
+                        lstValues.Add("<Match>");
+                    }
+                    lstValues.Add(oFirstProteinDetail.Value.ResidueStart.ToString());
+                    lstValues.Add(oFirstProteinDetail.Value.ResidueEnd.ToString());
+                }
+
+                var strXCorr = GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_XCorr, "0");
+                lstValues.Add(strXCorr);                                                              // XCorr
+
+                lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_Sp, "0"));              // SP
+                lstValues.Add(oPsm.MSGFSpecProb);                // MSGF SpecProb
+                lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_DelCn2, "0"));          // DelCn2
+
+                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_PValue, "0"));           // PValue
+                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_EValue, "0"));           // EValue
+                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, "0"));           // SpecEValue
+                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_FDR, "1"));              // FDR
+
+                if (oPsm.PeptideCleanSequence == "QQIEESTSDYDKEK") {
+                    Console.WriteLine(oPsm.Peptide + " in scan " + oPsm.ScanNumber);
+
+                    var parentIonMZ = oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge);
+
+                    Console.WriteLine("ParentIonMZ   = " + parentIonMZ);
+                    Console.WriteLine("PeptideWithNumericMods   = " + oPsm.PeptideWithNumericMods);
+                }
+
+                if (oPsm.ModifiedResidues.Count > 0) {
+                    intModifiedPSMsRead += 1;
+
+                    if (intModifiedPSMsRead % 500 == 0) {
+                        Console.WriteLine("PeptideWithNumericMods   = " + oPsm.PeptideWithNumericMods);
+                        foreach (var modifiedResidue in oPsm.ModifiedResidues) {
+                            Console.WriteLine("  " + modifiedResidue.Residue + modifiedResidue.EndResidueLocInPeptide + ": " + modifiedResidue.ModDefinition.ModificationMassAsText);
+                        }
+                    }
+
+                    var dblPeptideMassRecomputed = oMassCalculator.ComputeSequenceMassNumericMods(oPsm.PeptideWithNumericMods);
+                    if (Math.Abs(oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed) > 0.1) {
+                        Console.WriteLine("  Peptide mass disagreement: " + (oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"));
+                    }
+                }
+
+                var strFlattened = FlattenList(lstValues);
+
+                if (intPSMsRead % 1000 == 0) {
+                    //Console.WriteLine(intPSMsRead.ToString().PadRight(8) & " " & oPsm.Peptide.PadRight(40) & "   " & strXCorr)
+                    Console.WriteLine(strFlattened);
+                }
+
+                dctCachedValues.Add(intPSMsRead, oPsm);
+            }
+        }
+
+        private static readonly Regex RegexFindItraq = new Regex(@"^([A-Z][^A-Z]*)(\+144\.\d+)(.+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static string CleanupPeptide(string strPeptide)
+        {
+            var strPrimarySequence = string.Empty;
+            var strPrefix = string.Empty;
+            var strSuffix = string.Empty;
+
+            Match reMatch = default(Match);
+
+            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strPeptide, out strPrimarySequence, out strPrefix, out strSuffix)) {
+                // Look for an N-terminal iTraq mod
+                reMatch = RegexFindItraq.Match(strPrimarySequence);
+
+                if (reMatch.Success) {
+                    strPeptide = strPrefix + "." + reMatch.Groups[2].Value + reMatch.Groups[1].Value + reMatch.Groups[3].Value + "." + strSuffix;
+                }
+            }
+
+            return strPeptide;
+        }
+
+        private static string FlattenList(List<string> lstValues)
+        {
+            return FlattenList(lstValues, '\t');
+        }
+
+        private static string FlattenList(List<string> lstValues, char chSepChar)
+        {
+            var sbOutline = new StringBuilder();
+
+            for (var intIndex = 0; intIndex <= lstValues.Count - 1; intIndex++) {
+                if (intIndex > 0) {
+                    sbOutline.Append(chSepChar);
+                }
+                sbOutline.Append(lstValues[intIndex]);
+            }
+
+            return sbOutline.ToString();
+        }
+
+        private static string GetCorrectedMassErrorPPM(clsPSM oPsm, ref int intIsotopeError)
+        {
+            const double MASS_C13 = 1.00335483;
+
+            double dblDelM = 0;
+            double dblMassErrorPPM = 0;
+            intIsotopeError = 0;
+
+            if (double.TryParse(oPsm.MassErrorDa, out dblDelM)) {
+                // Examine dblDelM to determine which isotope was chosen
+                if (dblDelM >= -0.5) {
+                    // This is the typical case
+                    while (dblDelM > 0.5) {
+                        dblDelM -= MASS_C13;
+                        intIsotopeError += 1;
+                    }
+                } else {
+                    // This happens less often; but we'll still account for it
+                    // In this case, intCorrectionCount will be negative
+                    while (dblDelM < -0.5) {
+                        dblDelM += MASS_C13;
+                        intIsotopeError -= 1;
+                    }
+                }
+
+                dblMassErrorPPM = clsPeptideMassCalculator.MassToPPM(dblDelM, oPsm.PrecursorNeutralMass);
+            }
+
+            return dblMassErrorPPM.ToString("0.0000");
+        }
+
+        private static string GetScore(clsPSM oPsm, string strScoreName, string strValueIfMissing)
+        {
+            var strScoreValue = string.Empty;
+
+            if (!oPsm.TryGetScore(strScoreName, out strScoreValue)) {
+                strScoreValue = strValueIfMissing;
+            }
+
+            return strScoreValue;
+        }
+
+        private static void mPHRPReader_ErrorEvent(string strErrorMessage)
+        {
+            Console.WriteLine("Error: " + strErrorMessage);
+        }
+
+        private static void mPHRPReader_MessageEvent(string strMessage)
+        {
+            Console.WriteLine(strMessage);
+        }
+
+        private static void mPHRPReader_WarningEvent(string strWarningMessage)
+        {
+            Console.WriteLine("Warning: " + strWarningMessage);
+        }
+
+        #region "Event Handlers"
+        private static void ModExtractorErrorHandler(string errMsg)
+        {
+            Console.WriteLine("Error: " + errMsg);
+        }
+
+        private static void ModExtractorWarningHandler(string warningMsg)
+        {
+            Console.WriteLine("Warning: " + warningMsg);
+        }
+        #endregion
+    }
+}

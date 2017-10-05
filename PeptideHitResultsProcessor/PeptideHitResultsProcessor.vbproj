@@ -152,7 +152,7 @@
     <Folder Include="My Project\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PHRPReader\PHRPReader.vbproj">
+    <ProjectReference Include="..\PHRPReader\PHRPReader.csproj">
       <Project>{81a15d6e-10c3-4f2c-bf71-6642b76753ed}</Project>
       <Name>PHRPReader</Name>
     </ProjectReference>

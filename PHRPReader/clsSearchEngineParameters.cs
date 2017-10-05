@@ -1,297 +1,319 @@
-﻿Option Strict On
+﻿using System;
+using System.Collections.Generic;
 
-Public Class clsSearchEngineParameters
+namespace PHRPReader
+{
+    public class clsSearchEngineParameters
+    {
+        public const string MASS_TYPE_MONOISOTOPIC = "monoisotopic";
+        public const string MASS_TYPE_AVERAGE = "average";
 
-    Public Const MASS_TYPE_MONOISOTOPIC As String = "monoisotopic"
-    Public Const MASS_TYPE_AVERAGE As String = "average"
+        private string mSearchEngineName;
+        private string mSearchEngineVersion;
+        private DateTime mSearchDate;
 
-    Private mSearchEngineName As String
-    Private mSearchEngineVersion As String
-    Private mSearchDate As DateTime
+        private string mPrecursorMassType;             // Typically "monoisotopic" or "average"
+        private string mFragmentMassType;
 
-    Private mPrecursorMassType As String            ' Typically "monoisotopic" or "average"
-    Private mFragmentMassType As String
+        private string mSearchEngineParamFilePath;
 
-    Private mSearchEngineParamFilePath As String
+        private string mEnzyme;
 
-    Private mEnzyme As String
+        private readonly List<clsModificationDefinition> mModInfo;
 
-    Private ReadOnly mModInfo As List(Of clsModificationDefinition)
+        private readonly Dictionary<string, string> mParameters;
 
-    Private ReadOnly mParameters As Dictionary(Of String, String)
+        #region "Properties"
+        /// <summary>
+        /// Enzyme name
+        /// </summary>
+        /// <returns></returns>
+        public string Enzyme
+        {
+            get { return mEnzyme; }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    value = "none";
+                mEnzyme = value;
+            }
+        }
 
-#Region "Properties"
-    ''' <summary>
-    ''' Enzyme name
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property Enzyme As String
-        Get
-            Return mEnzyme
-        End Get
-        Set
-            If Value = "" Then Value = "none"
-            mEnzyme = Value
-        End Set
-    End Property
+        /// <summary>
+        /// FASTA file path
+        /// </summary>
+        /// <returns></returns>
+        public string FastaFilePath { get; set; }
 
-    ''' <summary>
-    ''' FASTA file path
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property FastaFilePath As String
+        /// <summary>
+        /// Fragment mass type
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Typically "monoisotopic" or "average"</remarks>
+        public string FragmentMassType
+        {
+            get { return mFragmentMassType; }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    value = MASS_TYPE_MONOISOTOPIC;
+                mFragmentMassType = value;
+            }
+        }
 
-    ''' <summary>
-    ''' Fragment mass type
-    ''' </summary>
-    ''' <returns></returns>
-    ''' <remarks>Typically "monoisotopic" or "average"</remarks>
-    Public Property FragmentMassType As String
-        Get
-            Return mFragmentMassType
-        End Get
-        Set
-            If String.IsNullOrEmpty(Value) Then Value = MASS_TYPE_MONOISOTOPIC
-            mFragmentMassType = Value
-        End Set
-    End Property
+        /// <summary>
+        /// Maximum number of internal cleavages (missed cleavage points)
+        /// </summary>
+        /// <returns></returns>
+        public int MaxNumberInternalCleavages { get; set; }
 
-    ''' <summary>
-    ''' Maximum number of internal cleavages (missed cleavage points)
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property MaxNumberInternalCleavages As Integer
+        /// <summary>
+        /// 0 means no-enzyme, 1 means partially tryptic, 2 means fully tryptic
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>For trypsin, this is NTT or Number of Tryptic Terminii</remarks>
+        public int MinNumberTermini { get; set; }
 
-    ''' <summary>
-    ''' 0 means no-enzyme, 1 means partially tryptic, 2 means fully tryptic
-    ''' </summary>
-    ''' <returns></returns>
-    ''' <remarks>For trypsin, this is NTT or Number of Tryptic Terminii</remarks>
-    Public Property MinNumberTermini As Integer
+        /// <summary>
+        /// Dynamic and static mods to search for
+        /// </summary>
+        /// <returns></returns>
+        public List<clsModificationDefinition> ModInfo
+        {
+            get { return mModInfo; }
+        }
 
-    ''' <summary>
-    ''' Dynamic and static mods to search for
-    ''' </summary>
-    ''' <returns></returns>
-    Public ReadOnly Property ModInfo As List(Of clsModificationDefinition)
-        Get
-            Return mModInfo
-        End Get
-    End Property
+        /// <summary>
+        /// Parameter dictionary (key/value pairs)
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, string> Parameters
+        {
+            get { return mParameters; }
+        }
 
-    ''' <summary>
-    ''' Parameter dictionary (key/value pairs)
-    ''' </summary>
-    ''' <returns></returns>
-    Public ReadOnly Property Parameters As Dictionary(Of String, String)
-        Get
-            Return mParameters
-        End Get
-    End Property
+        /// <summary>
+        /// Precursor mass tolerance, in Da; 0 if unknown
+        /// </summary>
+        /// <returns></returns>
+        public double PrecursorMassToleranceDa { get; set; }
 
-    ''' <summary>
-    ''' Precursor mass tolerance, in Da; 0 if unknown
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property PrecursorMassToleranceDa As Double
+        /// <summary>
+        /// Precursor mass tolerance, in ppm; 0 if unknown
+        /// </summary>
+        /// <returns></returns>
+        public double PrecursorMassTolerancePpm { get; set; }
 
-    ''' <summary>
-    ''' Precursor mass tolerance, in ppm; 0 if unknown
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property PrecursorMassTolerancePpm As Double
+        /// <summary>
+        /// Precursor mass type
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Typically "monoisotopic" or "average"</remarks>
+        public string PrecursorMassType
+        {
+            get { return mPrecursorMassType; }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    value = MASS_TYPE_MONOISOTOPIC;
+                mPrecursorMassType = value;
+            }
+        }
 
-    ''' <summary>
-    ''' Precursor mass type
-    ''' </summary>
-    ''' <returns></returns>
-    ''' <remarks>Typically "monoisotopic" or "average"</remarks>
-    Public Property PrecursorMassType As String
-        Get
-            Return mPrecursorMassType
-        End Get
-        Set
-            If String.IsNullOrWhiteSpace(Value) Then Value = MASS_TYPE_MONOISOTOPIC
-            mPrecursorMassType = Value
-        End Set
-    End Property
+        /// <summary>
+        /// Search engine name
+        /// </summary>
+        /// <returns></returns>
+        public string SearchEngineName
+        {
+            get { return mSearchEngineName; }
+        }
 
-    ''' <summary>
-    ''' Search engine name
-    ''' </summary>
-    ''' <returns></returns>
-    Public ReadOnly Property SearchEngineName As String
-        Get
-            Return mSearchEngineName
-        End Get
-    End Property
+        /// <summary>
+        /// Search engine parameter file path
+        /// </summary>
+        /// <returns></returns>
+        public string SearchEngineParamFilePath
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(mSearchEngineParamFilePath))
+                {
+                    return string.Empty;
+                }
+                else
+                {
+                    return mSearchEngineParamFilePath;
+                }
+            }
+        }
 
-    ''' <summary>
-    ''' Search engine parameter file path
-    ''' </summary>
-    ''' <returns></returns>
-    Public ReadOnly Property SearchEngineParamFilePath As String
-        Get
-            If String.IsNullOrWhiteSpace(mSearchEngineParamFilePath) Then
-                Return String.Empty
-            Else
-                Return mSearchEngineParamFilePath
-            End If
-        End Get
-    End Property
+        /// <summary>
+        /// Search engine version
+        /// </summary>
+        /// <returns></returns>
+        public string SearchEngineVersion
+        {
+            get { return mSearchEngineVersion; }
+        }
 
-    ''' <summary>
-    ''' Search engine version
-    ''' </summary>
-    ''' <returns></returns>
-    Public ReadOnly Property SearchEngineVersion As String
-        Get
-            Return mSearchEngineVersion
-        End Get
-    End Property
+        /// <summary>
+        /// Search date
+        /// </summary>
+        /// <returns></returns>
+        public DateTime SearchDate
+        {
+            get { return mSearchDate; }
+        }
 
-    ''' <summary>
-    ''' Search date
-    ''' </summary>
-    ''' <returns></returns>
-    Public ReadOnly Property SearchDate As DateTime
-        Get
-            Return mSearchDate
-        End Get
-    End Property
+        #endregion
 
-#End Region
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="searchEngineName"></param>
+        public clsSearchEngineParameters(string searchEngineName) : this(searchEngineName, new List<clsModificationDefinition>(), null)
+        {
+        }
 
-    ''' <summary>
-    ''' Constructor
-    ''' </summary>
-    ''' <param name="searchEngineName"></param>
-    Public Sub New(searchEngineName As String)
-        Me.New(searchEngineName, New List(Of clsModificationDefinition), Nothing)
-    End Sub
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="searchEngineName"></param>
+        /// <param name="objModInfo"></param>
+        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> objModInfo) : this(searchEngineName, objModInfo, null)
+        {
+        }
 
-    ''' <summary>
-    ''' Constructor
-    ''' </summary>
-    ''' <param name="searchEngineName"></param>
-    ''' <param name="objModInfo"></param>
-    Public Sub New(searchEngineName As String, objModInfo As List(Of clsModificationDefinition))
-        Me.New(searchEngineName, objModInfo, Nothing)
-    End Sub
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="searchEngineName"></param>
+        /// <param name="objModInfo"></param>
+        /// <param name="Parameters"></param>
+        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> objModInfo, Dictionary<string, string> Parameters)
+        {
+            this.InitializeDefaults();
 
-    ''' <summary>
-    ''' Constructor
-    ''' </summary>
-    ''' <param name="searchEngineName"></param>
-    ''' <param name="objModInfo"></param>
-    ''' <param name="Parameters"></param>
-    Public Sub New(searchEngineName As String, objModInfo As List(Of clsModificationDefinition), Parameters As Dictionary(Of String, String))
-        Me.InitializeDefaults()
+            mSearchEngineName = searchEngineName;
+            mSearchEngineParamFilePath = string.Empty;
 
-        mSearchEngineName = searchEngineName
-        mSearchEngineParamFilePath = String.Empty
+            mModInfo = objModInfo;
 
-        mModInfo = objModInfo
+            if (objModInfo == null)
+            {
+                mModInfo = new List<clsModificationDefinition>();
+            }
+            else
+            {
+                mModInfo = objModInfo;
+            }
 
-        If objModInfo Is Nothing Then
-            mModInfo = New List(Of clsModificationDefinition)
-        Else
-            mModInfo = objModInfo
-        End If
+            if (mParameters == null)
+            {
+                mParameters = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+            }
+            else
+            {
+                mParameters = Parameters;
+            }
+        }
 
-        If mParameters Is Nothing Then
-            mParameters = New Dictionary(Of String, String)(StringComparer.CurrentCultureIgnoreCase)
-        Else
-            mParameters = Parameters
-        End If
+        /// <summary>
+        /// Add a new dynamic or static modification
+        /// </summary>
+        /// <param name="objModInfo"></param>
+        public void AddModification(clsModificationDefinition objModInfo)
+        {
+            mModInfo.Add(objModInfo);
+        }
 
-    End Sub
+        /// <summary>
+        /// Add/update a parameter
+        /// </summary>
+        /// <param name="kvSetting"></param>
+        public void AddUpdateParameter(KeyValuePair<string, string> kvSetting)
+        {
+            AddUpdateParameter(kvSetting.Key, kvSetting.Value);
+        }
 
-    ''' <summary>
-    ''' Add a new dynamic or static modification
-    ''' </summary>
-    ''' <param name="objModInfo"></param>
-    Public Sub AddModification(objModInfo As clsModificationDefinition)
-        mModInfo.Add(objModInfo)
-    End Sub
+        /// <summary>
+        /// Add/update a parameter
+        /// </summary>
+        /// <param name="ParamName"></param>
+        /// <param name="ParamValue"></param>
+        public void AddUpdateParameter(string ParamName, string ParamValue)
+        {
+            if (mParameters.ContainsKey(ParamName))
+            {
+                mParameters[ParamName] = ParamValue;
+            }
+            else
+            {
+                mParameters.Add(ParamName, ParamValue);
+            }
+        }
 
-    ''' <summary>
-    ''' Add/update a parameter
-    ''' </summary>
-    ''' <param name="kvSetting"></param>
-    Public Sub AddUpdateParameter(kvSetting As KeyValuePair(Of String, String))
-        AddUpdateParameter(kvSetting.Key, kvSetting.Value)
-    End Sub
+        /// <summary>
+        /// Clear stored dynamic and static modifications
+        /// </summary>
+        public void ClearModifications()
+        {
+            mModInfo.Clear();
+        }
 
-    ''' <summary>
-    ''' Add/update a parameter
-    ''' </summary>
-    ''' <param name="ParamName"></param>
-    ''' <param name="ParamValue"></param>
-    Public Sub AddUpdateParameter(ParamName As String, ParamValue As String)
-        If mParameters.ContainsKey(ParamName) Then
-            mParameters(ParamName) = ParamValue
-        Else
-            mParameters.Add(ParamName, ParamValue)
-        End If
-    End Sub
+        /// <summary>
+        /// Clear stored key/value parameters
+        /// </summary>
+        public void ClearParameters()
+        {
+            mParameters.Clear();
+        }
 
-    ''' <summary>
-    ''' Clear stored dynamic and static modifications
-    ''' </summary>
-    Public Sub ClearModifications()
-        mModInfo.Clear()
-    End Sub
+        private void InitializeDefaults()
+        {
+            mSearchEngineName = "Unknown";
+            mSearchEngineVersion = "Unknown";
+            mSearchDate = new DateTime(1980, 1, 1);
 
-    ''' <summary>
-    ''' Clear stored key/value parameters
-    ''' </summary>
-    Public Sub ClearParameters()
-        mParameters.Clear()
-    End Sub
+            FastaFilePath = string.Empty;
 
-    Private Sub InitializeDefaults()
-        mSearchEngineName = "Unknown"
-        mSearchEngineVersion = "Unknown"
-        mSearchDate = New DateTime(1980, 1, 1)
+            PrecursorMassToleranceDa = 0;
+            PrecursorMassTolerancePpm = 0;
 
-        FastaFilePath = String.Empty
+            mPrecursorMassType = MASS_TYPE_MONOISOTOPIC;
+            mFragmentMassType = MASS_TYPE_MONOISOTOPIC;
 
-        PrecursorMassToleranceDa = 0
-        PrecursorMassTolerancePpm = 0
+            mEnzyme = "trypsin";
+            MaxNumberInternalCleavages = 4;
+            MinNumberTermini = 0;
+        }
 
-        mPrecursorMassType = MASS_TYPE_MONOISOTOPIC
-        mFragmentMassType = MASS_TYPE_MONOISOTOPIC
+        /// <summary>
+        /// Update the search engine parameter file path
+        /// </summary>
+        /// <param name="paramFilePath"></param>
+        public void UpdateSearchEngineParamFilePath(string paramFilePath)
+        {
+            mSearchEngineParamFilePath = paramFilePath;
+        }
 
-        mEnzyme = "trypsin"
-        MaxNumberInternalCleavages = 4
-        MinNumberTermini = 0
+        /// <summary>
+        /// Update the search engine version
+        /// </summary>
+        /// <param name="strSearchEngineVersion"></param>
+        public void UpdateSearchEngineVersion(string strSearchEngineVersion)
+        {
+            mSearchEngineVersion = string.Copy(strSearchEngineVersion);
+        }
 
-    End Sub
-
-    ''' <summary>
-    ''' Update the search engine parameter file path
-    ''' </summary>
-    ''' <param name="paramFilePath"></param>
-    Public Sub UpdateSearchEngineParamFilePath(paramFilePath As String)
-        mSearchEngineParamFilePath = paramFilePath
-    End Sub
-
-    ''' <summary>
-    ''' Update the search engine version
-    ''' </summary>
-    ''' <param name="strSearchEngineVersion"></param>
-    Public Sub UpdateSearchEngineVersion(strSearchEngineVersion As String)
-        mSearchEngineVersion = String.Copy(strSearchEngineVersion)
-    End Sub
-
-    ''' <summary>
-    ''' Update the search date
-    ''' </summary>
-    ''' <param name="dtSearchDate"></param>
-    Public Sub UpdateSearchDate(dtSearchDate As DateTime)
-        mSearchDate = dtSearchDate
-    End Sub
-
-End Class
-
+        /// <summary>
+        /// Update the search date
+        /// </summary>
+        /// <param name="dtSearchDate"></param>
+        public void UpdateSearchDate(DateTime dtSearchDate)
+        {
+            mSearchDate = dtSearchDate;
+        }
+    }
+}
