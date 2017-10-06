@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6487; October 5, 2017
+	- Convert to C#
+
 Version 1.5.6274; March 6, 2017
 	- Replace ToLower and ToUpper-based string comparisons with StringComparison.InvariantCultureIgnoreCase
 

@@ -1,523 +1,646 @@
-Option Strict On
+﻿// This program processes search results from several LC-MS/MS search engines to
+// determine the modifications present, determine the cleaveage and terminus state
+// of each peptide, and compute the monoisotopic mass of each peptide. See
+// clsSequestSynopsisFileProcessor and clsXTandemResultsConverter for
+// additional information
+//
+// -------------------------------------------------------------------------------
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Program started January 2, 2006
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
+// -------------------------------------------------------------------------------
+//
 
-' This program processes search results from several LC-MS/MS search engines to
-' determine the modifications present, determine the cleaveage and terminus state
-' of each peptide, and compute the monoisotopic mass of each peptide. See 
-' clsSequestSynopsisFileProcessor and clsXTandemResultsConverter for 
-' additional information
-'
-' -------------------------------------------------------------------------------
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Program started January 2, 2006
-'
-' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/
-' -------------------------------------------------------------------------------
-' 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+using System.Reflection;
+using System.Threading;
 
-Module modMain
-    Public Const PROGRAM_DATE As String = "February 13, 2017"
+namespace PeptideHitResultsProcRunner
+{
+    static class Program
+    {
+        public const string PROGRAM_DATE = "February 13, 2017";
 
-    Private mInputFilePath As String
-    Private mOutputFolderPath As String                         ' Optional
-    Private mParameterFilePath As String                        ' Optional
+        private static string mInputFilePath;
+        private static string mOutputFolderPath;                         // Optional
+        private static string mParameterFilePath;                        // Optional
 
-    Private mMassCorrectionTagsFilePath As String               ' Optional
-    Private mModificationDefinitionsFilePath As String          ' Optional
-    Private mSearchToolParameterFilePath As String              ' Optional
+        private static string mMassCorrectionTagsFilePath;               // Optional
+        private static string mModificationDefinitionsFilePath;          // Optional
+        private static string mSearchToolParameterFilePath;              // Optional
 
-    ' Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
-    Private mCreateProteinModsFile As Boolean
-    Private mFastaFilePath As String
-    Private mIgnorePeptideToProteinMapperErrors As Boolean
-    Private mProteinModsFileIncludesReversedProteins As Boolean
-    Private mUseExistingMTSPepToProteinMapFile As Boolean
+        // Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
+        private static bool mCreateProteinModsFile;
+        private static string mFastaFilePath;
+        private static bool mIgnorePeptideToProteinMapperErrors;
+        private static bool mProteinModsFileIncludesReversedProteins;
+        private static bool mUseExistingMTSPepToProteinMapFile;
 
-    ' Setting this to true assumes the input file is a valid PHRP data file
-    ' Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
-    Private mCreateProteinModsUsingPHRPDataFile As Boolean
+        // Setting this to true assumes the input file is a valid PHRP data file
+        // Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
+        private static bool mCreateProteinModsUsingPHRPDataFile;
 
-    Private mCreateInspectOrMSGFDBFirstHitsFile As Boolean
-    Private mCreateInspectOrMSGFDBSynopsisFile As Boolean
+        private static bool mCreateInspectOrMSGFDBFirstHitsFile;
+        private static bool mCreateInspectOrMSGFDBSynopsisFile;
 
-    Private mMsgfPlusEValueThreshold As Single
-    Private mMsgfPlusSpecEValueThreshold As Single
-    Private mInspectSynopsisFilePValueThreshold As Single
+        private static float mMsgfPlusEValueThreshold;
+        private static float mMsgfPlusSpecEValueThreshold;
+        private static float mInspectSynopsisFilePValueThreshold;
 
-    Private mMODaMODPlusSynopsisFileProbabilityThreshold As Single
+        private static float mMODaMODPlusSynopsisFileProbabilityThreshold;
 
-    Private mOutputFolderAlternatePath As String                ' Optional
-    Private mRecreateFolderHierarchyInAlternatePath As Boolean  ' Optional
+        private static string mOutputFolderAlternatePath;                // Optional
+        private static bool mRecreateFolderHierarchyInAlternatePath;     // Optional
 
-    Private mRecurseFolders As Boolean
-    Private mRecurseFoldersMaxLevels As Integer
+        private static bool mRecurseFolders;
+        private static int mRecurseFoldersMaxLevels;
 
-    Private mLogMessagesToFile As Boolean
-    Private mLogFilePath As String = String.Empty
-    Private mLogFolderPath As String = String.Empty
-    Private mQuietMode As Boolean
+        private static bool mLogMessagesToFile;
+        private static string mLogFilePath = string.Empty;
+        private static string mLogFolderPath = string.Empty;
+        private static bool mQuietMode;
 
-    Private WithEvents mPeptideHitResultsProcRunner As clsPeptideHitResultsProcRunner
-    Private mLastProgressReportTime As DateTime
-    Private mLastProgressReportValue As Integer
-    Private mLastProgressReportValueTime As DateTime
+        private static clsPeptideHitResultsProcRunner withEventsField_mPeptideHitResultsProcRunner;
+        private static clsPeptideHitResultsProcRunner mPeptideHitResultsProcRunner
+        {
+            get { return withEventsField_mPeptideHitResultsProcRunner; }
+            set
+            {
+                if (withEventsField_mPeptideHitResultsProcRunner != null)
+                {
+                    withEventsField_mPeptideHitResultsProcRunner.ErrorEvent -= mPeptideHitResultsProcRunner_ErrorEvent;
+                    withEventsField_mPeptideHitResultsProcRunner.MessageEvent -= mPeptideHitResultsProcRunner_MessageEvent;
+                    withEventsField_mPeptideHitResultsProcRunner.ProgressChanged -= mPeptideHitResultsProcRunner_ProgressChanged;
+                    withEventsField_mPeptideHitResultsProcRunner.ProgressReset -= mPeptideHitResultsProcRunner_ProgressReset;
+                    withEventsField_mPeptideHitResultsProcRunner.WarningEvent -= mPeptideHitResultsProcRunner_WarningEvent;
+                }
+                withEventsField_mPeptideHitResultsProcRunner = value;
+                if (withEventsField_mPeptideHitResultsProcRunner != null)
+                {
+                    withEventsField_mPeptideHitResultsProcRunner.ErrorEvent += mPeptideHitResultsProcRunner_ErrorEvent;
+                    withEventsField_mPeptideHitResultsProcRunner.MessageEvent += mPeptideHitResultsProcRunner_MessageEvent;
+                    withEventsField_mPeptideHitResultsProcRunner.ProgressChanged += mPeptideHitResultsProcRunner_ProgressChanged;
+                    withEventsField_mPeptideHitResultsProcRunner.ProgressReset += mPeptideHitResultsProcRunner_ProgressReset;
+                    withEventsField_mPeptideHitResultsProcRunner.WarningEvent += mPeptideHitResultsProcRunner_WarningEvent;
+                }
+            }
+        }
 
-    Public Function Main() As Integer
-        ' Returns 0 if no error, error code if an error
+        private static DateTime mLastProgressReportTime;
+        private static int mLastProgressReportValue;
+        private static DateTime mLastProgressReportValueTime;
 
-        Dim intReturnCode As Integer
-        Dim objParseCommandLine As New clsParseCommandLine
-        Dim blnProceed As Boolean
+        public static int Main()
+        {
+            // Returns 0 if no error, error code if an error
 
-        mInputFilePath = String.Empty
-        mOutputFolderPath = String.Empty
-        mParameterFilePath = String.Empty
+            int intReturnCode = 0;
+            clsParseCommandLine objParseCommandLine = new clsParseCommandLine();
+            bool blnProceed = false;
 
-        mMassCorrectionTagsFilePath = String.Empty
-        mModificationDefinitionsFilePath = String.Empty
-        mSearchToolParameterFilePath = String.Empty
+            mInputFilePath = string.Empty;
+            mOutputFolderPath = string.Empty;
+            mParameterFilePath = string.Empty;
 
-        mCreateProteinModsFile = False
-        mFastaFilePath = String.Empty
-        mIgnorePeptideToProteinMapperErrors = False
-        mProteinModsFileIncludesReversedProteins = False
-        mUseExistingMTSPepToProteinMapFile = False
+            mMassCorrectionTagsFilePath = string.Empty;
+            mModificationDefinitionsFilePath = string.Empty;
+            mSearchToolParameterFilePath = string.Empty;
 
-        mCreateProteinModsUsingPHRPDataFile = False
+            mCreateProteinModsFile = false;
+            mFastaFilePath = string.Empty;
+            mIgnorePeptideToProteinMapperErrors = false;
+            mProteinModsFileIncludesReversedProteins = false;
+            mUseExistingMTSPepToProteinMapFile = false;
 
-        mMsgfPlusEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD
-        mMsgfPlusSpecEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD
+            mCreateProteinModsUsingPHRPDataFile = false;
 
-        ' These should default to True
-        mCreateInspectOrMSGFDBFirstHitsFile = True
-        mCreateInspectOrMSGFDBSynopsisFile = True
-        mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
+            mMsgfPlusEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
+            mMsgfPlusSpecEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
-        mMODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD
+            // These should default to True
+            mCreateInspectOrMSGFDBFirstHitsFile = true;
+            mCreateInspectOrMSGFDBSynopsisFile = true;
+            mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
-        mRecurseFoldersMaxLevels = 0
+            mMODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
-        mQuietMode = False
-        mLogMessagesToFile = False
-        mLogFilePath = String.Empty
-        mLogFolderPath = String.Empty
+            mRecurseFoldersMaxLevels = 0;
 
-        Try
-            blnProceed = False
-            If objParseCommandLine.ParseCommandLine Then
-                If SetOptionsUsingCommandLineParameters(objParseCommandLine) Then blnProceed = True
-            End If
+            mQuietMode = false;
+            mLogMessagesToFile = false;
+            mLogFilePath = string.Empty;
+            mLogFolderPath = string.Empty;
 
-            If Not blnProceed OrElse
-               objParseCommandLine.NeedToShowHelp OrElse
-               objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse
-               String.IsNullOrWhiteSpace(mInputFilePath) Then
-                ShowProgramHelp()
-                intReturnCode = -1
-            Else
-                ' Note: Most of the options will get overridden if defined in the parameter file
-                mPeptideHitResultsProcRunner = New clsPeptideHitResultsProcRunner() With {
-                   .ShowMessages = Not mQuietMode,
-                    .LogMessagesToFile = mLogMessagesToFile,
-                    .LogFilePath = mLogFilePath,
-                    .LogFolderPath = mLogFolderPath,
-                    .MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath,
-                    .ModificationDefinitionsFilePath = mModificationDefinitionsFilePath,
-                    .SearchToolParameterFilePath = mSearchToolParameterFilePath,
-                    .WarnMissingParameterFileSection = True,
-                    .CreateProteinModsFile = mCreateProteinModsFile,
-                    .FastaFilePath = mFastaFilePath,
-                    .IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors,
-                    .ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins,
-                    .UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile,
-                    .CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile,
-                    .MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold,
-                    .MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold,
-                    .CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile,
-                    .CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile,
-                    .InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold,
-                    .MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
+            try
+            {
+                blnProceed = false;
+                if (objParseCommandLine.ParseCommandLine())
+                {
+                    if (SetOptionsUsingCommandLineParameters(objParseCommandLine))
+                        blnProceed = true;
                 }
 
-                If mRecurseFolders Then
-                    If mPeptideHitResultsProcRunner.ProcessFilesAndRecurseFolders(mInputFilePath, mOutputFolderPath, mOutputFolderAlternatePath, mRecreateFolderHierarchyInAlternatePath, mParameterFilePath, mRecurseFoldersMaxLevels) Then
-                        intReturnCode = 0
-                    Else
-                        intReturnCode = mPeptideHitResultsProcRunner.ErrorCode
-                    End If
-                Else
-                    If mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputFolderPath, mParameterFilePath) Then
-                        intReturnCode = 0
-                    Else
-                        intReturnCode = mPeptideHitResultsProcRunner.ErrorCode
-                        If intReturnCode = 0 Then
-                            intReturnCode = -1
-                            If Not mQuietMode Then
-                                ShowErrorMessage("ProcessFilesWildcard returned Success=False")
-                            End If
-                        Else
-                            If Not mQuietMode Then
-                                ShowErrorMessage("Error while processing: " & mPeptideHitResultsProcRunner.GetErrorMessage())
-                            End If
-                        End If
-                        
-                    End If
-                End If
-
-                DisplayProgressPercent(mLastProgressReportValue, True)
-            End If
-
-        Catch ex As Exception
-            ShowErrorMessage("Error occurred in modMain->Main: " & Environment.NewLine & ex.Message)
-            intReturnCode = -1
-        End Try
-
-        Return intReturnCode
-
-    End Function
-
-    Private Sub DisplayProgressPercent(intPercentComplete As Integer, blnAddCarriageReturn As Boolean)
-
-        If blnAddCarriageReturn Then
-            Console.WriteLine()
-        End If
-        If intPercentComplete > 100 Then intPercentComplete = 100
-        Console.Write("Processing: " & intPercentComplete.ToString() & "% ")
-
-        If blnAddCarriageReturn Then
-            Console.WriteLine()
-        End If
-    End Sub
-
-    Private Function GetAppVersion() As String
-        Return clsProcessFilesBaseClass.GetAppVersion(PROGRAM_DATE)
-    End Function
-
-    ''' <summary>
-    ''' Parse out True/False or Yes/No or T/F or Y/N or 1/0 from strValue
-    ''' </summary>
-    ''' <param name="strValue">Text to parse</param>
-    ''' <param name="blnValue">Output parameter</param>
-    ''' <returns>True if successfully parsed strValue; the result of the parse is in blnValue</returns>
-    ''' <remarks></remarks>
-    Private Function ParseBoolean(strValue As String, ByRef blnValue As Boolean) As Boolean
-
-        If String.IsNullOrEmpty(strValue) Then Return False
-
-        If Boolean.TryParse(strValue, blnValue) Then
-            Return True
-        Else
-            Select Case strValue.ToUpper().Chars(0)
-                Case "T"c, "Y"c, "1"c
-                    ' True or Yes or 1
-                    blnValue = True
-                    Return True
-                Case "F"c, "N"c, "0"c
-                    ' False or No or 0
-                    blnValue = False
-                    Return True
-            End Select
-        End If
-
-        Return False
-
-    End Function
-
-    Private Function SetOptionsUsingCommandLineParameters(objParseCommandLine As clsParseCommandLine) As Boolean
-        ' Returns True if no problems; otherwise, returns false
-
-        Dim strValue As String = String.Empty
-        Dim sngValue As Single
-        Dim intValue As Integer
-        Dim blnValue As Boolean
-        Dim lstValidParameters = New List(Of String) From {
-            "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods", "F", "Fasta",
-            "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
-            "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPvalue", "InsFHT", "InsSyn", "SynProb",
-            "S", "A", "R", "L", "Q"}
-
-        Try
-            ' Make sure no invalid parameters are present
-            If objParseCommandLine.InvalidParametersPresent(lstValidParameters) Then
-                ShowErrorMessage("Invalid commmand line parameters",
-                  (From item In objParseCommandLine.InvalidParameters(lstValidParameters) Select "/" & item).ToList())
-                Return False
-            Else
-                With objParseCommandLine
-                    ' Query objParseCommandLine to see if various parameters are present
-                    If .RetrieveValueForParameter("I", strValue) Then
-                        mInputFilePath = String.Copy(strValue)
-                    ElseIf .NonSwitchParameterCount > 0 Then
-                        mInputFilePath = .RetrieveNonSwitchParameter(0)
-                    End If
-
-                    If .RetrieveValueForParameter("O", strValue) Then mOutputFolderPath = String.Copy(strValue)
-
-                    ' Future
-                    ' If .RetrieveValueForParameter("Folder", strValue) Then mDatasetFolderPath = String.Copy(strValue)
-                    '
-
-                    If .RetrieveValueForParameter("P", strValue) Then mParameterFilePath = String.Copy(strValue)
-                    If .RetrieveValueForParameter("M", strValue) Then mModificationDefinitionsFilePath = String.Copy(strValue)
-                    If .RetrieveValueForParameter("T", strValue) Then mMassCorrectionTagsFilePath = String.Copy(strValue)
-                    If .RetrieveValueForParameter("N", strValue) Then mSearchToolParameterFilePath = String.Copy(strValue)
-
-                    If .IsParameterPresent("ProteinMods") Then
-                        mCreateProteinModsFile = True
-                    End If
-
-                    If .IsParameterPresent("ProteinModsViaPHRP") Then
-                        mCreateProteinModsUsingPHRPDataFile = True
-                    End If
-
-                    If .RetrieveValueForParameter("F", strValue) Then mFastaFilePath = String.Copy(strValue)
-                    If .RetrieveValueForParameter("Fasta", strValue) Then mFastaFilePath = String.Copy(strValue)
-
-                    If .IsParameterPresent("IgnorePepToProtMapErrors") Then mIgnorePeptideToProteinMapperErrors = True
-                    If .IsParameterPresent("ProteinModsIncludeReversed") Then mProteinModsFileIncludesReversedProteins = True
-                    If .IsParameterPresent("UseExistingPepToProteinMapFile") Then mUseExistingMTSPepToProteinMapFile = True
-
-                    If .RetrieveValueForParameter("InsFHT", strValue) Then
-                        If ParseBoolean(strValue, blnValue) Then
-                            mCreateInspectOrMSGFDBFirstHitsFile = blnValue
-                        End If
-                    End If
-
-                    If .RetrieveValueForParameter("InsSyn", strValue) Then
-                        If ParseBoolean(strValue, blnValue) Then
-                            mCreateInspectOrMSGFDBSynopsisFile = blnValue
-                        End If
-                    End If
-
-
-
-                    If .RetrieveValueForParameter("MSGFPlusEValue", strValue) Then
-                        If Single.TryParse(strValue, sngValue) Then
-                            mMsgfPlusEValueThreshold = sngValue
-                        End If
-                    End If
-
-                    If .RetrieveValueForParameter("MSGFPlusSpecEValue", strValue) Then
-                        If Single.TryParse(strValue, sngValue) Then
-                            mMsgfPlusSpecEValueThreshold = sngValue
-                        End If
-                    End If
-
-                    If .RetrieveValueForParameter("SynPvalue", strValue) Then
-                        If Single.TryParse(strValue, sngValue) Then
-                            mInspectSynopsisFilePValueThreshold = sngValue
-                        End If
-                    End If
-
-                    If .RetrieveValueForParameter("SynProb", strValue) Then
-                        If Single.TryParse(strValue, sngValue) Then
-                            mMODaMODPlusSynopsisFileProbabilityThreshold = sngValue
-                        End If
-                    End If
-
-                    If .RetrieveValueForParameter("S", strValue) Then
-                        mRecurseFolders = True
-                        If Integer.TryParse(strValue, intValue) Then
-                            mRecurseFoldersMaxLevels = intValue
-                        End If
-                    End If
-                    If .RetrieveValueForParameter("A", strValue) Then mOutputFolderAlternatePath = String.Copy(strValue)
-                    If .IsParameterPresent("R") Then mRecreateFolderHierarchyInAlternatePath = True
-
-                    If .RetrieveValueForParameter("L", strValue) Then
-                        mLogMessagesToFile = True
-
-                        If Not String.IsNullOrEmpty(strValue) Then
-                            mLogFilePath = String.Copy(strValue).Trim(""""c)
-                        End If
-                    End If
-
-                    If .RetrieveValueForParameter("LogFolder", strValue) Then
-                        mLogMessagesToFile = True
-                        If Not String.IsNullOrEmpty(strValue) Then
-                            mLogFolderPath = String.Copy(strValue)
-                        End If
-                    End If
-
-                    If .IsParameterPresent("Q") Then mQuietMode = True
-                End With
-
-                Return True
-            End If
-
-        Catch ex As Exception
-            ShowErrorMessage("Error parsing the command line parameters: " & Environment.NewLine & ex.Message)
-        End Try
-
-        Return False
-
-    End Function
-
-    Private Sub ShowErrorMessage(strMessage As String)
-        Const strSeparator = "------------------------------------------------------------------------------"
-
-        Console.WriteLine()
-        Console.WriteLine(strSeparator)
-        Console.WriteLine(strMessage)
-        Console.WriteLine(strSeparator)
-        Console.WriteLine()
-
-        WriteToErrorStream(strMessage)
-    End Sub
-
-    Private Sub ShowErrorMessage(strTitle As String, items As IEnumerable(Of String))
-        Const strSeparator = "------------------------------------------------------------------------------"
-        Dim strMessage As String
-
-        Console.WriteLine()
-        Console.WriteLine(strSeparator)
-        Console.WriteLine(strTitle)
-        strMessage = strTitle & ":"
-
-        For Each item As String In items
-            Console.WriteLine("   " & item)
-            strMessage &= " " & item
-        Next
-        Console.WriteLine(strSeparator)
-        Console.WriteLine()
-
-        WriteToErrorStream(strMessage)
-    End Sub
-
-    Private Sub ShowProgramHelp()
-
-        Try
-
-            Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF+ search result file, or MSAlign results file then creates a tab-delimited text file with the data in a standard format used at PNNL.")
-            Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides. Parallel files will be created containing sequence info and modification details.")
-            Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.")
-            Console.WriteLine()
-            Console.WriteLine("Program syntax:" & Environment.NewLine &
-                              IO.Path.GetFileName(Reflection.Assembly.GetExecutingAssembly().Location) &
-                              " InputFilePath [/O:OutputFolderPath]")
-            ' Future: 
-            ' Console.WriteLine(" [/Folder:DatasetFolderPath]")
-            '
-            Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]")
-            Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]")
-            Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]")
-            Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]")
-            Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]")
-            Console.WriteLine(" [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]")
-            Console.WriteLine(" [/SynProb:0.05]")
-            Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]")
-            Console.WriteLine()
-            Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)")
-            Console.WriteLine("The output folder switch is optional. If omitted, the output file will be created in the same folder as the input file.")
-            Console.WriteLine()
-            ' Future: 
-            ' Console.WriteLine("As an alternative to specifying an input file, you can specify an input folder. In this case the program will look for the best file to process from that folder, and will auto-determine /T and /N")
-            ' 
-            Console.WriteLine()
-            Console.WriteLine("The parameter file path is optional. If included, it should point to a valid XML parameter file.")
-            Console.WriteLine()
-            Console.WriteLine("Use /M to specify the file containing the modification definitions. This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).")
-            Console.WriteLine()
-            Console.WriteLine("Use /ProteinMods to indicate that the _ProteinMods.txt file should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F")
-            Console.WriteLine("Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file and thus the PHRP data files should not be re-created; only the _ProteinMods.txt file should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F")
-            Console.WriteLine("Use /F to specify the path to the fasta file. When provided, the order of the proteins in the FASTA file dictates which protein is listed for each peptide in the First Hits file")
-            Console.WriteLine()
-            Console.WriteLine("Use /IgnorePepToProtMapErrors to ignore peptide to protein mapping errors that occur when creating a missing _PepToProtMapMTS.txt file")
-            Console.WriteLine("Use /ProteinModsIncludeReversed to include Reversed proteins in the _ProteinMods.txt file")
-            Console.WriteLine("Use /UseExistingPepToProteinMapFile to use an existing _PepToProtMapMTS.txt file if it exists")
-            Console.WriteLine()
-            Console.WriteLine("Use /T to specify the file containing the mass correction tag info. This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).")
-            Console.WriteLine("Use /N to specify the parameter file provided to the search tool. This is only used when processing Inspect or MSGF+ files.")
-            Console.WriteLine()
-
-            Console.WriteLine("When processing an MSGF+ results file, use /MSGFPlusSpecEValue and /MSGFPlusEValue to customize the thresholds used to determine which peptides are written to the the synopsis file")
-            Console.WriteLine("Defaults are /MSGFPlusSpecEValue:" & PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD &
-                              " and /MSGFPlusEValue:" & PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD)
-            Console.WriteLine()
-            Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file. The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD & " or an FScore >= " & PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD & " will also be included in the synopsis file.")
-            Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when processing Inspect or MSGF+ results (default is /InsFHT:True)")
-            Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when processing Inspect or MSGF+ results (default is /InsSyn:True)")
-            Console.WriteLine()
-            Console.WriteLine("When processing a MODPlus or MODa results file, use /SynProb to customize the Probability threshold used to determine which peptides are written to the the synopsis file. The default is /Synprob:0.05")
-            Console.WriteLine()
-            Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.")
-            Console.WriteLine("When using /S, you can redirect the output of the results using /A.")
-            Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).")
-            Console.WriteLine()
-            Console.WriteLine("Use /L to specify that a log file should be created. Use /L:LogFilePath to specify the name (or full path) for the log file.")
-            Console.WriteLine("Use the optional /Q switch will suppress all error messages.")
-            Console.WriteLine()
-
-            Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006")
-            Console.WriteLine("Version: " & GetAppVersion())
-
-            Console.WriteLine()
-
-            Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com")
-            Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/")
-            Console.WriteLine()
-
-            ' Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
-            Threading.Thread.Sleep(750)
-
-        Catch ex As Exception
-            ShowErrorMessage("Error displaying the program syntax: " & ex.Message)
-        End Try
-
-    End Sub
-
-    Private Sub WriteToErrorStream(strErrorMessage As String)
-        Try
-            Using swErrorStream = New IO.StreamWriter(Console.OpenStandardError())
-                swErrorStream.WriteLine(strErrorMessage)
-            End Using
-        Catch ex As Exception
-            ' Ignore errors here
-        End Try
-    End Sub
-
-    Private Sub mPeptideHitResultsProcRunner_ErrorEvent(strMessage As String) Handles mPeptideHitResultsProcRunner.ErrorEvent
-        WriteToErrorStream(strMessage)
-    End Sub
-
-    Private Sub mPeptideHitResultsProcRunner_MessageEvent(strMessage As String) Handles mPeptideHitResultsProcRunner.MessageEvent
-        Console.WriteLine(strMessage)
-    End Sub
-
-    Private Sub mPeptideHitResultsProcRunner_ProgressChanged(taskDescription As String, percentComplete As Single) Handles mPeptideHitResultsProcRunner.ProgressChanged
-        Const PERCENT_REPORT_INTERVAL = 25
-        Const PROGRESS_DOT_INTERVAL_MSEC = 250
-        Const PROGRESS_VALUE_INTERVAL_SEC = 60
-
-        If percentComplete >= mLastProgressReportValue Then
-            If mLastProgressReportValue > 0 Then
-                Console.WriteLine()
-            End If
-            DisplayProgressPercent(mLastProgressReportValue, False)
-            mLastProgressReportValue += PERCENT_REPORT_INTERVAL
-            mLastProgressReportTime = DateTime.UtcNow
-        Else
-            If DateTime.UtcNow.Subtract(mLastProgressReportTime).TotalMilliseconds > PROGRESS_DOT_INTERVAL_MSEC Then
-                mLastProgressReportTime = DateTime.UtcNow
-                If DateTime.UtcNow.Subtract(mLastProgressReportValueTime).TotalSeconds > PROGRESS_VALUE_INTERVAL_SEC Then
-                    mLastProgressReportValueTime = DateTime.UtcNow
-                    Console.WriteLine()
-                    Console.Write(percentComplete.ToString("0.00") & "% complete ")
-                Else
-                    Console.Write(".")
-                End If
-
-            End If
-        End If
-    End Sub
-
-    Private Sub mPeptideHitResultsProcRunner_ProgressReset() Handles mPeptideHitResultsProcRunner.ProgressReset
-        mLastProgressReportTime = DateTime.UtcNow
-        mLastProgressReportValueTime = DateTime.UtcNow
-        mLastProgressReportValue = 0
-    End Sub
-
-    Private Sub mPeptideHitResultsProcRunner_WarningEvent(strMessage As String) Handles mPeptideHitResultsProcRunner.WarningEvent
-        Console.WriteLine("Warning: " & strMessage)
-    End Sub
-End Module
+                if (!blnProceed ||
+                    objParseCommandLine.NeedToShowHelp ||
+                    objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount == 0 ||
+                    string.IsNullOrWhiteSpace(mInputFilePath))
+                {
+                    ShowProgramHelp();
+                    intReturnCode = -1;
+                }
+                else
+                {
+                    // Note: Most of the options will get overridden if defined in the parameter file
+                    mPeptideHitResultsProcRunner = new clsPeptideHitResultsProcRunner
+                    {
+                        ShowMessages = !mQuietMode,
+                        LogMessagesToFile = mLogMessagesToFile,
+                        LogFilePath = mLogFilePath,
+                        LogFolderPath = mLogFolderPath,
+                        MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath,
+                        ModificationDefinitionsFilePath = mModificationDefinitionsFilePath,
+                        SearchToolParameterFilePath = mSearchToolParameterFilePath,
+                        WarnMissingParameterFileSection = true,
+                        CreateProteinModsFile = mCreateProteinModsFile,
+                        FastaFilePath = mFastaFilePath,
+                        IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors,
+                        ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins,
+                        UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile,
+                        CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile,
+                        MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold,
+                        MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold,
+                        CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFDBFirstHitsFile,
+                        CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFDBSynopsisFile,
+                        InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold,
+                        MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
+                    };
+
+                    if (mRecurseFolders)
+                    {
+                        if (mPeptideHitResultsProcRunner.ProcessFilesAndRecurseFolders(mInputFilePath, mOutputFolderPath, mOutputFolderAlternatePath, mRecreateFolderHierarchyInAlternatePath, mParameterFilePath, mRecurseFoldersMaxLevels))
+                        {
+                            intReturnCode = 0;
+                        }
+                        else
+                        {
+                            intReturnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
+                        }
+                    }
+                    else
+                    {
+                        if (mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputFolderPath, mParameterFilePath))
+                        {
+                            intReturnCode = 0;
+                        }
+                        else
+                        {
+                            intReturnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
+                            if (intReturnCode == 0)
+                            {
+                                intReturnCode = -1;
+                                if (!mQuietMode)
+                                {
+                                    ShowErrorMessage("ProcessFilesWildcard returned Success=False");
+                                }
+                            }
+                            else
+                            {
+                                if (!mQuietMode)
+                                {
+                                    ShowErrorMessage("Error while processing: " + mPeptideHitResultsProcRunner.GetErrorMessage());
+                                }
+                            }
+                        }
+                    }
+
+                    DisplayProgressPercent(mLastProgressReportValue, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage("Error occurred in modMain->Main: " + Environment.NewLine + ex.Message);
+                intReturnCode = -1;
+            }
+
+            return intReturnCode;
+        }
+
+        private static void DisplayProgressPercent(int intPercentComplete, bool blnAddCarriageReturn)
+        {
+            if (blnAddCarriageReturn)
+            {
+                Console.WriteLine();
+            }
+            if (intPercentComplete > 100)
+                intPercentComplete = 100;
+            Console.Write("Processing: " + intPercentComplete.ToString() + "% ");
+
+            if (blnAddCarriageReturn)
+            {
+                Console.WriteLine();
+            }
+        }
+
+        private static string GetAppVersion()
+        {
+            return clsProcessFilesBaseClass.GetAppVersion(PROGRAM_DATE);
+        }
+
+        /// <summary>
+        /// Parse out True/False or Yes/No or T/F or Y/N or 1/0 from strValue
+        /// </summary>
+        /// <param name="strValue">Text to parse</param>
+        /// <param name="blnValue">Output parameter</param>
+        /// <returns>True if successfully parsed strValue; the result of the parse is in blnValue</returns>
+        /// <remarks></remarks>
+        private static bool ParseBoolean(string strValue, ref bool blnValue)
+        {
+            if (string.IsNullOrEmpty(strValue))
+                return false;
+
+            if (bool.TryParse(strValue, out blnValue))
+            {
+                return true;
+            }
+            else
+            {
+                switch (strValue.ToUpper()[0])
+                {
+                    case 'T':
+                    case 'Y':
+                    case '1':
+                        // True or Yes or 1
+                        blnValue = true;
+                        return true;
+                    case 'F':
+                    case 'N':
+                    case '0':
+                        // False or No or 0
+                        blnValue = false;
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine objParseCommandLine)
+        {
+            // Returns True if no problems; otherwise, returns false
+
+            string strValue = string.Empty;
+            float sngValue = 0;
+            int intValue = 0;
+            bool blnValue = false;
+            var lstValidParameters = new List<string> { "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods",
+                "F", "Fasta", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
+                "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPvalue", "InsFHT", "InsSyn", "SynProb", "S", "A",
+                "R", "L",  "Q" };
+
+            try
+            {
+                // Make sure no invalid parameters are present
+                if (objParseCommandLine.InvalidParametersPresent(lstValidParameters))
+                {
+                    ShowErrorMessage("Invalid commmand line parameters",
+                        (from item in objParseCommandLine.InvalidParameters(lstValidParameters) select "/" + item).ToList());
+                    return false;
+                }
+                else
+                {
+                    // Query objParseCommandLine to see if various parameters are present
+                    if (objParseCommandLine.RetrieveValueForParameter("I", out strValue))
+                    {
+                        mInputFilePath = string.Copy(strValue);
+                    }
+                    else if (objParseCommandLine.NonSwitchParameterCount > 0)
+                    {
+                        mInputFilePath = objParseCommandLine.RetrieveNonSwitchParameter(0);
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("O", out strValue))
+                        mOutputFolderPath = string.Copy(strValue);
+
+                    // Future
+                    // If .RetrieveValueForParameter("Folder", strValue) Then mDatasetFolderPath = String.Copy(strValue)
+                    //
+
+                    if (objParseCommandLine.RetrieveValueForParameter("P", out strValue))
+                        mParameterFilePath = string.Copy(strValue);
+                    if (objParseCommandLine.RetrieveValueForParameter("M", out strValue))
+                        mModificationDefinitionsFilePath = string.Copy(strValue);
+                    if (objParseCommandLine.RetrieveValueForParameter("T", out strValue))
+                        mMassCorrectionTagsFilePath = string.Copy(strValue);
+                    if (objParseCommandLine.RetrieveValueForParameter("N", out strValue))
+                        mSearchToolParameterFilePath = string.Copy(strValue);
+
+                    if (objParseCommandLine.IsParameterPresent("ProteinMods"))
+                    {
+                        mCreateProteinModsFile = true;
+                    }
+
+                    if (objParseCommandLine.IsParameterPresent("ProteinModsViaPHRP"))
+                    {
+                        mCreateProteinModsUsingPHRPDataFile = true;
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("F", out strValue))
+                        mFastaFilePath = string.Copy(strValue);
+                    if (objParseCommandLine.RetrieveValueForParameter("Fasta", out strValue))
+                        mFastaFilePath = string.Copy(strValue);
+
+                    if (objParseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
+                        mIgnorePeptideToProteinMapperErrors = true;
+                    if (objParseCommandLine.IsParameterPresent("ProteinModsIncludeReversed"))
+                        mProteinModsFileIncludesReversedProteins = true;
+                    if (objParseCommandLine.IsParameterPresent("UseExistingPepToProteinMapFile"))
+                        mUseExistingMTSPepToProteinMapFile = true;
+
+                    if (objParseCommandLine.RetrieveValueForParameter("InsFHT", out strValue))
+                    {
+                        if (ParseBoolean(strValue, ref blnValue ))
+                        {
+                            mCreateInspectOrMSGFDBFirstHitsFile = blnValue;
+                        }
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("InsSyn", out strValue))
+                    {
+                        if (ParseBoolean(strValue, ref blnValue ))
+                        {
+                            mCreateInspectOrMSGFDBSynopsisFile = blnValue;
+                        }
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("MSGFPlusEValue", out strValue))
+                    {
+                        if (float.TryParse(strValue, out sngValue))
+                        {
+                            mMsgfPlusEValueThreshold = sngValue;
+                        }
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("MSGFPlusSpecEValue", out strValue))
+                    {
+                        if (float.TryParse(strValue, out sngValue))
+                        {
+                            mMsgfPlusSpecEValueThreshold = sngValue;
+                        }
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("SynPvalue", out strValue))
+                    {
+                        if (float.TryParse(strValue, out sngValue))
+                        {
+                            mInspectSynopsisFilePValueThreshold = sngValue;
+                        }
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("SynProb", out strValue))
+                    {
+                        if (float.TryParse(strValue, out sngValue))
+                        {
+                            mMODaMODPlusSynopsisFileProbabilityThreshold = sngValue;
+                        }
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("S", out strValue))
+                    {
+                        mRecurseFolders = true;
+                        if (int.TryParse(strValue, out intValue))
+                        {
+                            mRecurseFoldersMaxLevels = intValue;
+                        }
+                    }
+                    if (objParseCommandLine.RetrieveValueForParameter("A", out strValue))
+                        mOutputFolderAlternatePath = string.Copy(strValue);
+                    if (objParseCommandLine.IsParameterPresent("R"))
+                        mRecreateFolderHierarchyInAlternatePath = true;
+
+                    if (objParseCommandLine.RetrieveValueForParameter("L", out strValue))
+                    {
+                        mLogMessagesToFile = true;
+
+                        if (!string.IsNullOrEmpty(strValue))
+                        {
+                            mLogFilePath = string.Copy(strValue).Trim('"');
+                        }
+                    }
+
+                    if (objParseCommandLine.RetrieveValueForParameter("LogFolder", out strValue))
+                    {
+                        mLogMessagesToFile = true;
+                        if (!string.IsNullOrEmpty(strValue))
+                        {
+                            mLogFolderPath = string.Copy(strValue);
+                        }
+                    }
+
+                    if (objParseCommandLine.IsParameterPresent("Q"))
+                        mQuietMode = true;
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage("Error parsing the command line parameters: " + Environment.NewLine + ex.Message);
+            }
+
+            return false;
+        }
+
+        private static void ShowErrorMessage(string strMessage)
+        {
+            const string strSeparator = "------------------------------------------------------------------------------";
+
+            Console.WriteLine();
+            Console.WriteLine(strSeparator);
+            Console.WriteLine(strMessage);
+            Console.WriteLine(strSeparator);
+            Console.WriteLine();
+
+            WriteToErrorStream(strMessage);
+        }
+
+        private static void ShowErrorMessage(string strTitle, IEnumerable<string> items)
+        {
+            const string strSeparator = "------------------------------------------------------------------------------";
+            string strMessage = null;
+
+            Console.WriteLine();
+            Console.WriteLine(strSeparator);
+            Console.WriteLine(strTitle);
+            strMessage = strTitle + ":";
+
+            foreach (string item in items)
+            {
+                Console.WriteLine("   " + item);
+                strMessage += " " + item;
+            }
+            Console.WriteLine(strSeparator);
+            Console.WriteLine();
+
+            WriteToErrorStream(strMessage);
+        }
+
+        private static void ShowProgramHelp()
+        {
+            try
+            {
+                Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF+ search result file, or MSAlign results file then creates a tab-delimited text file with the data in a standard format used at PNNL.");
+                Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides. Parallel files will be created containing sequence info and modification details.");
+                Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.");
+                Console.WriteLine();
+                Console.WriteLine("Program syntax:" + Environment.NewLine +
+                                  Path.GetFileName(Assembly.GetExecutingAssembly().Location) +
+                                  " InputFilePath [/O:OutputFolderPath]");
+                // Future:
+                // Console.WriteLine(" [/Folder:DatasetFolderPath]")
+                //
+                Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]");
+                Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]");
+                Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]");
+                Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]");
+                Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]");
+                Console.WriteLine(" [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
+                Console.WriteLine(" [/SynProb:0.05]");
+                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]");
+                Console.WriteLine();
+                Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)");
+                Console.WriteLine("The output folder switch is optional. If omitted, the output file will be created in the same folder as the input file.");
+                Console.WriteLine();
+                // Future:
+                // Console.WriteLine("As an alternative to specifying an input file, you can specify an input folder. In this case the program will look for the best file to process from that folder, and will auto-determine /T and /N")
+                //
+                Console.WriteLine();
+                Console.WriteLine("The parameter file path is optional. If included, it should point to a valid XML parameter file.");
+                Console.WriteLine();
+                Console.WriteLine("Use /M to specify the file containing the modification definitions. This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).");
+                Console.WriteLine();
+                Console.WriteLine("Use /ProteinMods to indicate that the _ProteinMods.txt file should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F");
+                Console.WriteLine("Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file and thus the PHRP data files should not be re-created; only the _ProteinMods.txt file should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F");
+                Console.WriteLine("Use /F to specify the path to the fasta file. When provided, the order of the proteins in the FASTA file dictates which protein is listed for each peptide in the First Hits file");
+                Console.WriteLine();
+                Console.WriteLine("Use /IgnorePepToProtMapErrors to ignore peptide to protein mapping errors that occur when creating a missing _PepToProtMapMTS.txt file");
+                Console.WriteLine("Use /ProteinModsIncludeReversed to include Reversed proteins in the _ProteinMods.txt file");
+                Console.WriteLine("Use /UseExistingPepToProteinMapFile to use an existing _PepToProtMapMTS.txt file if it exists");
+                Console.WriteLine();
+                Console.WriteLine("Use /T to specify the file containing the mass correction tag info. This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).");
+                Console.WriteLine("Use /N to specify the parameter file provided to the search tool. This is only used when processing Inspect or MSGF+ files.");
+                Console.WriteLine();
+
+                Console.WriteLine("When processing an MSGF+ results file, use /MSGFPlusSpecEValue and /MSGFPlusEValue to customize the thresholds used to determine which peptides are written to the the synopsis file");
+                Console.WriteLine("Defaults are /MSGFPlusSpecEValue:" + PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +
+                                  " and /MSGFPlusEValue:" + PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD);
+                Console.WriteLine();
+                Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file. The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " + PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD + " or an FScore >= " + PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD + " will also be included in the synopsis file.");
+                Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when processing Inspect or MSGF+ results (default is /InsFHT:True)");
+                Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when processing Inspect or MSGF+ results (default is /InsSyn:True)");
+                Console.WriteLine();
+                Console.WriteLine("When processing a MODPlus or MODa results file, use /SynProb to customize the Probability threshold used to determine which peptides are written to the the synopsis file. The default is /Synprob:0.05");
+                Console.WriteLine();
+                Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.");
+                Console.WriteLine("When using /S, you can redirect the output of the results using /A.");
+                Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).");
+                Console.WriteLine();
+                Console.WriteLine("Use /L to specify that a log file should be created. Use /L:LogFilePath to specify the name (or full path) for the log file.");
+                Console.WriteLine("Use the optional /Q switch will suppress all error messages.");
+                Console.WriteLine();
+
+                Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006");
+                Console.WriteLine("Version: " + GetAppVersion());
+
+                Console.WriteLine();
+
+                Console.WriteLine("E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com");
+                Console.WriteLine("Website: http://omics.pnl.gov/ or http://panomics.pnnl.gov/");
+                Console.WriteLine();
+
+                // Delay for 750 msec in case the user double clicked this file from within Windows Explorer (or started the program via a shortcut)
+                Thread.Sleep(750);
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage("Error displaying the program syntax: " + ex.Message);
+            }
+        }
+
+        private static void WriteToErrorStream(string strErrorMessage)
+        {
+            try
+            {
+                using (var swErrorStream = new StreamWriter(Console.OpenStandardError()))
+                {
+                    swErrorStream.WriteLine(strErrorMessage);
+                }
+            }
+            catch (Exception)
+            {
+                // Ignore errors here
+            }
+        }
+
+        private static void mPeptideHitResultsProcRunner_ErrorEvent(string strMessage)
+        {
+            WriteToErrorStream(strMessage);
+        }
+
+        private static void mPeptideHitResultsProcRunner_MessageEvent(string strMessage)
+        {
+            Console.WriteLine(strMessage);
+        }
+
+        private static void mPeptideHitResultsProcRunner_ProgressChanged(string taskDescription, float percentComplete)
+        {
+            const int PERCENT_REPORT_INTERVAL = 25;
+            const int PROGRESS_DOT_INTERVAL_MSEC = 250;
+            const int PROGRESS_VALUE_INTERVAL_SEC = 60;
+
+            if (percentComplete >= mLastProgressReportValue)
+            {
+                if (mLastProgressReportValue > 0)
+                {
+                    Console.WriteLine();
+                }
+                DisplayProgressPercent(mLastProgressReportValue, false);
+                mLastProgressReportValue += PERCENT_REPORT_INTERVAL;
+                mLastProgressReportTime = DateTime.UtcNow;
+            }
+            else
+            {
+                if (DateTime.UtcNow.Subtract(mLastProgressReportTime).TotalMilliseconds > PROGRESS_DOT_INTERVAL_MSEC)
+                {
+                    mLastProgressReportTime = DateTime.UtcNow;
+                    if (DateTime.UtcNow.Subtract(mLastProgressReportValueTime).TotalSeconds > PROGRESS_VALUE_INTERVAL_SEC)
+                    {
+                        mLastProgressReportValueTime = DateTime.UtcNow;
+                        Console.WriteLine();
+                        Console.Write(percentComplete.ToString("0.00") + "% complete ");
+                    }
+                    else
+                    {
+                        Console.Write(".");
+                    }
+                }
+            }
+        }
+
+        private static void mPeptideHitResultsProcRunner_ProgressReset()
+        {
+            mLastProgressReportTime = DateTime.UtcNow;
+            mLastProgressReportValueTime = DateTime.UtcNow;
+            mLastProgressReportValue = 0;
+        }
+
+        private static void mPeptideHitResultsProcRunner_WarningEvent(string strMessage)
+        {
+            Console.WriteLine("Warning: " + strMessage);
+        }
+    }
+}
