@@ -1,7 +1,7 @@
 ; This is an Inno Setup configuration file
 ; http://www.jrsoftware.org/isinfo.php
 
-#define ApplicationVersion GetFileVersion('..\bin\PeptideHitResultsProcRunner.exe')
+#define ApplicationVersion GetFileVersion('..\bin\Release\PeptideHitResultsProcRunner.exe')
 
 [CustomMessages]
 AppName=Peptide Hit Results Processor
@@ -10,16 +10,16 @@ WelcomeLabel2=This will install [name/ver] on your computer.
 ; Example with multiple lines:
 ; WelcomeLabel2=Welcome message%n%nAdditional sentence
 [Files]
-Source: ..\bin\PeptideHitResultsProcRunner.exe         ; DestDir: {app}
-Source: ..\bin\PeptideHitResultsProcRunner.exe.config  ; DestDir: {app}
-Source: ..\bin\PeptideHitResultsProcessor.dll          ; DestDir: {app}
-Source: ..\bin\PeptideToProteinMapEngine.dll           ; DestDir: {app}
-Source: ..\bin\PHRPReader.dll                          ; DestDir: {app}
-Source: ..\bin\PeptideHitResultsProcessor.dll          ; DestDir: {app}
-Source: ..\bin\ProteinFileReader.dll                   ; DestDir: {app}
-Source: ..\bin\System.Data.SQLite.dll                  ; DestDir: {app}
-Source: ..\bin\x64\SQLite.Interop.dll                  ; DestDir: {app}\x64
-Source: ..\bin\x86\SQLite.Interop.dll                  ; DestDir: {app}\x86
+Source: ..\bin\Release\PeptideHitResultsProcRunner.exe         ; DestDir: {app}
+Source: ..\bin\Release\PeptideHitResultsProcRunner.exe.config  ; DestDir: {app}
+Source: ..\bin\Release\PeptideHitResultsProcessor.dll          ; DestDir: {app}
+Source: ..\bin\Release\PeptideToProteinMapEngine.dll           ; DestDir: {app}
+Source: ..\bin\Release\PHRPReader.dll                          ; DestDir: {app}
+Source: ..\bin\Release\PeptideHitResultsProcessor.dll          ; DestDir: {app}
+Source: ..\bin\Release\ProteinFileReader.dll                   ; DestDir: {app}
+Source: ..\bin\Release\System.Data.SQLite.dll                  ; DestDir: {app}
+Source: ..\bin\Release\x64\SQLite.Interop.dll                  ; DestDir: {app}\x64
+Source: ..\bin\Release\x86\SQLite.Interop.dll                  ; DestDir: {app}\x86
 
 Source: ..\bin\Convert_mzid_to_tsv.bat                        ; DestDir: {app}
 
