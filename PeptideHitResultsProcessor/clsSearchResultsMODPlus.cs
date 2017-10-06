@@ -1,65 +1,64 @@
-﻿Option Strict On
+﻿// This class is used to track the peptide details for a MODPlus search result
+// See clsSearchResultsBaseClass for additional information
+//
+// -------------------------------------------------------------------------------
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Created 5/15/2015
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// -------------------------------------------------------------------------------
+using PHRPReader;
 
-' This class is used to track the peptide details for a MODPlus search result
-' See clsSearchResultsBaseClass for additional information
-'
-' -------------------------------------------------------------------------------
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Created 5/15/2015
-'
-' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
-' -------------------------------------------------------------------------------
+namespace PeptideHitResultsProcessor
+{
+    public class clsSearchResultsMODPlus : clsSearchResultsBaseClass
+    {
+        #region "Classwide Variables"
+        // Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
+        #endregion
 
-Imports PHRPReader
+        #region "Properties"
 
-Public Class clsSearchResultsMODPlus
-    Inherits clsSearchResultsBaseClass
+        // Auto-Properties
+        public string Spectrum_Index { get; set; }
 
-#Region "Classwide Variables"
-    ' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
-#End Region
+        public string Precursor_mz { get; set; }            // Observed precursor m/z, converted to monoisotopic mass by MODa
 
-#Region "Properties"
+        public string MODPlusComputedDelM { get; set; }
+        public string MODPlusComputedDelMPPM { get; set; }
 
-    ' Auto-Properties
-    Public Property Spectrum_Index As String
+        public string MODPlusScore { get; set; }
 
-    Public Property Precursor_mz As String              ' Observed precursor m/z, converted to monoisotopic mass by MODa
+        public string Probability { get; set; }
 
-    Public Property MODPlusComputedDelM As String
-    Public Property MODPlusComputedDelMPPM As String
+        public string PeptidePosition { get; set; }
 
-    Public Property MODPlusScore As String
+        public string ModificationAnnotation { get; set; }
 
-    Public Property Probability As String
+        #endregion
 
-    Public Property PeptidePosition As String
+        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        public clsSearchResultsMODPlus(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(objPeptideMods, peptideSeqMassCalculator)
+        {
+        }
 
-    Public Property ModificationAnnotation As String
+        public override void Clear()
+        {
+            base.Clear();
+            Spectrum_Index = string.Empty;
 
+            Precursor_mz = string.Empty;
 
-#End Region
+            MODPlusComputedDelM = string.Empty;
+            MODPlusComputedDelMPPM = string.Empty;
 
-    Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
-        ' Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        MyBase.New(objPeptideMods, peptideSeqMassCalculator)
-    End Sub
+            MODPlusScore = string.Empty;
 
-    Public Overrides Sub Clear()
-        MyBase.Clear()
-        Spectrum_Index = String.Empty
+            Probability = string.Empty;
 
-        Precursor_mz = String.Empty
-
-        MODPlusComputedDelM = String.Empty
-        MODPlusComputedDelMPPM = String.Empty
-
-        MODPlusScore = String.Empty
-
-        Probability = String.Empty
-
-        PeptidePosition = String.Empty
-    End Sub
-
-End Class
+            PeptidePosition = string.Empty;
+        }
+    }
+}

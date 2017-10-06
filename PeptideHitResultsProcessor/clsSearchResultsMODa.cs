@@ -1,57 +1,58 @@
-﻿Option Strict On
+﻿// This class is used to track the peptide details for a MODa search result
+// See clsSearchResultsBaseClass for additional information
+//
+// -------------------------------------------------------------------------------
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Created 4/01/2014
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// -------------------------------------------------------------------------------
+using PHRPReader;
 
-' This class is used to track the peptide details for a MODa search result
-' See clsSearchResultsBaseClass for additional information
-'
-' -------------------------------------------------------------------------------
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Created 4/01/2014
-'
-' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
-' -------------------------------------------------------------------------------
+namespace PeptideHitResultsProcessor
+{
+    public class clsSearchResultsMODa : clsSearchResultsBaseClass
+    {
+        #region "Classwide Variables"
+        // Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
+        #endregion
 
-Imports PHRPReader
+        #region "Properties"
 
-Public Class clsSearchResultsMODa
-    Inherits clsSearchResultsBaseClass
+        // Auto-Properties
+        public string Spectrum_Index { get; set; }
 
-#Region "Classwide Variables"
-    ' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
-#End Region
+        public string Precursor_mz { get; set; }            // Observed precursor m/z, converted to monoisotopic mass by MODa
 
-#Region "Properties"
+        public string MODaComputedDelM { get; set; }
+        public string MODaComputedDelMPPM { get; set; }
 
-    ' Auto-Properties
-    Public Property Spectrum_Index As String
+        public string MODaScore { get; set; }
 
-    Public Property Precursor_mz As String              ' Observed precursor m/z, converted to monoisotopic mass by MODa
+        public string Probability { get; set; }
 
-    Public Property MODaComputedDelM As String
-    Public Property MODaComputedDelMPPM As String
+        #endregion
 
-    Public Property MODaScore As String
+        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        public clsSearchResultsMODa(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(objPeptideMods, peptideSeqMassCalculator)
+        {
+        }
 
-    Public Property Probability As String
+        public override void Clear()
+        {
+            base.Clear();
+            Spectrum_Index = string.Empty;
 
-#End Region
+            Precursor_mz = string.Empty;
 
-    Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
-        ' Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        MyBase.New(objPeptideMods, peptideSeqMassCalculator)
-    End Sub
+            MODaComputedDelM = string.Empty;
+            MODaComputedDelMPPM = string.Empty;
 
-    Public Overrides Sub Clear()
-        MyBase.Clear()
-        Spectrum_Index = String.Empty
+            MODaScore = string.Empty;
 
-        Precursor_mz = String.Empty
-
-        MODaComputedDelM = String.Empty
-        MODaComputedDelMPPM = String.Empty
-
-        MODaScore = String.Empty
-
-        Probability = String.Empty
-    End Sub
-End Class
+            Probability = string.Empty;
+        }
+    }
+}

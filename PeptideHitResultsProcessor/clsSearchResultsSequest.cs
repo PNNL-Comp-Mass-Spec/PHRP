@@ -1,106 +1,111 @@
-Option Strict On
+// This class is used to track the peptide details for a Sequest search result
+// See clsSearchResultsBaseClass for additional information
+//
+// -------------------------------------------------------------------------------
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Program started January 7, 2006
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// -------------------------------------------------------------------------------
+//
+// Licensed under the Apache License, Version 2.0; you may not use this file except
+// in compliance with the License.  You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Notice: This computer software was prepared by Battelle Memorial Institute,
+// hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the
+// Department of Energy (DOE).  All rights in the computer software are reserved
+// by DOE on behalf of the United States Government and the Contractor as
+// provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY
+// WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS
+// SOFTWARE.  This notice including this sentence must appear on any copies of
+// this computer software.
+using System;
+using PHRPReader;
 
-' This class is used to track the peptide details for a Sequest search result
-' See clsSearchResultsBaseClass for additional information
-'
-' -------------------------------------------------------------------------------
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Program started January 7, 2006
-'
-' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
-' -------------------------------------------------------------------------------
-' 
-' Licensed under the Apache License, Version 2.0; you may not use this file except
-' in compliance with the License.  You may obtain a copy of the License at 
-' http://www.apache.org/licenses/LICENSE-2.0
-'
-' Notice: This computer software was prepared by Battelle Memorial Institute, 
-' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
-' Department of Energy (DOE).  All rights in the computer software are reserved 
-' by DOE on behalf of the United States Government and the Contractor as 
-' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
-' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
-' SOFTWARE.  This notice including this sentence must appear on any copies of 
-' this computer software.
+namespace PeptideHitResultsProcessor
+{
+    public class clsSearchResultsSequest : clsSearchResultsBaseClass
+    {
+        #region "Classwide Variables"
 
-Imports PHRPReader
+        protected string mPeptideXCorrNext;             // Not stored in the synopsis or first hits file; it can be computed from XCorr and DeltaCn2
+        #endregion
 
-Public Class clsSearchResultsSequest
-    Inherits clsSearchResultsBaseClass
+        #region "Properties"
+        // Auto-properties (only work with Visual Studio 2010)
+        public string NumScans { get; set; }
+        public string PeptideDeltaCn { get; set; }
+        public string PeptideDeltaCn2 { get; set; }
+        public string PeptideMScore { get; set; }
+        public string PeptideNTT { get; set; }
+        public string PeptidePassFilt { get; set; }
+        public string PeptideRankSP { get; set; }
+        public string PeptideRankXC { get; set; }
+        public string PeptideSp { get; set; }
+        public string PeptideXCorr { get; set; }
+        public string PeptideXcRatio { get; set; }
+        public string IonsObserved { get; set; }
+        public string IonsExpected { get; set; }
+        public string DelMPPM { get; set; }
 
-#Region "Classwide Variables"
+        public string PeptideXCorrNext
+        {
+            get { return mPeptideXCorrNext; }
+        }
 
-    Protected mPeptideXCorrNext As String           ' Not stored in the synopsis or first hits file; it can be computed from XCorr and DeltaCn2
-#End Region
+        #endregion
 
-#Region "Properties"
-    ' Auto-properties (only work with Visual Studio 2010)
-    Public Property NumScans As String
-    Public Property PeptideDeltaCn As String
-    Public Property PeptideDeltaCn2 As String
-    Public Property PeptideMScore As String
-    Public Property PeptideNTT As String
-    Public Property PeptidePassFilt As String
-    Public Property PeptideRankSP As String
-    Public Property PeptideRankXC As String
-    Public Property PeptideSp As String
-    Public Property PeptideXCorr As String
-    Public Property PeptideXcRatio As String
-    Public Property IonsObserved As String
-    Public Property IonsExpected As String
-    Public Property DelMPPM As String
+        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        public clsSearchResultsSequest(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(objPeptideMods, peptideSeqMassCalculator)
+        {
+        }
 
-    Public ReadOnly Property PeptideXCorrNext As String
-        Get
-            Return mPeptideXCorrNext
-        End Get
-    End Property
+        public override void Clear()
+        {
+            base.Clear();
 
-#End Region
+            NumScans = string.Empty;
+            PeptideDeltaCn = string.Empty;
+            PeptideDeltaCn2 = string.Empty;
+            PeptideMScore = string.Empty;
+            PeptideNTT = string.Empty;
+            PeptidePassFilt = string.Empty;
+            PeptideRankSP = string.Empty;
+            PeptideRankXC = string.Empty;
+            PeptideSp = string.Empty;
+            PeptideXCorr = string.Empty;
+            PeptideXcRatio = string.Empty;
+            IonsObserved = string.Empty;
+            IonsExpected = string.Empty;
+            DelMPPM = string.Empty;
 
-    Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
-        ' Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        MyBase.New(objPeptideMods, peptideSeqMassCalculator)
-    End Sub
+            mPeptideXCorrNext = string.Empty;
+        }
 
-    Public Overrides Sub Clear()
-        MyBase.Clear()
+        protected void ComputePeptideXCorrNext()
+        {
+            float sngXCorr = 0;
+            float sngDelCN2 = 0;
 
-        NumScans = String.Empty
-        PeptideDeltaCn = String.Empty
-        PeptideDeltaCn2 = String.Empty
-        PeptideMScore = String.Empty
-        PeptideNTT = String.Empty
-        PeptidePassFilt = String.Empty
-        PeptideRankSP = String.Empty
-        PeptideRankXC = String.Empty
-        PeptideSp = String.Empty
-        PeptideXCorr = String.Empty
-        PeptideXcRatio = String.Empty
-        IonsObserved = String.Empty
-        IonsExpected = String.Empty
-        DelMPPM = String.Empty
-
-        mPeptideXCorrNext = String.Empty
-
-    End Sub
-
-    Protected Sub ComputePeptideXCorrNext()
-        Dim sngXCorr As Single
-        Dim sngDelCN2 As Single
-
-        Try
-            If Single.TryParse(PeptideXCorr, sngXCorr) AndAlso
-               Single.TryParse(PeptideDeltaCn2, sngDelCN2) Then
-                mPeptideXCorrNext = (sngXCorr - sngDelCN2 * sngXCorr).ToString
-            Else
-                mPeptideXCorrNext = "0"
-            End If
-
-        Catch ex As Exception
-            mPeptideXCorrNext = "0"
-        End Try
-    End Sub
-
-End Class
+            try
+            {
+                if (float.TryParse(PeptideXCorr, out sngXCorr) &&
+                    float.TryParse(PeptideDeltaCn2, out sngDelCN2))
+                {
+                    mPeptideXCorrNext = (sngXCorr - sngDelCN2 * sngXCorr).ToString();
+                }
+                else
+                {
+                    mPeptideXCorrNext = "0";
+                }
+            }
+            catch (Exception)
+            {
+                mPeptideXCorrNext = "0";
+            }
+        }
+    }
+}

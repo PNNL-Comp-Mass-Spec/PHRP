@@ -1,148 +1,163 @@
-Option Strict On
+// This class is used to track the peptide details for an XTandem search result
+// See clsSearchResultsBaseClass for additional information
+//
+// -------------------------------------------------------------------------------
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Program started January 7, 2006
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// -------------------------------------------------------------------------------
+//
+// Licensed under the Apache License, Version 2.0; you may not use this file except
+// in compliance with the License.  You may obtain a copy of the License at
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Notice: This computer software was prepared by Battelle Memorial Institute,
+// hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the
+// Department of Energy (DOE).  All rights in the computer software are reserved
+// by DOE on behalf of the United States Government and the Contractor as
+// provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY
+// WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS
+// SOFTWARE.  This notice including this sentence must appear on any copies of
+// this computer software.
+using System;
+using PHRPReader;
 
-' This class is used to track the peptide details for an XTandem search result
-' See clsSearchResultsBaseClass for additional information
-'
-' -------------------------------------------------------------------------------
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Program started January 7, 2006
-'
-' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
-' -------------------------------------------------------------------------------
-'
-' Licensed under the Apache License, Version 2.0; you may not use this file except
-' in compliance with the License.  You may obtain a copy of the License at
-' http://www.apache.org/licenses/LICENSE-2.0
-'
-' Notice: This computer software was prepared by Battelle Memorial Institute,
-' hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the
-' Department of Energy (DOE).  All rights in the computer software are reserved
-' by DOE on behalf of the United States Government and the Contractor as
-' provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY
-' WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS
-' SOFTWARE.  This notice including this sentence must appear on any copies of
-' this computer software.
+namespace PeptideHitResultsProcessor
+{
+    public class clsSearchResultsXTandem : clsSearchResultsBaseClass
+    {
+        #region "Classwide Variables"
+        // Note: ProteinExpectationValue and ProteinIntensity are defined in clsSearchResultsBaseClass
+        // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
+        protected string mPeptideNextScore;
 
-Imports PHRPReader
+        #endregion
 
-Public Class clsSearchResultsXTandem
-    Inherits clsSearchResultsBaseClass
+        #region "Properties"
 
-#Region "Classwide Variables"
-    ' Note: ProteinExpectationValue and ProteinIntensity are defined in clsSearchResultsBaseClass
-    ' The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
-    Protected mPeptideNextScore As String
+        public string fI { get; set; }
 
-#End Region
+        // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
+        public string PeptideExpectationValue { get; set; }
 
-#Region "Properties"
+        public string PeptideHyperscore { get; set; }
 
-    Public Property fI As String
+        public string PeptideNextScore
+        {
+            get { return mPeptideNextScore; }
+            set
+            {
+                mPeptideNextScore = value;
+                ComputePeptideDeltaCn2();
+            }
+        }
 
-    Public Property PeptideExpectationValue As String
+        public float PeptideDeltaCn2 { get; set; }
 
-    Public Property PeptideHyperscore As String
+        public string PeptideYScore { get; set; }
 
-    Public Property PeptideNextScore As String
-        Get
-            Return mPeptideNextScore
-        End Get
-        Set
-            mPeptideNextScore = Value
-            ComputePeptideDeltaCn2()
-        End Set
-    End Property
+        public string PeptideYIons { get; set; }
 
-    Public Property PeptideDeltaCn2 As Single
+        public string PeptideBScore { get; set; }
 
-    Public Property PeptideYScore As String
+        public string PeptideBIons { get; set; }
 
-    Public Property PeptideYIons As String
+        public string PeptideIntensity { get; set; }
 
-    Public Property PeptideBScore As String
+        public string PeptideIntensityMax { get; set; }
 
-    Public Property PeptideBIons As String
+        public double PeptideDeltaMassCorrectedPpm { get; set; }
 
-    Public Property PeptideIntensity As String
+        #endregion
 
-    Public Property PeptideIntensityMax As String
+        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        public clsSearchResultsXTandem(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(objPeptideMods, peptideSeqMassCalculator)
+        {
+        }
 
-    Public Property PeptideDeltaMassCorrectedPpm As Double
+        public override void Clear()
+        {
+            base.Clear();
 
-#End Region
+            fI = string.Empty;
 
-    Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
-        ' Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        MyBase.New(objPeptideMods, peptideSeqMassCalculator)
-    End Sub
+            PeptideExpectationValue = string.Empty;
+            PeptideHyperscore = string.Empty;
+            mPeptideNextScore = string.Empty;
+            PeptideDeltaCn2 = 0;
 
-    Public Overrides Sub Clear()
-        MyBase.Clear()
+            PeptideYScore = string.Empty;
+            PeptideYIons = string.Empty;
+            PeptideBScore = string.Empty;
+            PeptideBIons = string.Empty;
 
-        fI = String.Empty
+            PeptideIntensity = string.Empty;
+            PeptideIntensityMax = string.Empty;
 
-        PeptideExpectationValue = String.Empty
-        PeptideHyperscore = String.Empty
-        mPeptideNextScore = String.Empty
-        PeptideDeltaCn2 = 0
+            PeptideDeltaMassCorrectedPpm = 0;
+        }
 
-        PeptideYScore = String.Empty
-        PeptideYIons = String.Empty
-        PeptideBScore = String.Empty
-        PeptideBIons = String.Empty
+        public void ComputeDelMCorrectedXT()
+        {
+            double dblDelM = 0;
+            var intCorrectionCount = 0;
 
-        PeptideIntensity = String.Empty
-        PeptideIntensityMax = String.Empty
+            double dblPrecursorMonoMass = 0;
 
-        PeptideDeltaMassCorrectedPpm = 0
-    End Sub
+            var blnParseError = false;
 
-    Public Sub ComputeDelMCorrectedXT()
+            // Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
+            // (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
+            if (double.TryParse(PeptideDeltaMass, out dblDelM))
+            {
+                // Negate dblDelM so that it represents observed - theoretical
+                dblDelM = -dblDelM;
 
-        Dim dblDelM As Double
-        Dim intCorrectionCount = 0
+                // Compute the original value for the precursor monoisotopic mass
+                double dblParentIonMH = 0;
+                if (double.TryParse(base.ParentIonMH, out dblParentIonMH))
+                {
+                    dblPrecursorMonoMass = dblParentIonMH - PHRPReader.clsPeptideMassCalculator.MASS_PROTON;
+                }
+                else
+                {
+                    blnParseError = true;
+                }
 
-        Dim dblPrecursorMonoMass As Double
+                if (blnParseError)
+                {
+                    dblPrecursorMonoMass = PeptideMonoisotopicMass + dblDelM;
+                }
 
-        Dim blnParseError = False
+                const bool blnAdjustPrecursorMassForC13 = true;
+                PeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, PeptideMonoisotopicMass);
+            }
+            else
+            {
+                PeptideDeltaMassCorrectedPpm = 0;
+            }
+        }
 
-        ' Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
-        ' (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
-        If Double.TryParse(PeptideDeltaMass, dblDelM) Then
-
-            ' Negate dblDelM so that it represents observed - theoretical
-            dblDelM = -dblDelM
-
-            ' Compute the original value for the precursor monoisotopic mass
-            Dim dblParentIonMH As Double
-            If Double.TryParse(MyBase.ParentIonMH, dblParentIonMH) Then
-                dblPrecursorMonoMass = dblParentIonMH - PHRPReader.clsPeptideMassCalculator.MASS_PROTON
-            Else
-                blnParseError = True
-            End If
-
-            If blnParseError Then
-                dblPrecursorMonoMass = PeptideMonoisotopicMass + dblDelM
-            End If
-
-            Const blnAdjustPrecursorMassForC13 = True
-            PeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, PeptideMonoisotopicMass)
-
-        Else
-            PeptideDeltaMassCorrectedPpm = 0
-        End If
-    End Sub
-
-    Protected Sub ComputePeptideDeltaCn2()
-        Try
-            If clsPHRPParser.IsNumber(PeptideHyperscore) And clsPHRPParser.IsNumber(mPeptideNextScore) Then
-                PeptideDeltaCn2 = (CSng(PeptideHyperscore) - CSng(mPeptideNextScore)) / CSng(PeptideHyperscore)
-            Else
-                PeptideDeltaCn2 = 0
-            End If
-        Catch ex As Exception
-            PeptideDeltaCn2 = 0
-        End Try
-    End Sub
-End Class
+        protected void ComputePeptideDeltaCn2()
+        {
+            try
+            {
+                if (clsPHRPParser.IsNumber(PeptideHyperscore) & clsPHRPParser.IsNumber(mPeptideNextScore))
+                {
+                    PeptideDeltaCn2 = (Convert.ToSingle(PeptideHyperscore) - Convert.ToSingle(mPeptideNextScore)) / Convert.ToSingle(PeptideHyperscore);
+                }
+                else
+                {
+                    PeptideDeltaCn2 = 0;
+                }
+            }
+            catch (Exception)
+            {
+                PeptideDeltaCn2 = 0;
+            }
+        }
+    }
+}

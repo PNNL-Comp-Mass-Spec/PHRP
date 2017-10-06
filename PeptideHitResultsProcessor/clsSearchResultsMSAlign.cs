@@ -1,83 +1,83 @@
-﻿Option Strict On
+﻿// This class is used to track the peptide details for a MSAlign search result
+// See clsSearchResultsBaseClass for additional information
+//
+// -------------------------------------------------------------------------------
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Created 11/27/2012
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// -------------------------------------------------------------------------------
+using PHRPReader;
 
-' This class is used to track the peptide details for a MSAlign search result
-' See clsSearchResultsBaseClass for additional information
-'
-' -------------------------------------------------------------------------------
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Created 11/27/2012
-'
-' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
-' -------------------------------------------------------------------------------
+namespace PeptideHitResultsProcessor
+{
+    public class clsSearchResultsMSAlign : clsSearchResultsBaseClass
+    {
+        #region "Classwide Variables"
+        // Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
+        #endregion
 
-Imports PHRPReader
+        #region "Properties"
 
-Public Class clsSearchResultsMSAlign
-    Inherits clsSearchResultsBaseClass
+        // Auto-Properties
+        public string Prsm_ID { get; set; }
+        public string Spectrum_ID { get; set; }
 
-#Region "Classwide Variables"
-    ' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables 
-#End Region
+        public string Protein_Mass { get; set; }
+        public string Unexpected_Mod_Count { get; set; }
 
-#Region "Properties"
+        public string Peak_Count { get; set; }
+        public string Matched_Peak_Count { get; set; }
+        public string Matched_Fragment_Ion_Count { get; set; }
 
-    ' Auto-Properties
-    Public Property Prsm_ID As String
-    Public Property Spectrum_ID As String
+        public string PValue { get; set; }
+        public string Rank_PValue { get; set; }
 
-    Public Property Protein_Mass As String
-    Public Property Unexpected_Mod_Count As String
+        public string EValue { get; set; }
+        public string FDR { get; set; }
 
-    Public Property Peak_Count As String
-    Public Property Matched_Peak_Count As String
-    Public Property Matched_Fragment_Ion_Count As String
+        public string Species_ID { get; set; }
+        public string FragMethod { get; set; }
 
-    Public Property PValue As String
-    Public Property Rank_PValue As String
+        public string Precursor_mz { get; set; }            // Observed precursor_mz
+        public string MSAlignComputedDelM { get; set; }
+        public string MSAlignComputedDelMPPM { get; set; }
 
-    Public Property EValue As String
-    Public Property FDR As String
+        #endregion
 
-    Public Property Species_ID As String
-    Public Property FragMethod As String
+        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        public clsSearchResultsMSAlign(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(objPeptideMods, peptideSeqMassCalculator)
+        {
+        }
 
-    Public Property Precursor_mz As String              ' Observed precursor_mz
-    Public Property MSAlignComputedDelM As String
-    Public Property MSAlignComputedDelMPPM As String
+        public override void Clear()
+        {
+            base.Clear();
 
-#End Region
+            Prsm_ID = string.Empty;
+            Spectrum_ID = string.Empty;
 
-    Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
-        ' Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        MyBase.New(objPeptideMods, peptideSeqMassCalculator)
-    End Sub
+            Protein_Mass = string.Empty;
+            Unexpected_Mod_Count = string.Empty;
 
-    Public Overrides Sub Clear()
-        MyBase.Clear()
+            Peak_Count = string.Empty;
+            Matched_Peak_Count = string.Empty;
+            Matched_Fragment_Ion_Count = string.Empty;
 
-        Prsm_ID = String.Empty
-        Spectrum_ID = String.Empty
+            PValue = string.Empty;
+            Rank_PValue = string.Empty;
 
-        Protein_Mass = String.Empty
-        Unexpected_Mod_Count = String.Empty
+            EValue = string.Empty;
+            FDR = string.Empty;
 
-        Peak_Count = String.Empty
-        Matched_Peak_Count = String.Empty
-        Matched_Fragment_Ion_Count = String.Empty
+            Species_ID = string.Empty;
+            FragMethod = string.Empty;
 
-        PValue = String.Empty
-        Rank_PValue = String.Empty
-
-        EValue = String.Empty
-        FDR = String.Empty
-
-        Species_ID = String.Empty
-        FragMethod = String.Empty
-
-        Precursor_mz = String.Empty
-        MSAlignComputedDelM = String.Empty
-        MSAlignComputedDelMPPM = String.Empty
-
-    End Sub
-End Class
+            Precursor_mz = string.Empty;
+            MSAlignComputedDelM = string.Empty;
+            MSAlignComputedDelMPPM = string.Empty;
+        }
+    }
+}

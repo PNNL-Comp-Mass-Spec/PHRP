@@ -1,517 +1,640 @@
-Option Strict On
-
-' This class implements the IPeptideHitResultsProcessor interface 
-' It uses class clsXTandemResultsProcessor to read an XTandem search results XML file 
-'  or class clsSequestResultsProcessor to read a Sequest Synopsis or First Hits file
-'
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Copyright 2006, Battelle Memorial Institute
-' Started January 6, 2006
-
-Imports System.IO
-
-Public Class clsAnalysisManagerPeptideHitResultsProcessor
-    Implements IPeptideHitResultsProcessor
-
-
-#Region "Constants and enums"
-    Private Const DEFAULT_MASS_CORRECTION_TAGS_FILENAME As String = "Mass_Correction_Tags.txt"
-    Private Const MODIFICATION_DEFINITIONS_FILE_SUFFIX As String = "_ModDefs.txt"
-#End Region
-
-#Region "Classwide variables"
-
-    Private m_PeptideHitResultsFileFormat As clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
-
-    <Obsolete("Unused")>
-    Private m_MiscParams As Dictionary(Of String, String)
-
-    Private m_ParameterFilePath As String = String.Empty      ' Peptide search tool parameter file path
-    Private m_SettingsFilePath As String = String.Empty       ' XML settings file with section PeptideHitResultsProcessorOptions
-
-    Private m_PeptideHitResultsFilePath As String = String.Empty
-    Private m_MassCorrectionTagsFilePath As String = String.Empty
-    Private m_ModificationDefinitionsFilePath As String = String.Empty
-
-    Private m_ErrMsg As String = String.Empty
-
-    Private m_Status As IPeptideHitResultsProcessor.ProcessStatus
-    Private m_Results As IPeptideHitResultsProcessor.ProcessResults
-
-    Private WithEvents m_PeptideHitResultsProcessor As clsPHRPBaseClass
-
-    Private m_thThread As Threading.Thread
-
-#End Region
-
-#Region "Events"
-    Public Event ErrorOccurred(strMessage As String) Implements IPeptideHitResultsProcessor.ErrorOccurred
-    Public Event DebugEvent(strMessage As String) Implements IPeptideHitResultsProcessor.DebugEvent
-
-    ' PercentComplete ranges from 0 to 100, but can contain decimal percentage values
-    Public Event ProgressChanged(taskDescription As String, pctComplete As Single) Implements IPeptideHitResultsProcessor.ProgressChanged
-
-#End Region
-
-#Region "Properties"
-    Public Property AnalysisToolName As String = String.Empty Implements IPeptideHitResultsProcessor.AnalysisToolName
-
-
-    Public Property CreateInspectFirstHitsFile As Boolean Implements IPeptideHitResultsProcessor.CreateInspectFirstHitsFile
-
-    Public Property CreateInspectSynopsisFile As Boolean Implements IPeptideHitResultsProcessor.CreateInspectSynopsisFile
-
-    Public Property DatasetName As String = String.Empty Implements IPeptideHitResultsProcessor.DatasetName
-
-    Public Property DebugLevel As Integer = 0 Implements IPeptideHitResultsProcessor.DebugLevel
-
-    Public ReadOnly Property ErrMsg As String Implements IPeptideHitResultsProcessor.ErrMsg
-        Get
-            Return m_ErrMsg
-        End Get
-    End Property
-
-    Public Property MassCorrectionTagsFileName As String = String.Empty Implements IPeptideHitResultsProcessor.MassCorrectionTagsFileName
-
-    <Obsolete("Unused")>
-    Public WriteOnly Property MiscParams As Dictionary(Of String, String) Implements IPeptideHitResultsProcessor.MiscParams
-        Set
-            m_MiscParams = Value
-        End Set
-    End Property
-
-    Public Property ModificationDefinitionsFileName As String = String.Empty Implements IPeptideHitResultsProcessor.ModificationDefinitionsFileName
-
-    Public Property OutputFolderPath As String = String.Empty Implements IPeptideHitResultsProcessor.OutputFolderPath
-
-    ''' <summary>
-    ''' Peptide search tool parameter file name
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property ParameterFileName As String = String.Empty Implements IPeptideHitResultsProcessor.ParameterFileName
-
-    Public Property PeptideHitResultsFileName As String = String.Empty Implements IPeptideHitResultsProcessor.PeptideHitResultsFileName
-
-    Public ReadOnly Property PercentComplete As Single Implements IPeptideHitResultsProcessor.PercentComplete
-        Get
-            If Not m_PeptideHitResultsProcessor Is Nothing Then
-                Return m_PeptideHitResultsProcessor.ProgressPercentComplete
-            End If
-            Return 0
-        End Get
-    End Property
-
-    ''' <summary>
-    ''' XML settings file with section PeptideHitResultsProcessorOptions
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property SettingsFileName As String = String.Empty Implements IPeptideHitResultsProcessor.SettingsFileName
-
-    Public Property SourceFolderPath As String = String.Empty Implements IPeptideHitResultsProcessor.SourceFolderPath
-
-    Public ReadOnly Property Status As IPeptideHitResultsProcessor.ProcessStatus Implements IPeptideHitResultsProcessor.Status
-        Get
-            Return m_Status
-        End Get
-    End Property
-
-    Public ReadOnly Property Results As IPeptideHitResultsProcessor.ProcessResults Implements IPeptideHitResultsProcessor.Results
-        Get
-            Return m_Results
-        End Get
-    End Property
-#End Region
-
-    Public Function Abort() As IPeptideHitResultsProcessor.ProcessStatus Implements IPeptideHitResultsProcessor.Abort
-        If Not m_PeptideHitResultsProcessor Is Nothing Then
-            m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ABORTING
-            m_PeptideHitResultsProcessor.AbortProcessingNow()
-        End If
-        Return m_Status
-    End Function
-
-    Public Sub Setup(InitParams As IPeptideHitResultsProcessor.InitializationParams) Implements IPeptideHitResultsProcessor.Setup
-
-        'Copies all input data required for plugin operation to appropriate memory variables
-        With InitParams
-            SourceFolderPath = .SourceFolderPath
-            OutputFolderPath = .OutputFolderPath
-
-            PeptideHitResultsFileName = .PeptideHitResultsFileName
-            MassCorrectionTagsFileName = .MassCorrectionTagsFileName
-            ModificationDefinitionsFileName = .ModificationDefinitionsFileName
-
-            ' This is unused and thus obsolete
-            ' m_MiscParams = .MiscParams
-
-            DebugLevel = .DebugLevel
-
-            AnalysisToolName = .AnalysisToolName
-            DatasetName = .DatasetName
-            ParameterFileName = .ParameterFileName
-            SettingsFileName = .SettingsFileName
-
-            CreateInspectFirstHitsFile = .CreateInspectFirstHitsFile
-            CreateInspectSynopsisFile = .CreateInspectSynopsisFile
-
-        End With
-
-    End Sub
-
-    Public Function Start() As IPeptideHitResultsProcessor.ProcessStatus Implements IPeptideHitResultsProcessor.Start
-
-        m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_STARTING
-
-        'Verify necessary files are in specified locations
-        If Not InitSetup() Then
-            m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE
-            m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR
-            Return m_Status
-        End If
-
-        ' Process the results file (the process runs in a separate thread)
-        m_Status = ProcessPeptideHitResultsFile()
-
-        If m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR Then
-            m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE
-        End If
-
-        Return m_Status
-
-    End Function
-
-    ''' <summary>
-    ''' Initializes m_PeptideHitResultsProcessor then starts a separate thread to process the file
-    ''' </summary>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Protected Overridable Function ProcessPeptideHitResultsFile() As IPeptideHitResultsProcessor.ProcessStatus
-
-        Try
-            'Initialize m_PeptideHitResultsProcessor
-            Select Case m_PeptideHitResultsFileFormat
-                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
-                    m_PeptideHitResultsProcessor = New clsXTandemResultsProcessor
-
-                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile, clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
-                    m_PeptideHitResultsProcessor = New clsSequestResultsProcessor
-
-                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
-                    m_PeptideHitResultsProcessor = New clsInSpecTResultsProcessor
-
-                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
-                    m_PeptideHitResultsProcessor = New clsMSGFDBResultsProcessor
-
-                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
-                    m_PeptideHitResultsProcessor = New clsMSAlignResultsProcessor
-
-                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile
-                    m_PeptideHitResultsProcessor = New clsMODaResultsProcessor
-
-                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
-                    m_PeptideHitResultsProcessor = New clsMODaResultsProcessor
-
-                Case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
-                    m_PeptideHitResultsProcessor = New clsMSPathFinderResultsProcessor
-
-                Case Else
-                    ' Unknown format; cannot continue
-                    LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " & m_PeptideHitResultsFileFormat.ToString, Nothing)
-                    m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR
-                    Exit Try
-            End Select
-
-            ' Define the auxiliary file paths
-            With m_PeptideHitResultsProcessor
-                .MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath
-                .ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath
-                .SearchToolParameterFilePath = m_ParameterFilePath
-                .InspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD
-
-                .CreateInspectFirstHitsFile = CreateInspectFirstHitsFile
-                .CreateInspectSynopsisFile = CreateInspectSynopsisFile
-            End With
-
-            m_thThread = New Threading.Thread(AddressOf ProcessPeptideHitResultsFileWork)
-            m_thThread.Start()
-
-            m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_RUNNING
-
-        Catch ex As Exception
-            LogErrors("ProcessPeptideHitResultsFile", "Error initializing and running m_PeptideHitResultsProcessor", ex)
-            m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR
-        End Try
-
-        Return m_Status
-    End Function
-
-    Protected Overridable Sub ProcessPeptideHitResultsFileWork()
-
-        Dim blnSuccess As Boolean
-
-        Try
-            blnSuccess = m_PeptideHitResultsProcessor.ProcessFile(m_PeptideHitResultsFilePath, OutputFolderPath, m_SettingsFilePath)
-        Catch ex As Exception
-            blnSuccess = False
-        End Try
-
-        If blnSuccess Then
-            m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_COMPLETE
-        Else
-            If m_PeptideHitResultsProcessor.AbortProcessing Then
-                LogErrors("ProcessPeptideHitResultsFileWork", "Processing aborted", Nothing)
-                m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_ABORTED
-                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ABORTING
-            Else
-                LogErrors("ProcessPeptideHitResultsFileWork", m_PeptideHitResultsProcessor.ErrorMessage(), Nothing)
-                m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE
-                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR
-            End If
-        End If
-
-    End Sub
-
-    Protected Overridable Function InitSetup() As Boolean
-
-        'Initializes module variables and verifies mandatory parameters have been propery specified
-
-        'Output folder name
-        If OutputFolderPath = "" Then
-            m_ErrMsg = "Output folder path not specified"
-            Return False
-        End If
-
-        'Source folder name
-        If SourceFolderPath = "" Then
-            m_ErrMsg = "Source folder not specified"
-            Return False
-        End If
-
-        If Me.DebugLevel >= 3 Then
-            RaiseEvent DebugEvent("Setup params: OutFolderPath = " & OutputFolderPath)
-            RaiseEvent DebugEvent("Setup params: SourceFolderPath = " & SourceFolderPath)
-        End If
-
-        'Source directory exists?
-        If Not VerifyDirExists(SourceFolderPath) Then Return False 'Error msg handled by VerifyDirExists
-
-        'Output directory exists?
-        If Not VerifyDirExists(OutputFolderPath) Then Return False 'Error msg handled by VerifyDirExists
-
-        'Analysis tool name defined?
-        If String.IsNullOrWhiteSpace(AnalysisToolName) Then
-            m_ErrMsg = "Analysis tool name not specified"
-            Return False
-        End If
-
-        'Dataset name defined?
-        If String.IsNullOrWhiteSpace(DatasetName) Then
-            m_ErrMsg = "Dataset name not specified"
-            Return False
-        End If
-
-        'Settings file name defined?
-        If String.IsNullOrWhiteSpace(SettingsFileName) Then
-            m_ErrMsg = "Settings file name not specified"
-            Return False
-        End If
-
-        'Parameter file name defined?
-        If String.IsNullOrWhiteSpace(ParameterFileName) Then
-            m_ErrMsg = "Parameter file name not specified"
-            Return False
-        End If
-
-        'Define the parameter file path; this is passed as the search tool parameter file
-        m_ParameterFilePath = Path.Combine(SourceFolderPath, ParameterFileName)
-
-        'Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
-        m_SettingsFilePath = Path.Combine(SourceFolderPath, SettingsFileName)
-
-        'Define the peptide hit results format based on the analysis tool name
-        If AnalysisToolName.IndexOf("xtandem", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile
-
-        ElseIf AnalysisToolName.IndexOf("sequest", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile
-
-        ElseIf AnalysisToolName.IndexOf("inspect", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile
-
-        ElseIf AnalysisToolName.IndexOf("msgfdb", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile
-
-        ElseIf AnalysisToolName.IndexOf("msalign", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile
-
-        ElseIf AnalysisToolName.IndexOf("moda", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile
-
-        ElseIf AnalysisToolName.IndexOf("modplus", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile
-
-        ElseIf AnalysisToolName.IndexOf("mspathfinder", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile
-
-        ElseIf AnalysisToolName.IndexOf("dataextractor", StringComparison.InvariantCultureIgnoreCase) >= 0 Then
-            ' Data Extractor step-tool; we'll need to auto-determine the results format
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
-
-        Else
-            ' Unrecognized analysis tool name
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine
-        End If
-
-        If Me.DebugLevel >= 3 Then
-            RaiseEvent DebugEvent("Setup params: AnalysisToolName = " & AnalysisToolName)
-            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
-
-            RaiseEvent DebugEvent("Setup params: DSName = " & DatasetName)
-            RaiseEvent DebugEvent("Setup params: SettingsFilePath = " & m_SettingsFilePath)
-            RaiseEvent DebugEvent("Setup params: ParameterFilePath = " & m_ParameterFilePath)
-        End If
-
-        'Define the peptide hit results file name
-        If String.IsNullOrWhiteSpace(PeptideHitResultsFileName) Then
-            m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, SourceFolderPath, DatasetName)
-        Else
-            m_PeptideHitResultsFilePath = Path.Combine(SourceFolderPath, PeptideHitResultsFileName)
-        End If
-
-        If Me.DebugLevel >= 3 Then
-            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFilePath = " & m_PeptideHitResultsFilePath)
-        End If
-
-        'Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
-        If m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine Then
-            m_PeptideHitResultsFileFormat = clsPHRPBaseClass.DetermineResultsFileFormat(m_PeptideHitResultsFilePath)
-        End If
-
-        'Define the mass correction tags file path
-        If String.IsNullOrWhiteSpace(MassCorrectionTagsFileName) Then
-            m_MassCorrectionTagsFilePath = Path.Combine(SourceFolderPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME)
-        Else
-            m_MassCorrectionTagsFilePath = Path.Combine(SourceFolderPath, MassCorrectionTagsFileName)
-        End If
-
-        'Define the modification definitions file path
-        If String.IsNullOrWhiteSpace(ModificationDefinitionsFileName) Then
-            m_ModificationDefinitionsFilePath = Path.Combine(SourceFolderPath, Path.GetFileNameWithoutExtension(ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX)
-        Else
-            m_ModificationDefinitionsFilePath = Path.Combine(SourceFolderPath, ModificationDefinitionsFileName)
-        End If
-
-        If Me.DebugLevel >= 3 Then
-            RaiseEvent DebugEvent("Setup params: PeptideHitResultsFileFormat = " & m_PeptideHitResultsFileFormat.ToString)
-            RaiseEvent DebugEvent("Setup params: MassCorrectionTagsFilePath = " & m_MassCorrectionTagsFilePath)
-            RaiseEvent DebugEvent("Setup params: ModificationDefinitionsFilePath = " & m_ModificationDefinitionsFilePath)
-        End If
-
-        'Parameter file exists?
-        If Not VerifyFileExists(m_ParameterFilePath) Then Return False 'Error msg handled by VerifyFileExists
-
-        'Settings file exists?
-        If Not VerifyFileExists(m_SettingsFilePath) Then Return False 'Error msg handled by VerifyFileExists
-
-        'Peptide hit results file exists?
-        If Not VerifyFileExists(m_PeptideHitResultsFilePath) Then Return False 'Error msg handled by VerifyFileExists
-
-        'Modification definitions file exists?
-        If Not VerifyFileExists(m_ModificationDefinitionsFilePath) Then Return False 'Error msg handled by VerifyFileExists
-
-        'Mass correction tags file exists?
-        If Not VerifyFileExists(m_MassCorrectionTagsFilePath) Then Return False 'Error msg handled by VerifyFileExists
-
-        'If we got here, everything's OK
-        Return True
-
-    End Function
-
-    Private Sub LogErrors(strSource As String, strMessage As String, ex As Exception, Optional blnLogLocalOnly As Boolean = True)
-
-        m_ErrMsg = String.Copy(strMessage).Replace(ControlChars.NewLine, "; ")
-
-        If ex IsNot Nothing Then
-            If Not ex.Message Is Nothing AndAlso ex.Message.Length > 0 Then
-                m_ErrMsg &= "; " & ex.Message
-            End If
-        End If
-
-        Trace.WriteLine(Date.Now().ToLongTimeString & "; " & m_ErrMsg, strSource)
-        Console.WriteLine(Date.Now().ToLongTimeString & "; " & m_ErrMsg, strSource)
-
-        RaiseEvent ErrorOccurred(m_ErrMsg)
-
-    End Sub
-
-    Private Sub UpdateProgress(strProgressStepDescription As String, sngPercentComplete As Single)
-        Static strProgressStepDescriptionSaved As String = String.Empty
-        Static sngProgressPercentComplete As Single = 0
-
-        Dim blnDescriptionChanged = False
-
-        If strProgressStepDescription <> strProgressStepDescriptionSaved Then
-            blnDescriptionChanged = True
-        End If
-
-        strProgressStepDescriptionSaved = String.Copy(strProgressStepDescription)
-        If sngPercentComplete < 0 Then
-            sngPercentComplete = 0
-        ElseIf sngPercentComplete > 100 Then
-            sngPercentComplete = 100
-        End If
-        sngProgressPercentComplete = sngPercentComplete
-
-        If blnDescriptionChanged And Me.DebugLevel >= 2 Then
-            If Math.Abs(sngProgressPercentComplete) < Single.Epsilon Then
-                RaiseEvent DebugEvent(strProgressStepDescriptionSaved)
-            Else
-                RaiseEvent DebugEvent(strProgressStepDescriptionSaved & " (" & sngProgressPercentComplete.ToString("0.0") & "% complete)")
-            End If
-        End If
-
-        RaiseEvent ProgressChanged(strProgressStepDescription, sngPercentComplete)
-    End Sub
-
-    Protected Overridable Function VerifyDirExists(TestDir As String) As Boolean
-
-        'Verifies that the specified directory exists
-        If Directory.Exists(TestDir) Then
-            m_ErrMsg = ""
-            Return True
-        Else
-            m_ErrMsg = "Directory " & TestDir & " not found"
-            Return False
-        End If
-
-    End Function
-
-    Protected Overridable Function VerifyFileExists(TestFile As String) As Boolean
-        'Verifies specified file exists
-        If File.Exists(TestFile) Then
-            m_ErrMsg = ""
-            Return True
-        Else
-            m_ErrMsg = "File " & TestFile & " not found"
-            Return False
-        End If
-
-    End Function
-
-    Private Sub m_PeptideHitResultsProcessor_ErrorOccurred(ErrorMessage As String) Handles m_PeptideHitResultsProcessor.ErrorOccurred
-        LogErrors("PeptideHitResultsProcessor", ErrorMessage, Nothing, True)
-    End Sub
-
-    Private Sub mPeptideHitResultsProcessor_ProgressChanged(taskDescription As String, pctComplete As Single) Handles m_PeptideHitResultsProcessor.ProgressChanged
-        UpdateProgress(taskDescription, pctComplete)
-    End Sub
-
-    Private Sub mPeptideHitResultsProcessor_ProgressComplete() Handles m_PeptideHitResultsProcessor.ProgressComplete
-        ' OperationComplete()
-    End Sub
-
-    Private Sub mPeptideHitResultsProcessor_ProgressReset() Handles m_PeptideHitResultsProcessor.ProgressReset
-        ' ResetProgress()
-    End Sub
-
-End Class
+// This class implements the IPeptideHitResultsProcessor interface
+// It uses class clsXTandemResultsProcessor to read an XTandem search results XML file
+//  or class clsSequestResultsProcessor to read a Sequest Synopsis or First Hits file
+//
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Copyright 2006, Battelle Memorial Institute
+// Started January 6, 2006
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
+
+namespace PeptideHitResultsProcessor
+{
+    public class clsAnalysisManagerPeptideHitResultsProcessor : IPeptideHitResultsProcessor
+    {
+        #region "Constants and enums"
+        private const string DEFAULT_MASS_CORRECTION_TAGS_FILENAME = "Mass_Correction_Tags.txt";
+        private const string MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt";
+        #endregion
+
+        #region "Classwide variables"
+
+        private clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
+
+        [Obsolete("Unused")]
+        private Dictionary<string, string> m_MiscParams;
+
+        private string m_ParameterFilePath = string.Empty;      // Peptide search tool parameter file path
+        private string m_SettingsFilePath = string.Empty;       // XML settings file with section PeptideHitResultsProcessorOptions
+
+        private string m_PeptideHitResultsFilePath = string.Empty;
+        private string m_MassCorrectionTagsFilePath = string.Empty;
+        private string m_ModificationDefinitionsFilePath = string.Empty;
+
+        private string m_ErrMsg = string.Empty;
+
+        private IPeptideHitResultsProcessor.ProcessStatus m_Status;
+        private IPeptideHitResultsProcessor.ProcessResults m_Results;
+
+        private clsPHRPBaseClass withEventsField_m_PeptideHitResultsProcessor;
+        private clsPHRPBaseClass m_PeptideHitResultsProcessor
+        {
+            get { return withEventsField_m_PeptideHitResultsProcessor; }
+            set
+            {
+                if (withEventsField_m_PeptideHitResultsProcessor != null)
+                {
+                    withEventsField_m_PeptideHitResultsProcessor.ErrorOccurred -= m_PeptideHitResultsProcessor_ErrorOccurred;
+                    withEventsField_m_PeptideHitResultsProcessor.ProgressChanged -= mPeptideHitResultsProcessor_ProgressChanged;
+                    withEventsField_m_PeptideHitResultsProcessor.ProgressComplete -= mPeptideHitResultsProcessor_ProgressComplete;
+                    withEventsField_m_PeptideHitResultsProcessor.ProgressReset -= mPeptideHitResultsProcessor_ProgressReset;
+                }
+                withEventsField_m_PeptideHitResultsProcessor = value;
+                if (withEventsField_m_PeptideHitResultsProcessor != null)
+                {
+                    withEventsField_m_PeptideHitResultsProcessor.ErrorOccurred += m_PeptideHitResultsProcessor_ErrorOccurred;
+                    withEventsField_m_PeptideHitResultsProcessor.ProgressChanged += mPeptideHitResultsProcessor_ProgressChanged;
+                    withEventsField_m_PeptideHitResultsProcessor.ProgressComplete += mPeptideHitResultsProcessor_ProgressComplete;
+                    withEventsField_m_PeptideHitResultsProcessor.ProgressReset += mPeptideHitResultsProcessor_ProgressReset;
+                }
+            }
+        }
+
+        private Thread m_thThread;
+
+        #endregion
+
+        #region "Events"
+        public override event ErrorOccurredEventHandler ErrorOccurred;
+        public override event DebugEventEventHandler DebugEvent;
+
+        // PercentComplete ranges from 0 to 100, but can contain decimal percentage values
+        public override event ProgressChangedEventHandler ProgressChanged;
+
+        #endregion
+
+        #region "Properties"
+        public override string AnalysisToolName { get; set; }
+
+        public override bool CreateInspectFirstHitsFile { get; set; }
+
+        public override bool CreateInspectSynopsisFile { get; set; }
+
+        public override string DatasetName { get; set; }
+
+        public override int DebugLevel { get; set; }
+
+        public override string ErrMsg
+        {
+            get { return m_ErrMsg; }
+        }
+
+        public override string MassCorrectionTagsFileName { get; set; }
+
+        [Obsolete("Unused")]
+        public override Dictionary<string, string> MiscParams
+        {
+            get { return m_MiscParams; }
+            set { m_MiscParams = value; }
+        }
+
+        public override string ModificationDefinitionsFileName { get; set; }
+
+        public override string OutputFolderPath { get; set; }
+
+        /// <summary>
+        /// Peptide search tool parameter file name
+        /// </summary>
+        /// <returns></returns>
+        public override string ParameterFileName { get; set; }
+
+        public override string PeptideHitResultsFileName { get; set; }
+
+        public override float PercentComplete
+        {
+            get
+            {
+                if ((m_PeptideHitResultsProcessor != null))
+                {
+                    return m_PeptideHitResultsProcessor.ProgressPercentComplete;
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// XML settings file with section PeptideHitResultsProcessorOptions
+        /// </summary>
+        /// <returns></returns>
+        public override string SettingsFileName { get; set; }
+
+        public override string SourceFolderPath { get; set; }
+
+        public override IPeptideHitResultsProcessor.ProcessStatus Status
+        {
+            get { return m_Status; }
+        }
+
+        public override IPeptideHitResultsProcessor.ProcessResults Results
+        {
+            get { return m_Results; }
+        }
+        #endregion
+
+        public override IPeptideHitResultsProcessor.ProcessStatus Abort()
+        {
+            if ((m_PeptideHitResultsProcessor != null))
+            {
+                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ABORTING;
+                m_PeptideHitResultsProcessor.AbortProcessingNow();
+            }
+            return m_Status;
+        }
+
+        public override void Setup(IPeptideHitResultsProcessor.InitializationParams InitParams)
+        {
+            //Copies all input data required for plugin operation to appropriate memory variables
+            SourceFolderPath = InitParams.SourceFolderPath;
+            OutputFolderPath = InitParams.OutputFolderPath;
+
+            PeptideHitResultsFileName = InitParams.PeptideHitResultsFileName;
+            MassCorrectionTagsFileName = InitParams.MassCorrectionTagsFileName;
+            ModificationDefinitionsFileName = InitParams.ModificationDefinitionsFileName;
+
+            // This is unused and thus obsolete
+            // m_MiscParams = .MiscParams
+
+            DebugLevel = InitParams.DebugLevel;
+
+            AnalysisToolName = InitParams.AnalysisToolName;
+            DatasetName = InitParams.DatasetName;
+            ParameterFileName = InitParams.ParameterFileName;
+            SettingsFileName = InitParams.SettingsFileName;
+
+            CreateInspectFirstHitsFile = InitParams.CreateInspectFirstHitsFile;
+            CreateInspectSynopsisFile = InitParams.CreateInspectSynopsisFile;
+        }
+
+        public override IPeptideHitResultsProcessor.ProcessStatus Start()
+        {
+            m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_STARTING;
+
+            //Verify necessary files are in specified locations
+            if (!InitSetup())
+            {
+                m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE;
+                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
+                return m_Status;
+            }
+
+            // Process the results file (the process runs in a separate thread)
+            m_Status = ProcessPeptideHitResultsFile();
+
+            if (m_Status == IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR)
+            {
+                m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE;
+            }
+
+            return m_Status;
+        }
+
+        /// <summary>
+        /// Initializes m_PeptideHitResultsProcessor then starts a separate thread to process the file
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        protected virtual IPeptideHitResultsProcessor.ProcessStatus ProcessPeptideHitResultsFile()
+        {
+            try
+            {
+                //Initialize m_PeptideHitResultsProcessor
+                switch (m_PeptideHitResultsFileFormat)
+                {
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
+                        m_PeptideHitResultsProcessor = new clsXTandemResultsProcessor();
+
+                        break;
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile:
+                        m_PeptideHitResultsProcessor = new clsSequestResultsProcessor();
+
+                        break;
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile:
+                        m_PeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
+
+                        break;
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile:
+                        m_PeptideHitResultsProcessor = new clsMSGFDBResultsProcessor();
+
+                        break;
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
+                        m_PeptideHitResultsProcessor = new clsMSAlignResultsProcessor();
+
+                        break;
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile:
+                        m_PeptideHitResultsProcessor = new clsMODaResultsProcessor();
+
+                        break;
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile:
+                        m_PeptideHitResultsProcessor = new clsMODaResultsProcessor();
+
+                        break;
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
+                        m_PeptideHitResultsProcessor = new clsMSPathFinderResultsProcessor();
+
+                        break;
+                    default:
+                        // Unknown format; cannot continue
+                        LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " + m_PeptideHitResultsFileFormat.ToString(), null);
+                        m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
+                        return m_Status;
+
+                        break;
+                }
+
+                // Define the auxiliary file paths
+                m_PeptideHitResultsProcessor.MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath;
+                m_PeptideHitResultsProcessor.ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath;
+                m_PeptideHitResultsProcessor.SearchToolParameterFilePath = m_ParameterFilePath;
+                m_PeptideHitResultsProcessor.InspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
+
+                m_PeptideHitResultsProcessor.CreateInspectFirstHitsFile = CreateInspectFirstHitsFile;
+                m_PeptideHitResultsProcessor.CreateInspectSynopsisFile = CreateInspectSynopsisFile;
+
+                m_thThread = new Thread(ProcessPeptideHitResultsFileWork);
+                m_thThread.Start();
+
+                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_RUNNING;
+            }
+            catch (Exception ex)
+            {
+                LogErrors("ProcessPeptideHitResultsFile", "Error initializing and running m_PeptideHitResultsProcessor", ex);
+                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
+            }
+
+            return m_Status;
+        }
+
+        protected virtual void ProcessPeptideHitResultsFileWork()
+        {
+            bool blnSuccess = false;
+
+            try
+            {
+                blnSuccess = m_PeptideHitResultsProcessor.ProcessFile(m_PeptideHitResultsFilePath, OutputFolderPath, m_SettingsFilePath);
+            }
+            catch (Exception)
+            {
+                blnSuccess = false;
+            }
+
+            if (blnSuccess)
+            {
+                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_COMPLETE;
+            }
+            else
+            {
+                if (m_PeptideHitResultsProcessor.AbortProcessing)
+                {
+                    LogErrors("ProcessPeptideHitResultsFileWork", "Processing aborted", null);
+                    m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_ABORTED;
+                    m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ABORTING;
+                }
+                else
+                {
+                    LogErrors("ProcessPeptideHitResultsFileWork", m_PeptideHitResultsProcessor.ErrorMessage, null);
+                    m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE;
+                    m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
+                }
+            }
+        }
+
+        protected virtual bool InitSetup()
+        {
+            //Initializes module variables and verifies mandatory parameters have been propery specified
+
+            //Output folder name
+            if (string.IsNullOrEmpty(OutputFolderPath))
+            {
+                m_ErrMsg = "Output folder path not specified";
+                return false;
+            }
+
+            //Source folder name
+            if (string.IsNullOrEmpty(SourceFolderPath))
+            {
+                m_ErrMsg = "Source folder not specified";
+                return false;
+            }
+
+            if (this.DebugLevel >= 3)
+            {
+                if (DebugEvent != null)
+                {
+                    DebugEvent("Setup params: OutFolderPath = " + OutputFolderPath);
+                }
+                if (DebugEvent != null)
+                {
+                    DebugEvent("Setup params: SourceFolderPath = " + SourceFolderPath);
+                }
+            }
+
+            //Source directory exists?
+            if (!VerifyDirExists(SourceFolderPath))
+                return false; //Error msg handled by VerifyDirExists
+
+            //Output directory exists?
+            if (!VerifyDirExists(OutputFolderPath))
+                return false; //Error msg handled by VerifyDirExists
+
+            //Analysis tool name defined?
+            if (string.IsNullOrWhiteSpace(AnalysisToolName))
+            {
+                m_ErrMsg = "Analysis tool name not specified";
+                return false;
+            }
+
+            //Dataset name defined?
+            if (string.IsNullOrWhiteSpace(DatasetName))
+            {
+                m_ErrMsg = "Dataset name not specified";
+                return false;
+            }
+
+            //Settings file name defined?
+            if (string.IsNullOrWhiteSpace(SettingsFileName))
+            {
+                m_ErrMsg = "Settings file name not specified";
+                return false;
+            }
+
+            //Parameter file name defined?
+            if (string.IsNullOrWhiteSpace(ParameterFileName))
+            {
+                m_ErrMsg = "Parameter file name not specified";
+                return false;
+            }
+
+            //Define the parameter file path; this is passed as the search tool parameter file
+            m_ParameterFilePath = Path.Combine(SourceFolderPath, ParameterFileName);
+
+            //Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
+            m_SettingsFilePath = Path.Combine(SourceFolderPath, SettingsFileName);
+
+            //Define the peptide hit results format based on the analysis tool name
+            if (AnalysisToolName.IndexOf("xtandem", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile;
+            }
+            else if (AnalysisToolName.IndexOf("sequest", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile;
+            }
+            else if (AnalysisToolName.IndexOf("inspect", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile;
+            }
+            else if (AnalysisToolName.IndexOf("msgfdb", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile;
+            }
+            else if (AnalysisToolName.IndexOf("msalign", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile;
+            }
+            else if (AnalysisToolName.IndexOf("moda", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile;
+            }
+            else if (AnalysisToolName.IndexOf("modplus", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile;
+            }
+            else if (AnalysisToolName.IndexOf("mspathfinder", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
+            }
+            else if (AnalysisToolName.IndexOf("dataextractor", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                // Data Extractor step-tool; we'll need to auto-determine the results format
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
+            }
+            else
+            {
+                // Unrecognized analysis tool name
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
+            }
+
+            if (this.DebugLevel >= 3)
+            {
+                if (DebugEvent != null)
+                {
+                    DebugEvent("Setup params: AnalysisToolName = " + AnalysisToolName);
+                    DebugEvent("Setup params: PeptideHitResultsFileFormat = " + m_PeptideHitResultsFileFormat.ToString());
+
+                    DebugEvent("Setup params: DSName = " + DatasetName);
+                    DebugEvent("Setup params: SettingsFilePath = " + m_SettingsFilePath);
+                    DebugEvent("Setup params: ParameterFilePath = " + m_ParameterFilePath);
+                }
+            }
+
+            //Define the peptide hit results file name
+            if (string.IsNullOrWhiteSpace(PeptideHitResultsFileName))
+            {
+                m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, SourceFolderPath, DatasetName);
+            }
+            else
+            {
+                m_PeptideHitResultsFilePath = Path.Combine(SourceFolderPath, PeptideHitResultsFileName);
+            }
+
+            if (this.DebugLevel >= 3)
+            {
+                if (DebugEvent != null)
+                {
+                    DebugEvent("Setup params: PeptideHitResultsFilePath = " + m_PeptideHitResultsFilePath);
+                }
+            }
+
+            //Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
+            if (m_PeptideHitResultsFileFormat == clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.DetermineResultsFileFormat(m_PeptideHitResultsFilePath);
+            }
+
+            //Define the mass correction tags file path
+            if (string.IsNullOrWhiteSpace(MassCorrectionTagsFileName))
+            {
+                m_MassCorrectionTagsFilePath = Path.Combine(SourceFolderPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME);
+            }
+            else
+            {
+                m_MassCorrectionTagsFilePath = Path.Combine(SourceFolderPath, MassCorrectionTagsFileName);
+            }
+
+            //Define the modification definitions file path
+            if (string.IsNullOrWhiteSpace(ModificationDefinitionsFileName))
+            {
+                m_ModificationDefinitionsFilePath = Path.Combine(SourceFolderPath, Path.GetFileNameWithoutExtension(ParameterFileName) + MODIFICATION_DEFINITIONS_FILE_SUFFIX);
+            }
+            else
+            {
+                m_ModificationDefinitionsFilePath = Path.Combine(SourceFolderPath, ModificationDefinitionsFileName);
+            }
+
+            if (this.DebugLevel >= 3)
+            {
+                if (DebugEvent != null)
+                {
+                    DebugEvent("Setup params: PeptideHitResultsFileFormat = " + m_PeptideHitResultsFileFormat.ToString());
+                    DebugEvent("Setup params: MassCorrectionTagsFilePath = " + m_MassCorrectionTagsFilePath);
+                    DebugEvent("Setup params: ModificationDefinitionsFilePath = " + m_ModificationDefinitionsFilePath);
+                }
+            }
+
+            //Parameter file exists?
+            if (!VerifyFileExists(m_ParameterFilePath))
+                return false; //Error msg handled by VerifyFileExists
+
+            //Settings file exists?
+            if (!VerifyFileExists(m_SettingsFilePath))
+                return false; //Error msg handled by VerifyFileExists
+
+            //Peptide hit results file exists?
+            if (!VerifyFileExists(m_PeptideHitResultsFilePath))
+                return false; //Error msg handled by VerifyFileExists
+
+            //Modification definitions file exists?
+            if (!VerifyFileExists(m_ModificationDefinitionsFilePath))
+                return false; //Error msg handled by VerifyFileExists
+
+            //Mass correction tags file exists?
+            if (!VerifyFileExists(m_MassCorrectionTagsFilePath))
+                return false; //Error msg handled by VerifyFileExists
+
+            //If we got here, everything's OK
+            return true;
+        }
+
+        private void LogErrors(string strSource, string strMessage, Exception ex, bool blnLogLocalOnly = true)
+        {
+            m_ErrMsg = string.Copy(strMessage).Replace("\n", "; ");
+
+            if (ex != null)
+            {
+                if ((ex.Message != null) && ex.Message.Length > 0)
+                {
+                    m_ErrMsg += "; " + ex.Message;
+                }
+            }
+
+            Trace.WriteLine(System.DateTime.Now.ToLongTimeString() + "; " + m_ErrMsg, strSource);
+            Console.WriteLine(System.DateTime.Now.ToLongTimeString() + "; " + m_ErrMsg, strSource);
+
+            if (ErrorOccurred != null)
+            {
+                ErrorOccurred(m_ErrMsg);
+            }
+        }
+
+        private string strProgressStepDescriptionSaved = string.Empty;
+        private float sngProgressPercentComplete = 0;
+        private void UpdateProgress(string strProgressStepDescription, float sngPercentComplete)
+        {
+            var blnDescriptionChanged = false;
+
+            if (strProgressStepDescription != strProgressStepDescriptionSaved)
+            {
+                blnDescriptionChanged = true;
+            }
+
+            strProgressStepDescriptionSaved = string.Copy(strProgressStepDescription);
+            if (sngPercentComplete < 0)
+            {
+                sngPercentComplete = 0;
+            }
+            else if (sngPercentComplete > 100)
+            {
+                sngPercentComplete = 100;
+            }
+            sngProgressPercentComplete = sngPercentComplete;
+
+            if (blnDescriptionChanged & this.DebugLevel >= 2)
+            {
+                if (Math.Abs(sngProgressPercentComplete) < float.Epsilon)
+                {
+                    if (DebugEvent != null)
+                    {
+                        DebugEvent(strProgressStepDescriptionSaved);
+                    }
+                }
+                else
+                {
+                    if (DebugEvent != null)
+                    {
+                        DebugEvent(strProgressStepDescriptionSaved + " (" + sngProgressPercentComplete.ToString("0.0") + "% complete)");
+                    }
+                }
+            }
+
+            if (ProgressChanged != null)
+            {
+                ProgressChanged(strProgressStepDescription, sngPercentComplete);
+            }
+        }
+
+        protected virtual bool VerifyDirExists(string TestDir)
+        {
+            //Verifies that the specified directory exists
+            if (Directory.Exists(TestDir))
+            {
+                m_ErrMsg = "";
+                return true;
+            }
+            else
+            {
+                m_ErrMsg = "Directory " + TestDir + " not found";
+                return false;
+            }
+        }
+
+        protected virtual bool VerifyFileExists(string TestFile)
+        {
+            //Verifies specified file exists
+            if (File.Exists(TestFile))
+            {
+                m_ErrMsg = "";
+                return true;
+            }
+            else
+            {
+                m_ErrMsg = "File " + TestFile + " not found";
+                return false;
+            }
+        }
+
+        private void m_PeptideHitResultsProcessor_ErrorOccurred(string ErrorMessage)
+        {
+            LogErrors("PeptideHitResultsProcessor", ErrorMessage, null, true);
+        }
+
+        private void mPeptideHitResultsProcessor_ProgressChanged(string taskDescription, float pctComplete)
+        {
+            UpdateProgress(taskDescription, pctComplete);
+        }
+
+        private void mPeptideHitResultsProcessor_ProgressComplete()
+        {
+            // OperationComplete()
+        }
+
+        private void mPeptideHitResultsProcessor_ProgressReset()
+        {
+            // ResetProgress()
+        }
+    }
+}

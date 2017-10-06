@@ -1,74 +1,74 @@
-Option Strict On
+// This class is used to track the peptide details for an MSGF+ search result
+// See clsSearchResultsBaseClass for additional information
+//
+// -------------------------------------------------------------------------------
+// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+// Created 8/12/2011
+//
+// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// -------------------------------------------------------------------------------
+using PHRPReader;
 
-' This class is used to track the peptide details for an MSGF+ search result
-' See clsSearchResultsBaseClass for additional information
-'
-' -------------------------------------------------------------------------------
-' Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-' Created 8/12/2011
-'
-' E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
-' Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
-' -------------------------------------------------------------------------------
+namespace PeptideHitResultsProcessor
+{
+    public class clsSearchResultsMSGFDB : clsSearchResultsBaseClass
+    {
+        #region "Classwide Variables"
+        // Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
+        #endregion
 
-Imports PHRPReader
+        #region "Properties"
 
-Public Class clsSearchResultsMSGFDB
-    Inherits clsSearchResultsBaseClass
+        public string FragMethod { get; set; }
+        public string NTT { get; set; }
 
-#Region "Classwide Variables"
-    ' Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables 
-#End Region
+        public string DeNovoScore { get; set; }
+        public string MSGFScore { get; set; }
+        public string SpecEValue { get; set; }      // SpecProb in MSGFDB; SpecEValue in MSGF+
+        public string RankSpecEValue { get; set; }
+        public string EValue { get; set; }          // PValue in MSGFDB; EValue in MSGF+
 
-#Region "Properties"
+        public string QValue { get; set; }          // Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
+        public string PepQValue { get; set; }       // Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+
 
-    Public Property FragMethod As String
-    Public Property NTT As String
+        public string PrecursorMZ { get; set; }
+        public string MSGFPlusComputedDelM { get; set; }
+        public string MSGFPlusComputedDelMPPM { get; set; }
 
-    Public Property DeNovoScore As String
-    Public Property MSGFScore As String
-    Public Property SpecEValue As String        ' SpecProb in MSGFDB; SpecEValue in MSGF+
-    Public Property RankSpecEValue As String
-    Public Property EValue As String            ' PValue in MSGFDB; EValue in MSGF+
+        public string IsotopeError { get; set; }    // Only reported by MSGF+
 
-    Public Property QValue As String            ' Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
-    Public Property PepQValue As String         ' Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+
+        public bool MSGFPlusResults { get; set; }
+        #endregion
 
-    Public Property PrecursorMZ As String
-    Public Property MSGFPlusComputedDelM As String
-    Public Property MSGFPlusComputedDelMPPM As String
+        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        public clsSearchResultsMSGFDB(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(objPeptideMods, peptideSeqMassCalculator)
+        {
+        }
 
-    Public Property IsotopeError As String      ' Only reported by MSGF+
+        public override void Clear()
+        {
+            base.Clear();
 
-    Public Property MSGFPlusResults As Boolean
-#End Region
+            FragMethod = string.Empty;
+            NTT = string.Empty;
 
-    Public Sub New(objPeptideMods As clsPeptideModificationContainer, peptideSeqMassCalculator As clsPeptideMassCalculator)
-        ' Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        MyBase.New(objPeptideMods, peptideSeqMassCalculator)
-    End Sub
+            DeNovoScore = string.Empty;
+            MSGFScore = string.Empty;
+            SpecEValue = string.Empty;
+            RankSpecEValue = string.Empty;
+            EValue = string.Empty;
 
-    Public Overrides Sub Clear()
-        MyBase.Clear()
+            QValue = string.Empty;
+            PepQValue = string.Empty;
 
-        FragMethod = String.Empty
-        NTT = String.Empty
+            PrecursorMZ = string.Empty;
+            MSGFPlusComputedDelM = string.Empty;
+            MSGFPlusComputedDelMPPM = string.Empty;
 
-        DeNovoScore = String.Empty
-        MSGFScore = String.Empty
-        SpecEValue = String.Empty
-        RankSpecEValue = String.Empty
-        EValue = String.Empty
-
-        QValue = String.Empty
-        PepQValue = String.Empty
-
-        PrecursorMZ = String.Empty
-        MSGFPlusComputedDelM = String.Empty
-        MSGFPlusComputedDelMPPM = String.Empty
-
-        IsotopeError = String.Empty
-        MSGFPlusResults = False
-    End Sub
-
-End Class
+            IsotopeError = string.Empty;
+            MSGFPlusResults = false;
+        }
+    }
+}

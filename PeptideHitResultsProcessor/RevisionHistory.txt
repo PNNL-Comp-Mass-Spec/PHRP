@@ -1,5 +1,8 @@
 PeptideHitResultsProcessor.dll Revision History
 
+Version 1.5.6487; October 5, 2017
+	- Convert to C#
+
 Version 1.5.6253; February 13, 2017
 	- Check for duplicate MSGF+ results from dynamically modified residues at the N-terminus being listed twice in the MSGF+ results file
 

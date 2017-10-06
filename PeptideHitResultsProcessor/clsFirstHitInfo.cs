@@ -1,45 +1,51 @@
-﻿Imports PHRPReader
+﻿using System;
+using PHRPReader;
 
-Public Class clsFirstHitInfo
+namespace PeptideHitResultsProcessor
+{
+    public class clsFirstHitInfo
+    {
+        // ReSharper disable once UnassignedReadonlyField
+        private readonly string mPrimarySequence;
 
-    ' ReSharper disable once UnassignedReadonlyField
-    Private ReadOnly mPrimarySequence As String
+        private string mPrefix;
+        private string mSuffix;
 
-    Private mPrefix As String
-    Private mSuffix As String
+        public string CleanSequence { get; }
 
-    Public ReadOnly Property CleanSequence As String
+        public string SequenceWithModsAndContext
+        {
+            get { return mPrefix + "." + mPrimarySequence + "." + mSuffix; }
+        }
 
-    Public ReadOnly Property SequenceWithModsAndContext As String
-        Get
-            Return mPrefix & "." & mPrimarySequence & "." & mSuffix
-        End Get
-    End Property
+        public string ProteinName { get; set; }
 
-    Public Property ProteinName As String
+        public int ProteinNumber { get; set; }
 
-    Public Property ProteinNumber As Integer
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="peptideSeqWithModsAndContext"></param>
+        /// <param name="peptideCleanSeq"></param>
+        public clsFirstHitInfo(string peptideSeqWithModsAndContext, string peptideCleanSeq)
+        {
+            if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptideSeqWithModsAndContext, out mPrimarySequence, out mPrefix, out mSuffix))
+            {
+                throw new Exception("Unable to split the prefix and suffix from peptide " + peptideSeqWithModsAndContext);
+            }
 
-    ''' <summary>
-    ''' Constructor
-    ''' </summary>
-    ''' <param name="peptideSeqWithModsAndContext"></param>
-    ''' <param name="peptideCleanSeq"></param>
-    Public Sub New(peptideSeqWithModsAndContext As String, peptideCleanSeq As String)
+            CleanSequence = peptideCleanSeq;
+        }
 
-        If Not clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptideSeqWithModsAndContext, mPrimarySequence, mPrefix, mSuffix) Then
-            Throw New Exception("Unable to split the prefix and suffix from peptide " & peptideSeqWithModsAndContext)
-        End If
+        public override string ToString()
+        {
+            return CleanSequence + ", " + ProteinName + ", " + ProteinNumber;
+        }
 
-        CleanSequence = peptideCleanSeq
-    End Sub
-
-    Public Overrides Function ToString() As String
-        Return CleanSequence & ", " & ProteinName & ", " & ProteinNumber
-    End Function
-
-    Public Sub UpdatePrefixAndSuffix(newPrefix As String, newSuffix As String)
-        mPrefix = newPrefix
-        mSuffix = newSuffix
-    End Sub
-End Class
+        public void UpdatePrefixAndSuffix(string newPrefix, string newSuffix)
+        {
+            mPrefix = newPrefix;
+            mSuffix = newSuffix;
+        }
+    }
+}
