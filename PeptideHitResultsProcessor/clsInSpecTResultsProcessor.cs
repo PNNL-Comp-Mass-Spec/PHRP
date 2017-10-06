@@ -867,6 +867,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="strOutputFolderPath"></param>
         /// <param name="udtInspectModInfo"></param>
         /// <param name="lstPepToProteinMapping"></param>
+        /// <param name="strMTSPepToProteinMapFilePath"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         protected bool LoadPeptideToProteinMapInfoInspect(

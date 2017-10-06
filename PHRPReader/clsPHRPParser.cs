@@ -237,6 +237,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="strDatasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
+        /// <param name="ePeptideHitResultType"></param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
         /// <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
         protected clsPHRPParser(string strDatasetName, string strInputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, clsPHRPStartupOptions startupOptions)
@@ -813,22 +814,15 @@ namespace PHRPReader
 
                         if (mSeqToProteinMap.TryGetValue(objItem.Value, out lstProteinsForSeqID))
                         {
-                            const bool USE_LINQ = true;
-                            if (USE_LINQ)
-                            {
-                                lstProteinsForResultID = (from objProtein in lstProteinsForSeqID select objProtein.ProteinName).ToList();
-                            }
-                            else
-                            {
-                                lstProteinsForResultID = new List<string>(lstProteinsForSeqID.Count);
-                                foreach (clsProteinInfo objProtein in lstProteinsForSeqID)
-                                {
-                                    if (!lstProteinsForResultID.Contains(objProtein.ProteinName))
-                                    {
-                                        lstProteinsForResultID.Add(objProtein.ProteinName);
-                                    }
-                                }
-                            }
+                            lstProteinsForResultID = (from objProtein in lstProteinsForSeqID select objProtein.ProteinName).ToList();
+                            // lstProteinsForResultID = new List<string>(lstProteinsForSeqID.Count);
+                            // foreach (clsProteinInfo objProtein in lstProteinsForSeqID)
+                            // {
+                            //     if (!lstProteinsForResultID.Contains(objProtein.ProteinName))
+                            //     {
+                            //         lstProteinsForResultID.Add(objProtein.ProteinName);
+                            //     }
+                            // }
                         }
                         else
                         {

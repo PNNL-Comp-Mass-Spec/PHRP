@@ -171,6 +171,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="objSearchResult"></param>
         /// <param name="blnUpdateModOccurrenceCounts"></param>
+        /// <param name="lstModInfo"></param>
         /// <remarks></remarks>
         private void AddModificationsToResidues(
             clsSearchResultsMSPathFinder objSearchResult,
@@ -301,7 +302,9 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
+        /// <param name="cleanSequence"></param>
         /// <param name="modificationList">Comma separated list of modifications, e.g. Dehydro 52,Dehydro 63</param>
+        /// <param name="lstModInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         protected double ComputeTotalModMass(
@@ -416,6 +419,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="strInputFilePath"></param>
         /// <param name="strOutputFilePath"></param>
+        /// <param name="lstModInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         protected bool CreateSynResultsFile(
@@ -572,6 +576,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="strInputFilePath"></param>
         /// <param name="strOutputFolderPath"></param>
         /// <param name="blnResetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <param name="lstModInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         protected bool ParseMSPathfinderSynopsisFile(

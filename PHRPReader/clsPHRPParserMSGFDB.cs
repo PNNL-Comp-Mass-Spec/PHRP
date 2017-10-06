@@ -194,6 +194,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="objSearchEngineParams"></param>
         /// <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
+        /// <param name="resultType"></param>
         /// <returns>Precursor tolerance, in Da</returns>
         /// <remarks></remarks>
         public static double DeterminePrecursorMassTolerance(

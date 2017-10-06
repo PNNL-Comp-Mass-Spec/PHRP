@@ -1783,6 +1783,8 @@ namespace PeptideHitResultsProcessor
         /// <param name="intResultID"></param>
         /// <param name="swResultFile"></param>
         /// <param name="udtSearchResult"></param>
+        /// <param name="proteinName"></param>
+        /// <param name="peptidePosition"></param>
         /// <param name="strErrorLog"></param>
         /// <remarks></remarks>
         private void WriteSearchResultToFile(

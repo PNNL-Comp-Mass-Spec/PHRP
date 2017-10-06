@@ -171,6 +171,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="strInputFolderPath">Input folder path</param>
         /// <param name="strResultToSeqMapFilename">ResultToSeqMap filename</param>
+        /// <param name="strSeqToProteinMapFilename"></param>
         /// <param name="strSeqInfoFilename">SeqInfo filename</param>
         /// <remarks></remarks>
         public clsPHRPSeqMapReader(string strInputFolderPath, string strResultToSeqMapFilename, string strSeqToProteinMapFilename, string strSeqInfoFilename)

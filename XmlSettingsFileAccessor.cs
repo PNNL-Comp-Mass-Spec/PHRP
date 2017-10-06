@@ -1801,8 +1801,6 @@ namespace PeptideHitResultsProcRunner
                                 return;
                             }
                         }
-
-                        break;
                 }
             }
 

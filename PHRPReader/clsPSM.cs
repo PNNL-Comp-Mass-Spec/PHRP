@@ -650,6 +650,7 @@ namespace PHRPReader
         /// Update the peptide sequence, auto-determining the clean sequence if blnUpdateCleanSequence is true
         /// </summary>
         /// <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
+        /// <param name="blnUpdateCleanSequence"></param>
         /// <remarks>Does not update the cleavage state info.  If blnUpdateCleanSequence is false, then call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
         public void SetPeptide(string strPeptide, bool blnUpdateCleanSequence)
         {

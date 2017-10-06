@@ -220,12 +220,12 @@ namespace PeptideHitResultsProcessor
         public event ProgressResetEventHandler ProgressReset;
         public delegate void ProgressResetEventHandler();
 
+        public event ProgressChangedEventHandler ProgressChanged;
         /// <summary>
         /// Progress changed
         /// </summary>
         /// <param name="taskDescription"></param>
         /// <param name="percentComplete">Ranges from 0 to 100, but can contain decimal percentage values</param>
-        public event ProgressChangedEventHandler ProgressChanged;
         public delegate void ProgressChangedEventHandler(string taskDescription, float percentComplete);
         public event ProgressCompleteEventHandler ProgressComplete;
         public delegate void ProgressCompleteEventHandler();
@@ -1060,6 +1060,7 @@ namespace PeptideHitResultsProcessor
         /// Create the protein mod details file for the specified PHRP data file
         /// </summary>
         /// <param name="strPHRPDataFilePath"></param>
+        /// <param name="strOutputFolderPath"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         public bool CreateProteinModDetailsFile(string strPHRPDataFilePath, string strOutputFolderPath)

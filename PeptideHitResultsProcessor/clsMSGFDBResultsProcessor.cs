@@ -604,6 +604,8 @@ namespace PeptideHitResultsProcessor
         /// <param name="dblPrecursorErrorDa">Mass error (Observed - theoretical)</param>
         /// <param name="dblPrecursorMZ"></param>
         /// <param name="intCharge"></param>
+        /// <param name="dblPeptideMonoisotopicMass"></param>
+        /// <param name="blnAdjustPrecursorMassForC13"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         private double ComputeDelMCorrectedPPM(
@@ -663,8 +665,15 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Parses the digits in strModDigits to convert them to one or more modification symbols
         /// </summary>
+        /// <param name="currentResidue"></param>
         /// <param name="strModDigits">Example: +57.021 or +79.9663+14.0157 or -18.0106</param>
         /// <param name="strModSymbols"></param>
+        /// <param name="strDynModSymbols"></param>
+        /// <param name="lstMSGFDBModInfo"></param>
+        /// <param name="blnNterminalMod"></param>
+        /// <param name="blnPossibleCTerminalMod"></param>
+        /// <param name="dblModMassFound"></param>
+        /// <param name="blnContainsStaticMod"></param>
         /// <returns>True if success; false if a problem</returns>
         /// <remarks></remarks>
         private bool ConvertMGSFModMassesToSymbols(
@@ -834,6 +843,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="strScanGroupFilePath"></param>
         /// <param name="lstMSGFDBModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
         /// <param name="blnMSGFPlus">Output parameter: this function will set this to True if we're processing MSGF+ results</param>
+        /// <param name="lstSpecIdToIndex"></param>
         /// <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
         /// <returns></returns>
         /// <remarks></remarks>
