@@ -216,44 +216,42 @@ namespace PeptideHitResultsProcessor
                 {
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
                         m_PeptideHitResultsProcessor = new clsXTandemResultsProcessor();
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile:
                         m_PeptideHitResultsProcessor = new clsSequestResultsProcessor();
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile:
                         m_PeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile:
                         m_PeptideHitResultsProcessor = new clsMSGFDBResultsProcessor();
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
                         m_PeptideHitResultsProcessor = new clsMSAlignResultsProcessor();
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile:
                         m_PeptideHitResultsProcessor = new clsMODaResultsProcessor();
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile:
                         m_PeptideHitResultsProcessor = new clsMODaResultsProcessor();
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
                         m_PeptideHitResultsProcessor = new clsMSPathFinderResultsProcessor();
-
                         break;
+
                     default:
                         // Unknown format; cannot continue
                         LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " + m_PeptideHitResultsFileFormat.ToString(), null);
                         m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
                         return m_Status;
-
-                        break;
                 }
 
                 // Define the auxiliary file paths

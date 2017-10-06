@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace PeptideHitResultsProcessor
@@ -74,6 +75,7 @@ namespace PeptideHitResultsProcessor
         public abstract bool CreateInspectSynopsisFile { get; set; }
         public abstract bool CreateInspectFirstHitsFile { get; set; }
 
+        [Obsolete("Unused")]
         public abstract Dictionary<string, string> MiscParams { get; set; }    //For passing miscelleneous parameters (not presently used)
         public abstract ProcessStatus Status { get; } //Allows calling program to get current status
         public abstract ProcessResults Results { get; }  //Allows calling program to determine if processing succeeded

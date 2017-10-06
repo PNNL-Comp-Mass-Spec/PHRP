@@ -87,8 +87,6 @@ namespace PHRPReader
             double dblModificationMass = 0;
             clsModificationDefinition.eModificationTypeConstants eModificationType = default(clsModificationDefinition.eModificationTypeConstants);
 
-            List<string> lstModMasses = null;
-
             bool blnSkipLine = false;
             bool blnHeaderLineParsed = false;
 

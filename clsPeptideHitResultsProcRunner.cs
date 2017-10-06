@@ -252,8 +252,6 @@ namespace PeptideHitResultsProcRunner
 
         private void LoadModificationInfoFromDMS()
         {
-            bool blnSuccess = false;
-
             // ToDo: Contact DMS to get the modification information
             // The results of this query will need to be filtered to get the info for just this analysis job
 

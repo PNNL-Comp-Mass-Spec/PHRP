@@ -103,7 +103,6 @@ namespace PeptideHitResultsProcessor
         public void ComputeDelMCorrectedXT()
         {
             double dblDelM = 0;
-            var intCorrectionCount = 0;
 
             double dblPrecursorMonoMass = 0;
 
