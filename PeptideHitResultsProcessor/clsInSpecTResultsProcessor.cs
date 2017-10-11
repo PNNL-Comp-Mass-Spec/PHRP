@@ -751,7 +751,7 @@ namespace PeptideHitResultsProcessor
                                         Array.Resize(ref udtModList, udtModList.Length * 2);
                                     }
 
-                                    var udtMod = udtModList[intModCount];
+                                    var udtMod = new udtModInfoType();
                                     udtMod.ModMass = strSplitLine[1];
                                     udtMod.Residues = strSplitLine[2];
                                     udtMod.ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL.ToString();
@@ -806,6 +806,7 @@ namespace PeptideHitResultsProcessor
                                     {
                                         udtMod.ModMass = PHOS_MOD_MASS;
                                     }
+                                    udtModList[intModCount] = udtMod;
 
                                     intModCount += 1;
                                 }
@@ -1593,7 +1594,7 @@ namespace PeptideHitResultsProcessor
                     // Obtain the full path to the input file
                     var fiInputFile = new FileInfo(strInputFilePath);
 
-                    udtInspectModInfo = new udtModInfoType[-1 + 1];
+                    udtInspectModInfo = new udtModInfoType[0];
                     lstPepToProteinMapping = new List<udtPepToProteinMappingType>();
 
                     // Load the Inspect Parameter File so that we can determine the modification names and masses
@@ -1602,11 +1603,12 @@ namespace PeptideHitResultsProcessor
                         if (udtInspectModInfo == null || udtInspectModInfo.Length == 0)
                         {
                             udtInspectModInfo = new udtModInfoType[1];
-                            var modInfo = udtInspectModInfo[0];
+                            var modInfo = new udtModInfoType();
                             modInfo.ModName = PHOS_MOD_NAME.ToLower();
                             modInfo.ModMass = PHOS_MOD_MASS;
                             modInfo.Residues = PHOS_MOD_RESIDUES;
                             modInfo.ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL.ToString();
+                            udtInspectModInfo[1] = modInfo;
                         }
                     }
 
@@ -1913,6 +1915,7 @@ namespace PeptideHitResultsProcessor
                             }
                         }
                     }
+                    udtInspectModInfo[intIndex] = modInfo;
                 }
             }
         }
