@@ -6,17 +6,17 @@ using PHRPReader;
 namespace PHRP_UnitTests
 {
 
-    [TestFixture()]
+    [TestFixture]
     public class PeptideMassCalculatorUnitTests
     {
         private clsPeptideMassCalculator mPeptideMassCalculator;
-        [SetUp()]
+        [SetUp]
         public void Init()
         {
             mPeptideMassCalculator = new clsPeptideMassCalculator();
         }
 
-        [Test()]
+        [Test]
         [TestCase("A.LCDE.F", 478.17333)]
         [TestCase("-.LCDE.F", 478.17333)]
         [TestCase("A.LCDE.-", 478.17333)]
@@ -44,7 +44,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(expectedMass, computedMass, 0.001, "Unexpected mass for the amino acid sequence");
         }
 
-        [Test()]
+        [Test]
         [TestCase("E.TGMLTQKFARSLGMLAVDNQARV.R", "3:15.994; 11:79.996", 2602.3047)]
         [TestCase("..TGMLTQKFARSLGMLAVDNQARV.R", "3:15.994; 11:79.996", 2602.3047)]
         [TestCase("..TGMLTQKFARSLGMLAVDNQARV..", "3:15.994; 11:79.996", 2602.3047)]
@@ -83,7 +83,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(expectedMass, computedMass, 0.0001, "Unexpected mass for the amino acid sequence");
         }
 
-        [Test()]
+        [Test]
         [TestCase("R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A", 2184.97443)]
         [TestCase("K.Q-17.0265QIEESTSDYDKEK.L", 1681.73186)]
         [TestCase("Q-17.0265QIEESTSDYDKEK", 1681.73186)]
@@ -96,7 +96,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(expectedMass, computedMass, 1E-05, "Unexpected mass for the empirical formula");
         }
 
-        [Test()]
+        [Test]
         [TestCase("CHNOSP", 105.9516)]
         [TestCase("C2H3N4OS", 131.0027)]
         [TestCase("C2H3N-2OS3N+3S-2", 88.99353)]
@@ -116,7 +116,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(expectedMass, computedMass, 0.0001, "Unexpected mass for the empirical formula");
         }
 
-        [Test()]
+        [Test]
         [TestCase(1000, 1, 0, 998.99272)]
         [TestCase(1000, 3, 1, 2997.98545)]
         [TestCase(700, 0, 2, 351.00728)]
@@ -134,7 +134,7 @@ namespace PHRP_UnitTests
 
         }
 
-        [Test()]
+        [Test]
         [TestCase(1000, 1, 0, 977.01078)]
         [TestCase(1000, 3, 1, 2954.02156)]
         [TestCase(700, 0, 2, 372.9892)]
@@ -155,7 +155,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(expectedMz, newMz, 0.0001, "Unexpected convoluted m/z");
         }
 
-        [Test()]
+        [Test]
         [TestCase('A', 71.03711)]
         [TestCase('B', 114.04292)]
         [TestCase('C', 103.00918)]
@@ -196,7 +196,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(computedMass, computedMassAlt, 1E-05, "GetAminoAcidMass and ComputeMonoistopicMass do not agree on the mass for the amino acid");
         }
 
-        [Test()]
+        [Test]
         [TestCase(0.005, 1000, 5)]
         [TestCase(0.015, 1000, 15)]
         [TestCase(0.005, 500, 10)]
@@ -216,7 +216,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(massToConvert, reconvertedMass, 1E-05, "Da to PPM to Da round trip error");
         }
 
-        [Test()]
+        [Test]
         [TestCase(1200, 2, 1198.99272, 600.5036)]
         [TestCase(1200, 3, 1198.99272, 400.67152)]
         public void TestMassConversions(double dblMH, int chargeState, double expectedMonoMass, double expectedMz)

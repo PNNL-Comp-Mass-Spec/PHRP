@@ -3,18 +3,18 @@ using PHRPReader;
 
 namespace PHRP_UnitTests
 {
-    [TestFixture()]
+    [TestFixture]
     public class PeptideCleavageStateCalculatorTests
     {
         private clsPeptideCleavageStateCalculator mCleavageStateCalculator;
 
-        [SetUp()]
+        [SetUp]
         public void Init()
         {
             mCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
         }
 
-        [Test()]
+        [Test]
         [TestCase("A.BCDE.F", "BCDE", "A", "F")]
         [TestCase("-.BCDE.F", "BCDE", "-", "F")]
         [TestCase("A.BCDE.-", "BCDE", "A", "-")]
@@ -51,7 +51,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(expectedSuffix, strSuffix);
         }
 
-        [Test()]
+        [Test]
         [TestCase("A.BCDE.F", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific)]
         [TestCase("-.BCDE.F", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific)]
         [TestCase("E.TGMLTQKFARSLGMLAVDNQARV..", clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific)]
@@ -94,7 +94,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(expectedCleavageState, cleavageState);
         }
 
-        [Test()]
+        [Test]
         [TestCase("A.BCDE.F", 0)]
         [TestCase("-.BCDE.F", 0)]
         [TestCase("E.TGMLTQKFARSLGMLAVDNQARV..", 3)]
@@ -117,7 +117,7 @@ namespace PHRP_UnitTests
             Assert.AreEqual(expectedMissedCleavages, missedCleavages);
         }
 
-        [Test()]
+        [Test]
         [TestCase("A.BCDE.F", clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None)]
         [TestCase("-.BCDE.F", clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinNTerminus)]
         [TestCase("E.TGMLTQKFARSLGMLAVDNQARV..", clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinCTerminus)]
