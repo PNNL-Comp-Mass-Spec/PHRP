@@ -6,6 +6,7 @@ Imports System.Text
 Imports System.Text.RegularExpressions
 Imports System.Threading
 Imports PHRPReader
+Imports PRISM
 
 ' This program reads a PHRP-compatible _msgfdb_fht.txt file and creates the 
 ' equivalent tab-delimited _msgfplus.tsv file that would have been created
