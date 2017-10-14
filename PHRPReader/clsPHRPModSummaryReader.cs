@@ -20,16 +20,10 @@ namespace PHRPReader
 
         private readonly bool mSuccess;
 
-        public List<clsModificationDefinition> ModificationDefs
-        {
-            get { return mModificationDefs; }
-        }
+        public List<clsModificationDefinition> ModificationDefs => mModificationDefs;
 
         // ReSharper disable once ConvertToAutoProperty
-        public bool Success
-        {
-            get { return mSuccess; }
-        }
+        public bool Success => mSuccess;
 
         public clsPHRPModSummaryReader(string strModSummaryFilePath)
         {
@@ -58,7 +52,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public string GetModificationMassAsText(string strMassCorrectionTag)
         {
-            string strModMass = string.Empty;
+            var strModMass = string.Empty;
 
             if (mModDefMassesAsText.TryGetValue(strMassCorrectionTag, out strModMass))
             {
@@ -75,7 +69,7 @@ namespace PHRPReader
             string strLineIn = null;
             string[] strSplitLine = null;
 
-            SortedDictionary<string, int> objColumnHeaders = default(SortedDictionary<string, int>);
+            var objColumnHeaders = default(SortedDictionary<string, int>);
 
             string strModSymbol = null;
             string strModMass = null;
@@ -83,12 +77,12 @@ namespace PHRPReader
             string strModType = null;
             string strMassCorrectionTag = null;
 
-            char chModSymbol = default(char);
+            var chModSymbol = default(char);
             double dblModificationMass = 0;
-            clsModificationDefinition.eModificationTypeConstants eModificationType = default(clsModificationDefinition.eModificationTypeConstants);
+            var eModificationType = default(clsModificationDefinition.eModificationTypeConstants);
 
-            bool blnSkipLine = false;
-            bool blnHeaderLineParsed = false;
+            var blnSkipLine = false;
+            var blnHeaderLineParsed = false;
 
             if (lstModInfo == null)
             {
@@ -120,7 +114,7 @@ namespace PHRPReader
             // The first line is typically a header line:
             // Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
 
-            using (StreamReader srModSummaryFile = new StreamReader(new FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using (var srModSummaryFile = new StreamReader(new FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
                 blnHeaderLineParsed = false;
 
@@ -139,7 +133,7 @@ namespace PHRPReader
                             {
                                 // Parse the header line to confirm the column ordering
                                 // The Occurrence_Count column was mispelled prior to December 2012; need to check for this
-                                for (int intIndex = 0; intIndex <= strSplitLine.Length - 1; intIndex++)
+                                for (var intIndex = 0; intIndex <= strSplitLine.Length - 1; intIndex++)
                                 {
                                     if (strSplitLine[intIndex] == "Occurence_Count")
                                         strSplitLine[intIndex] = MOD_SUMMARY_COLUMN_Occurrence_Count;
@@ -179,7 +173,7 @@ namespace PHRPReader
                                 eModificationType = clsModificationDefinition.ModificationSymbolToModificationType(strModType[0]);
                             }
 
-                            clsModificationDefinition objModDef = default(clsModificationDefinition);
+                            var objModDef = default(clsModificationDefinition);
                             objModDef = new clsModificationDefinition(chModSymbol, dblModificationMass, strTargetResidues, eModificationType, strMassCorrectionTag);
                             objModDef.ModificationMassAsText = strModMass;
 

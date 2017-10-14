@@ -17,15 +17,9 @@ namespace PHRPReader
         /// <remarks></remarks>
         private readonly Dictionary<string, List<udtProteinLocationInfo>> mProteinMapInfo;
 
-        public int ProteinCount
-        {
-            get { return mProteinMapInfo.Count; }
-        }
+        public int ProteinCount => mProteinMapInfo.Count;
 
-        public Dictionary<string, List<udtProteinLocationInfo>> ProteinMapInfo
-        {
-            get { return mProteinMapInfo; }
-        }
+        public Dictionary<string, List<udtProteinLocationInfo>> ProteinMapInfo => mProteinMapInfo;
 
         public clsPepToProteinMapInfo(string proteinName, int residueStart, int residueEnd)
         {

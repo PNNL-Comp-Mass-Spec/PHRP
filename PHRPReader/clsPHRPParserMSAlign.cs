@@ -8,7 +8,6 @@
 //
 //*********************************************************************************************************
 using System;
-using System.Runtime.InteropServices;
 
 namespace PHRPReader
 {
@@ -46,50 +45,23 @@ namespace PHRPReader
 
         #region "Properties"
 
-        public override string PHRPFirstHitsFileName
-        {
-            get { return GetPHRPFirstHitsFileName(mDatasetName); }
-        }
+        public override string PHRPFirstHitsFileName => GetPHRPFirstHitsFileName(mDatasetName);
 
-        public override string PHRPModSummaryFileName
-        {
-            get { return GetPHRPModSummaryFileName(mDatasetName); }
-        }
+        public override string PHRPModSummaryFileName => GetPHRPModSummaryFileName(mDatasetName);
 
-        public override string PHRPPepToProteinMapFileName
-        {
-            get { return GetPHRPPepToProteinMapFileName(mDatasetName); }
-        }
+        public override string PHRPPepToProteinMapFileName => GetPHRPPepToProteinMapFileName(mDatasetName);
 
-        public override string PHRPProteinModsFileName
-        {
-            get { return GetPHRPProteinModsFileName(mDatasetName); }
-        }
+        public override string PHRPProteinModsFileName => GetPHRPProteinModsFileName(mDatasetName);
 
-        public override string PHRPSynopsisFileName
-        {
-            get { return GetPHRPSynopsisFileName(mDatasetName); }
-        }
+        public override string PHRPSynopsisFileName => GetPHRPSynopsisFileName(mDatasetName);
 
-        public override string PHRPResultToSeqMapFileName
-        {
-            get { return GetPHRPResultToSeqMapFileName(mDatasetName); }
-        }
+        public override string PHRPResultToSeqMapFileName => GetPHRPResultToSeqMapFileName(mDatasetName);
 
-        public override string PHRPSeqInfoFileName
-        {
-            get { return GetPHRPSeqInfoFileName(mDatasetName); }
-        }
+        public override string PHRPSeqInfoFileName => GetPHRPSeqInfoFileName(mDatasetName);
 
-        public override string PHRPSeqToProteinMapFileName
-        {
-            get { return GetPHRPSeqToProteinMapFileName(mDatasetName); }
-        }
+        public override string PHRPSeqToProteinMapFileName => GetPHRPSeqToProteinMapFileName(mDatasetName);
 
-        public override string SearchEngineName
-        {
-            get { return GetSearchEngineName(); }
-        }
+        public override string SearchEngineName => GetSearchEngineName();
 
         #endregion
 
@@ -166,7 +138,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         private double DeterminePrecursorMassTolerance(clsSearchEngineParameters objSearchEngineParams, out double dblTolerancePPM)
         {
-            string strTolerance = string.Empty;
+            var strTolerance = string.Empty;
 
             double dblToleranceDa = 0;
 
@@ -238,7 +210,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public override bool LoadSearchEngineParameters(string strSearchEngineParamFileName, out clsSearchEngineParameters objSearchEngineParams)
         {
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             objSearchEngineParams = new clsSearchEngineParameters(MSAlign_SEARCH_ENGINE_NAME);
 
@@ -251,9 +223,9 @@ namespace PHRPReader
 
         private bool ReadSearchEngineParamFile(string strSearchEngineParamFileName, clsSearchEngineParameters objSearchEngineParams)
         {
-            string strSettingValue = string.Empty;
-            clsModificationDefinition objModDef = default(clsModificationDefinition);
-            bool blnSuccess = false;
+            var strSettingValue = string.Empty;
+            var objModDef = default(clsModificationDefinition);
+            var blnSuccess = false;
 
             try
             {
@@ -305,13 +277,13 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string strLine, int intLinesRead, out clsPSM objPSM, bool fastReadMode)
         {
-            string[] strColumns = strLine.Split('\t');
+            var strColumns = strLine.Split('\t');
             string strPeptide = null;
             string strProtein = null;
 
             double dblPrecursorMZ = 0;
 
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             objPSM = new clsPSM();
 

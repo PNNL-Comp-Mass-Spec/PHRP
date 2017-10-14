@@ -110,16 +110,16 @@ namespace PHRPReader
         /// <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
         public Dictionary<int, clsScanStatsExInfo> ReadExtendedScanStatsData(string strInputFilePath)
         {
-            Dictionary<int, clsScanStatsExInfo> lstScanStats = default(Dictionary<int, clsScanStatsExInfo>);
+            var lstScanStats = default(Dictionary<int, clsScanStatsExInfo>);
             lstScanStats = new Dictionary<int, clsScanStatsExInfo>();
 
             string strLineIn = null;
             string[] strSplitLine = null;
-            bool blnHeaderLineParsed = false;
-            bool blnSkipLine = false;
+            var blnHeaderLineParsed = false;
+            var blnSkipLine = false;
 
-            int intLinesRead = 0;
-            int intScanNumber = 0;
+            var intLinesRead = 0;
+            var intScanNumber = 0;
 
             try
             {
@@ -157,7 +157,7 @@ namespace PHRPReader
 
                                 if (intScanNumber >= 0 && !lstScanStats.ContainsKey(intScanNumber))
                                 {
-                                    clsScanStatsExInfo objScanStatsInfo = default(clsScanStatsExInfo);
+                                    var objScanStatsInfo = default(clsScanStatsExInfo);
                                     objScanStatsInfo = new clsScanStatsExInfo(intScanNumber);
 
                                     objScanStatsInfo.IonInjectionTime = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_IonInjectionTime, mColumnHeaders, 0.0);

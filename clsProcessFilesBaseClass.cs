@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace PeptideHitResultsProcRunner
@@ -19,7 +20,7 @@ namespace PeptideHitResultsProcRunner
         /// Constructor
         /// </summary>
         /// <remarks></remarks>
-        public clsProcessFilesBaseClass()
+        protected clsProcessFilesBaseClass()
         {
             mFileDate = "October 17, 2013";
             mErrorCode = eProcessFilesErrorCodes.NoError;
@@ -70,14 +71,11 @@ namespace PeptideHitResultsProcRunner
         /// <remarks></remarks>
         public bool IgnoreErrorsWhenUsingWildcardMatching
         {
-            get { return mIgnoreErrorsWhenUsingWildcardMatching; }
-            set { mIgnoreErrorsWhenUsingWildcardMatching = value; }
+            get => mIgnoreErrorsWhenUsingWildcardMatching;
+            set => mIgnoreErrorsWhenUsingWildcardMatching = value;
         }
 
-        public eProcessFilesErrorCodes ErrorCode
-        {
-            get { return mErrorCode; }
-        }
+        public eProcessFilesErrorCodes ErrorCode => mErrorCode;
 
         #endregion
 
@@ -90,16 +88,14 @@ namespace PeptideHitResultsProcRunner
         {
             // Returns True if success, False if failure
 
-            FileInfo ioFileInfo = default(FileInfo);
-            DirectoryInfo ioFolder = default(DirectoryInfo);
-            bool blnSuccess = false;
+            bool blnSuccess;
 
             try
             {
                 // Make sure strInputFilePath points to a valid file
-                ioFileInfo = new FileInfo(strInputFilePath);
+                var inputfile = new FileInfo(strInputFilePath);
 
-                if (!ioFileInfo.Exists)
+                if (!inputfile.Exists)
                 {
                     if (ShowMessages)
                     {
@@ -118,19 +114,19 @@ namespace PeptideHitResultsProcRunner
                     if (string.IsNullOrWhiteSpace(strOutputFolderPath))
                     {
                         // Define strOutputFolderPath based on strInputFilePath
-                        strOutputFolderPath = ioFileInfo.DirectoryName;
+                        strOutputFolderPath = inputfile.DirectoryName;
                     }
 
                     // Make sure strOutputFolderPath points to a folder
-                    ioFolder = new DirectoryInfo(strOutputFolderPath);
+                    var outputFolder = new DirectoryInfo(strOutputFolderPath);
 
-                    if (!ioFolder.Exists)
+                    if (!outputFolder.Exists)
                     {
                         // strOutputFolderPath points to a non-existent folder; attempt to create it
-                        ioFolder.Create();
+                        outputFolder.Create();
                     }
 
-                    mOutputFolderPath = string.Copy(ioFolder.FullName);
+                    mOutputFolderPath = string.Copy(outputFolder.FullName);
 
                     blnSuccess = true;
                 }
@@ -148,15 +144,14 @@ namespace PeptideHitResultsProcRunner
         {
             // Returns True if success, False if failure
 
-            FileInfo ioFileInfo = default(FileInfo);
-            bool blnSuccess = false;
+            bool blnSuccess;
 
             try
             {
                 // Make sure strInputFilePath points to a valid file
-                ioFileInfo = new FileInfo(strInputFilePath);
+                var inputfile = new FileInfo(strInputFilePath);
 
-                if (!ioFileInfo.Exists)
+                if (!inputfile.Exists)
                 {
                     if (ShowMessages)
                     {
@@ -188,7 +183,7 @@ namespace PeptideHitResultsProcRunner
         {
             // Returns String.Empty if no error
 
-            string strErrorMessage = null;
+            string strErrorMessage;
 
             switch (ErrorCode)
             {
@@ -227,7 +222,7 @@ namespace PeptideHitResultsProcRunner
 
         public virtual string[] GetDefaultExtensionsToParse()
         {
-            string[] strExtensionsToParse = new string[1];
+            var strExtensionsToParse = new string[1];
 
             strExtensionsToParse[0] = ".*";
 
@@ -253,17 +248,8 @@ namespace PeptideHitResultsProcRunner
         {
             // Returns True if success, False if failure
 
-            bool blnSuccess = false;
-            int intMatchCount = 0;
-
-            string strCleanPath = null;
-            string strInputFolderPath = null;
-
-            FileInfo ioFileInfo = default(FileInfo);
-            DirectoryInfo ioFolderInfo = default(DirectoryInfo);
-
             mAbortProcessing = false;
-            blnSuccess = true;
+            var blnSuccess = true;
             try
             {
                 // Possibly reset the error code
@@ -277,18 +263,19 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 // See if strInputFilePath contains a wildcard (* or ?)
-                if ((strInputFilePath != null) && (strInputFilePath.Contains("*") | strInputFilePath.Contains("?")))
+                if (strInputFilePath != null && (strInputFilePath.Contains("*") | strInputFilePath.Contains("?")))
                 {
                     // Obtain a list of the matching  files
 
                     // Copy the path into strCleanPath and replace any * or ? characters with _
-                    strCleanPath = strInputFilePath.Replace("*", "_");
+                    var strCleanPath = strInputFilePath.Replace("*", "_");
                     strCleanPath = strCleanPath.Replace("?", "_");
 
-                    ioFileInfo = new FileInfo(strCleanPath);
-                    if (ioFileInfo.Directory.Exists)
+                    var cleanFileInfo = new FileInfo(strCleanPath);
+                    string strInputFolderPath;
+                    if (cleanFileInfo.Directory.Exists)
                     {
-                        strInputFolderPath = ioFileInfo.DirectoryName;
+                        strInputFolderPath = cleanFileInfo.DirectoryName;
                     }
                     else
                     {
@@ -296,23 +283,24 @@ namespace PeptideHitResultsProcRunner
                         strInputFolderPath = GetAppFolderPath();
                     }
 
-                    ioFolderInfo = new DirectoryInfo(strInputFolderPath);
+                    var inputFolder = new DirectoryInfo(strInputFolderPath);
 
                     // Remove any directory information from strInputFilePath
                     strInputFilePath = Path.GetFileName(strInputFilePath);
 
-                    intMatchCount = 0;
-                    foreach (FileInfo ioFileMatch in ioFolderInfo.GetFiles(strInputFilePath))
+                    var intMatchCount = 0;
+                    foreach (var inputfile in inputFolder.GetFiles(strInputFilePath))
                     {
                         intMatchCount += 1;
 
-                        blnSuccess = ProcessFile(ioFileMatch.FullName, strOutputFolderPath, strParameterFilePath, blnResetErrorCode);
+                        blnSuccess = ProcessFile(inputfile.FullName, strOutputFolderPath, strParameterFilePath, blnResetErrorCode);
 
                         if (mAbortProcessing)
                         {
                             break;
                         }
-                        else if (!blnSuccess && !mIgnoreErrorsWhenUsingWildcardMatching)
+
+                        if (!blnSuccess && !mIgnoreErrorsWhenUsingWildcardMatching)
                         {
                             break;
                         }
@@ -416,30 +404,23 @@ namespace PeptideHitResultsProcRunner
             //  used to filter the files that are processed
             // If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
 
-            string strCleanPath = null;
-            string strInputFolderPath = null;
-
-            FileInfo ioFileInfo = default(FileInfo);
-            DirectoryInfo ioFolderInfo = default(DirectoryInfo);
-
-            bool blnSuccess = false;
-            int intFileProcessCount = 0;
-            int intFileProcessFailCount = 0;
+            bool blnSuccess;
 
             // Examine strInputFilePathOrFolder to see if it contains a filename; if not, assume it points to a folder
             // First, see if it contains a * or ?
             try
             {
-                if ((strInputFilePathOrFolder != null) && (strInputFilePathOrFolder.Contains("*") | strInputFilePathOrFolder.Contains("?")))
+                string strInputFolderPath;
+                if (strInputFilePathOrFolder != null && (strInputFilePathOrFolder.Contains("*") | strInputFilePathOrFolder.Contains("?")))
                 {
                     // Copy the path into strCleanPath and replace any * or ? characters with _
-                    strCleanPath = strInputFilePathOrFolder.Replace("*", "_");
+                    var strCleanPath = strInputFilePathOrFolder.Replace("*", "_");
                     strCleanPath = strCleanPath.Replace("?", "_");
 
-                    ioFileInfo = new FileInfo(strCleanPath);
-                    if (ioFileInfo.Directory.Exists)
+                    var inputFile = new FileInfo(strCleanPath);
+                    if (inputFile.Directory.Exists)
                     {
-                        strInputFolderPath = ioFileInfo.DirectoryName;
+                        strInputFolderPath = inputFile.DirectoryName;
                     }
                     else
                     {
@@ -452,17 +433,17 @@ namespace PeptideHitResultsProcRunner
                 }
                 else
                 {
-                    ioFolderInfo = new DirectoryInfo(strInputFilePathOrFolder);
-                    if (ioFolderInfo.Exists)
+                    var inputfolder = new DirectoryInfo(strInputFilePathOrFolder);
+                    if (inputfolder.Exists)
                     {
-                        strInputFolderPath = ioFolderInfo.FullName;
+                        strInputFolderPath = inputfolder.FullName;
                         strInputFilePathOrFolder = "*";
                     }
                     else
                     {
-                        if (ioFolderInfo.Parent.Exists)
+                        if (inputfolder.Parent.Exists)
                         {
-                            strInputFolderPath = ioFolderInfo.Parent.FullName;
+                            strInputFolderPath = inputfolder.Parent.FullName;
                             strInputFilePathOrFolder = Path.GetFileName(strInputFilePathOrFolder);
                         }
                         else
@@ -480,9 +461,9 @@ namespace PeptideHitResultsProcRunner
                     {
                         try
                         {
-                            ioFolderInfo = new DirectoryInfo(strOutputFolderAlternatePath);
-                            if (!ioFolderInfo.Exists)
-                                ioFolderInfo.Create();
+                            var outputFolder = new DirectoryInfo(strOutputFolderAlternatePath);
+                            if (!outputFolder.Exists)
+                                outputFolder.Create();
                         }
                         catch (Exception ex)
                         {
@@ -494,8 +475,8 @@ namespace PeptideHitResultsProcRunner
 
                     // Initialize some parameters
                     mAbortProcessing = false;
-                    intFileProcessCount = 0;
-                    intFileProcessFailCount = 0;
+                    var intFileProcessCount = 0;
+                    var intFileProcessFailCount = 0;
 
                     // Call RecurseFoldersWork
                     const int intRecursionLevel = 1;
@@ -522,23 +503,23 @@ namespace PeptideHitResultsProcRunner
 
         private bool RecurseFoldersWork(string strInputFolderPath, string strFileNameMatch, string strOutputFolderName,
             string strParameterFilePath, string strOutputFolderAlternatePath,
-            bool blnRecreateFolderHierarchyInAlternatePath, string[] strExtensionsToParse,
+            bool blnRecreateFolderHierarchyInAlternatePath, IList<string> strExtensionsToParse,
             ref int intFileProcessCount, ref int intFileProcessFailCount,
             int intRecursionLevel, int intRecurseFoldersMaxLevels)
         {
             // If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
 
-            DirectoryInfo ioInputFolderInfo = default(DirectoryInfo);
+            DirectoryInfo inputFolder;
 
-            int intExtensionIndex = 0;
-            bool blnProcessAllExtensions = false;
+            int intExtensionIndex;
+            var blnProcessAllExtensions = false;
 
-            string strOutputFolderPathToUse = null;
-            bool blnSuccess = false;
+            string strOutputFolderPathToUse;
+            bool blnSuccess;
 
             try
             {
-                ioInputFolderInfo = new DirectoryInfo(strInputFolderPath);
+                inputFolder = new DirectoryInfo(strInputFolderPath);
             }
             catch (Exception ex)
             {
@@ -554,7 +535,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (blnRecreateFolderHierarchyInAlternatePath)
                     {
-                        strOutputFolderAlternatePath = Path.Combine(strOutputFolderAlternatePath, ioInputFolderInfo.Name);
+                        strOutputFolderAlternatePath = Path.Combine(strOutputFolderAlternatePath, inputFolder.Name);
                     }
                     strOutputFolderPathToUse = Path.Combine(strOutputFolderAlternatePath, strOutputFolderName);
                 }
@@ -574,7 +555,7 @@ namespace PeptideHitResultsProcRunner
             try
             {
                 // Validate strExtensionsToParse()
-                for (intExtensionIndex = 0; intExtensionIndex <= strExtensionsToParse.Length - 1; intExtensionIndex++)
+                for (intExtensionIndex = 0; intExtensionIndex <= strExtensionsToParse.Count - 1; intExtensionIndex++)
                 {
                     if (strExtensionsToParse[intExtensionIndex] == null)
                     {
@@ -592,10 +573,8 @@ namespace PeptideHitResultsProcRunner
                             blnProcessAllExtensions = true;
                             break;
                         }
-                        else
-                        {
-                            strExtensionsToParse[intExtensionIndex] = strExtensionsToParse[intExtensionIndex].ToUpper();
-                        }
+
+                        strExtensionsToParse[intExtensionIndex] = strExtensionsToParse[intExtensionIndex].ToUpper();
                     }
                 }
             }
@@ -619,13 +598,13 @@ namespace PeptideHitResultsProcRunner
                 // Process any matching files in this folder
                 blnSuccess = true;
 
-                foreach (FileInfo ioFileMatch in ioInputFolderInfo.GetFiles(strFileNameMatch))
+                foreach (var inputfile in inputFolder.GetFiles(strFileNameMatch))
                 {
-                    for (intExtensionIndex = 0; intExtensionIndex <= strExtensionsToParse.Length - 1; intExtensionIndex++)
+                    for (intExtensionIndex = 0; intExtensionIndex <= strExtensionsToParse.Count - 1; intExtensionIndex++)
                     {
-                        if (blnProcessAllExtensions || ioFileMatch.Extension.ToUpper() == strExtensionsToParse[intExtensionIndex])
+                        if (blnProcessAllExtensions || inputfile.Extension.ToUpper() == strExtensionsToParse[intExtensionIndex])
                         {
-                            blnSuccess = ProcessFile(ioFileMatch.FullName, strOutputFolderPathToUse, strParameterFilePath, true);
+                            blnSuccess = ProcessFile(inputfile.FullName, strOutputFolderPathToUse, strParameterFilePath, true);
                             if (!blnSuccess)
                             {
                                 intFileProcessFailCount += 1;
@@ -656,10 +635,10 @@ namespace PeptideHitResultsProcRunner
                 //  otherwise, compare intRecursionLevel to intRecurseFoldersMaxLevels
                 if (intRecurseFoldersMaxLevels <= 0 || intRecursionLevel <= intRecurseFoldersMaxLevels)
                 {
-                    // Call this function for each of the subfolders of ioInputFolderInfo
-                    foreach (DirectoryInfo ioSubFolderInfo in ioInputFolderInfo.GetDirectories())
+                    // Call this function for each of the subfolders of inputFolder
+                    foreach (var subFolder in inputFolder.GetDirectories())
                     {
-                        blnSuccess = RecurseFoldersWork(ioSubFolderInfo.FullName, strFileNameMatch, strOutputFolderName,
+                        blnSuccess = RecurseFoldersWork(subFolder.FullName, strFileNameMatch, strOutputFolderName,
                                                         strParameterFilePath, strOutputFolderAlternatePath,
                                                         blnRecreateFolderHierarchyInAlternatePath, strExtensionsToParse,
                                                         ref intFileProcessCount, ref intFileProcessFailCount,

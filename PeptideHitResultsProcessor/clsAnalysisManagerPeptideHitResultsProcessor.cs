@@ -8,7 +8,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
@@ -37,43 +36,12 @@ namespace PeptideHitResultsProcessor
 
         private string m_ErrMsg = string.Empty;
 
-        private IPeptideHitResultsProcessor.ProcessStatus m_Status;
-        private IPeptideHitResultsProcessor.ProcessResults m_Results;
+        private ProcessStatus m_Status;
+        private ProcessResults m_Results;
 
-        private clsPHRPBaseClass withEventsField_m_PeptideHitResultsProcessor;
-        private clsPHRPBaseClass m_PeptideHitResultsProcessor
-        {
-            get { return withEventsField_m_PeptideHitResultsProcessor; }
-            set
-            {
-                if (withEventsField_m_PeptideHitResultsProcessor != null)
-                {
-                    withEventsField_m_PeptideHitResultsProcessor.ErrorOccurred -= m_PeptideHitResultsProcessor_ErrorOccurred;
-                    withEventsField_m_PeptideHitResultsProcessor.ProgressChanged -= mPeptideHitResultsProcessor_ProgressChanged;
-                    withEventsField_m_PeptideHitResultsProcessor.ProgressComplete -= mPeptideHitResultsProcessor_ProgressComplete;
-                    withEventsField_m_PeptideHitResultsProcessor.ProgressReset -= mPeptideHitResultsProcessor_ProgressReset;
-                }
-                withEventsField_m_PeptideHitResultsProcessor = value;
-                if (withEventsField_m_PeptideHitResultsProcessor != null)
-                {
-                    withEventsField_m_PeptideHitResultsProcessor.ErrorOccurred += m_PeptideHitResultsProcessor_ErrorOccurred;
-                    withEventsField_m_PeptideHitResultsProcessor.ProgressChanged += mPeptideHitResultsProcessor_ProgressChanged;
-                    withEventsField_m_PeptideHitResultsProcessor.ProgressComplete += mPeptideHitResultsProcessor_ProgressComplete;
-                    withEventsField_m_PeptideHitResultsProcessor.ProgressReset += mPeptideHitResultsProcessor_ProgressReset;
-                }
-            }
-        }
+        private clsPHRPBaseClass m_PeptideHitResultsProcessor;
 
         private Thread m_thThread;
-
-        #endregion
-
-        #region "Events"
-        public override event ErrorOccurredEventHandler ErrorOccurred;
-        public override event DebugEventEventHandler DebugEvent;
-
-        // PercentComplete ranges from 0 to 100, but can contain decimal percentage values
-        public override event ProgressChangedEventHandler ProgressChanged;
 
         #endregion
 
@@ -88,18 +56,15 @@ namespace PeptideHitResultsProcessor
 
         public override int DebugLevel { get; set; }
 
-        public override string ErrMsg
-        {
-            get { return m_ErrMsg; }
-        }
+        public override string ErrMsg => m_ErrMsg;
 
         public override string MassCorrectionTagsFileName { get; set; }
 
         [Obsolete("Unused")]
         public override Dictionary<string, string> MiscParams
         {
-            get { return m_MiscParams; }
-            set { m_MiscParams = value; }
+            get => m_MiscParams;
+            set => m_MiscParams = value;
         }
 
         public override string ModificationDefinitionsFileName { get; set; }
@@ -118,7 +83,7 @@ namespace PeptideHitResultsProcessor
         {
             get
             {
-                if ((m_PeptideHitResultsProcessor != null))
+                if (m_PeptideHitResultsProcessor != null)
                 {
                     return m_PeptideHitResultsProcessor.ProgressPercentComplete;
                 }
@@ -134,28 +99,23 @@ namespace PeptideHitResultsProcessor
 
         public override string SourceFolderPath { get; set; }
 
-        public override IPeptideHitResultsProcessor.ProcessStatus Status
-        {
-            get { return m_Status; }
-        }
+        public override ProcessStatus Status => m_Status;
 
-        public override IPeptideHitResultsProcessor.ProcessResults Results
-        {
-            get { return m_Results; }
-        }
+        public override ProcessResults Results => m_Results;
+
         #endregion
 
-        public override IPeptideHitResultsProcessor.ProcessStatus Abort()
+        public override ProcessStatus Abort()
         {
-            if ((m_PeptideHitResultsProcessor != null))
+            if (m_PeptideHitResultsProcessor != null)
             {
-                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ABORTING;
+                m_Status = ProcessStatus.PH_ABORTING;
                 m_PeptideHitResultsProcessor.AbortProcessingNow();
             }
             return m_Status;
         }
 
-        public override void Setup(IPeptideHitResultsProcessor.InitializationParams InitParams)
+        public override void Setup(InitializationParams InitParams)
         {
             //Copies all input data required for plugin operation to appropriate memory variables
             SourceFolderPath = InitParams.SourceFolderPath;
@@ -179,24 +139,24 @@ namespace PeptideHitResultsProcessor
             CreateInspectSynopsisFile = InitParams.CreateInspectSynopsisFile;
         }
 
-        public override IPeptideHitResultsProcessor.ProcessStatus Start()
+        public override ProcessStatus Start()
         {
-            m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_STARTING;
+            m_Status = ProcessStatus.PH_STARTING;
 
             //Verify necessary files are in specified locations
             if (!InitSetup())
             {
-                m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE;
-                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
+                m_Results = ProcessResults.PH_FAILURE;
+                m_Status = ProcessStatus.PH_ERROR;
                 return m_Status;
             }
 
             // Process the results file (the process runs in a separate thread)
             m_Status = ProcessPeptideHitResultsFile();
 
-            if (m_Status == IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR)
+            if (m_Status == ProcessStatus.PH_ERROR)
             {
-                m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE;
+                m_Results = ProcessResults.PH_FAILURE;
             }
 
             return m_Status;
@@ -207,7 +167,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected virtual IPeptideHitResultsProcessor.ProcessStatus ProcessPeptideHitResultsFile()
+        protected virtual ProcessStatus ProcessPeptideHitResultsFile()
         {
             try
             {
@@ -250,9 +210,15 @@ namespace PeptideHitResultsProcessor
                     default:
                         // Unknown format; cannot continue
                         LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " + m_PeptideHitResultsFileFormat.ToString(), null);
-                        m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
+                        m_Status = ProcessStatus.PH_ERROR;
                         return m_Status;
                 }
+
+                RegisterEvents(m_PeptideHitResultsProcessor);
+
+                m_PeptideHitResultsProcessor.ProgressComplete += mPeptideHitResultsProcessor_ProgressComplete;
+                m_PeptideHitResultsProcessor.ProgressReset += mPeptideHitResultsProcessor_ProgressReset;
+
 
                 // Define the auxiliary file paths
                 m_PeptideHitResultsProcessor.MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath;
@@ -266,12 +232,12 @@ namespace PeptideHitResultsProcessor
                 m_thThread = new Thread(ProcessPeptideHitResultsFileWork);
                 m_thThread.Start();
 
-                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_RUNNING;
+                m_Status = ProcessStatus.PH_RUNNING;
             }
             catch (Exception ex)
             {
                 LogErrors("ProcessPeptideHitResultsFile", "Error initializing and running m_PeptideHitResultsProcessor", ex);
-                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
+                m_Status = ProcessStatus.PH_ERROR;
             }
 
             return m_Status;
@@ -279,7 +245,7 @@ namespace PeptideHitResultsProcessor
 
         protected virtual void ProcessPeptideHitResultsFileWork()
         {
-            bool blnSuccess = false;
+            bool blnSuccess;
 
             try
             {
@@ -292,21 +258,21 @@ namespace PeptideHitResultsProcessor
 
             if (blnSuccess)
             {
-                m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_COMPLETE;
+                m_Status = ProcessStatus.PH_COMPLETE;
             }
             else
             {
                 if (m_PeptideHitResultsProcessor.AbortProcessing)
                 {
                     LogErrors("ProcessPeptideHitResultsFileWork", "Processing aborted", null);
-                    m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_ABORTED;
-                    m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ABORTING;
+                    m_Results = ProcessResults.PH_ABORTED;
+                    m_Status = ProcessStatus.PH_ABORTING;
                 }
                 else
                 {
                     LogErrors("ProcessPeptideHitResultsFileWork", m_PeptideHitResultsProcessor.ErrorMessage, null);
-                    m_Results = IPeptideHitResultsProcessor.ProcessResults.PH_FAILURE;
-                    m_Status = IPeptideHitResultsProcessor.ProcessStatus.PH_ERROR;
+                    m_Results = ProcessResults.PH_FAILURE;
+                    m_Status = ProcessStatus.PH_ERROR;
                 }
             }
         }
@@ -329,16 +295,10 @@ namespace PeptideHitResultsProcessor
                 return false;
             }
 
-            if (this.DebugLevel >= 3)
+            if (DebugLevel >= 3)
             {
-                if (DebugEvent != null)
-                {
-                    DebugEvent("Setup params: OutFolderPath = " + OutputFolderPath);
-                }
-                if (DebugEvent != null)
-                {
-                    DebugEvent("Setup params: SourceFolderPath = " + SourceFolderPath);
-                }
+                OnDebugEvent("Setup params: OutFolderPath = " + OutputFolderPath);
+                OnDebugEvent("Setup params: SourceFolderPath = " + SourceFolderPath);
             }
 
             //Source directory exists?
@@ -427,17 +387,14 @@ namespace PeptideHitResultsProcessor
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
             }
 
-            if (this.DebugLevel >= 3)
+            if (DebugLevel >= 3)
             {
-                if (DebugEvent != null)
-                {
-                    DebugEvent("Setup params: AnalysisToolName = " + AnalysisToolName);
-                    DebugEvent("Setup params: PeptideHitResultsFileFormat = " + m_PeptideHitResultsFileFormat.ToString());
+                OnDebugEvent("Setup params: AnalysisToolName = " + AnalysisToolName);
+                OnDebugEvent("Setup params: PeptideHitResultsFileFormat = " + m_PeptideHitResultsFileFormat.ToString());
 
-                    DebugEvent("Setup params: DSName = " + DatasetName);
-                    DebugEvent("Setup params: SettingsFilePath = " + m_SettingsFilePath);
-                    DebugEvent("Setup params: ParameterFilePath = " + m_ParameterFilePath);
-                }
+                OnDebugEvent("Setup params: DSName = " + DatasetName);
+                OnDebugEvent("Setup params: SettingsFilePath = " + m_SettingsFilePath);
+                OnDebugEvent("Setup params: ParameterFilePath = " + m_ParameterFilePath);
             }
 
             //Define the peptide hit results file name
@@ -450,12 +407,9 @@ namespace PeptideHitResultsProcessor
                 m_PeptideHitResultsFilePath = Path.Combine(SourceFolderPath, PeptideHitResultsFileName);
             }
 
-            if (this.DebugLevel >= 3)
+            if (DebugLevel >= 3)
             {
-                if (DebugEvent != null)
-                {
-                    DebugEvent("Setup params: PeptideHitResultsFilePath = " + m_PeptideHitResultsFilePath);
-                }
+                OnDebugEvent("Setup params: PeptideHitResultsFilePath = " + m_PeptideHitResultsFilePath);
             }
 
             //Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
@@ -484,14 +438,11 @@ namespace PeptideHitResultsProcessor
                 m_ModificationDefinitionsFilePath = Path.Combine(SourceFolderPath, ModificationDefinitionsFileName);
             }
 
-            if (this.DebugLevel >= 3)
+            if (DebugLevel >= 3)
             {
-                if (DebugEvent != null)
-                {
-                    DebugEvent("Setup params: PeptideHitResultsFileFormat = " + m_PeptideHitResultsFileFormat.ToString());
-                    DebugEvent("Setup params: MassCorrectionTagsFilePath = " + m_MassCorrectionTagsFilePath);
-                    DebugEvent("Setup params: ModificationDefinitionsFilePath = " + m_ModificationDefinitionsFilePath);
-                }
+                OnDebugEvent("Setup params: PeptideHitResultsFileFormat = " + m_PeptideHitResultsFileFormat.ToString());
+                OnDebugEvent("Setup params: MassCorrectionTagsFilePath = " + m_MassCorrectionTagsFilePath);
+                OnDebugEvent("Setup params: ModificationDefinitionsFilePath = " + m_ModificationDefinitionsFilePath);
             }
 
             //Parameter file exists?
@@ -518,71 +469,16 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private void LogErrors(string strSource, string strMessage, Exception ex, bool blnLogLocalOnly = true)
+        private void LogErrors(string strSource, string strMessage, Exception ex)
         {
             m_ErrMsg = string.Copy(strMessage).Replace("\n", "; ");
 
-            if (ex != null)
+            if (ex?.Message != null && ex.Message.Length > 0)
             {
-                if ((ex.Message != null) && ex.Message.Length > 0)
-                {
-                    m_ErrMsg += "; " + ex.Message;
-                }
+                m_ErrMsg += "; " + ex.Message;
             }
 
-            Trace.WriteLine(System.DateTime.Now.ToLongTimeString() + "; " + m_ErrMsg, strSource);
-            Console.WriteLine(System.DateTime.Now.ToLongTimeString() + "; " + m_ErrMsg, strSource);
-
-            if (ErrorOccurred != null)
-            {
-                ErrorOccurred(m_ErrMsg);
-            }
-        }
-
-        private string strProgressStepDescriptionSaved = string.Empty;
-        private float sngProgressPercentComplete = 0;
-        private void UpdateProgress(string strProgressStepDescription, float sngPercentComplete)
-        {
-            var blnDescriptionChanged = false;
-
-            if (strProgressStepDescription != strProgressStepDescriptionSaved)
-            {
-                blnDescriptionChanged = true;
-            }
-
-            strProgressStepDescriptionSaved = string.Copy(strProgressStepDescription);
-            if (sngPercentComplete < 0)
-            {
-                sngPercentComplete = 0;
-            }
-            else if (sngPercentComplete > 100)
-            {
-                sngPercentComplete = 100;
-            }
-            sngProgressPercentComplete = sngPercentComplete;
-
-            if (blnDescriptionChanged & this.DebugLevel >= 2)
-            {
-                if (Math.Abs(sngProgressPercentComplete) < float.Epsilon)
-                {
-                    if (DebugEvent != null)
-                    {
-                        DebugEvent(strProgressStepDescriptionSaved);
-                    }
-                }
-                else
-                {
-                    if (DebugEvent != null)
-                    {
-                        DebugEvent(strProgressStepDescriptionSaved + " (" + sngProgressPercentComplete.ToString("0.0") + "% complete)");
-                    }
-                }
-            }
-
-            if (ProgressChanged != null)
-            {
-                ProgressChanged(strProgressStepDescription, sngPercentComplete);
-            }
+            OnErrorEvent(strSource + ": " + m_ErrMsg);
         }
 
         protected virtual bool VerifyDirExists(string TestDir)
@@ -593,11 +489,9 @@ namespace PeptideHitResultsProcessor
                 m_ErrMsg = "";
                 return true;
             }
-            else
-            {
-                m_ErrMsg = "Directory " + TestDir + " not found";
-                return false;
-            }
+
+            m_ErrMsg = "Directory " + TestDir + " not found";
+            return false;
         }
 
         protected virtual bool VerifyFileExists(string TestFile)
@@ -608,21 +502,9 @@ namespace PeptideHitResultsProcessor
                 m_ErrMsg = "";
                 return true;
             }
-            else
-            {
-                m_ErrMsg = "File " + TestFile + " not found";
-                return false;
-            }
-        }
 
-        private void m_PeptideHitResultsProcessor_ErrorOccurred(string ErrorMessage)
-        {
-            LogErrors("PeptideHitResultsProcessor", ErrorMessage, null, true);
-        }
-
-        private void mPeptideHitResultsProcessor_ProgressChanged(string taskDescription, float pctComplete)
-        {
-            UpdateProgress(taskDescription, pctComplete);
+            m_ErrMsg = "File " + TestFile + " not found";
+            return false;
         }
 
         private void mPeptideHitResultsProcessor_ProgressComplete()

@@ -30,7 +30,7 @@ namespace PHRPReader
         /// <returns></returns>
         public string Enzyme
         {
-            get { return mEnzyme; }
+            get => mEnzyme;
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -52,7 +52,7 @@ namespace PHRPReader
         /// <remarks>Typically "monoisotopic" or "average"</remarks>
         public string FragmentMassType
         {
-            get { return mFragmentMassType; }
+            get => mFragmentMassType;
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -78,19 +78,13 @@ namespace PHRPReader
         /// Dynamic and static mods to search for
         /// </summary>
         /// <returns></returns>
-        public List<clsModificationDefinition> ModInfo
-        {
-            get { return mModInfo; }
-        }
+        public List<clsModificationDefinition> ModInfo => mModInfo;
 
         /// <summary>
         /// Parameter dictionary (key/value pairs)
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, string> Parameters
-        {
-            get { return mParameters; }
-        }
+        public Dictionary<string, string> Parameters => mParameters;
 
         /// <summary>
         /// Precursor mass tolerance, in Da; 0 if unknown
@@ -111,7 +105,7 @@ namespace PHRPReader
         /// <remarks>Typically "monoisotopic" or "average"</remarks>
         public string PrecursorMassType
         {
-            get { return mPrecursorMassType; }
+            get => mPrecursorMassType;
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
@@ -124,47 +118,25 @@ namespace PHRPReader
         /// Search engine name
         /// </summary>
         /// <returns></returns>
-        public string SearchEngineName
-        {
-            get { return mSearchEngineName; }
-        }
+        public string SearchEngineName => mSearchEngineName;
 
         /// <summary>
         /// Search engine parameter file path
         /// </summary>
         /// <returns></returns>
-        public string SearchEngineParamFilePath
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(mSearchEngineParamFilePath))
-                {
-                    return string.Empty;
-                }
-                else
-                {
-                    return mSearchEngineParamFilePath;
-                }
-            }
-        }
+        public string SearchEngineParamFilePath => string.IsNullOrWhiteSpace(mSearchEngineParamFilePath) ? string.Empty : mSearchEngineParamFilePath;
 
         /// <summary>
         /// Search engine version
         /// </summary>
         /// <returns></returns>
-        public string SearchEngineVersion
-        {
-            get { return mSearchEngineVersion; }
-        }
+        public string SearchEngineVersion => mSearchEngineVersion;
 
         /// <summary>
         /// Search date
         /// </summary>
         /// <returns></returns>
-        public DateTime SearchDate
-        {
-            get { return mSearchDate; }
-        }
+        public DateTime SearchDate => mSearchDate;
 
         #endregion
 
@@ -193,21 +165,14 @@ namespace PHRPReader
         /// <param name="Parameters"></param>
         public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> objModInfo, Dictionary<string, string> Parameters)
         {
-            this.InitializeDefaults();
+            InitializeDefaults();
 
             mSearchEngineName = searchEngineName;
             mSearchEngineParamFilePath = string.Empty;
 
             mModInfo = objModInfo;
 
-            if (objModInfo == null)
-            {
-                mModInfo = new List<clsModificationDefinition>();
-            }
-            else
-            {
-                mModInfo = objModInfo;
-            }
+            mModInfo = objModInfo ?? new List<clsModificationDefinition>();
 
             if (mParameters == null)
             {

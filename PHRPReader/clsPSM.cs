@@ -9,7 +9,6 @@
 //*********************************************************************************************************
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace PHRPReader
 {
@@ -47,10 +46,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>Update scores using SetScore</remarks>
-        public Dictionary<string, string> AdditionalScores
-        {
-            get { return mAdditionalScores; }
-        }
+        public Dictionary<string, string> AdditionalScores => mAdditionalScores;
 
         /// <summary>
         /// Assumed charge of the spectrum in which this peptide was identified
@@ -81,7 +77,7 @@ namespace PHRPReader
 
         public string DataLineText
         {
-            get { return mDataLineText; }
+            get => mDataLineText;
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -125,10 +121,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>A given residue is allowed to have more than one modification</remarks>
-        public List<clsAminoAcidModInfo> ModifiedResidues
-        {
-            get { return mModifiedPeptideResidues; }
-        }
+        public List<clsAminoAcidModInfo> ModifiedResidues => mModifiedPeptideResidues;
 
         /// <summary>
         /// MSGF Spectral E-Value associated with this peptide (aka SpecEValue or SpecProb)
@@ -153,8 +146,8 @@ namespace PHRPReader
         [Obsolete("Use MSGFSpecEValue")]
         public string MSGFSpecProb
         {
-            get { return MSGFSpecEValue; }
-            set { MSGFSpecEValue = value; }
+            get => MSGFSpecEValue;
+            set => MSGFSpecEValue = value;
         }
 
         /// <summary>
@@ -185,10 +178,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string Peptide
-        {
-            get { return mPeptide; }
-        }
+        public string Peptide => mPeptide;
 
         /// <summary>
         /// Peptide residues without any modification symbols or flanking residues
@@ -197,10 +187,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string PeptideCleanSequence
-        {
-            get { return mPeptideCleanSequence; }
-        }
+        public string PeptideCleanSequence => mPeptideCleanSequence;
 
         /// <summary>
         /// Computed monoisotopic mass (uncharged, theoretical mass, including mods)
@@ -219,7 +206,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public string PeptideWithNumericMods
         {
-            get { return mPeptideWithNumericMods; }
+            get => mPeptideWithNumericMods;
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -268,15 +255,9 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> Proteins
-        {
-            get { return mProteins; }
-        }
+        public List<string> Proteins => mProteins;
 
-        public Dictionary<string, clsProteinInfo> ProteinDetails
-        {
-            get { return mProteinDetails; }
-        }
+        public Dictionary<string, clsProteinInfo> ProteinDetails => mProteinDetails;
 
         /// <summary>
         /// ResultID of this peptide (typically assigned by the search engine)
@@ -292,10 +273,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public SortedSet<int> ScanList
-        {
-            get { return mScanList; }
-        }
+        public SortedSet<int> ScanList => mScanList;
 
         /// <summary>
         /// Scan number of the mass spectrum in which this peptide was identified
@@ -306,7 +284,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public int ScanNumber
         {
-            get { return mScanNumber; }
+            get => mScanNumber;
             set
             {
                 mScanNumber = value;
@@ -317,15 +295,9 @@ namespace PHRPReader
             }
         }
 
-        public int ScanNumberStart
-        {
-            get { return mScanList.Min; }
-        }
+        public int ScanNumberStart => mScanList.Min;
 
-        public int ScanNumberEnd
-        {
-            get { return mScanList.Max; }
-        }
+        public int ScanNumberEnd => mScanList.Max;
 
         /// <summary>
         /// Rank of this peptide in the given spectrum
@@ -530,7 +502,7 @@ namespace PHRPReader
                 objNew.AddModifiedResidue(objItem.Residue, objItem.ResidueLocInPeptide, objItem.ResidueTerminusState, objItem.ModDefinition);
             }
 
-            foreach (KeyValuePair<string, string> objScore in mAdditionalScores)
+            foreach (var objScore in mAdditionalScores)
             {
                 objNew.SetScore(objScore.Key, objScore.Value);
             }
@@ -562,7 +534,7 @@ namespace PHRPReader
         /// <returns>Score if defined, otherwise an empty string</returns>
         public string GetScore(string strScoreName)
         {
-            string strScoreValue = string.Empty;
+            var strScoreValue = string.Empty;
             if (mAdditionalScores.TryGetValue(strScoreName, out strScoreValue))
             {
                 return strScoreValue;
@@ -628,7 +600,7 @@ namespace PHRPReader
         public int GetScoreInt(string strScoreName, int intValueIfMissing)
         {
             string strScoreValue = null;
-            int intScore = 0;
+            var intScore = 0;
 
             strScoreValue = GetScore(strScoreName);
             if (!string.IsNullOrEmpty(strScoreValue) && int.TryParse(strScoreValue, out intScore))

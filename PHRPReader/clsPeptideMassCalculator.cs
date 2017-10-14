@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+
 // This class will compute the mass of a given peptide sequence.  The sequence
 //  must consist of only capital letters, though if RemovePrefixAndSuffixIfPresent = True, then
 //  characters up to the first . and after the last . in the sequence will be removed
@@ -102,27 +102,24 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string ErrorMessage
-        {
-            get { return mErrorMessage; }
-        }
+        public string ErrorMessage => mErrorMessage;
 
         public double PeptideCTerminusMass
         {
-            get { return mPeptideCTerminusMass; }
-            set { mPeptideCTerminusMass = value; }
+            get => mPeptideCTerminusMass;
+            set => mPeptideCTerminusMass = value;
         }
 
         public double PeptideNTerminusMass
         {
-            get { return mPeptideNTerminusMass; }
-            set { mPeptideNTerminusMass = value; }
+            get => mPeptideNTerminusMass;
+            set => mPeptideNTerminusMass = value;
         }
 
         public bool RemovePrefixAndSuffixIfPresent
         {
-            get { return mRemovePrefixAndSuffixIfPresent; }
-            set { mRemovePrefixAndSuffixIfPresent = value; }
+            get => mRemovePrefixAndSuffixIfPresent;
+            set => mRemovePrefixAndSuffixIfPresent = value;
         }
         #endregion
 
@@ -213,7 +210,7 @@ namespace PHRPReader
         /// If modification symbols are present, returns -1</remarks>
         public double ComputeSequenceMass(string strSequence)
         {
-            string strPrimarySequence = strSequence;
+            var strPrimarySequence = strSequence;
             double dblMass = 0;
             short intValidResidueCount = 0;
 
@@ -233,7 +230,7 @@ namespace PHRPReader
             }
 
             mErrorMessage = string.Empty;
-            foreach (char chChar in strPrimarySequence)
+            foreach (var chChar in strPrimarySequence)
             {
                 // Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chChar);
@@ -261,7 +258,7 @@ namespace PHRPReader
 
             if (intValidResidueCount > 0)
             {
-                dblMass += (mPeptideNTerminusMass + mPeptideCTerminusMass);
+                dblMass += mPeptideNTerminusMass + mPeptideCTerminusMass;
             }
 
             return dblMass;
@@ -303,7 +300,7 @@ namespace PHRPReader
             // Note that this call to ComputeSequenceMass will reset mErrorMessage
             var dblMass = ComputeSequenceMass(strSequence);
 
-            if (dblMass >= 0 && (modifiedResidues != null) && modifiedResidues.Count > 0)
+            if (dblMass >= 0 && modifiedResidues != null && modifiedResidues.Count > 0)
             {
                 var empiricalFormula = new clsEmpiricalFormula();
 
@@ -362,7 +359,7 @@ namespace PHRPReader
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         public double ComputeSequenceMassNumericMods(string strSequence)
         {
-            string strPrimarySequence = string.Empty;
+            var strPrimarySequence = string.Empty;
 
             if (mRemovePrefixAndSuffixIfPresent)
             {
@@ -474,7 +471,7 @@ namespace PHRPReader
                     else if (intCurrentCharge > 1)
                     {
                         // Convert dblMassMZ to M+H
-                        dblNewMZ = (dblMassMZ * intCurrentCharge) - dblChargeCarrierMass * (intCurrentCharge - 1);
+                        dblNewMZ = dblMassMZ * intCurrentCharge - dblChargeCarrierMass * (intCurrentCharge - 1);
                     }
                     else if (intCurrentCharge == 0)
                     {
@@ -525,7 +522,7 @@ namespace PHRPReader
         {
             var empiricalFormula = new clsEmpiricalFormula();
 
-            foreach (char chAminoAcidSymbol in strSequence)
+            foreach (var chAminoAcidSymbol in strSequence)
             {
                 // Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
@@ -847,7 +844,7 @@ namespace PHRPReader
             // Originally MSGF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
             // It now allows for any element
 
-            MatchCollection reMatches = mAtomicFormulaRegEx.Matches(strEmpiricalformula);
+            var reMatches = mAtomicFormulaRegEx.Matches(strEmpiricalformula);
 
             var empiricalFormula = new clsEmpiricalFormula();
 
@@ -944,7 +941,7 @@ namespace PHRPReader
         {
             for (byte aminoAcidIndex = 0; aminoAcidIndex <= AMINO_ACID_LIST_MAX_INDEX; aminoAcidIndex++)
             {
-                char aminoAcidSymbol = ConvertAminoAcidIndexToChar(aminoAcidIndex);
+                var aminoAcidSymbol = ConvertAminoAcidIndexToChar(aminoAcidIndex);
                 ResetAminoAcidToDefault(aminoAcidSymbol);
             }
         }
@@ -1054,7 +1051,7 @@ namespace PHRPReader
         private void UpdateAminoAcidStatEntry(byte aminoAcidIndex)
         {
             // Use Convert.ToChar to convert from Ascii code to the letter
-            char aminoAcidSymbol = ConvertAminoAcidIndexToChar(aminoAcidIndex);
+            var aminoAcidSymbol = ConvertAminoAcidIndexToChar(aminoAcidIndex);
 
             clsEmpiricalFormula empiricalFormula = null;
             var monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, out empiricalFormula);

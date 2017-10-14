@@ -8,28 +8,28 @@
         public const char N_TERMINAL_PROTEIN_SYMBOL_DMS = '[';
         public const char C_TERMINAL_PROTEIN_SYMBOL_DMS = ']';
 
-        public enum eResidueTerminusStateConstants : int
+        public enum eResidueTerminusStateConstants
         {
-            None = 0,
             // The residue is in the middle of the peptide
-            PeptideNTerminus = 1,
+            None = 0,
+
             // The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
-            PeptideCTerminus = 2,
+            PeptideNTerminus = 1,
+
             // The residue is located at the peptide's C-terminus; superseded by ProteinCTerminus if applicable
-            ProteinNTerminus = 3,
+            PeptideCTerminus = 2,
+
             // The residue is located at the protein's N-terminus
-            ProteinCTerminus = 4,
+            ProteinNTerminus = 3,
+
             // The residue is located at the protein's C-terminus
-            ProteinNandCCTerminus = 5
+            ProteinCTerminus = 4,
+
             // The protein only has one residue
+            ProteinNandCCTerminus = 5
+
         }
         #endregion
-
-        private readonly clsModificationDefinition mModDefinition;
-        private readonly char mResidue;
-        private readonly int mResidueLocInPeptide;
-        private readonly int mEndResidueLocInPeptide;
-        private readonly eResidueTerminusStateConstants mResidueTerminusState;
 
         /// <summary>
         /// True if the location of the modification is ambiguous
@@ -37,10 +37,7 @@
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool AmbiguousMod
-        {
-            get { return mEndResidueLocInPeptide > mResidueLocInPeptide; }
-        }
+        public bool AmbiguousMod => EndResidueLocInPeptide > ResidueLocInPeptide;
 
         /// <summary>
         /// For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, whill be the same as ResidueLocInPeptide
@@ -48,20 +45,11 @@
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public int EndResidueLocInPeptide
-        {
-            get { return mEndResidueLocInPeptide; }
-        }
+        public int EndResidueLocInPeptide { get; }
 
-        public clsModificationDefinition ModDefinition
-        {
-            get { return mModDefinition; }
-        }
+        public clsModificationDefinition ModDefinition { get; }
 
-        public char Residue
-        {
-            get { return mResidue; }
-        }
+        public char Residue { get; }
 
         /// <summary>
         /// Indicates the residue number modified; the first residue is at position 1
@@ -69,32 +57,26 @@
         /// <value></value>
         /// <returns></returns>
         /// <remarks>For ambiguous mods, indicates the first residue on which the mod could appear</remarks>
-        public int ResidueLocInPeptide
-        {
-            get { return mResidueLocInPeptide; }
-        }
+        public int ResidueLocInPeptide { get; }
 
-        public eResidueTerminusStateConstants ResidueTerminusState
-        {
-            get { return mResidueTerminusState; }
-        }
+        public eResidueTerminusStateConstants ResidueTerminusState { get; }
 
         public clsAminoAcidModInfo(char chResidue, int intResidueLocInPeptide, eResidueTerminusStateConstants eResidueTerminusState, clsModificationDefinition objModDefinition)
         {
-            mModDefinition = objModDefinition;
-            mResidue = chResidue;
-            mResidueLocInPeptide = intResidueLocInPeptide;
-            mEndResidueLocInPeptide = mResidueLocInPeptide;
-            mResidueTerminusState = eResidueTerminusState;
+            ModDefinition = objModDefinition;
+            Residue = chResidue;
+            ResidueLocInPeptide = intResidueLocInPeptide;
+            EndResidueLocInPeptide = ResidueLocInPeptide;
+            ResidueTerminusState = eResidueTerminusState;
         }
 
         public clsAminoAcidModInfo(char chResidue, int intResidueLocInPeptide, eResidueTerminusStateConstants eResidueTerminusState, clsModificationDefinition objModDefinition, int intEndResidueLocInPeptide)
         {
-            mModDefinition = objModDefinition;
-            mResidue = chResidue;
-            mResidueLocInPeptide = intResidueLocInPeptide;
-            mEndResidueLocInPeptide = intEndResidueLocInPeptide;
-            mResidueTerminusState = eResidueTerminusState;
+            ModDefinition = objModDefinition;
+            Residue = chResidue;
+            ResidueLocInPeptide = intResidueLocInPeptide;
+            EndResidueLocInPeptide = intEndResidueLocInPeptide;
+            ResidueTerminusState = eResidueTerminusState;
         }
     }
 }

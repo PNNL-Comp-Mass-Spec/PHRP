@@ -71,7 +71,6 @@
     <Compile Include="clsSearchResultsXTandem.cs" />
     <Compile Include="clsSequestResultsProcessor.cs" />
     <Compile Include="clsUniqueSequencesContainer.cs" />
-    <Compile Include="clsXmlSettingsFileAccessor.cs" />
     <Compile Include="clsXTandemResultsProcessor.cs" />
     <Compile Include="IPeptideHitResultsProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,6 +82,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="PRISM-Library">
+      <Version>2.4.36</Version>
+    </PackageReference>
     <PackageReference Include="System.Data.SQLite.Core">
       <Version>1.0.97</Version>
     </PackageReference>

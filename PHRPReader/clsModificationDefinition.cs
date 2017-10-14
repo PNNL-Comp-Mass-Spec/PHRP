@@ -35,7 +35,7 @@ namespace PHRPReader
         public const string UNKNOWN_MOD_BASE_NAME = "UnkMod";
         public const string INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME = UNKNOWN_MOD_BASE_NAME + "00";
 
-        public enum eModificationTypeConstants : int
+        public enum eModificationTypeConstants
         {
             /// <summary>
             /// Unknown mod type on a residue; essentially treated as a dynamic mod
@@ -101,7 +101,7 @@ namespace PHRPReader
         /// </remarks>
         public char ModificationSymbol
         {
-            get { return mModificationSymbol; }
+            get => mModificationSymbol;
             set
             {
                 if (value == default(char))
@@ -123,7 +123,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public double ModificationMass
         {
-            get { return mModificationMass; }
+            get => mModificationMass;
             set
             {
                 mModificationMass = value;
@@ -139,8 +139,8 @@ namespace PHRPReader
         /// <remarks>Represents the original string value read from the data file</remarks>
         public string ModificationMassAsText
         {
-            get { return mModificationMassAsText; }
-            set { mModificationMassAsText = value; }
+            get => mModificationMassAsText;
+            set => mModificationMassAsText = value;
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace PHRPReader
         /// </remarks>
         public string TargetResidues
         {
-            get { return mTargetResidues; }
+            get => mTargetResidues;
             set
             {
                 if (value == null)
@@ -178,8 +178,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public eModificationTypeConstants ModificationType
         {
-            get { return mModificationType; }
-            set { mModificationType = value; }
+            get => mModificationType;
+            set => mModificationType = value;
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace PHRPReader
         /// <remarks>Maximum length is 8 characters; cannot contain a colon, comma, or space</remarks>
         public string MassCorrectionTag
         {
-            get { return mMassCorrectionTag; }
+            get => mMassCorrectionTag;
             set
             {
                 if (value == null)
@@ -215,7 +215,7 @@ namespace PHRPReader
         /// </remarks>
         public char AffectedAtom
         {
-            get { return mAffectedAtom; }
+            get => mAffectedAtom;
             set
             {
                 if (value == default(char))
@@ -237,8 +237,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public int OccurrenceCount
         {
-            get { return mOccurrenceCount; }
-            set { mOccurrenceCount = value; }
+            get => mOccurrenceCount;
+            set => mOccurrenceCount = value;
         }
 
         /// <summary>
@@ -249,8 +249,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool UnknownModAutoDefined
         {
-            get { return mUnknownModAutoDefined; }
-            set { mUnknownModAutoDefined = value; }
+            get => mUnknownModAutoDefined;
+            set => mUnknownModAutoDefined = value;
         }
         #endregion
 
@@ -337,7 +337,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition objA, clsModificationDefinition objB)
         {
-            bool blnEquivalent = false;
+            var blnEquivalent = false;
 
             blnEquivalent = false;
             if (Math.Abs(Math.Round(objA.ModificationMass - objB.ModificationMass, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < float.Epsilon &&
@@ -371,7 +371,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition objA, clsModificationDefinition objB)
         {
-            bool blnEquivalent = false;
+            var blnEquivalent = false;
 
             // First compare objA to objB but ignore .ModificationSymbol and .AffectedResidues
             blnEquivalent = EquivalentMassTypeTagAndAtom(objA, objB);
@@ -386,7 +386,7 @@ namespace PHRPReader
                 {
                     blnEquivalent = true;
                 }
-                else if ((objA.TargetResidues != null) && (objB.TargetResidues != null))
+                else if (objA.TargetResidues != null && objB.TargetResidues != null)
                 {
                     if (objA.ModificationType == eModificationTypeConstants.DynamicMod ||
                         objA.ModificationType == eModificationTypeConstants.StaticMod)
@@ -422,8 +422,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static bool EquivalentTargetResidues(string strResidues1, string strResidues2, bool blnAllowResidues2ToBeSubsetOfResidues1)
         {
-            int intMatchCount = 0;
-            bool blnEquivalent = false;
+            var intMatchCount = 0;
+            var blnEquivalent = false;
 
             blnEquivalent = false;
 
@@ -446,7 +446,7 @@ namespace PHRPReader
                 {
                     // See if each of the residues in strResidues2 is in strResidues1
                     intMatchCount = 0;
-                    foreach (char chChar in strResidues2)
+                    foreach (var chChar in strResidues2)
                     {
                         if (strResidues1.IndexOf(chChar) >= 0)
                         {
@@ -480,7 +480,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool CanAffectPeptideOrProteinTerminus()
         {
-            SortedSet<char> lstTerminalSymbols = GetTerminalSymbols();
+            var lstTerminalSymbols = GetTerminalSymbols();
 
             if (mModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || mModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
             {
@@ -488,7 +488,7 @@ namespace PHRPReader
             }
             else
             {
-                foreach (char chChar in mTargetResidues)
+                foreach (var chChar in mTargetResidues)
                 {
                     if (lstTerminalSymbols.Contains(chChar))
                     {
@@ -506,7 +506,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool CanAffectPeptideResidues()
         {
-            SortedSet<char> lstTerminalSymbols = GetTerminalSymbols();
+            var lstTerminalSymbols = GetTerminalSymbols();
 
             if (mModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || mModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
             {
@@ -520,7 +520,7 @@ namespace PHRPReader
                 }
                 else
                 {
-                    foreach (char chChar in mTargetResidues)
+                    foreach (var chChar in mTargetResidues)
                     {
                         if (!lstTerminalSymbols.Contains(chChar))
                         {
@@ -540,7 +540,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static SortedSet<char> GetTerminalSymbols()
         {
-            SortedSet<char> lstTerminalSymbols = default(SortedSet<char>);
+            var lstTerminalSymbols = default(SortedSet<char>);
 
             lstTerminalSymbols = new SortedSet<char>();
 

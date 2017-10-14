@@ -33,7 +33,6 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 //
 using System;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace PHRPReader
@@ -50,7 +49,7 @@ namespace PHRPReader
         private const string TRYPSIN_LEFT_RESIDUE_REGEX = @"[KR]";
         private const string TRYPSIN_RIGHT_RESIDUE_REGEX = @"[^P]";
 
-        public enum ePeptideCleavageStateConstants : int
+        public enum ePeptideCleavageStateConstants
         {
             Unknown = -1,
             NonSpecific = 0,                   // e.g. Non-tryptic
@@ -58,7 +57,7 @@ namespace PHRPReader
             Full = 2                           // e.g. Fully tryptic
         }
 
-        public enum ePeptideTerminusStateConstants : int
+        public enum ePeptideTerminusStateConstants
         {
             None = 0,                       // The peptide is located in the middle of the protein
             ProteinNTerminus = 1,           // The peptide is located at the protein's N-terminus
@@ -66,7 +65,7 @@ namespace PHRPReader
             ProteinNandCCTerminus = 3       // The peptide spans the entire length of the protein
         }
 
-        public enum eStandardCleavageAgentConstants : int
+        public enum eStandardCleavageAgentConstants
         {
             Trypsin = 0,
             TrypsinWithoutProlineRule = 1,
@@ -116,14 +115,12 @@ namespace PHRPReader
         #region "Properties"
         public udtEnzymeMatchSpecType EnzymeMatchSpec
         {
-            get { return mEnzymeMatchSpec; }
-            set { SetEnzymeMatchSpec(value.LeftResidueRegEx, value.RightResidueRegEx); }
+            get => mEnzymeMatchSpec;
+            set => SetEnzymeMatchSpec(value.LeftResidueRegEx, value.RightResidueRegEx);
         }
 
-        public char[] TerminusSymbols
-        {
-            get { return mTerminusSymbols; }
-        }
+        public char[] TerminusSymbols => mTerminusSymbols;
+
         #endregion
 
         /// <summary>
@@ -160,9 +157,9 @@ namespace PHRPReader
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
         public ePeptideCleavageStateConstants ComputeCleavageState(string strSequenceWithPrefixAndSuffix)
         {
-            string strPrimarySequence = string.Empty;
-            string strPrefix = string.Empty;
-            string strSuffix = string.Empty;
+            var strPrimarySequence = string.Empty;
+            var strPrefix = string.Empty;
+            var strSuffix = string.Empty;
 
             if (SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, out strPrimarySequence, out strPrefix, out strSuffix))
             {
@@ -186,17 +183,17 @@ namespace PHRPReader
         {
             // Determine the cleavage state of strCleanSequence utilizing the rules specified in mEnzymeMatchSpec
 
-            char chSequenceStart = default(char);
-            char chSequenceEnd = default(char);
-            char chPrefix = default(char);
-            char chSuffix = default(char);
+            var chSequenceStart = default(char);
+            var chSequenceEnd = default(char);
+            var chPrefix = default(char);
+            var chSuffix = default(char);
 
-            ePeptideCleavageStateConstants ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
-            ePeptideTerminusStateConstants ePeptideTerminusState = ePeptideTerminusStateConstants.None;
-            bool blnRuleMatchStart = false;
-            bool blnRuleMatchEnd = false;
+            var ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
+            var ePeptideTerminusState = ePeptideTerminusStateConstants.None;
+            var blnRuleMatchStart = false;
+            var blnRuleMatchEnd = false;
 
-            if ((strCleanSequence != null) && strCleanSequence.Length > 0)
+            if (strCleanSequence != null && strCleanSequence.Length > 0)
             {
                 // Find the letter closest to the end of strPrefixResidues
                 chPrefix = FindLetterNearestEnd(strPrefixResidues);
@@ -274,9 +271,9 @@ namespace PHRPReader
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
         public short ComputeNumberOfMissedCleavages(string strSequenceWithPrefixAndSuffix)
         {
-            string strPrimarySequence = string.Empty;
-            string strPrefix = string.Empty;
-            string strSuffix = string.Empty;
+            var strPrimarySequence = string.Empty;
+            var strPrefix = string.Empty;
+            var strSuffix = string.Empty;
             string strPreviousLetter = null;
 
             short intNumMissedCleavages = 0;
@@ -286,9 +283,9 @@ namespace PHRPReader
                 if (!string.IsNullOrWhiteSpace(strPrimarySequence))
                 {
                     strPreviousLetter = "";
-                    for (int intIndex = 0; intIndex <= strPrimarySequence.Length - 1; intIndex++)
+                    for (var intIndex = 0; intIndex <= strPrimarySequence.Length - 1; intIndex++)
                     {
-                        char chCurrent = strPrimarySequence[intIndex];
+                        var chCurrent = strPrimarySequence[intIndex];
 
                         if (clsPHRPReader.IsLetterAtoZ(chCurrent))
                         {
@@ -317,9 +314,9 @@ namespace PHRPReader
         /// <remarks>Peptide must have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
         public ePeptideTerminusStateConstants ComputeTerminusState(string strSequenceWithPrefixAndSuffix)
         {
-            string strPrimarySequence = string.Empty;
-            string strPrefix = string.Empty;
-            string strSuffix = string.Empty;
+            var strPrimarySequence = string.Empty;
+            var strPrefix = string.Empty;
+            var strSuffix = string.Empty;
 
             if (SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, out strPrimarySequence, out strPrefix, out strSuffix))
             {
@@ -340,7 +337,7 @@ namespace PHRPReader
         /// <remarks>For example, if the peptide is -.PEPTIDE.G then pass chPrefix="-" and chSuffix="G"</remarks>
         public ePeptideTerminusStateConstants ComputeTerminusState(char chPrefix, char chSuffix)
         {
-            ePeptideTerminusStateConstants ePeptideTerminusState = ePeptideTerminusStateConstants.None;
+            var ePeptideTerminusState = ePeptideTerminusStateConstants.None;
 
             if (Array.BinarySearch(mTerminusSymbols, chPrefix) >= 0)
             {
@@ -382,9 +379,9 @@ namespace PHRPReader
         {
             // Determine the terminus state of strCleanSequence
 
-            char chPrefix = default(char);
-            char chSuffix = default(char);
-            ePeptideTerminusStateConstants ePeptideTerminusState = ePeptideTerminusStateConstants.None;
+            var chPrefix = default(char);
+            var chSuffix = default(char);
+            var ePeptideTerminusState = ePeptideTerminusStateConstants.None;
 
             if (strCleanSequence == null || strCleanSequence.Length == 0)
             {
@@ -425,9 +422,9 @@ namespace PHRPReader
 
             if (blnCheckForPrefixAndSuffixResidues)
             {
-                string strPrimarySequence = string.Empty;
-                string strPrefix = string.Empty;
-                string strSuffix = string.Empty;
+                var strPrimarySequence = string.Empty;
+                var strPrefix = string.Empty;
+                var strSuffix = string.Empty;
 
                 if (SplitPrefixAndSuffixFromSequence(strSequenceWithMods, out strPrimarySequence, out strPrefix, out strSuffix))
                 {
@@ -440,8 +437,8 @@ namespace PHRPReader
 
         private char FindLetterNearestEnd(string strText)
         {
-            int intIndex = 0;
-            char chMatch = default(char);
+            var intIndex = 0;
+            var chMatch = default(char);
 
             if (strText == null || strText.Length == 0)
             {
@@ -463,8 +460,8 @@ namespace PHRPReader
 
         private char FindLetterNearestStart(string strText)
         {
-            int intIndex = 0;
-            char chMatch = default(char);
+            var intIndex = 0;
+            var chMatch = default(char);
 
             if (strText == null || strText.Length == 0)
             {
@@ -491,7 +488,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static udtEnzymeMatchSpecType GetDefaultEnzymeMatchSpec()
         {
-            udtEnzymeMatchSpecType udtEnzymeMatchSpec = default(udtEnzymeMatchSpecType);
+            var udtEnzymeMatchSpec = default(udtEnzymeMatchSpecType);
             udtEnzymeMatchSpec.LeftResidueRegEx = TRYPSIN_LEFT_RESIDUE_REGEX;
             udtEnzymeMatchSpec.RightResidueRegEx = TRYPSIN_RIGHT_RESIDUE_REGEX;
             return udtEnzymeMatchSpec;
@@ -537,7 +534,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public void SetEnzymeMatchSpec(string strLeftResidueRegEx, string strRightResidueRegEx)
         {
-            if ((strLeftResidueRegEx != null) && (strRightResidueRegEx != null))
+            if (strLeftResidueRegEx != null && strRightResidueRegEx != null)
             {
                 if (strLeftResidueRegEx.Length == 0)
                     strLeftResidueRegEx = @"[A-Z]";
@@ -634,8 +631,8 @@ namespace PHRPReader
             out string strPrefix,
             out string strSuffix)
         {
-            int intPeriodLoc1 = 0;
-            int intPeriodLoc2 = 0;
+            var intPeriodLoc1 = 0;
+            var intPeriodLoc2 = 0;
             var blnSuccess = false;
 
             strPrefix = string.Empty;

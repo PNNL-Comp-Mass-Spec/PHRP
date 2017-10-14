@@ -12,13 +12,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PHRPReader
 {
-    public abstract class clsPHRPParser
+    public abstract class clsPHRPParser : PRISM.clsEventNotifier
     {
         #region "Structures"
         protected struct udtAmbiguousModInfo
@@ -63,15 +61,6 @@ namespace PHRPReader
 
         #endregion
 
-        #region "Events"
-        public event MessageEventEventHandler MessageEvent;
-        public delegate void MessageEventEventHandler(string strMessage);
-        public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string strErrorMessage);
-        public event WarningEventEventHandler WarningEvent;
-        public delegate void WarningEventEventHandler(string strWarningMessage);
-        #endregion
-
         #region "Properties"
 
         /// <summary>
@@ -80,10 +69,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> ErrorMessages
-        {
-            get { return mErrorMessages; }
-        }
+        public List<string> ErrorMessages => mErrorMessages;
 
         /// <summary>
         /// Input file path
@@ -91,10 +77,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string InputFilePath
-        {
-            get { return mInputFilePath; }
-        }
+        public string InputFilePath => mInputFilePath;
 
         /// <summary>
         /// Input folder path
@@ -102,10 +85,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string InputFolderPath
-        {
-            get { return mInputFolderPath; }
-        }
+        public string InputFolderPath => mInputFolderPath;
 
         /// <summary>
         /// Maximum number of proteins to associate with each PSM
@@ -115,8 +95,8 @@ namespace PHRPReader
         /// <remarks>0 means to load all proteins</remarks>
         public int MaxProteinsPerPSM
         {
-            get { return mMaxProteinsPerPSM; }
-            set { mMaxProteinsPerPSM = value; }
+            get => mMaxProteinsPerPSM;
+            set => mMaxProteinsPerPSM = value;
         }
 
         /// <summary>
@@ -125,19 +105,13 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public clsPHRPReader.ePeptideHitResultType PeptideHitResultType
-        {
-            get { return mPeptideHitResultType; }
-        }
+        public clsPHRPReader.ePeptideHitResultType PeptideHitResultType => mPeptideHitResultType;
 
         /// <summary>
         /// Peptide to protein map file name
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, clsPepToProteinMapInfo> PepToProteinMap
-        {
-            get { return mPepToProteinMap; }
-        }
+        public Dictionary<string, clsPepToProteinMapInfo> PepToProteinMap => mPepToProteinMap;
 
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
@@ -145,10 +119,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public SortedList<int, int> ResultToSeqMap
-        {
-            get { return mResultToSeqMap; }
-        }
+        public SortedList<int, int> ResultToSeqMap => mResultToSeqMap;
 
         /// <summary>
         /// Returns the cached sequence info, where key is SeqID
@@ -156,10 +127,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public SortedList<int, clsSeqInfo> SeqInfo
-        {
-            get { return mSeqInfo; }
-        }
+        public SortedList<int, clsSeqInfo> SeqInfo => mSeqInfo;
 
         /// <summary>
         /// Returns the cached sequence to protein map information
@@ -167,10 +135,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public SortedList<int, List<clsProteinInfo>> SeqToProteinMap
-        {
-            get { return mSeqToProteinMap; }
-        }
+        public SortedList<int, List<clsProteinInfo>> SeqToProteinMap => mSeqToProteinMap;
 
         /// <summary>
         /// Cached warning messages
@@ -178,10 +143,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> WarningMessages
-        {
-            get { return mWarningMessages; }
-        }
+        public List<string> WarningMessages => mWarningMessages;
 
         #endregion
 
@@ -249,14 +211,7 @@ namespace PHRPReader
 
             mCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
 
-            if (startupOptions.PeptideMassCalculator == null)
-            {
-                mPeptideMassCalculator = new clsPeptideMassCalculator();
-            }
-            else
-            {
-                mPeptideMassCalculator = startupOptions.PeptideMassCalculator;
-            }
+            mPeptideMassCalculator = startupOptions.PeptideMassCalculator ?? new clsPeptideMassCalculator();
 
             InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions);
         }
@@ -282,7 +237,6 @@ namespace PHRPReader
 
             mMaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM;
 
-            FileInfo fiFileInfo = default(FileInfo);
             var blnIsSynopsisFile = false;
 
             if (string.IsNullOrEmpty(strInputFilePath))
@@ -296,14 +250,14 @@ namespace PHRPReader
             }
             else
             {
-                fiFileInfo = new FileInfo(strInputFilePath);
-                mInputFilePath = fiFileInfo.FullName;
-                mInputFolderPath = fiFileInfo.DirectoryName;
+                var inputFile = new FileInfo(strInputFilePath);
+                mInputFilePath = inputFile.FullName;
+                mInputFolderPath = inputFile.DirectoryName;
 
                 var expectedSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
-                expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(expectedSynopsisName, fiFileInfo.Name);
+                expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(expectedSynopsisName, inputFile.Name);
 
-                if (string.Equals(fiFileInfo.Name, expectedSynopsisName, StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     blnIsSynopsisFile = true;
                 }
@@ -340,7 +294,7 @@ namespace PHRPReader
                 {
                     // Only continue if the fht versions exists
 
-                    string strResultToSeqMapFilePath = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName);
+                    var strResultToSeqMapFilePath = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName);
                     var blnSeqInfoLoaded = false;
 
                     if (!string.IsNullOrEmpty(strResultToSeqMapFilePath))
@@ -515,8 +469,7 @@ namespace PHRPReader
         {
             const string NOT_FOUND = "==SCORE_NOT_FOUND==";
 
-            string strValue = null;
-            strValue = clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders, NOT_FOUND);
+            var strValue = clsPHRPReader.LookupColumnValue(strColumns, strScoreColumnName, mColumnHeaders, NOT_FOUND);
 
             if (strValue != NOT_FOUND)
             {
@@ -542,11 +495,11 @@ namespace PHRPReader
             mWarningMessages.Clear();
         }
 
-        private readonly StringBuilder sbNewPeptide = new StringBuilder();
+        private readonly StringBuilder mNewPeptide = new StringBuilder();
 
-        private string ConvertModsToNumericMods(string strCleanSequence, List<clsAminoAcidModInfo> lstModifiedResidues)
+        private string ConvertModsToNumericMods(string strCleanSequence, IReadOnlyCollection<clsAminoAcidModInfo> lstModifiedResidues)
         {
-            sbNewPeptide.Length = 0;
+            mNewPeptide.Length = 0;
 
             if (lstModifiedResidues == null || lstModifiedResidues.Count == 0)
             {
@@ -555,18 +508,18 @@ namespace PHRPReader
 
             for (var intIndex = 0; intIndex <= strCleanSequence.Length - 1; intIndex++)
             {
-                sbNewPeptide.Append(strCleanSequence[intIndex]);
+                mNewPeptide.Append(strCleanSequence[intIndex]);
 
                 foreach (var objModInfo in lstModifiedResidues)
                 {
                     if (objModInfo.ResidueLocInPeptide == intIndex + 1)
                     {
-                        sbNewPeptide.Append(NumToStringPlusMinus(objModInfo.ModDefinition.ModificationMass, 4));
+                        mNewPeptide.Append(NumToStringPlusMinus(objModInfo.ModDefinition.ModificationMass, 4));
                     }
                 }
             }
 
-            return sbNewPeptide.ToString();
+            return mNewPeptide.ToString();
         }
 
         /// <summary>
@@ -578,11 +531,7 @@ namespace PHRPReader
         /// <remarks>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</remarks>
         private SortedList<int, udtAmbiguousModInfo> ExtractAmbiguousMods(string strSequenceWithMods)
         {
-            string strPrimarySequence = string.Empty;
-            string strPrefix = string.Empty;
-            string strSuffix = string.Empty;
-
-            if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, out strPrimarySequence, out strPrefix, out strSuffix))
+            if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequenceWithMods, out var strPrimarySequence, out _, out _))
             {
                 strPrimarySequence = string.Copy(strSequenceWithMods);
             }
@@ -591,7 +540,7 @@ namespace PHRPReader
 
             var intResidueNumber = 0;
             var blnParsingAmbiguousMod = false;
-            udtAmbiguousModInfo udtCurrentMod = default(udtAmbiguousModInfo);
+            var udtCurrentMod = default(udtAmbiguousModInfo);
 
             for (var intCharIndex = 0; intCharIndex <= strPrimarySequence.Length - 1; intCharIndex++)
             {
@@ -706,7 +655,8 @@ namespace PHRPReader
                 {
                     return true;
                 }
-                else if (int.TryParse(strData, out _))
+
+                if (int.TryParse(strData, out _))
                 {
                     return true;
                 }
@@ -723,28 +673,21 @@ namespace PHRPReader
         /// Reads the data in strModSummaryFilePath.  Populates mModInfo with the modification names, masses, and affected residues
         /// </summary>
         /// <returns>True if success; false if an error</returns>
-        private bool LoadModSummary()
+        private void LoadModSummary()
         {
-            clsPHRPModSummaryReader objModSummaryReader = default(clsPHRPModSummaryReader);
-
-            string strModSummaryFilePath = null;
-            string strModSummaryFilePathPreferred = null;
-
-            bool blnSuccess = false;
-
             try
             {
-                strModSummaryFilePath = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
+                var strModSummaryFilePath = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
                 if (string.IsNullOrEmpty(strModSummaryFilePath))
                 {
                     ReportWarning("ModSummaryFile path is empty; unable to continue");
-                    return false;
+                    return;
                 }
 
                 strModSummaryFilePath = Path.Combine(mInputFolderPath, strModSummaryFilePath);
 
                 strModSummaryFilePath = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(strModSummaryFilePath, mInputFilePath);
-                strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, mInputFilePath);
+                var strModSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(strModSummaryFilePath, mInputFilePath);
                 if (strModSummaryFilePath != strModSummaryFilePathPreferred && File.Exists(strModSummaryFilePathPreferred))
                 {
                     strModSummaryFilePath = strModSummaryFilePathPreferred;
@@ -753,13 +696,13 @@ namespace PHRPReader
                 if (!File.Exists(strModSummaryFilePath))
                 {
                     ReportWarning("ModSummary file not found: " + strModSummaryFilePath);
-                    return false;
+                    return;
                 }
 
                 ShowMessage("Reading the PHRP ModSummary file");
 
-                objModSummaryReader = new clsPHRPModSummaryReader(strModSummaryFilePath);
-                blnSuccess = objModSummaryReader.Success;
+                var objModSummaryReader = new clsPHRPModSummaryReader(strModSummaryFilePath);
+                var blnSuccess = objModSummaryReader.Success;
 
                 if (blnSuccess)
                 {
@@ -769,29 +712,29 @@ namespace PHRPReader
             catch (Exception ex)
             {
                 HandleException("Exception reading PHRP Mod Summary file", ex);
-                return false;
             }
 
-            return blnSuccess;
         }
 
         private bool LoadSeqInfo()
         {
-            bool blnSuccess = false;
-            clsPHRPSeqMapReader objReader = default(clsPHRPSeqMapReader);
+            bool blnSuccess;
 
-            int entriesParsed = 0;
-            DateTime dtLastProgress = DateTime.UtcNow;
-            bool blnNotifyComplete = false;
+            var entriesParsed = 0;
+            var dtLastProgress = DateTime.UtcNow;
+            var blnNotifyComplete = false;
 
             try
             {
                 ShowMessage("Reading the PHRP SeqInfo file");
 
                 // Instantiate the reader
-                objReader = new clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType, mInputFilePath);
+                var objReader =
+                    new clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType, mInputFilePath)
+                    {
+                        MaxProteinsPerSeqID = mMaxProteinsPerPSM
+                    };
 
-                objReader.MaxProteinsPerSeqID = mMaxProteinsPerPSM;
 
                 // Read the files
                 blnSuccess = objReader.GetProteinMapping(out mResultToSeqMap, out mSeqToProteinMap, out mSeqInfo, out mPepToProteinMap);
@@ -807,12 +750,11 @@ namespace PHRPReader
                 {
                     // Populate mResultIDToProteins
 
-                    foreach (KeyValuePair<int, int> objItem in mResultToSeqMap)
+                    foreach (var objItem in mResultToSeqMap)
                     {
-                        List<clsProteinInfo> lstProteinsForSeqID = null;
-                        List<string> lstProteinsForResultID = default(List<string>);
+                        List<string> lstProteinsForResultID;
 
-                        if (mSeqToProteinMap.TryGetValue(objItem.Value, out lstProteinsForSeqID))
+                        if (mSeqToProteinMap.TryGetValue(objItem.Value, out var lstProteinsForSeqID))
                         {
                             lstProteinsForResultID = (from objProtein in lstProteinsForSeqID select objProtein.ProteinName).ToList();
                             // lstProteinsForResultID = new List<string>(lstProteinsForSeqID.Count);
@@ -872,19 +814,19 @@ namespace PHRPReader
         /// Rounds the number to the specified number of digits, trimming off trailing zeros
         /// Example output: +79.9663 or -17.016
         /// </summary>
-        /// <param name="Value"></param>
-        /// <param name="DigitsOfPrecision"></param>
+        /// <param name="value"></param>
+        /// <param name="digitsOfPrecision"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static string NumToStringPlusMinus(double Value, int DigitsOfPrecision)
+        public static string NumToStringPlusMinus(double value, int digitsOfPrecision)
         {
             var strFormatString = "+0;-0";
-            if (DigitsOfPrecision > 0)
+            if (digitsOfPrecision > 0)
             {
-                strFormatString = "+0." + new string('0', DigitsOfPrecision) + ";-0." + new string('0', DigitsOfPrecision);
+                strFormatString = "+0." + new string('0', digitsOfPrecision) + ";-0." + new string('0', digitsOfPrecision);
             }
 
-            string strValue = Value.ToString(strFormatString).TrimEnd('0');
+            var strValue = value.ToString(strFormatString).TrimEnd('0');
 
             if (strValue.EndsWith("."))
             {
@@ -927,43 +869,37 @@ namespace PHRPReader
         /// <remarks>Automatically trims whitespace</remarks>
         public static KeyValuePair<string, string> ParseKeyValueSetting(string strText, char chDelimiter, string strCommentChar)
         {
-            KeyValuePair<string, string> kvSetting = default(KeyValuePair<string, string>);
-            string strKey = null;
-            string strValue = null;
-            int intCharIndex = 0;
+            if (string.IsNullOrEmpty(strText))
+                return new KeyValuePair<string, string>(string.Empty, string.Empty);
 
-            if (!string.IsNullOrEmpty(strText))
+            var intCharIndex = strText.IndexOf(chDelimiter);
+            if (intCharIndex <= 0)
+                return new KeyValuePair<string, string>(string.Empty, string.Empty);
+
+            var strKey = strText.Substring(0, intCharIndex).Trim();
+            string strValue;
+            if (intCharIndex < strText.Length - 1)
             {
-                intCharIndex = strText.IndexOf(chDelimiter);
-                if (intCharIndex > 0)
+                strValue = strText.Substring(intCharIndex + 1).Trim();
+
+                if (!string.IsNullOrEmpty(strCommentChar))
                 {
-                    strKey = strText.Substring(0, intCharIndex).Trim();
-                    if (intCharIndex < strText.Length - 1)
+                    // Look for the comment character
+                    var commentCharIndex = strValue.IndexOf(strCommentChar, StringComparison.Ordinal);
+                    if (commentCharIndex > 0)
                     {
-                        strValue = strText.Substring(intCharIndex + 1).Trim();
-
-                        if (!string.IsNullOrEmpty(strCommentChar))
-                        {
-                            // Look for the comment character
-                            var commentCharIndex = strValue.IndexOf(strCommentChar, StringComparison.Ordinal);
-                            if (commentCharIndex > 0)
-                            {
-                                // Trim off the comment
-                                strValue = strValue.Substring(0, commentCharIndex).Trim();
-                            }
-                        }
+                        // Trim off the comment
+                        strValue = strValue.Substring(0, commentCharIndex).Trim();
                     }
-                    else
-                    {
-                        strValue = string.Empty;
-                    }
-
-                    kvSetting = new KeyValuePair<string, string>(strKey, strValue);
-                    return kvSetting;
                 }
             }
+            else
+            {
+                strValue = string.Empty;
+            }
 
-            return new KeyValuePair<string, string>(string.Empty, string.Empty);
+            var kvSetting = new KeyValuePair<string, string>(strKey, strValue);
+            return kvSetting;
         }
 
         /// <summary>
@@ -982,10 +918,8 @@ namespace PHRPReader
         {
             var paramFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName);
 
-            string errorMessage = null;
-            string warningMessage = null;
             var success = ReadKeyValuePairSearchEngineParamFile(strSearchEngineName, paramFilePath, ePeptideHitResultType, objSearchEngineParams,
-                out errorMessage, out warningMessage);
+                out var errorMessage, out var warningMessage);
 
             if (!string.IsNullOrWhiteSpace(errorMessage))
             {
@@ -1038,15 +972,19 @@ namespace PHRPReader
                 {
                     while (!srInFile.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine().TrimStart();
+                        var lineIn = srInFile.ReadLine();
+                        if (string.IsNullOrEmpty(lineIn))
+                            continue;
 
-                        if (string.IsNullOrWhiteSpace(strLineIn) || strLineIn.StartsWith("#") || !strLineIn.Contains('='))
+                        var dataLine = lineIn.TrimStart();
+
+                        if (string.IsNullOrWhiteSpace(dataLine) || dataLine.StartsWith("#") || !dataLine.Contains('='))
                         {
                             continue;
                         }
 
                         // Split the line on the equals sign
-                        var kvSetting = ParseKeyValueSetting(strLineIn, '=', "#");
+                        var kvSetting = ParseKeyValueSetting(dataLine, '=', "#");
 
                         if (string.IsNullOrEmpty(kvSetting.Key))
                         {
@@ -1058,8 +996,7 @@ namespace PHRPReader
                         {
                             // ModA defines all of its static modifications with the ADD keyword
                             // Split the value at the comma and create a new setting entry with the residue name
-                            string warningMessageAddon = null;
-                            kvSetting = GetMODaStaticModSetting(kvSetting, out warningMessageAddon);
+                            kvSetting = GetMODaStaticModSetting(kvSetting, out var warningMessageAddon);
                             if (!string.IsNullOrWhiteSpace(warningMessageAddon))
                             {
                                 if (string.IsNullOrWhiteSpace(warningMessage))
@@ -1123,10 +1060,14 @@ namespace PHRPReader
                 {
                     while (!srInFile.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine().TrimStart();
+                        var lineIn = srInFile.ReadLine();
+                        if (string.IsNullOrEmpty(lineIn))
+                            continue;
+
+                        var dataLine = lineIn.TrimStart();
 
                         // Split the line on a colon
-                        var kvSetting = ParseKeyValueSetting(strLineIn, ':');
+                        var kvSetting = ParseKeyValueSetting(dataLine, ':');
 
                         switch (kvSetting.Key.ToLower())
                         {
@@ -1145,15 +1086,18 @@ namespace PHRPReader
                                     // The next line contains the search engine version
                                     if (!srInFile.EndOfStream)
                                     {
-                                        strLineIn = srInFile.ReadLine().TrimStart();
-                                        strSearchEngineVersion = string.Copy(strLineIn);
-                                        blnValidVersion = true;
+                                        var searchEngineLine = srInFile.ReadLine();
+                                        if (!string.IsNullOrEmpty(searchEngineLine))
+                                        {
+                                            strSearchEngineVersion = string.Copy(searchEngineLine.Trim());
+                                            blnValidVersion = true;
+                                        }
                                     }
                                 }
                                 break;
                             default:
+                                // Ignore the line
                                 break;
-                            // Ignore the line
                         }
                     }
                 }
@@ -1161,12 +1105,10 @@ namespace PHRPReader
                 if (!blnValidDate)
                 {
                     ReportError("Date line not found in the ToolVersionInfo file");
-                    blnSuccess = false;
                 }
                 else if (!blnValidVersion)
                 {
                     ReportError("ToolVersionInfo line not found in the ToolVersionInfo file");
-                    blnSuccess = false;
                 }
                 else
                 {
@@ -1175,55 +1117,37 @@ namespace PHRPReader
 
                 objSearchEngineParams.UpdateSearchEngineVersion(strSearchEngineVersion);
                 objSearchEngineParams.UpdateSearchDate(dtSearchDate);
+
+                return blnSuccess;
             }
             catch (Exception ex)
             {
                 ReportError("Error in ReadSearchEngineVersion: " + ex.Message);
+                return false;
             }
 
-            return blnSuccess;
         }
 
-        protected void ReportError(string strErrorMessage)
+        protected void ReportError(string message)
         {
-            mErrorMessage = strErrorMessage;
-            mErrorMessages.Add(strErrorMessage);
-            if (ErrorEvent != null)
-            {
-                ErrorEvent(strErrorMessage);
-            }
+            mErrorMessage = message;
+            mErrorMessages.Add(message);
+            OnErrorEvent(message);
         }
 
-        protected void ReportWarning(string strWarningMessage)
+        protected void ReportWarning(string message)
         {
-            mWarningMessages.Add(strWarningMessage);
-            if (WarningEvent != null)
-            {
-                WarningEvent(strWarningMessage);
-            }
+            mWarningMessages.Add(message);
+            OnWarningEvent(message);
         }
 
-        protected void ShowMessage(string strMessage)
+        protected void ShowMessage(string message)
         {
-            if (MessageEvent != null)
-            {
-                MessageEvent(strMessage);
-            }
+            OnStatusEvent(message);
         }
 
         private void StoreModInfo(clsPSM objPSM, clsSeqInfo objSeqInfo)
         {
-            string[] strMods = null;
-            KeyValuePair<string, string> kvModDetails = default(KeyValuePair<string, string>);
-
-            string strMassCorrectionTag = null;
-            int intResidueLoc = 0;
-
-            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState = default(clsAminoAcidModInfo.eResidueTerminusStateConstants);
-
-            bool blnMatchFound = false;
-
-            bool blnFavorTerminalMods = false;
 
             var lstNTerminalModsAdded = new List<string>();
             var lstCTerminalModsAdded = new List<string>();
@@ -1233,115 +1157,118 @@ namespace PHRPReader
 
             objPSM.ClearModifiedResidues();
 
-            if (objSeqInfo.ModCount > 0)
+            if (objSeqInfo.ModCount <= 0)
+                return;
+
+            // Split objSeqInfo.ModDescription on the comma character
+            var strMods = objSeqInfo.ModDescription.Split(',');
+
+            if (strMods.Length <= 0)
+                return;
+
+            // Parse objPSM.Peptide to look for ambiguous mods, for example -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
+
+            var lstAmbiguousMods = ExtractAmbiguousMods(objPSM.Peptide);
+
+            // ReSharper disable once UseImplicitlyTypedVariableEvident
+
+            for (var intModIndex = 0; intModIndex <= strMods.Length - 1; intModIndex++)
             {
-                // Split objSeqInfo.ModDescription on the comma character
-                strMods = objSeqInfo.ModDescription.Split(',');
+                // Split strMods on the colon characters
+                var kvModDetails = ParseKeyValueSetting(strMods[intModIndex], ':');
 
-                if ((strMods != null) && strMods.Count() > 0)
+                if (string.IsNullOrEmpty(kvModDetails.Key) || string.IsNullOrEmpty(kvModDetails.Value))
+                    continue;
+
+                var strMassCorrectionTag = kvModDetails.Key;
+                if (!int.TryParse(kvModDetails.Value, out var intResidueLoc))
+                    continue;
+
+                // Find the modification definition in mModInfo
+                // Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
+                // Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
+
+                bool blnFavorTerminalMods;
+                clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState;
+
+                if (intResidueLoc == 1)
                 {
-                    // Parse objPSM.Peptide to look for ambiguous mods, for example -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
-
-                    var lstAmbiguousMods = ExtractAmbiguousMods(objPSM.Peptide);
-
-                    // ReSharper disable once UseImplicitlyTypedVariableEvident
-
-                    for (int intModIndex = 0; intModIndex <= strMods.Count() - 1; intModIndex++)
+                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
+                    if (lstNTerminalModsAdded.Contains(strMassCorrectionTag))
                     {
-                        // Split strMods on the colon characters
-                        kvModDetails = ParseKeyValueSetting(strMods[intModIndex], ':');
-
-                        if (!string.IsNullOrEmpty(kvModDetails.Key) && !string.IsNullOrEmpty(kvModDetails.Value))
-                        {
-                            strMassCorrectionTag = kvModDetails.Key;
-                            if (int.TryParse(kvModDetails.Value, out intResidueLoc))
-                            {
-                                // Find the modification definition in mModInfo
-                                // Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
-                                // Thus, if intResidueLoc = 1 or intResidueLoc = objPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
-
-                                if (intResidueLoc == 1)
-                                {
-                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
-                                    if (lstNTerminalModsAdded.Contains(strMassCorrectionTag))
-                                    {
-                                        // We have likely already added this modification as an N-terminal mod, thus, don't favor terminal mods this time
-                                        // An example is an iTraq peptide where there is a K at the N-terminus
-                                        // It gets modified with iTraq twice: once because of the N-terminus and once because of Lysine
-                                        // For example, R.K+144.102063+144.102063TGSY+79.9663GALAEITASK+144.102063.E
-                                        blnFavorTerminalMods = false;
-                                    }
-                                    else
-                                    {
-                                        blnFavorTerminalMods = true;
-                                    }
-                                }
-                                else if (intResidueLoc == intPeptideResidueCount)
-                                {
-                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
-                                    if (lstCTerminalModsAdded.Contains(strMassCorrectionTag))
-                                    {
-                                        blnFavorTerminalMods = false;
-                                    }
-                                    else
-                                    {
-                                        blnFavorTerminalMods = true;
-                                    }
-                                }
-                                else
-                                {
-                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None;
-                                    blnFavorTerminalMods = false;
-                                }
-
-                                clsModificationDefinition objMatchedModDef = null;
-
-                                if (mModInfo == null)
-                                {
-                                    objMatchedModDef = new clsModificationDefinition();
-                                    objMatchedModDef.MassCorrectionTag = strMassCorrectionTag;
-                                    blnMatchFound = true;
-                                }
-                                else
-                                {
-                                    blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState,
-                                        out objMatchedModDef);
-                                }
-
-                                if (blnMatchFound)
-                                {
-                                    var lstMatches = (from item in lstAmbiguousMods where item.Key == intResidueLoc select item.Value).ToList();
-
-                                    if (lstMatches.Count > 0)
-                                    {
-                                        // Ambiguous modification
-                                        objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence[intResidueLoc - 1], intResidueLoc,
-                                            eResidueTerminusState, objMatchedModDef, lstMatches.First().ResidueEnd);
-                                    }
-                                    else
-                                    {
-                                        // Normal, non-ambiguous modified residue
-                                        objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence[intResidueLoc - 1], intResidueLoc,
-                                            eResidueTerminusState, objMatchedModDef);
-                                    }
-
-                                    if (intResidueLoc == 1)
-                                    {
-                                        lstNTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag);
-                                    }
-                                    else if (intResidueLoc == intPeptideResidueCount)
-                                    {
-                                        lstCTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag);
-                                    }
-                                }
-                                else
-                                {
-                                    // Could not find a valid entry in mModInfo
-                                    ReportError("Unrecognized mass correction tag found in the SeqInfo file: " + strMassCorrectionTag);
-                                }
-                            }
-                        }
+                        // We have likely already added this modification as an N-terminal mod, thus, don't favor terminal mods this time
+                        // An example is an iTraq peptide where there is a K at the N-terminus
+                        // It gets modified with iTraq twice: once because of the N-terminus and once because of Lysine
+                        // For example, R.K+144.102063+144.102063TGSY+79.9663GALAEITASK+144.102063.E
+                        blnFavorTerminalMods = false;
                     }
+                    else
+                    {
+                        blnFavorTerminalMods = true;
+                    }
+                }
+                else if (intResidueLoc == intPeptideResidueCount)
+                {
+                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
+                    if (lstCTerminalModsAdded.Contains(strMassCorrectionTag))
+                    {
+                        blnFavorTerminalMods = false;
+                    }
+                    else
+                    {
+                        blnFavorTerminalMods = true;
+                    }
+                }
+                else
+                {
+                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None;
+                    blnFavorTerminalMods = false;
+                }
+
+                clsModificationDefinition objMatchedModDef;
+                bool blnMatchFound;
+
+                if (mModInfo == null)
+                {
+                    objMatchedModDef = new clsModificationDefinition {MassCorrectionTag = strMassCorrectionTag};
+                    blnMatchFound = true;
+                }
+                else
+                {
+                    blnMatchFound = UpdatePSMFindMatchingModInfo(strMassCorrectionTag, blnFavorTerminalMods, eResidueTerminusState,
+                                                                 out objMatchedModDef);
+                }
+
+                if (blnMatchFound)
+                {
+                    var lstMatches = (from item in lstAmbiguousMods where item.Key == intResidueLoc select item.Value).ToList();
+
+                    if (lstMatches.Count > 0)
+                    {
+                        // Ambiguous modification
+                        objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence[intResidueLoc - 1], intResidueLoc,
+                                                  eResidueTerminusState, objMatchedModDef, lstMatches.First().ResidueEnd);
+                    }
+                    else
+                    {
+                        // Normal, non-ambiguous modified residue
+                        objPSM.AddModifiedResidue(objPSM.PeptideCleanSequence[intResidueLoc - 1], intResidueLoc,
+                                                  eResidueTerminusState, objMatchedModDef);
+                    }
+
+                    if (intResidueLoc == 1)
+                    {
+                        lstNTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag);
+                    }
+                    else if (intResidueLoc == intPeptideResidueCount)
+                    {
+                        lstCTerminalModsAdded.Add(objMatchedModDef.MassCorrectionTag);
+                    }
+                }
+                else
+                {
+                    // Could not find a valid entry in mModInfo
+                    ReportError("Unrecognized mass correction tag found in the SeqInfo file: " + strMassCorrectionTag);
                 }
             }
         }
@@ -1356,29 +1283,23 @@ namespace PHRPReader
         /// <remarks></remarks>
         protected bool UpdatePSMUsingSeqInfo(clsPSM objPSM)
         {
-            int intSeqID = 0;
-            clsSeqInfo objSeqInfo = null;
-
-            bool blnSuccess = false;
-
-            blnSuccess = false;
+            var blnSuccess = false;
 
             // First determine the modified residues present in this peptide
-            if ((mResultToSeqMap != null) && mResultToSeqMap.Count > 0)
+            if (mResultToSeqMap != null && mResultToSeqMap.Count > 0)
             {
-                if (mResultToSeqMap.TryGetValue(objPSM.ResultID, out intSeqID))
+                if (mResultToSeqMap.TryGetValue(objPSM.ResultID, out var intSeqID))
                 {
                     objPSM.SeqID = intSeqID;
 
-                    if (mSeqInfo.TryGetValue(intSeqID, out objSeqInfo))
+                    if (mSeqInfo.TryGetValue(intSeqID, out var objSeqInfo))
                     {
                         StoreModInfo(objPSM, objSeqInfo);
                         blnSuccess = true;
                     }
 
                     // Lookup the protein details using mSeqToProteinMap
-                    List<clsProteinInfo> lstProteinDetails = null;
-                    if (mSeqToProteinMap.TryGetValue(intSeqID, out lstProteinDetails))
+                    if (mSeqToProteinMap.TryGetValue(intSeqID, out var lstProteinDetails))
                     {
                         foreach (var oProtein in lstProteinDetails)
                         {
@@ -1402,15 +1323,15 @@ namespace PHRPReader
                     }
 
                     // Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
-                    var addnlProteins2 = (from item in objPSM.ProteinDetails select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase);
+                    var addnlProteins2 = (from item in objPSM.ProteinDetails select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase).ToList();
 
-                    int additionThresholdCheck = mMaxProteinsPerPSM;
+                    var additionThresholdCheck = mMaxProteinsPerPSM;
                     if (additionThresholdCheck < int.MaxValue)
                     {
                         additionThresholdCheck += 1;
                     }
 
-                    if (mMaxProteinsPerPSM > 0 && objPSM.Proteins.Count() + addnlProteins2.Count() > additionThresholdCheck)
+                    if (mMaxProteinsPerPSM > 0 && objPSM.Proteins.Count + addnlProteins2.Count > additionThresholdCheck)
                     {
                         // Maximum number of proteins will be reached; only add a subset of the proteins in addnlProteins2
                         // (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
@@ -1434,16 +1355,13 @@ namespace PHRPReader
                     {
                         // Make sure the residue start/end locations are up-to-date in objPSM.ProteinDetails
 
-                        clsPepToProteinMapInfo oPepToProteinMapInfo = null;
-
-                        if (mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, out oPepToProteinMapInfo))
+                        if (mPepToProteinMap.TryGetValue(objPSM.PeptideCleanSequence, out var oPepToProteinMapInfo))
                         {
                             foreach (var oProtein in objPSM.ProteinDetails)
                             {
                                 // Find the matching protein in oPepToProteinMapInfo
-                                List<clsPepToProteinMapInfo.udtProteinLocationInfo> lstLocations = null;
 
-                                if (oPepToProteinMapInfo.ProteinMapInfo.TryGetValue(oProtein.Key, out lstLocations))
+                                if (oPepToProteinMapInfo.ProteinMapInfo.TryGetValue(oProtein.Key, out var lstLocations))
                                 {
                                     var udtFirstLocation = lstLocations.First();
                                     oProtein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd);
@@ -1456,11 +1374,7 @@ namespace PHRPReader
 
             if (blnSuccess)
             {
-                string strPrimarySequence = string.Empty;
-                string strPrefix = string.Empty;
-                string strSuffix = string.Empty;
-
-                if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, out strPrimarySequence, out strPrefix, out strSuffix))
+                if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objPSM.Peptide, out _, out var strPrefix, out var strSuffix))
                 {
                     objPSM.PeptideWithNumericMods = strPrefix + "." + ConvertModsToNumericMods(objPSM.PeptideCleanSequence, objPSM.ModifiedResidues) + "." + strSuffix;
                 }
@@ -1497,7 +1411,7 @@ namespace PHRPReader
                 }
             }
 
-            bool blnMatchFound = false;
+            var blnMatchFound = false;
 
             if (lstMatchedDefs.Count > 0)
             {

@@ -46,7 +46,7 @@ namespace PeptideHitResultsProcessor
 
         public string PeptideNextScore
         {
-            get { return mPeptideNextScore; }
+            get => mPeptideNextScore;
             set
             {
                 mPeptideNextScore = value;

@@ -10,38 +10,20 @@
         private int mResidueStart;                         // Residue number in the protein at which this sequence starts
         private int mResidueEnd;                           // Residue number in the protein at which this sequence ends
 
-        public string ProteinName
-        {
-            get { return mProteinName; }
-        }
+        public string ProteinName => mProteinName;
 
         // ReSharper disable once ConvertToAutoProperty
-        public clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState
-        {
-            get { return mCleavageState; }
-        }
+        public clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState => mCleavageState;
 
-        public int ResidueStart
-        {
-            get { return mResidueStart; }
-        }
+        public int ResidueStart => mResidueStart;
 
-        public int ResidueEnd
-        {
-            get { return mResidueEnd; }
-        }
+        public int ResidueEnd => mResidueEnd;
 
         // ReSharper disable once ConvertToAutoProperty
-        public int SeqID
-        {
-            get { return mSeqID; }
-        }
+        public int SeqID => mSeqID;
 
         // ReSharper disable once ConvertToAutoProperty
-        public clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState
-        {
-            get { return mTerminusState; }
-        }
+        public clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState => mTerminusState;
 
         /// <summary>
         /// Constructor

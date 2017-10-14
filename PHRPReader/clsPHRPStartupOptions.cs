@@ -24,7 +24,7 @@
                 }
                 return mMaxProteinsPerPSM;
             }
-            set { mMaxProteinsPerPSM = value; }
+            set => mMaxProteinsPerPSM = value;
         }
 
         /// <summary>

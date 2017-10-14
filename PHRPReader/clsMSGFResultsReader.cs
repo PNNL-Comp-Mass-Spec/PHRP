@@ -84,16 +84,16 @@ namespace PHRPReader
         /// <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
         public Dictionary<int, string> ReadMSGFData(string strInputFilePath)
         {
-            Dictionary<int, string> lstMSGFData = default(Dictionary<int, string>);
+            var lstMSGFData = default(Dictionary<int, string>);
             lstMSGFData = new Dictionary<int, string>();
 
             string strLineIn = null;
             string[] strSplitLine = null;
-            bool blnHeaderLineParsed = false;
-            bool blnSkipLine = false;
+            var blnHeaderLineParsed = false;
+            var blnSkipLine = false;
 
-            int intLinesRead = 0;
-            int intResultID = 0;
+            var intLinesRead = 0;
+            var intResultID = 0;
             string strMSGFSpecProb = null;
 
             try

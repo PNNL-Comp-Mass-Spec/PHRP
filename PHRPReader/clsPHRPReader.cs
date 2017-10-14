@@ -13,16 +13,15 @@
 //*********************************************************************************************************
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PHRPReader
 {
-    public class clsPHRPReader : IDisposable
+    public class clsPHRPReader : PRISM.clsEventNotifier, IDisposable
     {
         #region "Constants"
 
@@ -69,7 +68,7 @@ namespace PHRPReader
             MSPathFinder = 8
         }
 
-        public enum ePHRPReaderErrorCodes : int
+        public enum ePHRPReaderErrorCodes
         {
             NoError = 0,
             InvalidInputFilePath = 1,
@@ -159,15 +158,6 @@ namespace PHRPReader
 
         #endregion
 
-        #region "Events"
-        public event MessageEventEventHandler MessageEvent;
-        public delegate void MessageEventEventHandler(string strMessage);
-        public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string strErrorMessage);
-        public event WarningEventEventHandler WarningEvent;
-        public delegate void WarningEventEventHandler(string strWarningMessage);
-        #endregion
-
         #region "Properties"
 
         /// <summary>
@@ -176,10 +166,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns>True if the file is readable</returns>
         /// <remarks></remarks>
-        public bool CanRead
-        {
-            get { return mCanRead; }
-        }
+        public bool CanRead => mCanRead;
 
         /// <summary>
         /// Returns the most recently loaded PSM
@@ -187,10 +174,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public clsPSM CurrentPSM
-        {
-            get { return mPSMCurrent; }
-        }
+        public clsPSM CurrentPSM => mPSMCurrent;
 
         /// <summary>
         /// Returns the most recently loaded PSM's sequence info (if available)
@@ -206,12 +190,9 @@ namespace PHRPReader
                 {
                     return null;
                 }
-                else
-                {
-                    clsSeqInfo oSeqInfo = null;
-                    mPHRPParser.SeqInfo.TryGetValue(mPSMCurrent.SeqID, out oSeqInfo);
-                    return oSeqInfo;
-                }
+
+                mPHRPParser.SeqInfo.TryGetValue(mPSMCurrent.SeqID, out var oSeqInfo);
+                return oSeqInfo;
             }
         }
 
@@ -221,10 +202,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string DatasetName
-        {
-            get { return mDatasetName; }
-        }
+        public string DatasetName => mDatasetName;
 
         /// <summary>
         /// If True, then will display messages at the console
@@ -234,8 +212,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool EchoMessagesToConsole
         {
-            get { return mEchoMessagesToConsole; }
-            set { mEchoMessagesToConsole = value; }
+            get => mEchoMessagesToConsole;
+            set => mEchoMessagesToConsole = value;
         }
 
         /// <summary>
@@ -244,10 +222,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> ErrorMessages
-        {
-            get { return mErrorMessages; }
-        }
+        public List<string> ErrorMessages => mErrorMessages;
 
         /// <summary>
         /// Current error message
@@ -255,10 +230,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string ErrorMessage
-        {
-            get { return mErrorMessage; }
-        }
+        public string ErrorMessage => mErrorMessage;
 
         /// <summary>
         /// Used to enable fast read mode when calling MoveNext
@@ -269,7 +241,7 @@ namespace PHRPReader
         /// <remarks>Once FastReadMode is enabled it cannot be turned off (this is a safety measure due to how data is cached)</remarks>
         public bool FastReadMode
         {
-            get { return mFastReadMode; }
+            get => mFastReadMode;
             set
             {
                 if (value)
@@ -286,10 +258,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool LoadModsAndSeqInfo
-        {
-            get { return mStartupOptions.LoadModsAndSeqInfo; }
-        }
+        public bool LoadModsAndSeqInfo => mStartupOptions.LoadModsAndSeqInfo;
 
         /// <summary>
         /// If true, then loads the MSGF SpecProb values from the _MSGF.txt file associated with the input file
@@ -297,10 +266,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool LoadMSGFResults
-        {
-            get { return mStartupOptions.LoadMSGFResults; }
-        }
+        public bool LoadMSGFResults => mStartupOptions.LoadMSGFResults;
 
         /// <summary>
         /// If True, then loads the MASIC _ScanStats.txt file
@@ -308,10 +274,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool LoadScanStatsData
-        {
-            get { return mStartupOptions.LoadScanStatsData; }
-        }
+        public bool LoadScanStatsData => mStartupOptions.LoadScanStatsData;
 
         /// <summary>
         /// The maximum number of proteins that will be tracked for each PSM
@@ -321,8 +284,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public int MaxProteinsPerPSM
         {
-            get { return mStartupOptions.MaxProteinsPerPSM; }
-            set { mStartupOptions.MaxProteinsPerPSM = value; }
+            get => mStartupOptions.MaxProteinsPerPSM;
+            set => mStartupOptions.MaxProteinsPerPSM = value;
         }
 
         /// <summary>
@@ -331,10 +294,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool ModSummaryFileLoaded
-        {
-            get { return mModSummaryFileLoaded; }
-        }
+        public bool ModSummaryFileLoaded => mModSummaryFileLoaded;
 
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB (aka MSGF+)
@@ -350,10 +310,8 @@ namespace PHRPReader
                 {
                     return ePeptideHitResultType.Unknown;
                 }
-                else
-                {
-                    return mPHRPParser.PeptideHitResultType;
-                }
+
+                return mPHRPParser.PeptideHitResultType;
             }
         }
 
@@ -371,10 +329,8 @@ namespace PHRPReader
                 {
                     return mSourceFileLinesRead / Convert.ToSingle(mSourceFileLineCount) * 100f;
                 }
-                else
-                {
-                    return 0;
-                }
+
+                return 0;
             }
         }
 
@@ -384,10 +340,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public clsPHRPParser PHRPParser
-        {
-            get { return mPHRPParser; }
-        }
+        public clsPHRPParser PHRPParser => mPHRPParser;
 
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
@@ -403,10 +356,8 @@ namespace PHRPReader
                 {
                     return new SortedList<int, int>();
                 }
-                else
-                {
-                    return mPHRPParser.ResultToSeqMap;
-                }
+
+                return mPHRPParser.ResultToSeqMap;
             }
         }
 
@@ -424,10 +375,8 @@ namespace PHRPReader
                 {
                     return new SortedList<int, clsSeqInfo>();
                 }
-                else
-                {
-                    return mPHRPParser.SeqInfo;
-                }
+
+                return mPHRPParser.SeqInfo;
             }
         }
 
@@ -445,10 +394,8 @@ namespace PHRPReader
                 {
                     return new SortedList<int, List<clsProteinInfo>>();
                 }
-                else
-                {
-                    return mPHRPParser.SeqToProteinMap;
-                }
+
+                return mPHRPParser.SeqToProteinMap;
             }
         }
 
@@ -460,8 +407,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool SkipDuplicatePSMs
         {
-            get { return mSkipDuplicatePSMs; }
-            set { mSkipDuplicatePSMs = value; }
+            get => mSkipDuplicatePSMs;
+            set => mSkipDuplicatePSMs = value;
         }
 
         /// <summary>
@@ -470,10 +417,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> WarningMessages
-        {
-            get { return mWarningMessages; }
-        }
+        public List<string> WarningMessages => mWarningMessages;
 
         #endregion
 
@@ -558,11 +502,14 @@ namespace PHRPReader
         /// <remarks></remarks>
         public clsPHRPReader(string strInputFilePath, ePeptideHitResultType eResultType, bool blnLoadModsAndSeqInfo, bool blnLoadMSGFResults, bool blnLoadScanStats)
         {
-            var oStartupOptions = new clsPHRPStartupOptions();
-            oStartupOptions.LoadModsAndSeqInfo = blnLoadModsAndSeqInfo;
-            oStartupOptions.LoadMSGFResults = blnLoadMSGFResults;
-            oStartupOptions.LoadScanStatsData = blnLoadScanStats;
-            mStartupOptions = oStartupOptions;
+            var startupOptions = new clsPHRPStartupOptions
+            {
+                LoadModsAndSeqInfo = blnLoadModsAndSeqInfo,
+                LoadMSGFResults = blnLoadMSGFResults,
+                LoadScanStatsData = blnLoadScanStats
+            };
+
+            mStartupOptions = startupOptions;
 
             mMSGFCachedResults = new Dictionary<int, string>();
 
@@ -574,7 +521,7 @@ namespace PHRPReader
             mErrorMessages = new List<string>();
             mWarningMessages = new List<string>();
 
-            InitializeClass(strInputFilePath, eResultType, mStartupOptions);
+            InitializeClass(strInputFilePath, eResultType);
         }
 
         /// <summary>
@@ -582,35 +529,23 @@ namespace PHRPReader
         /// </summary>
         /// <param name="strInputFilePath">Input file to read</param>
         /// <param name="eResultType">Source file PeptideHit result type</param>
-        /// <param name="oStartupOptions">Startup options</param>
+        /// <param name="startupOptions">Startup options</param>
         /// <remarks></remarks>
-        public clsPHRPReader(string strInputFilePath, ePeptideHitResultType eResultType, clsPHRPStartupOptions oStartupOptions)
+        public clsPHRPReader(string strInputFilePath, ePeptideHitResultType eResultType, clsPHRPStartupOptions startupOptions)
         {
-            if (oStartupOptions == null)
-            {
-                throw new ArgumentNullException(nameof(oStartupOptions));
-            }
-
-            mStartupOptions = oStartupOptions;
+            mStartupOptions = startupOptions ?? throw new ArgumentNullException(nameof(startupOptions));
 
             mMSGFCachedResults = new Dictionary<int, string>();
 
             mDynamicMods = new SortedDictionary<char, clsModificationDefinition>();
             mStaticMods = new SortedDictionary<string, List<clsModificationDefinition>>();
 
-            if (oStartupOptions.PeptideMassCalculator == null)
-            {
-                mPeptideMassCalculator = new clsPeptideMassCalculator();
-            }
-            else
-            {
-                mPeptideMassCalculator = oStartupOptions.PeptideMassCalculator;
-            }
+            mPeptideMassCalculator = startupOptions.PeptideMassCalculator ?? new clsPeptideMassCalculator();
 
             mErrorMessages = new List<string>();
             mWarningMessages = new List<string>();
 
-            InitializeClass(strInputFilePath, eResultType, mStartupOptions);
+            InitializeClass(strInputFilePath, eResultType);
         }
 
         /// <summary>
@@ -627,28 +562,26 @@ namespace PHRPReader
                 return strFilePath;
             }
 
-            var fiBasePHRPFile = new FileInfo(strBasePHRPFileName);
-            if (fiBasePHRPFile.Name.ToLower().Contains("_fht"))
+            var basePHRPFile = new FileInfo(strBasePHRPFileName);
+            if (basePHRPFile.Name.ToLower().Contains("_fht"))
             {
                 // strBasePHRPFileName is first-hits-file based
 
-                var fiFileInfo = new FileInfo(strFilePath);
-                var synIndex = fiFileInfo.Name.LastIndexOf("_syn", StringComparison.InvariantCultureIgnoreCase);
+                var firstHitsFile= new FileInfo(strFilePath);
+                var synIndex = firstHitsFile.Name.LastIndexOf("_syn", StringComparison.InvariantCultureIgnoreCase);
                 if (synIndex > 0)
                 {
                     // strFilePath is synopsis-file based
                     // Change strFilePath to contain _fht instead of _syn
 
-                    var strFilePathFHT = fiFileInfo.Name.Substring(0, synIndex) + "_fht" + fiFileInfo.Name.Substring(synIndex + "_syn".Length);
+                    var strFilePathFHT = firstHitsFile.Name.Substring(0, synIndex) + "_fht" + firstHitsFile.Name.Substring(synIndex + "_syn".Length);
 
                     if (Path.IsPathRooted(strFilePath))
                     {
-                        return Path.Combine(fiFileInfo.DirectoryName, strFilePathFHT);
+                        return Path.Combine(firstHitsFile.DirectoryName, strFilePathFHT);
                     }
-                    else
-                    {
-                        return strFilePathFHT;
-                    }
+
+                    return strFilePathFHT;
                 }
             }
 
@@ -664,25 +597,23 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string AutoSwitchToLegacyMSGFDBIfRequired(string strFilePath, string strBasePHRPFileName)
         {
-            var fiBasePHRPFile = new FileInfo(strBasePHRPFileName);
-            if (fiBasePHRPFile.Name.ToLower().Contains("_msgfdb"))
+            var basePHRPFile = new FileInfo(strBasePHRPFileName);
+            if (basePHRPFile.Name.ToLower().Contains("_msgfdb"))
             {
-                var fiFileInfo = new FileInfo(strFilePath);
-                var charIndex = fiFileInfo.Name.LastIndexOf("_msgfplus", StringComparison.InvariantCultureIgnoreCase);
+                var dataFile = new FileInfo(strFilePath);
+                var charIndex = dataFile.Name.LastIndexOf("_msgfplus", StringComparison.InvariantCultureIgnoreCase);
                 if (charIndex > 0)
                 {
                     // strFilePath has _msgfplus but should have _msgfdb
 
-                    var strFilePathNew = fiFileInfo.Name.Substring(0, charIndex) + "_msgfdb" + fiFileInfo.Name.Substring(charIndex + "_msgfplus".Length);
+                    var strFilePathNew = dataFile.Name.Substring(0, charIndex) + "_msgfdb" + dataFile.Name.Substring(charIndex + "_msgfplus".Length);
 
                     if (Path.IsPathRooted(strFilePath))
                     {
-                        return Path.Combine(fiFileInfo.DirectoryName, strFilePathNew);
+                        return Path.Combine(dataFile.DirectoryName, strFilePathNew);
                     }
-                    else
-                    {
-                        return strFilePathNew;
-                    }
+
+                    return strFilePathNew;
                 }
             }
 
@@ -696,15 +627,12 @@ namespace PHRPReader
         public void ClearErrors()
         {
             mErrorMessages.Clear();
-            if ((mPHRPParser != null))
-            {
-                mPHRPParser.ClearErrors();
-            }
+            mPHRPParser?.ClearErrors();
         }
 
         private int CountLines(string strTextFilePath)
         {
-            int intTotalLines = 0;
+            int intTotalLines;
 
             try
             {
@@ -733,10 +661,7 @@ namespace PHRPReader
         public void ClearWarnings()
         {
             mWarningMessages.Clear();
-            if ((mPHRPParser != null))
-            {
-                mPHRPParser.ClearWarnings();
-            }
+            mPHRPParser?.ClearWarnings();
         }
 
         /// <summary>
@@ -744,20 +669,19 @@ namespace PHRPReader
         /// </summary>
         /// <param name="strInputFilePath">Input file to read</param>
         /// <param name="eResultType">Source file PeptideHit result type</param>
-        /// <param name="oStartupOptions">Startup options</param>
         /// <remarks></remarks>
-        private void InitializeClass(string strInputFilePath, ePeptideHitResultType eResultType, clsPHRPStartupOptions oStartupOptions)
+        private void InitializeClass(string strInputFilePath, ePeptideHitResultType eResultType)
         {
             mInitialized = false;
 
-            InitializeMemberVariables(oStartupOptions);
+            InitializeMemberVariables();
 
             InitializeReader(strInputFilePath, eResultType);
 
             mInitialized = true;
         }
 
-        private void InitializeMemberVariables(clsPHRPStartupOptions oStartupOptions)
+        private void InitializeMemberVariables()
         {
             mDatasetName = string.Empty;
             mInputFilePath = string.Empty;
@@ -776,84 +700,78 @@ namespace PHRPReader
             mSourceFileLineCount = 0;
         }
 
-        private bool InitializeReader(string strInputFilePath, ePeptideHitResultType eResultType)
+        private void InitializeReader(string strInputFilePath, ePeptideHitResultType eResultType)
         {
-            string strModSummaryFilePath = string.Empty;
-
-            bool blnSuccess = false;
+            var strModSummaryFilePath = string.Empty;
 
             try
             {
-                if (strInputFilePath == null || strInputFilePath.Length == 0)
+                if (string.IsNullOrEmpty(strInputFilePath))
                 {
                     ReportError("Input file name is empty");
                     SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
                     if (!mInitialized)
                         throw new FileNotFoundException(mErrorMessage);
-                    return false;
+                    return;
                 }
-                else
+
+                // Confirm that the source file exists
+                // Make sure strInputFilePath points to a valid file
+                var inputFile = new FileInfo(strInputFilePath);
+
+                mInputFolderPath = inputFile.DirectoryName;
+                mInputFilePath = inputFile.FullName;
+
+                if (!inputFile.Exists)
                 {
-                    // Confirm that the source file exists
-                    // Make sure strInputFilePath points to a valid file
-                    var fiFileInfo = new FileInfo(strInputFilePath);
+                    ReportError("Input file not found: " + strInputFilePath);
+                    SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
+                    if (!mInitialized)
+                        throw new FileNotFoundException(mErrorMessage);
+                    return;
+                }
 
-                    mInputFolderPath = fiFileInfo.DirectoryName;
-                    mInputFilePath = fiFileInfo.FullName;
+                // Note that the following populates mDatasetName
+                var blnSuccess = ValidateInputFiles(strInputFilePath, ref eResultType, ref strModSummaryFilePath);
+                if (!blnSuccess)
+                {
+                    SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, true);
+                    if (!mInitialized)
+                        throw new FileNotFoundException(mErrorMessage);
+                    return;
+                }
 
-                    if (!fiFileInfo.Exists)
+                // Open the input file for reading
+                // Note that this will also load the MSGFSpecEValue info and ScanStats info
+                blnSuccess = InitializeParser(eResultType);
+
+                if (blnSuccess && mStartupOptions.LoadModsAndSeqInfo)
+                {
+                    // Read the PHRP Mod Summary File to populate mDynamicMods and mStaticMods
+                    // Note that the PHRPParser also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo.txt file is not found
+                    blnSuccess = ReadModSummaryFile(strModSummaryFilePath, mDynamicMods, mStaticMods);
+                    if (!blnSuccess)
                     {
-                        ReportError("Input file not found: " + strInputFilePath);
-                        SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
-                        if (!mInitialized)
-                            throw new FileNotFoundException(mErrorMessage);
-                        return false;
+                        mModSummaryFileLoaded = false;
+                        blnSuccess = true;
                     }
                     else
                     {
-                        // Note that the following populates mDatasetName
-                        blnSuccess = ValidateInputFiles(strInputFilePath, ref eResultType, ref strModSummaryFilePath);
-                        if (!blnSuccess)
-                        {
-                            SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, true);
-                            if (!mInitialized)
-                                throw new FileNotFoundException(mErrorMessage);
-                            return false;
-                        }
-
-                        // Open the input file for reading
-                        // Note that this will also load the MSGFSpecEValue info and ScanStats info
-                        blnSuccess = InitializeParser(eResultType);
-
-                        if (blnSuccess && mStartupOptions.LoadModsAndSeqInfo)
-                        {
-                            // Read the PHRP Mod Summary File to populate mDynamicMods and mStaticMods
-                            // Note that the PHRPParser also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo.txt file is not found
-                            blnSuccess = ReadModSummaryFile(strModSummaryFilePath, mDynamicMods, mStaticMods);
-                            if (!blnSuccess)
-                            {
-                                mModSummaryFileLoaded = false;
-                                blnSuccess = true;
-                            }
-                            else
-                            {
-                                mModSummaryFileLoaded = true;
-                            }
-                        }
-
-                        if (blnSuccess && mStartupOptions.LoadMSGFResults)
-                        {
-                            // Cache the MSGF values (if present)
-                            ReadAndCacheMSGFData();
-                        }
-
-                        if (blnSuccess && mStartupOptions.LoadScanStatsData)
-                        {
-                            // Cache the Scan Stats values (if present)
-                            ReadScanStatsData();
-                            ReadExtendedScanStatsData();
-                        }
+                        mModSummaryFileLoaded = true;
                     }
+                }
+
+                if (blnSuccess && mStartupOptions.LoadMSGFResults)
+                {
+                    // Cache the MSGF values (if present)
+                    ReadAndCacheMSGFData();
+                }
+
+                if (blnSuccess && mStartupOptions.LoadScanStatsData)
+                {
+                    // Cache the Scan Stats values (if present)
+                    ReadScanStatsData();
+                    ReadExtendedScanStatsData();
                 }
             }
             catch (Exception ex)
@@ -862,14 +780,12 @@ namespace PHRPReader
                 if (!mInitialized)
                     throw new Exception(mErrorMessage, ex);
             }
-
-            return blnSuccess;
         }
 
         private bool InitializeParser(ePeptideHitResultType eResultType)
         {
             var blnSuccess = true;
-            string strDatasetName = string.Copy(mDatasetName);
+            var strDatasetName = string.Copy(mDatasetName);
 
             try
             {
@@ -880,20 +796,20 @@ namespace PHRPReader
                         ReportError("Dataset name is undefined; unable to continue since loading ModsAndSeqInfo");
                         return false;
                     }
-                    else if (mStartupOptions.LoadMSGFResults)
+
+                    if (mStartupOptions.LoadMSGFResults)
                     {
                         ReportError("Dataset name is undefined; unable to continue since loading MSGF results");
                         return false;
                     }
-                    else if (mStartupOptions.LoadScanStatsData)
+
+                    if (mStartupOptions.LoadScanStatsData)
                     {
                         ReportError("Dataset name is undefined; unable to continue since loading ScanStatsData");
                         return false;
                     }
-                    else
-                    {
-                        strDatasetName = "Unknown_Dataset";
-                    }
+
+                    strDatasetName = "Unknown_Dataset";
                 }
 
                 // Initialize some tracking variables
@@ -951,44 +867,47 @@ namespace PHRPReader
                         break;
                 }
 
-                if (blnSuccess)
+                if (!blnSuccess)
                 {
-                    // Attach the event handlers
-                    mPHRPParser.ErrorEvent += mPHRPParser_ErrorEvent;
-                    mPHRPParser.MessageEvent += mPHRPParser_MessageEvent;
-                    mPHRPParser.WarningEvent += mPHRPParser_WarningEvent;
-
-                    // Report any errors cached during instantiation of mPHRPParser
-                    foreach (var strMessage in mPHRPParser.ErrorMessages)
-                    {
-                        ReportError(strMessage);
-                    }
-
-                    // Report any warnings cached during instantiation of mPHRPParser
-                    foreach (var strMessage in mPHRPParser.WarningMessages)
-                    {
-                        ReportWarning(strMessage);
-                    }
-
-                    mPHRPParser.ClearErrors();
-                    mPHRPParser.ClearWarnings();
-
-                    // Open the data file and count the number of lines so that we can compute progress
-                    mSourceFileLineCount = CountLines(mInputFilePath);
-
-                    // Open the data file for reading
-                    mSourceFile = new StreamReader(new FileStream(mInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                    mCanRead = true;
+                    return false;
                 }
+
+                // Attach the event handlers
+                RegisterEvents(mPHRPParser);
+
+                // Report any errors cached during instantiation of mPHRPParser
+                foreach (var strMessage in mPHRPParser.ErrorMessages)
+                {
+                    ReportError(strMessage);
+                }
+
+                // Report any warnings cached during instantiation of mPHRPParser
+                foreach (var strMessage in mPHRPParser.WarningMessages)
+                {
+                    ReportWarning(strMessage);
+                }
+
+                mPHRPParser.ClearErrors();
+                mPHRPParser.ClearWarnings();
+
+                // Open the data file and count the number of lines so that we can compute progress
+                mSourceFileLineCount = CountLines(mInputFilePath);
+
+                // Open the data file for reading
+                mSourceFile = new StreamReader(new FileStream(mInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                mCanRead = true;
+
+                return true;
             }
             catch (Exception ex)
             {
                 HandleException("Error in InitializeParser", ex);
                 if (!mInitialized)
                     throw new Exception(mErrorMessage, ex);
+
+                return false;
             }
 
-            return blnSuccess;
         }
 
         /// <summary>
@@ -1000,8 +919,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string AutoDetermineBestInputFile(string inputFolderPath)
         {
-            var eMatchedResultType = ePeptideHitResultType.Unknown;
-            return AutoDetermineBestInputFile(inputFolderPath, out eMatchedResultType);
+            return AutoDetermineBestInputFile(inputFolderPath, out _);
         }
 
         /// <summary>
@@ -1017,20 +935,16 @@ namespace PHRPReader
         {
             // Find candidate dataset names in strInputFolderPath
 
-            DirectoryInfo fiInputFolder = default(DirectoryInfo);
             var lstDatasetNames = new SortedSet<string>(StringComparer.CurrentCultureIgnoreCase);
             var lstFileSpec = new List<string>();
-
-            string strDataset = null;
-            int intCharIndex = 0;
 
             if (string.IsNullOrWhiteSpace(inputFolderPath))
             {
                 throw new DirectoryNotFoundException("Input folder path is empty");
             }
 
-            fiInputFolder = new DirectoryInfo(inputFolderPath);
-            if (!fiInputFolder.Exists)
+            var inputFolder = new DirectoryInfo(inputFolderPath);
+            if (!inputFolder.Exists)
             {
                 throw new DirectoryNotFoundException("Input folder not found: " + inputFolderPath);
             }
@@ -1075,11 +989,11 @@ namespace PHRPReader
 
             foreach (var strFileSpec in lstFileSpec)
             {
-                foreach (var fiFile in fiInputFolder.GetFiles("*" + strFileSpec))
+                foreach (var dataFile in inputFolder.GetFiles("*" + strFileSpec))
                 {
-                    strDataset = fiFile.Name;
+                    var strDataset = dataFile.Name;
 
-                    intCharIndex = strDataset.ToLower().IndexOf(strFileSpec, StringComparison.Ordinal);
+                    var intCharIndex = strDataset.ToLower().IndexOf(strFileSpec, StringComparison.Ordinal);
                     if (intCharIndex > 0)
                     {
                         strDataset = strDataset.Substring(0, intCharIndex);
@@ -1117,8 +1031,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string AutoDetermineBestInputFile(string strInputFolderPath, string strDatasetName)
         {
-            var eMatchedResultType = ePeptideHitResultType.Unknown;
-            return AutoDetermineBestInputFile(strInputFolderPath, strDatasetName, out eMatchedResultType);
+            return AutoDetermineBestInputFile(strInputFolderPath, strDatasetName, out _);
         }
 
         /// <summary>
@@ -1133,8 +1046,9 @@ namespace PHRPReader
         public static string AutoDetermineBestInputFile(string strInputFolderPath, string strDatasetName,
             out ePeptideHitResultType eMatchedResultType)
         {
-            var lstDatasetNames = new List<string>();
-            lstDatasetNames.Add(strDatasetName);
+            var lstDatasetNames = new List<string> {
+                strDatasetName
+            };
 
             return AutoDetermineBestInputFile(strInputFolderPath, lstDatasetNames, out eMatchedResultType);
         }
@@ -1151,17 +1065,11 @@ namespace PHRPReader
         public static string AutoDetermineBestInputFile(string strInputFolderPath, List<string> lstDatasetNames,
             out ePeptideHitResultType eMatchedResultType)
         {
-            DirectoryInfo fiInputFolder = default(DirectoryInfo);
-
-            // Items in this list are KeyValuePairs where the key is a filename to look for and the value is a PeptideHitResultType
-            List<KeyValuePair<string, ePeptideHitResultType>> lstFilesToFind = default(List<KeyValuePair<string, ePeptideHitResultType>>);
-
             // This list contains the standard PHRP file suffixes
-            List<string> lstAuxiliaryFileSuffixes = GetPHRPAuxiliaryFileSuffixes();
+            var lstAuxiliaryFileSuffixes = GetPHRPAuxiliaryFileSuffixes();
 
             // The key in this variable is the full path to the best Synopsis or First hits file and the value is the number of PHRP-related auxiliary files
-            KeyValuePair<string, int> kvBestSynOrFHTFile = default(KeyValuePair<string, int>);
-            kvBestSynOrFHTFile = new KeyValuePair<string, int>(string.Empty, 0);
+            var kvBestSynOrFHTFile = new KeyValuePair<string, int>(string.Empty, 0);
 
             // Set the matched result type to Unknown for now
             eMatchedResultType = ePeptideHitResultType.Unknown;
@@ -1171,8 +1079,8 @@ namespace PHRPReader
                 throw new DirectoryNotFoundException("Input folder path is empty");
             }
 
-            fiInputFolder = new DirectoryInfo(strInputFolderPath);
-            if (!fiInputFolder.Exists)
+            var inputFolder = new DirectoryInfo(strInputFolderPath);
+            if (!inputFolder.Exists)
             {
                 throw new DirectoryNotFoundException("Input folder not found: " + strInputFolderPath);
             }
@@ -1183,9 +1091,10 @@ namespace PHRPReader
             }
 
             // Construct a list of the files to search for
-            lstFilesToFind = new List<KeyValuePair<string, ePeptideHitResultType>>();
+            // Items in this list are KeyValuePairs where the key is a filename to look for and the value is a PeptideHitResultType
+            var lstFilesToFind = new List<KeyValuePair<string, ePeptideHitResultType>>();
 
-            foreach (string strDataset in lstDatasetNames)
+            foreach (var strDataset in lstDatasetNames)
             {
                 // MSGF+
                 lstFilesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(strDataset), ePeptideHitResultType.MSGFDB));
@@ -1224,22 +1133,21 @@ namespace PHRPReader
                 lstFilesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserSequest.GetPHRPFirstHitsFileName(strDataset), ePeptideHitResultType.Sequest));
             }
 
-            foreach (KeyValuePair<string, ePeptideHitResultType> kvFileToFind in lstFilesToFind)
+            foreach (var kvFileToFind in lstFilesToFind)
             {
                 if (!string.IsNullOrEmpty(kvFileToFind.Key))
                 {
-                    var fiSynOrFHTFile = new FileInfo(Path.Combine(fiInputFolder.FullName, kvFileToFind.Key));
+                    var synOrFHTFile = new FileInfo(Path.Combine(inputFolder.FullName, kvFileToFind.Key));
 
-                    if (fiSynOrFHTFile.Exists)
+                    if (synOrFHTFile.Exists)
                     {
                         // Match found
                         // Look for PHRP-related auxiliary files
 
                         var intAuxFileCount = 0;
-                        string strBaseName = null;
-                        strBaseName = Path.Combine(fiSynOrFHTFile.Directory.FullName, Path.GetFileNameWithoutExtension(fiSynOrFHTFile.Name));
+                        var strBaseName = Path.Combine(synOrFHTFile.Directory.FullName, Path.GetFileNameWithoutExtension(synOrFHTFile.Name));
 
-                        foreach (string strSuffix in lstAuxiliaryFileSuffixes)
+                        foreach (var strSuffix in lstAuxiliaryFileSuffixes)
                         {
                             if (File.Exists(strBaseName + strSuffix))
                             {
@@ -1249,7 +1157,7 @@ namespace PHRPReader
 
                         if (string.IsNullOrEmpty(kvBestSynOrFHTFile.Key) || intAuxFileCount > kvBestSynOrFHTFile.Value)
                         {
-                            kvBestSynOrFHTFile = new KeyValuePair<string, int>(fiSynOrFHTFile.FullName, intAuxFileCount);
+                            kvBestSynOrFHTFile = new KeyValuePair<string, int>(synOrFHTFile.FullName, intAuxFileCount);
                             eMatchedResultType = kvFileToFind.Value;
                         }
                     }
@@ -1289,9 +1197,7 @@ namespace PHRPReader
         /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
         public static string AutoDetermineDatasetName(string strFilePath)
         {
-            ePeptideHitResultType eResultType = default(ePeptideHitResultType);
-
-            eResultType = AutoDetermineResultType(strFilePath);
+            var eResultType = AutoDetermineResultType(strFilePath);
             return AutoDetermineDatasetName(strFilePath, eResultType);
         }
 
@@ -1304,10 +1210,9 @@ namespace PHRPReader
         /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
         public static string AutoDetermineDatasetName(string strFilePath, ePeptideHitResultType eResultType)
         {
-            string strDatasetName = string.Empty;
-            string strInputFileName = null;
+            var strDatasetName = string.Empty;
 
-            strInputFileName = Path.GetFileNameWithoutExtension(strFilePath);
+            var strInputFileName = Path.GetFileNameWithoutExtension(strFilePath);
 
             switch (eResultType)
             {
@@ -1387,7 +1292,7 @@ namespace PHRPReader
 
             if (string.IsNullOrEmpty(strDatasetName))
             {
-                string strFilePathTrimmed = string.Empty;
+                var strFilePathTrimmed = string.Empty;
                 if (AutoTrimExtraSuffix(strFilePath, ref strFilePathTrimmed))
                 {
                     strDatasetName = AutoDetermineDatasetName(strFilePathTrimmed, eResultType);
@@ -1408,96 +1313,84 @@ namespace PHRPReader
             const string LEGACY_MSGFPLUS_SUFFIX_SYN = "_msgfdb_syn.txt";
             const string LEGACY_MSGFPLUS_SUFFIX_FHT = "_msgfdb_fht.txt";
 
-            string strFilePathLCase = null;
+            var eResultType = ePeptideHitResultType.Unknown;
 
-            string strHeaderLine = null;
+            var strFilePathLCase = strFilePath.ToLower();
 
-            ePeptideHitResultType eResultType = default(ePeptideHitResultType);
-            eResultType = ePeptideHitResultType.Unknown;
-
-            strFilePathLCase = strFilePath.ToLower();
-
-            try
+            if (strFilePathLCase.EndsWith(clsPHRPParserXTandem.FILENAME_SUFFIX_SYN))
             {
-                if (strFilePathLCase.EndsWith(clsPHRPParserXTandem.FILENAME_SUFFIX_SYN))
+                eResultType = ePeptideHitResultType.XTandem;
+            }
+            else
+            {
+                if (strFilePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT))
                 {
-                    eResultType = ePeptideHitResultType.XTandem;
+                    eResultType = ePeptideHitResultType.MSGFDB;
+                }
+                else if (strFilePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_SYN) || strFilePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_FHT))
+                {
+                    eResultType = ePeptideHitResultType.MSGFDB;
+                }
+                else if (strFilePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_FHT))
+                {
+                    eResultType = ePeptideHitResultType.MSAlign;
+                }
+                else if (strFilePathLCase.EndsWith(clsPHRPParserMODa.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMODa.FILENAME_SUFFIX_FHT))
+                {
+                    eResultType = ePeptideHitResultType.MODa;
+                }
+                else if (strFilePathLCase.EndsWith(clsPHRPParserMODPlus.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMODPlus.FILENAME_SUFFIX_FHT))
+                {
+                    eResultType = ePeptideHitResultType.MODPlus;
+                }
+                else if (strFilePathLCase.EndsWith(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_FHT))
+                {
+                    eResultType = ePeptideHitResultType.MSPathFinder;
+                }
+                else if (strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_FHT))
+                {
+                    eResultType = ePeptideHitResultType.Inspect;
                 }
                 else
                 {
-                    if (strFilePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT))
+                    // Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
+
+                    if (!File.Exists(strFilePath))
                     {
-                        eResultType = ePeptideHitResultType.MSGFDB;
-                    }
-                    else if (strFilePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_SYN) || strFilePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_FHT))
-                    {
-                        eResultType = ePeptideHitResultType.MSGFDB;
-                    }
-                    else if (strFilePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_FHT))
-                    {
-                        eResultType = ePeptideHitResultType.MSAlign;
-                    }
-                    else if (strFilePathLCase.EndsWith(clsPHRPParserMODa.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMODa.FILENAME_SUFFIX_FHT))
-                    {
-                        eResultType = ePeptideHitResultType.MODa;
-                    }
-                    else if (strFilePathLCase.EndsWith(clsPHRPParserMODPlus.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMODPlus.FILENAME_SUFFIX_FHT))
-                    {
-                        eResultType = ePeptideHitResultType.MODPlus;
-                    }
-                    else if (strFilePathLCase.EndsWith(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_FHT))
-                    {
-                        eResultType = ePeptideHitResultType.MSPathFinder;
-                    }
-                    else if (strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_SYN) || strFilePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_FHT))
-                    {
-                        eResultType = ePeptideHitResultType.Inspect;
+                        // File doesn't exist; assume Sequest
+                        eResultType = ePeptideHitResultType.Sequest;
                     }
                     else
                     {
-                        // Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
-
-                        if (!File.Exists(strFilePath))
+                        using (var srInFile = new StreamReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                         {
-                            // File doesn't exist; assume Sequest
-                            eResultType = ePeptideHitResultType.Sequest;
-                        }
-                        else
-                        {
-                            using (var srInFile = new StreamReader(new FileStream(strFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                            if (!srInFile.EndOfStream)
                             {
-                                if (!srInFile.EndOfStream)
-                                {
-                                    strHeaderLine = srInFile.ReadLine();
+                                var strHeaderLine = srInFile.ReadLine();
 
-                                    if (LineContainsValues(strHeaderLine, clsPHRPParserInspect.DATA_COLUMN_MQScore, clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore))
-                                    {
-                                        eResultType = ePeptideHitResultType.Inspect;
-                                    }
-                                    else if (LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb) ||
-                                             LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue) ||
-                                             LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore))
-                                    {
-                                        eResultType = ePeptideHitResultType.MSGFDB;
-                                    }
-                                    else if (LineContainsValues(strHeaderLine, clsPHRPParserSequest.DATA_COLUMN_XCorr, clsPHRPParserSequest.DATA_COLUMN_DelCn))
-                                    {
-                                        eResultType = ePeptideHitResultType.Sequest;
-                                    }
+                                if (LineContainsValues(strHeaderLine, clsPHRPParserInspect.DATA_COLUMN_MQScore, clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore))
+                                {
+                                    eResultType = ePeptideHitResultType.Inspect;
+                                }
+                                else if (LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb) ||
+                                         LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue) ||
+                                         LineContainsValues(strHeaderLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore))
+                                {
+                                    eResultType = ePeptideHitResultType.MSGFDB;
+                                }
+                                else if (LineContainsValues(strHeaderLine, clsPHRPParserSequest.DATA_COLUMN_XCorr, clsPHRPParserSequest.DATA_COLUMN_DelCn))
+                                {
+                                    eResultType = ePeptideHitResultType.Sequest;
                                 }
                             }
                         }
                     }
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
 
             if (eResultType == ePeptideHitResultType.Unknown)
             {
-                string strFilePathTrimmed = string.Empty;
+                var strFilePathTrimmed = string.Empty;
                 if (AutoTrimExtraSuffix(strFilePath, ref strFilePathTrimmed))
                 {
                     eResultType = AutoDetermineResultType(strFilePathTrimmed);
@@ -1510,10 +1403,9 @@ namespace PHRPReader
         private static bool AutoTrimExtraSuffix(string strFilePath, ref string strFilePathTrimmed)
         {
             // Check whether strfilePathLCase ends in other known PHRP extensions
-            List<string> lstExtraSuffixes = default(List<string>);
-            lstExtraSuffixes = GetPHRPAuxiliaryFileSuffixes();
+            var lstExtraSuffixes = GetPHRPAuxiliaryFileSuffixes();
 
-            foreach (string strSuffix in lstExtraSuffixes)
+            foreach (var strSuffix in lstExtraSuffixes)
             {
                 if (strFilePath.EndsWith(strSuffix, StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -1525,7 +1417,7 @@ namespace PHRPReader
             return false;
         }
 
-        private readonly StringBuilder sbNewPeptide = new StringBuilder();
+        private readonly StringBuilder mNewPeptide = new StringBuilder();
 
         /// <summary>
         /// Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
@@ -1540,14 +1432,7 @@ namespace PHRPReader
             out string strPeptideWithNumericMods,
             out List<clsAminoAcidModInfo> lstPeptideMods)
         {
-            int intPeptideLength = 0;
-            char chMostRecentResidue = default(char);
             var intResidueLocInPeptide = 0;
-            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState = default(clsAminoAcidModInfo.eResidueTerminusStateConstants);
-
-            int intIndex = 0;
-            int intIndexStart = 0;
-            int intIndexEnd = 0;
 
             lstPeptideMods = new List<clsAminoAcidModInfo>();
             strPeptideWithNumericMods = string.Empty;
@@ -1561,11 +1446,11 @@ namespace PHRPReader
                     return true;
                 }
 
-                sbNewPeptide.Length = 0;
-                intPeptideLength = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, true).Length;
+                mNewPeptide.Length = 0;
+                var intPeptideLength = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, true).Length;
 
-                intIndexStart = 0;
-                intIndexEnd = strPeptide.Length - 1;
+                var intIndexStart = 0;
+                var intIndexEnd = strPeptide.Length - 1;
 
                 if (strPeptide.Length >= 4)
                 {
@@ -1584,21 +1469,24 @@ namespace PHRPReader
                     }
                 }
 
-                intIndex = 0;
-                chMostRecentResidue = '.';
+                var intIndex = 0;
+                var chMostRecentResidue = '.';
                 while (intIndex < strPeptide.Length)
                 {
                     if (intIndex < intIndexStart || intIndex > intIndexEnd)
                     {
                         // We're before or after the primary peptide sequence; simply append the character
-                        sbNewPeptide.Append(strPeptide[intIndex]);
+                        mNewPeptide.Append(strPeptide[intIndex]);
                     }
                     else
                     {
+                        var eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None;
+
                         if (IsLetterAtoZ(strPeptide[intIndex]))
                         {
                             chMostRecentResidue = strPeptide[intIndex];
                             intResidueLocInPeptide += 1;
+
                             if (intResidueLocInPeptide == 1)
                             {
                                 eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
@@ -1613,24 +1501,24 @@ namespace PHRPReader
                             }
 
                             // Character is a letter; append it
-                            sbNewPeptide.Append(chMostRecentResidue);
+                            mNewPeptide.Append(chMostRecentResidue);
 
                             if (mStaticMods.Count > 0)
                             {
                                 // See if it is present in mStaticMods (this is a case-sensitive search)
-                                AddStaticModIfPresent(mStaticMods, chMostRecentResidue, intResidueLocInPeptide, eResidueTerminusState, sbNewPeptide, lstPeptideMods);
+                                AddStaticModIfPresent(mStaticMods, chMostRecentResidue, intResidueLocInPeptide, eResidueTerminusState, mNewPeptide, lstPeptideMods);
 
                                 if (intIndex == intIndexStart && mStaticMods.Count > 0)
                                 {
                                     // We're at the N-terminus of the peptide
                                     // Possibly add a static N-terminal peptide mod (for example, iTRAQ8, which is 304.2022 Da)
-                                    AddStaticModIfPresent(mStaticMods, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus, sbNewPeptide, lstPeptideMods);
+                                    AddStaticModIfPresent(mStaticMods, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus, mNewPeptide, lstPeptideMods);
 
                                     if (strPeptide.StartsWith(PROTEIN_TERMINUS_SYMBOL_PHRP.ToString()))
                                     {
                                         // We're at the N-terminus of the protein
                                         // Possibly add a static N-terminal protein mod
-                                        AddStaticModIfPresent(mStaticMods, clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus, sbNewPeptide, lstPeptideMods);
+                                        AddStaticModIfPresent(mStaticMods, clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus, mNewPeptide, lstPeptideMods);
                                     }
                                 }
                             }
@@ -1638,26 +1526,26 @@ namespace PHRPReader
                         else
                         {
                             // Not a letter; see if it is present in mDynamicMods
-                            AddDynamicModIfPresent(mDynamicMods, chMostRecentResidue, strPeptide[intIndex], intResidueLocInPeptide, eResidueTerminusState, sbNewPeptide, lstPeptideMods);
+                            AddDynamicModIfPresent(mDynamicMods, chMostRecentResidue, strPeptide[intIndex], intResidueLocInPeptide, eResidueTerminusState, mNewPeptide, lstPeptideMods);
                         }
 
                         if (intIndex == intIndexEnd && mStaticMods.Count > 0)
                         {
                             // Possibly add a static C-terminal peptide mod
-                            AddStaticModIfPresent(mStaticMods, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus, sbNewPeptide, lstPeptideMods);
+                            AddStaticModIfPresent(mStaticMods, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus, mNewPeptide, lstPeptideMods);
 
                             if (strPeptide.EndsWith(PROTEIN_TERMINUS_SYMBOL_PHRP.ToString()))
                             {
                                 // We're at the C-terminus of the protein
                                 // Possibly add a static C-terminal protein mod
-                                AddStaticModIfPresent(mStaticMods, clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus, sbNewPeptide, lstPeptideMods);
+                                AddStaticModIfPresent(mStaticMods, clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS, intResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus, mNewPeptide, lstPeptideMods);
                             }
                         }
                     }
                     intIndex += 1;
                 }
 
-                strPeptideWithNumericMods = sbNewPeptide.ToString();
+                strPeptideWithNumericMods = mNewPeptide.ToString();
             }
             catch (Exception ex)
             {
@@ -1668,11 +1556,16 @@ namespace PHRPReader
             return true;
         }
 
-        private void AddDynamicModIfPresent(SortedDictionary<char, clsModificationDefinition> objMods, char chResidue, char chModSymbol, int ResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants ResidueTerminusState, StringBuilder sbNewPeptide, List<clsAminoAcidModInfo> lstPeptideMods)
+        private void AddDynamicModIfPresent(
+            IReadOnlyDictionary<char, clsModificationDefinition> objMods,
+            char chResidue,
+            char chModSymbol,
+            int ResidueLocInPeptide,
+            clsAminoAcidModInfo.eResidueTerminusStateConstants ResidueTerminusState,
+            StringBuilder sbNewPeptide,
+            ICollection<clsAminoAcidModInfo> lstPeptideMods)
         {
-            clsModificationDefinition objModDef = null;
-
-            if (objMods.TryGetValue(chModSymbol, out objModDef))
+            if (objMods.TryGetValue(chModSymbol, out var objModDef))
             {
                 // Mod mass found for dynamic mod symbol; append the mod
                 sbNewPeptide.Append(clsPHRPParser.NumToStringPlusMinus(objModDef.ModificationMass, 4));
@@ -1680,11 +1573,15 @@ namespace PHRPReader
             }
         }
 
-        private void AddStaticModIfPresent(SortedDictionary<string, List<clsModificationDefinition>> objMods, char chResidue, int ResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants ResidueTerminusState, StringBuilder sbNewPeptide, List<clsAminoAcidModInfo> lstPeptideMods)
+        private void AddStaticModIfPresent(
+            IReadOnlyDictionary<string, List<clsModificationDefinition>> objMods,
+            char chResidue,
+            int ResidueLocInPeptide,
+            clsAminoAcidModInfo.eResidueTerminusStateConstants ResidueTerminusState,
+            StringBuilder sbNewPeptide,
+            ICollection<clsAminoAcidModInfo> lstPeptideMods)
         {
-            List<clsModificationDefinition> lstModDefs = null;
-
-            if (objMods.TryGetValue(chResidue.ToString(), out lstModDefs))
+            if (objMods.TryGetValue(chResidue.ToString(), out var lstModDefs))
             {
                 // Static mod applies to this residue; append the mod (add a plus sign if it doesn't start with a minus sign)
 
@@ -1729,9 +1626,7 @@ namespace PHRPReader
             // SRM            95,207
             // Zoom-MS            29
 
-            string strCollisionMode = null;
-
-            strCollisionMode = strScanTypeName.ToUpper();
+            var strCollisionMode = strScanTypeName.ToUpper();
             if (strCollisionMode.StartsWith("SA_"))
             {
                 strCollisionMode = strCollisionMode.Substring(3);
@@ -1741,26 +1636,28 @@ namespace PHRPReader
             {
                 return "CID";
             }
-            else if (strCollisionMode.StartsWith("ETD"))
+
+            if (strCollisionMode.StartsWith("ETD"))
             {
                 return "ETD";
             }
-            else if (strCollisionMode.StartsWith("HCD"))
+
+            if (strCollisionMode.StartsWith("HCD"))
             {
                 return "HCD";
             }
-            else if (strCollisionMode.StartsWith("PQD"))
+
+            if (strCollisionMode.StartsWith("PQD"))
             {
                 return "PQD";
             }
-            else if (strCollisionMode.StartsWith("SID"))
+
+            if (strCollisionMode.StartsWith("SID"))
             {
                 return "SID";
             }
-            else
-            {
-                return "";
-            }
+
+            return "";
         }
 
         private static string GetLegacyMSGFPlusName(string msgfPlusName)
@@ -1833,16 +1730,16 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static List<string> GetPHRPAuxiliaryFileSuffixes()
         {
-            List<string> lstAuxSuffixes = default(List<string>);
-            lstAuxSuffixes = new List<string>();
-
-            lstAuxSuffixes.Add("_ResultToSeqMap.txt");
-            lstAuxSuffixes.Add("_SeqToProteinMap.txt");
-            lstAuxSuffixes.Add("_SeqInfo.txt");
-            lstAuxSuffixes.Add("_MSGF.txt");
-            lstAuxSuffixes.Add("_ProteinMods.txt");
-            lstAuxSuffixes.Add("_ModDetails.txt");
-            lstAuxSuffixes.Add("_ModSummary.txt");
+            var lstAuxSuffixes = new List<string>
+            {
+                "_ResultToSeqMap.txt",
+                "_SeqToProteinMap.txt",
+                "_SeqInfo.txt",
+                "_MSGF.txt",
+                "_ProteinMods.txt",
+                "_ModDetails.txt",
+                "_ModSummary.txt"
+            };
 
             return lstAuxSuffixes;
         }
@@ -1911,7 +1808,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetPHRPFirstHitsFileName(ePeptideHitResultType eResultType, string strDatasetName)
         {
-            clsPHRPParser oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
+            var oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
             var strPHRPResultsFileName = oParser.PHRPFirstHitsFileName;
 
             return strPHRPResultsFileName;
@@ -1926,7 +1823,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetPHRPModSummaryFileName(ePeptideHitResultType eResultType, string strDatasetName)
         {
-            clsPHRPParser oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
+            var oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
             var strPHRPModSummaryFileName = oParser.PHRPModSummaryFileName;
 
             return strPHRPModSummaryFileName;
@@ -1941,7 +1838,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetPHRPPepToProteinMapFileName(ePeptideHitResultType eResultType, string strDatasetName)
         {
-            clsPHRPParser oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
+            var oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
             var strPepToProteinMapFileName = oParser.PHRPPepToProteinMapFileName;
 
             return strPepToProteinMapFileName;
@@ -1956,7 +1853,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetPHRPProteinModsFileName(ePeptideHitResultType eResultType, string strDatasetName)
         {
-            clsPHRPParser oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
+            var oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
             var strProteinModsFileName = oParser.PHRPProteinModsFileName;
 
             return strProteinModsFileName;
@@ -1971,7 +1868,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetPHRPSynopsisFileName(ePeptideHitResultType eResultType, string strDatasetName)
         {
-            clsPHRPParser oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
+            var oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
             var strPHRPResultsFileName = oParser.PHRPSynopsisFileName;
 
             return strPHRPResultsFileName;
@@ -1986,7 +1883,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetPHRPResultToSeqMapFileName(ePeptideHitResultType eResultType, string strDatasetName)
         {
-            clsPHRPParser oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
+            var oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
             var strResultToSeqMapFilename = oParser.PHRPResultToSeqMapFileName;
 
             return strResultToSeqMapFilename;
@@ -2001,7 +1898,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetPHRPSeqInfoFileName(ePeptideHitResultType eResultType, string strDatasetName)
         {
-            clsPHRPParser oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
+            var oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
             var strSeqInfoFilename = oParser.PHRPSeqInfoFileName;
 
             return strSeqInfoFilename;
@@ -2016,7 +1913,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetPHRPSeqToProteinMapFileName(ePeptideHitResultType eResultType, string strDatasetName)
         {
-            clsPHRPParser oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
+            var oParser = GetPHRPFileFreeParser(eResultType, strDatasetName);
             var strSeqToProteinMapFileName = oParser.PHRPSeqToProteinMapFileName;
 
             return strSeqToProteinMapFileName;
@@ -2052,7 +1949,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string GetToolVersionInfoFilename(ePeptideHitResultType eResultType)
         {
-            string strToolVersionInfoFilename = string.Empty;
+            var strToolVersionInfoFilename = string.Empty;
 
             switch (eResultType)
             {
@@ -2118,10 +2015,8 @@ namespace PHRPReader
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
@@ -2137,7 +2032,8 @@ namespace PHRPReader
                 {
                     return true;
                 }
-                else if (int.TryParse(strData, out _))
+
+                if (int.TryParse(strData, out _))
                 {
                     return true;
                 }
@@ -2162,14 +2058,12 @@ namespace PHRPReader
                 }
             }
 
-            if (intMatchCount == lstValuesToFind.Count())
+            if (intMatchCount == lstValuesToFind.Length)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
@@ -2181,9 +2075,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static int LookupColumnIndex(string strColumnName, SortedDictionary<string, int> objColumnHeaders)
         {
-            int intColIndex = 0;
-
-            if (objColumnHeaders.TryGetValue(strColumnName, out intColIndex))
+            if (objColumnHeaders.TryGetValue(strColumnName, out var intColIndex))
             {
                 if (intColIndex >= 0)
                 {
@@ -2211,21 +2103,17 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static string LookupColumnValue(string[] strColumns, string strColumnName, SortedDictionary<string, int> objColumnHeaders, string strValueIfMissing)
         {
-            int intColIndex = 0;
-
-            if ((strColumns != null))
+            if (strColumns != null)
             {
-                intColIndex = LookupColumnIndex(strColumnName, objColumnHeaders);
+                var intColIndex = LookupColumnIndex(strColumnName, objColumnHeaders);
                 if (intColIndex >= 0 && intColIndex < strColumns.Length)
                 {
                     if (string.IsNullOrWhiteSpace(strColumns[intColIndex]))
                     {
                         return string.Empty;
                     }
-                    else
-                    {
-                        return strColumns[intColIndex];
-                    }
+
+                    return strColumns[intColIndex];
                 }
             }
 
@@ -2240,12 +2128,9 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static int LookupColumnValue(string[] strColumns, string strColumnName, SortedDictionary<string, int> objColumnHeaders, int valueIfMissing)
         {
-            string strValue = null;
-            int intValue = 0;
+            var strValue = LookupColumnValue(strColumns, strColumnName, objColumnHeaders, valueIfMissing.ToString());
 
-            strValue = clsPHRPReader.LookupColumnValue(strColumns, strColumnName, objColumnHeaders, valueIfMissing.ToString());
-
-            int.TryParse(strValue, out intValue);
+            int.TryParse(strValue, out var intValue);
 
             return intValue;
         }
@@ -2257,12 +2142,9 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static double LookupColumnValue(string[] strColumns, string strColumnName, SortedDictionary<string, int> objColumnHeaders, double ValueIfMissing)
         {
-            string strValue = null;
-            double dblValue = 0;
+            var strValue = LookupColumnValue(strColumns, strColumnName, objColumnHeaders, ValueIfMissing.ToString(CultureInfo.InvariantCulture));
 
-            strValue = clsPHRPReader.LookupColumnValue(strColumns, strColumnName, objColumnHeaders, ValueIfMissing.ToString());
-
-            double.TryParse(strValue, out dblValue);
+            double.TryParse(strValue, out var dblValue);
 
             return dblValue;
         }
@@ -2278,11 +2160,10 @@ namespace PHRPReader
             // Reset the column indices in objColumnHeaders
             if (objColumnHeaders.Count > 0)
             {
-                string[] strKeys = null;
-                strKeys = new string[objColumnHeaders.Count];
+                var strKeys = new string[objColumnHeaders.Count];
                 objColumnHeaders.Keys.CopyTo(strKeys, 0);
 
-                foreach (string strKey in strKeys)
+                foreach (var strKey in strKeys)
                 {
                     objColumnHeaders[strKey] = -1;
                 }
@@ -2309,10 +2190,9 @@ namespace PHRPReader
         /// <remarks>When FastReadMode is True, you should call FinalizeCurrentPSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
         public bool MoveNext()
         {
-            string strLineIn = string.Empty;
+            var strLineIn = string.Empty;
 
             var blnSuccess = false;
-            var blnMatchFound = false;
             var blnUsingCachedPSM = false;
 
             if (mCachedLineAvailable)
@@ -2366,7 +2246,7 @@ namespace PHRPReader
                 return false;
             }
 
-            blnMatchFound = true;
+            var blnMatchFound = true;
 
             // The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
             // If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods
@@ -2375,9 +2255,7 @@ namespace PHRPReader
                 MarkupPeptideWithMods();
             }
 
-            clsScanStatsInfo objScanStatsInfo = null;
-
-            var blnScanStatsValid = TryGetScanStats(mPSMCurrent.ScanNumber, out objScanStatsInfo);
+            var blnScanStatsValid = TryGetScanStats(mPSMCurrent.ScanNumber, out var objScanStatsInfo);
             mExtendedScanStatsValid = TryGetExtendedScanStats(mPSMCurrent.ScanNumber, out mExtendedScanStatsInfo);
 
             if (blnScanStatsValid) {
@@ -2391,7 +2269,7 @@ namespace PHRPReader
                     mPSMCurrent.CollisionMode = GetCollisionMode(objScanStatsInfo.ScanTypeName);
                 }
 
-                if (string.IsNullOrEmpty(mPSMCurrent.CollisionMode) && mExtendedScanStatsValid && (mExtendedScanStatsInfo != null)) {
+                if (string.IsNullOrEmpty(mPSMCurrent.CollisionMode) && mExtendedScanStatsValid && mExtendedScanStatsInfo != null) {
                     // Scan type still not determined, but Extended Scan Stats data is available
                     if (!string.IsNullOrEmpty(mExtendedScanStatsInfo.CollisionMode)) {
                         // Check for Collision mode being "0"
@@ -2409,15 +2287,13 @@ namespace PHRPReader
                 }
             }
 
-            if ((mMSGFCachedResults != null) && mMSGFCachedResults.Count > 0) {
-                string specEValueText = string.Empty;
-                double specEValue = 0;
-
-                if (mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, out specEValueText)) {
+            if (mMSGFCachedResults != null && mMSGFCachedResults.Count > 0) {
+                if (mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, out var specEValueText)) {
                     mPSMCurrent.MSGFSpecEValue = specEValueText;
-                    if (specEValueText.Length > 12) {
+                    if (specEValueText.Length > 12)
+                    {
                         // Attempt to shorten the SpecEValue value
-                        if (double.TryParse(specEValueText, out specEValue)) {
+                        if (double.TryParse(specEValueText, out var specEValue)) {
                             mPSMCurrent.MSGFSpecEValue = specEValue.ToString("0.00000E-00");
                         }
                     }
@@ -2431,45 +2307,42 @@ namespace PHRPReader
                     strLineIn = mSourceFile.ReadLine();
                     mSourceFileLinesRead += 1;
 
-                    if (!string.IsNullOrEmpty(strLineIn)) {
-                        clsPSM objNewPSM = new clsPSM();
-                        blnSuccess = mPHRPParser.ParsePHRPDataLine(strLineIn, mSourceFileLinesRead, out objNewPSM, mFastReadMode);
+                    if (string.IsNullOrEmpty(strLineIn))
+                        continue;
 
-                        // Check for duplicate lines
-                        // If this line is a duplicate of the previous line, then skip it
-                        // This happens in Sequest _syn.txt files where the line is repeated for all protein matches
-                        // It can also happen in MSGF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
+                    mPHRPParser.ParsePHRPDataLine(strLineIn, mSourceFileLinesRead, out var objNewPSM, mFastReadMode);
 
-                        var isDuplicate = false;
+                    // Check for duplicate lines
+                    // If this line is a duplicate of the previous line, then skip it
+                    // This happens in Sequest _syn.txt files where the line is repeated for all protein matches
+                    // It can also happen in MSGF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
 
-                        if (mPSMCurrent.ScanNumber == objNewPSM.ScanNumber && mPSMCurrent.Charge == objNewPSM.Charge) {
-                            if (string.Equals(mPSMCurrent.Peptide, objNewPSM.Peptide)) {
-                                isDuplicate = true;
-                            } else {
-                                string strPeptide1 = string.Empty;
-                                string strPeptide2 = string.Empty;
+                    var isDuplicate = false;
 
-                                if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(mPSMCurrent.Peptide, out strPeptide1, out _, out _) &&
-                                    clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objNewPSM.Peptide, out strPeptide2, out _, out _)) {
-                                    if (string.Equals(strPeptide1, strPeptide2)) {
-                                        isDuplicate = true;
-                                    }
+                    if (mPSMCurrent.ScanNumber == objNewPSM.ScanNumber && mPSMCurrent.Charge == objNewPSM.Charge) {
+                        if (string.Equals(mPSMCurrent.Peptide, objNewPSM.Peptide)) {
+                            isDuplicate = true;
+                        } else {
+                            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(mPSMCurrent.Peptide, out var strPeptide1, out _, out _) &&
+                                clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(objNewPSM.Peptide, out var strPeptide2, out _, out _)) {
+                                if (string.Equals(strPeptide1, strPeptide2)) {
+                                    isDuplicate = true;
                                 }
                             }
                         }
+                    }
 
-                        if (isDuplicate) {
-                            // Update the protein list
-                            var addnlProteins = objNewPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.CurrentCultureIgnoreCase);
-                            if (addnlProteins.Count() > 0) {
-                                mPSMCurrent.Proteins.AddRange(addnlProteins);
-                            }
-                        } else {
-                            blnReadNext = false;
-                            mCachedLine = string.Copy(strLineIn);
-                            mCachedLineAvailable = true;
-                            mCachedPSM = objNewPSM;
+                    if (isDuplicate) {
+                        // Update the protein list
+                        var addnlProteins = objNewPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.CurrentCultureIgnoreCase).ToList();
+                        if (addnlProteins.Any()) {
+                            mPSMCurrent.Proteins.AddRange(addnlProteins);
                         }
+                    } else {
+                        blnReadNext = false;
+                        mCachedLine = string.Copy(strLineIn);
+                        mCachedLineAvailable = true;
+                        mCachedPSM = objNewPSM;
                     }
                 }
             }
@@ -2479,17 +2352,14 @@ namespace PHRPReader
 
         private void ComputePrecursorNeutralMass()
         {
-            double dblMonoisotopicPrecursorMass = 0;
-
             if (!mExtendedScanStatsValid || mExtendedScanStatsInfo == null)
                 return;
 
-            dblMonoisotopicPrecursorMass = 0;
+            double dblMonoisotopicPrecursorMass = 0;
 
             // Try to extract out the precursor m/z value from the "Scan Filter Text" field
-            double dblParentIonMZ = 0;
 
-            if (ExtractParentIonMzFromFilterText(mExtendedScanStatsInfo.ScanFilterText, out dblParentIonMZ))
+            if (ExtractParentIonMzFromFilterText(mExtendedScanStatsInfo.ScanFilterText, out var dblParentIonMZ))
             {
                 if (dblParentIonMZ > 0)
                 {
@@ -2521,7 +2391,7 @@ namespace PHRPReader
         /// <remarks>The original version of this code (C#) is in ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(string, out double)</remarks>
         private bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
         {
-            Regex matcher = default(Regex);
+            Regex matcher;
 
             if (filterText.ToLower().Contains("msx"))
             {
@@ -2547,13 +2417,9 @@ namespace PHRPReader
 
         private void MarkupPeptideWithMods()
         {
-            bool blnSuccess = false;
-
             // Markup the peptide with the dynamic and static mods
-            string strPeptideWithMods = string.Empty;
-            List<clsAminoAcidModInfo> lstPeptideMods = null;
 
-            blnSuccess = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim(), out strPeptideWithMods, out lstPeptideMods);
+            var blnSuccess = ConvertModsToNumericMods(mPSMCurrent.Peptide.Trim(), out var strPeptideWithMods, out var lstPeptideMods);
             if (blnSuccess)
             {
                 double dblTotalModMass = 0;
@@ -2593,29 +2459,25 @@ namespace PHRPReader
             mPSMCurrentFinalized = true;
         }
 
-        private bool ReadAndCacheMSGFData()
+        private void ReadAndCacheMSGFData()
         {
-            string strMSGFFilePath = null;
-            var blnSuccess = false;
 
             try
             {
-                strMSGFFilePath = GetMSGFFileName(mInputFilePath);
+                var strMSGFFilePath = GetMSGFFileName(mInputFilePath);
                 strMSGFFilePath = Path.Combine(mInputFolderPath, strMSGFFilePath);
 
-                blnSuccess = ReadAndCacheMSGFData(strMSGFFilePath);
+                ReadAndCacheMSGFData(strMSGFFilePath);
             }
             catch (Exception ex)
             {
                 HandleException("Exception determining MSGF file path", ex);
             }
 
-            return blnSuccess;
         }
 
-        private bool ReadAndCacheMSGFData(string strMSGFFilePath)
+        private void ReadAndCacheMSGFData(string strMSGFFilePath)
         {
-            var blnSuccess = false;
 
             try
             {
@@ -2624,16 +2486,12 @@ namespace PHRPReader
 
                 if (File.Exists(strMSGFFilePath))
                 {
-                    clsMSGFResultsReader oMSGFReader = new clsMSGFResultsReader();
+                    var oMSGFReader = new clsMSGFResultsReader();
                     mMSGFCachedResults = oMSGFReader.ReadMSGFData(strMSGFFilePath);
 
                     if (oMSGFReader.ErrorMessage.Length > 0)
                     {
                         ReportError("Error reading MSGF data: " + oMSGFReader.ErrorMessage);
-                    }
-                    else
-                    {
-                        blnSuccess = true;
                     }
                 }
                 else
@@ -2646,7 +2504,6 @@ namespace PHRPReader
                 HandleException("Exception reading MSGF file", ex);
             }
 
-            return blnSuccess;
         }
 
         /// <summary>
@@ -2656,15 +2513,11 @@ namespace PHRPReader
         /// <param name="objDynamicMods">List with mod symbols as the key and the corresponding mod mass</param>
         /// <param name="objStaticMods">List with amino acid names as the key and the corresponding mod mass</param>
         /// <returns>True if success; false if an error</returns>
-        private bool ReadModSummaryFile(string strModSummaryFilePath, SortedDictionary<char, clsModificationDefinition> objDynamicMods, SortedDictionary<string, List<clsModificationDefinition>> objStaticMods)
+        private bool ReadModSummaryFile(
+            string strModSummaryFilePath,
+            IDictionary<char, clsModificationDefinition> objDynamicMods,
+            IDictionary<string, List<clsModificationDefinition>> objStaticMods)
         {
-            clsPHRPModSummaryReader objModSummaryReader = default(clsPHRPModSummaryReader);
-
-            List<clsModificationDefinition> lstModDefs = null;
-
-            string strModMass = null;
-            bool blnSuccess = false;
-
             try
             {
                 // Clear objDynamicMods and objStaticMods (should have been instantiated by the calling function)
@@ -2676,7 +2529,8 @@ namespace PHRPReader
                     ReportError("ModSummaryFile path is empty; unable to continue");
                     return false;
                 }
-                else if (!File.Exists(strModSummaryFilePath))
+
+                if (!File.Exists(strModSummaryFilePath))
                 {
                     ReportError("ModSummary file not found: " + strModSummaryFilePath);
                     return false;
@@ -2684,14 +2538,14 @@ namespace PHRPReader
 
                 ShowMessage("Reading the PHRP ModSummary file");
 
-                objModSummaryReader = new clsPHRPModSummaryReader(strModSummaryFilePath);
-                blnSuccess = objModSummaryReader.Success;
+                var objModSummaryReader = new clsPHRPModSummaryReader(strModSummaryFilePath);
+                var blnSuccess = objModSummaryReader.Success;
 
                 if (blnSuccess && objModSummaryReader.ModificationDefs.Count > 0)
                 {
                     foreach (var objModDef in objModSummaryReader.ModificationDefs)
                     {
-                        strModMass = objModSummaryReader.GetModificationMassAsText(objModDef.MassCorrectionTag);
+                        var strModMass = objModSummaryReader.GetModificationMassAsText(objModDef.MassCorrectionTag);
 
                         switch (objModDef.ModificationType)
                         {
@@ -2709,7 +2563,7 @@ namespace PHRPReader
                                 {
                                     try
                                     {
-                                        if (objStaticMods.TryGetValue(chChar.ToString(), out lstModDefs))
+                                        if (objStaticMods.TryGetValue(chChar.ToString(), out var lstModDefs))
                                         {
                                             if (!lstModDefs.Contains(objModDef))
                                             {
@@ -2721,8 +2575,9 @@ namespace PHRPReader
                                         }
                                         else
                                         {
-                                            lstModDefs = new List<clsModificationDefinition>();
-                                            lstModDefs.Add(objModDef);
+                                            lstModDefs = new List<clsModificationDefinition> {
+                                                objModDef
+                                            };
                                             objStaticMods.Add(chChar.ToString(), lstModDefs);
                                         }
                                     }
@@ -2763,12 +2618,11 @@ namespace PHRPReader
                             // However, do not log a warning since these are rarely used
 
                             case clsModificationDefinition.eModificationTypeConstants.UnknownType:
+                                // Unknown type; just ignore it
                                 break;
-                            // Unknown type; just ignore it
-
                             default:
+                                // Unknown type; just ignore it
                                 break;
-                            // Unknown type; just ignore it
                         }
                     }
                 }
@@ -2784,12 +2638,11 @@ namespace PHRPReader
 
         private bool ReadScanStatsData()
         {
-            string strScanStatsFilePath = null;
             var blnSuccess = false;
 
             try
             {
-                strScanStatsFilePath = GetScanStatsFilename(mDatasetName);
+                var strScanStatsFilePath = GetScanStatsFilename(mDatasetName);
                 strScanStatsFilePath = Path.Combine(mInputFolderPath, strScanStatsFilePath);
 
                 blnSuccess = ReadScanStatsData(strScanStatsFilePath);
@@ -2810,7 +2663,7 @@ namespace PHRPReader
             {
                 if (File.Exists(strScanStatsFilePath))
                 {
-                    clsScanStatsReader oScanStatsReader = new clsScanStatsReader();
+                    var oScanStatsReader = new clsScanStatsReader();
                     mScanStats = oScanStatsReader.ReadScanStatsData(strScanStatsFilePath);
 
                     if (oScanStatsReader.ErrorMessage.Length > 0)
@@ -2837,12 +2690,11 @@ namespace PHRPReader
 
         private bool ReadExtendedScanStatsData()
         {
-            string strExtendedScanStatsFilePath = null;
             var blnSuccess = false;
 
             try
             {
-                strExtendedScanStatsFilePath = GetExtendedScanStatsFilename(mDatasetName);
+                var strExtendedScanStatsFilePath = GetExtendedScanStatsFilename(mDatasetName);
                 strExtendedScanStatsFilePath = Path.Combine(mInputFolderPath, strExtendedScanStatsFilePath);
 
                 blnSuccess = ReadExtendedScanStatsData(strExtendedScanStatsFilePath);
@@ -2863,7 +2715,7 @@ namespace PHRPReader
             {
                 if (File.Exists(strExtendedScanStatsFilePath))
                 {
-                    clsExtendedScanStatsReader oExtendedScanStatsReader = new clsExtendedScanStatsReader();
+                    var oExtendedScanStatsReader = new clsExtendedScanStatsReader();
                     mScanStatsEx = oExtendedScanStatsReader.ReadExtendedScanStatsData(strExtendedScanStatsFilePath);
 
                     if (oExtendedScanStatsReader.ErrorMessage.Length > 0)
@@ -2892,37 +2744,26 @@ namespace PHRPReader
             return blnSuccess;
         }
 
-        private void ReportError(string strErrorMessage)
+        private void ReportError(string message)
         {
-            mErrorMessage = strErrorMessage;
+            mErrorMessage = message;
             if (mEchoMessagesToConsole)
-                Console.WriteLine(strErrorMessage);
-            mErrorMessages.Add(strErrorMessage);
+                Console.WriteLine(message);
+            mErrorMessages.Add(message);
 
-            if (ErrorEvent != null)
-            {
-                ErrorEvent(strErrorMessage);
-            }
+            OnErrorEvent(message);
         }
 
-        private void ReportWarning(string strWarningMessage)
+        private void ReportWarning(string message)
         {
             if (mEchoMessagesToConsole)
-                Console.WriteLine(strWarningMessage);
-            mWarningMessages.Add(strWarningMessage);
+                Console.WriteLine(message);
+            mWarningMessages.Add(message);
 
-            if (WarningEvent != null)
-            {
-                WarningEvent(strWarningMessage);
-            }
+            OnWarningEvent(message);
         }
 
-        private void SetLocalErrorCode(ePHRPReaderErrorCodes eNewErrorCode)
-        {
-            SetLocalErrorCode(eNewErrorCode, false);
-        }
-
-        private void SetLocalErrorCode(ePHRPReaderErrorCodes eNewErrorCode, bool blnLeaveExistingErrorCodeUnchanged)
+        private void SetLocalErrorCode(ePHRPReaderErrorCodes eNewErrorCode, bool blnLeaveExistingErrorCodeUnchanged = false)
         {
             if (blnLeaveExistingErrorCodeUnchanged && mLocalErrorCode != ePHRPReaderErrorCodes.NoError)
             {
@@ -2934,20 +2775,18 @@ namespace PHRPReader
             }
         }
 
-        private void ShowMessage(string strMessage)
+        private void ShowMessage(string message)
         {
             if (mEchoMessagesToConsole)
-                Console.WriteLine(strMessage);
-            if (MessageEvent != null)
-            {
-                MessageEvent(strMessage);
-            }
+                Console.WriteLine(message);
+
+            OnStatusEvent(message);
         }
 
         private bool TryGetScanStats(int intScanNumber,
             out clsScanStatsInfo objScanStatsInfo)
         {
-            if ((mScanStats != null) && mScanStats.Count > 0)
+            if (mScanStats != null && mScanStats.Count > 0)
             {
                 if (mScanStats.TryGetValue(intScanNumber, out objScanStatsInfo))
                 {
@@ -2961,7 +2800,7 @@ namespace PHRPReader
         private bool TryGetExtendedScanStats(int intScanNumber,
             out clsScanStatsExInfo objExtendedScanStatsInfo)
         {
-            if ((mScanStatsEx != null) && mScanStats.Count > 0)
+            if (mScanStatsEx != null && mScanStats.Count > 0)
             {
                 if (mScanStatsEx.TryGetValue(intScanNumber, out objExtendedScanStatsInfo))
                 {
@@ -2974,10 +2813,9 @@ namespace PHRPReader
 
         private bool ValidateInputFiles(string strInputFilePath, ref ePeptideHitResultType eResultType, ref string strModSummaryFilePath)
         {
-            FileInfo fiFileInfo = default(FileInfo);
 
-            fiFileInfo = new FileInfo(strInputFilePath);
-            if (!fiFileInfo.Exists)
+            var inputFile = new FileInfo(strInputFilePath);
+            if (!inputFile.Exists)
             {
                 SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
                 ReportError("Input file not found: " + strInputFilePath);
@@ -2999,7 +2837,7 @@ namespace PHRPReader
 
             // Extract the dataset name from the input file path
             mDatasetName = AutoDetermineDatasetName(strInputFilePath, eResultType);
-            if (mDatasetName == null || mDatasetName.Length == 0)
+            if (string.IsNullOrEmpty(mDatasetName))
             {
                 if (mStartupOptions.LoadModsAndSeqInfo || mStartupOptions.LoadMSGFResults || mStartupOptions.LoadScanStatsData)
                 {
@@ -3007,25 +2845,23 @@ namespace PHRPReader
                     SetLocalErrorCode(ePHRPReaderErrorCodes.InputFileFormatNotRecognized);
                     return false;
                 }
-                else
-                {
-                    ReportWarning("Unable to auto-determine the dataset name from the input file name; this is not a critical error since not reading related files: " + strInputFilePath);
-                }
+
+                ReportWarning("Unable to auto-determine the dataset name from the input file name; this is not a critical error since not reading related files: " + strInputFilePath);
             }
 
             if (mStartupOptions.LoadModsAndSeqInfo)
             {
                 strModSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName);
-                strModSummaryFilePath = Path.Combine(fiFileInfo.DirectoryName, strModSummaryFilePath);
+                strModSummaryFilePath = Path.Combine(inputFile.DirectoryName, strModSummaryFilePath);
 
-                strModSummaryFilePath = AutoSwitchToLegacyMSGFDBIfRequired(strModSummaryFilePath, fiFileInfo.Name);
-                var strModSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(strModSummaryFilePath, fiFileInfo.Name);
+                strModSummaryFilePath = AutoSwitchToLegacyMSGFDBIfRequired(strModSummaryFilePath, inputFile.Name);
+                var strModSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(strModSummaryFilePath, inputFile.Name);
                 if (strModSummaryFilePath != strModSummaryFilePathPreferred && File.Exists(strModSummaryFilePathPreferred))
                 {
                     strModSummaryFilePath = strModSummaryFilePathPreferred;
                 }
 
-                if (!ValidateRequiredFileExists("ModSummary file", strModSummaryFilePath) && fiFileInfo.Name.ToLower().Contains("_fht"))
+                if (!ValidateRequiredFileExists("ModSummary file", strModSummaryFilePath) && inputFile.Name.ToLower().Contains("_fht"))
                 {
                     SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound);
                     return false;
@@ -3046,7 +2882,7 @@ namespace PHRPReader
 
         private bool ValidateRequiredFileExists(string strFileDescription, string strFilePath, bool blnReportErrors)
         {
-            if (strFilePath == null || strFilePath.Length == 0)
+            if (string.IsNullOrEmpty(strFilePath))
             {
                 if (blnReportErrors)
                 {
@@ -3054,7 +2890,8 @@ namespace PHRPReader
                 }
                 return false;
             }
-            else if (!File.Exists(strFilePath))
+
+            if (!File.Exists(strFilePath))
             {
                 if (blnReportErrors)
                 {
@@ -3066,38 +2903,20 @@ namespace PHRPReader
             return true;
         }
 
-        private void mPHRPParser_ErrorEvent(string strErrorMessage)
-        {
-            ReportError(strErrorMessage);
-        }
-
-        private void mPHRPParser_MessageEvent(string strMessage)
-        {
-            ShowMessage(strMessage);
-        }
-
-        private void mPHRPParser_WarningEvent(string strWarningMessage)
-        {
-            ReportWarning(strWarningMessage);
-        }
-
         #region "IDisposable Support"
         private bool disposedValue; // To detect redundant calls
 
         // IDisposable
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.disposedValue)
+            if (!disposedValue)
             {
                 if (disposing)
                 {
-                    if ((mSourceFile != null))
-                    {
-                        mSourceFile.Close();
-                    }
+                    mSourceFile?.Close();
                 }
             }
-            this.disposedValue = true;
+            disposedValue = true;
         }
 
         // This code added by Visual Studio to correctly implement the disposable pattern.

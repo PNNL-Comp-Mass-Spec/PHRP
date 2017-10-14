@@ -10,7 +10,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace PHRPReader
@@ -49,50 +48,23 @@ namespace PHRPReader
 
         #region "Properties"
 
-        public override string PHRPFirstHitsFileName
-        {
-            get { return GetPHRPFirstHitsFileName(mDatasetName); }
-        }
+        public override string PHRPFirstHitsFileName => GetPHRPFirstHitsFileName(mDatasetName);
 
-        public override string PHRPModSummaryFileName
-        {
-            get { return GetPHRPModSummaryFileName(mDatasetName); }
-        }
+        public override string PHRPModSummaryFileName => GetPHRPModSummaryFileName(mDatasetName);
 
-        public override string PHRPPepToProteinMapFileName
-        {
-            get { return GetPHRPPepToProteinMapFileName(mDatasetName); }
-        }
+        public override string PHRPPepToProteinMapFileName => GetPHRPPepToProteinMapFileName(mDatasetName);
 
-        public override string PHRPProteinModsFileName
-        {
-            get { return GetPHRPProteinModsFileName(mDatasetName); }
-        }
+        public override string PHRPProteinModsFileName => GetPHRPProteinModsFileName(mDatasetName);
 
-        public override string PHRPSynopsisFileName
-        {
-            get { return GetPHRPSynopsisFileName(mDatasetName); }
-        }
+        public override string PHRPSynopsisFileName => GetPHRPSynopsisFileName(mDatasetName);
 
-        public override string PHRPResultToSeqMapFileName
-        {
-            get { return GetPHRPResultToSeqMapFileName(mDatasetName); }
-        }
+        public override string PHRPResultToSeqMapFileName => GetPHRPResultToSeqMapFileName(mDatasetName);
 
-        public override string PHRPSeqInfoFileName
-        {
-            get { return GetPHRPSeqInfoFileName(mDatasetName); }
-        }
+        public override string PHRPSeqInfoFileName => GetPHRPSeqInfoFileName(mDatasetName);
 
-        public override string PHRPSeqToProteinMapFileName
-        {
-            get { return GetPHRPSeqToProteinMapFileName(mDatasetName); }
-        }
+        public override string PHRPSeqToProteinMapFileName => GetPHRPSeqToProteinMapFileName(mDatasetName);
 
-        public override string SearchEngineName
-        {
-            get { return GetSearchEngineName(); }
-        }
+        public override string SearchEngineName => GetSearchEngineName();
 
         #endregion
 
@@ -172,8 +144,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         private double DeterminePrecursorMassTolerance(clsSearchEngineParameters objSearchEngineParams, out double dblTolerancePPM)
         {
-            string strPeptideMassTolerance = string.Empty;
-            string strPeptideMassUnits = string.Empty;
+            var strPeptideMassTolerance = string.Empty;
+            var strPeptideMassUnits = string.Empty;
 
             double dblToleranceDa = 0;
             double dblValue = 0;
@@ -186,7 +158,7 @@ namespace PHRPReader
                 {
                     // Determine the mass units
                     // 0 means Da, 1 means mmu, 2 means ppm
-                    int intUnits = 0;
+                    var intUnits = 0;
 
                     if (objSearchEngineParams.Parameters.TryGetValue("peptide_mass_units", out strPeptideMassUnits))
                     {
@@ -279,7 +251,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public override bool LoadSearchEngineParameters(string strSearchEngineParamFileName, out clsSearchEngineParameters objSearchEngineParams)
         {
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             objSearchEngineParams = new clsSearchEngineParameters(SEQ_SEARCH_ENGINE_NAME, mModInfo);
             objSearchEngineParams.Enzyme = "trypsin";
@@ -299,15 +271,15 @@ namespace PHRPReader
             string strFastaFilePath = null;
             string strSettingValue = null;
 
-            int intCharIndex = 0;
-            int intValue = 0;
+            var intCharIndex = 0;
+            var intValue = 0;
 
-            KeyValuePair<string, string> kvSetting = default(KeyValuePair<string, string>);
+            var kvSetting = default(KeyValuePair<string, string>);
 
-            Regex reEnzymeSpecificity = new Regex(@"^\S+\s(\d)\s\d\s.+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            Match reMatch = default(Match);
+            var reEnzymeSpecificity = new Regex(@"^\S+\s(\d)\s\d\s.+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var reMatch = default(Match);
 
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             try
             {
@@ -409,7 +381,7 @@ namespace PHRPReader
                                                 // Parse out the cleavage specificity number
                                                 // This is the first number after the closing parenthesis in the above examples
                                                 reMatch = reEnzymeSpecificity.Match(strSettingValue);
-                                                if ((reMatch != null) && reMatch.Success)
+                                                if (reMatch != null && reMatch.Success)
                                                 {
                                                     if (int.TryParse(reMatch.Groups[1].Value, out intValue))
                                                     {
@@ -522,14 +494,14 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string strLine, int intLinesRead, out clsPSM objPSM, bool fastReadMode)
         {
-            string[] strColumns = strLine.Split('\t');
+            var strColumns = strLine.Split('\t');
             string strPeptide = null;
             string strProtein = null;
 
             double dblPrecursorMH = 0;
             double dblMassErrorDa = 0;
 
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             objPSM = new clsPSM();
 

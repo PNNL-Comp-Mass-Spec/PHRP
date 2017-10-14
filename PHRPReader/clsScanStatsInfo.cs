@@ -6,10 +6,7 @@
 
         private string mScanTypeName;
         // ReSharper disable once ConvertToAutoProperty
-        public int ScanNumber
-        {
-            get { return mScanNumber; }
-        }
+        public int ScanNumber => mScanNumber;
 
         public float ScanTimeMinutes { get; set; }
 
@@ -29,18 +26,8 @@
 
         public string ScanTypeName
         {
-            get { return mScanTypeName; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    mScanTypeName = string.Empty;
-                }
-                else
-                {
-                    mScanTypeName = value;
-                }
-            }
+            get => mScanTypeName;
+            set => mScanTypeName = string.IsNullOrEmpty(value) ? string.Empty : value;
         }
 
         public clsScanStatsInfo(int intScanNumber, float sngScanTimeMinutes, int intScanType)

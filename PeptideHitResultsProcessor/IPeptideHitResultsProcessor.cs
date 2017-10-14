@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PeptideHitResultsProcessor
 {
-    public abstract class IPeptideHitResultsProcessor
+    public abstract class IPeptideHitResultsProcessor : PRISM.clsEventNotifier
     {
         //Defines minimum required functionality for classes that will process peptide hit results files
         //Note that the peptide hit results file format will determined using AnalysisToolName
@@ -47,17 +47,6 @@ namespace PeptideHitResultsProcessor
             public bool CreateInspectSynopsisFile;
             public bool CreateInspectFirstHitsFile;
         }
-        #endregion
-
-        #region "Events"
-        public abstract event ErrorOccurredEventHandler ErrorOccurred;
-        public delegate void ErrorOccurredEventHandler(string strMessage);
-        public abstract event DebugEventEventHandler DebugEvent;
-        public delegate void DebugEventEventHandler(string strMessage);
-
-        // PercentComplete ranges from 0 to 100, but can contain decimal percentage values
-        public abstract event ProgressChangedEventHandler ProgressChanged;
-        public delegate void ProgressChangedEventHandler(string taskDescription, float percentComplete);
         #endregion
 
         #region "Properties"

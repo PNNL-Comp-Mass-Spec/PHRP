@@ -40,10 +40,8 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Properties"
-        public int UniqueSequenceCount
-        {
-            get { return htMasterSequences.Count; }
-        }
+        public int UniqueSequenceCount => htMasterSequences.Count;
+
         #endregion
 
         public clsUniqueSequencesContainer()
@@ -70,10 +68,9 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        public int GetNextUniqueSequenceID(string strSequence, string strModDescription, ref bool blnExistingSequenceFound)
+        public int GetNextUniqueSequenceID(string strSequence, string strModDescription, out bool blnExistingSequenceFound)
         {
-            int intUniqueSeqID = 0;
-            string strKey = null;
+            int intUniqueSeqID;
 
             blnExistingSequenceFound = false;
 
@@ -84,7 +81,7 @@ namespace PeptideHitResultsProcessor
                 if (strModDescription == null)
                     strModDescription = string.Empty;
 
-                strKey = strSequence + SEQUENCE_MOD_DESC_SEP + strModDescription;
+                var strKey = strSequence + SEQUENCE_MOD_DESC_SEP + strModDescription;
 
                 if (htMasterSequences.ContainsKey(strKey))
                 {

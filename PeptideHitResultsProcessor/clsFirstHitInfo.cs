@@ -13,10 +13,7 @@ namespace PeptideHitResultsProcessor
 
         public string CleanSequence { get; }
 
-        public string SequenceWithModsAndContext
-        {
-            get { return mPrefix + "." + mPrimarySequence + "." + mSuffix; }
-        }
+        public string SequenceWithModsAndContext => mPrefix + "." + mPrimarySequence + "." + mSuffix;
 
         public string ProteinName { get; set; }
 

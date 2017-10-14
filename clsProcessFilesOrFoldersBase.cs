@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using PRISM;
 
 namespace PeptideHitResultsProcRunner
 {
@@ -16,7 +17,7 @@ namespace PeptideHitResultsProcRunner
     /// Created in October 2013
     /// Last updated in January 2017
     /// </remarks>
-    public abstract class clsProcessFilesOrFoldersBase
+    public abstract class clsProcessFilesOrFoldersBase : clsEventNotifier
     {
         #region "Constants and Enums"
 
@@ -46,17 +47,9 @@ namespace PeptideHitResultsProcRunner
 
         public event ProgressResetEventHandler ProgressReset;
         public delegate void ProgressResetEventHandler();
-        public event ProgressChangedEventHandler ProgressChanged;
-        public delegate void ProgressChangedEventHandler(string taskDescription, float percentComplete);       // PercentComplete ranges from 0 to 100, but can contain decimal percentage values
+
         public event ProgressCompleteEventHandler ProgressComplete;
         public delegate void ProgressCompleteEventHandler();
-
-        public event ErrorEventEventHandler ErrorEvent;
-        public delegate void ErrorEventEventHandler(string strMessage);
-        public event WarningEventEventHandler WarningEvent;
-        public delegate void WarningEventEventHandler(string strMessage);
-        public event MessageEventEventHandler MessageEvent;
-        public delegate void MessageEventEventHandler(string strMessage);
 
         protected string mProgressStepDescription;
         protected float mProgressPercentComplete;          // Ranges from 0 to 100, but can contain decimal percentage values
@@ -75,23 +68,17 @@ namespace PeptideHitResultsProcRunner
 
         public bool AbortProcessing
         {
-            get { return mAbortProcessing; }
-            set { mAbortProcessing = value; }
+            get => mAbortProcessing;
+            set => mAbortProcessing = value;
         }
 
-        public string FileVersion
-        {
-            get { return GetVersionForExecutingAssembly(); }
-        }
+        public string FileVersion => GetVersionForExecutingAssembly();
 
-        public string FileDate
-        {
-            get { return mFileDate; }
-        }
+        public string FileDate => mFileDate;
 
         public string LogFilePath
         {
-            get { return mLogFilePath; }
+            get => mLogFilePath;
             set
             {
                 if (value == null)
@@ -102,31 +89,25 @@ namespace PeptideHitResultsProcRunner
 
         public string LogFolderPath
         {
-            get { return mLogFolderPath; }
-            set { mLogFolderPath = value; }
+            get => mLogFolderPath;
+            set => mLogFolderPath = value;
         }
 
         public bool LogMessagesToFile
         {
-            get { return mLogMessagesToFile; }
-            set { mLogMessagesToFile = value; }
+            get => mLogMessagesToFile;
+            set => mLogMessagesToFile = value;
         }
 
-        public virtual string ProgressStepDescription
-        {
-            get { return mProgressStepDescription; }
-        }
+        public virtual string ProgressStepDescription => mProgressStepDescription;
 
         // ProgressPercentComplete ranges from 0 to 100, but can contain decimal percentage values
-        public float ProgressPercentComplete
-        {
-            get { return Convert.ToSingle(Math.Round(mProgressPercentComplete, 2)); }
-        }
+        public float ProgressPercentComplete => Convert.ToSingle(Math.Round(mProgressPercentComplete, 2));
 
         public bool ShowMessages
         {
-            get { return mShowMessages; }
-            set { mShowMessages = value; }
+            get => mShowMessages;
+            set => mShowMessages = value;
         }
 
         #endregion
@@ -174,7 +155,7 @@ namespace PeptideHitResultsProcRunner
         /// <remarks></remarks>
         public static bool CreateSettingsFileIfMissing(string strApplicationName, string strSettingsFileName)
         {
-            string strSettingsFilePathLocal = GetSettingsFilePathLocal(strApplicationName, strSettingsFileName);
+            var strSettingsFilePathLocal = GetSettingsFilePathLocal(strApplicationName, strSettingsFileName);
 
             return CreateSettingsFileIfMissing(strSettingsFilePathLocal);
         }
@@ -191,12 +172,11 @@ namespace PeptideHitResultsProcRunner
             {
                 if (!File.Exists(strSettingsFilePathLocal))
                 {
-                    FileInfo fiMasterSettingsFile = default(FileInfo);
-                    fiMasterSettingsFile = new FileInfo(Path.Combine(GetAppFolderPath(), Path.GetFileName(strSettingsFilePathLocal)));
+                    var masterSettingsFile = new FileInfo(Path.Combine(GetAppFolderPath(), Path.GetFileName(strSettingsFilePathLocal)));
 
-                    if (fiMasterSettingsFile.Exists)
+                    if (masterSettingsFile.Exists)
                     {
-                        fiMasterSettingsFile.CopyTo(strSettingsFilePathLocal);
+                        masterSettingsFile.CopyTo(strSettingsFilePathLocal);
                     }
                 }
             }
@@ -228,7 +208,6 @@ namespace PeptideHitResultsProcRunner
         {
             const int THREAD_SLEEP_TIME_MSEC = 100;
 
-            int intTotalThreadWaitTimeMsec = 0;
             if (intMaxWaitTimeMSec < 100)
                 intMaxWaitTimeMSec = 100;
             if (intMaxWaitTimeMSec > 5000)
@@ -238,10 +217,10 @@ namespace PeptideHitResultsProcRunner
 
             try
             {
-                Thread gcThread = new Thread(GarbageCollectWaitForGC);
+                var gcThread = new Thread(GarbageCollectWaitForGC);
                 gcThread.Start();
 
-                intTotalThreadWaitTimeMsec = 0;
+                var intTotalThreadWaitTimeMsec = 0;
                 while (gcThread.IsAlive && intTotalThreadWaitTimeMsec < intMaxWaitTimeMSec)
                 {
                     Thread.Sleep(THREAD_SLEEP_TIME_MSEC);
@@ -277,7 +256,7 @@ namespace PeptideHitResultsProcRunner
         /// <remarks>For example, C:\Users\username\AppData\Roaming\AppName</remarks>
         public static string GetAppDataFolderPath(string strAppName)
         {
-            string strAppDataFolder = null;
+            string strAppDataFolder;
 
             if (string.IsNullOrWhiteSpace(strAppName))
             {
@@ -330,14 +309,14 @@ namespace PeptideHitResultsProcRunner
         /// <remarks></remarks>
         public static string GetAppVersion(string strProgramDate)
         {
-            return Assembly.GetExecutingAssembly().GetName().Version.ToString() + " (" + strProgramDate + ")";
+            return Assembly.GetExecutingAssembly().GetName().Version + " (" + strProgramDate + ")";
         }
 
         public abstract string GetErrorMessage();
 
         private string GetVersionForExecutingAssembly()
         {
-            string strVersion = null;
+            string strVersion;
 
             try
             {
@@ -382,23 +361,22 @@ namespace PeptideHitResultsProcRunner
             }
         }
 
-        protected void LogMessage(string strMessage)
+        protected void LogMessage(string message)
         {
-            LogMessage(strMessage, eMessageTypeConstants.Normal);
+            LogMessage(message, eMessageTypeConstants.Normal);
         }
 
-        protected void LogMessage(string strMessage, eMessageTypeConstants eMessageType)
+        protected void LogMessage(string message, eMessageTypeConstants eMessageType)
         {
-            LogMessage(strMessage, eMessageType, intDuplicateHoldoffHours: 0);
+            LogMessage(message, eMessageType, intDuplicateHoldoffHours: 0);
         }
 
-        protected void LogMessage(string strMessage, eMessageTypeConstants eMessageType, int intDuplicateHoldoffHours)
+        protected void LogMessage(string message, eMessageTypeConstants eMessageType, int intDuplicateHoldoffHours)
         {
             // Note that CleanupPaths() will update mOutputFolderPath, which is used here if mLogFolderPath is blank
             // Thus, be sure to call CleanupPaths (or update mLogFolderPath) before the first call to LogMessage
 
-            string strMessageType = null;
-            bool blnOpeningExistingFile = false;
+            string strMessageType;
 
             switch (eMessageType)
             {
@@ -469,15 +447,16 @@ namespace PeptideHitResultsProcRunner
                         mLogFilePath = Path.Combine(mLogFolderPath, mLogFilePath);
                     }
 
-                    blnOpeningExistingFile = File.Exists(mLogFilePath);
+                    var blnOpeningExistingFile = File.Exists(mLogFilePath);
 
                     if ((blnOpeningExistingFile & mLogDataCache.Count == 0))
                     {
                         UpdateLogDataCache(mLogFilePath, DateTime.UtcNow.AddHours(-intDuplicateHoldoffHours));
                     }
 
-                    mLogFile = new StreamWriter(new FileStream(mLogFilePath, FileMode.Append, FileAccess.Write, FileShare.Read));
-                    mLogFile.AutoFlush = true;
+                    mLogFile = new StreamWriter(new FileStream(mLogFilePath, FileMode.Append, FileAccess.Write, FileShare.Read)) {
+                        AutoFlush = true
+                    };
 
                     if (!blnOpeningExistingFile)
                     {
@@ -493,15 +472,14 @@ namespace PeptideHitResultsProcRunner
                 }
             }
 
-            if ((mLogFile != null))
+            if (mLogFile != null)
             {
                 var blnWriteToLog = true;
 
-                string strLogKey = strMessageType + "_" + strMessage;
-                DateTime dtLastLogTime = default(DateTime);
-                bool blnMessageCached = false;
+                var strLogKey = strMessageType + "_" + message;
+                bool blnMessageCached;
 
-                if (mLogDataCache.TryGetValue(strLogKey, out dtLastLogTime))
+                if (mLogDataCache.TryGetValue(strLogKey, out var dtLastLogTime))
                 {
                     blnMessageCached = true;
                 }
@@ -520,7 +498,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     mLogFile.WriteLine(DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt") + "\t" +
                                        strMessageType + "\t" +
-                                       strMessage);
+                                       message);
 
                     if (blnMessageCached)
                     {
@@ -545,56 +523,41 @@ namespace PeptideHitResultsProcRunner
                 }
             }
 
-            RaiseMessageEvent(strMessage, eMessageType);
+            RaiseMessageEvent(message, eMessageType);
         }
 
         private string strLastMessage = "";
         private DateTime dtLastReportTime = DateTime.Now;
 
-        private void RaiseMessageEvent(string strMessage, eMessageTypeConstants eMessageType)
+        private void RaiseMessageEvent(string message, eMessageTypeConstants eMessageType)
         {
-            if (!string.IsNullOrWhiteSpace(strMessage))
+            if (string.IsNullOrWhiteSpace(message)) return;
+
+            if (string.Equals(message, strLastMessage) && DateTime.UtcNow.Subtract(dtLastReportTime).TotalSeconds < 0.5)
             {
-                if (string.Equals(strMessage, strLastMessage) && DateTime.UtcNow.Subtract(dtLastReportTime).TotalSeconds < 0.5)
+                // Duplicate message; do not raise any events
+            }
+            else
+            {
+                dtLastReportTime = DateTime.UtcNow;
+                strLastMessage = string.Copy(message);
+
+                switch (eMessageType)
                 {
-                    // Duplicate message; do not raise any events
-                }
-                else
-                {
-                    dtLastReportTime = DateTime.UtcNow;
-                    strLastMessage = string.Copy(strMessage);
+                    case eMessageTypeConstants.Normal:
+                        OnStatusEvent(message);
+                        break;
+                    case eMessageTypeConstants.Warning:
+                        OnWarningEvent(message);
 
-                    switch (eMessageType)
-                    {
-                        case eMessageTypeConstants.Normal:
-                            if (MessageEvent != null)
-                            {
-                                MessageEvent(strMessage);
-                            }
+                        break;
+                    case eMessageTypeConstants.ErrorMsg:
+                        OnErrorEvent(message);
 
-                            break;
-                        case eMessageTypeConstants.Warning:
-                            if (WarningEvent != null)
-                            {
-                                WarningEvent(strMessage);
-                            }
-
-                            break;
-                        case eMessageTypeConstants.ErrorMsg:
-                            if (ErrorEvent != null)
-                            {
-                                ErrorEvent(strMessage);
-                            }
-
-                            break;
-                        default:
-                            if (MessageEvent != null)
-                            {
-                                MessageEvent(strMessage);
-                            }
-
-                            break;
-                    }
+                        break;
+                    default:
+                        OnStatusEvent(message);
+                        break;
                 }
             }
         }
@@ -602,88 +565,82 @@ namespace PeptideHitResultsProcRunner
         protected void ResetProgress()
         {
             mProgressPercentComplete = 0;
-            if (ProgressReset != null)
-            {
-                ProgressReset();
-            }
+            ProgressReset?.Invoke();
         }
 
         protected void ResetProgress(string strProgressStepDescription)
         {
             UpdateProgress(strProgressStepDescription, 0);
-            if (ProgressReset != null)
-            {
-                ProgressReset();
-            }
+            ProgressReset?.Invoke();
         }
 
-        protected void ShowErrorMessage(string strMessage)
+        protected void ShowErrorMessage(string message)
         {
-            ShowErrorMessage(strMessage, blnAllowLogToFile: true);
+            ShowErrorMessage(message, blnAllowLogToFile: true);
         }
 
-        protected void ShowErrorMessage(string strMessage, bool blnAllowLogToFile)
+        protected void ShowErrorMessage(string message, bool blnAllowLogToFile)
         {
-            ShowErrorMessage(strMessage, blnAllowLogToFile, intDuplicateHoldoffHours: 0);
+            ShowErrorMessage(message, blnAllowLogToFile, intDuplicateHoldoffHours: 0);
         }
 
-        protected void ShowErrorMessage(string strMessage, int intDuplicateHoldoffHours)
+        protected void ShowErrorMessage(string message, int intDuplicateHoldoffHours)
         {
-            ShowErrorMessage(strMessage, blnAllowLogToFile: true, intDuplicateHoldoffHours: intDuplicateHoldoffHours);
+            ShowErrorMessage(message, blnAllowLogToFile: true, intDuplicateHoldoffHours: intDuplicateHoldoffHours);
         }
 
-        protected void ShowErrorMessage(string strMessage, bool blnAllowLogToFile, int intDuplicateHoldoffHours)
+        protected void ShowErrorMessage(string message, bool blnAllowLogToFile, int intDuplicateHoldoffHours)
         {
             const string strSeparator = "------------------------------------------------------------------------------";
 
             Console.WriteLine();
             Console.WriteLine(strSeparator);
-            Console.WriteLine(strMessage);
+            Console.WriteLine(message);
             Console.WriteLine(strSeparator);
             Console.WriteLine();
 
             if (blnAllowLogToFile)
             {
                 // Note that LogMessage will call RaiseMessageEvent
-                LogMessage(strMessage, eMessageTypeConstants.ErrorMsg, intDuplicateHoldoffHours);
+                LogMessage(message, eMessageTypeConstants.ErrorMsg, intDuplicateHoldoffHours);
             }
             else
             {
-                RaiseMessageEvent(strMessage, eMessageTypeConstants.ErrorMsg);
+                RaiseMessageEvent(message, eMessageTypeConstants.ErrorMsg);
             }
         }
 
-        protected void ShowMessage(string strMessage)
+        protected void ShowMessage(string message)
         {
-            ShowMessage(strMessage, blnAllowLogToFile: true, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: 0);
+            ShowMessage(message, blnAllowLogToFile: true, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: 0);
         }
 
-        protected void ShowMessage(string strMessage, int intDuplicateHoldoffHours)
+        protected void ShowMessage(string message, int intDuplicateHoldoffHours)
         {
-            ShowMessage(strMessage, blnAllowLogToFile: true, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: intDuplicateHoldoffHours);
+            ShowMessage(message, blnAllowLogToFile: true, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: intDuplicateHoldoffHours);
         }
 
-        protected void ShowMessage(string strMessage, bool blnAllowLogToFile)
+        protected void ShowMessage(string message, bool blnAllowLogToFile)
         {
-            ShowMessage(strMessage, blnAllowLogToFile, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: 0);
+            ShowMessage(message, blnAllowLogToFile, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: 0);
         }
 
-        protected void ShowMessage(string strMessage, bool blnAllowLogToFile, bool blnPrecedeWithNewline)
+        protected void ShowMessage(string message, bool blnAllowLogToFile, bool blnPrecedeWithNewline)
         {
-            ShowMessage(strMessage, blnAllowLogToFile, blnPrecedeWithNewline, intDuplicateHoldoffHours: 0);
+            ShowMessage(message, blnAllowLogToFile, blnPrecedeWithNewline, intDuplicateHoldoffHours: 0);
         }
 
         protected void ShowMessage(
-            string strMessage,
+            string message,
             bool blnAllowLogToFile,
             bool blnPrecedeWithNewline,
             int intDuplicateHoldoffHours)
         {
-            ShowMessage(strMessage, blnAllowLogToFile, blnPrecedeWithNewline, intDuplicateHoldoffHours, eMessageTypeConstants.Normal);
+            ShowMessage(message, blnAllowLogToFile, blnPrecedeWithNewline, intDuplicateHoldoffHours, eMessageTypeConstants.Normal);
         }
 
         protected void ShowMessage(
-            string strMessage,
+            string message,
             bool blnAllowLogToFile,
             bool blnPrecedeWithNewline,
             int intDuplicateHoldoffHours,
@@ -693,32 +650,32 @@ namespace PeptideHitResultsProcRunner
             {
                 Console.WriteLine();
             }
-            Console.WriteLine(strMessage);
+            Console.WriteLine(message);
 
             if (blnAllowLogToFile)
             {
                 // Note that LogMessage will call RaiseMessageEvent
-                LogMessage(strMessage, eMessageType, intDuplicateHoldoffHours);
+                LogMessage(message, eMessageType, intDuplicateHoldoffHours);
             }
             else
             {
-                RaiseMessageEvent(strMessage, eMessageType);
+                RaiseMessageEvent(message, eMessageType);
             }
         }
 
-        protected void ShowWarning(string strMessage)
+        protected void ShowWarning(string message)
         {
-            ShowMessage(strMessage, blnAllowLogToFile: true, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: 0, eMessageType: eMessageTypeConstants.Warning);
+            ShowMessage(message, blnAllowLogToFile: true, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: 0, eMessageType: eMessageTypeConstants.Warning);
         }
 
-        protected void ShowWarning(string strMessage, int intDuplicateHoldoffHours)
+        protected void ShowWarning(string message, int intDuplicateHoldoffHours)
         {
-            ShowMessage(strMessage, blnAllowLogToFile: true, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: intDuplicateHoldoffHours, eMessageType: eMessageTypeConstants.Warning);
+            ShowMessage(message, blnAllowLogToFile: true, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: intDuplicateHoldoffHours, eMessageType: eMessageTypeConstants.Warning);
         }
 
-        protected void ShowWarning(string strMessage, bool blnAllowLogToFile)
+        protected void ShowWarning(string message, bool blnAllowLogToFile)
         {
-            ShowMessage(strMessage, blnAllowLogToFile, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: 0, eMessageType: eMessageTypeConstants.Warning);
+            ShowMessage(message, blnAllowLogToFile, blnPrecedeWithNewline: false, intDuplicateHoldoffHours: 0, eMessageType: eMessageTypeConstants.Warning);
         }
 
         private void TrimLogDataCache()
@@ -731,7 +688,7 @@ namespace PeptideHitResultsProcRunner
                 // Remove entries from mLogDataCache so that the list count is 80% of MAX_LOGDATA_CACHE_SIZE
 
                 // First construct a list of dates that we can sort to determine the datetime threshold for removal
-                List<System.DateTime> lstDates = (from entry in mLogDataCache select entry.Value).ToList();
+                var lstDates = (from entry in mLogDataCache select entry.Value).ToList();
 
                 // Sort by date
                 lstDates.Sort();
@@ -743,7 +700,7 @@ namespace PeptideHitResultsProcRunner
                 var dtThreshold = lstDates[intThresholdIndex];
 
                 // Construct a list of keys to be removed
-                List<string> lstKeys = (from entry in mLogDataCache where entry.Value <= dtThreshold select entry.Key).ToList();
+                var lstKeys = (from entry in mLogDataCache where entry.Value <= dtThreshold select entry.Key).ToList();
 
                 // Remove each of the keys
                 foreach (var strKey in lstKeys)
@@ -772,33 +729,34 @@ namespace PeptideHitResultsProcRunner
                     while (!srLogFile.EndOfStream)
                     {
                         var strLineIn = srLogFile.ReadLine();
+                        if (string.IsNullOrEmpty(strLineIn))
+                            continue;
+
                         var reMatch = reParseLine.Match(strLineIn);
 
-                        if (reMatch.Success)
-                        {
-                            DateTime dtLogTime = default(DateTime);
-                            if (DateTime.TryParse(reMatch.Groups[1].Value, out dtLogTime))
-                            {
-                                dtLogTime = dtLogTime.ToUniversalTime();
-                                if (dtLogTime >= dtDateThresholdToStore)
-                                {
-                                    string strKey = reMatch.Groups[2].Value + "_" + reMatch.Groups[3].Value;
+                        if (!reMatch.Success) continue;
 
-                                    try
+                        if (DateTime.TryParse(reMatch.Groups[1].Value, out var dtLogTime))
+                        {
+                            dtLogTime = dtLogTime.ToUniversalTime();
+                            if (dtLogTime >= dtDateThresholdToStore)
+                            {
+                                var strKey = reMatch.Groups[2].Value + "_" + reMatch.Groups[3].Value;
+
+                                try
+                                {
+                                    if (mLogDataCache.ContainsKey(strKey))
                                     {
-                                        if (mLogDataCache.ContainsKey(strKey))
-                                        {
-                                            mLogDataCache[strKey] = dtLogTime;
-                                        }
-                                        else
-                                        {
-                                            mLogDataCache.Add(strKey, dtLogTime);
-                                        }
+                                        mLogDataCache[strKey] = dtLogTime;
                                     }
-                                    catch (Exception)
+                                    else
                                     {
-                                        // Ignore errors here
+                                        mLogDataCache.Add(strKey, dtLogTime);
                                     }
+                                }
+                                catch (Exception)
+                                {
+                                    // Ignore errors here
                                 }
                             }
                         }
@@ -857,18 +815,12 @@ namespace PeptideHitResultsProcRunner
                 }
             }
 
-            if (ProgressChanged != null)
-            {
-                ProgressChanged(ProgressStepDescription, ProgressPercentComplete);
-            }
+            OnProgressUpdate(ProgressStepDescription, ProgressPercentComplete);
         }
 
         protected void OperationComplete()
         {
-            if (ProgressComplete != null)
-            {
-                ProgressComplete();
-            }
+            ProgressComplete?.Invoke();
         }
     }
 }

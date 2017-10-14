@@ -12,21 +12,13 @@ namespace PHRPReader
 {
     public class clsSeqInfo
     {
-        private readonly int mSeqID;
-        private readonly int mModCount;
-        private readonly string mModDescription;
-        private double mMonoisotopicMass;
-
         /// <summary>
         /// Sequence ID
         /// </summary>
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public int SeqID
-        {
-            get { return mSeqID; }
-        }
+        public int SeqID { get; }
 
         /// <summary>
         /// Number of modifications
@@ -34,10 +26,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public int ModCount
-        {
-            get { return mModCount; }
-        }
+        public int ModCount { get; }
 
         /// <summary>
         /// Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"
@@ -45,10 +34,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string ModDescription
-        {
-            get { return mModDescription; }
-        }
+        public string ModDescription { get; }
 
         /// <summary>
         /// Theoretical, monoisotopic mass (including the modified residues)
@@ -56,41 +42,31 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public double MonoisotopicMass
-        {
-            get { return mMonoisotopicMass; }
-        }
+        public double MonoisotopicMass { get; private set; }
 
         /// <summary>
         /// Constructor using Sequence ID and mass
         /// </summary>
         /// <remarks></remarks>
-        public clsSeqInfo(int SeqID, double MonoisotopicMass) : this(SeqID, MonoisotopicMass, 0, string.Empty)
+        public clsSeqInfo(int seqID, double monoisotopicMass) : this(seqID, monoisotopicMass, 0, string.Empty)
         {
         }
 
         /// <summary>
         /// Constructor using Sequence ID, mass, mod count, and list of modifications
         /// </summary>
-        /// <param name="SeqID">Sequence ID</param>
-        /// <param name="MonoisotopicMass">Theoretical, monoisotopic mass (including the modified residues)</param>
-        /// <param name="ModCount">Number of modifications</param>
-        /// <param name="ModDescription">Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"</param>
+        /// <param name="seqID">Sequence ID</param>
+        /// <param name="monoisotopicMass">Theoretical, monoisotopic mass (including the modified residues)</param>
+        /// <param name="modCount">Number of modifications</param>
+        /// <param name="modDescription">Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"</param>
         /// <remarks></remarks>
-        public clsSeqInfo(int SeqID, double MonoisotopicMass, int ModCount, string ModDescription)
+        public clsSeqInfo(int seqID, double monoisotopicMass, int modCount, string modDescription)
         {
-            mSeqID = SeqID;
-            mMonoisotopicMass = MonoisotopicMass;
-            mModCount = ModCount;
+            SeqID = seqID;
+            MonoisotopicMass = monoisotopicMass;
+            ModCount = modCount;
 
-            if (string.IsNullOrEmpty(ModDescription))
-            {
-                mModDescription = string.Empty;
-            }
-            else
-            {
-                mModDescription = ModDescription;
-            }
+            ModDescription = string.IsNullOrEmpty(modDescription) ? string.Empty : modDescription;
         }
 
         /// <summary>
@@ -100,7 +76,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public void UpdateMonoisotopicMass(double monoMass)
         {
-            mMonoisotopicMass = monoMass;
+            MonoisotopicMass = monoMass;
         }
     }
 }

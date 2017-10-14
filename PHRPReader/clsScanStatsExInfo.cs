@@ -2,13 +2,7 @@
 {
     public class clsScanStatsExInfo
     {
-        private readonly int mScanNumber;
-
-        // ReSharper disable once ConvertToAutoProperty
-        public int ScanNumber
-        {
-            get { return mScanNumber; }
-        }
+        public int ScanNumber { get; }
 
         public double IonInjectionTime { get; set; }
 
@@ -46,9 +40,9 @@
 
         public double Source_Current { get; set; }
 
-        public clsScanStatsExInfo(int intScanNumber)
+        public clsScanStatsExInfo(int scanNumber)
         {
-            mScanNumber = intScanNumber;
+            ScanNumber = scanNumber;
         }
     }
 }

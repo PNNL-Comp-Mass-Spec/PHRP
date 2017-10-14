@@ -58,7 +58,7 @@ namespace PHRPReader
         /// <param name="elementCount"></param>
         public void AddElement(string elementSymbol, int elementCount)
         {
-            int existingCount = 0;
+            var existingCount = 0;
             if (ElementCounts.TryGetValue(elementSymbol, out existingCount))
             {
                 ElementCounts[elementSymbol] = existingCount + elementCount;
@@ -88,7 +88,7 @@ namespace PHRPReader
         /// <returns>Element Count, or 0 if the element is not in ElementCounts</returns>
         public int GetElementCount(char elementSymbol)
         {
-            int elementCount = 0;
+            var elementCount = 0;
             if (ElementCounts.TryGetValue(elementSymbol.ToString(), out elementCount))
             {
                 return elementCount;
@@ -104,7 +104,7 @@ namespace PHRPReader
                 return "<Undefined>";
             }
 
-            string formulaDescription = string.Empty;
+            var formulaDescription = string.Empty;
             foreach (var element in ElementCounts)
             {
                 if (element.Value == 1)

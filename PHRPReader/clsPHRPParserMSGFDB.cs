@@ -8,9 +8,7 @@
 //
 //*********************************************************************************************************
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace PHRPReader
@@ -68,50 +66,23 @@ namespace PHRPReader
 
         #region "Properties"
 
-        public override string PHRPFirstHitsFileName
-        {
-            get { return GetPHRPFirstHitsFileName(mDatasetName); }
-        }
+        public override string PHRPFirstHitsFileName => GetPHRPFirstHitsFileName(mDatasetName);
 
-        public override string PHRPModSummaryFileName
-        {
-            get { return GetPHRPModSummaryFileName(mDatasetName); }
-        }
+        public override string PHRPModSummaryFileName => GetPHRPModSummaryFileName(mDatasetName);
 
-        public override string PHRPPepToProteinMapFileName
-        {
-            get { return GetPHRPPepToProteinMapFileName(mDatasetName); }
-        }
+        public override string PHRPPepToProteinMapFileName => GetPHRPPepToProteinMapFileName(mDatasetName);
 
-        public override string PHRPProteinModsFileName
-        {
-            get { return GetPHRPProteinModsFileName(mDatasetName); }
-        }
+        public override string PHRPProteinModsFileName => GetPHRPProteinModsFileName(mDatasetName);
 
-        public override string PHRPSynopsisFileName
-        {
-            get { return GetPHRPSynopsisFileName(mDatasetName); }
-        }
+        public override string PHRPSynopsisFileName => GetPHRPSynopsisFileName(mDatasetName);
 
-        public override string PHRPResultToSeqMapFileName
-        {
-            get { return GetPHRPResultToSeqMapFileName(mDatasetName); }
-        }
+        public override string PHRPResultToSeqMapFileName => GetPHRPResultToSeqMapFileName(mDatasetName);
 
-        public override string PHRPSeqInfoFileName
-        {
-            get { return GetPHRPSeqInfoFileName(mDatasetName); }
-        }
+        public override string PHRPSeqInfoFileName => GetPHRPSeqInfoFileName(mDatasetName);
 
-        public override string PHRPSeqToProteinMapFileName
-        {
-            get { return GetPHRPSeqToProteinMapFileName(mDatasetName); }
-        }
+        public override string PHRPSeqToProteinMapFileName => GetPHRPSeqToProteinMapFileName(mDatasetName);
 
-        public override string SearchEngineName
-        {
-            get { return GetSearchEngineName(); }
-        }
+        public override string SearchEngineName => GetSearchEngineName();
 
         #endregion
 
@@ -202,10 +173,6 @@ namespace PHRPReader
             out double dblTolerancePPM,
             clsPHRPReader.ePeptideHitResultType resultType)
         {
-            var strTolerance = string.Empty;
-            string[] strToleranceSplit = null;
-
-            Match reMatch = default(Match);
             var reExtraToleranceWithUnits = new Regex(@"([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var reExtraToleranceNoUnits = new Regex(@"([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -213,25 +180,21 @@ namespace PHRPReader
 
             dblTolerancePPM = 0;
 
-            if (!objSearchEngineParams.Parameters.TryGetValue("PMTolerance", out strTolerance))
+            if (!objSearchEngineParams.Parameters.TryGetValue("PMTolerance", out var strTolerance))
             {
                 return dblToleranceDa;
             }
 
             // Parent mass tolerance
             // Might contain two values, separated by a comma
-            strToleranceSplit = strTolerance.Split(',');
-
-            if (strToleranceSplit == null)
-            {
-                return dblToleranceDa;
-            }
+            var strToleranceSplit = strTolerance.Split(',');
 
             foreach (var strItem in strToleranceSplit)
             {
                 if (strItem.Trim().StartsWith("#"))
                     continue;
 
+                Match reMatch;
                 if (resultType == clsPHRPReader.ePeptideHitResultType.MSPathFinder)
                 {
                     reMatch = reExtraToleranceNoUnits.Match(strItem);
@@ -244,9 +207,7 @@ namespace PHRPReader
                 if (!reMatch.Success)
                     continue;
 
-                double dblToleranceCurrent = 0;
-
-                if (!double.TryParse(reMatch.Groups[1].Value, out dblToleranceCurrent))
+                if (!double.TryParse(reMatch.Groups[1].Value, out var dblToleranceCurrent))
                     continue;
 
                 if (resultType == clsPHRPReader.ePeptideHitResultType.MSPathFinder)
@@ -285,8 +246,7 @@ namespace PHRPReader
         /// <remarks>This function is used by clsPHRPMassErrorValidator in the Analysis Manager</remarks>
         public static bool GetCustomChargeCarrierMass(clsSearchEngineParameters objSearchEngineParams, out double chargeCarrierMass)
         {
-            string strValue = null;
-            if (objSearchEngineParams.Parameters.TryGetValue(CHARGE_CARRIER_MASS_PARAM_NAME, out strValue))
+            if (objSearchEngineParams.Parameters.TryGetValue(CHARGE_CARRIER_MASS_PARAM_NAME, out var strValue))
             {
                 if (double.TryParse(strValue, out chargeCarrierMass))
                 {
@@ -352,11 +312,9 @@ namespace PHRPReader
         /// <remarks></remarks>
         public override bool LoadSearchEngineParameters(string strSearchEngineParamFileName, out clsSearchEngineParameters objSearchEngineParams)
         {
-            bool blnSuccess = false;
-
             objSearchEngineParams = new clsSearchEngineParameters(MSGFDB_SEARCH_ENGINE_NAME, mModInfo);
 
-            blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams);
+            var blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams);
 
             ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams);
 
@@ -376,11 +334,10 @@ namespace PHRPReader
                     return false;
                 }
 
-                var strSettingValue = string.Empty;
-                int intValue = 0;
+                int intValue;
 
                 // Determine the enzyme name
-                if (objSearchEngineParams.Parameters.TryGetValue("enzymeid", out strSettingValue))
+                if (objSearchEngineParams.Parameters.TryGetValue("enzymeid", out var strSettingValue))
                 {
                     if (int.TryParse(strSettingValue, out intValue))
                     {
@@ -477,12 +434,11 @@ namespace PHRPReader
                 }
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                double dblTolerancePPM = 0;
-                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, out dblTolerancePPM, clsPHRPReader.ePeptideHitResultType.MSGFDB);
+                objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, out var dblTolerancePPM, clsPHRPReader.ePeptideHitResultType.MSGFDB);
                 objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM;
 
                 // Look for Custom Amino Acid definitions
-                if (!objSearchEngineParams.Parameters.Any(paramEntry => paramEntry.Key == clsMSGFPlusParamFileModExtractor.PARAM_TAG_CUSTOMAA))
+                if (objSearchEngineParams.Parameters.All(paramEntry => paramEntry.Key != clsMSGFPlusParamFileModExtractor.PARAM_TAG_CUSTOMAA))
                 {
                     // No custom amino acid entries
                     return true;
@@ -493,8 +449,7 @@ namespace PHRPReader
                 success = UpdateMassCalculatorMasses(strSearchEngineParamFileName);
 
                 // Look for a custom charge carrier mass
-                double customChargeCarrierMass = 0;
-                if (GetCustomChargeCarrierMass(objSearchEngineParams, out customChargeCarrierMass))
+                if (GetCustomChargeCarrierMass(objSearchEngineParams, out var customChargeCarrierMass))
                 {
                     ShowMessage(string.Format("Using a charge carrier mass of {0:F3} Da", customChargeCarrierMass));
                     mPeptideMassCalculator.ChargeCarrierMass = customChargeCarrierMass;
@@ -521,18 +476,13 @@ namespace PHRPReader
         public override bool ParsePHRPDataLine(string strLine, int intLinesRead, out clsPSM objPSM, bool fastReadMode)
         {
             var strColumns = strLine.Split('\t');
-            string strPeptide = null;
-            string strProtein = null;
-
-            double dblPrecursorMZ = 0;
-
-            bool blnMSGFPlusResults = false;
-            bool blnSuccess = false;
+            var blnSuccess = false;
 
             objPSM = new clsPSM();
 
             try
             {
+                bool blnMSGFPlusResults;
                 if (clsPHRPReader.LookupColumnIndex(DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders) >= 0)
                 {
                     blnMSGFPlusResults = true;
@@ -561,7 +511,7 @@ namespace PHRPReader
                         objPSM.ScoreRank = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb, mColumnHeaders, 1);
                     }
 
-                    strPeptide = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var strPeptide = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -574,12 +524,12 @@ namespace PHRPReader
 
                     objPSM.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
-                    strProtein = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var strProtein = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders);
                     objPSM.AddProtein(strProtein);
 
                     objPSM.CollisionMode = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_FragMethod, mColumnHeaders, "n/a");
 
-                    dblPrecursorMZ = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                    var dblPrecursorMZ = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
                     objPSM.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, objPSM.Charge, 0);
 
                     objPSM.MassErrorDa = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders);
@@ -597,8 +547,7 @@ namespace PHRPReader
                     if (objPSM.MSGFSpecEValue.Length > 13)
                     {
                         // Attempt to shorten the SpecEValue value
-                        double dblSpecEValue;
-                        if (double.TryParse(objPSM.MSGFSpecEValue, out dblSpecEValue))
+                        if (double.TryParse(objPSM.MSGFSpecEValue, out var dblSpecEValue))
                         {
                             objPSM.MSGFSpecEValue = dblSpecEValue.ToString("0.0000000E-00");
                         }
@@ -627,10 +576,8 @@ namespace PHRPReader
                         AddScore(objPSM, strColumns, DATA_COLUMN_PepQValue);
                         AddScore(objPSM, strColumns, DATA_COLUMN_Isotope_Error);
 
-                        string strValue = string.Empty;
-
                         // Duplicate the score values to provide backwards compatibility
-                        if (objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out strValue))
+                        if (objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out var strValue))
                             objPSM.SetScore(DATA_COLUMN_MSGFDB_SpecProb, strValue);
                         if (objPSM.TryGetScore(DATA_COLUMN_Rank_MSGFPlus_SpecEValue, out strValue))
                             objPSM.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, strValue);
@@ -639,26 +586,21 @@ namespace PHRPReader
                         if (objPSM.TryGetScore(DATA_COLUMN_PepQValue, out strValue))
                             objPSM.SetScore(DATA_COLUMN_PepFDR, strValue);
 
-                        var strEValue = string.Empty;
+                        var blnPValueStored = false;
 
-                        bool blnPValueStored = false;
-
-                        if (objPSM.TryGetScore(DATA_COLUMN_EValue, out strEValue))
+                        if (objPSM.TryGetScore(DATA_COLUMN_EValue, out var strEValue))
                         {
-                            string strSpecEValue = string.Empty;
-                            if (objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out strSpecEValue))
+                            if (objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out var strSpecEValue))
                             {
                                 // Compute PValue using EValue and SpecEValue
-                                double dblEValue = 0;
-                                if (double.TryParse(strEValue, out dblEValue))
+                                if (double.TryParse(strEValue, out var dblEValue))
                                 {
-                                    double dblSpecEValue = 0;
-                                    if (double.TryParse(strSpecEValue, out dblSpecEValue))
+                                    if (double.TryParse(strSpecEValue, out var dblSpecEValue))
                                     {
                                         if (dblSpecEValue > 0)
                                         {
-                                            double dblN = dblEValue / dblSpecEValue;
-                                            double dblPValue = 1 - Math.Pow((1 - dblSpecEValue), dblN);
+                                            var dblN = dblEValue / dblSpecEValue;
+                                            var dblPValue = 1 - Math.Pow(1 - dblSpecEValue, dblN);
 
                                             if (Math.Abs(dblPValue) <= double.Epsilon)
                                             {
@@ -700,7 +642,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                base.ReportError("Error parsing line " + intLinesRead + " in the MSGFDB data file: " + ex.Message);
+                ReportError("Error parsing line " + intLinesRead + " in the MSGFDB data file: " + ex.Message);
             }
 
             return blnSuccess;
@@ -708,13 +650,10 @@ namespace PHRPReader
 
         private bool UpdateMassCalculatorMasses(string strSearchEngineParamFileName)
         {
-            string localErrorMsg = string.Empty;
             var modFileProcessor = new clsMSGFPlusParamFileModExtractor("MSGF+");
+            RegisterEvents(modFileProcessor);
 
-            modFileProcessor.ErrorOccurred += ModExtractorErrorHandler;
-            modFileProcessor.WarningMessageEvent += ModExtractorWarningHandler;
-
-            var success = UpdateMassCalculatorMasses(strSearchEngineParamFileName, modFileProcessor, mPeptideMassCalculator, out localErrorMsg);
+            var success = UpdateMassCalculatorMasses(strSearchEngineParamFileName, modFileProcessor, mPeptideMassCalculator, out var localErrorMsg);
 
             if (!string.IsNullOrWhiteSpace(localErrorMsg) && string.IsNullOrWhiteSpace(mErrorMessage))
             {
@@ -747,10 +686,8 @@ namespace PHRPReader
 
             errorMessage = string.Empty;
 
-            List<clsMSGFPlusParamFileModExtractor.udtModInfoType> lstModInfo = null;
-
             // Note that this call will initialize lstModInfo
-            var success = modFileProcessor.ExtractModInfoFromParamFile(strSearchEngineParamFileName, out lstModInfo);
+            var success = modFileProcessor.ExtractModInfoFromParamFile(strSearchEngineParamFileName, out var lstModInfo);
             if (!success)
             {
                 errorMessage = modFileProcessor.ErrorMessage;
@@ -786,17 +723,5 @@ namespace PHRPReader
 
             return true;
         }
-
-        #region "Event Handlers"
-        private void ModExtractorErrorHandler(string errMsg)
-        {
-            ReportError(errMsg);
-        }
-
-        private void ModExtractorWarningHandler(string warningMsg)
-        {
-            ReportError(warningMsg);
-        }
-        #endregion
     }
 }

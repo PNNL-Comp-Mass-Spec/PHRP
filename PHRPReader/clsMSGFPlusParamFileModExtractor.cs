@@ -33,11 +33,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace PHRPReader
 {
-    public class clsMSGFPlusParamFileModExtractor
+    public class clsMSGFPlusParamFileModExtractor : PRISM.clsEventNotifier
     {
         #region "Constants and Enums"
 
@@ -49,7 +48,7 @@ namespace PHRPReader
 
         private const string MSGFPLUS_COMMENT_CHAR = "#";
 
-        public enum eMSGFDBModType : int
+        public enum eMSGFDBModType
         {
             Unknown = 0,
             DynamicMod = 1,
@@ -99,19 +98,9 @@ namespace PHRPReader
         private readonly string mToolName;
         #endregion
 
-        #region "Events"
-        public event ErrorOccurredEventHandler ErrorOccurred;
-        public delegate void ErrorOccurredEventHandler(string errMsg);
-        public event WarningMessageEventEventHandler WarningMessageEvent;
-        public delegate void WarningMessageEventEventHandler(string warningMsg);
-        #endregion
-
         #region "Properties"
 
-        public string ErrorMessage
-        {
-            get { return mErrorMessage; }
-        }
+        public string ErrorMessage => mErrorMessage;
 
         #endregion
 
@@ -160,7 +149,7 @@ namespace PHRPReader
                 return 203.079376;
             }
 
-            clsEmpiricalFormula empiricalFormula = default(clsEmpiricalFormula);
+            clsEmpiricalFormula empiricalFormula;
 
             try
             {
@@ -172,10 +161,9 @@ namespace PHRPReader
                 return 0;
             }
 
-            List<string> unknownSymbols = null;
-            var monoisotopicMass = clsPeptideMassCalculator.ComputeMonoistopicMass(empiricalFormula.ElementCounts, out unknownSymbols);
+            var monoisotopicMass = clsPeptideMassCalculator.ComputeMonoistopicMass(empiricalFormula.ElementCounts, out var unknownSymbols);
 
-            if ((unknownSymbols != null) && unknownSymbols.Count > 0)
+            if (unknownSymbols != null && unknownSymbols.Count > 0)
             {
                 var errMsg = "Error parsing empirical formula '" + strEmpiricalformula + "', ";
                 if (unknownSymbols.Count == 1)
@@ -203,10 +191,10 @@ namespace PHRPReader
         public bool ExtractModInfoFromParamFile(string paramFilePath,
             out List<udtModInfoType> lstModInfo)
         {
-            var tagNamesToFind = new List<string>();
-            tagNamesToFind.Add(PARAM_TAG_MOD_STATIC);
-            tagNamesToFind.Add(PARAM_TAG_MOD_DYNAMIC);
-            tagNamesToFind.Add(PARAM_TAG_CUSTOMAA);
+            var tagNamesToFind = new List<string> {
+                PARAM_TAG_MOD_STATIC,
+                PARAM_TAG_MOD_DYNAMIC,
+                PARAM_TAG_CUSTOMAA };
 
             // Initialization
             lstModInfo = new List<udtModInfoType>();
@@ -222,59 +210,59 @@ namespace PHRPReader
                     return false;
                 }
 
-                var fiParamFile = new FileInfo(paramFilePath);
-                if (!fiParamFile.Exists)
+                var paramFile = new FileInfo(paramFilePath);
+                if (!paramFile.Exists)
                 {
                     ReportError(mToolName + " param file not found: " + paramFilePath);
                     return false;
                 }
 
                 // Read the contents of the parameter (or mods) file
-                using (var srInFile = new StreamReader(new FileStream(fiParamFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var srInFile = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     while (!srInFile.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine().Trim();
+                        var dataLine = srInFile.ReadLine();
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
 
-                        string strModSpec = string.Empty;
+                        var trimmedLine = dataLine.Trim();
 
-                        if (strLineIn.StartsWith(MSGFPLUS_COMMENT_CHAR))
+                        var strModSpec = string.Empty;
+
+                        if (trimmedLine.StartsWith(MSGFPLUS_COMMENT_CHAR))
                         {
                             // Comment line (starts with #)
                             // Skip it
                             continue;
                         }
-                        else
+
+                        foreach (var tagName in tagNamesToFind)
                         {
-                            foreach (var tagName in tagNamesToFind)
+                            strModSpec = ValidateIsValidModSpec(trimmedLine, tagName);
+                            if (!string.IsNullOrEmpty(strModSpec))
                             {
-                                strModSpec = ValidateIsValidModSpec(strLineIn, tagName);
-                                if (!string.IsNullOrEmpty(strModSpec))
-                                {
-                                    // Known tag found; strLineIn was something like this:
-                                    //   StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
-                                    //   DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
-                                    //   CustomAA=C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
-                                    //
-                                    // And strModSpec will now be something like this:
-                                    //   C2H3N1O1,C,fix,any,Carbamidomethylation
-                                    //   C2H3NO, *,  opt, N-term,   Carbamidomethylation
-                                    //   C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
+                                // Known tag found; strLineIn was something like this:
+                                //   StaticMod=C2H3N1O1,C,fix,any,Carbamidomethylation
+                                //   DynamicMod=C2H3NO, *,  opt, N-term,   Carbamidomethylation
+                                //   CustomAA=C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
+                                //
+                                // And strModSpec will now be something like this:
+                                //   C2H3N1O1,C,fix,any,Carbamidomethylation
+                                //   C2H3NO, *,  opt, N-term,   Carbamidomethylation
+                                //   C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
 
-                                    break;
-                                }
+                                break;
                             }
+                        }
 
-                            if (string.IsNullOrEmpty(strModSpec))
+                        if (string.IsNullOrEmpty(strModSpec))
+                        {
+                            var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", "");
+                            if (lineInNoSpaces.Contains(",opt,") || lineInNoSpaces.Contains(",fix,") || lineInNoSpaces.Contains(",custom,"))
                             {
-                                var lineInNoSpaces = TrimComment(strLineIn).Replace(" ", "");
-                                if (lineInNoSpaces.Contains(",opt,") || lineInNoSpaces.Contains(",fix,") || lineInNoSpaces.Contains(",custom,"))
-                                {
-                                    strModSpec = lineInNoSpaces;
-                                }
+                                strModSpec = lineInNoSpaces;
                             }
                         }
 
@@ -299,7 +287,6 @@ namespace PHRPReader
                             continue;
                         }
 
-                        var udtModInfo = new udtModInfoType();
 
                         // Notes when tracking information for custom amino acids
                         //   ModName:    Name associated with the custom amino acid
@@ -309,7 +296,9 @@ namespace PHRPReader
                         //   ModType:    eMSGFDBModType.CustomAA
                         //   ModSymbol:  ?   (a question mark; not used)
 
-                        udtModInfo.ModMass = strSplitLine[0].Trim();
+                        var udtModInfo = new udtModInfoType {
+                            ModMass = strSplitLine[0].Trim()
+                        };
 
                         // .ModMass could be a number, or could be an empirical formula
                         // First try to parse out a number
@@ -422,44 +411,28 @@ namespace PHRPReader
             return true;
         }
 
-        private void ReportError(string errMsg)
+        private void ReportError(string message)
         {
-            mErrorMessage = errMsg;
-            if (ErrorOccurred != null)
-            {
-                ErrorOccurred(errMsg);
-            }
+            mErrorMessage = message;
+            OnErrorEvent(message);
         }
 
-        private void ReportWarning(string warningMsg)
+        private void ReportWarning(string message)
         {
-            if (WarningMessageEvent != null)
-            {
-                WarningMessageEvent(warningMsg);
-            }
+            OnWarningEvent(message);
         }
 
         public void ResolveMSGFDBModsWithModDefinitions(List<udtModInfoType> lstMSGFDBModInfo, clsPeptideModificationContainer oPeptideMods)
         {
-            int intResidueIndex = 0;
-            int intResIndexStart = 0;
-            int intResIndexEnd = 0;
-
-            char chTargetResidue = default(char);
-            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState = default(clsAminoAcidModInfo.eResidueTerminusStateConstants);
-            clsModificationDefinition.eModificationTypeConstants eModType = default(clsModificationDefinition.eModificationTypeConstants);
-            bool blnExistingModFound = false;
-
-            clsModificationDefinition objModificationDefinition = default(clsModificationDefinition);
-
-            if ((lstMSGFDBModInfo != null))
+            if (lstMSGFDBModInfo != null)
             {
                 // Call .LookupModificationDefinitionByMass for each entry in lstMSGFDBModInfo
 
                 for (var intIndex = 0; intIndex <= lstMSGFDBModInfo.Count - 1; intIndex++)
                 {
-                    udtModInfoType udtModInfo = default(udtModInfoType);
-                    udtModInfo = lstMSGFDBModInfo[intIndex];
+                    var udtModInfo = lstMSGFDBModInfo[intIndex];
+                    int intResIndexStart;
+                    int intResIndexEnd;
 
                     if (udtModInfo.Residues.Length > 0)
                     {
@@ -472,8 +445,9 @@ namespace PHRPReader
                         intResIndexEnd = -1;
                     }
 
-                    for (intResidueIndex = intResIndexStart; intResidueIndex <= intResIndexEnd; intResidueIndex++)
+                    for (var intResidueIndex = intResIndexStart; intResidueIndex <= intResIndexEnd; intResidueIndex++)
                     {
+                        char chTargetResidue;
                         if (intResidueIndex >= 0)
                         {
                             chTargetResidue = udtModInfo.Residues[intResidueIndex];
@@ -489,7 +463,8 @@ namespace PHRPReader
                             chTargetResidue = default(char);
                         }
 
-                        eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
+                        var eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
+                        clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState;
 
                         if (udtModInfo.ModType == eMSGFDBModType.DynNTermPeptide)
                         {
@@ -539,9 +514,8 @@ namespace PHRPReader
                             }
                         }
 
-                        blnExistingModFound = false;
-
-                        objModificationDefinition = oPeptideMods.LookupModificationDefinitionByMassAndModType(udtModInfo.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, ref blnExistingModFound, true, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION);
+                        var objModificationDefinition = oPeptideMods.LookupModificationDefinitionByMassAndModType(
+                            udtModInfo.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, out _, true);
 
                         if (intResidueIndex == intResIndexStart)
                         {
@@ -558,7 +532,7 @@ namespace PHRPReader
         private static string TrimComment(string value)
         {
             // Look for the MSGF+ comment character
-            var commentCharIndex = value.IndexOf(MSGFPLUS_COMMENT_CHAR);
+            var commentCharIndex = value.IndexOf(MSGFPLUS_COMMENT_CHAR, StringComparison.Ordinal);
 
             if (commentCharIndex > 0)
             {
@@ -571,12 +545,11 @@ namespace PHRPReader
 
         private string ValidateIsValidModSpec(string strLineIn, string strModTag)
         {
-            KeyValuePair<string, string> kvSetting = default(KeyValuePair<string, string>);
-            string strModSpec = string.Empty;
+            var strModSpec = string.Empty;
 
             if (strLineIn.StartsWith(strModTag, StringComparison.InvariantCultureIgnoreCase))
             {
-                kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, '=', "#");
+                var kvSetting = clsPHRPParser.ParseKeyValueSetting(strLineIn, '=', "#");
 
                 if (string.IsNullOrEmpty(kvSetting.Value) || kvSetting.Value.ToLower() == "none")
                 {

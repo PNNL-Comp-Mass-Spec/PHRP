@@ -50,10 +50,7 @@ namespace PeptideHitResultsProcessor
         public string IonsExpected { get; set; }
         public string DelMPPM { get; set; }
 
-        public string PeptideXCorrNext
-        {
-            get { return mPeptideXCorrNext; }
-        }
+        public string PeptideXCorrNext => mPeptideXCorrNext;
 
         #endregion
 
