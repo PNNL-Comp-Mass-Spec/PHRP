@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using PHRPReader;
 
@@ -11,24 +10,6 @@ namespace Test_PHRPReader
 {
     static class Program
     {
-        private static clsPHRPReader withEventsField_mPHRPReader;
-        private static clsPHRPReader mPHRPReader {
-            get { return withEventsField_mPHRPReader; }
-            set {
-                if (withEventsField_mPHRPReader != null) {
-                    withEventsField_mPHRPReader.ErrorEvent -= mPHRPReader_ErrorEvent;
-                    withEventsField_mPHRPReader.MessageEvent -= mPHRPReader_MessageEvent;
-                    withEventsField_mPHRPReader.WarningEvent -= mPHRPReader_WarningEvent;
-                }
-                withEventsField_mPHRPReader = value;
-                if (withEventsField_mPHRPReader != null) {
-                    withEventsField_mPHRPReader.ErrorEvent += mPHRPReader_ErrorEvent;
-                    withEventsField_mPHRPReader.MessageEvent += mPHRPReader_MessageEvent;
-                    withEventsField_mPHRPReader.WarningEvent += mPHRPReader_WarningEvent;
-                }
-            }
-        }
-
         public static void Main()
         {
             //const string strSequestSynFilePath = @"Seq201304121552_Auto934225\Firestone_Soil_07_18_05APR13_Frodo_12-12-04_syn.txt";
@@ -44,8 +25,8 @@ namespace Test_PHRPReader
 
             //const string strMSAlignFolder = @"\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
 
-            string strSynOrFHTFile = null;
-            clsPHRPReader.ePeptideHitResultType eMatchedResultType = default(clsPHRPReader.ePeptideHitResultType);
+            string strSynOrFHTFile;
+            var eMatchedResultType = default(clsPHRPReader.ePeptideHitResultType);
 
             if (false) {
                 Console.WriteLine();
@@ -89,14 +70,14 @@ namespace Test_PHRPReader
                 Console.WriteLine("Warning, Folder not found: " + strSequestFolder);
             }
 
-            if (true | !diSequestFolder.Exists)
+            if (true || !diSequestFolder.Exists)
                 return;
 
-            DateTime dtStartTimeNoSkipDup = default(DateTime);
-            DateTime dtEndTimeNoSkipDup = default(DateTime);
+            var dtStartTimeNoSkipDup = default(DateTime);
+            var dtEndTimeNoSkipDup = default(DateTime);
 
-            DateTime dtStartTimeSkipDup = default(DateTime);
-            DateTime dtEndTimeSkipDup = default(DateTime);
+            var dtStartTimeSkipDup = default(DateTime);
+            var dtEndTimeSkipDup = default(DateTime);
 
             Console.WriteLine();
             strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder);
@@ -122,14 +103,13 @@ namespace Test_PHRPReader
 
         private static void TestMSGFPlusParamFileParsing(string msgfPlusParamFilePath)
         {
-            string localErrorMsg = string.Empty;
             var modFileProcessor = new clsMSGFPlusParamFileModExtractor("MSGF+");
 
-            modFileProcessor.ErrorOccurred += ModExtractorErrorHandler;
-            modFileProcessor.WarningMessageEvent += ModExtractorWarningHandler;
+            modFileProcessor.ErrorEvent += ErrorEventHandler;
+            modFileProcessor.WarningEvent += WarningEventHandler;
 
             var peptideMassCalculator = new clsPeptideMassCalculator();
-            var success = clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(msgfPlusParamFilePath, modFileProcessor, peptideMassCalculator, out localErrorMsg);
+            clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(msgfPlusParamFilePath, modFileProcessor, peptideMassCalculator, out _);
 
             var udtModInfo = new List<clsPeptideMassCalculator.udtPeptideSequenceModInfoType>();
 
@@ -137,9 +117,11 @@ namespace Test_PHRPReader
 
             Console.WriteLine("Mono mass of PEPTIDE: " + monoMass.ToString("0.0000"));
 
-            var udtModifiedResidue = new clsPeptideMassCalculator.udtPeptideSequenceModInfoType();
-            udtModifiedResidue.ResidueLocInPeptide = 4;
-            udtModifiedResidue.ModificationMass = 79.966;
+            var udtModifiedResidue = new clsPeptideMassCalculator.udtPeptideSequenceModInfoType
+            {
+                ResidueLocInPeptide = 4,
+                ModificationMass = 79.966
+            };
             udtModInfo.Add(udtModifiedResidue);
 
             var monoMassModified = peptideMassCalculator.ComputeSequenceMass("PEPTIDE", udtModInfo);
@@ -153,41 +135,47 @@ namespace Test_PHRPReader
 
         private static void TestPHRPReader(string strSynOrFHTFile, bool blnSkipDuplicates)
         {
-            FileInfo fiInputFile = default(FileInfo);
-            fiInputFile = new FileInfo(strSynOrFHTFile);
+            var fiInputFile = new FileInfo(strSynOrFHTFile);
 
             Console.WriteLine("Instantiating reader");
-            var oStartupOptions = new clsPHRPStartupOptions();
-            oStartupOptions.LoadModsAndSeqInfo = true;
-            oStartupOptions.LoadMSGFResults = true;
-            oStartupOptions.LoadScanStatsData = false;
-            oStartupOptions.MaxProteinsPerPSM = 100;
+            var oStartupOptions = new clsPHRPStartupOptions
+            {
+                LoadModsAndSeqInfo = true,
+                LoadMSGFResults = true,
+                LoadScanStatsData = false,
+                MaxProteinsPerPSM = 100
+            };
 
-            mPHRPReader = new clsPHRPReader(fiInputFile.FullName, clsPHRPReader.ePeptideHitResultType.Unknown, oStartupOptions);
-            mPHRPReader.EchoMessagesToConsole = false;
-            mPHRPReader.SkipDuplicatePSMs = blnSkipDuplicates;
+            var phrpReader =
+                new clsPHRPReader(fiInputFile.FullName, clsPHRPReader.ePeptideHitResultType.Unknown, oStartupOptions)
+                {
+                    EchoMessagesToConsole = false,
+                    SkipDuplicatePSMs = blnSkipDuplicates
+                };
 
             // Check for any load errors
-            if (mPHRPReader.ErrorMessages.Count > 0) {
+            if (phrpReader.ErrorMessages.Count > 0) {
                 Console.WriteLine("Error(s) instantiating the reader:");
-                foreach (var errorMessage in mPHRPReader.ErrorMessages) {
+                foreach (var errorMessage in phrpReader.ErrorMessages) {
                     Console.WriteLine("  " + errorMessage);
                 }
             }
 
+            phrpReader.ErrorEvent += ErrorEventHandler;
+            phrpReader.StatusEvent += MessageEventHandler;
+            phrpReader.WarningEvent += WarningEventHandler;
+
             const bool fastReadEnabled = true;
-            mPHRPReader.FastReadMode = fastReadEnabled;
+            phrpReader.FastReadMode = fastReadEnabled;
 
             var oMassCalculator = new clsPeptideMassCalculator();
 
-            if (!mPHRPReader.CanRead) {
-                Console.WriteLine("Aborting since PHRPReader is not ready: " + mPHRPReader.ErrorMessage);
+            if (!phrpReader.CanRead) {
+                Console.WriteLine("Aborting since PHRPReader is not ready: " + phrpReader.ErrorMessage);
                 return;
             }
 
             var lstValues = new List<string>();
-            int intIsotopeErrorComputed = 0;
-            string strMassErrorPPM = null;
 
             var intPSMsRead = 0;
             var intModifiedPSMsRead = 0;
@@ -196,23 +184,19 @@ namespace Test_PHRPReader
 
             Console.WriteLine("Reading data");
 
-            while (mPHRPReader.MoveNext()) {
-                clsPSM oPsm = mPHRPReader.CurrentPSM;
+            while (phrpReader.MoveNext()) {
+                var oPsm = phrpReader.CurrentPSM;
 
                 intPSMsRead += 1;
                 lstValues.Clear();
 
-                mPHRPReader.FinalizeCurrentPSM();
+                phrpReader.FinalizeCurrentPSM();
 
-                var primarySequence = string.Empty;
-                var prefix = string.Empty;
-                var suffix = string.Empty;
-                clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(oPsm.Peptide, out primarySequence, out prefix, out suffix);
+                clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(oPsm.Peptide, out _, out _, out _);
 
-                intIsotopeErrorComputed = 0;
-                strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, ref intIsotopeErrorComputed);
+                var strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, out _);
 
-                lstValues.Add(mPHRPReader.DatasetName + "_dta.txt");                                             // #SpecFile
+                lstValues.Add(phrpReader.DatasetName + "_dta.txt");                                             // #SpecFile
                 lstValues.Add("index=" + intPSMsRead);                                                           // SpecID
                 lstValues.Add(oPsm.ScanNumber.ToString());                                                       // ScanNum
                 lstValues.Add(oPsm.CollisionMode);                                                               // FragMethod
@@ -247,7 +231,7 @@ namespace Test_PHRPReader
                 lstValues.Add(strXCorr);                                                              // XCorr
 
                 lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_Sp, "0"));              // SP
-                lstValues.Add(oPsm.MSGFSpecProb);                // MSGF SpecProb
+                lstValues.Add(oPsm.MSGFSpecEValue);                                                   // MSGF SpecEValue
                 lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_DelCn2, "0"));          // DelCn2
 
                 lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_PValue, "0"));           // PValue
@@ -294,15 +278,10 @@ namespace Test_PHRPReader
         private static readonly Regex RegexFindItraq = new Regex(@"^([A-Z][^A-Z]*)(\+144\.\d+)(.+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static string CleanupPeptide(string strPeptide)
         {
-            var strPrimarySequence = string.Empty;
-            var strPrefix = string.Empty;
-            var strSuffix = string.Empty;
-
-            Match reMatch = default(Match);
-
-            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strPeptide, out strPrimarySequence, out strPrefix, out strSuffix)) {
+            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strPeptide, out var strPrimarySequence, out var strPrefix, out var strSuffix))
+            {
                 // Look for an N-terminal iTraq mod
-                reMatch = RegexFindItraq.Match(strPrimarySequence);
+                var reMatch = RegexFindItraq.Match(strPrimarySequence);
 
                 if (reMatch.Success) {
                     strPeptide = strPrefix + "." + reMatch.Groups[2].Value + reMatch.Groups[1].Value + reMatch.Groups[3].Value + "." + strSuffix;
@@ -312,34 +291,19 @@ namespace Test_PHRPReader
             return strPeptide;
         }
 
-        private static string FlattenList(List<string> lstValues)
+        private static string FlattenList(IReadOnlyList<string> lstValues, string chSepChar = "\t")
         {
-            return FlattenList(lstValues, '\t');
+            return string.Join(chSepChar, lstValues);
         }
 
-        private static string FlattenList(List<string> lstValues, char chSepChar)
-        {
-            var sbOutline = new StringBuilder();
-
-            for (var intIndex = 0; intIndex <= lstValues.Count - 1; intIndex++) {
-                if (intIndex > 0) {
-                    sbOutline.Append(chSepChar);
-                }
-                sbOutline.Append(lstValues[intIndex]);
-            }
-
-            return sbOutline.ToString();
-        }
-
-        private static string GetCorrectedMassErrorPPM(clsPSM oPsm, ref int intIsotopeError)
+        private static string GetCorrectedMassErrorPPM(clsPSM oPsm, out int intIsotopeError)
         {
             const double MASS_C13 = 1.00335483;
 
-            double dblDelM = 0;
             double dblMassErrorPPM = 0;
             intIsotopeError = 0;
 
-            if (double.TryParse(oPsm.MassErrorDa, out dblDelM)) {
+            if (double.TryParse(oPsm.MassErrorDa, out var dblDelM)) {
                 // Examine dblDelM to determine which isotope was chosen
                 if (dblDelM >= -0.5) {
                     // This is the typical case
@@ -364,40 +328,27 @@ namespace Test_PHRPReader
 
         private static string GetScore(clsPSM oPsm, string strScoreName, string strValueIfMissing)
         {
-            var strScoreValue = string.Empty;
-
-            if (!oPsm.TryGetScore(strScoreName, out strScoreValue)) {
+            if (!oPsm.TryGetScore(strScoreName, out var strScoreValue)) {
                 strScoreValue = strValueIfMissing;
             }
 
             return strScoreValue;
         }
 
-        private static void mPHRPReader_ErrorEvent(string strErrorMessage)
+        private static void ErrorEventHandler(string message, Exception ex)
         {
-            Console.WriteLine("Error: " + strErrorMessage);
+            PRISM.ConsoleMsgUtils.ShowError(message);
         }
 
-        private static void mPHRPReader_MessageEvent(string strMessage)
+        private static void MessageEventHandler(string message)
         {
-            Console.WriteLine(strMessage);
+            Console.WriteLine(message);
         }
 
-        private static void mPHRPReader_WarningEvent(string strWarningMessage)
+        private static void WarningEventHandler(string message)
         {
-            Console.WriteLine("Warning: " + strWarningMessage);
+            PRISM.ConsoleMsgUtils.ShowWarning(message);
         }
 
-        #region "Event Handlers"
-        private static void ModExtractorErrorHandler(string errMsg)
-        {
-            Console.WriteLine("Error: " + errMsg);
-        }
-
-        private static void ModExtractorWarningHandler(string warningMsg)
-        {
-            Console.WriteLine("Warning: " + warningMsg);
-        }
-        #endregion
     }
 }
