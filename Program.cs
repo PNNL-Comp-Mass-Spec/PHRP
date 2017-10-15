@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "October 13, 2017";
+        public const string PROGRAM_DATE = "October 15, 2017";
 
         private static string mInputFilePath;
         private static string mOutputFolderPath;                         // Optional
@@ -577,7 +577,10 @@ namespace PeptideHitResultsProcRunner
 
         private static void mPeptideHitResultsProcRunner_WarningEvent(string message)
         {
-            ConsoleMsgUtils.ShowWarning("Warning: " + message);
+            if (message.StartsWith("Warning", StringComparison.InvariantCultureIgnoreCase))
+                ConsoleMsgUtils.ShowWarning(message);
+            else
+                ConsoleMsgUtils.ShowWarning("Warning: " + message);
         }
     }
 }
