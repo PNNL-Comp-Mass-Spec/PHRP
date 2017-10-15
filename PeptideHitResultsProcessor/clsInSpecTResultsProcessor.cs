@@ -26,6 +26,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using PHRPReader;
@@ -507,7 +508,7 @@ namespace PeptideHitResultsProcessor
                             var udtFilteredSearchResults = new udtInspectSearchResultType[1000];
 
                             // Parse the input file
-                            while (!srDataFile.EndOfStream & !base.AbortProcessing)
+                            while (!srDataFile.EndOfStream & !AbortProcessing)
                             {
                                 var strLineIn = srDataFile.ReadLine();
 
@@ -696,95 +697,100 @@ namespace PeptideHitResultsProcessor
                 {
                     while (!srInFile.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine().Trim();
+                        var lineIn = srInFile.ReadLine();
+                        if (string.IsNullOrWhiteSpace(lineIn))
+                            continue;
 
-                        if (strLineIn.Length > 0)
+                        var dataLine = lineIn.Trim();
+                        if (dataLine.Length <= 0)
+                            continue;
+
+                        if (dataLine[0] == '#')
                         {
-                            if (strLineIn[0] == '#')
+                            // Comment line; skip it
+                            continue;
+                        }
+
+                        if (!dataLine.StartsWith("mod", StringComparison.InvariantCultureIgnoreCase))
+                            continue;
+
+                        // Modification definition line
+
+                        // Split the line on commas
+                        var strSplitLine = dataLine.Split(',');
+
+                        if (strSplitLine.Length < 3 || strSplitLine[0].ToLower().Trim() != "mod")
+                            continue;
+
+                        if (udtModList == null || udtModList.Length == 0)
+                        {
+                            udtModList = new udtModInfoType[1];
+                        }
+                        else if (intModCount >= udtModList.Length)
+                        {
+                            Array.Resize(ref udtModList, udtModList.Length * 2);
+                        }
+
+                        var udtMod = new udtModInfoType
+                        {
+                            ModMass = strSplitLine[1],
+                            Residues = strSplitLine[2],
+                            ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL.ToString()
+                        };
+
+                        if (strSplitLine.Length >= 4)
+                        {
+                            switch (strSplitLine[3].ToLower())
                             {
-                                // Comment line; skip it
-                            }
-                            else if (strLineIn.StartsWith("mod", StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                // Modification definition line
-
-                                // Split the line on commas
-                                var strSplitLine = strLineIn.Split(',');
-
-                                if (strSplitLine.Length >= 3 && strSplitLine[0].ToLower().Trim() == "mod")
-                                {
-                                    if (udtModList == null || udtModList.Length == 0)
-                                    {
-                                        udtModList = new udtModInfoType[1];
-                                    }
-                                    else if (intModCount >= udtModList.Length)
-                                    {
-                                        Array.Resize(ref udtModList, udtModList.Length * 2);
-                                    }
-
-                                    var udtMod = new udtModInfoType
-                                    {
-                                        ModMass = strSplitLine[1],
-                                        Residues = strSplitLine[2],
-                                        ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL.ToString()
-                                    };
-
-                                    if (strSplitLine.Length >= 4)
-                                    {
-                                        switch (strSplitLine[3].ToLower())
-                                        {
-                                            case "opt":
-                                                udtMod.ModType = eInspectModType.DynamicMod;
-                                                break;
-                                            case "fix":
-                                                udtMod.ModType = eInspectModType.StaticMod;
-                                                break;
-                                            case "nterminal":
-                                                udtMod.ModType = eInspectModType.DynNTermPeptide;
-                                                break;
-                                            case "cterminal":
-                                                udtMod.ModType = eInspectModType.DynCTermPeptide;
-                                                break;
-                                            default:
-                                                ReportWarning("Unrecognized Mod Type in the Inspect parameter file");
-                                                udtMod.ModType = eInspectModType.DynamicMod;
-                                                break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Assume dynamic if not specifed
-                                        udtMod.ModType = eInspectModType.DynamicMod;
-                                    }
-
-                                    if (strSplitLine.Length >= 5)
-                                    {
-                                        udtMod.ModName = strSplitLine[4].ToLower();
-                                        if (udtMod.ModName.Length > 4)
-                                        {
-                                            // Only keep the first 4 characters of the modification name
-                                            udtMod.ModName = udtMod.ModName.Substring(0, 4);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        intUnnamedModID += 1;
-                                        udtMod.ModName = "UnnamedMod" + intUnnamedModID.ToString();
-                                    }
-
-                                    // Check for phosphorylation
-                                    // Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
-                                    //  However, we want to use the more precise mass of 79.9663
-                                    if (udtMod.ModName == PHOS_MOD_NAME.ToLower() & udtMod.ModMass == "80")
-                                    {
-                                        udtMod.ModMass = PHOS_MOD_MASS;
-                                    }
-                                    udtModList[intModCount] = udtMod;
-
-                                    intModCount += 1;
-                                }
+                                case "opt":
+                                    udtMod.ModType = eInspectModType.DynamicMod;
+                                    break;
+                                case "fix":
+                                    udtMod.ModType = eInspectModType.StaticMod;
+                                    break;
+                                case "nterminal":
+                                    udtMod.ModType = eInspectModType.DynNTermPeptide;
+                                    break;
+                                case "cterminal":
+                                    udtMod.ModType = eInspectModType.DynCTermPeptide;
+                                    break;
+                                default:
+                                    ReportWarning("Unrecognized Mod Type in the Inspect parameter file");
+                                    udtMod.ModType = eInspectModType.DynamicMod;
+                                    break;
                             }
                         }
+                        else
+                        {
+                            // Assume dynamic if not specifed
+                            udtMod.ModType = eInspectModType.DynamicMod;
+                        }
+
+                        if (strSplitLine.Length >= 5)
+                        {
+                            udtMod.ModName = strSplitLine[4].ToLower();
+                            if (udtMod.ModName.Length > 4)
+                            {
+                                // Only keep the first 4 characters of the modification name
+                                udtMod.ModName = udtMod.ModName.Substring(0, 4);
+                            }
+                        }
+                        else
+                        {
+                            intUnnamedModID += 1;
+                            udtMod.ModName = "UnnamedMod" + intUnnamedModID.ToString();
+                        }
+
+                        // Check for phosphorylation
+                        // Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
+                        //  However, we want to use the more precise mass of 79.9663
+                        if (udtMod.ModName == PHOS_MOD_NAME.ToLower() & udtMod.ModMass == "80")
+                        {
+                            udtMod.ModMass = PHOS_MOD_MASS;
+                        }
+                        udtModList[intModCount] = udtMod;
+
+                        intModCount += 1;
                     }
                 }
 
@@ -918,7 +924,7 @@ namespace PeptideHitResultsProcessor
             return blnSuccess;
         }
 
-        private bool ParseInspectSynFileHeaderLine(string strLineIn, ref int[] intColumnMapping)
+        private bool ParseInspectSynFileHeaderLine(string strLineIn, out int[] intColumnMapping)
         {
             // Parse the header line
 
@@ -1033,11 +1039,11 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var strBaseOutputFilePath = Path.Combine(strOutputFolderPath, Path.GetFileName(strInputFilePath));
-                        var blnSuccess = base.InitializeSequenceOutputFiles(strBaseOutputFilePath);
+                        var blnSuccess = InitializeSequenceOutputFiles(strBaseOutputFilePath);
 
                         // Parse the input file
 
-                        while (!srDataFile.EndOfStream & !base.AbortProcessing)
+                        while (!srDataFile.EndOfStream & !AbortProcessing)
                         {
                             var strLineIn = srDataFile.ReadLine();
                             if (string.IsNullOrWhiteSpace(strLineIn))
@@ -1049,7 +1055,7 @@ namespace PeptideHitResultsProcessor
 
                             if (!blnHeaderParsed)
                             {
-                                blnSuccess = ParseInspectSynFileHeaderLine(strLineIn, ref intColumnMapping);
+                                blnSuccess = ParseInspectSynFileHeaderLine(strLineIn, out intColumnMapping);
                                 if (blnSuccess)
                                 {
                                     blnDataLine = false;
@@ -1065,7 +1071,7 @@ namespace PeptideHitResultsProcessor
                             bool blnValidSearchResult;
                             if (blnDataLine)
                             {
-                                blnValidSearchResult = ParseInSpectSynFileEntry(ref strLineIn, ref intColumnMapping, searchResult, ref strErrorLog, ref strCurrentPeptideWithMods);
+                                blnValidSearchResult = ParseInSpectSynFileEntry(strLineIn, intColumnMapping, searchResult, ref strErrorLog, out strCurrentPeptideWithMods);
                             }
                             else
                             {
@@ -1114,7 +1120,7 @@ namespace PeptideHitResultsProcessor
                                         strErrorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'" + "\n";
                                     }
                                 }
-                                base.SaveResultsFileEntrySeqInfo((clsSearchResultsBaseClass)searchResult, blnFirstMatchForGroup);
+                                SaveResultsFileEntrySeqInfo(searchResult, blnFirstMatchForGroup);
 
                                 if (lstPepToProteinMapping.Count > 0)
                                 {
@@ -1132,7 +1138,7 @@ namespace PeptideHitResultsProcessor
                                             if (lstPepToProteinMapping[intPepToProteinMapIndex].Protein != strCurrentProtein)
                                             {
                                                 searchResult.ProteinName = string.Copy(lstPepToProteinMapping[intPepToProteinMapIndex].Protein);
-                                                base.SaveResultsFileEntrySeqInfo((clsSearchResultsBaseClass)searchResult, false);
+                                                SaveResultsFileEntrySeqInfo(searchResult, false);
                                             }
 
                                             intPepToProteinMapIndex += 1;
@@ -1162,7 +1168,7 @@ namespace PeptideHitResultsProcessor
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(strInputFilePath);
-                        var strModificationSummaryFilePath = Path.GetFileName(base.ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
+                        var strModificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
                         strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath);
 
                         SaveModificationSummaryFile(strModificationSummaryFilePath);
@@ -1184,7 +1190,7 @@ namespace PeptideHitResultsProcessor
                 }
                 finally
                 {
-                    base.CloseSequenceOutputFiles();
+                    CloseSequenceOutputFiles();
                 }
             }
             catch (Exception ex)
@@ -1335,17 +1341,19 @@ namespace PeptideHitResultsProcessor
         }
 
         private bool ParseInSpectSynFileEntry(
-            ref string strLineIn,
-            ref int[] intColumnMapping,
+            string strLineIn,
+            IReadOnlyList<int> intColumnMapping,
             clsSearchResultsInSpecT searchResult,
             ref string strErrorLog,
-            ref string strPeptideSequenceWithMods)
+            out string strPeptideSequenceWithMods)
         {
             // Parses an entry from the Inspect Synopsis file
 
             string[] strSplitLine = null;
 
-            var blnValidSearchResult = false;
+            bool blnValidSearchResult;
+
+            strPeptideSequenceWithMods = string.Empty;
 
             try
             {
@@ -1354,7 +1362,6 @@ namespace PeptideHitResultsProcessor
 
                 // Reset searchResult
                 searchResult.Clear();
-                strPeptideSequenceWithMods = string.Empty;
 
                 strSplitLine = strLineIn.Trim().Split('\t');
                 if (strSplitLine.Length < INSPECT_SYN_FILE_MIN_COL_COUNT)
@@ -1384,10 +1391,9 @@ namespace PeptideHitResultsProcessor
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(strPeptideSequenceWithMods, true, true);
 
-                var searchResultBase = default(clsSearchResultsBaseClass);
-                searchResultBase = (clsSearchResultsBaseClass)searchResult;
+                var searchResultBase = (clsSearchResultsBaseClass)searchResult;
 
-                base.ComputePseudoPeptideLocInProtein(searchResultBase);
+                ComputePseudoPeptideLocInProtein(searchResultBase);
 
                 // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
                 // If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
@@ -1402,7 +1408,7 @@ namespace PeptideHitResultsProcessor
                     // Therefore, we will negate .peptideDeltaMass
                     try
                     {
-                        searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString();
+                        searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString(CultureInfo.InvariantCulture);
                     }
                     catch (Exception)
                     {
@@ -1492,12 +1498,6 @@ namespace PeptideHitResultsProcessor
         /// <returns>True if success, False if failure</returns>
         public override bool ProcessFile(string strInputFilePath, string strOutputFolderPath, string strParameterFilePath)
         {
-            string strOutputFilePath = null;
-            string strSynOutputFilePath = null;
-            string strPepToProteinMapFilePath = null;
-
-            udtModInfoType[] udtInspectModInfo = null;
-            var lstPepToProteinMapping = default(List<udtPepToProteinMappingType>);
             var strMTSPepToProteinMapFilePath = string.Empty;
 
             var blnSuccess = false;
@@ -1523,7 +1523,7 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                base.ResetProgress("Parsing " + Path.GetFileName(strInputFilePath));
+                ResetProgress("Parsing " + Path.GetFileName(strInputFilePath));
 
                 if (!CleanupFilePaths(ref strInputFilePath, ref strOutputFolderPath))
                 {
@@ -1535,8 +1535,8 @@ namespace PeptideHitResultsProcessor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(strInputFilePath);
 
-                    udtInspectModInfo = new udtModInfoType[0];
-                    lstPepToProteinMapping = new List<udtPepToProteinMappingType>();
+                    var udtInspectModInfo = new udtModInfoType[0];
+                    var lstPepToProteinMapping = new List<udtPepToProteinMappingType>();
 
                     // Load the Inspect Parameter File so that we can determine the modification names and masses
                     if (!ExtractModInfoFromInspectParamFile(SearchToolParameterFilePath, ref udtInspectModInfo))
@@ -1544,11 +1544,13 @@ namespace PeptideHitResultsProcessor
                         if (udtInspectModInfo == null || udtInspectModInfo.Length == 0)
                         {
                             udtInspectModInfo = new udtModInfoType[1];
-                            var modInfo = new udtModInfoType();
-                            modInfo.ModName = PHOS_MOD_NAME.ToLower();
-                            modInfo.ModMass = PHOS_MOD_MASS;
-                            modInfo.Residues = PHOS_MOD_RESIDUES;
-                            modInfo.ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL.ToString();
+                            var modInfo = new udtModInfoType
+                            {
+                                ModName = PHOS_MOD_NAME.ToLower(),
+                                ModMass = PHOS_MOD_MASS,
+                                Residues = PHOS_MOD_RESIDUES,
+                                ModSymbol = UNKNOWN_INSPECT_MOD_SYMBOL.ToString()
+                            };
                             udtInspectModInfo[1] = modInfo;
                         }
                     }
@@ -1556,18 +1558,18 @@ namespace PeptideHitResultsProcessor
                     // Resolve the mods in mInspectModInfo with the ModDefs mods
                     ResolveInspectModsWithModDefinitions(ref udtInspectModInfo);
 
-                    if (base.CreateInspectFirstHitsFile)
+                    if (CreateInspectFirstHitsFile)
                     {
                         // Create the first hits output file
-                        base.ResetProgress("Creating the FHT file (top TotalPRMScore)", true);
+                        ResetProgress("Creating the FHT file (top TotalPRMScore)", true);
 
-                        strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath);
+                        var strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath);
                         strOutputFilePath = Path.Combine(strOutputFolderPath, strOutputFilePath + INSPECT_TOTALPRM_FIRST_HITS_FILE_SUFFIX);
 
                         blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, ref udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyTotalPRM);
 
                         // Create the first hits output file
-                        base.ResetProgress("Creating the FHT file (top FScore)", true);
+                        ResetProgress("Creating the FHT file (top FScore)", true);
 
                         strOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath);
                         strOutputFilePath = Path.Combine(strOutputFolderPath, strOutputFilePath + INSPECT_FSCORE_FIRST_HITS_FILE_SUFFIX);
@@ -1575,27 +1577,27 @@ namespace PeptideHitResultsProcessor
                         blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strOutputFilePath, ref udtInspectModInfo, eFilteredOutputFileTypeConstants.FHTbyFScore);
                     }
 
-                    if (base.CreateInspectSynopsisFile)
+                    if (CreateInspectSynopsisFile)
                     {
                         // Create the synopsis output file
-                        base.ResetProgress("Creating the SYN file", true);
+                        ResetProgress("Creating the SYN file", true);
 
                         //Define the synopsis output file name based on strInputFilePath
-                        strSynOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath);
+                        var strSynOutputFilePath = Path.GetFileNameWithoutExtension(strInputFilePath);
                         strSynOutputFilePath = Path.Combine(strOutputFolderPath, strSynOutputFilePath + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
                         blnSuccess = CreateFHTorSYNResultsFile(strInputFilePath, strSynOutputFilePath, ref udtInspectModInfo, eFilteredOutputFileTypeConstants.SynFile);
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
                         // LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
-                        strPepToProteinMapFilePath = Path.Combine(Path.GetDirectoryName(inputFile.FullName), Path.GetFileNameWithoutExtension(inputFile.FullName) + FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING + ".txt");
+                        var strPepToProteinMapFilePath = Path.Combine(Path.GetDirectoryName(inputFile.FullName), Path.GetFileNameWithoutExtension(inputFile.FullName) + FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING + ".txt");
 
-                        base.ResetProgress("Loading the PepToProtein map file: " + Path.GetFileName(strPepToProteinMapFilePath), true);
+                        ResetProgress("Loading the PepToProtein map file: " + Path.GetFileName(strPepToProteinMapFilePath), true);
 
                         LoadPeptideToProteinMapInfoInspect(strPepToProteinMapFilePath, strOutputFolderPath, ref udtInspectModInfo, ref lstPepToProteinMapping, ref strMTSPepToProteinMapFilePath);
 
                         // Create the other PHRP-specific files
-                        base.ResetProgress("Creating the PHRP files for " + Path.GetFileName(strSynOutputFilePath), true);
+                        ResetProgress("Creating the PHRP files for " + Path.GetFileName(strSynOutputFilePath), true);
 
                         blnSuccess = ParseInSpectSynopsisFile(strSynOutputFilePath, strOutputFolderPath, ref lstPepToProteinMapping, false);
 
@@ -1606,27 +1608,27 @@ namespace PeptideHitResultsProcessor
                         if (blnSuccess && CreateProteinModsFile)
                         {
                             // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                            base.ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath);
+                            ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(strSynOutputFilePath)), strOutputFolderPath);
 
                             // Create the Protein Mods file
-                            blnSuccess = base.CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect);
+                            blnSuccess = CreateProteinModDetailsFile(strSynOutputFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect);
                         }
                     }
 
                     if (blnSuccess)
                     {
-                        base.OperationComplete();
+                        OperationComplete();
                     }
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " + ex.Message);
+                    SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " + ex.Message, ex);
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ProcessFile:" + ex.Message);
+                SetErrorMessage("Error in ProcessFile:" + ex.Message, ex);
                 SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
             }
 
@@ -1639,34 +1641,30 @@ namespace PeptideHitResultsProcessor
         // If strValue ends in .0000, then remove the .0000 portion
         private string RemoveExtraneousDigits(string strValue)
         {
-            var reMatch = default(Match);
-
             if (string.IsNullOrWhiteSpace(strValue))
             {
                 return string.Empty;
             }
+
+            var reMatch = RegexAllZeroes.Match(strValue);
+            if (reMatch.Success && reMatch.Index > 0)
+            {
+                strValue = strValue.Substring(0, reMatch.Index);
+            }
             else
             {
-                reMatch = RegexAllZeroes.Match(strValue);
+                reMatch = RegexNumPlusZeroes.Match(strValue);
                 if (reMatch.Success && reMatch.Index > 0)
                 {
-                    strValue = strValue.Substring(0, reMatch.Index);
-                }
-                else
-                {
-                    reMatch = RegexNumPlusZeroes.Match(strValue);
-                    if (reMatch.Success && reMatch.Index > 0)
+                    if (reMatch.Groups.Count > 1)
                     {
-                        if (reMatch.Groups.Count > 1)
-                        {
-                            // Number is of the form 1.0030 or 1.300 or 1.030
-                            strValue = strValue.Substring(0, reMatch.Index) + reMatch.Groups[1].Value;
-                        }
+                        // Number is of the form 1.0030 or 1.300 or 1.030
+                        strValue = strValue.Substring(0, reMatch.Index) + reMatch.Groups[1].Value;
                     }
                 }
-
-                return strValue;
             }
+
+            return strValue;
         }
 
         private static readonly Regex RegexNTerminalModMassRegEx = new Regex(INSPECT_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
@@ -1683,9 +1681,6 @@ namespace PeptideHitResultsProcessor
         {
             var strPrefix = string.Empty;
             var strSuffix = string.Empty;
-
-            var intModMass = 0;
-            var reMatch = default(Match);
 
             if (strPeptide.Length >= 4)
             {
@@ -1708,6 +1703,7 @@ namespace PeptideHitResultsProcessor
                     if (udtInspectModInfo[intIndex].ModType == eInspectModType.DynNTermPeptide |
                         udtInspectModInfo[intIndex].ModType == eInspectModType.DynCTermPeptide)
                     {
+                        var reMatch = default(Match);
                         if (udtInspectModInfo[intIndex].ModType == eInspectModType.DynNTermPeptide)
                         {
                             // Inspect notates N-terminal mods like this: R.+14HVIFLAER.R   (Note: This behavior is not yet confirmed)
@@ -1733,7 +1729,7 @@ namespace PeptideHitResultsProcessor
                                 // Match found
                                 try
                                 {
-                                    intModMass = Convert.ToInt32(reMatch.Groups[1].Value);
+                                    var intModMass = Convert.ToInt32(reMatch.Groups[1].Value);
 
                                     // Compare the mod mass in the specification to this Mod's mod mass
                                     // If they are less than 0.5 Da apart, then assume we have a match; yes, this assumption is a bit flaky
@@ -1882,7 +1878,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private void SortAndWriteFilteredSearchResults(
-            StreamWriter swResultFile,
+            TextWriter swResultFile,
             int intFilteredSearchResultCount,
             ref udtInspectSearchResultType[] udtFilteredSearchResults,
             ref string strErrorLog)

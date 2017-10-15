@@ -10,7 +10,7 @@
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 2, 2006
 //
-// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 // -------------------------------------------------------------------------------
 //
@@ -95,44 +95,34 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         private bool AddDynamicAndStaticResidueMods(
-            clsSearchResultsSequest searchResult,
+            clsSearchResultsBaseClass searchResult,
             bool blnUpdateModOccurrenceCounts)
         {
             // Step through .PeptideSequenceWithMods
             // For each residue, check if a static mod is defined that affects that residue
             // For each mod symbol, determine the modification and add to searchResult
 
-            var intModIndex = 0;
-            var chChar = default(char);
-            var objModificationDefinition = default(clsModificationDefinition);
-
-            string strSequence = null;
-            var chMostRecentLetter = default(char);
+            var chMostRecentLetter = '-';
             var intResidueLocInPeptide = 0;
 
-            var blnSuccess = false;
-
-            chMostRecentLetter = '-';
-            intResidueLocInPeptide = 0;
-
             // Assume success for now
-            blnSuccess = true;
+            var blnSuccess = true;
 
-            strSequence = searchResult.PeptideSequenceWithMods;
+            var strSequence = searchResult.PeptideSequenceWithMods;
             for (var intIndex = 0; intIndex <= strSequence.Length - 1; intIndex++)
             {
-                chChar = strSequence[intIndex];
+                var chChar = strSequence[intIndex];
 
                 if (IsLetterAtoZ(chChar))
                 {
                     chMostRecentLetter = chChar;
                     intResidueLocInPeptide += 1;
 
-                    for (intModIndex = 0; intModIndex <= mPeptideMods.ModificationCount - 1; intModIndex++)
+                    for (var intModIndex = 0; intModIndex <= mPeptideMods.ModificationCount - 1; intModIndex++)
                     {
                         if (mPeptideMods.GetModificationTypeByIndex(intModIndex) == clsModificationDefinition.eModificationTypeConstants.StaticMod)
                         {
-                            objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex);
+                            var objModificationDefinition = mPeptideMods.GetModificationByIndex(intModIndex);
 
                             if (objModificationDefinition.TargetResiduesContain(chChar))
                             {
@@ -174,7 +164,7 @@ namespace PeptideHitResultsProcessor
             return blnSuccess;
         }
 
-        private bool AddModificationsAndComputeMass(clsSearchResultsSequest searchResult, bool blnUpdateModOccurrenceCounts)
+        private bool AddModificationsAndComputeMass(clsSearchResultsBaseClass searchResult, bool blnUpdateModOccurrenceCounts)
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = true;
 
@@ -279,10 +269,10 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var strBaseOutputFilePath = Path.Combine(strOutputFolderPath, Path.GetFileName(strInputFilePath));
-                        var blnSuccess = base.InitializeSequenceOutputFiles(strBaseOutputFilePath);
+                        var blnSuccess = InitializeSequenceOutputFiles(strBaseOutputFilePath);
 
                         // Parse the input file
-                        while (!srDataFile.EndOfStream & !base.AbortProcessing)
+                        while (!srDataFile.EndOfStream & !AbortProcessing)
                         {
                             var strLineIn = srDataFile.ReadLine();
                             if (string.IsNullOrWhiteSpace(strLineIn))
@@ -294,7 +284,7 @@ namespace PeptideHitResultsProcessor
 
                             if (!blnHeaderParsed)
                             {
-                                blnSuccess = ParseSequestSynFileHeaderLine(strLineIn, ref intColumnMapping);
+                                blnSuccess = ParseSequestSynFileHeaderLine(strLineIn, out intColumnMapping);
                                 if (blnSuccess)
                                 {
                                     blnDataLine = false;
@@ -310,7 +300,7 @@ namespace PeptideHitResultsProcessor
                             bool blnValidSearchResult;
                             if (blnDataLine)
                             {
-                                blnValidSearchResult = ParseSequestResultsFileEntry(ref strLineIn, ref intColumnMapping, searchResult, ref strErrorLog);
+                                blnValidSearchResult = ParseSequestResultsFileEntry(strLineIn, intColumnMapping, searchResult, ref strErrorLog);
                             }
                             else
                             {
@@ -365,7 +355,7 @@ namespace PeptideHitResultsProcessor
                                         strErrorLog += "\n";
                                     }
                                 }
-                                base.SaveResultsFileEntrySeqInfo((clsSearchResultsBaseClass)searchResult, blnFirstMatchForGroup);
+                                SaveResultsFileEntrySeqInfo(searchResult, blnFirstMatchForGroup);
                             }
 
                             // Update the progress
@@ -384,7 +374,7 @@ namespace PeptideHitResultsProcessor
                     {
                         // Create the modification summary file
                         var inputFile = new FileInfo(strInputFilePath);
-                        var strModificationSummaryFilePath = Path.GetFileName(base.ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
+                        var strModificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
                         strModificationSummaryFilePath = Path.Combine(strOutputFolderPath, strModificationSummaryFilePath);
 
                         SaveModificationSummaryFile(strModificationSummaryFilePath);
@@ -407,7 +397,7 @@ namespace PeptideHitResultsProcessor
                 }
                 finally
                 {
-                    base.CloseSequenceOutputFiles();
+                    CloseSequenceOutputFiles();
                 }
             }
             catch (Exception ex)
@@ -420,8 +410,8 @@ namespace PeptideHitResultsProcessor
         }
 
         private bool ParseSequestResultsFileEntry(
-            ref string strLineIn,
-            ref int[] intColumnMapping,
+            string strLineIn,
+            IReadOnlyList<int> intColumnMapping,
             clsSearchResultsSequest searchResult,
             ref string strErrorLog)
         {
@@ -478,10 +468,9 @@ namespace PeptideHitResultsProcessor
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(strPeptideSequenceWithMods, true, true);
 
-                var searchResultBase = default(clsSearchResultsBaseClass);
-                searchResultBase = (clsSearchResultsBaseClass)searchResult;
+                var searchResultBase = (clsSearchResultsBaseClass)searchResult;
 
-                base.ComputePseudoPeptideLocInProtein(searchResultBase);
+                ComputePseudoPeptideLocInProtein(searchResultBase);
 
                 // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
                 // If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
@@ -570,7 +559,7 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                base.ResetProgress("Parsing " + Path.GetFileName(strInputFilePath));
+                ResetProgress("Parsing " + Path.GetFileName(strInputFilePath));
 
                 if (!CleanupFilePaths(ref strInputFilePath, ref strOutputFolderPath))
                 {
@@ -598,7 +587,7 @@ namespace PeptideHitResultsProcessor
 
                 if (blnSuccess)
                 {
-                    base.OperationComplete();
+                    OperationComplete();
                 }
             }
             catch (Exception ex)
@@ -612,20 +601,20 @@ namespace PeptideHitResultsProcessor
 
         private bool CreateProteinModsFileWork(FileInfo inputFile, string strOutputFolderPath)
         {
-            var blnSuccess = false;
+            bool blnSuccess;
 
             // First create the MTS PepToProteinMap file using inputFile
             // Will also look for the first hits or synopsis file and use that too if it is present
 
             var lstSourcePHRPDataFiles = new List<string>();
 
-            string strAdditionalFile = null;
+            string strAdditionalFile;
             var strInputFileBaseName = Path.GetFileNameWithoutExtension(inputFile.Name);
 
             lstSourcePHRPDataFiles.Add(inputFile.FullName);
             if (strInputFileBaseName.EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.InvariantCultureIgnoreCase))
             {
-                strAdditionalFile = base.ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_FIRST_HITS_FILE);
+                strAdditionalFile = ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_FIRST_HITS_FILE);
                 if (File.Exists(strAdditionalFile))
                 {
                     lstSourcePHRPDataFiles.Add(strAdditionalFile);
@@ -633,7 +622,7 @@ namespace PeptideHitResultsProcessor
             }
             else if (strInputFileBaseName.EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.InvariantCultureIgnoreCase))
             {
-                strAdditionalFile = base.ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_SYNOPSIS_FILE);
+                strAdditionalFile = ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_SYNOPSIS_FILE);
                 if (File.Exists(strAdditionalFile))
                 {
                     lstSourcePHRPDataFiles.Add(strAdditionalFile);
@@ -649,7 +638,7 @@ namespace PeptideHitResultsProcessor
             else
             {
                 // Mapping file does not exist
-                blnSuccess = base.CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath);
+                blnSuccess = CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath);
                 if (!blnSuccess)
                 {
                     ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
@@ -659,10 +648,10 @@ namespace PeptideHitResultsProcessor
             if (blnSuccess)
             {
                 // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                base.ValidatePHRPReaderSupportFiles(inputFile.FullName, strOutputFolderPath);
+                ValidatePHRPReaderSupportFiles(inputFile.FullName, strOutputFolderPath);
 
                 // Now create the Protein Mods file
-                blnSuccess = base.CreateProteinModDetailsFile(inputFile.FullName, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest);
+                blnSuccess = CreateProteinModDetailsFile(inputFile.FullName, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest);
             }
 
             if (!blnSuccess)
@@ -671,51 +660,51 @@ namespace PeptideHitResultsProcessor
                 blnSuccess = true;
             }
 
-            return blnSuccess;
+            return true;
         }
 
         private bool ParseSequestSynFileHeaderLine(
             string strLineIn,
-            ref int[] intColumnMapping)
+            out int[] intColumnMapping)
         {
             // Parse the header line
 
-            string[] strSplitLine = null;
-            var eResultFileColumn = default(eSequestSynopsisFileColumns);
-            var lstColumnNames = default(SortedDictionary<string, eSequestSynopsisFileColumns>);
-            lstColumnNames = new SortedDictionary<string, eSequestSynopsisFileColumns>(StringComparer.InvariantCultureIgnoreCase);
+
+
+            var lstColumnNames = new SortedDictionary<string, eSequestSynopsisFileColumns>(StringComparer.InvariantCultureIgnoreCase)
+            {
+                {"HitNum", eSequestSynopsisFileColumns.RowIndex},
+                {"ScanNum", eSequestSynopsisFileColumns.Scan},
+                {"ScanCount", eSequestSynopsisFileColumns.NumScans},
+                {"ChargeState", eSequestSynopsisFileColumns.Charge},
+                {"MH", eSequestSynopsisFileColumns.PeptideMH},
+                {"XCorr", eSequestSynopsisFileColumns.XCorr},
+                {"DelCn", eSequestSynopsisFileColumns.DeltaCn},
+                {"Sp", eSequestSynopsisFileColumns.Sp},
+                {"Reference", eSequestSynopsisFileColumns.ProteinName},
+                {"MultiProtein", eSequestSynopsisFileColumns.MultipleProteinCount},     // Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
+                {"Peptide", eSequestSynopsisFileColumns.PeptideSequence},
+                {"DelCn2", eSequestSynopsisFileColumns.DeltaCn2},
+                {"RankSP", eSequestSynopsisFileColumns.RankSP},
+                {"RankXC", eSequestSynopsisFileColumns.RankXC},
+                {"DelM", eSequestSynopsisFileColumns.DelM},
+                {"XcRatio", eSequestSynopsisFileColumns.XcRatio},
+                {"PassFilt", eSequestSynopsisFileColumns.PassFilt},                     // Legacy/unused
+                {"MScore", eSequestSynopsisFileColumns.MScore},                         // Legacy/unused
+                {"NumTrypticEnds", eSequestSynopsisFileColumns.NTT},
+                {"Ions_Observed", eSequestSynopsisFileColumns.IonsObserved},
+                {"Ions_Expected", eSequestSynopsisFileColumns.IonsExpected},
+                {"DelM_PPM", eSequestSynopsisFileColumns.DelMPPM},
+                {"Cleavage_State", eSequestSynopsisFileColumns.Cleavage_State},         // Computed by this program and appended to the input file or saved in a new file
+                {"Terminus_State", eSequestSynopsisFileColumns.Terminus_State},         // Computed by this program
+                {"Mod_Count", eSequestSynopsisFileColumns.Mod_Count},                   // Computed by this program
+                {"Mod_Description", eSequestSynopsisFileColumns.Mod_Description},       // Computed by this program
+                {"Monoisotopic_Mass", eSequestSynopsisFileColumns.Monoisotopic_Mass}    // Computed by this program
+            };
+
+
 
             intColumnMapping = new int[SequestSynopsisFileColCount];
-
-            lstColumnNames.Add("HitNum", eSequestSynopsisFileColumns.RowIndex);
-            lstColumnNames.Add("ScanNum", eSequestSynopsisFileColumns.Scan);
-            lstColumnNames.Add("ScanCount", eSequestSynopsisFileColumns.NumScans);
-            lstColumnNames.Add("ChargeState", eSequestSynopsisFileColumns.Charge);
-            lstColumnNames.Add("MH", eSequestSynopsisFileColumns.PeptideMH);
-            lstColumnNames.Add("XCorr", eSequestSynopsisFileColumns.XCorr);
-            lstColumnNames.Add("DelCn", eSequestSynopsisFileColumns.DeltaCn);
-            lstColumnNames.Add("Sp", eSequestSynopsisFileColumns.Sp);
-            lstColumnNames.Add("Reference", eSequestSynopsisFileColumns.ProteinName);
-            lstColumnNames.Add("MultiProtein", eSequestSynopsisFileColumns.MultipleProteinCount);                     // Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
-            lstColumnNames.Add("Peptide", eSequestSynopsisFileColumns.PeptideSequence);
-            lstColumnNames.Add("DelCn2", eSequestSynopsisFileColumns.DeltaCn2);
-            lstColumnNames.Add("RankSP", eSequestSynopsisFileColumns.RankSP);
-            lstColumnNames.Add("RankXC", eSequestSynopsisFileColumns.RankXC);
-            lstColumnNames.Add("DelM", eSequestSynopsisFileColumns.DelM);
-            lstColumnNames.Add("XcRatio", eSequestSynopsisFileColumns.XcRatio);
-            lstColumnNames.Add("PassFilt", eSequestSynopsisFileColumns.PassFilt);                // Legacy/unused
-            lstColumnNames.Add("MScore", eSequestSynopsisFileColumns.MScore);                    // Legacy/unused
-            lstColumnNames.Add("NumTrypticEnds", eSequestSynopsisFileColumns.NTT);
-            lstColumnNames.Add("Ions_Observed", eSequestSynopsisFileColumns.IonsObserved);
-            lstColumnNames.Add("Ions_Expected", eSequestSynopsisFileColumns.IonsExpected);
-            lstColumnNames.Add("DelM_PPM", eSequestSynopsisFileColumns.DelMPPM);
-
-            // The following columns are computed by this program and appended to the input file or saved in a new file
-            lstColumnNames.Add("Cleavage_State", eSequestSynopsisFileColumns.Cleavage_State);
-            lstColumnNames.Add("Terminus_State", eSequestSynopsisFileColumns.Terminus_State);
-            lstColumnNames.Add("Mod_Count", eSequestSynopsisFileColumns.Mod_Count);
-            lstColumnNames.Add("Mod_Description", eSequestSynopsisFileColumns.Mod_Description);
-            lstColumnNames.Add("Monoisotopic_Mass", eSequestSynopsisFileColumns.Monoisotopic_Mass);
 
             try
             {
@@ -725,10 +714,10 @@ namespace PeptideHitResultsProcessor
                     intColumnMapping[intIndex] = -1;
                 }
 
-                strSplitLine = strLineIn.Split('\t');
+                var strSplitLine = strLineIn.Split('\t');
                 for (var intIndex = 0; intIndex <= strSplitLine.Length - 1; intIndex++)
                 {
-                    if (lstColumnNames.TryGetValue(strSplitLine[intIndex], out eResultFileColumn))
+                    if (lstColumnNames.TryGetValue(strSplitLine[intIndex], out var eResultFileColumn))
                     {
                         // Recognized column name; update intColumnMapping
                         intColumnMapping[(int)eResultFileColumn] = intIndex;

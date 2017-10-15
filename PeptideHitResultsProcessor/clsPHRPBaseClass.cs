@@ -5,7 +5,7 @@
 // Copyright 2006, Battelle Memorial Institute.  All Rights Reserved.
 // Started January 6, 2006
 //
-// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 // -------------------------------------------------------------------------------
 //
@@ -29,6 +29,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using PeptideToProteinMapEngine;
 using PHRPReader;
 
 namespace PeptideHitResultsProcessor
@@ -41,7 +42,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "October 13, 2017";
+            mFileDate = "October 15, 2017";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator {ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON};
 
@@ -607,9 +608,9 @@ namespace PeptideHitResultsProcessor
                     {
                         outputFolder.Create();
                     }
-                    catch (Exception)
+                    catch (Exception ex2)
                     {
-                        SetErrorMessage("Invalid output folder: " + strOutputFolderPath);
+                        SetErrorMessage("Invalid output folder: " + strOutputFolderPath, ex2);
                         SetErrorCode(ePHRPErrorCodes.InvalidOutputFolderPath);
                         return false;
                     }
@@ -619,7 +620,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error cleaning up the file paths: " + ex.Message);
+                SetErrorMessage("Error cleaning up the file paths: " + ex.Message, ex);
                 SetErrorCode(ePHRPErrorCodes.FilePathError);
                 return false;
             }
@@ -886,7 +887,7 @@ namespace PeptideHitResultsProcessor
 
                 var htPeptideToProteinMapResults = new Hashtable();
 
-                var objPeptideToProteinMapper = new PeptideToProteinMapEngine.clsPeptideToProteinMapEngine
+                var peptideToProteinMapper = new clsPeptideToProteinMapEngine
                 {
                     DeleteTempFiles = true,
                     IgnoreILDifferences = false,
@@ -894,7 +895,7 @@ namespace PeptideHitResultsProcessor
                     LogMessagesToFile = false,
                     MatchPeptidePrefixAndSuffixToProtein = false,
                     OutputProteinSequence = false,
-                    PeptideInputFileFormat = PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.ePeptideInputFileFormatConstants.PHRPFile,
+                    PeptideInputFileFormat = clsPeptideToProteinMapEngine.ePeptideInputFileFormatConstants.PHRPFile,
                     PeptideFileSkipFirstLine = false,
                     ProteinDataRemoveSymbolCharacters = true,
                     ProteinInputFilePath = FastaFilePath,
@@ -904,25 +905,28 @@ namespace PeptideHitResultsProcessor
                     ShowMessages = true
                 };
 
-                using (var swMTSpepToProteinMapFile =
+                RegisterEvents(peptideToProteinMapper);
+                peptideToProteinMapper.ProgressUpdate -= OnProgressUpdate;
+
+                using (var pepToProtMapWriter =
                        new StreamWriter(new FileStream(strMTSPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     foreach (var strInputFilePath in lstSourcePHRPDataFiles)
                     {
                         var strResultsFilePath = Path.GetFileNameWithoutExtension(strInputFilePath) +
-                            PeptideToProteinMapEngine.clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING;
+                            clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING;
 
                         strResultsFilePath = Path.Combine(strOutputFolderPath, strResultsFilePath);
 
                         // Make sure the results file doesn't already exist
                         DeleteFileIgnoreErrors(strResultsFilePath);
 
-                        objPeptideToProteinMapper.ProgressChanged += PeptideToProteinMapper_ProgressChanged;
+                        peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
                         mNextPeptideToProteinMapperLevel = 25;
 
-                        blnSuccess = objPeptideToProteinMapper.ProcessFile(strInputFilePath, strOutputFolderPath, string.Empty, true);
+                        blnSuccess = peptideToProteinMapper.ProcessFile(strInputFilePath, strOutputFolderPath, string.Empty, true);
 
-                        objPeptideToProteinMapper.ProgressChanged -= PeptideToProteinMapper_ProgressChanged;
+                        peptideToProteinMapper.ProgressUpdate -= PeptideToProteinMapper_ProgressChanged;
 
                         if (blnSuccess)
                         {
@@ -937,17 +941,17 @@ namespace PeptideHitResultsProcessor
                         }
                         else
                         {
-                            if (string.IsNullOrWhiteSpace(objPeptideToProteinMapper.GetErrorMessage()) && objPeptideToProteinMapper.StatusMessage.ToLower().Contains("error"))
+                            if (string.IsNullOrWhiteSpace(peptideToProteinMapper.GetErrorMessage()) && peptideToProteinMapper.StatusMessage.ToLower().Contains("error"))
                             {
-                                SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + objPeptideToProteinMapper.StatusMessage);
+                                SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + peptideToProteinMapper.StatusMessage);
                             }
                             else
                             {
-                                if (objPeptideToProteinMapper.StatusMessage.Length > 0)
+                                if (peptideToProteinMapper.StatusMessage.Length > 0)
                                 {
-                                    SetErrorMessage("clsPeptideToProteinMapEngine status: " + objPeptideToProteinMapper.StatusMessage);
+                                    SetErrorMessage("clsPeptideToProteinMapEngine status: " + peptideToProteinMapper.StatusMessage);
                                 }
-                                SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + objPeptideToProteinMapper.GetErrorMessage());
+                                SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + peptideToProteinMapper.GetErrorMessage());
                             }
 
                             if (IgnorePeptideToProteinMapperErrors)
@@ -984,19 +988,17 @@ namespace PeptideHitResultsProcessor
                             {
                                 var strLineIn = srResultsFile.ReadLine();
 
-                                if (!string.IsNullOrWhiteSpace(strLineIn))
-                                {
-                                    var strSplitLine = strLineIn.Split(new [] {'\t'}, 2);
-                                    if (strSplitLine.Length >= 2)
-                                    {
-                                        var strPeptideAndProteinKey = strSplitLine[0] + "_" + strSplitLine[1];
+                                if (string.IsNullOrWhiteSpace(strLineIn)) continue;
 
-                                        if (!htPeptideToProteinMapResults.ContainsKey(strPeptideAndProteinKey))
-                                        {
-                                            htPeptideToProteinMapResults.Add(strPeptideAndProteinKey, 0);
-                                            swMTSpepToProteinMapFile.WriteLine(strLineIn);
-                                        }
-                                    }
+                                var strSplitLine = strLineIn.Split(new [] {'\t'}, 2);
+                                if (strSplitLine.Length < 2) continue;
+
+                                var strPeptideAndProteinKey = strSplitLine[0] + "_" + strSplitLine[1];
+
+                                if (!htPeptideToProteinMapResults.ContainsKey(strPeptideAndProteinKey))
+                                {
+                                    htPeptideToProteinMapResults.Add(strPeptideAndProteinKey, 0);
+                                    pepToProtMapWriter.WriteLine(strLineIn);
                                 }
                             }
                         }
@@ -1006,11 +1008,11 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                objPeptideToProteinMapper.CloseLogFileNow();
+                peptideToProteinMapper.CloseLogFileNow();
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreatePepToProteinMapFile:" + ex.Message);
+                SetErrorMessage("Error in CreatePepToProteinMapFile:" + ex.Message, ex);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
             }
 
@@ -1264,7 +1266,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreateProteinModDetailsFile:" + ex.Message);
+                SetErrorMessage("Error in CreateProteinModDetailsFile:" + ex.Message, ex);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
             }
 
@@ -1703,7 +1705,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in LoadParameterFileSettings:" + ex.Message);
+                SetErrorMessage("Error in LoadParameterFileSettings:" + ex.Message, ex);
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile);
                 return false;
             }
@@ -1754,19 +1756,23 @@ namespace PeptideHitResultsProcessor
                     var intLinesRead = 0;
                     while (!srInFile.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine();
-                        if (string.IsNullOrEmpty(strLineIn))
+                        var lineIn = srInFile.ReadLine();
+                        if (string.IsNullOrWhiteSpace(lineIn))
+                            continue;
+
+                        var dataLine = lineIn.Trim();
+                        if (dataLine.Length <= 0)
                             continue;
 
                         // Split the line on tabs
-                        var strSplitLine = strLineIn.Trim().Split('\t');
+                        var strSplitLine = dataLine.Trim().Split('\t');
 
                         if (strSplitLine.Length >= 4)
                         {
                             if (intLinesRead == 0 && !int.TryParse(strSplitLine[2], out _))
                             {
                                 // Header line; cache it
-                                strHeaderLine = string.Copy(strLineIn);
+                                strHeaderLine = string.Copy(dataLine);
                             }
                             else
                             {
@@ -1788,7 +1794,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the Peptide to Protein Map File (" + Path.GetFileName(strPepToProteinMapFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the Peptide to Protein Map File (" + Path.GetFileName(strPepToProteinMapFilePath) + "): " + ex.Message, ex);
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
                 blnSuccess = false;
             }
@@ -1839,18 +1845,18 @@ namespace PeptideHitResultsProcessor
             return strNewFileName;
         }
 
-        protected void ReportError(string errMsg, bool throwException = false, Exception innerException = null)
+        protected void ReportError(string errMsg, bool throwException = false, Exception ex = null)
         {
             SetErrorMessage(errMsg);
 
             if (throwException)
             {
-                if (innerException == null)
+                if (ex == null)
                 {
                     throw new Exception(errMsg);
                 }
 
-                throw new Exception(errMsg, innerException);
+                throw new Exception(errMsg, ex);
             }
         }
 
@@ -2039,7 +2045,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected void SetErrorMessage(string message)
+        protected void SetErrorMessage(string message, Exception ex = null)
         {
             if (message == null)
                 message = string.Empty;
@@ -2047,7 +2053,7 @@ namespace PeptideHitResultsProcessor
             mErrorMessage = message;
             if (message.Length > 0)
             {
-                OnErrorEvent(message);
+                OnErrorEvent(message, ex);
             }
         }
 
@@ -2082,7 +2088,7 @@ namespace PeptideHitResultsProcessor
 
         protected void UpdateProgress(float sngPercentComplete)
         {
-            UpdateProgress(this.ProgressStepDescription, sngPercentComplete);
+            UpdateProgress(ProgressStepDescription, sngPercentComplete);
         }
 
         protected void UpdateProgress(string strProgressStepDescription, float sngPercentComplete)
@@ -2099,6 +2105,97 @@ namespace PeptideHitResultsProcessor
             mProgressPercentComplete = sngPercentComplete;
 
             OnProgressUpdate(ProgressStepDescription, ProgressPercentComplete);
+        }
+
+        /// <summary>
+        /// Validate that the specified file exists and has at least one tab-delimited row with a numeric value in the first column
+        /// </summary>
+        /// <param name="filePath">Path to the file</param>
+        /// <param name="fileDescription">File description, e.g. Synopsis</param>
+        /// <param name="errorMessage"></param>
+        /// <returns>True if the file has data; otherwise false</returns>
+        /// <remarks></remarks>
+        public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage)
+        {
+            const int numericDataColIndex = 0;
+            return ValidateFileHasData(filePath, fileDescription, out errorMessage, numericDataColIndex);
+        }
+
+        /// <summary>
+        /// Validate that the specified file exists and has at least one tab-delimited row with a numeric value
+        /// </summary>
+        /// <param name="filePath">Path to the file</param>
+        /// <param name="fileDescription">File description, e.g. Synopsis</param>
+        /// <param name="errorMessage"></param>
+        /// <param name="numericDataColIndex">Index of the numeric data column; use -1 to simply look for any text in the file</param>
+        /// <returns>True if the file has data; otherwise false</returns>
+        /// <remarks></remarks>
+        public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage, int numericDataColIndex)
+        {
+
+            var dataFound = false;
+
+            errorMessage = string.Empty;
+
+            try
+            {
+                var fiFileInfo = new FileInfo(filePath);
+
+                if (!fiFileInfo.Exists)
+                {
+                    errorMessage = fileDescription + " file not found: " + fiFileInfo.Name;
+                    return false;
+                }
+
+                if (fiFileInfo.Length == 0)
+                {
+                    errorMessage = fileDescription + " file is empty (zero-bytes)";
+                    return false;
+                }
+
+                // Open the file and confirm it has data rows
+                using (var srInFile = new StreamReader(new FileStream(fiFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                {
+                    while (!srInFile.EndOfStream && !dataFound)
+                    {
+                        var lineIn = srInFile.ReadLine();
+                        if (string.IsNullOrEmpty(lineIn))
+                            continue;
+
+                        if (numericDataColIndex < 0)
+                        {
+                            dataFound = true;
+                        }
+                        else
+                        {
+                            // Split on the tab character and check if the first column is numeric
+                            var splitLine = lineIn.Split('\t');
+
+                            if (splitLine.Length <= numericDataColIndex)
+                                continue;
+
+                            if (double.TryParse(splitLine[numericDataColIndex], out _))
+                            {
+                                dataFound = true;
+                            }
+                        }
+                    }
+                }
+
+                if (!dataFound)
+                {
+                    errorMessage = fileDescription + " is empty (no data)";
+                }
+
+            }
+            catch (Exception)
+            {
+                errorMessage = "Exception validating " + fileDescription + " file";
+                return false;
+            }
+
+            return dataFound;
+
         }
 
         private bool ValidatePeptideToProteinMapResults(string strPeptideToProteinMapFilePath, bool blnIgnorePeptideToProteinMapperErrors)
@@ -2178,7 +2275,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in ValidatePeptideToProteinMapResults:" + ex.Message);
+                SetErrorMessage("Error in ValidatePeptideToProteinMapResults:" + ex.Message, ex);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
                 blnSuccess = false;
             }

@@ -22,8 +22,8 @@ namespace PeptideHitResultsProcRunner
         /// <remarks></remarks>
         protected clsProcessFilesBaseClass()
         {
-            mFileDate = "October 17, 2013";
-            mErrorCode = eProcessFilesErrorCodes.NoError;
+            mFileDate = "October 15, 2017";
+            ErrorCode = eProcessFilesErrorCodes.NoError;
         }
 
         #region "Constants and Enums"
@@ -55,9 +55,6 @@ namespace PeptideHitResultsProcRunner
         //'    End Get
         //'End Property
 
-        private eProcessFilesErrorCodes mErrorCode;
-
-        protected bool mIgnoreErrorsWhenUsingWildcardMatching;
 
         #endregion
 
@@ -69,67 +66,62 @@ namespace PeptideHitResultsProcRunner
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool IgnoreErrorsWhenUsingWildcardMatching
-        {
-            get => mIgnoreErrorsWhenUsingWildcardMatching;
-            set => mIgnoreErrorsWhenUsingWildcardMatching = value;
-        }
+        public bool IgnoreErrorsWhenUsingWildcardMatching { get; set; }
 
-        public eProcessFilesErrorCodes ErrorCode => mErrorCode;
+        /// <summary>
+        /// Error code reflecting processing outcome
+        /// </summary>
+        public eProcessFilesErrorCodes ErrorCode { get; set; }
 
         #endregion
 
-        protected override void CleanupPaths(ref string strInputFileOrFolderPath, ref string strOutputFolderPath)
+        protected override void CleanupPaths(ref string inputFileOrFolderPath, ref string outputFolderPath)
         {
-            CleanupFilePaths(ref strInputFileOrFolderPath, ref strOutputFolderPath);
+            CleanupFilePaths(ref inputFileOrFolderPath, ref outputFolderPath);
         }
 
-        protected bool CleanupFilePaths(ref string strInputFilePath, ref string strOutputFolderPath)
+        protected bool CleanupFilePaths(ref string inputFilePath, ref string outputFolderPath)
         {
             // Returns True if success, False if failure
 
-            bool blnSuccess;
-
             try
             {
-                // Make sure strInputFilePath points to a valid file
-                var inputfile = new FileInfo(strInputFilePath);
+                // Make sure inputFilePath points to a valid file
+                var inputfile = new FileInfo(inputFilePath);
 
                 if (!inputfile.Exists)
                 {
                     if (ShowMessages)
                     {
-                        ShowErrorMessage("Input file not found: " + strInputFilePath);
+                        ShowErrorMessage("Input file not found: " + inputFilePath);
                     }
                     else
                     {
-                        LogMessage("Input file not found: " + strInputFilePath, eMessageTypeConstants.ErrorMsg);
+                        LogMessage("Input file not found: " + inputFilePath, eMessageTypeConstants.ErrorMsg);
                     }
 
-                    mErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
-                    blnSuccess = false;
+                    ErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
+                    return false;
                 }
-                else
+
+                if (string.IsNullOrWhiteSpace(outputFolderPath))
                 {
-                    if (string.IsNullOrWhiteSpace(strOutputFolderPath))
-                    {
-                        // Define strOutputFolderPath based on strInputFilePath
-                        strOutputFolderPath = inputfile.DirectoryName;
-                    }
-
-                    // Make sure strOutputFolderPath points to a folder
-                    var outputFolder = new DirectoryInfo(strOutputFolderPath);
-
-                    if (!outputFolder.Exists)
-                    {
-                        // strOutputFolderPath points to a non-existent folder; attempt to create it
-                        outputFolder.Create();
-                    }
-
-                    mOutputFolderPath = string.Copy(outputFolder.FullName);
-
-                    blnSuccess = true;
+                    // Define outputFolderPath based on inputFilePath
+                    outputFolderPath = inputfile.DirectoryName;
                 }
+
+                // Make sure outputFolderPath points to a folder
+                var outputFolder = new DirectoryInfo(outputFolderPath);
+
+                if (!outputFolder.Exists)
+                {
+                    // outputFolderPath points to a non-existent folder; attempt to create it
+                    outputFolder.Create();
+                }
+
+                mOutputFolderPath = string.Copy(outputFolder.FullName);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -137,38 +129,33 @@ namespace PeptideHitResultsProcRunner
                 return false;
             }
 
-            return blnSuccess;
         }
 
-        protected bool CleanupInputFilePath(ref string strInputFilePath)
+        protected bool CleanupInputFilePath(ref string inputFilePath)
         {
             // Returns True if success, False if failure
 
-            bool blnSuccess;
-
             try
             {
-                // Make sure strInputFilePath points to a valid file
-                var inputfile = new FileInfo(strInputFilePath);
+                // Make sure inputFilePath points to a valid file
+                var inputfile = new FileInfo(inputFilePath);
 
                 if (!inputfile.Exists)
                 {
                     if (ShowMessages)
                     {
-                        ShowErrorMessage("Input file not found: " + strInputFilePath);
+                        ShowErrorMessage("Input file not found: " + inputFilePath);
                     }
                     else
                     {
-                        LogMessage("Input file not found: " + strInputFilePath, eMessageTypeConstants.ErrorMsg);
+                        LogMessage("Input file not found: " + inputFilePath, eMessageTypeConstants.ErrorMsg);
                     }
 
-                    mErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
-                    blnSuccess = false;
+                    ErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
+                    return false;
                 }
-                else
-                {
-                    blnSuccess = true;
-                }
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -176,149 +163,148 @@ namespace PeptideHitResultsProcRunner
                 return false;
             }
 
-            return blnSuccess;
         }
 
         protected string GetBaseClassErrorMessage()
         {
             // Returns String.Empty if no error
 
-            string strErrorMessage;
+            string errorMessage;
 
             switch (ErrorCode)
             {
                 case eProcessFilesErrorCodes.NoError:
-                    strErrorMessage = string.Empty;
+                    errorMessage = string.Empty;
                     break;
                 case eProcessFilesErrorCodes.InvalidInputFilePath:
-                    strErrorMessage = "Invalid input file path";
+                    errorMessage = "Invalid input file path";
                     break;
                 case eProcessFilesErrorCodes.InvalidOutputFolderPath:
-                    strErrorMessage = "Invalid output folder path";
+                    errorMessage = "Invalid output folder path";
                     break;
                 case eProcessFilesErrorCodes.ParameterFileNotFound:
-                    strErrorMessage = "Parameter file not found";
+                    errorMessage = "Parameter file not found";
                     break;
                 case eProcessFilesErrorCodes.InvalidParameterFile:
-                    strErrorMessage = "Invalid parameter file";
+                    errorMessage = "Invalid parameter file";
                     break;
                 case eProcessFilesErrorCodes.FilePathError:
-                    strErrorMessage = "General file path error";
+                    errorMessage = "General file path error";
                     break;
                 case eProcessFilesErrorCodes.LocalizedError:
-                    strErrorMessage = "Localized error";
+                    errorMessage = "Localized error";
                     break;
                 case eProcessFilesErrorCodes.UnspecifiedError:
-                    strErrorMessage = "Unspecified error";
+                    errorMessage = "Unspecified error";
                     break;
                 default:
                     // This shouldn't happen
-                    strErrorMessage = "Unknown error state";
+                    errorMessage = "Unknown error state";
                     break;
             }
 
-            return strErrorMessage;
+            return errorMessage;
         }
 
         public virtual string[] GetDefaultExtensionsToParse()
         {
-            var strExtensionsToParse = new string[1];
+            var extensionsToParse = new string[1];
 
-            strExtensionsToParse[0] = ".*";
+            extensionsToParse[0] = ".*";
 
-            return strExtensionsToParse;
+            return extensionsToParse;
         }
 
-        public bool ProcessFilesWildcard(string strInputFolderPath)
+        public bool ProcessFilesWildcard(string inputFolderPath)
         {
-            return ProcessFilesWildcard(strInputFolderPath, string.Empty, string.Empty);
+            return ProcessFilesWildcard(inputFolderPath, string.Empty, string.Empty);
         }
 
-        public bool ProcessFilesWildcard(string strInputFilePath, string strOutputFolderPath)
+        public bool ProcessFilesWildcard(string inputFilePath, string outputFolderPath)
         {
-            return ProcessFilesWildcard(strInputFilePath, strOutputFolderPath, string.Empty);
+            return ProcessFilesWildcard(inputFilePath, outputFolderPath, string.Empty);
         }
 
-        public bool ProcessFilesWildcard(string strInputFilePath, string strOutputFolderPath, string strParameterFilePath)
+        public bool ProcessFilesWildcard(string inputFilePath, string outputFolderPath, string parameterFilePath)
         {
-            return ProcessFilesWildcard(strInputFilePath, strOutputFolderPath, strParameterFilePath, true);
+            return ProcessFilesWildcard(inputFilePath, outputFolderPath, parameterFilePath, true);
         }
 
-        public bool ProcessFilesWildcard(string strInputFilePath, string strOutputFolderPath, string strParameterFilePath, bool blnResetErrorCode)
+        public bool ProcessFilesWildcard(string inputFilePath, string outputFolderPath, string parameterFilePath, bool resetErrorCode)
         {
             // Returns True if success, False if failure
 
-            mAbortProcessing = false;
-            var blnSuccess = true;
+            AbortProcessing = false;
+            var success = true;
             try
             {
                 // Possibly reset the error code
-                if (blnResetErrorCode)
-                    mErrorCode = eProcessFilesErrorCodes.NoError;
+                if (resetErrorCode)
+                    ErrorCode = eProcessFilesErrorCodes.NoError;
 
-                if (!string.IsNullOrWhiteSpace(strOutputFolderPath))
+                if (!string.IsNullOrWhiteSpace(outputFolderPath))
                 {
                     // Update the cached output folder path
-                    mOutputFolderPath = string.Copy(strOutputFolderPath);
+                    mOutputFolderPath = string.Copy(outputFolderPath);
                 }
 
-                // See if strInputFilePath contains a wildcard (* or ?)
-                if (strInputFilePath != null && (strInputFilePath.Contains("*") | strInputFilePath.Contains("?")))
+                // See if inputFilePath contains a wildcard (* or ?)
+                if (inputFilePath != null && inputFilePath.Contains("*") | inputFilePath.Contains("?"))
                 {
                     // Obtain a list of the matching  files
 
-                    // Copy the path into strCleanPath and replace any * or ? characters with _
-                    var strCleanPath = strInputFilePath.Replace("*", "_");
-                    strCleanPath = strCleanPath.Replace("?", "_");
+                    // Copy the path into cleanPath and replace any * or ? characters with _
+                    var cleanPath = inputFilePath.Replace("*", "_");
+                    cleanPath = cleanPath.Replace("?", "_");
 
-                    var cleanFileInfo = new FileInfo(strCleanPath);
-                    string strInputFolderPath;
+                    var cleanFileInfo = new FileInfo(cleanPath);
+                    string inputFolderPath;
                     if (cleanFileInfo.Directory.Exists)
                     {
-                        strInputFolderPath = cleanFileInfo.DirectoryName;
+                        inputFolderPath = cleanFileInfo.DirectoryName;
                     }
                     else
                     {
                         // Use the directory that has the .exe file
-                        strInputFolderPath = GetAppFolderPath();
+                        inputFolderPath = GetAppFolderPath();
                     }
 
-                    var inputFolder = new DirectoryInfo(strInputFolderPath);
+                    var inputFolder = new DirectoryInfo(inputFolderPath);
 
-                    // Remove any directory information from strInputFilePath
-                    strInputFilePath = Path.GetFileName(strInputFilePath);
+                    // Remove any directory information from inputFilePath
+                    inputFilePath = Path.GetFileName(inputFilePath);
 
-                    var intMatchCount = 0;
-                    foreach (var inputfile in inputFolder.GetFiles(strInputFilePath))
+                    var matchCount = 0;
+                    foreach (var inputfile in inputFolder.GetFiles(inputFilePath))
                     {
-                        intMatchCount += 1;
+                        matchCount += 1;
 
-                        blnSuccess = ProcessFile(inputfile.FullName, strOutputFolderPath, strParameterFilePath, blnResetErrorCode);
+                        success = ProcessFile(inputfile.FullName, outputFolderPath, parameterFilePath, resetErrorCode);
 
-                        if (mAbortProcessing)
+                        if (AbortProcessing)
                         {
                             break;
                         }
 
-                        if (!blnSuccess && !mIgnoreErrorsWhenUsingWildcardMatching)
+                        if (!success && !IgnoreErrorsWhenUsingWildcardMatching)
                         {
                             break;
                         }
-                        if (intMatchCount % 100 == 0)
+                        if (matchCount % 100 == 0)
                             Console.Write(".");
                     }
 
-                    if (intMatchCount == 0)
+                    if (matchCount == 0)
                     {
-                        if (mErrorCode == eProcessFilesErrorCodes.NoError)
+                        if (ErrorCode == eProcessFilesErrorCodes.NoError)
                         {
                             if (ShowMessages)
                             {
-                                ShowErrorMessage("No match was found for the input file path: " + strInputFilePath);
+                                ShowErrorMessage("No match was found for the input file path: " + inputFilePath);
                             }
                             else
                             {
-                                LogMessage("No match was found for the input file path: " + strInputFilePath, eMessageTypeConstants.ErrorMsg);
+                                LogMessage("No match was found for the input file path: " + inputFilePath, eMessageTypeConstants.ErrorMsg);
                             }
                         }
                     }
@@ -329,8 +315,10 @@ namespace PeptideHitResultsProcRunner
                 }
                 else
                 {
-                    blnSuccess = ProcessFile(strInputFilePath, strOutputFolderPath, strParameterFilePath, blnResetErrorCode);
+                    success = ProcessFile(inputFilePath, outputFolderPath, parameterFilePath, resetErrorCode);
                 }
+
+                return success;
             }
             catch (Exception ex)
             {
@@ -338,159 +326,160 @@ namespace PeptideHitResultsProcRunner
                 return false;
             }
 
-            return blnSuccess;
         }
 
-        public bool ProcessFile(string strInputFilePath)
+        public bool ProcessFile(string inputFilePath)
         {
-            return ProcessFile(strInputFilePath, string.Empty, string.Empty);
+            return ProcessFile(inputFilePath, string.Empty, string.Empty);
         }
 
-        public bool ProcessFile(string strInputFilePath, string strOutputFolderPath)
+        public bool ProcessFile(string inputFilePath, string outputFolderPath)
         {
-            return ProcessFile(strInputFilePath, strOutputFolderPath, string.Empty);
+            return ProcessFile(inputFilePath, outputFolderPath, string.Empty);
         }
 
-        public bool ProcessFile(string strInputFilePath, string strOutputFolderPath, string strParameterFilePath)
+        public bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath)
         {
-            return ProcessFile(strInputFilePath, strOutputFolderPath, strParameterFilePath, true);
+            return ProcessFile(inputFilePath, outputFolderPath, parameterFilePath, true);
         }
 
         // Main function for processing a single file
-        public abstract bool ProcessFile(string strInputFilePath, string strOutputFolderPath, string strParameterFilePath, bool blnResetErrorCode);
+        public abstract bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath, bool resetErrorCode);
 
-        public bool ProcessFilesAndRecurseFolders(string strInputFolderPath)
+        public bool ProcessFilesAndRecurseFolders(string inputFolderPath)
         {
-            return ProcessFilesAndRecurseFolders(strInputFolderPath, string.Empty, string.Empty);
+            return ProcessFilesAndRecurseFolders(inputFolderPath, string.Empty, string.Empty);
         }
 
-        public bool ProcessFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderName)
+        public bool ProcessFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderName)
         {
-            return ProcessFilesAndRecurseFolders(strInputFilePathOrFolder, strOutputFolderName, string.Empty);
+            return ProcessFilesAndRecurseFolders(inputFilePathOrFolder, outputFolderName, string.Empty);
         }
 
-        public bool ProcessFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderName, string strParameterFilePath)
+        public bool ProcessFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderName, string parameterFilePath)
         {
-            return ProcessFilesAndRecurseFolders(strInputFilePathOrFolder, strOutputFolderName, string.Empty, false, strParameterFilePath);
+            return ProcessFilesAndRecurseFolders(inputFilePathOrFolder, outputFolderName, string.Empty, false, parameterFilePath);
         }
 
-        public bool ProcessFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderName, string strParameterFilePath, string[] strExtensionsToParse)
+        public bool ProcessFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderName, string parameterFilePath, string[] extensionsToParse)
         {
-            return ProcessFilesAndRecurseFolders(strInputFilePathOrFolder, strOutputFolderName, string.Empty, false, strParameterFilePath, 0, strExtensionsToParse);
+            return ProcessFilesAndRecurseFolders(inputFilePathOrFolder, outputFolderName, string.Empty, false, parameterFilePath, 0, extensionsToParse);
         }
 
-        public bool ProcessFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderName, string strOutputFolderAlternatePath, bool blnRecreateFolderHierarchyInAlternatePath)
+        public bool ProcessFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderName, string outputFolderAlternatePath, bool recreateFolderHierarchyInAlternatePath)
         {
-            return ProcessFilesAndRecurseFolders(strInputFilePathOrFolder, strOutputFolderName, strOutputFolderAlternatePath, blnRecreateFolderHierarchyInAlternatePath, string.Empty);
+            return ProcessFilesAndRecurseFolders(inputFilePathOrFolder, outputFolderName, outputFolderAlternatePath, recreateFolderHierarchyInAlternatePath, string.Empty);
         }
 
-        public bool ProcessFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderName, string strOutputFolderAlternatePath, bool blnRecreateFolderHierarchyInAlternatePath, string strParameterFilePath)
+        public bool ProcessFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderName, string outputFolderAlternatePath, bool recreateFolderHierarchyInAlternatePath, string parameterFilePath)
         {
-            return ProcessFilesAndRecurseFolders(strInputFilePathOrFolder, strOutputFolderName, strOutputFolderAlternatePath, blnRecreateFolderHierarchyInAlternatePath, strParameterFilePath, 0);
+            return ProcessFilesAndRecurseFolders(inputFilePathOrFolder, outputFolderName, outputFolderAlternatePath, recreateFolderHierarchyInAlternatePath, parameterFilePath, 0);
         }
 
-        public bool ProcessFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderName, string strOutputFolderAlternatePath, bool blnRecreateFolderHierarchyInAlternatePath, string strParameterFilePath, int intRecurseFoldersMaxLevels)
+        public bool ProcessFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderName, string outputFolderAlternatePath, bool recreateFolderHierarchyInAlternatePath, string parameterFilePath, int recurseFoldersMaxLevels)
         {
-            return ProcessFilesAndRecurseFolders(strInputFilePathOrFolder, strOutputFolderName, strOutputFolderAlternatePath, blnRecreateFolderHierarchyInAlternatePath, strParameterFilePath, intRecurseFoldersMaxLevels, GetDefaultExtensionsToParse());
+            return ProcessFilesAndRecurseFolders(inputFilePathOrFolder, outputFolderName, outputFolderAlternatePath, recreateFolderHierarchyInAlternatePath, parameterFilePath, recurseFoldersMaxLevels, GetDefaultExtensionsToParse());
         }
 
         // Main function for processing files in a folder (and subfolders)
-        public bool ProcessFilesAndRecurseFolders(string strInputFilePathOrFolder, string strOutputFolderName, string strOutputFolderAlternatePath, bool blnRecreateFolderHierarchyInAlternatePath, string strParameterFilePath, int intRecurseFoldersMaxLevels, string[] strExtensionsToParse)
+        public bool ProcessFilesAndRecurseFolders(string inputFilePathOrFolder, string outputFolderName, string outputFolderAlternatePath, bool recreateFolderHierarchyInAlternatePath, string parameterFilePath, int recurseFoldersMaxLevels, string[] extensionsToParse)
         {
-            // Calls ProcessFiles for all files in strInputFilePathOrFolder and below having an extension listed in strExtensionsToParse()
+            // Calls ProcessFiles for all files in inputFilePathOrFolder and below having an extension listed in extensionsToParse()
             // The extensions should be of the form ".TXT" or ".RAW" (i.e. a period then the extension)
             // If any of the extensions is "*" or ".*" then all files will be processed
-            // If strInputFilePathOrFolder contains a filename with a wildcard (* or ?), then that information will be
+            // If inputFilePathOrFolder contains a filename with a wildcard (* or ?), then that information will be
             //  used to filter the files that are processed
-            // If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
+            // If recurseFoldersMaxLevels is <=0 then we recurse infinitely
 
-            bool blnSuccess;
-
-            // Examine strInputFilePathOrFolder to see if it contains a filename; if not, assume it points to a folder
+            // Examine inputFilePathOrFolder to see if it contains a filename; if not, assume it points to a folder
             // First, see if it contains a * or ?
             try
             {
-                string strInputFolderPath;
-                if (strInputFilePathOrFolder != null && (strInputFilePathOrFolder.Contains("*") | strInputFilePathOrFolder.Contains("?")))
+                string inputFolderPath;
+                if (string.IsNullOrWhiteSpace(inputFilePathOrFolder))
                 {
-                    // Copy the path into strCleanPath and replace any * or ? characters with _
-                    var strCleanPath = strInputFilePathOrFolder.Replace("*", "_");
-                    strCleanPath = strCleanPath.Replace("?", "_");
+                    inputFolderPath = string.Empty;
+                }
+                else if (inputFilePathOrFolder.Contains("*") || inputFilePathOrFolder.Contains("?"))
+                {
+                    // Copy the path into cleanPath and replace any * or ? characters with _
+                    var cleanPath = inputFilePathOrFolder.Replace("*", "_");
+                    cleanPath = cleanPath.Replace("?", "_");
 
-                    var inputFile = new FileInfo(strCleanPath);
+                    var inputFile = new FileInfo(cleanPath);
                     if (inputFile.Directory.Exists)
                     {
-                        strInputFolderPath = inputFile.DirectoryName;
+                        inputFolderPath = inputFile.DirectoryName;
                     }
                     else
                     {
                         // Use the directory that has the .exe file
-                        strInputFolderPath = GetAppFolderPath();
+                        inputFolderPath = GetAppFolderPath();
                     }
 
-                    // Remove any directory information from strInputFilePath
-                    strInputFilePathOrFolder = Path.GetFileName(strInputFilePathOrFolder);
+                    // Remove any directory information from inputFilePath
+                    inputFilePathOrFolder = Path.GetFileName(inputFilePathOrFolder);
                 }
                 else
                 {
-                    var inputfolder = new DirectoryInfo(strInputFilePathOrFolder);
+                    var inputfolder = new DirectoryInfo(inputFilePathOrFolder);
                     if (inputfolder.Exists)
                     {
-                        strInputFolderPath = inputfolder.FullName;
-                        strInputFilePathOrFolder = "*";
+                        inputFolderPath = inputfolder.FullName;
+                        inputFilePathOrFolder = "*";
                     }
                     else
                     {
-                        if (inputfolder.Parent.Exists)
+                        if (inputfolder.Parent != null && inputfolder.Parent.Exists)
                         {
-                            strInputFolderPath = inputfolder.Parent.FullName;
-                            strInputFilePathOrFolder = Path.GetFileName(strInputFilePathOrFolder);
+                            inputFolderPath = inputfolder.Parent.FullName;
+                            inputFilePathOrFolder = Path.GetFileName(inputFilePathOrFolder);
                         }
                         else
                         {
                             // Unable to determine the input folder path
-                            strInputFolderPath = string.Empty;
+                            inputFolderPath = string.Empty;
                         }
                     }
                 }
 
-                if (!string.IsNullOrWhiteSpace(strInputFolderPath))
+                if (string.IsNullOrWhiteSpace(inputFolderPath))
                 {
-                    // Validate the output folder path
-                    if (!string.IsNullOrWhiteSpace(strOutputFolderAlternatePath))
-                    {
-                        try
-                        {
-                            var outputFolder = new DirectoryInfo(strOutputFolderAlternatePath);
-                            if (!outputFolder.Exists)
-                                outputFolder.Create();
-                        }
-                        catch (Exception ex)
-                        {
-                            mErrorCode = eProcessFilesErrorCodes.InvalidOutputFolderPath;
-                            ShowErrorMessage("Error validating the alternate output folder path in ProcessFilesAndRecurseFolders:" + ex.Message);
-                            return false;
-                        }
-                    }
-
-                    // Initialize some parameters
-                    mAbortProcessing = false;
-                    var intFileProcessCount = 0;
-                    var intFileProcessFailCount = 0;
-
-                    // Call RecurseFoldersWork
-                    const int intRecursionLevel = 1;
-                    blnSuccess = RecurseFoldersWork(strInputFolderPath, strInputFilePathOrFolder, strOutputFolderName,
-                                                    strParameterFilePath, strOutputFolderAlternatePath,
-                                                    blnRecreateFolderHierarchyInAlternatePath, strExtensionsToParse,
-                                                    ref intFileProcessCount, ref intFileProcessFailCount,
-                                                    intRecursionLevel, intRecurseFoldersMaxLevels);
-                }
-                else
-                {
-                    mErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
+                    ErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
                     return false;
                 }
+
+                // Validate the output folder path
+                if (!string.IsNullOrWhiteSpace(outputFolderAlternatePath))
+                {
+                    try
+                    {
+                        var outputFolder = new DirectoryInfo(outputFolderAlternatePath);
+                        if (!outputFolder.Exists)
+                            outputFolder.Create();
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorCode = eProcessFilesErrorCodes.InvalidOutputFolderPath;
+                        ShowErrorMessage("Error validating the alternate output folder path in ProcessFilesAndRecurseFolders:" + ex.Message);
+                        return false;
+                    }
+                }
+
+                // Initialize some parameters
+                AbortProcessing = false;
+                var fileProcessCount = 0;
+                var fileProcessFailCount = 0;
+
+                // Call RecurseFoldersWork
+                const int recursionLevel = 1;
+                var success = RecurseFoldersWork(inputFolderPath, inputFilePathOrFolder, outputFolderName,
+                                             parameterFilePath, outputFolderAlternatePath,
+                                             recreateFolderHierarchyInAlternatePath, extensionsToParse,
+                                             ref fileProcessCount, ref fileProcessFailCount,
+                                             recursionLevel, recurseFoldersMaxLevels);
+
+                return success;
             }
             catch (Exception ex)
             {
@@ -498,126 +487,125 @@ namespace PeptideHitResultsProcRunner
                 return false;
             }
 
-            return blnSuccess;
         }
 
-        private bool RecurseFoldersWork(string strInputFolderPath, string strFileNameMatch, string strOutputFolderName,
-            string strParameterFilePath, string strOutputFolderAlternatePath,
-            bool blnRecreateFolderHierarchyInAlternatePath, IList<string> strExtensionsToParse,
-            ref int intFileProcessCount, ref int intFileProcessFailCount,
-            int intRecursionLevel, int intRecurseFoldersMaxLevels)
+        private bool RecurseFoldersWork(string inputFolderPath, string fileNameMatch, string outputFolderName,
+            string parameterFilePath, string outputFolderAlternatePath,
+            bool recreateFolderHierarchyInAlternatePath, IList<string> extensionsToParse,
+            ref int fileProcessCount, ref int fileProcessFailCount,
+            int recursionLevel, int recurseFoldersMaxLevels)
         {
-            // If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
+            // If recurseFoldersMaxLevels is <=0 then we recurse infinitely
 
             DirectoryInfo inputFolder;
 
-            int intExtensionIndex;
-            var blnProcessAllExtensions = false;
+            int extensionIndex;
+            var processAllExtensions = false;
 
-            string strOutputFolderPathToUse;
-            bool blnSuccess;
+            string outputFolderPathToUse;
+            bool success;
 
             try
             {
-                inputFolder = new DirectoryInfo(strInputFolderPath);
+                inputFolder = new DirectoryInfo(inputFolderPath);
             }
             catch (Exception ex)
             {
                 // Input folder path error
                 HandleException("Error in RecurseFoldersWork", ex);
-                mErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
+                ErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
                 return false;
             }
 
             try
             {
-                if (!string.IsNullOrWhiteSpace(strOutputFolderAlternatePath))
+                if (!string.IsNullOrWhiteSpace(outputFolderAlternatePath))
                 {
-                    if (blnRecreateFolderHierarchyInAlternatePath)
+                    if (recreateFolderHierarchyInAlternatePath)
                     {
-                        strOutputFolderAlternatePath = Path.Combine(strOutputFolderAlternatePath, inputFolder.Name);
+                        outputFolderAlternatePath = Path.Combine(outputFolderAlternatePath, inputFolder.Name);
                     }
-                    strOutputFolderPathToUse = Path.Combine(strOutputFolderAlternatePath, strOutputFolderName);
+                    outputFolderPathToUse = Path.Combine(outputFolderAlternatePath, outputFolderName);
                 }
                 else
                 {
-                    strOutputFolderPathToUse = strOutputFolderName;
+                    outputFolderPathToUse = outputFolderName;
                 }
             }
             catch (Exception ex)
             {
                 // Output file path error
                 HandleException("Error in RecurseFoldersWork", ex);
-                mErrorCode = eProcessFilesErrorCodes.InvalidOutputFolderPath;
+                ErrorCode = eProcessFilesErrorCodes.InvalidOutputFolderPath;
                 return false;
             }
 
             try
             {
-                // Validate strExtensionsToParse()
-                for (intExtensionIndex = 0; intExtensionIndex <= strExtensionsToParse.Count - 1; intExtensionIndex++)
+                // Validate extensionsToParse()
+                for (extensionIndex = 0; extensionIndex <= extensionsToParse.Count - 1; extensionIndex++)
                 {
-                    if (strExtensionsToParse[intExtensionIndex] == null)
+                    if (extensionsToParse[extensionIndex] == null)
                     {
-                        strExtensionsToParse[intExtensionIndex] = string.Empty;
+                        extensionsToParse[extensionIndex] = string.Empty;
                     }
                     else
                     {
-                        if (!strExtensionsToParse[intExtensionIndex].StartsWith("."))
+                        if (!extensionsToParse[extensionIndex].StartsWith("."))
                         {
-                            strExtensionsToParse[intExtensionIndex] = "." + strExtensionsToParse[intExtensionIndex];
+                            extensionsToParse[extensionIndex] = "." + extensionsToParse[extensionIndex];
                         }
 
-                        if (strExtensionsToParse[intExtensionIndex] == ".*")
+                        if (extensionsToParse[extensionIndex] == ".*")
                         {
-                            blnProcessAllExtensions = true;
+                            processAllExtensions = true;
                             break;
                         }
 
-                        strExtensionsToParse[intExtensionIndex] = strExtensionsToParse[intExtensionIndex].ToUpper();
+                        extensionsToParse[extensionIndex] = extensionsToParse[extensionIndex].ToUpper();
                     }
                 }
             }
             catch (Exception ex)
             {
                 HandleException("Error in RecurseFoldersWork", ex);
-                mErrorCode = eProcessFilesErrorCodes.UnspecifiedError;
+                ErrorCode = eProcessFilesErrorCodes.UnspecifiedError;
                 return false;
             }
 
             try
             {
-                if (!string.IsNullOrWhiteSpace(strOutputFolderPathToUse))
+                if (!string.IsNullOrWhiteSpace(outputFolderPathToUse))
                 {
                     // Update the cached output folder path
-                    mOutputFolderPath = string.Copy(strOutputFolderPathToUse);
+                    mOutputFolderPath = string.Copy(outputFolderPathToUse);
                 }
 
-                ShowMessage("Examining " + strInputFolderPath);
+                ShowMessage("Examining " + inputFolderPath);
 
                 // Process any matching files in this folder
-                blnSuccess = true;
+                success = true;
 
-                foreach (var inputfile in inputFolder.GetFiles(strFileNameMatch))
+                foreach (var inputfile in inputFolder.GetFiles(fileNameMatch))
                 {
-                    for (intExtensionIndex = 0; intExtensionIndex <= strExtensionsToParse.Count - 1; intExtensionIndex++)
+                    for (extensionIndex = 0; extensionIndex <= extensionsToParse.Count - 1; extensionIndex++)
                     {
-                        if (blnProcessAllExtensions || inputfile.Extension.ToUpper() == strExtensionsToParse[intExtensionIndex])
+                        if (processAllExtensions || inputfile.Extension.ToUpper() == extensionsToParse[extensionIndex])
                         {
-                            blnSuccess = ProcessFile(inputfile.FullName, strOutputFolderPathToUse, strParameterFilePath, true);
-                            if (!blnSuccess)
+                            success = ProcessFile(inputfile.FullName, outputFolderPathToUse, parameterFilePath, true);
+                            if (!success)
                             {
-                                intFileProcessFailCount += 1;
-                                blnSuccess = true;
+                                fileProcessFailCount += 1;
+                                success = true;
                             }
                             else
                             {
-                                intFileProcessCount += 1;
+                                fileProcessCount += 1;
                             }
                             break;
                         }
 
-                        if (mAbortProcessing)
+                        if (AbortProcessing)
                             break;
                     }
                 }
@@ -625,37 +613,37 @@ namespace PeptideHitResultsProcRunner
             catch (Exception ex)
             {
                 HandleException("Error in RecurseFoldersWork", ex);
-                mErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
+                ErrorCode = eProcessFilesErrorCodes.InvalidInputFilePath;
                 return false;
             }
 
-            if (!mAbortProcessing)
+            if (!AbortProcessing)
             {
-                // If intRecurseFoldersMaxLevels is <=0 then we recurse infinitely
-                //  otherwise, compare intRecursionLevel to intRecurseFoldersMaxLevels
-                if (intRecurseFoldersMaxLevels <= 0 || intRecursionLevel <= intRecurseFoldersMaxLevels)
+                // If recurseFoldersMaxLevels is <=0 then we recurse infinitely
+                //  otherwise, compare recursionLevel to recurseFoldersMaxLevels
+                if (recurseFoldersMaxLevels <= 0 || recursionLevel <= recurseFoldersMaxLevels)
                 {
                     // Call this function for each of the subfolders of inputFolder
                     foreach (var subFolder in inputFolder.GetDirectories())
                     {
-                        blnSuccess = RecurseFoldersWork(subFolder.FullName, strFileNameMatch, strOutputFolderName,
-                                                        strParameterFilePath, strOutputFolderAlternatePath,
-                                                        blnRecreateFolderHierarchyInAlternatePath, strExtensionsToParse,
-                                                        ref intFileProcessCount, ref intFileProcessFailCount,
-                                                        intRecursionLevel + 1, intRecurseFoldersMaxLevels);
+                        success = RecurseFoldersWork(subFolder.FullName, fileNameMatch, outputFolderName,
+                                                        parameterFilePath, outputFolderAlternatePath,
+                                                        recreateFolderHierarchyInAlternatePath, extensionsToParse,
+                                                        ref fileProcessCount, ref fileProcessFailCount,
+                                                        recursionLevel + 1, recurseFoldersMaxLevels);
 
-                        if (!blnSuccess)
+                        if (!success)
                             break;
                     }
                 }
             }
 
-            return blnSuccess;
+            return success;
         }
 
         protected void SetBaseClassErrorCode(eProcessFilesErrorCodes eNewErrorCode)
         {
-            mErrorCode = eNewErrorCode;
+            ErrorCode = eNewErrorCode;
         }
 
         // The following functions should be placed in any derived class
@@ -666,9 +654,9 @@ namespace PeptideHitResultsProcRunner
         //     SetLocalErrorCode(eNewErrorCode, false);
         // }
         //
-        // private void SetLocalErrorCode(eDerivedClassErrorCodes eNewErrorCode, bool blnLeaveExistingErrorCodeUnchanged)
+        // private void SetLocalErrorCode(eDerivedClassErrorCodes eNewErrorCode, bool leaveExistingErrorCodeUnchanged)
         // {
-        //     if (blnLeaveExistingErrorCodeUnchanged && mLocalErrorCode != eDerivedClassErrorCodes.NoError)
+        //     if (leaveExistingErrorCodeUnchanged && mLocalErrorCode != eDerivedClassErrorCodes.NoError)
         //     {
         //         // An error code is already defined; do not change it
         //     }
