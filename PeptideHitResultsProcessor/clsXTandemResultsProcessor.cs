@@ -10,7 +10,7 @@
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 2, 2006
 //
-// E-mail: matthew.monroe@pnnl.gov or matt@alchemistmatt.com
+// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 // -------------------------------------------------------------------------------
 //
