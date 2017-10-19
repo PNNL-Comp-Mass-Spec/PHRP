@@ -275,7 +275,14 @@ namespace PeptideHitResultsProcRunner
                 if (!File.Exists(strParameterFilePath))
                 {
                     // See if strParameterFilePath points to a file in the same directory as the application
-                    strParameterFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Path.GetFileName(strParameterFilePath));
+                    var appFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    if (string.IsNullOrWhiteSpace(appFolderPath))
+                    {
+                        SetBaseClassErrorCode(eProcessFilesErrorCodes.ParameterFileNotFound);
+                        return false;
+                    }
+
+                    strParameterFilePath = Path.Combine(appFolderPath, Path.GetFileName(strParameterFilePath));
                     if (!File.Exists(strParameterFilePath))
                     {
                         SetBaseClassErrorCode(eProcessFilesErrorCodes.ParameterFileNotFound);

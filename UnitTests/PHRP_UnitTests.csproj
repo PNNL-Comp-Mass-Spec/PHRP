@@ -51,6 +51,9 @@
     <PackageReference Include="NUnit">
       <Version>3.8.1</Version>
     </PackageReference>
+    <PackageReference Include="PRISM-Library">
+      <Version>2.4.39</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PeptideHitResultsProcessor\PeptideHitResultsProcessor.csproj">
