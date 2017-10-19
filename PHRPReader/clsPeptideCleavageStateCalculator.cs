@@ -212,11 +212,10 @@ namespace PHRPReader
         /// <remarks></remarks>
         public clsPeptideCleavageStateCalculator()
         {
-            mTerminusSymbols = new char[3];
-            mTerminusSymbols[0] = TERMINUS_SYMBOL_SEQUEST;
-            mTerminusSymbols[1] = TERMINUS_SYMBOL_XTANDEM_NTerminus;
-            mTerminusSymbols[2] = TERMINUS_SYMBOL_XTANDEM_CTerminus;
-            Array.Sort(mTerminusSymbols);
+            mTerminusSymbols = new SortedSet<char> {
+                TERMINUS_SYMBOL_SEQUEST,
+                TERMINUS_SYMBOL_XTANDEM_NTerminus,
+                TERMINUS_SYMBOL_XTANDEM_CTerminus };
 
             SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin);
         }
@@ -235,111 +234,95 @@ namespace PHRPReader
         /// <summary>
         /// Determines the cleavage state of the specified peptide
         /// </summary>
-        /// <param name="strSequenceWithPrefixAndSuffix"></param>
+        /// <param name="sequenceWithPrefixAndSuffix"></param>
         /// <returns></returns>
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
-        public ePeptideCleavageStateConstants ComputeCleavageState(string strSequenceWithPrefixAndSuffix)
+        public ePeptideCleavageStateConstants ComputeCleavageState(string sequenceWithPrefixAndSuffix)
         {
-            var strPrimarySequence = string.Empty;
-            var strPrefix = string.Empty;
-            var strSuffix = string.Empty;
+            if (SplitPrefixAndSuffixFromSequence(sequenceWithPrefixAndSuffix, out var primarySequence, out var prefix, out var suffix))
+            {
+                return ComputeCleavageState(primarySequence, prefix, suffix);
+            }
 
-            if (SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, out strPrimarySequence, out strPrefix, out strSuffix))
-            {
-                return ComputeCleavageState(strPrimarySequence, strPrefix, strSuffix);
-            }
-            else
-            {
-                return ePeptideCleavageStateConstants.NonSpecific;
-            }
+            return ePeptideCleavageStateConstants.NonSpecific;
         }
 
         /// <summary>
-        /// Determines the cleavage state of the specified peptide
+        /// Determine the cleavage state of cleanSequence utilizing the rules specified in mEnzymeMatchSpec
         /// </summary>
-        /// <param name="strCleanSequence"></param>
-        /// <param name="strPrefixResidues"></param>
-        /// <param name="strSuffixResidues"></param>
+        /// <param name="cleanSequence"></param>
+        /// <param name="prefixResidues"></param>
+        /// <param name="suffixResidues"></param>
         /// <returns></returns>
         /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
-        public ePeptideCleavageStateConstants ComputeCleavageState(string strCleanSequence, string strPrefixResidues, string strSuffixResidues)
+        public ePeptideCleavageStateConstants ComputeCleavageState(string cleanSequence, string prefixResidues, string suffixResidues)
         {
-            // Determine the cleavage state of strCleanSequence utilizing the rules specified in mEnzymeMatchSpec
+            if (string.IsNullOrEmpty(cleanSequence))
+                return ePeptideCleavageStateConstants.NonSpecific;
 
-            var chSequenceStart = default(char);
-            var chSequenceEnd = default(char);
-            var chPrefix = default(char);
-            var chSuffix = default(char);
+            // Find the letter closest to the end of prefixResidues
+            var prefix = FindLetterNearestEnd(prefixResidues);
 
-            var ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
-            var ePeptideTerminusState = ePeptideTerminusStateConstants.None;
-            var blnRuleMatchStart = false;
-            var blnRuleMatchEnd = false;
+            // Find the letter closest to the start of suffixResidues
+            var suffix = FindLetterNearestStart(suffixResidues);
 
-            if (strCleanSequence != null && strCleanSequence.Length > 0)
+            // Find the letter closest to the start of cleanSequence
+            var chSequenceStart = FindLetterNearestStart(cleanSequence);
+
+            // Find the letter closest to the end of cleanSequence
+            var chSequenceEnd = FindLetterNearestEnd(cleanSequence);
+
+            // Determine the terminus state of this peptide
+            var ePeptideTerminusState = ComputeTerminusState(prefix, suffix);
+
+            ePeptideCleavageStateConstants ePeptideCleavageState;
+
+            if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinNandCCTerminus)
             {
-                // Find the letter closest to the end of strPrefixResidues
-                chPrefix = FindLetterNearestEnd(strPrefixResidues);
-
-                // Find the letter closest to the start of strSuffixResidues
-                chSuffix = FindLetterNearestStart(strSuffixResidues);
-
-                // Find the letter closest to the start of strCleanSequence
-                chSequenceStart = FindLetterNearestStart(strCleanSequence);
-
-                // Find the letter closest to the end of strCleanSequence
-                chSequenceEnd = FindLetterNearestEnd(strCleanSequence);
-
-                // Determine the terminus state of this peptide
-                ePeptideTerminusState = ComputeTerminusState(chPrefix, chSuffix);
-
-                if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinNandCCTerminus)
+                // The peptide spans the entire length of the protein; mark it as fully tryptic
+                ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
+            }
+            else if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinNTerminus)
+            {
+                // Peptides at the N-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
+                if (TestCleavageRule(chSequenceEnd, suffix))
                 {
-                    // The peptide spans the entire length of the protein; mark it as fully tryptic
                     ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
-                }
-                else if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinNTerminus)
-                {
-                    // Peptides at the N-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
-                    if (TestCleavageRule(chSequenceEnd, chSuffix))
-                    {
-                        ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
-                    }
-                    else
-                    {
-                        // Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
-                    }
-                }
-                else if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinCTerminus)
-                {
-                    // Peptides at the C-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
-                    if (TestCleavageRule(chPrefix, chSequenceStart))
-                    {
-                        ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
-                    }
-                    else
-                    {
-                        // Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
-                    }
                 }
                 else
                 {
-                    // Check whether chPrefix matches mLeftRegEx and chSequenceStart matches mRightRegEx
-                    blnRuleMatchStart = TestCleavageRule(chPrefix, chSequenceStart);
-                    blnRuleMatchEnd = TestCleavageRule(chSequenceEnd, chSuffix);
+                    ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
+                }
+            }
+            else if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinCTerminus)
+            {
+                // Peptides at the C-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
+                if (TestCleavageRule(prefix, chSequenceStart))
+                {
+                    ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
+                }
+                else
+                {
+                    ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
+                }
+            }
+            else
+            {
+                // Check whether prefix matches mLeftRegEx and chSequenceStart matches mRightRegEx
+                var blnRuleMatchStart = TestCleavageRule(prefix, chSequenceStart);
+                var blnRuleMatchEnd = TestCleavageRule(chSequenceEnd, suffix);
 
-                    if (blnRuleMatchStart && blnRuleMatchEnd)
-                    {
-                        ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
-                    }
-                    else if (blnRuleMatchStart || blnRuleMatchEnd)
-                    {
-                        ePeptideCleavageState = ePeptideCleavageStateConstants.Partial;
-                    }
-                    else
-                    {
-                        // Leave ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific
-                    }
+                if (blnRuleMatchStart && blnRuleMatchEnd)
+                {
+                    ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
+                }
+                else if (blnRuleMatchStart || blnRuleMatchEnd)
+                {
+                    ePeptideCleavageState = ePeptideCleavageStateConstants.Partial;
+                }
+                else
+                {
+                    ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
                 }
             }
 
@@ -349,83 +332,72 @@ namespace PHRPReader
         /// <summary>
         /// Count the number of missed cleavages in the peptide
         /// </summary>
-        /// <param name="strSequenceWithPrefixAndSuffix"></param>
+        /// <param name="sequenceWithPrefixAndSuffix"></param>
         /// <returns></returns>
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
-        public short ComputeNumberOfMissedCleavages(string strSequenceWithPrefixAndSuffix)
+        public short ComputeNumberOfMissedCleavages(string sequenceWithPrefixAndSuffix)
         {
-            var strPrimarySequence = string.Empty;
-            var strPrefix = string.Empty;
-            var strSuffix = string.Empty;
-            string strPreviousLetter = null;
+            short numMissedCleavages = 0;
 
-            short intNumMissedCleavages = 0;
+            if (!SplitPrefixAndSuffixFromSequence(sequenceWithPrefixAndSuffix, out var primarySequence, out _, out _))
+                return numMissedCleavages;
 
-            if (SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, out strPrimarySequence, out strPrefix, out strSuffix))
+            if (string.IsNullOrWhiteSpace(primarySequence))
+                return numMissedCleavages;
+
+            var previousLetter = "";
+            for (var intIndex = 0; intIndex <= primarySequence.Length - 1; intIndex++)
             {
-                if (!string.IsNullOrWhiteSpace(strPrimarySequence))
+                var chCurrent = primarySequence[intIndex];
+
+                if (!clsPHRPReader.IsLetterAtoZ(chCurrent))
+                    continue;
+
+                if (!string.IsNullOrEmpty(previousLetter))
                 {
-                    strPreviousLetter = "";
-                    for (var intIndex = 0; intIndex <= strPrimarySequence.Length - 1; intIndex++)
+                    if (TestCleavageRule(previousLetter[0], chCurrent))
                     {
-                        var chCurrent = strPrimarySequence[intIndex];
-
-                        if (clsPHRPReader.IsLetterAtoZ(chCurrent))
-                        {
-                            if (!string.IsNullOrEmpty(strPreviousLetter))
-                            {
-                                if (TestCleavageRule(strPreviousLetter[0], chCurrent))
-                                {
-                                    intNumMissedCleavages += 1;
-                                }
-                            }
-
-                            strPreviousLetter = chCurrent.ToString();
-                        }
+                        numMissedCleavages += 1;
                     }
                 }
+
+                previousLetter = chCurrent.ToString();
             }
 
-            return intNumMissedCleavages;
+            return numMissedCleavages;
         }
 
         /// <summary>
         /// Determine the terminus state of the peptide
         /// </summary>
-        /// <param name="strSequenceWithPrefixAndSuffix"></param>
+        /// <param name="sequenceWithPrefixAndSuffix"></param>
         /// <returns></returns>
         /// <remarks>Peptide must have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
-        public ePeptideTerminusStateConstants ComputeTerminusState(string strSequenceWithPrefixAndSuffix)
+        public ePeptideTerminusStateConstants ComputeTerminusState(string sequenceWithPrefixAndSuffix)
         {
-            var strPrimarySequence = string.Empty;
-            var strPrefix = string.Empty;
-            var strSuffix = string.Empty;
+            if (SplitPrefixAndSuffixFromSequence(sequenceWithPrefixAndSuffix, out var primarySequence, out var prefix, out var suffix))
+            {
+                return ComputeTerminusState(primarySequence, prefix, suffix);
+            }
 
-            if (SplitPrefixAndSuffixFromSequence(strSequenceWithPrefixAndSuffix, out strPrimarySequence, out strPrefix, out strSuffix))
-            {
-                return ComputeTerminusState(strPrimarySequence, strPrefix, strSuffix);
-            }
-            else
-            {
-                return ePeptideTerminusStateConstants.None;
-            }
+            return ePeptideTerminusStateConstants.None;
         }
 
         /// <summary>
         /// Determine the terminus state given the prefix and suffix characters
         /// </summary>
-        /// <param name="chPrefix"></param>
-        /// <param name="chSuffix"></param>
+        /// <param name="prefix"></param>
+        /// <param name="suffix"></param>
         /// <returns></returns>
-        /// <remarks>For example, if the peptide is -.PEPTIDE.G then pass chPrefix="-" and chSuffix="G"</remarks>
-        public ePeptideTerminusStateConstants ComputeTerminusState(char chPrefix, char chSuffix)
+        /// <remarks>For example, if the peptide is -.PEPTIDE.G then pass prefix="-" and suffix="G"</remarks>
+        public ePeptideTerminusStateConstants ComputeTerminusState(char prefix, char suffix)
         {
-            var ePeptideTerminusState = ePeptideTerminusStateConstants.None;
+            ePeptideTerminusStateConstants ePeptideTerminusState;
 
-            if (Array.BinarySearch(mTerminusSymbols, chPrefix) >= 0)
+            if (mTerminusSymbols.Contains(prefix))
             {
                 // Prefix character matches a terminus symbol
-                if (Array.BinarySearch(mTerminusSymbols, chSuffix) >= 0)
+                if (mTerminusSymbols.Contains(suffix))
                 {
                     // The peptide spans the entire length of the protein
                     ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus;
@@ -436,7 +408,7 @@ namespace PHRPReader
                     ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus;
                 }
             }
-            else if (Array.BinarySearch(mTerminusSymbols, chSuffix) >= 0)
+            else if (mTerminusSymbols.Contains(suffix))
             {
                 // Suffix character matches a terminus symbol
                 // The peptide is located at the protein's C-terminus
@@ -444,7 +416,7 @@ namespace PHRPReader
             }
             else
             {
-                // Leave ePeptideTerminusState = ePeptideTerminusStateConstants.None
+                ePeptideTerminusState = ePeptideTerminusStateConstants.None;
             }
 
             return ePeptideTerminusState;
@@ -453,32 +425,30 @@ namespace PHRPReader
         /// <summary>
         /// Determine the terminus state of the peptide
         /// </summary>
-        /// <param name="strCleanSequence"></param>
-        /// <param name="strPrefixResidues"></param>
-        /// <param name="strSuffixResidues"></param>
+        /// <param name="cleanSequence"></param>
+        /// <param name="prefixResidues"></param>
+        /// <param name="suffixResidues"></param>
         /// <returns></returns>
         /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
-        public ePeptideTerminusStateConstants ComputeTerminusState(string strCleanSequence, string strPrefixResidues, string strSuffixResidues)
+        public ePeptideTerminusStateConstants ComputeTerminusState(string cleanSequence, string prefixResidues, string suffixResidues)
         {
-            // Determine the terminus state of strCleanSequence
+            // Determine the terminus state of cleanSequence
 
-            var chPrefix = default(char);
-            var chSuffix = default(char);
-            var ePeptideTerminusState = ePeptideTerminusStateConstants.None;
+            ePeptideTerminusStateConstants ePeptideTerminusState;
 
-            if (strCleanSequence == null || strCleanSequence.Length == 0)
+            if (string.IsNullOrEmpty(cleanSequence))
             {
                 ePeptideTerminusState = ePeptideTerminusStateConstants.None;
             }
             else
             {
-                // Find the letter closest to the end of strPrefixResidues
-                chPrefix = FindLetterNearestEnd(strPrefixResidues);
+                // Find the letter closest to the end of prefixResidues
+                var prefix = FindLetterNearestEnd(prefixResidues);
 
-                // Find the letter closest to the start of strSuffixResidues
-                chSuffix = FindLetterNearestStart(strSuffixResidues);
+                // Find the letter closest to the start of suffixResidues
+                var suffix = FindLetterNearestStart(suffixResidues);
 
-                ePeptideTerminusState = ComputeTerminusState(chPrefix, chSuffix);
+                ePeptideTerminusState = ComputeTerminusState(prefix, suffix);
             }
 
             return ePeptideTerminusState;
@@ -505,13 +475,9 @@ namespace PHRPReader
 
             if (blnCheckForPrefixAndSuffixResidues)
             {
-                var strPrimarySequence = string.Empty;
-                var strPrefix = string.Empty;
-                var strSuffix = string.Empty;
-
-                if (SplitPrefixAndSuffixFromSequence(strSequenceWithMods, out strPrimarySequence, out strPrefix, out strSuffix))
+                if (SplitPrefixAndSuffixFromSequence(strSequenceWithMods, out var primarySequence, out _, out _))
                 {
-                    return RegexNotLetter.Replace(strPrimarySequence, string.Empty);
+                    return RegexNotLetter.Replace(primarySequence, string.Empty);
                 }
             }
 
@@ -520,18 +486,17 @@ namespace PHRPReader
 
         private char FindLetterNearestEnd(string strText)
         {
-            var intIndex = 0;
-            var chMatch = default(char);
+            char chMatch;
 
-            if (strText == null || strText.Length == 0)
+            if (string.IsNullOrEmpty(strText))
             {
                 chMatch = TERMINUS_SYMBOL_SEQUEST;
             }
             else
             {
-                intIndex = strText.Length - 1;
+                var intIndex = strText.Length - 1;
                 chMatch = strText[intIndex];
-                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) && intIndex > 0)
+                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && intIndex > 0)
                 {
                     intIndex -= 1;
                     chMatch = strText[intIndex];
@@ -543,18 +508,17 @@ namespace PHRPReader
 
         private char FindLetterNearestStart(string strText)
         {
-            var intIndex = 0;
-            var chMatch = default(char);
+            char chMatch;
 
-            if (strText == null || strText.Length == 0)
+            if (string.IsNullOrEmpty(strText))
             {
                 chMatch = TERMINUS_SYMBOL_SEQUEST;
             }
             else
             {
-                intIndex = 0;
+                var intIndex = 0;
                 chMatch = strText[intIndex];
-                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || Array.BinarySearch(mTerminusSymbols, chMatch) >= 0) && intIndex < strText.Length - 1)
+                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && intIndex < strText.Length - 1)
                 {
                     intIndex += 1;
                     chMatch = strText[intIndex];
@@ -698,120 +662,116 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Examines strSequenceIn and splits apart into prefix, primary sequence, and suffix
+        /// Examines sequenceIn and splits apart into prefix, primary sequence, and suffix
         /// </summary>
-        /// <param name="strSequenceIn">Peptide sequence to examine</param>
-        /// <param name="strPrimarySequence">Primary sequence (output)</param>
-        /// <param name="strPrefix">Prefix residue (output)</param>
-        /// <param name="strSuffix">Suffix residue (output)</param>
+        /// <param name="sequenceIn">Peptide sequence to examine</param>
+        /// <param name="primarySequence">Primary sequence (output)</param>
+        /// <param name="prefix">Prefix residue (output)</param>
+        /// <param name="suffix">Suffix residue (output)</param>
         /// <returns> Returns True if success, False if prefix and suffix residues were not found</returns>
         /// <remarks>If more than one character is present before the first period or after the last period, then all characters are returned
         /// If the peptide starts with ".." then it is auto-changed to start with "."
         /// If the peptide ends with ".." then it is auto-changed to end with "."
         /// </remarks>
-        public static bool SplitPrefixAndSuffixFromSequence(string strSequenceIn,
-            out string strPrimarySequence,
-            out string strPrefix,
-            out string strSuffix)
+        public static bool SplitPrefixAndSuffixFromSequence(string sequenceIn,
+            out string primarySequence,
+            out string prefix,
+            out string suffix)
         {
-            var intPeriodLoc1 = 0;
-            var intPeriodLoc2 = 0;
             var blnSuccess = false;
 
-            strPrefix = string.Empty;
-            strSuffix = string.Empty;
-            strPrimarySequence = string.Empty;
+            prefix = string.Empty;
+            suffix = string.Empty;
+            primarySequence = string.Empty;
 
-            if (strSequenceIn == null || strSequenceIn.Length == 0)
+            if (string.IsNullOrEmpty(sequenceIn))
             {
                 return false;
             }
-            else
+
+            if (sequenceIn.StartsWith("..") && sequenceIn.Length > 2)
             {
-                if (strSequenceIn.StartsWith("..") && strSequenceIn.Length > 2)
+                sequenceIn = "." + sequenceIn.Substring(2);
+            }
+
+            if (sequenceIn.EndsWith("..") && sequenceIn.Length > 2)
+            {
+                sequenceIn = sequenceIn.Substring(0, sequenceIn.Length - 2) + ".";
+            }
+
+            primarySequence = string.Copy(sequenceIn);
+
+            // See if sequenceIn contains two periods
+            var intPeriodLoc1 = sequenceIn.IndexOf('.');
+            if (intPeriodLoc1 >= 0)
+            {
+                var intPeriodLoc2 = sequenceIn.LastIndexOf('.');
+
+                if (intPeriodLoc2 > intPeriodLoc1 + 1)
                 {
-                    strSequenceIn = "." + strSequenceIn.Substring(2);
-                }
-
-                if (strSequenceIn.EndsWith("..") && strSequenceIn.Length > 2)
-                {
-                    strSequenceIn = strSequenceIn.Substring(0, strSequenceIn.Length - 2) + ".";
-                }
-
-                strPrimarySequence = string.Copy(strSequenceIn);
-
-                // See if strSequenceIn contains two periods
-                intPeriodLoc1 = strSequenceIn.IndexOf('.');
-                if (intPeriodLoc1 >= 0)
-                {
-                    intPeriodLoc2 = strSequenceIn.LastIndexOf('.');
-
-                    if (intPeriodLoc2 > intPeriodLoc1 + 1)
+                    // Sequence contains two periods with letters between the periods,
+                    // For example, A.BCDEFGHIJK.L or ABCD.BCDEFGHIJK.L
+                    // Extract out the text between the periods
+                    primarySequence = sequenceIn.Substring(intPeriodLoc1 + 1, intPeriodLoc2 - intPeriodLoc1 - 1);
+                    if (intPeriodLoc1 > 0)
                     {
-                        // Sequence contains two periods with letters between the periods,
-                        // For example, A.BCDEFGHIJK.L or ABCD.BCDEFGHIJK.L
-                        // Extract out the text between the periods
-                        strPrimarySequence = strSequenceIn.Substring(intPeriodLoc1 + 1, intPeriodLoc2 - intPeriodLoc1 - 1);
+                        prefix = sequenceIn.Substring(0, intPeriodLoc1);
+                    }
+                    suffix = sequenceIn.Substring(intPeriodLoc2 + 1);
+
+                    blnSuccess = true;
+                }
+                else if (intPeriodLoc2 == intPeriodLoc1 + 1)
+                {
+                    // Peptide contains two periods in a row
+                    if (intPeriodLoc1 <= 1)
+                    {
+                        primarySequence = string.Empty;
+
                         if (intPeriodLoc1 > 0)
                         {
-                            strPrefix = strSequenceIn.Substring(0, intPeriodLoc1);
+                            prefix = sequenceIn.Substring(0, intPeriodLoc1);
                         }
-                        strSuffix = strSequenceIn.Substring(intPeriodLoc2 + 1);
+                        suffix = sequenceIn.Substring(intPeriodLoc2 + 1);
 
                         blnSuccess = true;
                     }
-                    else if (intPeriodLoc2 == intPeriodLoc1 + 1)
+                    else
                     {
-                        // Peptide contains two periods in a row
-                        if (intPeriodLoc1 <= 1)
-                        {
-                            strPrimarySequence = string.Empty;
-
-                            if (intPeriodLoc1 > 0)
-                            {
-                                strPrefix = strSequenceIn.Substring(0, intPeriodLoc1);
-                            }
-                            strSuffix = strSequenceIn.Substring(intPeriodLoc2 + 1);
-
-                            blnSuccess = true;
-                        }
-                        else
-                        {
-                            // Leave the sequence unchanged
-                            strPrimarySequence = string.Copy(strSequenceIn);
-                            blnSuccess = false;
-                        }
+                        // Leave the sequence unchanged
+                        primarySequence = string.Copy(sequenceIn);
+                        blnSuccess = false;
                     }
-                    else if (intPeriodLoc1 == intPeriodLoc2)
+                }
+                else if (intPeriodLoc1 == intPeriodLoc2)
+                {
+                    // Peptide only contains one period
+                    if (intPeriodLoc1 == 0)
                     {
-                        // Peptide only contains one period
-                        if (intPeriodLoc1 == 0)
-                        {
-                            strPrimarySequence = strSequenceIn.Substring(1);
-                            blnSuccess = true;
-                        }
-                        else if (intPeriodLoc1 == strSequenceIn.Length - 1)
-                        {
-                            strPrimarySequence = strSequenceIn.Substring(0, intPeriodLoc1);
-                            blnSuccess = true;
-                        }
-                        else if (intPeriodLoc1 == 1 && strSequenceIn.Length > 2)
-                        {
-                            strPrimarySequence = strSequenceIn.Substring(intPeriodLoc1 + 1);
-                            strPrefix = strSequenceIn.Substring(0, intPeriodLoc1);
-                            blnSuccess = true;
-                        }
-                        else if (intPeriodLoc1 == strSequenceIn.Length - 2)
-                        {
-                            strPrimarySequence = strSequenceIn.Substring(0, intPeriodLoc1);
-                            strSuffix = strSequenceIn.Substring(intPeriodLoc1 + 1);
-                            blnSuccess = true;
-                        }
-                        else
-                        {
-                            // Leave the sequence unchanged
-                            strPrimarySequence = string.Copy(strSequenceIn);
-                        }
+                        primarySequence = sequenceIn.Substring(1);
+                        blnSuccess = true;
+                    }
+                    else if (intPeriodLoc1 == sequenceIn.Length - 1)
+                    {
+                        primarySequence = sequenceIn.Substring(0, intPeriodLoc1);
+                        blnSuccess = true;
+                    }
+                    else if (intPeriodLoc1 == 1 && sequenceIn.Length > 2)
+                    {
+                        primarySequence = sequenceIn.Substring(intPeriodLoc1 + 1);
+                        prefix = sequenceIn.Substring(0, intPeriodLoc1);
+                        blnSuccess = true;
+                    }
+                    else if (intPeriodLoc1 == sequenceIn.Length - 2)
+                    {
+                        primarySequence = sequenceIn.Substring(0, intPeriodLoc1);
+                        suffix = sequenceIn.Substring(intPeriodLoc1 + 1);
+                        blnSuccess = true;
+                    }
+                    else
+                    {
+                        // Leave the sequence unchanged
+                        primarySequence = string.Copy(sequenceIn);
                     }
                 }
             }

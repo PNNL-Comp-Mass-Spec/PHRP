@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "October 15, 2017";
+        public const string PROGRAM_DATE = "October 18, 2017";
 
         private static string mInputFilePath;
         private static string mOutputFolderPath;                         // Optional
@@ -220,7 +220,7 @@ namespace PeptideHitResultsProcRunner
             }
             if (intPercentComplete > 100)
                 intPercentComplete = 100;
-            Console.Write("Processing: " + intPercentComplete.ToString() + "% ");
+            Console.Write("Processing: " + intPercentComplete + "% ");
 
             if (blnAddCarriageReturn)
             {

@@ -1,73 +1,131 @@
 ﻿namespace PHRPReader
 {
+    /// <summary>
+    /// Protein (or peptide) metadata
+    /// </summary>
     public class clsProteinInfo
     {
-        private readonly string mProteinName;
-        private string mProteinDescription;
-        private readonly int mSeqID;
-        private readonly clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants mCleavageState;
-        private readonly clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants mTerminusState;
-        private int mResidueStart;                         // Residue number in the protein at which this sequence starts
-        private int mResidueEnd;                           // Residue number in the protein at which this sequence ends
+        /// <summary>
+        /// Protein name
+        /// </summary>
+        public string ProteinName { get; }
 
-        public string ProteinName => mProteinName;
+        /// <summary>
+        /// Protein description
+        /// </summary>
+        public string Description { get; }
 
-        // ReSharper disable once ConvertToAutoProperty
-        public clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState => mCleavageState;
+        /// <summary>
+        /// Cleavage state of a protein fragment
+        /// </summary>
+        public clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState { get; }
 
-        public int ResidueStart => mResidueStart;
+        /// <summary>
+        /// Residue number in the protein at which this sequence starts
+        /// </summary>
+        public int ResidueStart { get; private set; }
 
-        public int ResidueEnd => mResidueEnd;
+        /// <summary>
+        /// Residue number in the protein at which this sequence ends
+        /// </summary>
+        public int ResidueEnd { get; private set; }
 
-        // ReSharper disable once ConvertToAutoProperty
-        public int SeqID => mSeqID;
+        /// <summary>
+        /// Sequence ID
+        /// </summary>
+        public int SeqID { get; }
 
-        // ReSharper disable once ConvertToAutoProperty
-        public clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState => mTerminusState;
+        /// <summary>
+        /// Terminus state of a protein fragment
+        /// </summary>
+        public clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState { get; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="ProteinName"></param>
-        /// <param name="SeqID"></param>
-        /// <param name="CleavageState"></param>
-        /// <param name="TerminusState"></param>
+        /// <param name="proteinName"></param>
+        /// <param name="seqID"></param>
+        /// <param name="cleavageState"></param>
+        /// <param name="terminusState"></param>
         /// <remarks></remarks>
-        public clsProteinInfo(string ProteinName, int SeqID, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState) : this(ProteinName, string.Empty, SeqID, CleavageState, TerminusState)
+        public clsProteinInfo(
+            string proteinName,
+            int seqID,
+            clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants cleavageState,
+            clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants terminusState) : this(proteinName, string.Empty, seqID, cleavageState, terminusState)
         {
         }
 
-        public clsProteinInfo(string ProteinName, string ProteinDescription, int SeqID, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState) : this(ProteinName, string.Empty, SeqID, CleavageState, TerminusState, 0, 0)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="proteinName"></param>
+        /// <param name="proteinDescription"></param>
+        /// <param name="seqID"></param>
+        /// <param name="cleavageState"></param>
+        /// <param name="terminusState"></param>
+        public clsProteinInfo(
+            string proteinName,
+            string proteinDescription,
+            int seqID,
+            clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants cleavageState,
+            clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants terminusState) : this(proteinName, proteinDescription, seqID, cleavageState, terminusState, 0, 0)
         {
         }
 
-        public clsProteinInfo(string ProteinName, string ProteinDescription, int SeqID, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants TerminusState, int ProteinResidueStart, int ProteinResidueEnd)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="proteinName"></param>
+        /// <param name="proteinDescription"></param>
+        /// <param name="seqID"></param>
+        /// <param name="cleavageState"></param>
+        /// <param name="terminusState"></param>
+        /// <param name="proteinResidueStart"></param>
+        /// <param name="proteinResidueEnd"></param>
+        public clsProteinInfo(
+            string proteinName,
+            string proteinDescription,
+            int seqID,
+            clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants cleavageState,
+            clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants terminusState,
+            int proteinResidueStart,
+            int proteinResidueEnd)
         {
-            mProteinName = ProteinName;
-            if (string.IsNullOrEmpty(ProteinDescription))
+            ProteinName = proteinName;
+            if (string.IsNullOrEmpty(proteinDescription))
             {
-                mProteinDescription = string.Empty;
+                Description = string.Empty;
             }
             else
             {
-                mProteinDescription = ProteinDescription;
+                Description = proteinDescription;
             }
-            mSeqID = SeqID;
-            mCleavageState = CleavageState;
-            mTerminusState = TerminusState;
+            SeqID = seqID;
+            CleavageState = cleavageState;
+            TerminusState = terminusState;
 
-            UpdateLocationInProtein(ProteinResidueStart, ProteinResidueEnd);
+            UpdateLocationInProtein(proteinResidueStart, proteinResidueEnd);
         }
 
-        public void UpdateLocationInProtein(int ProteinResidueStart, int ProteinResidueEnd)
+        /// <summary>
+        /// Update the start/end residues for this protein (or peptide)
+        /// </summary>
+        /// <param name="proteinResidueStart"></param>
+        /// <param name="proteinResidueEnd"></param>
+        public void UpdateLocationInProtein(int proteinResidueStart, int proteinResidueEnd)
         {
-            mResidueStart = ProteinResidueStart;
-            mResidueEnd = ProteinResidueEnd;
+            ResidueStart = proteinResidueStart;
+            ResidueEnd = proteinResidueEnd;
         }
 
+        /// <summary>
+        /// Protein name
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
-            return mProteinName;
+            return ProteinName;
         }
     }
 }

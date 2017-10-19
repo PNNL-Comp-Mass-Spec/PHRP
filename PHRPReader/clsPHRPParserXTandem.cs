@@ -106,34 +106,34 @@ namespace PHRPReader
         /// <summary>
         /// Constructor; assumes blnLoadModsAndSeqInfo=True
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <remarks></remarks>
-        public clsPHRPParserXTandem(string strDatasetName, string strInputFilePath)
-            : this(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
+        public clsPHRPParserXTandem(string datasetName, string strInputFilePath)
+            : this(datasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
         {
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
-        public clsPHRPParserXTandem(string strDatasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
-            : base(strDatasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.XTandem, blnLoadModsAndSeqInfo)
+        public clsPHRPParserXTandem(string datasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
+            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.XTandem, blnLoadModsAndSeqInfo)
         {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
-        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
-        public clsPHRPParserXTandem(string strDatasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(strDatasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.XTandem, startupOptions)
+        public clsPHRPParserXTandem(string datasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
+            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.XTandem, startupOptions)
         {
         }
 
@@ -147,6 +147,9 @@ namespace PHRPReader
             return strText + "; " + strAppend;
         }
 
+        /// <summary>
+        /// Define column header names
+        /// </summary>
         protected override void DefineColumnHeaders()
         {
             mColumnHeaders.Clear();
@@ -218,47 +221,92 @@ namespace PHRPReader
             return dblTolerance;
         }
 
-        public static string GetPHRPFirstHitsFileName(string strDatasetName)
+        /// <summary>
+        /// Default first hits file for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPFirstHitsFileName(string datasetName)
         {
             // X!Tandem does not have a first-hits file; just the _xt.txt file
             return string.Empty;
         }
 
-        public static string GetPHRPModSummaryFileName(string strDatasetName)
+        /// <summary>
+        /// Defeault ModSummary file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPModSummaryFileName(string datasetName)
         {
-            return strDatasetName + "_xt_ModSummary.txt";
+            return datasetName + "_xt_ModSummary.txt";
         }
 
-        public static string GetPHRPPepToProteinMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default PepToProtMap file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
-            return strDatasetName + "_xt_PepToProtMapMTS.txt";
+            return datasetName + "_xt_PepToProtMapMTS.txt";
         }
 
-        public static string GetPHRPProteinModsFileName(string strDatasetName)
+        /// <summary>
+        /// Default ProteinMods file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPProteinModsFileName(string datasetName)
         {
-            return strDatasetName + "_xt_ProteinMods.txt";
+            return datasetName + "_xt_ProteinMods.txt";
         }
 
-        public static string GetPHRPSynopsisFileName(string strDatasetName)
+        /// <summary>
+        /// Default Synopsis file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSynopsisFileName(string datasetName)
         {
-            return strDatasetName + FILENAME_SUFFIX_SYN;
+            return datasetName + FILENAME_SUFFIX_SYN;
         }
 
-        public static string GetPHRPResultToSeqMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default ResultToSeq map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
-            return strDatasetName + "_xt_ResultToSeqMap.txt";
+            return datasetName + "_xt_ResultToSeqMap.txt";
         }
 
-        public static string GetPHRPSeqInfoFileName(string strDatasetName)
+        /// <summary>
+        /// Default SeqInfo map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSeqInfoFileName(string datasetName)
         {
-            return strDatasetName + "_xt_SeqInfo.txt";
+            return datasetName + "_xt_SeqInfo.txt";
         }
 
-        public static string GetPHRPSeqToProteinMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default SeqToProtein map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
-            return strDatasetName + "_xt_SeqToProteinMap.txt";
+            return datasetName + "_xt_SeqToProteinMap.txt";
         }
 
+        /// <summary>
+        /// Additional search engine parameter file names
+        /// </summary>
+        /// <param name="strSearchEngineParamFilePath"></param>
+        /// <returns></returns>
         public static List<string> GetAdditionalSearchEngineParamFileNames(string strSearchEngineParamFilePath)
         {
             var lstFileNames = new List<string>();
@@ -367,6 +415,9 @@ namespace PHRPReader
             return strFastaFile;
         }
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         public static string GetSearchEngineName()
         {
             return XT_SEARCH_ENGINE_NAME;
@@ -407,12 +458,19 @@ namespace PHRPReader
             return ParseXTandemParamFile(strSearchEngineParamFileName, objSearchEngineParams, blnLookForDefaultParamsFileName: true);
         }
 
-        public bool ParseXTandemParamFile(string strParamFileName, clsSearchEngineParameters objSearchEngineParams, bool blnLookForDefaultParamsFileName)
-        {
-            return ParseXTandemParamFile(strParamFileName, objSearchEngineParams, blnLookForDefaultParamsFileName, blnDetermineFastaFileNameUsingTaxonomyFile: true);
-        }
-
-        public bool ParseXTandemParamFile(string strParamFileName, clsSearchEngineParameters objSearchEngineParams, bool blnLookForDefaultParamsFileName, bool blnDetermineFastaFileNameUsingTaxonomyFile)
+        /// <summary>
+        /// Parse an X!Tandem parameter file
+        /// </summary>
+        /// <param name="strParamFileName"></param>
+        /// <param name="objSearchEngineParams"></param>
+        /// <param name="blnLookForDefaultParamsFileName"></param>
+        /// <param name="blnDetermineFastaFileNameUsingTaxonomyFile"></param>
+        /// <returns></returns>
+        public bool ParseXTandemParamFile(
+            string strParamFileName,
+            clsSearchEngineParameters objSearchEngineParams,
+            bool blnLookForDefaultParamsFileName,
+            bool blnDetermineFastaFileNameUsingTaxonomyFile = true)
         {
             var strErrorMessage = string.Empty;
 
@@ -614,7 +672,7 @@ namespace PHRPReader
 
                     if (fastReadMode)
                     {
-                        objPSM.SetPeptide(strPeptide, blnUpdateCleanSequence: false);
+                        objPSM.SetPeptide(strPeptide, updateCleanSequence: false);
                     }
                     else
                     {

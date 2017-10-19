@@ -99,38 +99,41 @@ namespace PHRPReader
         /// <summary>
         /// Constructor; assumes blnLoadModsAndSeqInfo=True
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <remarks></remarks>
-        public clsPHRPParserMODPlus(string strDatasetName, string strInputFilePath)
-            : this(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
+        public clsPHRPParserMODPlus(string datasetName, string strInputFilePath)
+            : this(datasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
         {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
-        public clsPHRPParserMODPlus(string strDatasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
-            : base(strDatasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus, blnLoadModsAndSeqInfo)
+        public clsPHRPParserMODPlus(string datasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
+            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus, blnLoadModsAndSeqInfo)
         {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
-        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
-        public clsPHRPParserMODPlus(string strDatasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(strDatasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus, startupOptions)
+        public clsPHRPParserMODPlus(string datasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
+            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus, startupOptions)
         {
         }
 
+        /// <summary>
+        /// Define column header names
+        /// </summary>
         protected override void DefineColumnHeaders()
         {
             mColumnHeaders.Clear();
@@ -155,47 +158,90 @@ namespace PHRPReader
             AddHeaderColumn(DATA_COLUMN_QValue);
         }
 
-        public static string GetPHRPFirstHitsFileName(string strDatasetName)
+        /// <summary>
+        /// Default first hits file for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPFirstHitsFileName(string datasetName)
         {
             // MODplus does not have a first-hits file; just the _syn.txt file
             return string.Empty;
         }
 
-        public static string GetPHRPModSummaryFileName(string strDatasetName)
+        /// <summary>
+        /// Defeault ModSummary file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPModSummaryFileName(string datasetName)
         {
-            return strDatasetName + "_modp_syn_ModSummary.txt";
+            return datasetName + "_modp_syn_ModSummary.txt";
         }
 
-        public static string GetPHRPPepToProteinMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default PepToProtMap file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
-            return strDatasetName + "_modp_PepToProtMapMTS.txt";
+            return datasetName + "_modp_PepToProtMapMTS.txt";
         }
 
-        public static string GetPHRPProteinModsFileName(string strDatasetName)
+        /// <summary>
+        /// Default ProteinMods file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPProteinModsFileName(string datasetName)
         {
-            return strDatasetName + "_modp_syn_ProteinMods.txt";
+            return datasetName + "_modp_syn_ProteinMods.txt";
         }
 
-        public static string GetPHRPSynopsisFileName(string strDatasetName)
+        /// <summary>
+        /// Default Synopsis file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSynopsisFileName(string datasetName)
         {
-            return strDatasetName + FILENAME_SUFFIX_SYN;
+            return datasetName + FILENAME_SUFFIX_SYN;
         }
 
-        public static string GetPHRPResultToSeqMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default ResultToSeq map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
-            return strDatasetName + "_modp_syn_ResultToSeqMap.txt";
+            return datasetName + "_modp_syn_ResultToSeqMap.txt";
         }
 
-        public static string GetPHRPSeqInfoFileName(string strDatasetName)
+        /// <summary>
+        /// Default SeqInfo map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSeqInfoFileName(string datasetName)
         {
-            return strDatasetName + "_modp_syn_SeqInfo.txt";
+            return datasetName + "_modp_syn_SeqInfo.txt";
         }
 
-        public static string GetPHRPSeqToProteinMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default SeqToProtein map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
-            return strDatasetName + "_modp_syn_SeqToProteinMap.txt";
+            return datasetName + "_modp_syn_SeqToProteinMap.txt";
         }
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         public static string GetSearchEngineName()
         {
             return MODplus_SEARCH_ENGINE_NAME;
@@ -295,38 +341,38 @@ namespace PHRPReader
                 }
 
                 var modNodes = doc.SelectNodes("/search/modifications/fixed/mod");
-                if (modNodes != null && modNodes.Count > 0)
+                if (modNodes == null || modNodes.Count <= 0)
+                    return true;
+
+                // Store the fixed mods
+
+                foreach (XmlNode node in modNodes)
                 {
-                    // Store the fixed mods
+                    // var modName = GetAttribute(node, "name");
+                    var strResidue = GetAttribute(node, "site").Trim();
+                    // var modPosition = GetAttribute(node, "position");
+                    var modMass = GetAttribute(node, "massdiff");
 
-                    foreach (XmlNode node in modNodes)
+                    // Replace N-Term or C-Term with < or >
+                    if (strResidue.ToLower() == "n-term")
+                        strResidue = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                    if (strResidue.ToLower() == "c-term")
+                        strResidue = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+
+                    if (!double.TryParse(modMass, out var modMassDa))
+                        continue;
+
+                    if (Math.Abs(modMassDa - 0) < float.Epsilon)
+                        continue;
+
+                    var eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod;
+                    if (strResidue == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || strResidue == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
-                        var modName = GetAttribute(node, "name");
-                        var strResidue = GetAttribute(node, "site").Trim();
-                        var modPosition = GetAttribute(node, "position");
-                        var modMass = GetAttribute(node, "massdiff");
-
-                        // Replace N-Term or C-Term with < or >
-                        if (strResidue.ToLower() == "n-term")
-                            strResidue = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                        if (strResidue.ToLower() == "c-term")
-                            strResidue = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-
-                        if (double.TryParse(modMass, out var modMassDa))
-                        {
-                            if (Math.Abs(modMassDa - 0) > float.Epsilon)
-                            {
-                                var eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod;
-                                if (strResidue == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || strResidue == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
-                                {
-                                    eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
-                                }
-
-                                var objModDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, strResidue, eModType, "Mod" + modMassDa.ToString("0"));
-                                objSearchEngineParams.AddModification(objModDef);
-                            }
-                        }
+                        eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
                     }
+
+                    var objModDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, strResidue, eModType, "Mod" + modMassDa.ToString("0"));
+                    objSearchEngineParams.AddModification(objModDef);
                 }
 
                 return true;
@@ -410,7 +456,7 @@ namespace PHRPReader
 
                     if (fastReadMode)
                     {
-                        objPSM.SetPeptide(strPeptide, blnUpdateCleanSequence: false);
+                        objPSM.SetPeptide(strPeptide, updateCleanSequence: false);
                     }
                     else
                     {

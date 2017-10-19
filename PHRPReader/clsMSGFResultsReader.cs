@@ -28,6 +28,7 @@ namespace PHRPReader
         public const string DATA_COLUMN_SpecProb = "SpecProb";
         public const string DATA_COLUMN_Notes = "Notes";
 #pragma warning restore 1591
+
         #endregion
 
         #region "Class-wide variables"
@@ -47,10 +48,8 @@ namespace PHRPReader
                 {
                     return string.Empty;
                 }
-                else
-                {
-                    return mErrorMessage;
-                }
+
+                return mErrorMessage;
             }
         }
 
@@ -89,60 +88,51 @@ namespace PHRPReader
         /// <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
         public Dictionary<int, string> ReadMSGFData(string strInputFilePath)
         {
-            var lstMSGFData = default(Dictionary<int, string>);
-            lstMSGFData = new Dictionary<int, string>();
-
-            string strLineIn = null;
-            string[] strSplitLine = null;
-            var blnHeaderLineParsed = false;
-            var blnSkipLine = false;
-
-            var intLinesRead = 0;
-            var intResultID = 0;
-            string strMSGFSpecProb = null;
+            var lstMSGFData = new Dictionary<int, string>();
 
             try
             {
                 DefineColumnHeaders();
-                intLinesRead = 0;
+
                 mErrorMessage = string.Empty;
 
                 using (var srInFile = new StreamReader(new FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
+                    var blnHeaderLineParsed = false;
+
                     while (!srInFile.EndOfStream)
                     {
-                        strLineIn = srInFile.ReadLine();
-                        intLinesRead += 1;
-                        blnSkipLine = false;
+                        var strLineIn = srInFile.ReadLine();
+                        var blnSkipLine = false;
 
-                        if (!string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(strLineIn))
+                            continue;
+
+                        var strSplitLine = strLineIn.Split('\t');
+
+                        if (!blnHeaderLineParsed)
                         {
-                            strSplitLine = strLineIn.Split('\t');
-
-                            if (!blnHeaderLineParsed)
+                            if (!clsPHRPReader.IsNumber(strSplitLine[0]))
                             {
-                                if (!clsPHRPReader.IsNumber(strSplitLine[0]))
-                                {
-                                    // Parse the header line to confirm the column ordering
-                                    clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders);
-                                    blnSkipLine = true;
-                                }
-
-                                blnHeaderLineParsed = true;
+                                // Parse the header line to confirm the column ordering
+                                clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders);
+                                blnSkipLine = true;
                             }
 
-                            if (!blnSkipLine && strSplitLine.Length >= 4)
+                            blnHeaderLineParsed = true;
+                        }
+
+                        if (!blnSkipLine && strSplitLine.Length >= 4)
+                        {
+                            var intResultID = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
+
+                            if (intResultID >= 0)
                             {
-                                intResultID = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
+                                var strMSGFSpecProb = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
 
-                                if (intResultID >= 0)
+                                if (!string.IsNullOrEmpty(strMSGFSpecProb) && !lstMSGFData.ContainsKey(intResultID))
                                 {
-                                    strMSGFSpecProb = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
-
-                                    if (!string.IsNullOrEmpty(strMSGFSpecProb) && !lstMSGFData.ContainsKey(intResultID))
-                                    {
-                                        lstMSGFData.Add(intResultID, strMSGFSpecProb);
-                                    }
+                                    lstMSGFData.Add(intResultID, strMSGFSpecProb);
                                 }
                             }
                         }

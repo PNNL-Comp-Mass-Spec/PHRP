@@ -52,11 +52,16 @@ namespace PHRPReader
             AddProtein(proteinName, residueStart, residueEnd);
         }
 
+        /// <summary>
+        /// Add another peptide to protein mapping for a given peptide
+        /// </summary>
+        /// <param name="proteinName">Protein name</param>
+        /// <param name="residueStart">Location that a peptide starts in the protein</param>
+        /// <param name="residueEnd">Location that a peptide ends in the protein</param>
+        /// <remarks>If an entry already exists for a protein at a given start position, the end position will be updated</remarks>
         public void AddProtein(string proteinName, int residueStart, int residueEnd)
         {
-            List<udtProteinLocationInfo> lstLocations = null;
-
-            if (mProteinMapInfo.TryGetValue(proteinName, out lstLocations))
+            if (ProteinMapInfo.TryGetValue(proteinName, out var lstLocations))
             {
                 // Protein mapping already exists; check residueStart
                 foreach (var udtLoc in lstLocations)
@@ -64,25 +69,27 @@ namespace PHRPReader
                     if (udtLoc.ResidueStart == residueStart)
                     {
                         // Update this entry
-                        if (udtLoc.ResidueEnd != residueEnd)
-                        {
-                            udtLoc.ResidueEnd = residueEnd;
-                        }
+                        udtLoc.ResidueEnd = residueEnd;
                         return;
                     }
                 }
 
-                var udtLocInfoAddnl = new udtProteinLocationInfo();
-                udtLocInfoAddnl.ResidueStart = residueStart;
-                udtLocInfoAddnl.ResidueEnd = residueEnd;
+                var udtLocInfoAddnl = new udtProteinLocationInfo
+                {
+                    ResidueStart = residueStart,
+                    ResidueEnd = residueEnd
+                };
 
                 lstLocations.Add(udtLocInfoAddnl);
                 return;
             }
 
-            var udtLocInfo = new udtProteinLocationInfo();
-            udtLocInfo.ResidueStart = residueStart;
-            udtLocInfo.ResidueEnd = residueEnd;
+            // Protein not found
+            var udtLocInfo = new udtProteinLocationInfo
+            {
+                ResidueStart = residueStart,
+                ResidueEnd = residueEnd
+            };
 
             mProteinMapInfo.Add(proteinName, new List<udtProteinLocationInfo> { udtLocInfo });
         }

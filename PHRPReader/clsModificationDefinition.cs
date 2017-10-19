@@ -425,16 +425,11 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition objA, clsModificationDefinition objB)
         {
-            var blnEquivalent = false;
-
-            blnEquivalent = false;
-            if (Math.Abs(Math.Round(objA.ModificationMass - objB.ModificationMass, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < float.Epsilon &&
+            var blnEquivalent =
+                Math.Abs(Math.Round(objA.ModificationMass - objB.ModificationMass, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < float.Epsilon &&
                 objA.ModificationType == objB.ModificationType &&
                 objA.MassCorrectionTag == objB.MassCorrectionTag &&
-                objA.AffectedAtom == objB.AffectedAtom)
-            {
-                blnEquivalent = true;
-            }
+                objA.AffectedAtom == objB.AffectedAtom;
 
             return blnEquivalent;
         }
@@ -459,10 +454,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition objA, clsModificationDefinition objB)
         {
-            var blnEquivalent = false;
-
             // First compare objA to objB but ignore .ModificationSymbol and .AffectedResidues
-            blnEquivalent = EquivalentMassTypeTagAndAtom(objA, objB);
+            var blnEquivalent = EquivalentMassTypeTagAndAtom(objA, objB);
 
             if (blnEquivalent)
             {
@@ -510,10 +503,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static bool EquivalentTargetResidues(string strResidues1, string strResidues2, bool blnAllowResidues2ToBeSubsetOfResidues1)
         {
-            var intMatchCount = 0;
             var blnEquivalent = false;
-
-            blnEquivalent = false;
 
             if (strResidues1 == null && strResidues2 == null)
             {
@@ -533,7 +523,7 @@ namespace PHRPReader
                 else if (strResidues1.Length >= strResidues2.Length)
                 {
                     // See if each of the residues in strResidues2 is in strResidues1
-                    intMatchCount = 0;
+                    var intMatchCount = 0;
                     foreach (var chChar in strResidues2)
                     {
                         if (strResidues1.IndexOf(chChar) >= 0)
@@ -574,17 +564,15 @@ namespace PHRPReader
             {
                 return true;
             }
-            else
+
+            foreach (var chChar in mTargetResidues)
             {
-                foreach (var chChar in mTargetResidues)
+                if (lstTerminalSymbols.Contains(chChar))
                 {
-                    if (lstTerminalSymbols.Contains(chChar))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
-                return false;
             }
+            return false;
         }
 
         /// <summary>
@@ -600,25 +588,21 @@ namespace PHRPReader
             {
                 return false;
             }
-            else
+
+            if (string.IsNullOrEmpty(mTargetResidues))
             {
-                if (string.IsNullOrEmpty(mTargetResidues))
+                return true;
+            }
+
+            foreach (var chChar in mTargetResidues)
+            {
+                if (!lstTerminalSymbols.Contains(chChar))
                 {
                     return true;
                 }
-                else
-                {
-                    foreach (var chChar in mTargetResidues)
-                    {
-                        if (!lstTerminalSymbols.Contains(chChar))
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
             }
+
+            return false;
         }
 
         /// <summary>
@@ -628,14 +612,13 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static SortedSet<char> GetTerminalSymbols()
         {
-            var lstTerminalSymbols = default(SortedSet<char>);
-
-            lstTerminalSymbols = new SortedSet<char>();
-
-            lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS);
-            lstTerminalSymbols.Add(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS);
-            lstTerminalSymbols.Add(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS);
-            lstTerminalSymbols.Add(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS);
+            var lstTerminalSymbols = new SortedSet<char>
+            {
+                clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS,
+                clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS,
+                clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS,
+                clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+            };
 
             return lstTerminalSymbols;
         }
@@ -646,29 +629,27 @@ namespace PHRPReader
         /// <param name="chModificationTypeSymbol">D, S, T, I, or P</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static clsModificationDefinition.eModificationTypeConstants ModificationSymbolToModificationType(char chModificationTypeSymbol)
+        public static eModificationTypeConstants ModificationSymbolToModificationType(char chModificationTypeSymbol)
         {
             if (chModificationTypeSymbol == default(char))
             {
-                return clsModificationDefinition.eModificationTypeConstants.UnknownType;
+                return eModificationTypeConstants.UnknownType;
             }
-            else
+
+            switch (chModificationTypeSymbol)
             {
-                switch (chModificationTypeSymbol)
-                {
-                    case 'D':
-                        return clsModificationDefinition.eModificationTypeConstants.DynamicMod;
-                    case 'S':
-                        return clsModificationDefinition.eModificationTypeConstants.StaticMod;
-                    case 'T':
-                        return clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
-                    case 'I':
-                        return clsModificationDefinition.eModificationTypeConstants.IsotopicMod;
-                    case 'P':
-                        return clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
-                    default:
-                        return clsModificationDefinition.eModificationTypeConstants.UnknownType;
-                }
+                case 'D':
+                    return eModificationTypeConstants.DynamicMod;
+                case 'S':
+                    return eModificationTypeConstants.StaticMod;
+                case 'T':
+                    return eModificationTypeConstants.TerminalPeptideStaticMod;
+                case 'I':
+                    return eModificationTypeConstants.IsotopicMod;
+                case 'P':
+                    return eModificationTypeConstants.ProteinTerminusStaticMod;
+                default:
+                    return eModificationTypeConstants.UnknownType;
             }
         }
 
@@ -678,7 +659,7 @@ namespace PHRPReader
         /// <param name="eModificationType"></param>
         /// <returns>D, S, T, I, or P</returns>
         /// <remarks></remarks>
-        public static char ModificationTypeToModificationSymbol(clsModificationDefinition.eModificationTypeConstants eModificationType)
+        public static char ModificationTypeToModificationSymbol(eModificationTypeConstants eModificationType)
         {
             switch (eModificationType)
             {
@@ -709,14 +690,13 @@ namespace PHRPReader
             {
                 return false;
             }
-            else if (this.TargetResidues.IndexOf(chComparisonResidue) >= 0)
+
+            if (TargetResidues.IndexOf(chComparisonResidue) >= 0)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
     }
 }

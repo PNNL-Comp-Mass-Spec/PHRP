@@ -18,17 +18,47 @@ using System.IO;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class is used to track modifications that can be applied to peptides
+    /// It handles both residue level modifications and static, peptide-wide modifications
+    /// </summary>
+    /// <remarks>
+    /// Use ReadMassCorrectionTagsFile() and ReadModificationDefinitionsFile() to customize
+    /// the default mass correction tag and modification definition lists
+    /// </remarks>
     public class clsPeptideModificationContainer
     {
         #region "Constants and Enums"
+
+        /// <summary>
+        /// Default modification symbols
+        /// </summary>
         public const string DEFAULT_MODIFICATION_SYMBOLS = "*#@$&!%~†‡¤º^`×÷+=ø¢";         // A few other possibilities: €£¥§
 
+        /// <summary>
+        /// Digits of precision to round masses to when finding mass correction tags by mass
+        /// </summary>
         public const byte MASS_DIGITS_OF_PRECISION = 3;
 
+        /// <summary>
+        /// Symbol used by X!Tandem for tracking a modification at the peptide N-terminus
+        /// </summary>
         public const char N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM = '[';
+
+        /// <summary>
+        /// Symbol used by X!Tandem for tracking a modification at the peptide C-terminus
+        /// </summary>
         public const char C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM = ']';
 
+        /// <summary>
+        /// Symbol used by Inspect for tracking a modification at the peptide N-terminus
+        /// </summary>
         public const char N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT = '[';
+
+
+        /// <summary>
+        /// Symbol used by Inspect for tracking a modification at the peptide C-terminus
+        /// </summary>
         public const char C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT = ']';
 
         #endregion
@@ -52,26 +82,37 @@ namespace PHRPReader
         // which the auto-addition method sometimes incorrectly notes
         private List<clsModificationDefinition> mStandardRefinementModifications;
 
-        private bool mConsiderModSymbolWhenFindingIdenticalMods;
-
         private Dictionary<int, string> mIntegerMassCorrectionTagLookup;
 
         #endregion
 
         #region "Properties"
+
+        /// <summary>
+        /// Error message
+        /// </summary>
         public string ErrorMessage => mErrorMessage;
 
+        /// <summary>
+        /// Modification count
+        /// </summary>
         public int ModificationCount => mModifications.Count;
 
+        /// <summary>
+        /// Modification list
+        /// </summary>
         public List<clsModificationDefinition> Modifications => mModifications;
 
-        public bool ConsiderModSymbolWhenFindingIdenticalMods
-        {
-            get => mConsiderModSymbolWhenFindingIdenticalMods;
-            set => mConsiderModSymbolWhenFindingIdenticalMods = value;
-        }
+        /// <summary>
+        /// When true, take the mod symbol into account when finding identical mods
+        /// </summary>
+        public bool ConsiderModSymbolWhenFindingIdenticalMods { get; set; }
+
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public clsPeptideModificationContainer()
         {
             InitializeLocalVariables();
@@ -99,7 +140,7 @@ namespace PHRPReader
                 {
                     blnMatchFound = true;
 
-                    if (mConsiderModSymbolWhenFindingIdenticalMods)
+                    if (ConsiderModSymbolWhenFindingIdenticalMods)
                     {
                         if (objModificationDefinition.ModificationSymbol != mModifications[intModificationIndex].ModificationSymbol)
                         {
@@ -152,7 +193,15 @@ namespace PHRPReader
             return mModifications.Count - 1;
         }
 
-        private clsModificationDefinition AddUnknownModification(double dblModificationMass, clsModificationDefinition.eModificationTypeConstants eModType, char chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState, bool blnAddToModificationListIfUnknown, bool blnUseNextAvailableModificationSymbol, char chModSymbol, byte MassDigitsOfPrecision)
+        private clsModificationDefinition AddUnknownModification(
+            double dblModificationMass,
+            clsModificationDefinition.eModificationTypeConstants eModType,
+            char chTargetResidue,
+            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
+            bool addToModificationListIfUnknown,
+            bool blnUseNextAvailableModificationSymbol,
+            char chModSymbol,
+            byte massDigitsOfPrecision)
         {
             string strTargetResidues;
 
@@ -189,11 +238,11 @@ namespace PHRPReader
                 chModSymbol = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
             }
 
-            var strMassCorrectionTag = LookupMassCorrectionTagByMass(dblModificationMass, MassDigitsOfPrecision, true, MassDigitsOfPrecision);
+            var strMassCorrectionTag = LookupMassCorrectionTagByMass(dblModificationMass, massDigitsOfPrecision, true, massDigitsOfPrecision);
 
             var objModificationDefinition = new clsModificationDefinition(chModSymbol, dblModificationMass, strTargetResidues, eModType, strMassCorrectionTag, clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, true);
 
-            if (!blnAddToModificationListIfUnknown)
+            if (!addToModificationListIfUnknown)
                 return objModificationDefinition;
 
             // Append objModificationDefinition to mModifications()
@@ -214,10 +263,13 @@ namespace PHRPReader
 
             return objModificationDefinition;
 
-            // Either blnAddToModificationListIfUnknown = False or no more default modification symbols
+            // Either addToModificationListIfUnknown = False or no more default modification symbols
             // Return objModificationDefinition, which has .ModificationSymbol = LAST_RESORT_MODIFICATION_SYMBOL
         }
 
+        /// <summary>
+        /// Append standard refinement modifications
+        /// </summary>
         public void AppendStandardRefinmentModifications()
         {
             for (var intIndex = 0; intIndex <= mStandardRefinementModifications.Count - 1; intIndex++)
@@ -227,6 +279,9 @@ namespace PHRPReader
             }
         }
 
+        /// <summary>
+        /// Clear modifications
+        /// </summary>
         public void ClearModifications()
         {
             UpdateDefaultModificationSymbols(DEFAULT_MODIFICATION_SYMBOLS);
@@ -346,6 +401,11 @@ namespace PHRPReader
             return strClosestMassCorrectionTag;
         }
 
+        /// <summary>
+        /// Get a modification, by index
+        /// </summary>
+        /// <param name="intIndex"></param>
+        /// <returns></returns>
         public clsModificationDefinition GetModificationByIndex(int intIndex)
         {
             if (intIndex >= 0 & intIndex < mModifications.Count)
@@ -356,6 +416,11 @@ namespace PHRPReader
             return new clsModificationDefinition();
         }
 
+        /// <summary>
+        /// Get the modification type, by modification index
+        /// </summary>
+        /// <param name="intIndex"></param>
+        /// <returns></returns>
         public clsModificationDefinition.eModificationTypeConstants GetModificationTypeByIndex(int intIndex)
         {
             if (intIndex >= 0 & intIndex < mModifications.Count)
@@ -366,46 +431,87 @@ namespace PHRPReader
             return clsModificationDefinition.eModificationTypeConstants.UnknownType;
         }
 
+        /// <summary>
+        /// Find the mass correction tag with the given mass, adding to the unknown modification list if not found
+        /// </summary>
+        /// <param name="dblModificationMass"></param>
+        /// <returns>Mod name, or empty string if no match</returns>
+        /// <remarks>
+        /// Searches known mods using 3 digits of precision, then 2 digits, then 1 digit
+        /// If no match, adds as a new, unknown modification
+        /// </remarks>
         public string LookupMassCorrectionTagByMass(double dblModificationMass)
         {
-            const byte MassDigitsOfPrecision = MASS_DIGITS_OF_PRECISION;
-            const bool blnAddToModificationListIfUnknown = true;
+            const byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION;
+            const bool addToModificationListIfUnknown = true;
 
-            return LookupMassCorrectionTagByMass(dblModificationMass, MassDigitsOfPrecision, blnAddToModificationListIfUnknown);
+            return LookupMassCorrectionTagByMass(dblModificationMass, massDigitsOfPrecision, addToModificationListIfUnknown);
         }
 
-        public string LookupMassCorrectionTagByMass(double dblModificationMass, byte MassDigitsOfPrecision)
+        /// <summary>
+        ///  Find the mass correction tag with the given mass, adding to the unknown modification list if not  found
+        /// </summary>
+        /// <param name="dblModificationMass"></param>
+        /// <param name="massDigitsOfPrecision"></param>
+        /// <returns>Mod name, or empty string if no match</returns>
+        /// <remarks>
+        /// Searches known mods using massDigitsOfPrecision digits of precision, then massDigitsOfPrecision-1 digits, ... 1 digit
+        /// If no match, adds as a new, unknown modification
+        /// </remarks>
+        public string LookupMassCorrectionTagByMass(double dblModificationMass, byte massDigitsOfPrecision)
         {
-            const bool blnAddToModificationListIfUnknown = true;
+            const bool addToModificationListIfUnknown = true;
 
-            return LookupMassCorrectionTagByMass(dblModificationMass, MassDigitsOfPrecision, blnAddToModificationListIfUnknown);
+            return LookupMassCorrectionTagByMass(dblModificationMass, massDigitsOfPrecision, addToModificationListIfUnknown);
         }
 
-        public string LookupMassCorrectionTagByMass(double dblModificationMass, byte MassDigitsOfPrecision, bool blnAddToModificationListIfUnknown)
+        /// <summary>
+        /// Find the mass correction tag with the given mass, adding to the unknown modification list if not found and addToModificationListIfUnknown is true
+        /// </summary>
+        /// <param name="dblModificationMass"></param>
+        /// <param name="massDigitsOfPrecision"></param>
+        /// <param name="addToModificationListIfUnknown"></param>
+        /// <returns>Mod name, or empty string if no match</returns>
+        /// <remarks>
+        /// Searches known mods using massDigitsOfPrecision digits of precision, then massDigitsOfPrecision-1 digits, ... 1 digit
+        /// If no match, adds as a new, unknown modification
+        /// </remarks>
+        public string LookupMassCorrectionTagByMass(double dblModificationMass, byte massDigitsOfPrecision, bool addToModificationListIfUnknown)
         {
-            const byte MassDigitsOfPrecisionLoose = 1;
+            const byte massDigitsOfPrecisionLoose = 1;
 
-            return LookupMassCorrectionTagByMass(dblModificationMass, MassDigitsOfPrecision, blnAddToModificationListIfUnknown, MassDigitsOfPrecisionLoose);
+            return LookupMassCorrectionTagByMass(dblModificationMass, massDigitsOfPrecision, addToModificationListIfUnknown, massDigitsOfPrecisionLoose);
         }
 
-        public string LookupMassCorrectionTagByMass(double dblModificationMass, byte MassDigitsOfPrecision, bool blnAddToModificationListIfUnknown, byte MassDigitsOfPrecisionLoose)
+        /// <summary>
+        /// Find the mass correction tag with the given mass, adding to the unknown modification list if not found and addToModificationListIfUnknown is true
+        /// </summary>
+        /// <param name="dblModificationMass"></param>
+        /// <param name="massDigitsOfPrecision"></param>
+        /// <param name="addToModificationListIfUnknown"></param>
+        /// <param name="massDigitsOfPrecisionLoose"></param>
+        /// <returns>Mod name, or empty string if no match</returns>
+        public string LookupMassCorrectionTagByMass(
+            double dblModificationMass,
+            byte massDigitsOfPrecision,
+            bool addToModificationListIfUnknown,
+            byte massDigitsOfPrecisionLoose)
         {
-            int intMassDigitsOfPrecisionCurrent;
             int intMassDigitsOfPrecisionStop;
 
-            if (MassDigitsOfPrecision < MassDigitsOfPrecisionLoose)
-                MassDigitsOfPrecisionLoose = MassDigitsOfPrecision;
+            if (massDigitsOfPrecision < massDigitsOfPrecisionLoose)
+                massDigitsOfPrecisionLoose = massDigitsOfPrecision;
 
-            if (MassDigitsOfPrecision >= MassDigitsOfPrecisionLoose)
+            if (massDigitsOfPrecision >= massDigitsOfPrecisionLoose)
             {
-                intMassDigitsOfPrecisionStop = MassDigitsOfPrecisionLoose;
+                intMassDigitsOfPrecisionStop = massDigitsOfPrecisionLoose;
             }
             else
             {
-                intMassDigitsOfPrecisionStop = MassDigitsOfPrecision;
+                intMassDigitsOfPrecisionStop = massDigitsOfPrecision;
             }
 
-            for (intMassDigitsOfPrecisionCurrent = MassDigitsOfPrecision; intMassDigitsOfPrecisionCurrent >= intMassDigitsOfPrecisionStop; intMassDigitsOfPrecisionCurrent += -1)
+            for (var currentPrecision = (int)massDigitsOfPrecision; currentPrecision >= intMassDigitsOfPrecisionStop; currentPrecision += -1)
             {
                 var strClosestMassCorrectionTag = string.Empty;
                 var dblClosestMassCorrectionTagMassDiff = double.MaxValue;
@@ -440,13 +546,13 @@ namespace PHRPReader
                     // Error enumerating through mMassCorrectionTags
                 }
 
-                if (Math.Abs(Math.Round(dblClosestMassCorrectionTagMassDiff, intMassDigitsOfPrecisionCurrent)) < float.Epsilon)
+                if (Math.Abs(Math.Round(dblClosestMassCorrectionTagMassDiff, currentPrecision)) < float.Epsilon)
                 {
                     // Match found
                     return strClosestMassCorrectionTag;
                 }
 
-                if (intMassDigitsOfPrecisionCurrent > intMassDigitsOfPrecisionStop)
+                if (currentPrecision > intMassDigitsOfPrecisionStop)
                 {
                     // Let the For loop go through another iteration to see if we find a match
                 }
@@ -456,7 +562,7 @@ namespace PHRPReader
                     // Name the modification based on the mod mass
                     strClosestMassCorrectionTag = GenerateGenericModMassName(dblModificationMass);
 
-                    if (blnAddToModificationListIfUnknown)
+                    if (addToModificationListIfUnknown)
                     {
                         try
                         {
@@ -476,10 +582,21 @@ namespace PHRPReader
             return string.Empty;
         }
 
-        public clsModificationDefinition LookupDynamicModificationDefinitionByTargetInfo(char chModificationSymbol, char chTargetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState, out bool blnExistingModFound)
+        /// <summary>
+        /// Looks for a modification of type .DynamicMod or type .UnknownType in mModifications having .ModificationSymbol = chModificationSymbol and chTargetResidue in .TargetResidues
+        /// </summary>
+        /// <param name="chModificationSymbol"></param>
+        /// <param name="chTargetResidue"></param>
+        /// <param name="eResidueTerminusState"></param>
+        /// <param name="blnExistingModFound"></param>
+        /// <returns>Modification details</returns>
+        /// <remarks>If chModificationSymbol does not match any of the mods, a modification with a mass of 0 is returned</remarks>
+        public clsModificationDefinition LookupDynamicModificationDefinitionByTargetInfo(
+            char chModificationSymbol,
+            char chTargetResidue,
+            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
+            out bool blnExistingModFound)
         {
-            // Looks for a modification of type .DynamicMod or type .UnknownType in mModifications having .ModificationSymbol = chModificationSymbol and chTargetResidue in .TargetResidues
-            // Note: If chModificationSymbol does not match any of the mods, then a modification with a mass of 0 is returned
 
             blnExistingModFound = false;
             if (chTargetResidue != default(char) || eResidueTerminusState != clsAminoAcidModInfo.eResidueTerminusStateConstants.None)
@@ -616,16 +733,16 @@ namespace PHRPReader
         /// <param name="chTargetResidue">If defined, then returns the first modification with the given mass and containing the residue in .TargetResidues; if no match, then looks for the first modification with the given mass and no defined .TargetResidues</param>
         /// <param name="eResidueTerminusState"></param>
         /// <param name="blnExistingModFound"></param>
-        /// <param name="blnAddToModificationListIfUnknown"></param>
-        /// <param name="MassDigitsOfPrecision"></param>
-        /// <returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True</returns>
+        /// <param name="addToModificationListIfUnknown"></param>
+        /// <param name="massDigitsOfPrecision"></param>
+        /// <returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown is True</returns>
         /// <remarks>If chTargetResidue is nothing, then follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         public clsModificationDefinition LookupModificationDefinitionByMass(double dblModificationMass,
             char chTargetResidue,
             clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
             out bool blnExistingModFound,
-            bool blnAddToModificationListIfUnknown,
-            byte MassDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
+            bool addToModificationListIfUnknown,
+            byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
         {
             clsModificationDefinition objModificationDefinition;
 
@@ -644,7 +761,7 @@ namespace PHRPReader
                         continue;
                     }
 
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) > float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) > float.Epsilon)
                     {
                         continue;
                     }
@@ -692,7 +809,7 @@ namespace PHRPReader
             {
                 if ((mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && string.IsNullOrWhiteSpace(mModifications[intIndex].TargetResidues))
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
                         return mModifications[intIndex];
@@ -706,7 +823,7 @@ namespace PHRPReader
             {
                 for (var intIndex = 0; intIndex <= mStandardRefinementModifications.Count - 1; intIndex++)
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
                         // Now see if .TargetResidues contains chTargetResidue
@@ -717,7 +834,7 @@ namespace PHRPReader
                             objModificationDefinition = mStandardRefinementModifications[intIndex];
                             objModificationDefinition.ModificationSymbol = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
 
-                            if (blnAddToModificationListIfUnknown && mDefaultModificationSymbols.Count > 0)
+                            if (addToModificationListIfUnknown && mDefaultModificationSymbols.Count > 0)
                             {
                                 // Append objModificationDefinition to mModifications()
                                 var intNewModIndex = AddModification(objModificationDefinition, true);
@@ -729,7 +846,7 @@ namespace PHRPReader
                                 return objModificationDefinition;
                             }
 
-                            // Either blnAddToModificationListIfUnknown = False or no more default modification symbols
+                            // Either addToModificationListIfUnknown = False or no more default modification symbols
                             // Return objModificationDefinition, which has .ModificationSymbol = LAST_RESORT_MODIFICATION_SYMBOL
                             return objModificationDefinition;
                         }
@@ -743,7 +860,7 @@ namespace PHRPReader
             {
                 if (mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType)
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
                         // Assure that the target residues contain chTargetResidue
@@ -762,7 +879,7 @@ namespace PHRPReader
             const char chModSymbol = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
             const bool blnUseNextAvailableModificationSymbol = true;
 
-            objModificationDefinition = AddUnknownModification(dblModificationMass, eModType, chTargetResidue, eResidueTerminusState, blnAddToModificationListIfUnknown, blnUseNextAvailableModificationSymbol, chModSymbol, MassDigitsOfPrecision);
+            objModificationDefinition = AddUnknownModification(dblModificationMass, eModType, chTargetResidue, eResidueTerminusState, addToModificationListIfUnknown, blnUseNextAvailableModificationSymbol, chModSymbol, massDigitsOfPrecision);
 
             return objModificationDefinition;
         }
@@ -775,9 +892,9 @@ namespace PHRPReader
         /// <param name="chTargetResidue">If defined, then returns the first modification with the given mass and containing the residue in .TargetResidues; if no match, then looks for the first modification with the given mass and no defined .TargetResidues</param>
         /// <param name="eResidueTerminusState"></param>
         /// <param name="blnExistingModFound"></param>
-        /// <param name="blnAddToModificationListIfUnknown"></param>
-        /// <param name="MassDigitsOfPrecision"></param>
-        /// <returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True</returns>
+        /// <param name="addToModificationListIfUnknown"></param>
+        /// <param name="massDigitsOfPrecision"></param>
+        /// <returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True</returns>
         /// <remarks>If chTargetResidue is nothing, then follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         public clsModificationDefinition LookupModificationDefinitionByMassAndModType(
             double dblModificationMass,
@@ -785,13 +902,13 @@ namespace PHRPReader
             char chTargetResidue,
             clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
             out bool blnExistingModFound,
-            bool blnAddToModificationListIfUnknown,
-            byte MassDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
+            bool addToModificationListIfUnknown,
+            byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
         {
             // If chTargetResidue is defined, then returns the first modification with the given mass and containing the residue in .TargetResidues
             //  If no match is found, then looks for the first modification with the given mass and no defined .TargetResidues
             //  If no match is found, then looks for the first dynamic modification with the given mass, regardless of .TargetResidues
-            //  If no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True
+            //  If no match is found, then returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True
             // If chTargetResidue is nothing, then follows similar logic, but skips defined modifications with defined .TargetResidues
 
             clsModificationDefinition objModificationDefinition;
@@ -822,7 +939,7 @@ namespace PHRPReader
                 {
                     if (mModifications[intIndex].ModificationType == eModType && (mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && mModifications[intIndex].TargetResidues.Length > 0)
                     {
-                        if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < float.Epsilon)
+                        if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) < float.Epsilon)
                         {
                             // Matching mass found
                             // Now see if .TargetResidues contains chTargetResidue
@@ -869,7 +986,7 @@ namespace PHRPReader
             {
                 if (mModifications[intIndex].ModificationType == eModType && (mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod || mModifications[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && string.IsNullOrWhiteSpace(mModifications[intIndex].TargetResidues))
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
                         return mModifications[intIndex];
@@ -883,7 +1000,7 @@ namespace PHRPReader
             {
                 for (var intIndex = 0; intIndex <= mStandardRefinementModifications.Count - 1; intIndex++)
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
                         // Now see if .TargetResidues contains chTargetResidue
@@ -895,7 +1012,7 @@ namespace PHRPReader
                             objModificationDefinition.ModificationSymbol = chModSymbol;
                             objModificationDefinition.ModificationType = eModType;
 
-                            if (blnAddToModificationListIfUnknown && mDefaultModificationSymbols.Count > 0)
+                            if (addToModificationListIfUnknown && mDefaultModificationSymbols.Count > 0)
                             {
                                 // Append objModificationDefinition to mModifications()
                                 var intNewModIndex = AddModification(objModificationDefinition, true);
@@ -907,7 +1024,7 @@ namespace PHRPReader
                                 return objModificationDefinition;
                             }
 
-                            // Either blnAddToModificationListIfUnknown = False or no more default modification symbols
+                            // Either addToModificationListIfUnknown = False or no more default modification symbols
                             // Return objModificationDefinition, which has .ModificationSymbol = LAST_RESORT_MODIFICATION_SYMBOL
                             return objModificationDefinition;
                         }
@@ -921,7 +1038,7 @@ namespace PHRPReader
             {
                 if (mModifications[intIndex].ModificationType == eModType)
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
                         // Assure that the target residues contain chTargetResidue
@@ -936,7 +1053,7 @@ namespace PHRPReader
             }
 
             // Still no match; define a new custom modification
-            objModificationDefinition = AddUnknownModification(dblModificationMass, eModType, chTargetResidue, eResidueTerminusState, blnAddToModificationListIfUnknown, blnUseNextAvailableModificationSymbol, chModSymbol, MassDigitsOfPrecision);
+            objModificationDefinition = AddUnknownModification(dblModificationMass, eModType, chTargetResidue, eResidueTerminusState, addToModificationListIfUnknown, blnUseNextAvailableModificationSymbol, chModSymbol, massDigitsOfPrecision);
 
             return objModificationDefinition;
         }
@@ -956,6 +1073,12 @@ namespace PHRPReader
             UpdateIntegerBasedModificationMap();
         }
 
+        /// <summary>
+        /// Load the mass correction tags file
+        /// </summary>
+        /// <param name="strFilePath"></param>
+        /// <param name="blnFileNotFound"></param>
+        /// <returns></returns>
         public bool ReadMassCorrectionTagsFile(string strFilePath, ref bool blnFileNotFound)
         {
             bool blnSuccess;
@@ -1029,6 +1152,12 @@ namespace PHRPReader
             return blnSuccess;
         }
 
+        /// <summary>
+        /// Read a modification definitions file (_ModDefs.txt)
+        /// </summary>
+        /// <param name="strFilePath"></param>
+        /// <param name="blnFileNotFound"></param>
+        /// <returns></returns>
         public bool ReadModificationDefinitionsFile(string strFilePath, ref bool blnFileNotFound)
         {
 
@@ -1217,6 +1346,9 @@ namespace PHRPReader
             return blnSuccess;
         }
 
+        /// <summary>
+        /// Reset mod occurrence count stats
+        /// </summary>
         public void ResetOccurrenceCountStats()
         {
             for (var intIndex = 0; intIndex <= mModifications.Count - 1; intIndex++)
@@ -1225,6 +1357,9 @@ namespace PHRPReader
             }
         }
 
+        /// <summary>
+        /// Define the default mass correction tags
+        /// </summary>
         public void SetDefaultMassCorrectionTags()
         {
             try
@@ -1487,7 +1622,19 @@ namespace PHRPReader
             }
         }
 
-        public bool VerifyModificationPresent(double dblModificationMass, string strTargetResidues, clsModificationDefinition.eModificationTypeConstants eModificationType, int MassDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
+        /// <summary>
+        /// Verify that a modification is present, adding it if missing
+        /// </summary>
+        /// <param name="dblModificationMass"></param>
+        /// <param name="strTargetResidues"></param>
+        /// <param name="eModificationType"></param>
+        /// <param name="massDigitsOfPrecision"></param>
+        /// <returns>True if the modification was matched or was added; false if an error</returns>
+        public bool VerifyModificationPresent(
+            double dblModificationMass,
+            string strTargetResidues,
+            clsModificationDefinition.eModificationTypeConstants eModificationType,
+            int massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
         {
             // Returns True if the modification was matched or was added
             // Returns False if an error
@@ -1498,8 +1645,8 @@ namespace PHRPReader
 
             var blnMatchFound = false;
 
-            if (MassDigitsOfPrecision < 0)
-                MassDigitsOfPrecision = 0;
+            if (massDigitsOfPrecision < 0)
+                massDigitsOfPrecision = 0;
 
             try
             {
@@ -1509,7 +1656,7 @@ namespace PHRPReader
                         continue;
 
                     // Matching modification type
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), MassDigitsOfPrecision)) > float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(mModifications[intIndex].ModificationMass - dblModificationMass), massDigitsOfPrecision)) > float.Epsilon)
                         continue;
 
                     // Matching mass

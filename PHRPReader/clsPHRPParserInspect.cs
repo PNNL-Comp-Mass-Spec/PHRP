@@ -108,38 +108,41 @@ namespace PHRPReader
         /// <summary>
         /// Constructor; assumes blnLoadModsAndSeqInfo=True
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <remarks></remarks>
-        public clsPHRPParserInspect(string strDatasetName, string strInputFilePath)
-            : this(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
+        public clsPHRPParserInspect(string datasetName, string strInputFilePath)
+            : this(datasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
         {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
-        public clsPHRPParserInspect(string strDatasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
-            : base(strDatasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.Inspect, blnLoadModsAndSeqInfo)
+        public clsPHRPParserInspect(string datasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
+            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.Inspect, blnLoadModsAndSeqInfo)
         {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
-        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
-        public clsPHRPParserInspect(string strDatasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(strDatasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.Inspect, startupOptions)
+        public clsPHRPParserInspect(string datasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
+            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.Inspect, startupOptions)
         {
         }
 
+        /// <summary>
+        /// Define column header names
+        /// </summary>
         protected override void DefineColumnHeaders()
         {
             mColumnHeaders.Clear();
@@ -184,14 +187,12 @@ namespace PHRPReader
         /// <remarks></remarks>
         private double DeterminePrecursorMassTolerance(clsSearchEngineParameters objSearchEngineParams, out double dblTolerancePPM)
         {
-            var strTolerance = string.Empty;
-
             double dblToleranceDa = 0;
             double dblTolerance = 0;
 
             dblTolerancePPM = 0;
 
-            if (objSearchEngineParams.Parameters.TryGetValue("ParentPPM", out strTolerance))
+            if (objSearchEngineParams.Parameters.TryGetValue("ParentPPM", out var strTolerance))
             {
                 // Parent mass tolerance, in ppm
                 double.TryParse(strTolerance, out dblTolerancePPM);
@@ -213,46 +214,89 @@ namespace PHRPReader
             return dblTolerance;
         }
 
-        public static string GetPHRPFirstHitsFileName(string strDatasetName)
+        /// <summary>
+        /// Default first hits file for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPFirstHitsFileName(string datasetName)
         {
-            return strDatasetName + FILENAME_SUFFIX_FHT;
+            return datasetName + FILENAME_SUFFIX_FHT;
         }
 
-        public static string GetPHRPModSummaryFileName(string strDatasetName)
+        /// <summary>
+        /// Defeault ModSummary file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPModSummaryFileName(string datasetName)
         {
-            return strDatasetName + "_inspect_syn_ModSummary.txt";
+            return datasetName + "_inspect_syn_ModSummary.txt";
         }
 
-        public static string GetPHRPPepToProteinMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default PepToProtMap file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
-            return strDatasetName + "_inspect_PepToProtMapMTS.txt";
+            return datasetName + "_inspect_PepToProtMapMTS.txt";
         }
 
-        public static string GetPHRPProteinModsFileName(string strDatasetName)
+        /// <summary>
+        /// Default ProteinMods file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPProteinModsFileName(string datasetName)
         {
-            return strDatasetName + "_inspect_syn_ProteinMods.txt";
+            return datasetName + "_inspect_syn_ProteinMods.txt";
         }
 
-        public static string GetPHRPSynopsisFileName(string strDatasetName)
+        /// <summary>
+        /// Default Synopsis file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSynopsisFileName(string datasetName)
         {
-            return strDatasetName + FILENAME_SUFFIX_SYN;
+            return datasetName + FILENAME_SUFFIX_SYN;
         }
 
-        public static string GetPHRPResultToSeqMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default ResultToSeq map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
-            return strDatasetName + "_inspect_syn_ResultToSeqMap.txt";
+            return datasetName + "_inspect_syn_ResultToSeqMap.txt";
         }
 
-        public static string GetPHRPSeqInfoFileName(string strDatasetName)
+        /// <summary>
+        /// Default SeqInfo map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSeqInfoFileName(string datasetName)
         {
-            return strDatasetName + "_inspect_syn_SeqInfo.txt";
+            return datasetName + "_inspect_syn_SeqInfo.txt";
         }
 
-        public static string GetPHRPSeqToProteinMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default SeqToProtein map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
-            return strDatasetName + "_inspect_syn_SeqToProteinMap.txt";
+            return datasetName + "_inspect_syn_SeqToProteinMap.txt";
         }
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         public static string GetSearchEngineName()
         {
             return INS_SEARCH_ENGINE_NAME;
@@ -267,11 +311,9 @@ namespace PHRPReader
         /// <remarks></remarks>
         public override bool LoadSearchEngineParameters(string strSearchEngineParamFileName, out clsSearchEngineParameters objSearchEngineParams)
         {
-            var blnSuccess = false;
-
             objSearchEngineParams = new clsSearchEngineParameters(INS_SEARCH_ENGINE_NAME, mModInfo);
 
-            blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams);
+            var blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams);
 
             ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams);
 
@@ -280,7 +322,6 @@ namespace PHRPReader
 
         private bool ReadSearchEngineParamFile(string strSearchEngineParamFileName, clsSearchEngineParameters objSearchEngineParams)
         {
-            var strSettingValue = string.Empty;
             var blnSuccess = false;
 
             try
@@ -290,7 +331,7 @@ namespace PHRPReader
                 if (blnSuccess)
                 {
                     // Determine the enzyme name
-                    if (objSearchEngineParams.Parameters.TryGetValue("protease", out strSettingValue))
+                    if (objSearchEngineParams.Parameters.TryGetValue("protease", out var strSettingValue))
                     {
                         switch (strSettingValue.ToLower())
                         {
@@ -313,8 +354,7 @@ namespace PHRPReader
                     }
 
                     // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                    double dblTolerancePPM = 0;
-                    objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, out dblTolerancePPM);
+                    objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, out var dblTolerancePPM);
                     objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM;
                 }
             }
@@ -338,9 +378,6 @@ namespace PHRPReader
         public override bool ParsePHRPDataLine(string strLine, int intLinesRead, out clsPSM objPSM, bool fastReadMode)
         {
             var strColumns = strLine.Split('\t');
-            string strPeptide = null;
-            string strProtein = null;
-            double dblPrecursorMZ = 0;
 
             var blnSuccess = false;
 
@@ -359,11 +396,11 @@ namespace PHRPReader
                     objPSM.ResultID = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
                     objPSM.ScoreRank = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_RankTotalPRMScore, mColumnHeaders, 0);
 
-                    strPeptide = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var strPeptide = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders);
 
                     if (fastReadMode)
                     {
-                        objPSM.SetPeptide(strPeptide, blnUpdateCleanSequence: false);
+                        objPSM.SetPeptide(strPeptide, updateCleanSequence: false);
                     }
                     else
                     {
@@ -372,10 +409,10 @@ namespace PHRPReader
 
                     objPSM.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
-                    strProtein = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var strProtein = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders);
                     objPSM.AddProtein(strProtein);
 
-                    dblPrecursorMZ = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                    var dblPrecursorMZ = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
                     objPSM.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, objPSM.Charge, 0);
 
                     objPSM.MassErrorDa = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_PrecursorError, mColumnHeaders);
@@ -407,7 +444,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                base.ReportError("Error parsing line " + intLinesRead + " in the Inspect data file: " + ex.Message);
+                ReportError("Error parsing line " + intLinesRead + " in the Inspect data file: " + ex.Message);
             }
 
             return blnSuccess;

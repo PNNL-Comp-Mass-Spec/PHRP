@@ -89,25 +89,25 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFolderPath">Input file path</param>
         /// <param name="ePeptideHitResultType">Peptide Hit result type</param>
         /// <remarks></remarks>
-        public clsPHRPSeqMapReader(string strDatasetName, string strInputFolderPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType) : this(strDatasetName, strInputFolderPath, ePeptideHitResultType, clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, strDatasetName))
+        public clsPHRPSeqMapReader(string datasetName, string strInputFolderPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType) : this(datasetName, strInputFolderPath, ePeptideHitResultType, clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, datasetName))
         {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFolderPath">Input file path</param>
         /// <param name="ePeptideHitResultType">Peptide Hit result type</param>
         /// <param name="strPHRPDataFileName">The base PHRP data file name; used when calling AutoSwitchToLegacyMSGFDBIfRequired and AutoSwitchToFHTIfRequired</param>
         /// <remarks></remarks>
-        public clsPHRPSeqMapReader(string strDatasetName, string strInputFolderPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, string strPHRPDataFileName)
+        public clsPHRPSeqMapReader(string datasetName, string strInputFolderPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, string strPHRPDataFileName)
         {
-            mDatasetName = strDatasetName;
+            mDatasetName = datasetName;
 
             if (string.IsNullOrEmpty(mDatasetName))
             {
@@ -160,7 +160,7 @@ namespace PHRPReader
                 throw new Exception(mErrorMessage);
             }
 
-            mMaxProteinsPerSeqID = 0;
+            MaxProteinsPerSeqID = 0;
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace PHRPReader
             mSeqToProteinMapFilename = strSeqToProteinMapFilename;
             mSeqInfoFilename = strSeqInfoFilename;
 
-            mMaxProteinsPerSeqID = 0;
+            MaxProteinsPerSeqID = 0;
         }
 
         /// <summary>
@@ -356,7 +356,7 @@ namespace PHRPReader
 
                                         if (lstPepToProteinMap.TryGetValue(strPeptide, out var oPepToProtMapInfo))
                                         {
-                                            if (mMaxProteinsPerSeqID == 0 || oPepToProtMapInfo.ProteinCount < mMaxProteinsPerSeqID)
+                                            if (MaxProteinsPerSeqID == 0 || oPepToProtMapInfo.ProteinCount < MaxProteinsPerSeqID)
                                             {
                                                 oPepToProtMapInfo.AddProtein(strSplitLine[1], residueStart, residueEnd);
                                             }
@@ -599,7 +599,7 @@ namespace PHRPReader
                         if (lstSeqToProteinMap.TryGetValue(intSeqID, out var lstProteins))
                         {
                             // Sequence already exists in lstSeqToProteinMap; add the new protein info
-                            if (mMaxProteinsPerSeqID == 0 || lstProteins.Count < mMaxProteinsPerSeqID)
+                            if (MaxProteinsPerSeqID == 0 || lstProteins.Count < MaxProteinsPerSeqID)
                             {
                                 lstProteins.Add(objProteinInfo);
                             }

@@ -122,38 +122,41 @@ namespace PHRPReader
         /// <summary>
         /// Constructor; assumes blnLoadModsAndSeqInfo=True
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <remarks></remarks>
-        public clsPHRPParserMSGFDB(string strDatasetName, string strInputFilePath)
-            : this(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
+        public clsPHRPParserMSGFDB(string datasetName, string strInputFilePath)
+            : this(datasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
         {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
-        public clsPHRPParserMSGFDB(string strDatasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
-            : base(strDatasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB, blnLoadModsAndSeqInfo)
+        public clsPHRPParserMSGFDB(string datasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
+            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB, blnLoadModsAndSeqInfo)
         {
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
-        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
-        public clsPHRPParserMSGFDB(string strDatasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(strDatasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB, startupOptions)
+        public clsPHRPParserMSGFDB(string datasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
+            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB, startupOptions)
         {
         }
 
+        /// <summary>
+        /// Define column header names
+        /// </summary>
         protected override void DefineColumnHeaders()
         {
             mColumnHeaders.Clear();
@@ -291,46 +294,89 @@ namespace PHRPReader
             return false;
         }
 
-        public static string GetPHRPFirstHitsFileName(string strDatasetName)
+        /// <summary>
+        /// Default first hits file for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPFirstHitsFileName(string datasetName)
         {
-            return strDatasetName + FILENAME_SUFFIX_FHT;
+            return datasetName + FILENAME_SUFFIX_FHT;
         }
 
-        public static string GetPHRPModSummaryFileName(string strDatasetName)
+        /// <summary>
+        /// Defeault ModSummary file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPModSummaryFileName(string datasetName)
         {
-            return strDatasetName + "_msgfplus_syn_ModSummary.txt";
+            return datasetName + "_msgfplus_syn_ModSummary.txt";
         }
 
-        public static string GetPHRPPepToProteinMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default PepToProtMap file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPPepToProteinMapFileName(string datasetName)
         {
-            return strDatasetName + "_msgfplus_PepToProtMapMTS.txt";
+            return datasetName + "_msgfplus_PepToProtMapMTS.txt";
         }
 
-        public static string GetPHRPProteinModsFileName(string strDatasetName)
+        /// <summary>
+        /// Default ProteinMods file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPProteinModsFileName(string datasetName)
         {
-            return strDatasetName + "_msgfplus_syn_ProteinMods.txt";
+            return datasetName + "_msgfplus_syn_ProteinMods.txt";
         }
 
-        public static string GetPHRPSynopsisFileName(string strDatasetName)
+        /// <summary>
+        /// Default Synopsis file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSynopsisFileName(string datasetName)
         {
-            return strDatasetName + FILENAME_SUFFIX_SYN;
+            return datasetName + FILENAME_SUFFIX_SYN;
         }
 
-        public static string GetPHRPResultToSeqMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default ResultToSeq map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPResultToSeqMapFileName(string datasetName)
         {
-            return strDatasetName + "_msgfplus_syn_ResultToSeqMap.txt";
+            return datasetName + "_msgfplus_syn_ResultToSeqMap.txt";
         }
 
-        public static string GetPHRPSeqInfoFileName(string strDatasetName)
+        /// <summary>
+        /// Default SeqInfo map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSeqInfoFileName(string datasetName)
         {
-            return strDatasetName + "_msgfplus_syn_SeqInfo.txt";
+            return datasetName + "_msgfplus_syn_SeqInfo.txt";
         }
 
-        public static string GetPHRPSeqToProteinMapFileName(string strDatasetName)
+        /// <summary>
+        /// Default SeqToProtein map file name for the given dataset
+        /// </summary>
+        /// <param name="datasetName"></param>
+        /// <returns>Filename</returns>
+        public static string GetPHRPSeqToProteinMapFileName(string datasetName)
         {
-            return strDatasetName + "_msgfplus_syn_SeqToProteinMap.txt";
+            return datasetName + "_msgfplus_syn_SeqToProteinMap.txt";
         }
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         public static string GetSearchEngineName()
         {
             return MSGFDB_SEARCH_ENGINE_NAME;
@@ -508,13 +554,12 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string strLine, int intLinesRead, out clsPSM objPSM, bool fastReadMode)
         {
-            var strColumns = strLine.Split('\t');
-            var blnSuccess = false;
-
             objPSM = new clsPSM();
 
             try
             {
+                var strColumns = strLine.Split('\t');
+
                 bool blnMSGFPlusResults;
                 if (clsPHRPReader.LookupColumnIndex(DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders) >= 0)
                 {
@@ -530,155 +575,152 @@ namespace PHRPReader
                 if (objPSM.ScanNumber == -100)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                objPSM.ResultID = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+
+                if (blnMSGFPlusResults)
+                {
+                    objPSM.ScoreRank = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue, mColumnHeaders, 1);
                 }
                 else
                 {
-                    objPSM.ResultID = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-
-                    if (blnMSGFPlusResults)
-                    {
-                        objPSM.ScoreRank = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue, mColumnHeaders, 1);
-                    }
-                    else
-                    {
-                        objPSM.ScoreRank = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb, mColumnHeaders, 1);
-                    }
-
-                    var strPeptide = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        objPSM.SetPeptide(strPeptide, blnUpdateCleanSequence: false);
-                    }
-                    else
-                    {
-                        objPSM.SetPeptide(strPeptide, mCleavageStateCalculator);
-                    }
-
-                    objPSM.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0));
-
-                    var strProtein = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders);
-                    objPSM.AddProtein(strProtein);
-
-                    objPSM.CollisionMode = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_FragMethod, mColumnHeaders, "n/a");
-
-                    var dblPrecursorMZ = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
-                    objPSM.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, objPSM.Charge, 0);
-
-                    objPSM.MassErrorDa = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders);
-                    objPSM.MassErrorPPM = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
-
-                    if (blnMSGFPlusResults)
-                    {
-                        objPSM.MSGFSpecEValue = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders);
-                    }
-                    else
-                    {
-                        objPSM.MSGFSpecEValue = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders);
-                    }
-
-                    if (objPSM.MSGFSpecEValue.Length > 13)
-                    {
-                        // Attempt to shorten the SpecEValue value
-                        if (double.TryParse(objPSM.MSGFSpecEValue, out var dblSpecEValue))
-                        {
-                            objPSM.MSGFSpecEValue = dblSpecEValue.ToString("0.0000000E-00");
-                        }
-                    }
-                    blnSuccess = true;
+                    objPSM.ScoreRank = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb, mColumnHeaders, 1);
                 }
 
-                if (blnSuccess)
+                var strPeptide = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders);
+
+                if (fastReadMode)
                 {
-                    if (!fastReadMode)
+                    objPSM.SetPeptide(strPeptide, updateCleanSequence: false);
+                }
+                else
+                {
+                    objPSM.SetPeptide(strPeptide, mCleavageStateCalculator);
+                }
+
+                objPSM.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+
+                var strProtein = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders);
+                objPSM.AddProtein(strProtein);
+
+                objPSM.CollisionMode = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_FragMethod, mColumnHeaders, "n/a");
+
+                var precursorMZ = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                objPSM.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, objPSM.Charge, 0);
+
+                objPSM.MassErrorDa = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders);
+                objPSM.MassErrorPPM = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+
+                if (blnMSGFPlusResults)
+                {
+                    objPSM.MSGFSpecEValue = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders);
+                }
+                else
+                {
+                    objPSM.MSGFSpecEValue = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_MSGFDB_SpecProb, mColumnHeaders);
+                }
+
+                if (objPSM.MSGFSpecEValue.Length > 13)
+                {
+                    // Attempt to shorten the SpecEValue value
+                    if (double.TryParse(objPSM.MSGFSpecEValue, out var specEValue))
                     {
-                        UpdatePSMUsingSeqInfo(objPSM);
+                        objPSM.MSGFSpecEValue = specEValue.ToString("0.0000000E-00");
                     }
+                }
 
-                    // Store the remaining scores
-                    AddScore(objPSM, strColumns, DATA_COLUMN_DeNovoScore);
+                if (!fastReadMode)
+                {
+                    UpdatePSMUsingSeqInfo(objPSM);
+                }
 
-                    AddScore(objPSM, strColumns, DATA_COLUMN_MSGFScore);
+                // Store the remaining scores
+                AddScore(objPSM, strColumns, DATA_COLUMN_DeNovoScore);
 
-                    if (blnMSGFPlusResults)
+                AddScore(objPSM, strColumns, DATA_COLUMN_MSGFScore);
+
+                if (blnMSGFPlusResults)
+                {
+                    AddScore(objPSM, strColumns, DATA_COLUMN_MSGFPlus_SpecEValue);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_EValue);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_QValue);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_PepQValue);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_Isotope_Error);
+
+                    // Duplicate the score values to provide backwards compatibility
+                    if (objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out var strValue))
+                        objPSM.SetScore(DATA_COLUMN_MSGFDB_SpecProb, strValue);
+                    if (objPSM.TryGetScore(DATA_COLUMN_Rank_MSGFPlus_SpecEValue, out strValue))
+                        objPSM.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, strValue);
+                    if (objPSM.TryGetScore(DATA_COLUMN_QValue, out strValue))
+                        objPSM.SetScore(DATA_COLUMN_FDR, strValue);
+                    if (objPSM.TryGetScore(DATA_COLUMN_PepQValue, out strValue))
+                        objPSM.SetScore(DATA_COLUMN_PepFDR, strValue);
+
+                    var pValueStored = false;
+
+                    if (objPSM.TryGetScore(DATA_COLUMN_EValue, out var strEValue))
                     {
-                        AddScore(objPSM, strColumns, DATA_COLUMN_MSGFPlus_SpecEValue);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_EValue);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_QValue);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_PepQValue);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_Isotope_Error);
-
-                        // Duplicate the score values to provide backwards compatibility
-                        if (objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out var strValue))
-                            objPSM.SetScore(DATA_COLUMN_MSGFDB_SpecProb, strValue);
-                        if (objPSM.TryGetScore(DATA_COLUMN_Rank_MSGFPlus_SpecEValue, out strValue))
-                            objPSM.SetScore(DATA_COLUMN_Rank_MSGFDB_SpecProb, strValue);
-                        if (objPSM.TryGetScore(DATA_COLUMN_QValue, out strValue))
-                            objPSM.SetScore(DATA_COLUMN_FDR, strValue);
-                        if (objPSM.TryGetScore(DATA_COLUMN_PepQValue, out strValue))
-                            objPSM.SetScore(DATA_COLUMN_PepFDR, strValue);
-
-                        var blnPValueStored = false;
-
-                        if (objPSM.TryGetScore(DATA_COLUMN_EValue, out var strEValue))
+                        if (objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out var strSpecEValue))
                         {
-                            if (objPSM.TryGetScore(DATA_COLUMN_MSGFPlus_SpecEValue, out var strSpecEValue))
+                            // Compute PValue using EValue and SpecEValue
+                            if (double.TryParse(strEValue, out var eValue))
                             {
-                                // Compute PValue using EValue and SpecEValue
-                                if (double.TryParse(strEValue, out var dblEValue))
+                                if (double.TryParse(strSpecEValue, out var specEValue))
                                 {
-                                    if (double.TryParse(strSpecEValue, out var dblSpecEValue))
+                                    if (specEValue > 0)
                                     {
-                                        if (dblSpecEValue > 0)
+                                        var dblN = eValue / specEValue;
+                                        var pValue = 1 - Math.Pow(1 - specEValue, dblN);
+
+                                        if (Math.Abs(pValue) <= double.Epsilon)
                                         {
-                                            var dblN = dblEValue / dblSpecEValue;
-                                            var dblPValue = 1 - Math.Pow(1 - dblSpecEValue, dblN);
-
-                                            if (Math.Abs(dblPValue) <= double.Epsilon)
-                                            {
-                                                objPSM.SetScore(DATA_COLUMN_PValue, "0");
-                                            }
-                                            else
-                                            {
-                                                objPSM.SetScore(DATA_COLUMN_PValue, dblPValue.ToString("0.00000E-00"));
-                                            }
-
-                                            blnPValueStored = true;
+                                            objPSM.SetScore(DATA_COLUMN_PValue, "0");
                                         }
+                                        else
+                                        {
+                                            objPSM.SetScore(DATA_COLUMN_PValue, pValue.ToString("0.00000E-00"));
+                                        }
+
+                                        pValueStored = true;
                                     }
                                 }
                             }
+                        }
 
-                            if (!blnPValueStored)
-                            {
-                                // Store E-value as P-value (these values are not identical, and will only be close for high-confidence results, i.e. results with FDR < 2%)
-                                objPSM.SetScore(DATA_COLUMN_PValue, strEValue);
-                            }
+                        if (!pValueStored)
+                        {
+                            // Store E-value as P-value (these values are not identical, and will only be close for high-confidence results, i.e. results with FDR < 2%)
+                            objPSM.SetScore(DATA_COLUMN_PValue, strEValue);
                         }
                     }
-                    else
-                    {
-                        AddScore(objPSM, strColumns, DATA_COLUMN_MSGFDB_SpecProb);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_PValue);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_FDR);
-                        AddScore(objPSM, strColumns, DATA_COLUMN_PepFDR);
-                    }
-
-                    AddScore(objPSM, strColumns, DATA_COLUMN_EFDR);      // This column will not be present if a Target/Decoy (TDA) search was performed
-
-                    AddScore(objPSM, strColumns, DATA_COLUMN_IMS_Scan);
-
-                    AddScore(objPSM, strColumns, DATA_COLUMN_IMS_Drift_Time);
                 }
+                else
+                {
+                    AddScore(objPSM, strColumns, DATA_COLUMN_MSGFDB_SpecProb);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_Rank_MSGFDB_SpecProb);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_PValue);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_FDR);
+                    AddScore(objPSM, strColumns, DATA_COLUMN_PepFDR);
+                }
+
+                AddScore(objPSM, strColumns, DATA_COLUMN_EFDR); // This column will not be present if a Target/Decoy (TDA) search was performed
+
+                AddScore(objPSM, strColumns, DATA_COLUMN_IMS_Scan);
+
+                AddScore(objPSM, strColumns, DATA_COLUMN_IMS_Drift_Time);
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Error parsing line " + intLinesRead + " in the MSGFDB data file: " + ex.Message);
+                return false;
             }
 
-            return blnSuccess;
         }
 
         private bool UpdateMassCalculatorMasses(string strSearchEngineParamFileName)

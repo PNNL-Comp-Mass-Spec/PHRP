@@ -62,11 +62,17 @@
             set => mScanTypeName = string.IsNullOrEmpty(value) ? string.Empty : value;
         }
 
-        public clsScanStatsInfo(int intScanNumber, float sngScanTimeMinutes, int intScanType)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="scanNumber"></param>
+        /// <param name="scanTimeMinutes"></param>
+        /// <param name="scanType"></param>
+        public clsScanStatsInfo(int scanNumber, float scanTimeMinutes, int scanType)
         {
-            mScanNumber = intScanNumber;
-            ScanTimeMinutes = sngScanTimeMinutes;
-            ScanType = intScanType;
+            ScanNumber = scanNumber;
+            ScanTimeMinutes = scanTimeMinutes;
+            ScanType = scanType;
         }
     }
 }

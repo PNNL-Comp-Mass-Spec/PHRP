@@ -171,7 +171,7 @@ namespace PHRPReader
         {
             ChargeCarrierMass = MASS_PROTON;
             mErrorMessage = string.Empty;
-            mRemovePrefixAndSuffixIfPresent = true;
+            RemovePrefixAndSuffixIfPresent = true;
             InitializeAminoAcidData();
         }
 
@@ -187,8 +187,7 @@ namespace PHRPReader
 
             foreach (var element in empiricalFormula.ElementCounts)
             {
-                double elementMass = 0;
-                if (mElementMonoMasses.TryGetValue(element.Key, out elementMass))
+                if (mElementMonoMasses.TryGetValue(element.Key, out var elementMass))
                 {
                     monoisotopicMass += element.Value * elementMass;
                 }
@@ -216,8 +215,7 @@ namespace PHRPReader
 
             foreach (var elementItem in elementalComposition)
             {
-                double elementMass = 0;
-                if (mElementMonoMasses.TryGetValue(elementItem.Key, out elementMass))
+                if (mElementMonoMasses.TryGetValue(elementItem.Key, out var elementMass))
                 {
                     monoisotopicMass += elementItem.Value * elementMass;
                 }
@@ -244,7 +242,7 @@ namespace PHRPReader
             double dblMass = 0;
             short intValidResidueCount = 0;
 
-            if (mRemovePrefixAndSuffixIfPresent)
+            if (RemovePrefixAndSuffixIfPresent)
             {
                 if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, out strPrimarySequence, out _, out _))
                 {
@@ -274,11 +272,9 @@ namespace PHRPReader
                         dblMass = -1;
                         break;
                     }
-                    else
-                    {
-                        dblMass += mAminoAcidMasses[aminoAcidIndex];
-                        intValidResidueCount += 1;
-                    }
+
+                    dblMass += mAminoAcidMasses[aminoAcidIndex];
+                    intValidResidueCount += 1;
                 }
                 catch (Exception)
                 {
@@ -288,7 +284,7 @@ namespace PHRPReader
 
             if (intValidResidueCount > 0)
             {
-                dblMass += mPeptideNTerminusMass + mPeptideCTerminusMass;
+                dblMass += PeptideNTerminusMass + PeptideCTerminusMass;
             }
 
             return dblMass;
@@ -389,9 +385,9 @@ namespace PHRPReader
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         public double ComputeSequenceMassNumericMods(string strSequence)
         {
-            var strPrimarySequence = string.Empty;
+            string strPrimarySequence;
 
-            if (mRemovePrefixAndSuffixIfPresent)
+            if (RemovePrefixAndSuffixIfPresent)
             {
                 if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, out strPrimarySequence, out _, out _))
                 {
@@ -418,8 +414,7 @@ namespace PHRPReader
                 }
 
                 var strModMass = reMatch.ToString();
-                double dblModMass = 0;
-                if (double.TryParse(strModMass, out dblModMass))
+                if (double.TryParse(strModMass, out var dblModMass))
                 {
                     dblModMassTotal += dblModMass;
                 }
@@ -439,10 +434,8 @@ namespace PHRPReader
             {
                 return -1;
             }
-            else
-            {
-                return dblPeptideMass + dblModMassTotal;
-            }
+
+            return dblPeptideMass + dblModMassTotal;
         }
 
         private short ConvertAminoAcidCharToIndex(char aminoAcidSymbol)
@@ -479,7 +472,7 @@ namespace PHRPReader
         /// <remarks>To return the neutral mass, set intDesiredCharge to 0</remarks>
         public double ConvoluteMass(double dblMassMZ, int intCurrentCharge, int intDesiredCharge, double dblChargeCarrierMass)
         {
-            double dblNewMZ = 0;
+            double dblNewMZ;
 
             if (Math.Abs(dblChargeCarrierMass) < float.Epsilon)
             {
@@ -564,10 +557,8 @@ namespace PHRPReader
                         mErrorMessage = "Unknown symbol " + chAminoAcidSymbol + " in sequence " + strSequence;
                         break;
                     }
-                    else
-                    {
-                        empiricalFormula.AddElements(mAminoAcidEmpiricalFormulas[aminoAcidIndex]);
-                    }
+
+                    empiricalFormula.AddElements(mAminoAcidEmpiricalFormulas[aminoAcidIndex]);
                 }
                 catch (Exception)
                 {
@@ -588,7 +579,7 @@ namespace PHRPReader
         {
             // Returns the mass if success, 0 if an error
 
-            if (!(chAminoAcidSymbol == default(char)))
+            if (chAminoAcidSymbol != default(char))
             {
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
                 if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
@@ -596,10 +587,8 @@ namespace PHRPReader
                     // Invalid Index
                     return 0;
                 }
-                else
-                {
-                    return mAminoAcidMasses[aminoAcidIndex];
-                }
+
+                return mAminoAcidMasses[aminoAcidIndex];
             }
 
             return 0;
@@ -626,10 +615,8 @@ namespace PHRPReader
                 // Invalid Index
                 return new clsEmpiricalFormula();
             }
-            else
-            {
-                return mAminoAcidEmpiricalFormulas[aminoAcidIndex];
-            }
+
+            return mAminoAcidEmpiricalFormulas[aminoAcidIndex];
         }
 
         /// <summary>
@@ -683,7 +670,7 @@ namespace PHRPReader
             sbRegEx.Append(@")");
 
             // RegEx will be of the form: (?<ElementSymbol>H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al)(?<ElementCount>[+-]?\d*)
-            var reAtomicFormulaRegEx = new Regex(sbRegEx.ToString() + @"(?<ElementCount>[+-]?\d*)", REGEX_OPTIONS);
+            var reAtomicFormulaRegEx = new Regex(sbRegEx + @"(?<ElementCount>[+-]?\d*)", REGEX_OPTIONS);
 
             return reAtomicFormulaRegEx;
         }
@@ -693,7 +680,7 @@ namespace PHRPReader
             // These monoisotopic masses come from those traditionally used in DMS
             // They were originally assembled by Gordon Anderson for use in ICR-2LS
 
-            double monoMass = 0;
+            double monoMass;
 
             switch (aminoAcidSymbol)
             {
@@ -1001,8 +988,8 @@ namespace PHRPReader
         {
             // See comment in Sub InitializeAminoAcidData concerning these masses
 
-            mPeptideNTerminusMass = DEFAULT_N_TERMINUS_MASS_CHANGE;
-            mPeptideCTerminusMass = DEFAULT_C_TERMINUS_MASS_CHANGE;
+            PeptideNTerminusMass = DEFAULT_N_TERMINUS_MASS_CHANGE;
+            PeptideCTerminusMass = DEFAULT_C_TERMINUS_MASS_CHANGE;
         }
 
         /// <summary>
@@ -1039,11 +1026,9 @@ namespace PHRPReader
                 // Invalid Index
                 return false;
             }
-            else
-            {
-                mAminoAcidEmpiricalFormulas[aminoAcidIndex] = empiricalFormula;
-                return true;
-            }
+
+            mAminoAcidEmpiricalFormulas[aminoAcidIndex] = empiricalFormula;
+            return true;
         }
 
         /// <summary>
@@ -1055,7 +1040,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool SetAminoAcidMass(char chAminoAcidSymbol, double dblMass)
         {
-            if (!(chAminoAcidSymbol == default(char)))
+            if (chAminoAcidSymbol != default(char))
             {
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
                 if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
@@ -1063,11 +1048,9 @@ namespace PHRPReader
                     // Invalid Index
                     return false;
                 }
-                else
-                {
-                    mAminoAcidMasses[aminoAcidIndex] = dblMass;
-                    return true;
-                }
+
+                mAminoAcidMasses[aminoAcidIndex] = dblMass;
+                return true;
             }
 
             return false;
@@ -1083,8 +1066,7 @@ namespace PHRPReader
             // Use Convert.ToChar to convert from Ascii code to the letter
             var aminoAcidSymbol = ConvertAminoAcidIndexToChar(aminoAcidIndex);
 
-            clsEmpiricalFormula empiricalFormula = null;
-            var monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, out empiricalFormula);
+            var monoMass = GetDefaultAminoAcidMass(aminoAcidSymbol, out var empiricalFormula);
 
             mAminoAcidMasses[aminoAcidIndex] = monoMass;
             mAminoAcidEmpiricalFormulas[aminoAcidIndex] = empiricalFormula;

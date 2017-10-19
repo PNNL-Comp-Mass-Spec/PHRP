@@ -287,9 +287,12 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> Proteins => mProteins;
+        public IReadOnlyList<string> Proteins => mProteins;
 
-        public Dictionary<string, clsProteinInfo> ProteinDetails => mProteinDetails;
+        /// <summary>
+        /// Dictionary with info on each protein, including name, description, cleavage state, terminus state, residue start, and residue end
+        /// </summary>
+        public IReadOnlyDictionary<string, clsProteinInfo> ProteinDetails => mProteinDetails;
 
         /// <summary>
         /// ResultID of this peptide (typically assigned by the search engine)
@@ -327,8 +330,14 @@ namespace PHRPReader
             }
         }
 
+        /// <summary>
+        /// First scan number
+        /// </summary>
         public int ScanNumberStart => mScanList.Min;
 
+        /// <summary>
+        /// Last scan number
+        /// </summary>
         public int ScanNumberEnd => mScanList.Max;
 
         /// <summary>
@@ -361,9 +370,13 @@ namespace PHRPReader
             mProteinDetails = new Dictionary<string, clsProteinInfo>(StringComparer.CurrentCultureIgnoreCase);
             mModifiedPeptideResidues = new List<clsAminoAcidModInfo>();
             mAdditionalScores = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-            this.Clear();
+            Clear();
         }
 
+        /// <summary>
+        /// Add an additional scan number to associate with this PSM
+        /// </summary>
+        /// <param name="intScanNumber"></param>
         public void AddCombinedScan(int intScanNumber)
         {
             if (!mScanList.Contains(intScanNumber))
@@ -412,32 +425,50 @@ namespace PHRPReader
         /// <summary>
         /// Add a new protein to associate with this peptide
         /// </summary>
-        /// <param name="strProteinName"></param>
-        /// <remarks></remarks>
-        public void AddProtein(string strProteinName)
+        /// <param name="proteinName"></param>
+        /// <remarks>Does not update the ProteinDetails dictionary</remarks>
+        public void AddProtein(string proteinName)
         {
-            if (!string.IsNullOrWhiteSpace(strProteinName) && !mProteins.Contains(strProteinName))
+            if (!string.IsNullOrWhiteSpace(proteinName) && !mProteins.Contains(proteinName))
             {
-                mProteins.Add(strProteinName);
+                mProteins.Add(proteinName);
             }
         }
 
         /// <summary>
-        /// Add new detailed protein info for this peptide
+        /// Add detailed info of a protein associated with this peptide
         /// </summary>
-        /// <param name="oProteinInfo"></param>
-        /// <remarks></remarks>
-        public void AddProteinDetail(clsProteinInfo oProteinInfo)
+        /// <param name="proteinInfo"></param>
+        /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
+        public void AddProtein(clsProteinInfo proteinInfo)
         {
-            clsProteinInfo oCachedInfo = null;
-            if (mProteinDetails.TryGetValue(oProteinInfo.ProteinName, out oCachedInfo))
+            AddProteinDetail(proteinInfo);
+        }
+
+        /// <summary>
+        /// Add detailed info of a protein associated with this peptide
+        /// </summary>
+        /// <param name="proteinInfo"></param>
+        /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
+        public void AddProteinDetail(clsProteinInfo proteinInfo)
+        {
+
+            var proteinName = proteinInfo.ProteinName;
+
+            if (mProteinDetails.ContainsKey(proteinName))
             {
-                mProteinDetails[oProteinInfo.ProteinName] = oProteinInfo;
+                mProteinDetails[proteinName] = proteinInfo;
             }
             else
             {
-                mProteinDetails.Add(oProteinInfo.ProteinName, oProteinInfo);
+                mProteinDetails.Add(proteinName, proteinInfo);
             }
+
+            if (!mProteins.Contains(proteinName))
+            {
+                mProteins.Add(proteinName);
+            }
+
         }
 
         /// <summary>
@@ -479,6 +510,9 @@ namespace PHRPReader
             mAdditionalScores.Clear();
         }
 
+        /// <summary>
+        /// Clear any residue modifications
+        /// </summary>
         public void ClearModifiedResidues()
         {
             mModifiedPeptideResidues.Clear();
@@ -491,21 +525,22 @@ namespace PHRPReader
         /// <remarks></remarks>
         public clsPSM Clone()
         {
-            clsPSM objNew = null;
-
-            objNew = new clsPSM();
-
-            objNew.ResultID = ResultID;
-            objNew.ScoreRank = ScoreRank;
-            objNew.ScanNumber = mScanNumber;
-            objNew.ElutionTimeMinutes = ElutionTimeMinutes;
+            var objNew = new clsPSM
+            {
+                ResultID = ResultID,
+                ScoreRank = ScoreRank,
+                ScanNumber = mScanNumber,
+                ElutionTimeMinutes = ElutionTimeMinutes
+            };
 
             foreach (var intScanNumber in mScanList)
             {
                 objNew.AddCombinedScan(intScanNumber);
             }
 
-            objNew.SetPeptide(mPeptide);               // Note: this will auto-update mPeptideCleanSequence in objNew
+            // Note: this call will auto-update mPeptideCleanSequence in objNew
+            objNew.SetPeptide(mPeptide);
+
             objNew.PeptideWithNumericMods = mPeptideWithNumericMods;
             objNew.Charge = Charge;
             objNew.CollisionMode = CollisionMode;
@@ -519,9 +554,9 @@ namespace PHRPReader
             objNew.MassErrorDa = MassErrorDa;
             objNew.MassErrorPPM = MassErrorPPM;
 
-            foreach (var strProtein in mProteins)
+            foreach (var protein in mProteins)
             {
-                objNew.AddProtein(strProtein);
+                objNew.AddProtein(protein);
             }
 
             foreach (var item in mProteinDetails.Values)
@@ -542,197 +577,175 @@ namespace PHRPReader
             return objNew;
         }
 
+        /// <summary>
+        /// Update the clean sequence
+        /// </summary>
         public void UpdateCleanSequence()
         {
-            UpdateCleanSequence(mPeptide);
-        }
-
-        private void UpdateCleanSequence(string strPeptide)
-        {
-            if (string.IsNullOrEmpty(strPeptide))
+            if (string.IsNullOrEmpty(mPeptide))
             {
                 mPeptideCleanSequence = string.Empty;
             }
             else
             {
-                mPeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(strPeptide, true);
+                mPeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(mPeptide, true);
             }
         }
 
         /// <summary>
         /// Returns the value stored for the specified score
         /// </summary>
-        /// <param name="strScoreName">Score name</param>
+        /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise an empty string</returns>
-        public string GetScore(string strScoreName)
+        public string GetScore(string scoreName)
         {
-            var strScoreValue = string.Empty;
-            if (mAdditionalScores.TryGetValue(strScoreName, out strScoreValue))
+            if (mAdditionalScores.TryGetValue(scoreName, out var scoreValue))
             {
-                return strScoreValue;
+                return scoreValue;
             }
-            else
-            {
-                return string.Empty;
-            }
+
+            return string.Empty;
         }
 
         /// <summary>
         ///  Returns the value stored for the specified score (as a double)
         /// </summary>
-        /// <param name="strScoreName">Score name</param>
+        /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise 0</returns>
         /// <remarks></remarks>
-        public double GetScoreDbl(string strScoreName)
+        public double GetScoreDbl(string scoreName)
         {
-            return GetScoreDbl(strScoreName, 0);
+            return GetScoreDbl(scoreName, 0);
         }
 
         /// <summary>
         ///  Returns the value stored for the specified score (as a double)
         /// </summary>
-        /// <param name="strScoreName">Score name</param>
-        /// <param name="dblValueIfMissing">Value to return if the score is not defined</param>
+        /// <param name="scoreName">Score name</param>
+        /// <param name="valueIfMissing">Value to return if the score is not defined</param>
         /// <returns>Score if defined, otherwise dblValueIfMissing</returns>
         /// <remarks></remarks>
-        public double GetScoreDbl(string strScoreName, double dblValueIfMissing)
+        public double GetScoreDbl(string scoreName, double valueIfMissing)
         {
-            string strScoreValue = null;
-            double dblScore = 0;
-
-            strScoreValue = GetScore(strScoreName);
-            if (!string.IsNullOrEmpty(strScoreValue) && double.TryParse(strScoreValue, out dblScore))
+            var scoreValue = GetScore(scoreName);
+            if (!string.IsNullOrEmpty(scoreValue) && double.TryParse(scoreValue, out var dblScore))
             {
                 return dblScore;
             }
-            else
-            {
-                return dblValueIfMissing;
-            }
+
+            return valueIfMissing;
         }
 
         /// <summary>
         ///  Returns the value stored for the specified score (as an integer)
         /// </summary>
-        /// <param name="strScoreName">Score name</param>
+        /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise 0</returns>
         /// <remarks></remarks>
-        public int GetScoreInt(string strScoreName)
+        public int GetScoreInt(string scoreName)
         {
-            return GetScoreInt(strScoreName, 0);
+            return GetScoreInt(scoreName, 0);
         }
 
         /// <summary>
         ///  Returns the value stored for the specified score (as an integer)
         /// </summary>
-        /// <param name="strScoreName">Score name</param>
+        /// <param name="scoreName">Score name</param>
         /// <param name="intValueIfMissing">Value to return if the score is not defined</param>
         /// <returns>Score if defined, otherwise intValueIfMissing</returns>
         /// <remarks></remarks>
-        public int GetScoreInt(string strScoreName, int intValueIfMissing)
+        public int GetScoreInt(string scoreName, int intValueIfMissing)
         {
-            string strScoreValue = null;
-            var intScore = 0;
-
-            strScoreValue = GetScore(strScoreName);
-            if (!string.IsNullOrEmpty(strScoreValue) && int.TryParse(strScoreValue, out intScore))
+            var scoreValue = GetScore(scoreName);
+            if (!string.IsNullOrEmpty(scoreValue) && int.TryParse(scoreValue, out var intScore))
             {
                 return intScore;
             }
-            else
-            {
-                return intValueIfMissing;
-            }
-        }
 
-        public void SetPeptide(string strPeptide)
-        {
-            SetPeptide(strPeptide, blnUpdateCleanSequence: true);
+            return intValueIfMissing;
         }
 
         /// <summary>
-        /// Update the peptide sequence, auto-determining the clean sequence if blnUpdateCleanSequence is true
+        /// Update the peptide sequence, auto-determining the clean sequence if updateCleanSequence is true
         /// </summary>
-        /// <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
-        /// <param name="blnUpdateCleanSequence"></param>
-        /// <remarks>Does not update the cleavage state info.  If blnUpdateCleanSequence is false, then call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
-        public void SetPeptide(string strPeptide, bool blnUpdateCleanSequence)
+        /// <param name="peptideSequence">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
+        /// <param name="updateCleanSequence"></param>
+        /// <remarks>Does not update the cleavage state info.  If updateCleanSequence is false, then call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
+        public void SetPeptide(string peptideSequence, bool updateCleanSequence = true)
         {
-            if (string.IsNullOrEmpty(strPeptide))
+            if (string.IsNullOrEmpty(peptideSequence))
             {
                 mPeptide = string.Empty;
             }
             else
             {
-                mPeptide = strPeptide;
+                mPeptide = peptideSequence;
             }
 
-            if (blnUpdateCleanSequence)
+            if (updateCleanSequence)
             {
-                UpdateCleanSequence(mPeptide);
+                UpdateCleanSequence();
             }
         }
 
         /// <summary>
         /// Update the peptide sequence (auto-determines the clean sequence); also auto-update the the cleavage state info
         /// </summary>
-        /// <param name="strPeptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
-        /// <param name="objCleavageStateCalculator">Cleavage state calculator object</param>
+        /// <param name="peptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
+        /// <param name="cleavageStateCalculator">Cleavage state calculator object</param>
         /// <remarks></remarks>
-        public void SetPeptide(string strPeptide, clsPeptideCleavageStateCalculator objCleavageStateCalculator)
+        public void SetPeptide(string peptide, clsPeptideCleavageStateCalculator cleavageStateCalculator)
         {
-            SetPeptide(strPeptide);
-            UpdateCleavageInfo(objCleavageStateCalculator);
+            SetPeptide(peptide);
+            UpdateCleavageInfo(cleavageStateCalculator);
         }
 
         /// <summary>
         /// Add/update an additional score to associate with this peptide
         /// </summary>
-        /// <param name="strScoreName"></param>
-        /// <param name="strScoreValue"></param>
+        /// <param name="scoreName"></param>
+        /// <param name="scoreValue"></param>
         /// <remarks></remarks>
-        public void SetScore(string strScoreName, string strScoreValue)
+        public void SetScore(string scoreName, string scoreValue)
         {
-            if (mAdditionalScores.ContainsKey(strScoreName))
+            if (mAdditionalScores.ContainsKey(scoreName))
             {
-                mAdditionalScores[strScoreName] = strScoreValue;
+                mAdditionalScores[scoreName] = scoreValue;
             }
             else
             {
-                mAdditionalScores.Add(strScoreName, strScoreValue);
+                mAdditionalScores.Add(scoreName, scoreValue);
             }
         }
 
         /// <summary>
         /// Returns the value stored for the specified score
         /// </summary>
-        /// <param name="strScoreName"></param>
-        /// <param name="strScoreValue"></param>
+        /// <param name="scoreName"></param>
+        /// <param name="scoreValue"></param>
         /// <returns>True if the score is defined, otherwise false</returns>
         /// <remarks></remarks>
-        public bool TryGetScore(string strScoreName, out string strScoreValue)
+        public bool TryGetScore(string scoreName, out string scoreValue)
         {
-            strScoreValue = string.Empty;
-            if (mAdditionalScores.TryGetValue(strScoreName, out strScoreValue))
+            scoreValue = string.Empty;
+            if (mAdditionalScores.TryGetValue(scoreName, out scoreValue))
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
         /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic terminii based on the peptide sequence
         /// </summary>
-        /// <param name="objCleavageStateCalculator"></param>
+        /// <param name="cleavageStateCalculator"></param>
         /// <remarks></remarks>
-        public void UpdateCleavageInfo(clsPeptideCleavageStateCalculator objCleavageStateCalculator)
+        public void UpdateCleavageInfo(clsPeptideCleavageStateCalculator cleavageStateCalculator)
         {
-            NumMissedCleavages = objCleavageStateCalculator.ComputeNumberOfMissedCleavages(mPeptide);
+            NumMissedCleavages = cleavageStateCalculator.ComputeNumberOfMissedCleavages(mPeptide);
 
-            CleavageState = objCleavageStateCalculator.ComputeCleavageState(mPeptide);
+            CleavageState = cleavageStateCalculator.ComputeCleavageState(mPeptide);
 
             if (CleavageState == clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)
             {

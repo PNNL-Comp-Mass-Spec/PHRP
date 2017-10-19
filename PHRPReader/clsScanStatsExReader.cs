@@ -62,10 +62,8 @@ namespace PHRPReader
                 {
                     return string.Empty;
                 }
-                else
-                {
-                    return mErrorMessage;
-                }
+
+                return mErrorMessage;
             }
         }
 
@@ -117,79 +115,70 @@ namespace PHRPReader
         /// <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
         public Dictionary<int, clsScanStatsExInfo> ReadExtendedScanStatsData(string strInputFilePath)
         {
-            var lstScanStats = default(Dictionary<int, clsScanStatsExInfo>);
-            lstScanStats = new Dictionary<int, clsScanStatsExInfo>();
-
-            string strLineIn = null;
-            string[] strSplitLine = null;
-            var blnHeaderLineParsed = false;
-            var blnSkipLine = false;
-
-            var intLinesRead = 0;
-            var intScanNumber = 0;
+            var lstScanStats = new Dictionary<int, clsScanStatsExInfo>();
 
             try
             {
                 DefineColumnHeaders();
-                intLinesRead = 0;
                 mErrorMessage = string.Empty;
 
                 using (var srInFile = new StreamReader(new FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
+                    var blnHeaderLineParsed = false;
+
                     while (!srInFile.EndOfStream)
                     {
-                        strLineIn = srInFile.ReadLine();
-                        intLinesRead += 1;
-                        blnSkipLine = false;
+                        var strLineIn = srInFile.ReadLine();
+                        var blnSkipLine = false;
 
-                        if (!string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(strLineIn))
+                            continue;
+
+                        var strSplitLine = strLineIn.Split('\t');
+
+                        if (!blnHeaderLineParsed)
                         {
-                            strSplitLine = strLineIn.Split('\t');
-
-                            if (!blnHeaderLineParsed)
+                            if (!clsPHRPReader.IsNumber(strSplitLine[0]))
                             {
-                                if (!clsPHRPReader.IsNumber(strSplitLine[0]))
-                                {
-                                    // Parse the header line to confirm the column ordering
-                                    clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders);
-                                    blnSkipLine = true;
-                                }
-
-                                blnHeaderLineParsed = true;
+                                // Parse the header line to confirm the column ordering
+                                clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders);
+                                blnSkipLine = true;
                             }
 
-                            if (!blnSkipLine && strSplitLine.Length >= 4)
-                            {
-                                intScanNumber = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
-
-                                if (intScanNumber >= 0 && !lstScanStats.ContainsKey(intScanNumber))
-                                {
-                                    var objScanStatsInfo = default(clsScanStatsExInfo);
-                                    objScanStatsInfo = new clsScanStatsExInfo(intScanNumber);
-
-                                    objScanStatsInfo.IonInjectionTime = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_IonInjectionTime, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.ScanEvent = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanEvent, mColumnHeaders, 0);
-                                    objScanStatsInfo.MasterIndex = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_MasterIndex, mColumnHeaders, 0);
-                                    objScanStatsInfo.ElapsedScanTime = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ElapsedScanTime, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.ChargeState = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ChargeState, mColumnHeaders, 0);
-                                    objScanStatsInfo.MonoisotopicMZ = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_MonoisotopicMZ, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.MS2IsolationWidth = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_MS2IsolationWidth, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.FTAnalyzerSettings = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_FTAnalyzerSettings, mColumnHeaders);
-                                    objScanStatsInfo.FTAnalyzerMessage = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_FTAnalyzerMessage, mColumnHeaders);
-                                    objScanStatsInfo.FTResolution = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_FTResolution, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.ConversionParameterB = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ConversionParameterB, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.ConversionParameterC = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ConversionParameterC, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.ConversionParameterD = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ConversionParameterD, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.ConversionParameterE = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ConversionParameterE, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.CollisionMode = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_CollisionMode, mColumnHeaders);
-                                    objScanStatsInfo.ScanFilterText = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanFilterText, mColumnHeaders);
-                                    objScanStatsInfo.SourceVoltage = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SourceVoltage, mColumnHeaders, 0.0);
-                                    objScanStatsInfo.Source_Current = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_Source_Current, mColumnHeaders, 0.0);
-
-                                    lstScanStats.Add(intScanNumber, objScanStatsInfo);
-                                }
-                            }
+                            blnHeaderLineParsed = true;
                         }
+
+                        if (blnSkipLine || strSplitLine.Length < 4)
+                            continue;
+
+                        var intScanNumber = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
+
+                        if (intScanNumber < 0 || lstScanStats.ContainsKey(intScanNumber))
+                            continue;
+
+                        var objScanStatsInfo = new clsScanStatsExInfo(intScanNumber)
+                        {
+                            IonInjectionTime = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_IonInjectionTime, mColumnHeaders, 0.0),
+                            ScanEvent = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanEvent, mColumnHeaders, 0),
+                            MasterIndex = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_MasterIndex, mColumnHeaders, 0),
+                            ElapsedScanTime = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ElapsedScanTime, mColumnHeaders, 0.0),
+                            ChargeState = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ChargeState, mColumnHeaders, 0),
+                            MonoisotopicMZ = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_MonoisotopicMZ, mColumnHeaders, 0.0),
+                            MS2IsolationWidth = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_MS2IsolationWidth, mColumnHeaders, 0.0),
+                            FTAnalyzerSettings = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_FTAnalyzerSettings, mColumnHeaders),
+                            FTAnalyzerMessage = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_FTAnalyzerMessage, mColumnHeaders),
+                            FTResolution = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_FTResolution, mColumnHeaders, 0.0),
+                            ConversionParameterB = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ConversionParameterB, mColumnHeaders, 0.0),
+                            ConversionParameterC = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ConversionParameterC, mColumnHeaders, 0.0),
+                            ConversionParameterD = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ConversionParameterD, mColumnHeaders, 0.0),
+                            ConversionParameterE = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ConversionParameterE, mColumnHeaders, 0.0),
+                            CollisionMode = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_CollisionMode, mColumnHeaders),
+                            ScanFilterText = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ScanFilterText, mColumnHeaders),
+                            SourceVoltage = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SourceVoltage, mColumnHeaders, 0.0),
+                            Source_Current = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_Source_Current, mColumnHeaders, 0.0)
+                        };
+
+                        lstScanStats.Add(intScanNumber, objScanStatsInfo);
                     }
                 }
             }

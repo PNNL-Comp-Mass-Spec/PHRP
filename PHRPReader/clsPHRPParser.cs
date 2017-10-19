@@ -247,12 +247,12 @@ namespace PHRPReader
         /// <summary>
         /// Initialize the parser for the given dataset, input file, and result type
         /// </summary>
-        /// <param name="strDatasetName">Dataset Name</param>
+        /// <param name="datasetName">Dataset Name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-        protected clsPHRPParser(string strDatasetName, string strInputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
+        protected clsPHRPParser(string datasetName, string strInputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
             bool blnLoadModsAndSeqInfo)
         {
             mErrorMessages = new List<string>();
@@ -266,18 +266,18 @@ namespace PHRPReader
 
             var startupOptions = new clsPHRPStartupOptions {LoadModsAndSeqInfo = blnLoadModsAndSeqInfo};
 
-            InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions);
+            InitializeParser(datasetName, strInputFilePath, ePeptideHitResultType, startupOptions);
         }
 
         /// <summary>
         /// Initialize the parser for the given dataset, input file, and result type
         /// </summary>
-        /// <param name="strDatasetName">Dataset name</param>
+        /// <param name="datasetName">Dataset name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <param name="ePeptideHitResultType"></param>
-        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
+        /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks>If strInputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-        protected clsPHRPParser(string strDatasetName, string strInputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, clsPHRPStartupOptions startupOptions)
+        protected clsPHRPParser(string datasetName, string strInputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, clsPHRPStartupOptions startupOptions)
         {
             mErrorMessages = new List<string>();
             mWarningMessages = new List<string>();
@@ -288,13 +288,13 @@ namespace PHRPReader
 
             mPeptideMassCalculator = startupOptions.PeptideMassCalculator ?? new clsPeptideMassCalculator();
 
-            InitializeParser(strDatasetName, strInputFilePath, ePeptideHitResultType, startupOptions);
+            InitializeParser(datasetName, strInputFilePath, ePeptideHitResultType, startupOptions);
         }
 
         /// <summary>
         /// Initialize the parser for the given dataset and input file
         /// </summary>
-        /// <param name="strDatasetName">Dataset Name</param>
+        /// <param name="datasetName">Dataset Name</param>
         /// <param name="strInputFilePath">Input file path</param>
         /// <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="startupOptions">Startup options</param>
@@ -302,15 +302,16 @@ namespace PHRPReader
         /// startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
         /// Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
         /// </remarks>
-        private void InitializeParser(string strDatasetName, string strInputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, clsPHRPStartupOptions startupOptions)
+        private void InitializeParser(string datasetName, string strInputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, clsPHRPStartupOptions startupOptions)
         {
-            if (string.IsNullOrWhiteSpace(strDatasetName))
-                strDatasetName = "Undefined";
-            mDatasetName = strDatasetName;
+            if (string.IsNullOrWhiteSpace(datasetName))
+                datasetName = "Undefined";
+
+            mDatasetName = datasetName;
 
             mPeptideHitResultType = ePeptideHitResultType;
 
-            mMaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM;
+            MaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM;
 
             var blnIsSynopsisFile = false;
 
@@ -429,23 +430,23 @@ namespace PHRPReader
                 throw new Exception("Unable to auto-determine the PeptideHitResultType for " + strInputFilePath);
             }
 
-            var strDatasetName = clsPHRPReader.AutoDetermineDatasetName(strInputFilePath);
-            if (string.IsNullOrEmpty(strDatasetName))
+            var datasetName = clsPHRPReader.AutoDetermineDatasetName(strInputFilePath);
+            if (string.IsNullOrEmpty(datasetName))
             {
                 throw new Exception("Unable to auto-determine the Dataset Name for " + strInputFilePath);
             }
 
-            return GetParser(strInputFilePath, strDatasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo);
+            return GetParser(strInputFilePath, datasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo);
         }
 
         /// <summary>
         /// Returns the appropriate PHRPParser class based on the input file name
         /// </summary>
         /// <param name="strInputFilePath">Input file path</param>
-        /// ''' <param name="strDatasetName">Dataset Name</param>
+        /// ''' <param name="datasetName">Dataset Name</param>
         /// <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type from strInputFilePath</remarks>
-        public static clsPHRPParser GetParser(string strInputFilePath, string strDatasetName, bool blnLoadModsAndSeqInfo)
+        public static clsPHRPParser GetParser(string strInputFilePath, string datasetName, bool blnLoadModsAndSeqInfo)
         {
             var ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strInputFilePath);
 
@@ -454,42 +455,42 @@ namespace PHRPReader
                 throw new Exception("Unable to auto-determine the PeptideHitResultType for " + strInputFilePath);
             }
 
-            return GetParser(strInputFilePath, strDatasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo);
+            return GetParser(strInputFilePath, datasetName, ePeptideHitResultType, blnLoadModsAndSeqInfo);
         }
 
         /// <summary>
         /// Returns the appropriate PHRPParser class based on ePeptideHitResultType
         /// </summary>
         /// <param name="strInputFilePath">Input file path</param>
-        /// <param name="strDatasetName">Dataset Name</param>
+        /// <param name="datasetName">Dataset Name</param>
         /// <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="blnLoadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks></remarks>
-        public static clsPHRPParser GetParser(string strInputFilePath, string strDatasetName, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
+        public static clsPHRPParser GetParser(string strInputFilePath, string datasetName, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
             bool blnLoadModsAndSeqInfo)
         {
             switch (ePeptideHitResultType)
             {
                 case clsPHRPReader.ePeptideHitResultType.Inspect:
-                    return new clsPHRPParserInspect(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo);
+                    return new clsPHRPParserInspect(datasetName, strInputFilePath, blnLoadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.MSAlign:
-                    return new clsPHRPParserMSAlign(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo);
+                    return new clsPHRPParserMSAlign(datasetName, strInputFilePath, blnLoadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.MSGFDB:
-                    return new clsPHRPParserMSGFDB(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo);
+                    return new clsPHRPParserMSGFDB(datasetName, strInputFilePath, blnLoadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.Sequest:
-                    return new clsPHRPParserSequest(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo);
+                    return new clsPHRPParserSequest(datasetName, strInputFilePath, blnLoadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.XTandem:
-                    return new clsPHRPParserXTandem(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo);
+                    return new clsPHRPParserXTandem(datasetName, strInputFilePath, blnLoadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.MODa:
-                    return new clsPHRPParserMODa(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo);
+                    return new clsPHRPParserMODa(datasetName, strInputFilePath, blnLoadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.MODPlus:
-                    return new clsPHRPParserMODPlus(strDatasetName, strInputFilePath, blnLoadModsAndSeqInfo);
+                    return new clsPHRPParserMODPlus(datasetName, strInputFilePath, blnLoadModsAndSeqInfo);
 
                 default:
                     throw new Exception("Unrecognized value for PeptideHitResultType: " + ePeptideHitResultType.ToString());
@@ -498,6 +499,9 @@ namespace PHRPReader
 
         #region "Functions overridden by derived classes"
 
+        /// <summary>
+        /// Define column header names
+        /// </summary>
         protected abstract void DefineColumnHeaders();
 
         /// <summary>
@@ -535,11 +539,21 @@ namespace PHRPReader
 
         #endregion
 
+        /// <summary>
+        /// Add a header column
+        /// </summary>
+        /// <param name="strColumnName"></param>
         protected void AddHeaderColumn(string strColumnName)
         {
             mColumnHeaders.Add(strColumnName, mColumnHeaders.Count);
         }
 
+        /// <summary>
+        /// Add a score to a PSM
+        /// </summary>
+        /// <param name="objPSM"></param>
+        /// <param name="strColumns"></param>
+        /// <param name="strScoreColumnName"></param>
         protected void AddScore(clsPSM objPSM, string[] strColumns, string strScoreColumnName)
         {
             const string NOT_FOUND = "==SCORE_NOT_FOUND==";
@@ -667,6 +681,10 @@ namespace PHRPReader
             return lstAmbiguousMods;
         }
 
+        /// <summary>
+        /// Finalize the PSM by updating the clean sequence, updating mod info, and updating the sequence info
+        /// </summary>
+        /// <param name="objPSM"></param>
         public void FinalizePSM(clsPSM objPSM)
         {
             objPSM.UpdateCleanSequence();
@@ -707,6 +725,11 @@ namespace PHRPReader
             return kvSetting;
         }
 
+        /// <summary>
+        /// Report an exception as an error
+        /// </summary>
+        /// <param name="strBaseMessage"></param>
+        /// <param name="ex"></param>
         protected void HandleException(string strBaseMessage, Exception ex)
         {
             if (string.IsNullOrEmpty(strBaseMessage))
@@ -807,7 +830,7 @@ namespace PHRPReader
                 var objReader =
                     new clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType, mInputFilePath)
                     {
-                        MaxProteinsPerSeqID = mMaxProteinsPerPSM
+                        MaxProteinsPerSeqID = MaxProteinsPerPSM
                     };
 
 
@@ -846,10 +869,10 @@ namespace PHRPReader
                             lstProteinsForResultID = new List<string>();
                         }
 
-                        if (mMaxProteinsPerPSM > 0 && lstProteinsForResultID.Count > mMaxProteinsPerPSM)
+                        if (MaxProteinsPerPSM > 0 && lstProteinsForResultID.Count > MaxProteinsPerPSM)
                         {
                             // Only add a subset of the proteins in lstProteinsForResultID
-                            var lstProteinSubset = lstProteinsForResultID.Take(mMaxProteinsPerPSM).OrderBy(item => item).ToList();
+                            var lstProteinSubset = lstProteinsForResultID.Take(MaxProteinsPerPSM).OrderBy(item => item).ToList();
                             mResultIDToProteins.Add(objItem.Key, lstProteinSubset);
                         }
                         else
@@ -1099,6 +1122,12 @@ namespace PHRPReader
             }
         }
 
+        /// <summary>
+        /// Determine the search engine version using a Tool_Version_Info file
+        /// </summary>
+        /// <param name="ePeptideHitResultType"></param>
+        /// <param name="objSearchEngineParams"></param>
+        /// <returns></returns>
         protected bool ReadSearchEngineVersion(
             clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
             clsSearchEngineParameters objSearchEngineParams)
@@ -1170,9 +1199,6 @@ namespace PHRPReader
                                     }
                                 }
                                 break;
-                            default:
-                                // Ignore the line
-                                break;
                         }
                     }
                 }
@@ -1203,6 +1229,10 @@ namespace PHRPReader
 
         }
 
+        /// <summary>
+        /// Repor an error
+        /// </summary>
+        /// <param name="message"></param>
         protected void ReportError(string message)
         {
             mErrorMessage = message;
@@ -1210,12 +1240,20 @@ namespace PHRPReader
             OnErrorEvent(message);
         }
 
+        /// <summary>
+        /// Report a warning
+        /// </summary>
+        /// <param name="message"></param>
         protected void ReportWarning(string message)
         {
             mWarningMessages.Add(message);
             OnWarningEvent(message);
         }
 
+        /// <summary>
+        /// Report a status message
+        /// </summary>
+        /// <param name="message"></param>
         protected void ShowMessage(string message)
         {
             OnStatusEvent(message);
@@ -1376,9 +1414,9 @@ namespace PHRPReader
                     // Lookup the protein details using mSeqToProteinMap
                     if (mSeqToProteinMap.TryGetValue(intSeqID, out var lstProteinDetails))
                     {
-                        foreach (var oProtein in lstProteinDetails)
+                        foreach (var protein in lstProteinDetails)
                         {
-                            objPSM.AddProteinDetail(oProtein);
+                            objPSM.AddProteinDetail(protein);
                         }
                     }
 
@@ -1387,43 +1425,14 @@ namespace PHRPReader
 
                     foreach (var proteinName in addnlProteins1)
                     {
-                        if (mMaxProteinsPerPSM > 0 && objPSM.ProteinDetails.Count > mMaxProteinsPerPSM)
+                        if (MaxProteinsPerPSM > 0 && objPSM.ProteinDetails.Count > MaxProteinsPerPSM)
                         {
                             // Maximum number of proteins reached (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
                             break;
                         }
 
-                        var oProtein = new clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None);
-                        objPSM.ProteinDetails.Add(proteinName, oProtein);
-                    }
-
-                    // Make sure all of the proteins in objPSM.ProteinDetails are defined in objPSM.Proteins
-                    var addnlProteins2 = (from item in objPSM.ProteinDetails select item.Key).Except(objPSM.Proteins, StringComparer.CurrentCultureIgnoreCase).ToList();
-
-                    var additionThresholdCheck = mMaxProteinsPerPSM;
-                    if (additionThresholdCheck < int.MaxValue)
-                    {
-                        additionThresholdCheck += 1;
-                    }
-
-                    if (mMaxProteinsPerPSM > 0 && objPSM.Proteins.Count + addnlProteins2.Count > additionThresholdCheck)
-                    {
-                        // Maximum number of proteins will be reached; only add a subset of the proteins in addnlProteins2
-                        // (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
-
-                        foreach (var oProtein in addnlProteins2)
-                        {
-                            if (mMaxProteinsPerPSM > 0 && objPSM.Proteins.Count >= mMaxProteinsPerPSM)
-                            {
-                                // Maximum number of proteins reached
-                                break;
-                            }
-                            objPSM.Proteins.Add(oProtein);
-                        }
-                    }
-                    else
-                    {
-                        objPSM.Proteins.AddRange(addnlProteins2);
+                        var proteinInfo = new clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None);
+                        objPSM.AddProtein(proteinInfo);
                     }
 
                     if (mPepToProteinMap.Count > 0)
