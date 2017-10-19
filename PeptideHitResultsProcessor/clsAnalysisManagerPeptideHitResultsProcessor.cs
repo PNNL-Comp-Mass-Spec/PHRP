@@ -7,7 +7,6 @@
 // Started January 6, 2006
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -23,9 +22,6 @@ namespace PeptideHitResultsProcessor
         #region "Classwide variables"
 
         private clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
-
-        [Obsolete("Unused")]
-        private Dictionary<string, string> m_MiscParams;
 
         private string m_ParameterFilePath = string.Empty;      // Peptide search tool parameter file path
         private string m_SettingsFilePath = string.Empty;       // XML settings file with section PeptideHitResultsProcessorOptions
@@ -46,38 +42,8 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Properties"
-        public override string AnalysisToolName { get; set; }
-
-        public override bool CreateInspectFirstHitsFile { get; set; }
-
-        public override bool CreateInspectSynopsisFile { get; set; }
-
-        public override string DatasetName { get; set; }
-
-        public override int DebugLevel { get; set; }
 
         public override string ErrMsg => m_ErrMsg;
-
-        public override string MassCorrectionTagsFileName { get; set; }
-
-        [Obsolete("Unused")]
-        public override Dictionary<string, string> MiscParams
-        {
-            get => m_MiscParams;
-            set => m_MiscParams = value;
-        }
-
-        public override string ModificationDefinitionsFileName { get; set; }
-
-        public override string OutputFolderPath { get; set; }
-
-        /// <summary>
-        /// Peptide search tool parameter file name
-        /// </summary>
-        /// <returns></returns>
-        public override string ParameterFileName { get; set; }
-
-        public override string PeptideHitResultsFileName { get; set; }
 
         public override float PercentComplete
         {
@@ -90,14 +56,6 @@ namespace PeptideHitResultsProcessor
                 return 0;
             }
         }
-
-        /// <summary>
-        /// XML settings file with section PeptideHitResultsProcessorOptions
-        /// </summary>
-        /// <returns></returns>
-        public override string SettingsFileName { get; set; }
-
-        public override string SourceFolderPath { get; set; }
 
         public override ProcessStatus Status => m_Status;
 

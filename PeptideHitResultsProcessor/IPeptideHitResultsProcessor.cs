@@ -50,27 +50,37 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Properties"
-        public abstract string SourceFolderPath { get; set; } // (in) - path to folder containing the peptide hit results file
-        public abstract string OutputFolderPath { get; set; } // (in) - path to folder where processed file is to be placed
-        public abstract string PeptideHitResultsFileName { get; set; } // (in) - Filename containing the peptide hit results; See comment for PeptideHitResultsFileName in Structure InitializationParams above
-        public abstract string MassCorrectionTagsFileName { get; set; } // (in) - Filename containing the global mass correction tags list; See comment for PeptideHitResultsFileName in Structure InitializationParams above
-        public abstract string ModificationDefinitionsFileName { get; set; } // (in) - Filename containing modification definitions for this peptide hit results file; See comment for PeptideHitResultsFileName in Structure InitializationParams above
+        public virtual string SourceFolderPath { get; set; } // (in) - path to folder containing the peptide hit results file
+        public virtual string OutputFolderPath { get; set; } // (in) - path to folder where processed file is to be placed
+        public virtual string PeptideHitResultsFileName { get; set; } // (in) - Filename containing the peptide hit results; See comment for PeptideHitResultsFileName in Structure InitializationParams above
+        public virtual string MassCorrectionTagsFileName { get; set; } // (in) - Filename containing the global mass correction tags list; See comment for PeptideHitResultsFileName in Structure InitializationParams above
+        public virtual string ModificationDefinitionsFileName { get; set; } // (in) - Filename containing modification definitions for this peptide hit results file; See comment for PeptideHitResultsFileName in Structure InitializationParams above
 
-        public abstract string AnalysisToolName { get; set; }
-        public abstract string DatasetName { get; set; }
-        public abstract string ParameterFileName { get; set; }
-        public abstract string SettingsFileName { get; set; }
+        public virtual string AnalysisToolName { get; set; }
+        public virtual string DatasetName { get; set; }
 
-        public abstract bool CreateInspectSynopsisFile { get; set; }
-        public abstract bool CreateInspectFirstHitsFile { get; set; }
+        /// <summary>
+        /// Peptide search tool parameter file name
+        /// </summary>
+        /// <returns></returns>
+        public virtual string ParameterFileName { get; set; }
+
+        /// <summary>
+        /// XML settings file with section PeptideHitResultsProcessorOptions
+        /// </summary>
+        /// <returns></returns>
+        public virtual string SettingsFileName { get; set; }
+
+        public virtual bool CreateInspectSynopsisFile { get; set; }
+        public virtual bool CreateInspectFirstHitsFile { get; set; }
 
         [Obsolete("Unused")]
-        public abstract Dictionary<string, string> MiscParams { get; set; }    //For passing miscelleneous parameters (not presently used)
+        public virtual Dictionary<string, string> MiscParams { get; set; }    //For passing miscelleneous parameters (not presently used)
         public abstract ProcessStatus Status { get; } //Allows calling program to get current status
         public abstract ProcessResults Results { get; }  //Allows calling program to determine if processing succeeded
         public abstract string ErrMsg { get; }  //Error message describing any errors encountered
         public abstract float PercentComplete { get; }   // Progress indicator, value between 0 and 100
-        public abstract int DebugLevel { get; set; } //Allows control of debug information verbosity; 0=minimum, 5=maximum verbosity
+        public virtual int DebugLevel { get; set; } //Allows control of debug information verbosity; 0=minimum, 5=maximum verbosity
 
         #endregion
 
