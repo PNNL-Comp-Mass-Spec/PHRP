@@ -1027,11 +1027,11 @@ namespace PeptideHitResultsProcessor
                     {
                         // Compute DelM and DelM_PPM
                         var dblDelM = dblPrecursorMonoMass - dblPeptideMonoMassMODPlus;
-                        udtSearchResult.DelM = PRISM.StringUtilities.DblToString(dblDelM, 6);
+                        udtSearchResult.DelM = MassErrorToString(dblDelM);
 
                         var dblPeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, true, dblPeptideMonoMassMODPlus);
 
-                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(dblPeptideDeltaMassCorrectedPpm, 5);
+                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(dblPeptideDeltaMassCorrectedPpm, 5, 0.00005);
                     }
 
                     // Store the monoisotopic MH value in .MH; note that this is (M+H)+
@@ -1781,7 +1781,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Score,
                     udtSearchResult.Probability,
                     udtSearchResult.RankScore.ToString(),
-                    udtSearchResult.QValue.ToString("0.000000")
+                    PRISM.StringUtilities.DblToString(udtSearchResult.QValue, 5, 0.00005)
                 };
 
                 swResultFile.WriteLine(CollapseList(lstData));

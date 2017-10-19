@@ -1306,7 +1306,7 @@ namespace PeptideHitResultsProcessor
 
                             var dblPeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(dblPrecursorErrorDa, dblPrecursorMonoMass, dblPeptideMonoisotopicMass, true);
 
-                            udtSearchResult.DelMPPM = PRISM.StringUtilities.DblToString(dblPeptideDeltaMassCorrectedPpm, 4);
+                            udtSearchResult.DelMPPM = PRISM.StringUtilities.DblToString(dblPeptideDeltaMassCorrectedPpm, 5, 0.00005);
                         }
                     }
                     else

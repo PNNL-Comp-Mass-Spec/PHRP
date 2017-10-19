@@ -1818,6 +1818,16 @@ namespace PeptideHitResultsProcessor
             return blnSuccess;
         }
 
+        protected string MassErrorToString(double massErrorDa)
+        {
+            if (Math.Abs(massErrorDa) < 0.000001)
+                return "0";
+
+            return Math.Abs(massErrorDa) < 0.0001 ?
+                PRISM.StringUtilities.DblToString(massErrorDa, 6, 0.0000001) :
+                PRISM.StringUtilities.DblToString(massErrorDa, 5, 0.000001);
+        }
+
         protected void OperationComplete()
         {
             ProgressComplete?.Invoke();

@@ -1871,9 +1871,9 @@ namespace PeptideHitResultsProcessor
                             {
                                 dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPMErrorPPM, dblPeptideMonoisotopicMass);
 
-                                    // Note that this will be a C13-corrected precursor error; not the true precursor error
-                                    udtSearchResult.PMErrorDa = PRISM.StringUtilities.DblToString(dblPrecursorErrorDa, 6);
-                                }
+                                // Note that this will be a C13-corrected precursor error; not the true precursor error
+                                udtSearchResult.PMErrorDa = MassErrorToString(dblPrecursorErrorDa);
+
                             }
                         }
                     }
@@ -1887,15 +1887,14 @@ namespace PeptideHitResultsProcessor
                                                                                       udtSearchResult.ChargeNum, dblPeptideMonoisotopicMass,
                                                                                       true);
 
-                            udtSearchResult.PMErrorPPM = PRISM.StringUtilities.DblToString(dblPeptideDeltaMassCorrectedPpm, 5);
+                        udtSearchResult.PMErrorPPM = PRISM.StringUtilities.DblToString(dblPeptideDeltaMassCorrectedPpm, 5, 0.00005);
 
                         if (string.IsNullOrEmpty(udtSearchResult.PMErrorDa))
                         {
                             dblPrecursorErrorDa = clsPeptideMassCalculator.PPMToMass(dblPeptideDeltaMassCorrectedPpm, dblPeptideMonoisotopicMass);
 
-                                // Note that this will be a C13-corrected precursor error; not the true precursor error
-                                udtSearchResult.PMErrorDa = PRISM.StringUtilities.DblToString(dblPrecursorErrorDa, 6);
-                            }
+                            // Note that this will be a C13-corrected precursor error; not the true precursor error
+                            udtSearchResult.PMErrorDa = MassErrorToString(dblPrecursorErrorDa);
                         }
                     }
                 }

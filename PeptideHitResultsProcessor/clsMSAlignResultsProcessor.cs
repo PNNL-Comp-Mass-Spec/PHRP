@@ -1027,15 +1027,15 @@ namespace PeptideHitResultsProcessor
                     {
                         // Compute DelM and DelM_PPM
                         var dblDelM = dblPrecursorMonoMass - dblPeptideMonoMassMSAlign;
-                        udtSearchResult.DelM = PRISM.StringUtilities.DblToString(dblDelM, 6);
+                        udtSearchResult.DelM = MassErrorToString(dblDelM);
 
                         if (dblPrecursorMZ > 0)
                         {
-                            udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(dblDelM, dblPrecursorMZ), 5);
+                            udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(dblDelM, dblPrecursorMZ), 5, 0.00005);
                         }
                         else
                         {
-                            udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(dblDelM, 1000), 5);
+                            udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(dblDelM, 1000), 5, 0.00005);
                         }
                     }
 
