@@ -1650,7 +1650,7 @@ namespace PeptideHitResultsProcessor
                                            objSearchResult.PeptideBIons + SEP_CHAR +
                                            objSearchResult.PeptideDeltaMass + SEP_CHAR +
                                            objSearchResult.PeptideIntensity + SEP_CHAR +
-                                           PRISM.StringUtilities.DblToString(objSearchResult.PeptideDeltaMassCorrectedPpm, 4));
+                                           PRISM.StringUtilities.DblToString(objSearchResult.PeptideDeltaMassCorrectedPpm, 5, 0.00005));
         }
 
         protected override string TruncateProteinName(string strProteinNameAndDescription)

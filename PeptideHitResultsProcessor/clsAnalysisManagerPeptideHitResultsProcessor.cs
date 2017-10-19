@@ -73,28 +73,28 @@ namespace PeptideHitResultsProcessor
             return m_Status;
         }
 
-        public override void Setup(InitializationParams InitParams)
+        public override void Setup(InitializationParams options)
         {
             //Copies all input data required for plugin operation to appropriate memory variables
-            SourceFolderPath = InitParams.SourceFolderPath;
-            OutputFolderPath = InitParams.OutputFolderPath;
+            SourceFolderPath = options.SourceFolderPath;
+            OutputFolderPath = options.OutputFolderPath;
 
-            PeptideHitResultsFileName = InitParams.PeptideHitResultsFileName;
-            MassCorrectionTagsFileName = InitParams.MassCorrectionTagsFileName;
-            ModificationDefinitionsFileName = InitParams.ModificationDefinitionsFileName;
+            PeptideHitResultsFileName = options.PeptideHitResultsFileName;
+            MassCorrectionTagsFileName = options.MassCorrectionTagsFileName;
+            ModificationDefinitionsFileName = options.ModificationDefinitionsFileName;
 
             // This is unused and thus obsolete
             // m_MiscParams = .MiscParams
 
-            DebugLevel = InitParams.DebugLevel;
+            DebugLevel = options.DebugLevel;
 
-            AnalysisToolName = InitParams.AnalysisToolName;
-            DatasetName = InitParams.DatasetName;
-            ParameterFileName = InitParams.ParameterFileName;
-            SettingsFileName = InitParams.SettingsFileName;
+            AnalysisToolName = options.AnalysisToolName;
+            DatasetName = options.DatasetName;
+            ParameterFileName = options.ParameterFileName;
+            SettingsFileName = options.SettingsFileName;
 
-            CreateInspectFirstHitsFile = InitParams.CreateInspectFirstHitsFile;
-            CreateInspectSynopsisFile = InitParams.CreateInspectSynopsisFile;
+            CreateInspectFirstHitsFile = options.CreateInspectFirstHitsFile;
+            CreateInspectSynopsisFile = options.CreateInspectSynopsisFile;
         }
 
         public override ProcessStatus Start()

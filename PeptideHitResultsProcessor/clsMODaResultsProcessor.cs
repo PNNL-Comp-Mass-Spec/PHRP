@@ -1966,22 +1966,24 @@ namespace PeptideHitResultsProcessor
             // Write out the header line for synopsis / first hits files
             try
             {
-                var lstData = new List<string>();
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_ResultID);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Scan);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Spectrum_Index);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Charge);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_PrecursorMZ);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_DelM);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_DelM_PPM);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_MH);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Protein);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Score);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Probability);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Rank_Probability);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_Peptide_Position);
-                lstData.Add(clsPHRPParserMODa.DATA_COLUMN_QValue);
+                var lstData = new List<string>
+                {
+                    clsPHRPParserMODa.DATA_COLUMN_ResultID,
+                    clsPHRPParserMODa.DATA_COLUMN_Scan,
+                    clsPHRPParserMODa.DATA_COLUMN_Spectrum_Index,
+                    clsPHRPParserMODa.DATA_COLUMN_Charge,
+                    clsPHRPParserMODa.DATA_COLUMN_PrecursorMZ,
+                    clsPHRPParserMODa.DATA_COLUMN_DelM,
+                    clsPHRPParserMODa.DATA_COLUMN_DelM_PPM,
+                    clsPHRPParserMODa.DATA_COLUMN_MH,
+                    clsPHRPParserMODa.DATA_COLUMN_Peptide,
+                    clsPHRPParserMODa.DATA_COLUMN_Protein,
+                    clsPHRPParserMODa.DATA_COLUMN_Score,
+                    clsPHRPParserMODa.DATA_COLUMN_Probability,
+                    clsPHRPParserMODa.DATA_COLUMN_Rank_Probability,
+                    clsPHRPParserMODa.DATA_COLUMN_Peptide_Position,
+                    clsPHRPParserMODa.DATA_COLUMN_QValue
+                };
 
                 swResultFile.WriteLine(CollapseList(lstData));
             }
@@ -2015,22 +2017,24 @@ namespace PeptideHitResultsProcessor
                 // MODa
                 // ResultID   Scan   Spectrum_Index   Charge   PrecursorMZ   DelM   DelM_PPM   MH   Peptide   Protein   Score   Probability   Rank_Probability   PeptidePosition      QValue
 
-                var lstData = new List<string>();
-                lstData.Add(intResultID.ToString());
-                lstData.Add(udtSearchResult.ScanNum.ToString());
-                lstData.Add(udtSearchResult.SpectrumIndex);
-                lstData.Add(udtSearchResult.Charge);
-                lstData.Add(udtSearchResult.PrecursorMZ);
-                lstData.Add(udtSearchResult.DelM);
-                lstData.Add(udtSearchResult.DelM_PPM);
-                lstData.Add(udtSearchResult.MH);
-                lstData.Add(udtSearchResult.Peptide);
-                lstData.Add(udtSearchResult.Protein);
-                lstData.Add(udtSearchResult.Score);
-                lstData.Add(udtSearchResult.Probability);
-                lstData.Add(udtSearchResult.RankProbability.ToString());
-                lstData.Add(udtSearchResult.PeptidePosition);
-                lstData.Add(udtSearchResult.QValue.ToString("0.000000"));
+                var lstData = new List<string>
+                {
+                    intResultID.ToString(),
+                    udtSearchResult.ScanNum.ToString(),
+                    udtSearchResult.SpectrumIndex,
+                    udtSearchResult.Charge,
+                    udtSearchResult.PrecursorMZ,
+                    udtSearchResult.DelM,
+                    udtSearchResult.DelM_PPM,
+                    udtSearchResult.MH,
+                    udtSearchResult.Peptide,
+                    udtSearchResult.Protein,
+                    udtSearchResult.Score,
+                    udtSearchResult.Probability,
+                    udtSearchResult.RankProbability.ToString(),
+                    udtSearchResult.PeptidePosition,
+                    PRISM.StringUtilities.DblToString(udtSearchResult.QValue, 5, 0.00005)
+                };
 
                 swResultFile.WriteLine(CollapseList(lstData));
             }

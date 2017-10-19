@@ -26,7 +26,7 @@ namespace Test_PHRPReader
             //const string strMSAlignFolder = @"\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
 
             string strSynOrFHTFile;
-            var eMatchedResultType = default(clsPHRPReader.ePeptideHitResultType);
+            clsPHRPReader.ePeptideHitResultType eMatchedResultType;
 
             if (false) {
                 Console.WriteLine();
