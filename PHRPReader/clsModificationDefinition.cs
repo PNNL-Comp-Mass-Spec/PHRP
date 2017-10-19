@@ -1,5 +1,3 @@
-// This class describes an amino acid modification
-//
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Copyright 2006, Battelle Memorial Institute.  All Rights Reserved.
@@ -13,27 +11,44 @@
 // in compliance with the License.  You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 //
-// Notice: This computer software was prepared by Battelle Memorial Institute,
-// hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the
-// Department of Energy (DOE).  All rights in the computer software are reserved
-// by DOE on behalf of the United States Government and the Contractor as
-// provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY
-// WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS
-// SOFTWARE.  This notice including this sentence must appear on any copies of
-// this computer software.
+
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class describes an amino acid modification
+    /// </summary>
     public class clsModificationDefinition
     {
         #region "Constants and Enums"
-        public const char LAST_RESORT_MODIFICATION_SYMBOL = '_';                        // The underscore is used if all of the DEFAULT_MODIFICATION_SYMBOLS are used up
+
+        /// <summary>
+        /// Modification symbol used after all of the DEFAULT_MODIFICATION_SYMBOLS have been used
+        /// </summary>
+        public const char LAST_RESORT_MODIFICATION_SYMBOL = '_';
+
+        /// <summary>
+        /// Symbol to indicate a modification does not have a mod symbol
+        /// </summary>
+        /// <remarks>Used with isotopic mods and protein terminus static mods</remarks>
         public const char NO_SYMBOL_MODIFICATION_SYMBOL = '-';
+
+        /// <summary>
+        /// Unknown mod base name
+        /// </summary>
         public const string UNKNOWN_MOD_BASE_NAME = "UnkMod";
+
+        /// <summary>
+        /// Initial unknown mass correction tag name
+        /// </summary>
         public const string INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME = UNKNOWN_MOD_BASE_NAME + "00";
 
+        /// <summary>
+        /// Modification types
+        /// </summary>
         public enum eModificationTypeConstants
         {
             /// <summary>
@@ -76,15 +91,57 @@ namespace PHRPReader
         #endregion
 
         #region "Classwide Variables"
-        private char mModificationSymbol;              // One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
-        private double mModificationMass;              // Monoisotopic modification mass
-        private string mModificationMassAsText;        // Modification mass, stored as text
-        private string mTargetResidues;                // If this string is empty, then the given modification can apply to any residue or terminus; Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to; Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols (< and > for the peptide terminii; [ and ] for the protein terminii)
+        /// <summary>
+        /// One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
+        /// </summary>
+        private char mModificationSymbol;
+
+        /// <summary>
+        /// Monoisotopic modification mass
+        /// </summary>
+        private double mModificationMass;
+
+        /// <summary>
+        /// Modification mass, stored as text
+        /// </summary>
+        private string mModificationMassAsText;
+
+        /// <summary>
+        /// Target residues, tracked as a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to
+        /// Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols (&lt; and &gt; for the peptide terminii; [ and ] for the protein terminii)
+        /// </summary>
+        /// <remarks>
+        /// If this is empty, the given modification can apply to any residue or terminus
+        /// </remarks>
+        private string mTargetResidues;
+
+        /// <summary>
+        /// Modification type
+        /// </summary>
         private eModificationTypeConstants mModificationType;
-        private string mMassCorrectionTag;             // Name associated with the given ModificationMass; maximum length is 8 characters; cannot contain a colon, comma, or space
-        private char mAffectedAtom;                    // Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications); for Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
-        private int mOccurrenceCount;                  // Number of times this modification was observed in the given XML file
-        private bool mUnknownModAutoDefined;           // True if this was an unknown mass that was auto defined
+
+        /// <summary>
+        /// Name associated with the given ModificationMass; maximum length is 8 characters
+        /// Cannot contain a colon, comma, or space
+        /// </summary>
+        private string mMassCorrectionTag;
+
+        /// <summary>
+        /// Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications)
+        /// For Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
+        /// </summary>
+        private char mAffectedAtom;
+
+        /// <summary>
+        /// Number of times this modification was observed in the given XML file
+        /// </summary>
+        private int mOccurrenceCount;
+
+        /// <summary>
+        /// True if this was an unknown mass that was auto defined
+        /// </summary>
+        private bool mUnknownModAutoDefined;
+
         #endregion
 
         #region "Properties"
@@ -126,7 +183,7 @@ namespace PHRPReader
             set
             {
                 mModificationMass = value;
-                mModificationMassAsText = mModificationMass.ToString();
+                mModificationMassAsText = mModificationMass.ToString(CultureInfo.InvariantCulture);
             }
         }
 
@@ -253,50 +310,82 @@ namespace PHRPReader
         }
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public clsModificationDefinition()
         {
-            this.Clear();
+            Clear();
         }
 
+        /// <summary>
+        /// Constructor that takes a mod symbol and mod mass
+        /// </summary>
+        /// <param name="chModificationSymbol"></param>
+        /// <param name="dblModificationMass"></param>
         public clsModificationDefinition(char chModificationSymbol, double dblModificationMass)
         {
-            this.Clear();
+            Clear();
 
-            this.ModificationSymbol = chModificationSymbol;
-            this.ModificationMass = dblModificationMass;
+            ModificationSymbol = chModificationSymbol;
+            ModificationMass = dblModificationMass;
         }
 
+        /// <summary>
+        /// Constructor that takes a mod mass, target residues, and modification tye
+        /// </summary>
+        /// <param name="dblModificationMass"></param>
+        /// <param name="strTargetResidues"></param>
+        /// <param name="eModificationType"></param>
         public clsModificationDefinition(double dblModificationMass, string strTargetResidues, eModificationTypeConstants eModificationType)
         {
-            this.Clear();
+            Clear();
 
-            this.ModificationMass = dblModificationMass;
-            this.TargetResidues = strTargetResidues;
-            this.ModificationType = eModificationType;
+            ModificationMass = dblModificationMass;
+            TargetResidues = strTargetResidues;
+            ModificationType = eModificationType;
         }
 
+        /// <summary>
+        /// Constructor that takes a mod symbol, mod mass, target residues, modification type, and mass correction tag
+        /// </summary>
+        /// <param name="chModificationSymbol"></param>
+        /// <param name="dblModificationMass"></param>
+        /// <param name="strTargetResidues"></param>
+        /// <param name="eModificationType"></param>
+        /// <param name="strMassCorrectionTag"></param>
         public clsModificationDefinition(char chModificationSymbol, double dblModificationMass, string strTargetResidues, eModificationTypeConstants eModificationType, string strMassCorrectionTag)
         {
-            this.Clear();
+            Clear();
 
-            this.ModificationSymbol = chModificationSymbol;
-            this.ModificationMass = dblModificationMass;
-            this.TargetResidues = strTargetResidues;
-            this.ModificationType = eModificationType;
-            this.MassCorrectionTag = strMassCorrectionTag;
+            ModificationSymbol = chModificationSymbol;
+            ModificationMass = dblModificationMass;
+            TargetResidues = strTargetResidues;
+            ModificationType = eModificationType;
+            MassCorrectionTag = strMassCorrectionTag;
         }
 
+        /// <summary>
+        /// Constructor that takes a mod symbol, mod mass, target residues, modification type, mass correction tag, and affected atom
+        /// </summary>
+        /// <param name="chModificationSymbol"></param>
+        /// <param name="dblModificationMass"></param>
+        /// <param name="strTargetResidues"></param>
+        /// <param name="eModificationType"></param>
+        /// <param name="strMassCorrectionTag"></param>
+        /// <param name="chAffectedAtom"></param>
+        /// <param name="blnUnknownModAutoDefined"></param>
         public clsModificationDefinition(char chModificationSymbol, double dblModificationMass, string strTargetResidues, eModificationTypeConstants eModificationType, string strMassCorrectionTag, char chAffectedAtom, bool blnUnknownModAutoDefined)
         {
-            this.Clear();
+            Clear();
 
-            this.ModificationSymbol = chModificationSymbol;
-            this.ModificationMass = dblModificationMass;
-            this.TargetResidues = strTargetResidues;
-            this.ModificationType = eModificationType;
-            this.MassCorrectionTag = strMassCorrectionTag;
-            this.AffectedAtom = chAffectedAtom;
-            this.UnknownModAutoDefined = blnUnknownModAutoDefined;
+            ModificationSymbol = chModificationSymbol;
+            ModificationMass = dblModificationMass;
+            TargetResidues = strTargetResidues;
+            ModificationType = eModificationType;
+            MassCorrectionTag = strMassCorrectionTag;
+            AffectedAtom = chAffectedAtom;
+            UnknownModAutoDefined = blnUnknownModAutoDefined;
         }
 
         /// <summary>

@@ -1,11 +1,24 @@
 ﻿namespace PHRPReader
 {
+    /// <summary>
+    /// PHRP Startup options
+    /// </summary>
+    /// <remarks>Use these options to define load behavior to be used when instantiating PHRP reader</remarks>
     public class clsPHRPStartupOptions
     {
-        private int mMaxProteinsPerPSM;
-
+        /// <summary>
+        /// If true, load the modification and SeqInfo data
+        /// </summary>
         public bool LoadModsAndSeqInfo { get; set; }
+
+        /// <summary>
+        /// If true, load MSGF results (not MSGF+)
+        /// </summary>
         public bool LoadMSGFResults { get; set; }
+
+        /// <summary>
+        /// If true, load ScanStats data
+        /// </summary>
         public bool LoadScanStatsData { get; set; }
 
         /// <summary>
@@ -13,19 +26,8 @@
         /// </summary>
         /// <value></value>
         /// <returns></returns>
-        /// <remarks>0 means to load all proteins</remarks>
-        public int MaxProteinsPerPSM
-        {
-            get
-            {
-                if (mMaxProteinsPerPSM <= 0)
-                {
-                    return int.MaxValue;
-                }
-                return mMaxProteinsPerPSM;
-            }
-            set => mMaxProteinsPerPSM = value;
-        }
+        /// <remarks>Set to 0 to load all proteins</remarks>
+        public int MaxProteinsPerPSM { get; set; }
 
         /// <summary>
         /// Use this to override the default peptide mass calculator class;
@@ -36,12 +38,15 @@
         /// <remarks></remarks>
         public clsPeptideMassCalculator PeptideMassCalculator { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public clsPHRPStartupOptions()
         {
             LoadModsAndSeqInfo = true;
             LoadMSGFResults = true;
             LoadScanStatsData = false;
-            mMaxProteinsPerPSM = 0;      // 0 means to load all proteins
+            MaxProteinsPerPSM = 0;      // 0 means to load all proteins
         }
     }
 }

@@ -4,13 +4,8 @@
 //
 // Created 04/04/2012
 //
-// This class reads a tab-delimited text file (created by the Peptide File Extractor or by PHRP)
-// and returns the data for each peptide hit search result
-//
-// It also integrates MSGF results with the peptide hit search results
-// And, it integrates scan stats values (to determine elution time)
-//
 //*********************************************************************************************************
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -21,16 +16,23 @@ using System.Text.RegularExpressions;
 
 namespace PHRPReader
 {
+    /// <summary>
+    ///  This class reads a tab-delimited text file (created by the Peptide File Extractor or by PHRP)
+    ///  and returns the data for each peptide hit search result
+    ///
+    ///  It also integrates MSGF results with the peptide hit search results
+    ///  And, it integrates scan stats values (to determine elution time)
+    /// </summary>
     public class clsPHRPReader : PRISM.clsEventNotifier, IDisposable
     {
         #region "Constants"
 
-        public const char N_TERMINAL_PEPTIDE_SYMBOL_DMS = '<';
-        public const char C_TERMINAL_PEPTIDE_SYMBOL_DMS = '>';
-        public const char N_TERMINAL_PROTEIN_SYMBOL_DMS = '[';
-        public const char C_TERMINAL_PROTEIN_SYMBOL_DMS = ']';
+        /// <summary>
+        /// Symbol used by PHRP to indicate a protein terminus
+        /// </summary>
         public const char PROTEIN_TERMINUS_SYMBOL_PHRP = '-';
 
+#pragma warning disable 1591
         public const string MSGF_RESULT_COLUMN_SpectrumFile = "#SpectrumFile";
         public const string MSGF_RESULT_COLUMN_Title = "Title";
         public const string MSGF_RESULT_COLUMN_Annotation = "Annotation";
@@ -44,6 +46,7 @@ namespace PHRPReader
         public const string MSGF_RESULT_FILENAME_SUFFIX = "_MSGF.txt";
         public const string SCAN_STATS_FILENAME_SUFFIX = "_ScanStats.txt";
         public const string EXTENDED_SCAN_STATS_FILENAME_SUFFIX = "_ScanStatsEx.txt";
+#pragma warning restore 1591
 
         // This RegEx is used to extract parent ion m/z from a filter string that does not contain msx
         // ${ParentMZ} will hold the last parent ion m/z found
@@ -55,6 +58,11 @@ namespace PHRPReader
         //  For example, 636.04 in FTMS + p NSI Full msx ms2 636.04@hcd28.00 641.04@hcd28.00 654.05@hcd28.00 [88.00-1355.00]
         private const string PARENTION_ONLY_MSX_REGEX = @"[Mm][Ss]\d* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*[^\[\r\n]*(\[[^\]\r\n]+\])?";
 
+#pragma warning disable 1591
+
+        /// <summary>
+        /// Peptide hit results type
+        /// </summary>
         public enum ePeptideHitResultType
         {
             Unknown = 0,
@@ -68,6 +76,9 @@ namespace PHRPReader
             MSPathFinder = 8
         }
 
+        /// <summary>
+        /// PHRP Reader error codes
+        /// </summary>
         public enum ePHRPReaderErrorCodes
         {
             NoError = 0,
@@ -79,6 +90,7 @@ namespace PHRPReader
             UnspecifiedError = -1
         }
 
+#pragma warning restore 1591
         #endregion
 
         #region "Module variables"

@@ -3,9 +3,19 @@ using System.Collections.Generic;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// Search engine parameters container
+    /// </summary>
     public class clsSearchEngineParameters
     {
+        /// <summary>
+        /// Monoisotopic mass
+        /// </summary>
         public const string MASS_TYPE_MONOISOTOPIC = "monoisotopic";
+
+        /// <summary>
+        /// Average mass
+        /// </summary>
         public const string MASS_TYPE_AVERAGE = "average";
 
         private string mSearchEngineName;

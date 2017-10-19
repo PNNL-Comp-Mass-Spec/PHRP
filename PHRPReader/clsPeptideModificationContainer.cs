@@ -1,9 +1,3 @@
-// This class is used to track modifications that can be applied to peptides
-// It handles both residue level modifications and static, peptide-wide modifications
-//
-// Use ReadMassCorrectionTagsFile() and ReadModificationDefinitionsFile() to customize
-//  the default mass correction tag and modification definition lists
-//
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 5, 2006
@@ -16,14 +10,6 @@
 // in compliance with the License.  You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 //
-// Notice: This computer software was prepared by Battelle Memorial Institute,
-// hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the
-// Department of Energy (DOE).  All rights in the computer software are reserved
-// by DOE on behalf of the United States Government and the Contractor as
-// provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY
-// WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS
-// SOFTWARE.  This notice including this sentence must appear on any copies of
-// this computer software.
 
 using System;
 using System.Collections;

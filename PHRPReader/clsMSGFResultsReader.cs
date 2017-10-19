@@ -4,18 +4,22 @@
 //
 // Created 04/03/2012
 //
-// This class reads MSGF scores from a tab-delimited _msgf.txt file
-//
 //*********************************************************************************************************
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class reads MSGF scores from a tab-delimited _msgf.txt file
+    /// </summary>
     public class clsMSGFResultsReader
     {
         #region "Constants"
+
+#pragma warning disable 1591
         public const string DATA_COLUMN_ResultID = "Result_ID";
         public const string DATA_COLUMN_Scan = "Scan";
         public const string DATA_COLUMN_Charge = "Charge";
@@ -23,6 +27,7 @@ namespace PHRPReader
         public const string DATA_COLUMN_Peptide = "Peptide";
         public const string DATA_COLUMN_SpecProb = "SpecProb";
         public const string DATA_COLUMN_Notes = "Notes";
+#pragma warning restore 1591
         #endregion
 
         #region "Class-wide variables"

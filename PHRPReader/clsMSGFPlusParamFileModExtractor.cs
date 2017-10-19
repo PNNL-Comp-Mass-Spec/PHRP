@@ -29,6 +29,7 @@
 // Started 7/16/2015
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // -------------------------------------------------------------------------------
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,27 +37,79 @@ using System.Linq;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class reads a DMS-based parameter file for MSGF+ or MSPathFinder to extract the dynamic and static modification information
+    /// </summary>
+    /// <remarks>See above for an example parameter file</remarks>
     public class clsMSGFPlusParamFileModExtractor : PRISM.clsEventNotifier
     {
         #region "Constants and Enums"
 
+        /// <summary>
+        /// Unknown MSGF+ mod symbols
+        /// </summary>
         public const char UNKNOWN_MSGFPlus_MOD_SYMBOL = '?';
 
+        /// <summary>
+        /// Static mod parameter file keyword
+        /// </summary>
         public const string PARAM_TAG_MOD_STATIC = "StaticMod";
+
+        /// <summary>
+        /// Dynamic mod parameter file keyword
+        /// </summary>
         public const string PARAM_TAG_MOD_DYNAMIC = "DynamicMod";
+
+        /// <summary>
+        /// Custom amino acid definition parameter file keyword
+        /// </summary>
         public const string PARAM_TAG_CUSTOMAA = "CustomAA";
 
         private const string MSGFPLUS_COMMENT_CHAR = "#";
 
+        /// <summary>
+        /// MSGF+ modification type
+        /// </summary>
         public enum eMSGFDBModType
         {
+            /// <summary>
+            /// Unknown
+            /// </summary>
             Unknown = 0,
+
+            /// <summary>
+            /// Dynamic
+            /// </summary>
             DynamicMod = 1,
+
+            /// <summary>
+            /// Static
+            /// </summary>
             StaticMod = 2,
+
+            /// <summary>
+            /// N-terminal peptide dynamic
+            /// </summary>
             DynNTermPeptide = 3,
+
+            /// <summary>
+            /// C-terminal peptide dynamic
+            /// </summary>
             DynCTermPeptide = 4,
+
+            /// <summary>
+            /// N-terminal protein dynamic
+            /// </summary>
             DynNTermProtein = 5,
+
+            /// <summary>
+            /// C-terminal protein dynamic
+            /// </summary>
             DynCTermProtein = 6,
+
+            /// <summary>
+            /// Custom amino acid definition
+            /// </summary>
             CustomAA = 7
         }
 
@@ -79,16 +132,43 @@ namespace PHRPReader
         /// </remarks>
         public struct udtModInfoType
         {
-            public string ModName;         // Mod name (read from the parameter file) isn't used by MSGF+, but it is used by MSPathFinder
-            public string ModMass;         // Storing as a string since reading from a text file and writing to a text file.  Also, can be a mass or an empirical formula
-            public double ModMassVal;
-            public string Residues;
-            public eMSGFDBModType ModType;
-            public char ModSymbol;         // Modification symbol: *, #, @, ... ; dash if a static mod
+            /// <summary>
+            /// Mod name (read from the parameter file) isn't used by MSGF+, but it is used by MSPathFinder
+            /// </summary>
+            public string ModName;
 
+            /// <summary>
+            /// Mod mass, stored as a string since reading from a text file and writing to a text file.  Also, can be a mass or an empirical formula
+            /// </summary>
+            public string ModMass;
+
+            /// <summary>
+            /// Modification mass
+            /// </summary>
+            public double ModMassVal;
+
+            /// <summary>
+            /// Affected residues
+            /// </summary>
+            public string Residues;
+
+            /// <summary>
+            /// Modification type
+            /// </summary>
+            public eMSGFDBModType ModType;
+
+            /// <summary>
+            /// Modification symbol: *, #, @, ... ; dash if a static mod
+            /// </summary>
+            public char ModSymbol;
+
+            /// <summary>
+            /// Mod type, name, mass, residues
+            /// </summary>
+            /// <returns></returns>
             public override string ToString()
             {
-                return ModType.ToString() + " " + ModName + ", " + ModMass + "; " + Residues;
+                return ModType + " " + ModName + ", " + ModMass + "; " + Residues;
             }
         }
         #endregion
@@ -100,6 +180,9 @@ namespace PHRPReader
 
         #region "Properties"
 
+        /// <summary>
+        /// Error message
+        /// </summary>
         public string ErrorMessage => mErrorMessage;
 
         #endregion
@@ -422,6 +505,11 @@ namespace PHRPReader
             OnWarningEvent(message);
         }
 
+        /// <summary>
+        /// Resod
+        /// </summary>
+        /// <param name="lstMSGFDBModInfo"></param>
+        /// <param name="oPeptideMods"></param>
         public void ResolveMSGFDBModsWithModDefinitions(List<udtModInfoType> lstMSGFDBModInfo, clsPeptideModificationContainer oPeptideMods)
         {
             if (lstMSGFDBModInfo != null)

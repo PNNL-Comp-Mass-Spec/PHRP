@@ -2,6 +2,9 @@
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// Empirical formula
+    /// </summary>
     public class clsEmpiricalFormula
     {
         /// <summary>
@@ -97,6 +100,10 @@ namespace PHRPReader
             return 0;
         }
 
+        /// <summary>
+        /// String representation of the empirical formula
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             if (ElementCounts.Count == 0)

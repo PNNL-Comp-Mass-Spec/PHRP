@@ -8,15 +8,19 @@
 //
 //*********************************************************************************************************
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// PHRP parser for SEQUEST
+    /// </summary>
     public class clsPHRPParserSequest : clsPHRPParser
     {
         #region "Constants"
+
+#pragma warning disable 1591
         public const string DATA_COLUMN_HitNum = "HitNum";
         public const string DATA_COLUMN_ScanNum = "ScanNum";
         public const string DATA_COLUMN_ScanCount = "ScanCount";
@@ -44,26 +48,55 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_FHT = "_fht.txt";
 
         private const string SEQ_SEARCH_ENGINE_NAME = "SEQUEST";
+#pragma warning restore 1591
+
         #endregion
 
         #region "Properties"
 
+        /// <summary>
+        /// First hits file
+        /// </summary>
         public override string PHRPFirstHitsFileName => GetPHRPFirstHitsFileName(mDatasetName);
 
+        /// <summary>
+        /// Mod summary file
+        /// </summary>
         public override string PHRPModSummaryFileName => GetPHRPModSummaryFileName(mDatasetName);
 
+        /// <summary>
+        /// Peptide to protein map file
+        /// </summary>
         public override string PHRPPepToProteinMapFileName => GetPHRPPepToProteinMapFileName(mDatasetName);
 
+        /// <summary>
+        /// Protein mods file
+        /// </summary>
         public override string PHRPProteinModsFileName => GetPHRPProteinModsFileName(mDatasetName);
 
+        /// <summary>
+        /// Synopsis file
+        /// </summary>
         public override string PHRPSynopsisFileName => GetPHRPSynopsisFileName(mDatasetName);
 
+        /// <summary>
+        /// Result to sequence map file
+        /// </summary>
         public override string PHRPResultToSeqMapFileName => GetPHRPResultToSeqMapFileName(mDatasetName);
 
+        /// <summary>
+        /// Sequence info file
+        /// </summary>
         public override string PHRPSeqInfoFileName => GetPHRPSeqInfoFileName(mDatasetName);
 
+        /// <summary>
+        /// Sequence to protein map file
+        /// </summary>
         public override string PHRPSeqToProteinMapFileName => GetPHRPSeqToProteinMapFileName(mDatasetName);
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         public override string SearchEngineName => GetSearchEngineName();
 
         #endregion

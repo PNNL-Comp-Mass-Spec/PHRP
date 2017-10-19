@@ -13,9 +13,14 @@ using System.IO;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// Extended scan stats reader
+    /// </summary>
     public class clsExtendedScanStatsReader
     {
         #region "Constants"
+
+#pragma warning disable 1591
         public const string DATA_COLUMN_Dataset = "Dataset";
         public const string DATA_COLUMN_ScanNumber = "ScanNumber";
         public const string DATA_COLUMN_IonInjectionTime = "Ion Injection Time (ms)";
@@ -36,6 +41,8 @@ namespace PHRPReader
         public const string DATA_COLUMN_ScanFilterText = "Scan Filter Text";
         public const string DATA_COLUMN_SourceVoltage = "Source Voltage (kV)";
         public const string DATA_COLUMN_Source_Current = "Source Current (uA)";
+#pragma warning restore 1591
+
         #endregion
 
         #region "Class-wide variables"

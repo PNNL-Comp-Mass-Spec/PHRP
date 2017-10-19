@@ -4,12 +4,13 @@
 //
 // Created 04/20/2012
 //
-// This class tracks the sequence information determined by PHRP and stored in a _SeqInfo.txt file
-//
 //*********************************************************************************************************
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class tracks the sequence information determined by PHRP and stored in a _SeqInfo.txt file
+    /// </summary>
     public class clsSeqInfo
     {
         /// <summary>

@@ -4,14 +4,20 @@ using System.IO;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// ModSummary file reader
+    /// </summary>
     public class clsPHRPModSummaryReader
     {
+
+#pragma warning disable 1591
         public const string MOD_SUMMARY_COLUMN_Modification_Symbol = "Modification_Symbol";
         public const string MOD_SUMMARY_COLUMN_Modification_Mass = "Modification_Mass";
         public const string MOD_SUMMARY_COLUMN_Target_Residues = "Target_Residues";
         public const string MOD_SUMMARY_COLUMN_Modification_Type = "Modification_Type";
         public const string MOD_SUMMARY_COLUMN_Mass_Correction_Tag = "Mass_Correction_Tag";
         public const string MOD_SUMMARY_COLUMN_Occurrence_Count = "Occurrence_Count";
+#pragma warning restore 1591
 
         private readonly List<clsModificationDefinition> mModificationDefs;
 

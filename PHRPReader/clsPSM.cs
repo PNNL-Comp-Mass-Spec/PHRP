@@ -4,16 +4,22 @@
 //
 // Created 04/04/2012
 //
-// This class tracks the details for a peptide hit search result (typically loaded from a tab-delimited text file created by the Peptide File Extractor or by PHRP)
-//
 //*********************************************************************************************************
+
 using System;
 using System.Collections.Generic;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class tracks the details for a peptide hit search result
+    /// (typically loaded from a tab-delimited text file created by the Peptide File Extractor or by PHRP)
+    /// </summary>
     public class clsPSM
     {
+        /// <summary>
+        /// Unknown collision mode
+        /// </summary>
         public const string UNKNOWN_COLLISION_MODE = "n/a";
 
         private string mDataLineText = string.Empty;
@@ -21,21 +27,46 @@ namespace PHRPReader
         // Note: Be sure to update the Clone() function if you add new class-wide variables or properties
 
         private int mScanNumber;
-        private readonly SortedSet<int> mScanList;          // List of scans that were combined prior to identifying this peptide
 
-        private string mPeptide;                    // Peptide Sequence, with or without prefix & suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
-        private string mPeptideWithNumericMods;         // Peptide Sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
+        /// <summary>
+        /// List of scans that were combined prior to identifying this peptide
+        /// </summary>
+        private readonly SortedSet<int> mScanList;
+
+        /// <summary>
+        /// Peptide sequence, with or without prefix and suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
+        /// </summary>
+        private string mPeptide;
+
+        /// <summary>
+        /// Peptide sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
+        /// </summary>
+        private string mPeptideWithNumericMods;
+
+        /// <summary>
+        /// Pepide sequence without any mod symbols
+        /// </summary>
         private string mPeptideCleanSequence;
 
+        /// <summary>
+        /// Modified residues
+        /// </summary>
         private readonly List<clsAminoAcidModInfo> mModifiedPeptideResidues;
 
-        // Note that protein names are case-sensitive
+        /// <summary>
+        /// Protein names
+        /// </summary>
+        /// <remarks>Note that names are case-sensitive</remarks>
         private readonly List<string> mProteins;
 
-        // Lists protein name, description, cleavage state, terminus state, residue start, and residue end
+        /// <summary>
+        /// Dictionary with info on each protein, including name, description, cleavage state, terminus state, residue start, and residue end
+        /// </summary>
         private readonly Dictionary<string, clsProteinInfo> mProteinDetails;
 
-        // This dictionary tracks additional, tool-specific scores
+        /// <summary>
+        /// Dictionary tracking additional, tool-specific scores
+        /// </summary>
         private readonly Dictionary<string, string> mAdditionalScores;
 
         #region "Properties"
@@ -46,7 +77,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>Update scores using SetScore</remarks>
-        public Dictionary<string, string> AdditionalScores => mAdditionalScores;
+        public IReadOnlyDictionary<string, string> AdditionalScores => mAdditionalScores;
 
         /// <summary>
         /// Assumed charge of the spectrum in which this peptide was identified
@@ -75,6 +106,9 @@ namespace PHRPReader
         /// <remarks></remarks>
         public string CollisionMode { get; set; }
 
+        /// <summary>
+        /// Single line of data read from a PHRP data file
+        /// </summary>
         public string DataLineText
         {
             get => mDataLineText;
@@ -234,10 +268,8 @@ namespace PHRPReader
                 {
                     return string.Empty;
                 }
-                else
-                {
-                    return mProteins[0];
-                }
+
+                return mProteins[0];
             }
         }
 

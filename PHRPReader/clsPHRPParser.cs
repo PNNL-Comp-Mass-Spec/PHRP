@@ -8,6 +8,7 @@
 // It must be derived by a sub-class customized for the specific analysis tool (Sequest, X!Tandem, Inspect, etc.)
 //
 //*********************************************************************************************************
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,36 +17,85 @@ using System.Text;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// PHRP parser base class
+    /// </summary>
     public abstract class clsPHRPParser : PRISM.clsEventNotifier
     {
         #region "Structures"
+
+        /// <summary>
+        /// Tracks ambigious modifications
+        /// </summary>
         protected struct udtAmbiguousModInfo
         {
+            /// <summary>
+            /// First residue the mod could apply to
+            /// </summary>
             public int ResidueStart;
+
+            /// <summary>
+            /// Last residue the mod could apply to
+            /// </summary>
             public int ResidueEnd;
+
+            /// <summary>
+            /// Modification mass (as a string)
+            /// </summary>
             public string ModMassString;
         }
         #endregion
 
         #region "Module variables"
 
+        /// <summary>
+        /// Dataset name
+        /// </summary>
         protected string mDatasetName;
+
+        /// <summary>
+        /// Input file path
+        /// </summary>
         private string mInputFilePath;
+
+        /// <summary>
+        /// Input folder path
+        /// </summary>
         protected string mInputFolderPath;
+
+        /// <summary>
+        /// True if initialized
+        /// </summary>
         private bool mInitialized;
 
-        private int mMaxProteinsPerPSM;
-
-        // Column headers in the synopsis file and first hits file
+        /// <summary>
+        /// Column headers in the synopsis file and first hits file
+        /// </summary>
         protected SortedDictionary<string, int> mColumnHeaders;
 
+        /// <summary>
+        /// Error message
+        /// </summary>
         protected string mErrorMessage = string.Empty;
 
+        /// <summary>
+        /// Cleavage state calculator
+        /// </summary>
         protected readonly clsPeptideCleavageStateCalculator mCleavageStateCalculator;
+
+        /// <summary>
+        /// Peptide mass calculator
+        /// </summary>
         protected readonly clsPeptideMassCalculator mPeptideMassCalculator;
 
+        /// <summary>
+        /// PHRP result type
+        /// </summary>
         protected clsPHRPReader.ePeptideHitResultType mPeptideHitResultType;
 
+        /// <summary>
+        /// Modification info
+        /// </summary>
         protected List<clsModificationDefinition> mModInfo;
 
         private SortedList<int, int> mResultToSeqMap;
@@ -53,7 +103,9 @@ namespace PHRPReader
         private SortedList<int, List<clsProteinInfo>> mSeqToProteinMap;
         private Dictionary<string, clsPepToProteinMapInfo> mPepToProteinMap;
 
-        // This List tracks the Protein Names for each ResultID
+        /// <summary>
+        /// Protein Names for each ResultID
+        /// </summary>
         protected readonly SortedList<int, List<string>> mResultIDToProteins;
 
         private readonly List<string> mErrorMessages;
@@ -93,11 +145,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>0 means to load all proteins</remarks>
-        public int MaxProteinsPerPSM
-        {
-            get => mMaxProteinsPerPSM;
-            set => mMaxProteinsPerPSM = value;
-        }
+        public int MaxProteinsPerPSM { get; set; }
 
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB
@@ -149,22 +197,49 @@ namespace PHRPReader
 
         #region "Properties overridden by derived classes"
 
+        /// <summary>
+        /// First hits file
+        /// </summary>
         public abstract string PHRPFirstHitsFileName { get; }
 
+        /// <summary>
+        /// Mod summary file
+        /// </summary>
         public abstract string PHRPModSummaryFileName { get; }
 
+        /// <summary>
+        /// Peptide to protein map file
+        /// </summary>
         public abstract string PHRPPepToProteinMapFileName { get; }
 
+        /// <summary>
+        /// Protein mods file
+        /// </summary>
         public abstract string PHRPProteinModsFileName { get; }
 
+        /// <summary>
+        /// Synopsis file
+        /// </summary>
         public abstract string PHRPSynopsisFileName { get; }
 
+        /// <summary>
+        /// Result to sequence map file
+        /// </summary>
         public abstract string PHRPResultToSeqMapFileName { get; }
 
+        /// <summary>
+        /// Sequence info file
+        /// </summary>
         public abstract string PHRPSeqInfoFileName { get; }
 
+        /// <summary>
+        /// Sequence to protein map file
+        /// </summary>
         public abstract string PHRPSeqToProteinMapFileName { get; }
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         public abstract string SearchEngineName { get; }
 
         #endregion

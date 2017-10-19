@@ -1,26 +1,3 @@
-// This class will compute the cleavage state and terminus state of a given peptide sequence.
-// It can also be used to remove modification symbols from a sequence using ExtractCleanSequenceFromSequenceWithMods
-
-// The sequence can simply contain single-letter amino acid symbols (capital letters) or a mix
-//  of amino acid symbols and modification symbols, for example:
-//   A.BCDEFGHIJK.L
-//   A.B*CDEFGHIJK.L
-//   A.BCDEFGHIJK*.L
-//   A.BCDEFGHIJK.L
-
-// Function ComputeCleavageState is overloaded to either except the peptide sequence with
-//  prefix and suffix letters (e.g. A.BCDEFGHIJK.L) or accept the primary peptide sequence,
-//  the prefix residue(s), and the suffix residue(s).
-
-// Use EnzymeMatchSpec to specify the residues to match for cleavage
-
-// The default cleavage specification is for trypsin: [KR]|[^P]
-
-// Note: Function SplitPrefixAndSuffixFromSequence will change peptides that look like:
-//      E.TGMLTQKFARSLGMLAVDNQARV..   to   E.TGMLTQKFARSLGMLAVDNQARV.
-//   or ..TGMLTQKFARSLGMLAVDNQARV.R   to   .TGMLTQKFARSLGMLAVDNQARV.R
-//
-
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 4, 2006
@@ -33,40 +10,120 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 //
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class will compute the cleavage state and terminus state of a given peptide sequence.
+    /// It can also be used to remove modification symbols from a sequence using ExtractCleanSequenceFromSequenceWithMods
+    /// </summary>
+    /// <remarks>
+    /// The sequence can simply contain single-letter amino acid symbols (capital letters) or a mix
+    /// of amino acid symbols and modification symbols, for example:
+    ///   A.BCDEFGHIJK.L
+    ///   A.B*CDEFGHIJK.L
+    ///   A.BCDEFGHIJK*.L
+    ///   A.BCDEFGHIJK.L
+    ///
+    /// Function ComputeCleavageState is overloaded to either except the peptide sequence with
+    /// prefix and suffix letters (e.g. A.BCDEFGHIJK.L) or accept the primary peptide sequence,
+    /// the prefix residue(s), and the suffix residue(s).
+    ///
+    /// Use EnzymeMatchSpec to specify the residues to match for cleavage
+    ///
+    /// The default cleavage specification is for trypsin: [KR]|[^P]
+    ///
+    /// Note: Function SplitPrefixAndSuffixFromSequence will change peptides that look like:
+    ///      E.TGMLTQKFARSLGMLAVDNQARV..   to   E.TGMLTQKFARSLGMLAVDNQARV.
+    ///   or ..TGMLTQKFARSLGMLAVDNQARV.R   to   .TGMLTQKFARSLGMLAVDNQARV.R
+    /// </remarks>
     public class clsPeptideCleavageStateCalculator
     {
         #region "Constants and Enums"
 
+        /// <summary>
+        /// Generic residue symbol
+        /// </summary>
         public const char GENERIC_RESIDUE_SYMBOL = 'X';
+
+        /// <summary>
+        /// Peptide terminus symbol for SEQUEST
+        /// </summary>
         public const char TERMINUS_SYMBOL_SEQUEST = '-';
+
+        /// <summary>
+        /// Peptide N-terminus symbol for X!Tandem
+        /// </summary>
         public const char TERMINUS_SYMBOL_XTANDEM_NTerminus = '[';
+
+        /// <summary>
+        /// /// Peptide C-terminus symbol for X!Tandem
+        /// </summary>
         public const char TERMINUS_SYMBOL_XTANDEM_CTerminus = ']';
 
         private const string TRYPSIN_LEFT_RESIDUE_REGEX = @"[KR]";
         private const string TRYPSIN_RIGHT_RESIDUE_REGEX = @"[^P]";
 
+        /// <summary>
+        /// Peptide cleavage state
+        /// </summary>
         public enum ePeptideCleavageStateConstants
         {
+            /// <summary>
+            /// Unknown cleavage specificity
+            /// </summary>
             Unknown = -1,
-            NonSpecific = 0,                   // e.g. Non-tryptic
-            Partial = 1,                       // e.g. Partially tryptic
-            Full = 2                           // e.g. Fully tryptic
+
+            /// <summary>
+            /// E.g., non-tryptic
+            /// </summary>
+            NonSpecific = 0,
+
+            /// <summary>
+            /// E.g., partially tryptic
+            /// </summary>
+            Partial = 1,
+
+            /// <summary>
+            /// E.g., fully tryptic
+            /// </summary>
+            Full = 2
         }
 
+        /// <summary>
+        /// Peptide terminus state
+        /// </summary>
         public enum ePeptideTerminusStateConstants
         {
-            None = 0,                       // The peptide is located in the middle of the protein
-            ProteinNTerminus = 1,           // The peptide is located at the protein's N-terminus
-            ProteinCTerminus = 2,           // The peptide is located at the protein's C-terminus
-            ProteinNandCCTerminus = 3       // The peptide spans the entire length of the protein
+            /// <summary>
+            /// The peptide is located in the middle of the protein
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// The peptide is located at the protein's N-terminus
+            /// </summary>
+            ProteinNTerminus = 1,
+
+            /// <summary>
+            /// The peptide is located at the protein's C-terminus
+            /// </summary>
+            ProteinCTerminus = 2,
+
+            /// <summary>
+            /// The peptide spans the entire length of the protein
+            /// </summary>
+            ProteinNandCCTerminus = 3
         }
 
+        /// <summary>
+        /// Standard enzymes
+        /// </summary>
         public enum eStandardCleavageAgentConstants
         {
+#pragma warning disable 1591
             Trypsin = 0,
             TrypsinWithoutProlineRule = 1,
             TrypsinPlusFVLEY = 2,
@@ -78,20 +135,36 @@ namespace PHRPReader
             EndoLysC = 8,
             EndoAspN = 9,
             V8 = 10
+#pragma warning restore 1591
         }
         #endregion
 
         #region "Structures"
-        // Example RegEx match strings for udtEnzymeMatchSpecType:
-        // [KR] means to match K or R
-        // [^P] means the residue cannot be P
-        // [A-Z] means to match anything; empty string also means match anything
-        // Note, this function will automatically change [X] to [A-Z] (provided GENERIC_RESIDUE_SYMBOL = "X")
+
+        /// <summary>
+        /// Example RegEx match strings for udtEnzymeMatchSpecType:
+        /// [KR] means to match K or R
+        /// [^P] means the residue cannot be P
+        /// [A-Z] means to match anything; empty string also means match anything
+        /// </summary>
+        /// <remarks>Note, this class will automatically change [X] to [A-Z] (provided GENERIC_RESIDUE_SYMBOL = "X")</remarks>
         public struct udtEnzymeMatchSpecType
         {
-            public string LeftResidueRegEx;            // RegEx match string for matching the residue to the left of the cleavage point
-            public string RightResidueRegEx;           // RegEx match string for matching the residue to the right of the cleavage point
+            /// <summary>
+            /// RegEx match string for matching the residue to the left of the cleavage point
+            /// </summary>
+            public string LeftResidueRegEx;
 
+            /// <summary>
+            /// RegEx match string for matching the residue to the right of the cleavage point
+            /// </summary>
+            public string RightResidueRegEx;
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="strLeftResidueRegEx"></param>
+            /// <param name="strRightResidueRegEx"></param>
             public udtEnzymeMatchSpecType(string strLeftResidueRegEx, string strRightResidueRegEx)
             {
                 LeftResidueRegEx = strLeftResidueRegEx;
@@ -107,19 +180,29 @@ namespace PHRPReader
         private Regex mRightRegEx;
         private bool mUsingStandardTrypsinRules;
 
-        // This array holds TERMINUS_SYMBOL_SEQUEST, TERMINUS_SYMBOL_XTANDEM_NTerminus, and TERMINUS_SYMBOL_XTANDEM_CTerminus
-        //  and is useful for quickly checking for the presence of a terminus symbol using a binary search
-        private char[] mTerminusSymbols;
+        /// <summary>
+        /// This array holds TERMINUS_SYMBOL_SEQUEST, TERMINUS_SYMBOL_XTANDEM_NTerminus, and TERMINUS_SYMBOL_XTANDEM_CTerminus
+        /// and is useful for quickly checking for the presence of a terminus symbol using a binary search
+        /// </summary>
+        private readonly SortedSet<char> mTerminusSymbols;
+
         #endregion
 
         #region "Properties"
+
+        /// <summary>
+        /// RegEx patterns for matching cleavage site residues
+        /// </summary>
         public udtEnzymeMatchSpecType EnzymeMatchSpec
         {
             get => mEnzymeMatchSpec;
             set => SetEnzymeMatchSpec(value.LeftResidueRegEx, value.RightResidueRegEx);
         }
 
-        public char[] TerminusSymbols => mTerminusSymbols;
+        /// <summary>
+        /// Array of peptide terminus symbols
+        /// </summary>
+        public SortedSet<char> TerminusSymbols => mTerminusSymbols;
 
         #endregion
 

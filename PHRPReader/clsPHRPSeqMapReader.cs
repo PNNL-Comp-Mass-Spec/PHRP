@@ -4,9 +4,14 @@ using System.IO;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// PHRP SeqMap reader
+    /// </summary>
     public class clsPHRPSeqMapReader
     {
         #region "Constants"
+
+#pragma warning disable 1591
         public const string SEQ_PROT_MAP_COLUMN_Unique_Seq_ID = "Unique_Seq_ID";
         public const string SEQ_PROT_MAP_COLUMN_Cleavage_State = "Cleavage_State";
         public const string SEQ_PROT_MAP_COLUMN_Terminus_State = "Terminus_State";
@@ -19,6 +24,7 @@ namespace PHRPReader
         public const string SEQ_INFO_COLUMN_Mod_Count = "Mod_Count";
         public const string SEQ_INFO_COLUMN_Mod_Description = "Mod_Description";
         public const string SEQ_INFO_COLUMN_Monoisotopic_Mass = "Monoisotopic_Mass";
+#pragma warning restore 1591
 
         #endregion
 
@@ -33,31 +39,49 @@ namespace PHRPReader
 
         private readonly clsPHRPReader.ePeptideHitResultType mPeptideHitResultType;
 
-        private int mMaxProteinsPerSeqID;
-
         private string mErrorMessage = string.Empty;
         #endregion
 
         #region "Properties"
 
+        /// <summary>
+        /// Dataset name
+        /// </summary>
         public string DatasetName => mDatasetName;
 
+        /// <summary>
+        /// Error message
+        /// </summary>
         public string ErrorMessage => mErrorMessage;
 
+        /// <summary>
+        /// Input folder path
+        /// </summary>
         public string InputFolderPath => mInputFolderPath;
 
-        public int MaxProteinsPerSeqID
-        {
-            get => mMaxProteinsPerSeqID;
-            set => mMaxProteinsPerSeqID = value;
-        }
+        /// <summary>
+        /// Max proteins to track for each SeqID
+        /// </summary>
+        public int MaxProteinsPerSeqID { get; set; }
 
+        /// <summary>
+        /// PHRP result type
+        /// </summary>
         public clsPHRPReader.ePeptideHitResultType PeptideHitResultType => mPeptideHitResultType;
 
+        /// <summary>
+        /// PepToProtMap filename
+        /// </summary>
         public string PepToProteinMapFilename => mPepToProteinMapFilename;
 
+        /// <summary>
+        /// ResultToSeqMap filename
+        /// </summary>
         public string ResultToSeqMapFilename => mResultToSeqMapFilename;
 
+        /// <summary>
+        /// SeqToProteinMap filename
+        /// </summary>
         public string SeqToProteinMapFilename => mSeqToProteinMapFilename;
 
         #endregion

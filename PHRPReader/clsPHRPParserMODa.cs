@@ -12,9 +12,14 @@ using System.Collections.Generic;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// PHRP parser for MODa
+    /// </summary>
     public class clsPHRPParserMODa : clsPHRPParser
     {
         #region "Constants"
+
+#pragma warning disable 1591
         public const string DATA_COLUMN_ResultID = "ResultID";
         public const string DATA_COLUMN_Scan = "Scan";
         public const string DATA_COLUMN_Spectrum_Index = "Spectrum_Index";
@@ -35,26 +40,55 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_FHT = "_moda_fht.txt";
 
         private const string MODa_SEARCH_ENGINE_NAME = "MODa";
+#pragma warning restore 1591
+
         #endregion
 
         #region "Properties"
 
+        /// <summary>
+        /// First hits file
+        /// </summary>
         public override string PHRPFirstHitsFileName => GetPHRPFirstHitsFileName(mDatasetName);
 
+        /// <summary>
+        /// Mod summary file
+        /// </summary>
         public override string PHRPModSummaryFileName => GetPHRPModSummaryFileName(mDatasetName);
 
+        /// <summary>
+        /// Peptide to protein map file
+        /// </summary>
         public override string PHRPPepToProteinMapFileName => GetPHRPPepToProteinMapFileName(mDatasetName);
 
+        /// <summary>
+        /// Protein mods file
+        /// </summary>
         public override string PHRPProteinModsFileName => GetPHRPProteinModsFileName(mDatasetName);
 
+        /// <summary>
+        /// Synopsis file
+        /// </summary>
         public override string PHRPSynopsisFileName => GetPHRPSynopsisFileName(mDatasetName);
 
+        /// <summary>
+        /// Result to sequence map file
+        /// </summary>
         public override string PHRPResultToSeqMapFileName => GetPHRPResultToSeqMapFileName(mDatasetName);
 
+        /// <summary>
+        /// Sequence info file
+        /// </summary>
         public override string PHRPSeqInfoFileName => GetPHRPSeqInfoFileName(mDatasetName);
 
+        /// <summary>
+        /// Sequence to protein map file
+        /// </summary>
         public override string PHRPSeqToProteinMapFileName => GetPHRPSeqToProteinMapFileName(mDatasetName);
 
+        /// <summary>
+        /// Search engine name
+        /// </summary>
         public override string SearchEngineName => GetSearchEngineName();
 
         #endregion

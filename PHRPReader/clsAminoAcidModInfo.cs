@@ -1,31 +1,65 @@
 ﻿namespace PHRPReader
 {
+    /// <summary>
+    /// Tracks modifications on a residue
+    /// </summary>
     public class clsAminoAcidModInfo
     {
         #region "Constants and Enums"
+
+        /// <summary>
+        /// Symbol used by DMS for tracking the N-terminus of a peptide
+        /// </summary>
         public const char N_TERMINAL_PEPTIDE_SYMBOL_DMS = '<';
+
+        /// <summary>
+        /// Symbol used by DMS for tracking the C-terminus of a peptide
+        /// </summary>
         public const char C_TERMINAL_PEPTIDE_SYMBOL_DMS = '>';
+
+        /// <summary>
+        /// Symbol used by DMS for tracking the N-terminus of a protein
+        /// </summary>
         public const char N_TERMINAL_PROTEIN_SYMBOL_DMS = '[';
+
+        /// <summary>
+        /// Symbol used by DMS for tracking the C-terminus of a protein
+        /// </summary>
         public const char C_TERMINAL_PROTEIN_SYMBOL_DMS = ']';
 
+        /// <summary>
+        /// Terminus state enum
+        /// </summary>
         public enum eResidueTerminusStateConstants
         {
-            // The residue is in the middle of the peptide
+            /// <summary>
+            /// The residue is in the middle of the peptide
+            /// </summary>
             None = 0,
 
-            // The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
+            /// <summary>
+            /// The residue is located at the peptide's N-terminus; superseded by ProteinNTerminus if applicable
+            /// </summary>
             PeptideNTerminus = 1,
 
-            // The residue is located at the peptide's C-terminus; superseded by ProteinCTerminus if applicable
+            /// <summary>
+            /// The residue is located at the peptide's C-terminus; superseded by ProteinCTerminus if applicable
+            /// </summary>
             PeptideCTerminus = 2,
 
-            // The residue is located at the protein's N-terminus
+            /// <summary>
+            /// The residue is located at the protein's N-terminus
+            /// </summary>
             ProteinNTerminus = 3,
 
-            // The residue is located at the protein's C-terminus
+            /// <summary>
+            /// The residue is located at the protein's C-terminus
+            /// </summary>
             ProteinCTerminus = 4,
 
-            // The protein only has one residue
+            /// <summary>
+            /// The protein only has one residue
+            /// </summary>
             ProteinNandCCTerminus = 5
 
         }
@@ -47,8 +81,14 @@
         /// <remarks></remarks>
         public int EndResidueLocInPeptide { get; }
 
+        /// <summary>
+        /// Modification definition
+        /// </summary>
         public clsModificationDefinition ModDefinition { get; }
 
+        /// <summary>
+        /// Amino acid residue symbol
+        /// </summary>
         public char Residue { get; }
 
         /// <summary>
@@ -59,24 +99,42 @@
         /// <remarks>For ambiguous mods, indicates the first residue on which the mod could appear</remarks>
         public int ResidueLocInPeptide { get; }
 
+        /// <summary>
+        /// Residue terminus state
+        /// </summary>
         public eResidueTerminusStateConstants ResidueTerminusState { get; }
 
-        public clsAminoAcidModInfo(char chResidue, int intResidueLocInPeptide, eResidueTerminusStateConstants eResidueTerminusState, clsModificationDefinition objModDefinition)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="residue"></param>
+        /// <param name="residueLocInPeptide"></param>
+        /// <param name="residueTerminusState"></param>
+        /// <param name="objModDefinition"></param>
+        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, eResidueTerminusStateConstants residueTerminusState, clsModificationDefinition objModDefinition)
         {
             ModDefinition = objModDefinition;
-            Residue = chResidue;
-            ResidueLocInPeptide = intResidueLocInPeptide;
+            Residue = residue;
+            ResidueLocInPeptide = residueLocInPeptide;
             EndResidueLocInPeptide = ResidueLocInPeptide;
-            ResidueTerminusState = eResidueTerminusState;
+            ResidueTerminusState = residueTerminusState;
         }
 
-        public clsAminoAcidModInfo(char chResidue, int intResidueLocInPeptide, eResidueTerminusStateConstants eResidueTerminusState, clsModificationDefinition objModDefinition, int intEndResidueLocInPeptide)
+        /// <summary>
+        /// Constructor with endResidueLocInPeptide
+        /// </summary>
+        /// <param name="residue"></param>
+        /// <param name="residueLocInPeptide"></param>
+        /// <param name="residueTerminusState"></param>
+        /// <param name="objModDefinition"></param>
+        /// <param name="endResidueLocInPeptide"></param>
+        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, eResidueTerminusStateConstants residueTerminusState, clsModificationDefinition objModDefinition, int endResidueLocInPeptide)
         {
             ModDefinition = objModDefinition;
-            Residue = chResidue;
-            ResidueLocInPeptide = intResidueLocInPeptide;
-            EndResidueLocInPeptide = intEndResidueLocInPeptide;
-            ResidueTerminusState = eResidueTerminusState;
+            Residue = residue;
+            ResidueLocInPeptide = residueLocInPeptide;
+            EndResidueLocInPeptide = endResidueLocInPeptide;
+            ResidueTerminusState = residueTerminusState;
         }
     }
 }

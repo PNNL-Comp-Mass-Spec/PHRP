@@ -4,8 +4,6 @@
 //
 // Created 04/20/2012
 //
-// This class reads MASIC ScanStats data from a tab-delimited _ScanStats.txt file
-//
 //*********************************************************************************************************
 using System;
 using System.Collections.Generic;
@@ -13,9 +11,14 @@ using System.IO;
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class reads MASIC ScanStats data from a tab-delimited _ScanStats.txt file
+    /// </summary>
     public class clsScanStatsReader
     {
         #region "Constants"
+
+#pragma warning disable 1591
         public const string DATA_COLUMN_Dataset = "Dataset";
         public const string DATA_COLUMN_ScanNumber = "ScanNumber";
         public const string DATA_COLUMN_ScanTime = "ScanTime";
@@ -27,6 +30,9 @@ namespace PHRPReader
         public const string DATA_COLUMN_IonCount = "IonCount";
         public const string DATA_COLUMN_IonCountRaw = "IonCountRaw";
         public const string DATA_COLUMN_ScanTypeName = "ScanTypeName";
+
+#pragma warning restore 1591
+
         #endregion
 
         #region "Class-wide variables"

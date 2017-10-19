@@ -1,14 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-
-// This class will compute the mass of a given peptide sequence.  The sequence
-//  must consist of only capital letters, though if RemovePrefixAndSuffixIfPresent = True, then
-//  characters up to the first . and after the last . in the sequence will be removed
-// Residue modification information can be supplied by passing an array of modifications using
-//  the structure udtPeptideSequenceModInfoType
-//
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Program started January 3, 2006
@@ -21,36 +10,80 @@ using System.Text.RegularExpressions;
 // http://www.apache.org/licenses/LICENSE-2.0
 //
 
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+
 namespace PHRPReader
 {
+    /// <summary>
+    /// This class will compute the mass of a given peptide sequence.  The sequence
+    /// must consist of only capital letters, though if RemovePrefixAndSuffixIfPresent = True,
+    /// characters up to the first . and after the last . in the sequence will be removed.
+    /// Residue modification information can be supplied by passing an array of modifications
+    /// using the structure udtPeptideSequenceModInfoType
+    /// </summary>
     public class clsPeptideMassCalculator
     {
         #region "Constants and Enums"
 
+        /// <summary>
+        /// Symbol used when the modification is not an isotopic modification
+        /// </summary>
         public const char NO_AFFECTED_ATOM_SYMBOL = '-';
 
+        /// <summary>
+        /// Monoisotopic mass of hydrogen
+        /// </summary>
         public const double MASS_HYDROGEN = 1.0078246;
+
+        /// <summary>
+        /// Monoisotopic mass of oxygen
+        /// </summary>
         public const double MASS_OXYGEN = 15.9949141;
-        public const double MASS_PROTON = 1.00727649;               // Note that this is the mass of hydrogen minus the mass of one electron
+
+        /// <summary>
+        /// Monoisotopic mass of a proton
+        /// </summary>
+        /// <remarks>This is the mass of hydrogen minus the mass of one electron</remarks>
+        public const double MASS_PROTON = 1.00727649;
+
+        /// <summary>
+        /// Monoisotopic mass of hydrogen
+        /// </summary>
         public const double MASS_ELECTRON = 0.00054811;
 
+        /// <summary>
+        /// Default N-terminal mass change (+1.007276)
+        /// </summary>
         public const double DEFAULT_N_TERMINUS_MASS_CHANGE = MASS_HYDROGEN;
+
+        /// <summary>
+        /// Default C-terminal mass change (+15.9949)
+        /// </summary>
         public const double DEFAULT_C_TERMINUS_MASS_CHANGE = MASS_OXYGEN + MASS_HYDROGEN;
 
         private const byte ASCII_VAL_LETTER_A = 65;
         #endregion
 
         #region "Structures"
+
+        /// <summary>
+        /// Peptide sequence mod info
+        /// </summary>
         public struct udtPeptideSequenceModInfoType
         {
             /// <summary>
             /// Position that the modification occurs; not used by clsPeptideMassCalculator
             /// </summary>
             public int ResidueLocInPeptide;
+
             /// <summary>
             /// Modification mass
             /// </summary>
             public double ModificationMass;
+
             /// <summary>
             /// Affected atom
             /// </summary>
@@ -73,10 +106,6 @@ namespace PHRPReader
         private clsEmpiricalFormula[] mAminoAcidEmpiricalFormulas;
 
         // Typically mPeptideNTerminusMass + mPeptideCTerminusMass = 18.0105633 (the mass of water)
-        private double mPeptideNTerminusMass;
-        private double mPeptideCTerminusMass;
-
-        private bool mRemovePrefixAndSuffixIfPresent;
 
         private string mErrorMessage;
 
@@ -94,6 +123,9 @@ namespace PHRPReader
 
         #region "Properties"
 
+        /// <summary>
+        /// Charge carrier mass
+        /// </summary>
         public double ChargeCarrierMass { get; set; }
 
         /// <summary>
@@ -104,23 +136,21 @@ namespace PHRPReader
         /// <remarks></remarks>
         public string ErrorMessage => mErrorMessage;
 
-        public double PeptideCTerminusMass
-        {
-            get => mPeptideCTerminusMass;
-            set => mPeptideCTerminusMass = value;
-        }
+        /// <summary>
+        /// Peptide C-terminus mass
+        /// </summary>
+        public double PeptideCTerminusMass { get; set; }
 
-        public double PeptideNTerminusMass
-        {
-            get => mPeptideNTerminusMass;
-            set => mPeptideNTerminusMass = value;
-        }
+        /// <summary>
+        /// Peptide N-terminus mass
+        /// </summary>
+        public double PeptideNTerminusMass { get; set; }
 
-        public bool RemovePrefixAndSuffixIfPresent
-        {
-            get => mRemovePrefixAndSuffixIfPresent;
-            set => mRemovePrefixAndSuffixIfPresent = value;
-        }
+        /// <summary>
+        /// If true, look for and remove prefix and suffix residues
+        /// </summary>
+        public bool RemovePrefixAndSuffixIfPresent { get; set; }
+
         #endregion
 
         /// <summary>
