@@ -71,10 +71,10 @@ namespace PHRPReader
         private Queue mDefaultModificationSymbols;
 
         // List of known mass correction tags
-        private Hashtable mMassCorrectionTags;
+        private readonly Dictionary<string, double> mMassCorrectionTags;
 
         // List of known modifications
-        private List<clsModificationDefinition> mModifications;
+        private readonly List<clsModificationDefinition> mModifications;
 
         private string mErrorMessage;
 
@@ -115,6 +115,9 @@ namespace PHRPReader
         /// </summary>
         public clsPeptideModificationContainer()
         {
+            mMassCorrectionTags = new Dictionary<string, double>();
+            mModifications = new List<clsModificationDefinition>();
+
             InitializeLocalVariables();
         }
 
@@ -529,15 +532,13 @@ namespace PHRPReader
                     }
 
                     // First look for an exact match in mMassCorrectionTags
-                    var objEnum = mMassCorrectionTags.GetEnumerator();
-                    while (objEnum.MoveNext())
+                    foreach (var massCorrectionTag in mMassCorrectionTags)
                     {
-                        // strMassCorrectionTag = CStr(objEnum.Key)
-                        var dblMassDiff = Math.Abs(dblModificationMass - Convert.ToDouble(objEnum.Value));
-                        if (dblMassDiff < dblClosestMassCorrectionTagMassDiff)
+                        var massDiff = Math.Abs(dblModificationMass - massCorrectionTag.Value);
+                        if (massDiff < closestMassCorrectionTagMassDiff)
                         {
-                            strClosestMassCorrectionTag = Convert.ToString(objEnum.Key);
-                            dblClosestMassCorrectionTagMassDiff = dblMassDiff;
+                            closestMassCorrectionTag = massCorrectionTag.Key;
+                            closestMassCorrectionTagMassDiff = massDiff;
                         }
                     }
                 }
@@ -564,14 +565,14 @@ namespace PHRPReader
 
                     if (addToModificationListIfUnknown)
                     {
-                        try
+                        if (mMassCorrectionTags.ContainsKey(closestMassCorrectionTag))
                         {
-                            mMassCorrectionTags.Add(strClosestMassCorrectionTag, dblModificationMass);
+                            Console.WriteLine("Warning: Ignoring duplicate mass correction tag: {0}, mass {1:F3}",
+                                              closestMassCorrectionTag, dblModificationMass);
                         }
-                        catch (Exception)
+                        else
                         {
-                            // This shouldn't happen; a match should have been found earlier in this function
-                            // Ignore the error
+                            mMassCorrectionTags.Add(closestMassCorrectionTag, dblModificationMass);
                         }
                     }
 
@@ -1063,8 +1064,6 @@ namespace PHRPReader
             mErrorMessage = string.Empty;
             SetDefaultMassCorrectionTags();
 
-            mModifications = new List<clsModificationDefinition>();
-
             // Note that this sub will call UpdateDefaultModificationSymbols()
             ClearModifications();
 
@@ -1106,14 +1105,7 @@ namespace PHRPReader
                 {
                     using (var srMassCorrectionTagsFile = new StreamReader(strFilePath))
                     {
-                        if (mMassCorrectionTags == null)
-                        {
-                            mMassCorrectionTags = new Hashtable();
-                        }
-                        else
-                        {
-                            mMassCorrectionTags.Clear();
-                        }
+                        mMassCorrectionTags.Clear();
 
                         while (!srMassCorrectionTagsFile.EndOfStream)
                         {
@@ -1364,14 +1356,7 @@ namespace PHRPReader
         {
             try
             {
-                if (mMassCorrectionTags == null)
-                {
-                    mMassCorrectionTags = new Hashtable();
-                }
-                else
-                {
-                    mMassCorrectionTags.Clear();
-                }
+                mMassCorrectionTags.Clear();
 
                 // Note: Function StoreMassCorrectionTag will remove spaces
                 // from the beginning or end of the mass correction tag names
