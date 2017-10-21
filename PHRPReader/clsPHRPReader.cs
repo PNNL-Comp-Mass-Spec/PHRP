@@ -2550,6 +2550,7 @@ namespace PHRPReader
                 if (objModSummaryReader.ModificationDefs.Count == 0)
                     return true;
 
+                var duplicateModSymbolCounts = new Dictionary<char, int>();
 
                 foreach (var modDef in objModSummaryReader.ModificationDefs)
                 {
@@ -2602,23 +2603,33 @@ namespace PHRPReader
                             // Dynamic residue mod (Includes mod type "D")
                             // Note that < and > mean peptide N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
 
-                                try
+                            try
+                            {
+                                if (objDynamicMods.ContainsKey(modDef.ModificationSymbol))
                                 {
-                                    if (objDynamicMods.ContainsKey(objModDef.ModificationSymbol))
+                                    // Mod symbol already present in objDynamicMods; this is unexpected, but can happen with MODa, which finds lots of mods
+                                    if (duplicateModSymbolCounts.TryGetValue(modDef.ModificationSymbol, out var duplicateCount))
                                     {
-                                        // Mod symbol already present in objDynamicMods; this is unexpected
-                                        // We'll log a warning, but continue
-                                        ShowMessage("Warning: Dynamic mod symbol '" + objModDef.ModificationSymbol + "' is already defined; it cannot have more than one associated mod mass (duplicate has ModMass=" + strModMass + ")");
+                                        duplicateModSymbolCounts[modDef.ModificationSymbol] = duplicateCount + 1;
                                     }
                                     else
                                     {
-                                        objDynamicMods.Add(objModDef.ModificationSymbol, objModDef);
+                                        duplicateModSymbolCounts.Add(modDef.ModificationSymbol, 1);
+
+                                        // We'll log a warning, but continue
+                                        ShowMessage("Warning: Dynamic mod symbol '" + modDef.ModificationSymbol + "' is already defined; " +
+                                                    "it cannot have more than one associated mod mass (duplicate has ModMass=" + strModMass + ")");
                                     }
                                 }
-                                catch (Exception ex)
+                                else
                                 {
-                                    HandleException("Exception adding dynamic mod for " + objModDef.ModificationSymbol + " with ModMass=" + strModMass, ex);
+                                    objDynamicMods.Add(modDef.ModificationSymbol, modDef);
                                 }
+                            }
+                            catch (Exception ex)
+                            {
+                                HandleException("Exception adding dynamic mod for " + modDef.ModificationSymbol + " with ModMass=" + strModMass, ex);
+                            }
 
                             break;
 
@@ -2632,6 +2643,12 @@ namespace PHRPReader
                             break;
                     }
                 }
+
+                foreach (var item in duplicateModSymbolCounts)
+                {
+                    if (item.Value > 1)
+                    {
+                        ShowMessage(string.Format(" Duplicate count for symbol '{0}': {1}", item.Key, item.Value));
                     }
                 }
             }
