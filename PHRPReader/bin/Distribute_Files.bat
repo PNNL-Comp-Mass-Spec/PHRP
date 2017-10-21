@@ -16,7 +16,6 @@ call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_Phospho_FDR_Aggregator_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_Converter_PlugIn\bin"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Plugins\AM_PRIDE_MzXML_PlugIn\bin"
-call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\DMS_Managers\Analysis_Manager\Test_Plugins\TestMagePlugIn\bin\Debug"
 pause
 
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\MASICResultsMerger\bin"
