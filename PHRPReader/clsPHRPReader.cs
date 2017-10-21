@@ -2543,58 +2543,64 @@ namespace PHRPReader
                 ShowMessage("Reading the PHRP ModSummary file");
 
                 var objModSummaryReader = new clsPHRPModSummaryReader(strModSummaryFilePath);
-                var blnSuccess = objModSummaryReader.Success;
+                var success = objModSummaryReader.Success;
+                if (!success)
+                    return false;
 
-                if (blnSuccess && objModSummaryReader.ModificationDefs.Count > 0)
+                if (objModSummaryReader.ModificationDefs.Count == 0)
+                    return true;
+
+
+                foreach (var modDef in objModSummaryReader.ModificationDefs)
                 {
-                    foreach (var objModDef in objModSummaryReader.ModificationDefs)
+                    var strModMass = objModSummaryReader.GetModificationMassAsText(modDef.MassCorrectionTag);
+
+                    switch (modDef.ModificationType)
                     {
-                        var strModMass = objModSummaryReader.GetModificationMassAsText(objModDef.MassCorrectionTag);
+                        case clsModificationDefinition.eModificationTypeConstants.StaticMod:
+                        case clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod:
+                        case clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod:
 
-                        switch (objModDef.ModificationType)
-                        {
-                            case clsModificationDefinition.eModificationTypeConstants.StaticMod:
-                            case clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod:
-                            case clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod:
+                            // "S", "T", or "P"
+                            // Static residue mod, peptide terminus static mod, or protein terminus static mod
+                            // Note that < and > mean peptide N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                            // Note that [ and ] mean protein N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
 
-                                // "S", "T", or "P"
-                                // Static residue mod, peptide terminus static mod, or protein terminus static mod
-                                // Note that < and > mean peptide N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
-                                // Note that [ and ] mean protein N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
-
-                                // This mod could apply to multiple residues, so need to process each character in strTargetResidues
-                                foreach (var chChar in objModDef.TargetResidues)
+                            // This mod could apply to multiple residues, so need to process each character in strTargetResidues
+                            foreach (var chChar in modDef.TargetResidues)
+                            {
+                                try
                                 {
-                                    try
+                                    if (objStaticMods.TryGetValue(chChar.ToString(), out var lstModDefs))
                                     {
-                                        if (objStaticMods.TryGetValue(chChar.ToString(), out var lstModDefs))
+                                        if (!lstModDefs.Contains(modDef))
                                         {
-                                            if (!lstModDefs.Contains(objModDef))
-                                            {
-                                                // Residue is already present in objStaticMods; this is unusual, but we'll allow it
-                                                // We'll log a warning, but continue
-                                                ShowMessage("Warning: Residue '" + chChar + "' has more than one static mod defined; this is not typically used, but will be allowed");
-                                                lstModDefs.Add(objModDef);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            lstModDefs = new List<clsModificationDefinition> {
-                                                objModDef
-                                            };
-                                            objStaticMods.Add(chChar.ToString(), lstModDefs);
+                                            // Residue is already present in objStaticMods; this is unusual, but we'll allow it
+                                            // We'll log a warning, but continue
+                                            ShowMessage("Warning: Residue '" + chChar + "' has more than one static mod defined; " +
+                                                        "this is not typically used, but will be allowed");
+                                            lstModDefs.Add(modDef);
                                         }
                                     }
-                                    catch (Exception ex)
+                                    else
                                     {
-                                        HandleException("Exception adding static mod for " + chChar + " with ModMass=" + strModMass, ex);
+                                        lstModDefs = new List<clsModificationDefinition>
+                                        {
+                                            modDef
+                                        };
+                                        objStaticMods.Add(chChar.ToString(), lstModDefs);
                                     }
                                 }
+                                catch (Exception ex)
+                                {
+                                    HandleException("Exception adding static mod for " + chChar + " with ModMass=" + strModMass, ex);
+                                }
+                            }
 
-                                break;
-                            case clsModificationDefinition.eModificationTypeConstants.DynamicMod:
-                                // Dynamic residue mod (Includes mod type "D")
-                                // Note that < and > mean peptide N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                            break;
+                        case clsModificationDefinition.eModificationTypeConstants.DynamicMod:
+                            // Dynamic residue mod (Includes mod type "D")
+                            // Note that < and > mean peptide N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
 
                                 try
                                 {
@@ -2614,17 +2620,18 @@ namespace PHRPReader
                                     HandleException("Exception adding dynamic mod for " + objModDef.ModificationSymbol + " with ModMass=" + strModMass, ex);
                                 }
 
-                                break;
+                            break;
 
-                            case clsModificationDefinition.eModificationTypeConstants.IsotopicMod:
-                                break;
+                        case clsModificationDefinition.eModificationTypeConstants.IsotopicMod:
                             // Isotopic mods are not supported by this class
                             // However, do not log a warning since these are rarely used
+                            break;
 
-                            case clsModificationDefinition.eModificationTypeConstants.UnknownType:
-                                // Unknown type; just ignore it
-                                break;
-                        }
+                        case clsModificationDefinition.eModificationTypeConstants.UnknownType:
+                            // Unknown type; just ignore it
+                            break;
+                    }
+                }
                     }
                 }
             }
