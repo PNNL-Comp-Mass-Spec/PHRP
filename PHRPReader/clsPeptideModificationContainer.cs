@@ -532,8 +532,7 @@ namespace PHRPReader
                         closestMassCorrectionTag = GetBestIntegerBasedMassCorrectionTag(dblModificationMass);
                         if (!string.IsNullOrEmpty(closestMassCorrectionTag))
                         {
-                            dblClosestMassCorrectionTagMassDiff = 0;
-                            break;
+                            return closestMassCorrectionTag;
                         }
                     }
 
