@@ -371,7 +371,13 @@ namespace PHRPReader
                         eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
                     }
 
-                    var objModDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, strResidue, eModType, "Mod" + modMassDa.ToString("0"));
+                    var objModDef = new clsModificationDefinition(
+                        clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                        modMassDa,
+                        strResidue,
+                        eModType,
+                        "Mod" + modMassDa.ToString("0"));
+
                     objSearchEngineParams.AddModification(objModDef);
                 }
 

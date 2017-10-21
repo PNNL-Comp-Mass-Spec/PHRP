@@ -317,11 +317,24 @@ namespace PHRPReader
                         switch (strSettingValue)
                         {
                             case "C57":
-                                objModDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 57.0215, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcet");
+                                objModDef = new clsModificationDefinition(
+                                    clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                                    57.0215,
+                                    "C",
+                                    clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                    "IodoAcet");
+
                                 objSearchEngineParams.AddModification(objModDef);
                                 break;
+
                             case "C58":
-                                objModDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 58.0055, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcid");
+                                objModDef = new clsModificationDefinition(
+                                    clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                                    58.0055,
+                                    "C",
+                                    clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                    "IodoAcid");
+
                                 objSearchEngineParams.AddModification(objModDef);
                                 break;
                         }
