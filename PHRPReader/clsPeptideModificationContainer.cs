@@ -243,7 +243,13 @@ namespace PHRPReader
 
             var strMassCorrectionTag = LookupMassCorrectionTagByMass(dblModificationMass, massDigitsOfPrecision, true, massDigitsOfPrecision);
 
-            var objModificationDefinition = new clsModificationDefinition(chModSymbol, dblModificationMass, strTargetResidues, eModType, strMassCorrectionTag, clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, true);
+            var objModificationDefinition = new clsModificationDefinition(
+                chModSymbol,
+                dblModificationMass,
+                strTargetResidues,
+                eModType,
+                strMassCorrectionTag,
+                clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, true);
 
             if (!addToModificationListIfUnknown)
                 return objModificationDefinition;
@@ -390,18 +396,18 @@ namespace PHRPReader
         /// <remarks></remarks>
         private string GetBestIntegerBasedMassCorrectionTag(double dblModificationMass)
         {
-            var strClosestMassCorrectionTag = string.Empty;
+            var closestMassCorrectionTag = string.Empty;
 
             foreach (var tagOverride in mIntegerMassCorrectionTagLookup)
             {
                 if (Math.Abs(dblModificationMass - tagOverride.Key) < 0.0001)
                 {
-                    strClosestMassCorrectionTag = tagOverride.Value;
+                    closestMassCorrectionTag = tagOverride.Value;
                     break;
                 }
             }
 
-            return strClosestMassCorrectionTag;
+            return closestMassCorrectionTag;
         }
 
         /// <summary>
@@ -516,15 +522,15 @@ namespace PHRPReader
 
             for (var currentPrecision = (int)massDigitsOfPrecision; currentPrecision >= intMassDigitsOfPrecisionStop; currentPrecision += -1)
             {
-                var strClosestMassCorrectionTag = string.Empty;
-                var dblClosestMassCorrectionTagMassDiff = double.MaxValue;
+                var closestMassCorrectionTag = string.Empty;
+                var closestMassCorrectionTagMassDiff = double.MaxValue;
 
                 try
                 {
                     if (intMassDigitsOfPrecisionStop == 0)
                     {
-                        strClosestMassCorrectionTag = GetBestIntegerBasedMassCorrectionTag(dblModificationMass);
-                        if (!string.IsNullOrEmpty(strClosestMassCorrectionTag))
+                        closestMassCorrectionTag = GetBestIntegerBasedMassCorrectionTag(dblModificationMass);
+                        if (!string.IsNullOrEmpty(closestMassCorrectionTag))
                         {
                             dblClosestMassCorrectionTagMassDiff = 0;
                             break;
@@ -547,10 +553,10 @@ namespace PHRPReader
                     // Error enumerating through mMassCorrectionTags
                 }
 
-                if (Math.Abs(Math.Round(dblClosestMassCorrectionTagMassDiff, currentPrecision)) < float.Epsilon)
+                if (Math.Abs(Math.Round(closestMassCorrectionTagMassDiff, currentPrecision)) < float.Epsilon)
                 {
                     // Match found
-                    return strClosestMassCorrectionTag;
+                    return closestMassCorrectionTag;
                 }
 
                 if (currentPrecision > intMassDigitsOfPrecisionStop)
@@ -561,7 +567,7 @@ namespace PHRPReader
                 {
                     // Match not found
                     // Name the modification based on the mod mass
-                    strClosestMassCorrectionTag = GenerateGenericModMassName(dblModificationMass);
+                    closestMassCorrectionTag = GenerateGenericModMassName(dblModificationMass);
 
                     if (addToModificationListIfUnknown)
                     {
@@ -576,7 +582,7 @@ namespace PHRPReader
                         }
                     }
 
-                    return strClosestMassCorrectionTag;
+                    return closestMassCorrectionTag;
                 }
             }
 
