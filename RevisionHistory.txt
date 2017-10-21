@@ -1,5 +1,11 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6502; October 20, 2017
+	- Fix bug finding a matching mass correction tag based on mass
+
+Version 1.5.6501; October 19, 2017
+	- Extensive code cleanup, including using clsEventNotifier in PRISM.dll
+
 Version 1.5.6487; October 5, 2017
 	- Convert to C#
 
