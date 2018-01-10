@@ -1,3 +1,12 @@
+@echo off
+
+echo.
+echo Be sure to build PeptideHitResultsProcessor.dll in Release mode prior to calling this batch file
+echo.
+pause
+
+@echo on
+
 copy Release\PeptideHitResultsProcessor.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common"
 copy Release\PeptideHitResultsProcessor.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin"
 
