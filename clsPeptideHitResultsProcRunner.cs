@@ -168,8 +168,6 @@ namespace PeptideHitResultsProcRunner
 
         private void InitializeLocalVariables()
         {
-            ShowMessages = false;
-
             mPeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
 
             MassCorrectionTagsFilePath = string.Empty;
@@ -196,14 +194,14 @@ namespace PeptideHitResultsProcRunner
             mLocalErrorCode = eResultsProcessorErrorCodes.NoError;
         }
 
-        private void InitializePeptideHitResultsProcessor(string strInputFilePath)
+        private void InitializePeptideHitResultsProcessor(string inputFilePath)
         {
             if (mObtainModificationDefinitionsFromDMS)
             {
                 LoadModificationInfoFromDMS();
             }
 
-            var sourceFile = new FileInfo(strInputFilePath);
+            var sourceFile = new FileInfo(inputFilePath);
 
             mPeptideHitResultsProcessor.MassCorrectionTagsFilePath = ResolveFilePath(sourceFile.DirectoryName, MassCorrectionTagsFilePath);
             mPeptideHitResultsProcessor.ModificationDefinitionsFilePath = ResolveFilePath(sourceFile.DirectoryName, ModificationDefinitionsFilePath);
@@ -259,23 +257,23 @@ namespace PeptideHitResultsProcRunner
             //ORDER BY AJ.AJ_jobID, PFMI.Local_Symbol
         }
 
-        private bool LoadParameterFileSettings(string strParameterFilePath)
+        private bool LoadParameterFileSettings(string parameterFilePath)
         {
             const string OPTIONS_SECTION = "PeptideHitResultsProcRunner";
 
-            var objSettingsFile = new PRISM.XmlSettingsFileAccessor();
+            var objSettingsFile = new XmlSettingsFileAccessor();
 
             try
             {
-                if (string.IsNullOrWhiteSpace(strParameterFilePath))
+                if (string.IsNullOrWhiteSpace(parameterFilePath))
                 {
                     // No parameter file specified; nothing to load
                     return true;
                 }
 
-                if (!File.Exists(strParameterFilePath))
+                if (!File.Exists(parameterFilePath))
                 {
-                    // See if strParameterFilePath points to a file in the same directory as the application
+                    // See if parameterFilePath points to a file in the same directory as the application
                     var appFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                     if (string.IsNullOrWhiteSpace(appFolderPath))
                     {
@@ -283,19 +281,19 @@ namespace PeptideHitResultsProcRunner
                         return false;
                     }
 
-                    strParameterFilePath = Path.Combine(appFolderPath, Path.GetFileName(strParameterFilePath));
-                    if (!File.Exists(strParameterFilePath))
+                    parameterFilePath = Path.Combine(appFolderPath, Path.GetFileName(parameterFilePath));
+                    if (!File.Exists(parameterFilePath))
                     {
                         SetBaseClassErrorCode(eProcessFilesErrorCodes.ParameterFileNotFound);
                         return false;
                     }
                 }
 
-                if (objSettingsFile.LoadSettings(strParameterFilePath))
+                if (objSettingsFile.LoadSettings(parameterFilePath))
                 {
                     if (!objSettingsFile.SectionPresent(OPTIONS_SECTION))
                     {
-                        ShowErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + strParameterFilePath);
+                        ShowErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + parameterFilePath);
                         SetBaseClassErrorCode(eProcessFilesErrorCodes.InvalidParameterFile);
                         return false;
                     }
@@ -322,21 +320,27 @@ namespace PeptideHitResultsProcRunner
             return true;
         }
 
-        // Main processing function
-        public override bool ProcessFile(string strInputFilePath, string strOutputFolderPath, string strParameterFilePath, bool blnResetErrorCode)
+        /// <summary>
+        /// Main processing function
+        /// </summary>
+        /// <param name="inputFilePath"></param>
+        /// <param name="outputFolderPath"></param>
+        /// <param name="parameterFilePath"></param>
+        /// <param name="resetErrorCode"></param>
+        /// <returns>True if success, False if failure</returns>
+        public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath, bool resetErrorCode)
         {
-            // Returns True if success, False if failure
 
             var success = false;
 
-            if (blnResetErrorCode)
+            if (resetErrorCode)
             {
                 SetLocalErrorCode(eResultsProcessorErrorCodes.NoError);
             }
 
-            if (!LoadParameterFileSettings(strParameterFilePath))
+            if (!LoadParameterFileSettings(parameterFilePath))
             {
-                var strStatusMessage = "Parameter file load error: " + strParameterFilePath;
+                var strStatusMessage = "Parameter file load error: " + parameterFilePath;
                 ShowErrorMessage(strStatusMessage);
 
                 if (ErrorCode == eProcessFilesErrorCodes.NoError)
@@ -348,7 +352,7 @@ namespace PeptideHitResultsProcRunner
 
             try
             {
-                if (string.IsNullOrWhiteSpace(strInputFilePath))
+                if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     ShowErrorMessage("Input file name is empty");
                     SetBaseClassErrorCode(eProcessFilesErrorCodes.InvalidInputFilePath);
@@ -356,23 +360,22 @@ namespace PeptideHitResultsProcRunner
                 else
                 {
                     // Note that CleanupFilePaths() will update mOutputFolderPath, which is used by LogMessage()
-                    if (!CleanupFilePaths(ref strInputFilePath, ref strOutputFolderPath))
+                    if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
                     {
                         SetBaseClassErrorCode(eProcessFilesErrorCodes.FilePathError);
                     }
                     else
                     {
-                        mProgressStepDescription = "Parsing " + Path.GetFileName(strInputFilePath);
-                        LogMessage(mProgressStepDescription);
+                        UpdateProgress("Parsing " + Path.GetFileName(inputFilePath));
                         ResetProgress();
 
                         if (CreateProteinModsUsingPHRPDataFile)
                         {
-                            success = StartCreateProteinModsViaPHRPData(strInputFilePath, strOutputFolderPath);
+                            success = StartCreateProteinModsViaPHRPData(inputFilePath, outputFolderPath);
                         }
                         else
                         {
-                            success = StartPHRP(strInputFilePath, strOutputFolderPath, strParameterFilePath);
+                            success = StartPHRP(inputFilePath, outputFolderPath, parameterFilePath);
                         }
                     }
                 }
@@ -394,32 +397,36 @@ namespace PeptideHitResultsProcRunner
         }
 
         /// <summary>
-        /// Looks for file strFileNameOrPath in the current working directory
-        /// If not found, then looks in strSourceFolderPath
+        /// Looks for file fileNameOrPath in the current working directory
+        /// If not found, then looks in sourceFolderPath
         /// </summary>
-        /// <param name="strSourceFolderPath">Path to the folder containing the input file</param>
-        /// <param name="strFileNameOrPath">File to find (either filename or full file path)</param>
-        /// <returns>The path to the file if found, or strFileNameOrPath if not found</returns>
+        /// <param name="sourceFolderPath">Path to the folder containing the input file</param>
+        /// <param name="fileNameOrPath">File to find (either filename or full file path)</param>
+        /// <returns>The path to the file if found, or fileNameOrPath if not found</returns>
         /// <remarks></remarks>
-        protected string ResolveFilePath(string strSourceFolderPath, string strFileNameOrPath)
+        protected string ResolveFilePath(string sourceFolderPath, string fileNameOrPath)
         {
-            if (File.Exists(strFileNameOrPath))
+            if (File.Exists(fileNameOrPath))
             {
-                return strFileNameOrPath;
+                return fileNameOrPath;
             }
 
-            var strNewPath = Path.Combine(strSourceFolderPath, Path.GetFileName(strFileNameOrPath));
-            if (File.Exists(strNewPath))
+            var fileName = Path.GetFileName(fileNameOrPath);
+            if (string.IsNullOrWhiteSpace(fileName))
+                return fileNameOrPath;
+
+            var newFilePath = Path.Combine(sourceFolderPath, fileName);
+            if (File.Exists(newFilePath))
             {
-                return strNewPath;
+                return newFilePath;
             }
 
-            return strFileNameOrPath;
+            return fileNameOrPath;
         }
 
-        private void SetLocalErrorCode(eResultsProcessorErrorCodes eNewErrorCode, bool blnLeaveExistingErrorCodeUnchanged = false)
+        private void SetLocalErrorCode(eResultsProcessorErrorCodes eNewErrorCode, bool leaveExistingErrorCodeUnchanged = false)
         {
-            if (blnLeaveExistingErrorCodeUnchanged && mLocalErrorCode != eResultsProcessorErrorCodes.NoError)
+            if (leaveExistingErrorCodeUnchanged && mLocalErrorCode != eResultsProcessorErrorCodes.NoError)
             {
                 // An error code is already defined; do not change it
             }
@@ -441,7 +448,7 @@ namespace PeptideHitResultsProcRunner
             }
         }
 
-        private bool StartCreateProteinModsViaPHRPData(string strInputFilePath, string strOutputFolderPath)
+        private bool StartCreateProteinModsViaPHRPData(string inputFilePath, string outputFolderPath)
         {
 
             try
@@ -492,13 +499,13 @@ namespace PeptideHitResultsProcRunner
 
                     default:
                         // Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
-                        ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(strInputFilePath);
+                        ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(inputFilePath);
                         break;
                 }
 
                 if (ePeptideHitResultType == clsPHRPReader.ePeptideHitResultType.Unknown)
                 {
-                    ShowErrorMessage("Error: Could not determine the format of the PHRP data file: " + strInputFilePath);
+                    ShowErrorMessage("Error: Could not determine the format of the PHRP data file: " + inputFilePath);
                     return false;
                 }
 
@@ -543,9 +550,9 @@ namespace PeptideHitResultsProcRunner
                 // Instead use local event handlers that optionally log to a file
                 RegisterResultsProcessEvents(mPeptideHitResultsProcessor);
 
-                InitializePeptideHitResultsProcessor(strInputFilePath);
+                InitializePeptideHitResultsProcessor(inputFilePath);
 
-                var success = mPeptideHitResultsProcessor.CreateProteinModDetailsFile(strInputFilePath, strOutputFolderPath);
+                var success = mPeptideHitResultsProcessor.CreateProteinModDetailsFile(inputFilePath, outputFolderPath);
 
                 if (!success)
                 {
@@ -565,7 +572,7 @@ namespace PeptideHitResultsProcRunner
 
         }
 
-        private bool StartPHRP(string strInputFilePath, string strOutputFolderPath, string strParameterFilePath)
+        private bool StartPHRP(string inputFilePath, string outputFolderPath, string parameterFilePath)
         {
 
             try
@@ -573,7 +580,7 @@ namespace PeptideHitResultsProcRunner
                 clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants ePeptideHitResultsFormat;
                 if (mPeptideHitResultsFileFormat == clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine)
                 {
-                    ePeptideHitResultsFormat = clsPHRPBaseClass.DetermineResultsFileFormat(strInputFilePath);
+                    ePeptideHitResultsFormat = clsPHRPBaseClass.DetermineResultsFileFormat(inputFilePath);
                 }
                 else
                 {
@@ -660,9 +667,9 @@ namespace PeptideHitResultsProcRunner
                 // Instead use local event handlers that optionally log to a file
                 RegisterResultsProcessEvents(mPeptideHitResultsProcessor);
 
-                InitializePeptideHitResultsProcessor(strInputFilePath);
+                InitializePeptideHitResultsProcessor(inputFilePath);
 
-                var success = mPeptideHitResultsProcessor.ProcessFile(strInputFilePath, strOutputFolderPath, strParameterFilePath);
+                var success = mPeptideHitResultsProcessor.ProcessFile(inputFilePath, outputFolderPath, parameterFilePath);
                 if (!success)
                 {
                     ShowErrorMessage(mPeptideHitResultsProcessor.ErrorMessage);
@@ -704,9 +711,9 @@ namespace PeptideHitResultsProcRunner
             UpdateProgress(taskDescription, percentComplete);
         }
 
-        private void mPeptideHitResultsProcessor_WarningMessageEvent(string WarningMessage)
+        private void mPeptideHitResultsProcessor_WarningMessageEvent(string warningMessage)
         {
-            LogMessage(WarningMessage, eMessageTypeConstants.Warning);
+            LogMessage(warningMessage, eMessageTypeConstants.Warning);
         }
     }
 }
