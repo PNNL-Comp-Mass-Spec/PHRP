@@ -95,7 +95,6 @@
 rem if not exist "$(TargetDir)x86" mkdir "$(TargetDir)x86"
 rem if not exist "$(TargetDir)x64" mkdir "$(TargetDir)x64"
 rem xcopy "$(ProjectDir)Lib\x86\*" "$(TargetDir)x86\" /D /Y
-rem xcopy "$(ProjectDir)Lib\x64\*" "$(TargetDir)x64\" /D /Y
-copy "$(TargetPath)" "$(ProjectDir)\..\bin\"</PostBuildEvent>
+rem xcopy "$(ProjectDir)Lib\x64\*" "$(TargetDir)x64\" /D /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
