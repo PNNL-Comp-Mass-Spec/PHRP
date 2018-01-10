@@ -24,6 +24,7 @@
 // this computer software.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using PeptideHitResultsProcessor;
@@ -32,7 +33,7 @@ using PRISM;
 
 namespace PeptideHitResultsProcRunner
 {
-    public class clsPeptideHitResultsProcRunner : clsProcessFilesBaseClass
+    public class clsPeptideHitResultsProcRunner : PRISM.FileProcessor.ProcessFilesBase
     {
         public clsPeptideHitResultsProcRunner()
         {
@@ -119,7 +120,7 @@ namespace PeptideHitResultsProcRunner
 
         #endregion
 
-        public override string[] GetDefaultExtensionsToParse()
+        public override IList<string> GetDefaultExtensionsToParse()
         {
             var strExtensionsToParse = new string[2];
 
