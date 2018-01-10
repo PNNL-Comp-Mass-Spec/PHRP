@@ -15,12 +15,16 @@ copy Release\*.dll "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Ma
 copy Release\PeptideHitResultsProcessor.pdb "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP"
 copy Release\PeptideHitResultsProcRunner.exe "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP"
 copy Release\PeptideHitResultsProcRunner.pdb "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP"
+copy Release\PHRPReader.pdb "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP"
+copy Release\PHRPReader.xml "F:\My Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP"
 
 copy Release\*.dll "C:\DMS_Programs\PHRP"
 copy Release\PHRPReader.pdb "C:\DMS_Programs\PHRP"
 copy Release\PeptideHitResultsProcessor.pdb "C:\DMS_Programs\PHRP"
 copy Release\PeptideHitResultsProcRunner.exe "C:\DMS_Programs\PHRP"
 copy Release\PeptideHitResultsProcRunner.pdb "C:\DMS_Programs\PHRP"
+copy Release\PHRPReader.pdb "C:\DMS_Programs\PHRP"
+copy Release\PHRPReader.xml "C:\DMS_Programs\PHRP"
 
 pause
 
