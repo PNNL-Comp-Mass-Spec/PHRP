@@ -107,3 +107,6 @@ PeptideHitResultsProcessor_SourceCode/*
 /PeptideHitResultsProcessor/Unused
 /PeptideHitResultsProcessor_Installer/Output
 **/.vs/
+/Data/MSGFPlus_Example/PHRP_LogFile.txt
+**/PeptideHitResultsProcRunner_log*.txt
+
