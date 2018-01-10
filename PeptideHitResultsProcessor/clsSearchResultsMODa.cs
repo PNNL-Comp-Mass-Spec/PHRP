@@ -6,7 +6,7 @@
 // Created 4/01/2014
 //
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// Website: https://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
 // -------------------------------------------------------------------------------
 using PHRPReader;
 

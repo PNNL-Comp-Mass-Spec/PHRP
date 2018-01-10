@@ -3,7 +3,7 @@
 // Program started January 4, 2006
 //
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// Website: http://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or http://panomics.pnnl.gov/' -------------------------------------------------------------------------------
+// Website: https://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or https://panomics.pnnl.gov/' -------------------------------------------------------------------------------
 //
 // Licensed under the Apache License, Version 2.0; you may not use this file except
 // in compliance with the License.  You may obtain a copy of the License at
