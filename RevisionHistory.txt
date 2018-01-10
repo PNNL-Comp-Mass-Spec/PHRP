@@ -1,5 +1,8 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.6583; January 9, 2018
+	- Use FileProcessor.ProcessFilesBase in PRISM.dll
+
 Version 1.5.6502; October 20, 2017
 	- Fix bug finding a matching mass correction tag based on mass
 
