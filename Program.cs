@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "October 20, 2017";
+        public const string PROGRAM_DATE = "January 8, 2018";
 
         private static string mInputFilePath;
         private static string mOutputFolderPath;                         // Optional
@@ -64,7 +64,6 @@ namespace PeptideHitResultsProcRunner
         private static bool mLogMessagesToFile;
         private static string mLogFilePath = string.Empty;
         private static string mLogFolderPath = string.Empty;
-        private static bool mQuietMode;
 
         private static clsPeptideHitResultsProcRunner mPeptideHitResultsProcRunner;
 
@@ -107,7 +106,6 @@ namespace PeptideHitResultsProcRunner
 
             mRecurseFoldersMaxLevels = 0;
 
-            mQuietMode = false;
             mLogMessagesToFile = false;
             mLogFilePath = string.Empty;
             mLogFolderPath = string.Empty;
@@ -134,7 +132,6 @@ namespace PeptideHitResultsProcRunner
                     // Note: Most of the options will get overridden if defined in the parameter file
                     mPeptideHitResultsProcRunner = new clsPeptideHitResultsProcRunner
                     {
-                        ShowMessages = !mQuietMode,
                         LogMessagesToFile = mLogMessagesToFile,
                         LogFilePath = mLogFilePath,
                         LogFolderPath = mLogFolderPath,
@@ -185,17 +182,11 @@ namespace PeptideHitResultsProcRunner
                             if (intReturnCode == 0)
                             {
                                 intReturnCode = -1;
-                                if (!mQuietMode)
-                                {
-                                    ShowErrorMessage("ProcessFilesWildcard returned Success=False");
-                                }
+                                ShowErrorMessage("ProcessFilesWildcard returned Success=False");
                             }
                             else
                             {
-                                if (!mQuietMode)
-                                {
-                                    ShowErrorMessage("Error while processing: " + mPeptideHitResultsProcRunner.GetErrorMessage());
-                                }
+                                ShowErrorMessage("Error while processing: " + mPeptideHitResultsProcRunner.GetErrorMessage());
                             }
                         }
                     }
@@ -230,7 +221,7 @@ namespace PeptideHitResultsProcRunner
 
         private static string GetAppVersion()
         {
-            return clsProcessFilesOrFoldersBase.GetAppVersion(PROGRAM_DATE);
+            return PRISM.FileProcessor.ProcessFilesOrFoldersBase.GetAppVersion(PROGRAM_DATE);
         }
 
         /// <summary>
@@ -277,7 +268,7 @@ namespace PeptideHitResultsProcRunner
             var lstValidParameters = new List<string> { "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods",
                 "F", "Fasta", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
                 "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPvalue", "InsFHT", "InsSyn", "SynProb", "S", "A",
-                "R", "L",  "Q" };
+                "R", "L" };
 
             try
             {
@@ -418,9 +409,6 @@ namespace PeptideHitResultsProcRunner
                     }
                 }
 
-                if (objParseCommandLine.IsParameterPresent("Q"))
-                    mQuietMode = true;
-
                 return true;
             }
             catch (Exception ex)
@@ -462,7 +450,7 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]");
                 Console.WriteLine(" [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
                 Console.WriteLine(" [/SynProb:0.05]");
-                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]");
+                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]]");
                 Console.WriteLine();
                 Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)");
                 Console.WriteLine("The output folder switch is optional. If omitted, the output file will be created in the same folder as the input file.");
@@ -502,7 +490,6 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).");
                 Console.WriteLine();
                 Console.WriteLine("Use /L to specify that a log file should be created. Use /L:LogFilePath to specify the name (or full path) for the log file.");
-                Console.WriteLine("Use the optional /Q switch will suppress all error messages.");
                 Console.WriteLine();
 
                 Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006");

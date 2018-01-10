@@ -30,7 +30,7 @@ PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputFolderPath]
  [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]
  [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] [/SynPvalue:0.2]
  [/InsFHT:True|False] [/InsSyn:True|False]
- [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]] [/Q]
+ [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]]
 
 The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File 
 (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an 
@@ -93,8 +93,6 @@ folder (if defined).
 Use /L to specify that a log file should be created.  Use /L:LogFilePath to specify the name 
 (or full path) for the log file.
 
-Use the optional /Q switch will suppress all error messages.
-
 -------------------------------------------------------------------------------
 Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 Copyright 2006, Battelle Memorial Institute.  All Rights Reserved.
@@ -106,20 +104,3 @@ Website: http://ncrr.pnl.gov/ or http://www.sysbio.org/resources/staff/
 Licensed under the Apache License, Version 2.0; you may not use this file except 
 in compliance with the License.  You may obtain a copy of the License at 
 http://www.apache.org/licenses/LICENSE-2.0
-
-All publications that result from the use of this software should include 
-the following acknowledgment statement:
- Portions of this research were supported by the W.R. Wiley Environmental 
- Molecular Science Laboratory, a national scientific user facility sponsored 
- by the U.S. Department of Energy's Office of Biological and Environmental 
- Research and located at PNNL.  PNNL is operated by Battelle Memorial Institute 
- for the U.S. Department of Energy under contract DE-AC05-76RL0 1830.
-
-Notice: This computer software was prepared by Battelle Memorial Institute, 
-hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the 
-Department of Energy (DOE).  All rights in the computer software are reserved 
-by DOE on behalf of the United States Government and the Contractor as 
-provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY 
-WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS 
-SOFTWARE.  This notice including this sentence must appear on any copies of 
-this computer software.
