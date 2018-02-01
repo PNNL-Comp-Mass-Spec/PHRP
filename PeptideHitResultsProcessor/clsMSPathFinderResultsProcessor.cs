@@ -816,7 +816,7 @@ namespace PeptideHitResultsProcessor
                 blnValidSearchResult = false;
 
                 udtSearchResult.Clear();
-                var strSplitLine = strLineIn.Trim().Split('\t');
+                var strSplitLine = strLineIn.TrimEnd().Split('\t');
 
                 if (strSplitLine.Length >= 11)
                 {
@@ -1066,7 +1066,7 @@ namespace PeptideHitResultsProcessor
             try
             {
 
-                strSplitLine = strLineIn.Trim().Split('\t');
+                strSplitLine = strLineIn.TrimEnd().Split('\t');
 
                 if (strSplitLine.Length < 15)
                 {

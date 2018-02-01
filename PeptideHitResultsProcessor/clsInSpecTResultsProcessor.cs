@@ -1225,7 +1225,7 @@ namespace PeptideHitResultsProcessor
                 // Reset udtSearchResult
                 udtSearchResult.Clear();
 
-                strSplitLine = strLineIn.Trim().Split('\t');
+                strSplitLine = strLineIn.TrimEnd().Split('\t');
 
                 if (strSplitLine.Length >= 15)
                 {
@@ -1363,7 +1363,7 @@ namespace PeptideHitResultsProcessor
                 // Reset searchResult
                 searchResult.Clear();
 
-                strSplitLine = strLineIn.Trim().Split('\t');
+                strSplitLine = strLineIn.TrimEnd().Split('\t');
                 if (strSplitLine.Length < INSPECT_SYN_FILE_MIN_COL_COUNT)
                 {
                     return false;

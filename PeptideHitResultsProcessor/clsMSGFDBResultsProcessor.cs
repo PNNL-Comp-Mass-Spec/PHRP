@@ -92,8 +92,8 @@ namespace PeptideHitResultsProcessor
             Scan = 2,
             FragMethod = 3,
             PrecursorMZ = 4,
-            PMErrorDa = 5,               // Corresponds to PMError(Da)
-            PMErrorPPM = 6,              // Corresponds to PMError(ppm)
+            PMErrorDa = 5,               // Corresponds to PrecursorError(Da)
+            PMErrorPPM = 6,              // Corresponds to PrecursorError(ppm)
             Charge = 7,
             Peptide = 8,
             Protein = 9,
@@ -1675,7 +1675,7 @@ namespace PeptideHitResultsProcessor
                 lstSearchResultsCurrentScan.Clear();
 
                 udtSearchResult.Clear();
-                var strSplitLine = strLineIn.Trim().Split('\t');
+                var strSplitLine = strLineIn.TrimEnd().Split('\t');
 
                 if (strSplitLine.Length < 13)
                 {
@@ -2155,7 +2155,7 @@ namespace PeptideHitResultsProcessor
                 // Set this to False for now
                 blnValidSearchResult = false;
 
-                strSplitLine = strLineIn.Trim().Split('\t');
+                strSplitLine = strLineIn.TrimEnd().Split('\t');
 
                 if (strSplitLine.Length >= 15)
                 {
@@ -2758,7 +2758,11 @@ namespace PeptideHitResultsProcessor
                     }
                     else
                     {
-                        intIndex += reMatch.Groups[1].Value.Length;
+                        var addon = reMatch.Groups[1].Value.Length;
+                        if (addon == 0)
+                            intIndex += 1;
+                        else
+                            intIndex += addon;
                     }
                 }
             }

@@ -427,7 +427,7 @@ namespace PeptideHitResultsProcessor
                 // Reset searchResult
                 searchResult.Clear();
 
-                strSplitLine = strLineIn.Trim().Split('\t');
+                strSplitLine = strLineIn.TrimEnd().Split('\t');
                 if (strSplitLine.Length < SEQUEST_SYN_FILE_MIN_COL_COUNT)
                 {
                     return false;

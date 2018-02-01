@@ -1819,7 +1819,7 @@ namespace PeptideHitResultsProcessor
                             continue;
 
                         // Split the line on tabs
-                        var splitLine = dataLine.Trim().Split('\t');
+                        var splitLine = dataLine.TrimEnd().Split('\t');
 
                         if (splitLine.Length >= 4)
                         {
