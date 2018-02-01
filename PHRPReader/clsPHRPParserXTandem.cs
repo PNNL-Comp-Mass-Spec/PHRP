@@ -104,24 +104,24 @@ namespace PHRPReader
         #endregion
 
         /// <summary>
-        /// Constructor; assumes blnLoadModsAndSeqInfo=True
+        /// Constructor; assumes loadModsAndSeqInfo=True
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
-        /// <param name="strInputFilePath">Input file path</param>
+        /// <param name="inputFilePath">Input file path</param>
         /// <remarks></remarks>
-        public clsPHRPParserXTandem(string datasetName, string strInputFilePath)
-            : this(datasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
+        public clsPHRPParserXTandem(string datasetName, string inputFilePath)
+            : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
         }
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
-        /// <param name="strInputFilePath">Input file path</param>
-        /// <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="loadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
-        public clsPHRPParserXTandem(string datasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
-            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.XTandem, blnLoadModsAndSeqInfo)
+        public clsPHRPParserXTandem(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.XTandem, loadModsAndSeqInfo)
         {
         }
 
@@ -129,22 +129,22 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
-        /// <param name="strInputFilePath">Input file path</param>
+        /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
-        public clsPHRPParserXTandem(string datasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.XTandem, startupOptions)
+        public clsPHRPParserXTandem(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
+            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.XTandem, startupOptions)
         {
         }
 
-        private static string AppendToString(string strText, string strAppend)
+        private static string AppendToString(string text, string append)
         {
-            if (string.IsNullOrEmpty(strText))
+            if (string.IsNullOrEmpty(text))
             {
-                return strAppend;
+                return append;
             }
 
-            return strText + "; " + strAppend;
+            return text + "; " + append;
         }
 
         /// <summary>
@@ -177,48 +177,48 @@ namespace PHRPReader
         /// <summary>
         /// Determines the precursor mass tolerance
         /// </summary>
-        /// <param name="objSearchEngineParams"></param>
-        /// <param name="dblTolerancePPM">Precursor mass tolerance, in ppm</param>
+        /// <param name="searchEngineParams"></param>
+        /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
         /// <returns>Precursor tolerance, in Da</returns>
         /// <remarks></remarks>
-        private double DeterminePrecursorMassTolerance(clsSearchEngineParameters objSearchEngineParams, out double dblTolerancePPM)
+        private double DeterminePrecursorMassTolerance(clsSearchEngineParameters searchEngineParams, out double tolerancePPM)
         {
-            var blnPPM = false;
+            var isPPM = false;
 
-            double dblTolerancePlus = 0;
-            double dblToleranceMinus = 0;
+            double tolerancePlus = 0;
+            double toleranceMinus = 0;
 
-            if (objSearchEngineParams.Parameters.TryGetValue("spectrum, out parent monoisotopic mass error units", out var strUnits))
+            if (searchEngineParams.Parameters.TryGetValue("spectrum, out parent monoisotopic mass error units", out var units))
             {
-                if (strUnits.ToLower().Trim() == "ppm")
-                    blnPPM = true;
+                if (units.ToLower().Trim() == "ppm")
+                    isPPM = true;
             }
 
-            if (objSearchEngineParams.Parameters.TryGetValue("spectrum, out parent monoisotopic mass error minus", out var strTolerance))
+            if (searchEngineParams.Parameters.TryGetValue("spectrum, out parent monoisotopic mass error minus", out var toleranceText))
             {
-                double.TryParse(strTolerance, out dblToleranceMinus);
+                double.TryParse(toleranceText, out toleranceMinus);
             }
 
-            if (objSearchEngineParams.Parameters.TryGetValue("spectrum, out parent monoisotopic mass error plus", out strTolerance))
+            if (searchEngineParams.Parameters.TryGetValue("spectrum, out parent monoisotopic mass error plus", out toleranceText))
             {
-                double.TryParse(strTolerance, out dblTolerancePlus);
+                double.TryParse(toleranceText, out tolerancePlus);
             }
 
-            var dblTolerance = Math.Max(dblToleranceMinus, dblTolerancePlus);
-            if (blnPPM)
+            var tolerance = Math.Max(toleranceMinus, tolerancePlus);
+            if (isPPM)
             {
-                dblTolerancePPM = dblTolerance;
+                tolerancePPM = tolerance;
 
                 // Convert from PPM to dalton (assuming a mass of 2000 m/z)
-                dblTolerance = clsPeptideMassCalculator.PPMToMass(dblTolerance, 2000);
+                tolerance = clsPeptideMassCalculator.PPMToMass(tolerance, 2000);
             }
             else
             {
                 // Convert from dalton to PPM (assuming a mass of 2000 m/z)
-                dblTolerancePPM = clsPeptideMassCalculator.MassToPPM(dblTolerance, 2000);
+                tolerancePPM = clsPeptideMassCalculator.MassToPPM(tolerance, 2000);
             }
 
-            return dblTolerance;
+            return tolerance;
         }
 
         /// <summary>
@@ -305,32 +305,32 @@ namespace PHRPReader
         /// <summary>
         /// Additional search engine parameter file names
         /// </summary>
-        /// <param name="strSearchEngineParamFilePath"></param>
+        /// <param name="searchEngineParamFilePath"></param>
         /// <returns></returns>
-        public static List<string> GetAdditionalSearchEngineParamFileNames(string strSearchEngineParamFilePath)
+        public static List<string> GetAdditionalSearchEngineParamFileNames(string searchEngineParamFilePath)
         {
-            var lstFileNames = new List<string>();
+            var fileNames = new List<string>();
 
-            var strErrorMessage = string.Empty;
+            var errorMessage = string.Empty;
 
             try
             {
-                if (!File.Exists(strSearchEngineParamFilePath))
+                if (!File.Exists(searchEngineParamFilePath))
                 {
-                    lstFileNames.Add("default_input.xml  (Not Confirmed)");
-                    lstFileNames.Add("taxonomy.xml  (Not Confirmed)");
+                    fileNames.Add("default_input.xml  (Not Confirmed)");
+                    fileNames.Add("taxonomy.xml  (Not Confirmed)");
                 }
                 else
                 {
-                    var paramFile = new FileInfo(strSearchEngineParamFilePath);
-                    var objSearchEngineParams = new clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME);
+                    var paramFile = new FileInfo(searchEngineParamFilePath);
+                    var searchEngineParams = new clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME);
 
                     try
                     {
-                        var strDefaultParamsFilename = GetXTandemDefaultParamsFilename(strSearchEngineParamFilePath);
-                        if (!string.IsNullOrEmpty(strDefaultParamsFilename))
+                        var defaultParamsFilename = GetXTandemDefaultParamsFilename(searchEngineParamFilePath);
+                        if (!string.IsNullOrEmpty(defaultParamsFilename))
                         {
-                            lstFileNames.Add(strDefaultParamsFilename);
+                            fileNames.Add(defaultParamsFilename);
                         }
                     }
                     catch (Exception ex)
@@ -340,11 +340,11 @@ namespace PHRPReader
 
                     try
                     {
-                        ParseXTandemParamFileWork(paramFile.DirectoryName, paramFile.Name, objSearchEngineParams, false, true, ref strErrorMessage);
+                        ParseXTandemParamFileWork(paramFile.DirectoryName, paramFile.Name, searchEngineParams, false, true, ref errorMessage);
 
-                        if (objSearchEngineParams.Parameters.TryGetValue(TAXONOMY_INFO_KEY_NAME, out var strTaxonomyFilename))
+                        if (searchEngineParams.Parameters.TryGetValue(TAXONOMY_INFO_KEY_NAME, out var taxonomyFilename))
                         {
-                            lstFileNames.Add(Path.GetFileName(strTaxonomyFilename));
+                            fileNames.Add(Path.GetFileName(taxonomyFilename));
                         }
                     }
                     catch (Exception ex)
@@ -352,9 +352,9 @@ namespace PHRPReader
                         Console.WriteLine("Error in ParseXTandemParamFileWork: " + ex.Message);
                     }
 
-                    if (!string.IsNullOrEmpty(strErrorMessage))
+                    if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        Console.WriteLine(strErrorMessage);
+                        Console.WriteLine(errorMessage);
                     }
                 }
             }
@@ -363,42 +363,42 @@ namespace PHRPReader
                 Console.WriteLine("Exception in GetAdditionalSearchEngineParamFileNames: " + ex.Message);
             }
 
-            return lstFileNames;
+            return fileNames;
         }
 
-        private static string GetFastaFileFromTaxonomyFile(string strInputFolderPath, string strTaxononomyFilename, out string strErrorMessage)
+        private static string GetFastaFileFromTaxonomyFile(string inputFolderPath, string taxononomyFilename, out string errorMessage)
         {
-            var strFastaFile = string.Empty;
+            var fastaFile = string.Empty;
 
-            strErrorMessage = string.Empty;
+            errorMessage = string.Empty;
 
             try
             {
-                var strTaxonomyFilePath = Path.Combine(strInputFolderPath, strTaxononomyFilename);
-                if (!File.Exists(strTaxonomyFilePath))
+                var taxonomyFilePath = Path.Combine(inputFolderPath, taxononomyFilename);
+                if (!File.Exists(taxonomyFilePath))
                 {
-                    strErrorMessage = AppendToString(strErrorMessage, "Warning, taxonomy file not found: " + strTaxonomyFilePath);
+                    errorMessage = AppendToString(errorMessage, "Warning, taxonomy file not found: " + taxonomyFilePath);
                 }
                 else
                 {
                     // Open the XML file and look for the "file" element with attribute "peptide"
-                    using (var objXMLReader = new XmlTextReader(strTaxonomyFilePath))
+                    using (var xmlReader = new XmlTextReader(taxonomyFilePath))
                     {
-                        while (objXMLReader.Read())
+                        while (xmlReader.Read())
                         {
-                            XMLTextReaderSkipWhitespace(objXMLReader);
-                            if (objXMLReader.ReadState != ReadState.Interactive)
+                            XMLTextReaderSkipWhitespace(xmlReader);
+                            if (xmlReader.ReadState != ReadState.Interactive)
                                 break;
 
-                            if (objXMLReader.NodeType == XmlNodeType.Element)
+                            if (xmlReader.NodeType == XmlNodeType.Element)
                             {
-                                if (objXMLReader.Name.ToLower() == "file")
+                                if (xmlReader.Name.ToLower() == "file")
                                 {
-                                    var strFileFormat = XMLTextReaderGetAttributeValue(objXMLReader, "format", string.Empty);
+                                    var fileFormat = XMLTextReaderGetAttributeValue(xmlReader, "format", string.Empty);
 
-                                    if (strFileFormat == "peptide")
+                                    if (fileFormat == "peptide")
                                     {
-                                        strFastaFile = XMLTextReaderGetAttributeValue(objXMLReader, "URL", string.Empty);
+                                        fastaFile = XMLTextReaderGetAttributeValue(xmlReader, "URL", string.Empty);
                                         break;
                                     }
                                 }
@@ -409,10 +409,10 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                strErrorMessage = AppendToString(strErrorMessage, "Error in GetFastaFileFromTaxonomyFile: " + ex.Message);
+                errorMessage = AppendToString(errorMessage, "Error in GetFastaFileFromTaxonomyFile: " + ex.Message);
             }
 
-            return strFastaFile;
+            return fastaFile;
         }
 
         /// <summary>
@@ -423,86 +423,86 @@ namespace PHRPReader
             return XT_SEARCH_ENGINE_NAME;
         }
 
-        private static string GetXTandemDefaultParamsFilename(string strParamFilePath)
+        private static string GetXTandemDefaultParamsFilename(string paramFilePath)
         {
-            var strDefaultParamsFilename = string.Empty;
+            var defaultParamsFilename = string.Empty;
 
             // Open the XML file and look for the "list path, default parameters" entry
-            using (var objXMLReader = new XmlTextReader(strParamFilePath))
+            using (var xmlReader = new XmlTextReader(paramFilePath))
             {
-                while (MoveToNextInputParam(objXMLReader, out var kvSetting))
+                while (MoveToNextInputParam(xmlReader, out var kvSetting))
                 {
                     if (kvSetting.Key == "list path, default parameters")
                     {
-                        strDefaultParamsFilename = string.Copy(kvSetting.Value);
+                        defaultParamsFilename = string.Copy(kvSetting.Value);
                         break;
                     }
                 }
             }
 
-            return strDefaultParamsFilename;
+            return defaultParamsFilename;
         }
 
         /// <summary>
         /// Parses the specified X!Tandem parameter file
         /// Note that the file specified by parameter "list path, default parameters" will also be auto-parsed (if found in folder mInputFolderPath)
         /// </summary>
-        /// <param name="strSearchEngineParamFileName"></param>
-        /// <param name="objSearchEngineParams"></param>
+        /// <param name="searchEngineParamFileName"></param>
+        /// <param name="searchEngineParams"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public override bool LoadSearchEngineParameters(string strSearchEngineParamFileName, out clsSearchEngineParameters objSearchEngineParams)
+        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
         {
-            objSearchEngineParams = new clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME, mModInfo);
+            searchEngineParams = new clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME, mModInfo);
 
-            return ParseXTandemParamFile(strSearchEngineParamFileName, objSearchEngineParams, blnLookForDefaultParamsFileName: true);
+            return ParseXTandemParamFile(searchEngineParamFileName, searchEngineParams, lookForDefaultParamsFileName: true);
         }
 
         /// <summary>
         /// Parse an X!Tandem parameter file
         /// </summary>
-        /// <param name="strParamFileName"></param>
-        /// <param name="objSearchEngineParams"></param>
-        /// <param name="blnLookForDefaultParamsFileName"></param>
-        /// <param name="blnDetermineFastaFileNameUsingTaxonomyFile"></param>
+        /// <param name="paramFileName"></param>
+        /// <param name="searchEngineParams"></param>
+        /// <param name="lookForDefaultParamsFileName"></param>
+        /// <param name="determineFastaFileNameUsingTaxonomyFile"></param>
         /// <returns></returns>
         public bool ParseXTandemParamFile(
-            string strParamFileName,
-            clsSearchEngineParameters objSearchEngineParams,
-            bool blnLookForDefaultParamsFileName,
-            bool blnDetermineFastaFileNameUsingTaxonomyFile = true)
+            string paramFileName,
+            clsSearchEngineParameters searchEngineParams,
+            bool lookForDefaultParamsFileName,
+            bool determineFastaFileNameUsingTaxonomyFile = true)
         {
-            var strErrorMessage = string.Empty;
+            var errorMessage = string.Empty;
 
-            var blnSuccess = false;
+            var success = false;
 
             try
             {
-                var strParamFilePath = Path.Combine(mInputFolderPath, strParamFileName);
+                var paramFilePath = Path.Combine(mInputFolderPath, paramFileName);
 
-                if (!File.Exists(strParamFilePath))
+                if (!File.Exists(paramFilePath))
                 {
-                    ReportError("X!Tandem param file not found: " + strParamFilePath);
+                    ReportError("X!Tandem param file not found: " + paramFilePath);
                 }
                 else
                 {
                     try
                     {
-                        blnSuccess = ParseXTandemParamFileWork(mInputFolderPath, strParamFileName, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile, blnLookForDefaultParamsFileName, ref strErrorMessage);
+                        success = ParseXTandemParamFileWork(mInputFolderPath, paramFileName, searchEngineParams, determineFastaFileNameUsingTaxonomyFile, lookForDefaultParamsFileName, ref errorMessage);
                     }
                     catch (Exception ex)
                     {
                         ReportError("Error in ParseXTandemParamFileWork: " + ex.Message);
                     }
 
-                    if (!string.IsNullOrEmpty(strErrorMessage))
+                    if (!string.IsNullOrEmpty(errorMessage))
                     {
-                        ReportError(strErrorMessage);
+                        ReportError(errorMessage);
                     }
 
                     // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                    objSearchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(objSearchEngineParams, out var dblTolerancePPM);
-                    objSearchEngineParams.PrecursorMassTolerancePpm = dblTolerancePPM;
+                    searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM);
+                    searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
                 }
             }
             catch (Exception ex)
@@ -510,86 +510,86 @@ namespace PHRPReader
                 ReportError("Error in ParseXTandemParamFile: " + ex.Message);
             }
 
-            ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams);
+            ReadSearchEngineVersion(mPeptideHitResultType, searchEngineParams);
 
-            return blnSuccess;
+            return success;
         }
 
         private static bool ParseXTandemParamFileWork(
-            string strInputFolderPath,
-            string strParamFileName,
-            clsSearchEngineParameters objSearchEngineParams,
-            bool blnDetermineFastaFileNameUsingTaxonomyFile,
-            bool blnLookForDefaultParamsFileName,
-            ref string strErrorMessage)
+            string inputFolderPath,
+            string paramFileName,
+            clsSearchEngineParameters searchEngineParams,
+            bool determineFastaFileNameUsingTaxonomyFile,
+            bool lookForDefaultParamsFileName,
+            ref string errorMessage)
         {
             // Note: Do not put a Try/Catch block in this function
 
-            var strParamFilePath = Path.Combine(strInputFolderPath, strParamFileName);
+            var paramFilePath = Path.Combine(inputFolderPath, paramFileName);
 
-            if (blnLookForDefaultParamsFileName)
+            if (lookForDefaultParamsFileName)
             {
-                string strDefaultParamsFilename;
+                string defaultParamsFilename;
                 try
                 {
-                    strDefaultParamsFilename = GetXTandemDefaultParamsFilename(strParamFilePath);
+                    defaultParamsFilename = GetXTandemDefaultParamsFilename(paramFilePath);
                 }
                 catch (Exception ex)
                 {
-                    strErrorMessage = AppendToString(strErrorMessage, "Error in GetXTandemDefaultParamsFilename: " + ex.Message);
-                    strDefaultParamsFilename = string.Empty;
+                    errorMessage = AppendToString(errorMessage, "Error in GetXTandemDefaultParamsFilename: " + ex.Message);
+                    defaultParamsFilename = string.Empty;
                 }
 
-                if (!string.IsNullOrEmpty(strDefaultParamsFilename))
+                if (!string.IsNullOrEmpty(defaultParamsFilename))
                 {
-                    // Read the parameters from the default parameters file and store them in objSearchEngineParams
+                    // Read the parameters from the default parameters file and store them in searchEngineParams
                     // Do this by recursively calling this function
 
                     // First confirm that the file exists
-                    if (File.Exists(Path.Combine(strInputFolderPath, strDefaultParamsFilename)))
+                    if (File.Exists(Path.Combine(inputFolderPath, defaultParamsFilename)))
                     {
-                        ParseXTandemParamFileWork(strInputFolderPath, strDefaultParamsFilename, objSearchEngineParams, blnDetermineFastaFileNameUsingTaxonomyFile, false, ref strErrorMessage);
+                        ParseXTandemParamFileWork(inputFolderPath, defaultParamsFilename, searchEngineParams, determineFastaFileNameUsingTaxonomyFile, false, ref errorMessage);
                     }
                     else
                     {
-                        strErrorMessage = AppendToString(strErrorMessage, "Warning, file not found: " + strDefaultParamsFilename);
+                        errorMessage = AppendToString(errorMessage, "Warning, file not found: " + defaultParamsFilename);
                     }
                 }
             }
 
-            // Now read the parameters in strParamFilePath
-            using (var objXMLReader = new XmlTextReader(strParamFilePath))
+            // Now read the parameters in paramFilePath
+            using (var xmlReader = new XmlTextReader(paramFilePath))
             {
-                while (MoveToNextInputParam(objXMLReader, out var kvSetting))
+                while (MoveToNextInputParam(xmlReader, out var kvSetting))
                 {
                     if (!string.IsNullOrEmpty(kvSetting.Key))
                     {
-                        objSearchEngineParams.AddUpdateParameter(kvSetting.Key, kvSetting.Value);
+                        searchEngineParams.AddUpdateParameter(kvSetting.Key, kvSetting.Value);
 
                         switch (kvSetting.Key)
                         {
                             case TAXONOMY_INFO_KEY_NAME:
 
-                                if (blnDetermineFastaFileNameUsingTaxonomyFile)
+                                if (determineFastaFileNameUsingTaxonomyFile)
                                 {
                                     // Open the taxonomy file to determine the fasta file used
-                                    var strSetting = GetFastaFileFromTaxonomyFile(strInputFolderPath, Path.GetFileName(kvSetting.Value), out strErrorMessage);
+                                    var setting = GetFastaFileFromTaxonomyFile(inputFolderPath, Path.GetFileName(kvSetting.Value), out errorMessage);
 
-                                    if (!string.IsNullOrEmpty(strSetting))
+                                    if (!string.IsNullOrEmpty(setting))
                                     {
-                                        objSearchEngineParams.FastaFilePath = strSetting;
+                                        searchEngineParams.FastaFilePath = setting;
                                     }
                                 }
 
                                 break;
                             case "spectrum, fragment mass type":
-                                objSearchEngineParams.FragmentMassType = kvSetting.Value;
+                                searchEngineParams.FragmentMassType = kvSetting.Value;
 
                                 break;
                             case "scoring, maximum missed cleavage sites":
-                                if (int.TryParse(kvSetting.Value, out var intValue))
+                                if (int.TryParse(kvSetting.Value, out var value))
                                 {
-                                    objSearchEngineParams.MaxNumberInternalCleavages = intValue;
+                                    searchEngineParams.MaxNumberInternalCleavages = value;
                                 }
 
                                 break;
@@ -601,33 +601,33 @@ namespace PHRPReader
             return true;
         }
 
-        private static bool MoveToNextInputParam(XmlReader objXMLReader, out KeyValuePair<string, string> kvParameter)
+        private static bool MoveToNextInputParam(XmlReader xmlReader, out KeyValuePair<string, string> kvParameter)
         {
 
-            while (objXMLReader.Read())
+            while (xmlReader.Read())
             {
-                XMLTextReaderSkipWhitespace(objXMLReader);
-                if (objXMLReader.ReadState != ReadState.Interactive)
+                XMLTextReaderSkipWhitespace(xmlReader);
+                if (xmlReader.ReadState != ReadState.Interactive)
                     break;
 
-                if (objXMLReader.NodeType != XmlNodeType.Element)
+                if (xmlReader.NodeType != XmlNodeType.Element)
                     continue;
 
-                if (objXMLReader.Name.ToLower() != "note")
+                if (xmlReader.Name.ToLower() != "note")
                     continue;
 
-                var strNoteType = XMLTextReaderGetAttributeValue(objXMLReader, "type", string.Empty);
+                var noteType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
 
-                if (strNoteType != "input") continue;
+                if (noteType != "input") continue;
 
-                var strParamName = XMLTextReaderGetAttributeValue(objXMLReader, "label", string.Empty);
+                var paramName = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
 
-                if (objXMLReader.Read())
+                if (xmlReader.Read())
                 {
                     // Read the note's inner text
-                    var strValue = XMLTextReaderGetInnerText(objXMLReader);
+                    var value = XMLTextReaderGetInnerText(xmlReader);
 
-                    kvParameter = new KeyValuePair<string, string>(strParamName, strValue);
+                    kvParameter = new KeyValuePair<string, string>(paramName, value);
                     return true;
                 }
             }
@@ -639,148 +639,148 @@ namespace PHRPReader
         /// <summary>
         /// Parse the data line read from a PHRP results file
         /// </summary>
-        /// <param name="strLine">Data line</param>
-        /// <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
-        /// <param name="objPSM">clsPSM object (output)</param>
+        /// <param name="line">Data line</param>
+        /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
+        /// <param name="psm">clsPSM object (output)</param>
         /// <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if success, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-        public override bool ParsePHRPDataLine(string strLine, int intLinesRead, out clsPSM objPSM, bool fastReadMode)
+        public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
-            var strColumns = strLine.Split('\t');
+            var columns = line.Split('\t');
 
-            var blnSuccess = false;
+            var success = false;
 
-            objPSM = new clsPSM();
+            psm = new clsPSM();
 
             try
             {
-                objPSM.DataLineText = strLine;
-                objPSM.ScanNumber = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (objPSM.ScanNumber == -100)
+                psm.DataLineText = line;
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
+                if (psm.ScanNumber == -100)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    objPSM.ResultID = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Result_ID, mColumnHeaders, 0);
+                    psm.ResultID = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Result_ID, mColumnHeaders, 0);
 
                     // X!Tandem only tracks the top-ranked peptide for each spectrum
-                    objPSM.ScoreRank = 1;
+                    psm.ScoreRank = 1;
 
-                    var strPeptide = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders);
+                    var peptide = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders);
 
                     if (fastReadMode)
                     {
-                        objPSM.SetPeptide(strPeptide, updateCleanSequence: false);
+                        psm.SetPeptide(peptide, updateCleanSequence: false);
                     }
                     else
                     {
-                        objPSM.SetPeptide(strPeptide, mCleavageStateCalculator);
+                        psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    objPSM.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
                     // Lookup the protein name(s) using mResultIDToProteins
-                    if (mResultIDToProteins.TryGetValue(objPSM.ResultID, out var lstProteinsForResultID))
+                    if (mResultIDToProteins.TryGetValue(psm.ResultID, out var proteinsForResultID))
                     {
-                        foreach (var strProtein in lstProteinsForResultID)
+                        foreach (var protein in proteinsForResultID)
                         {
-                            objPSM.AddProtein(strProtein);
+                            psm.AddProtein(protein);
                         }
                     }
 
                     // The Peptide_MH value listed in X!Tandem files is the theoretical (computed) MH of the peptide
-                    // We'll update this value below using dblMassErrorDa
+                    // We'll update this value below using massErrorDa
                     // We'll further update this value using the ScanStatsEx data
-                    var dblPeptideMH = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0);
-                    objPSM.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPeptideMH, 1, 0);
+                    var peptideMH = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0);
+                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH, 1, 0);
 
-                    objPSM.MassErrorDa = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Delta_Mass, mColumnHeaders);
-                    if (double.TryParse(objPSM.MassErrorDa, out var dblMassErrorDa))
+                    psm.MassErrorDa = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Delta_Mass, mColumnHeaders);
+                    if (double.TryParse(psm.MassErrorDa, out var massErrorDa))
                     {
                         // Adjust the precursor mass
-                        objPSM.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPeptideMH - dblMassErrorDa, 1, 0);
+                        psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH - massErrorDa, 1, 0);
                     }
 
-                    objPSM.MassErrorPPM = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorPPM = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
 
-                    blnSuccess = true;
+                    success = true;
                 }
 
-                if (blnSuccess)
+                if (success)
                 {
                     if (!fastReadMode)
                     {
-                        UpdatePSMUsingSeqInfo(objPSM);
+                        UpdatePSMUsingSeqInfo(psm);
                     }
 
                     // Store the remaining scores
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Hyperscore);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Expectation_Value_LogE);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_DeltaCn2);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_y_score);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_y_ions);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_b_score);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_b_ions);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Intensity_LogI);
+                    AddScore(psm, columns, DATA_COLUMN_Peptide_Hyperscore);
+                    AddScore(psm, columns, DATA_COLUMN_Peptide_Expectation_Value_LogE);
+                    AddScore(psm, columns, DATA_COLUMN_DeltaCn2);
+                    AddScore(psm, columns, DATA_COLUMN_y_score);
+                    AddScore(psm, columns, DATA_COLUMN_y_ions);
+                    AddScore(psm, columns, DATA_COLUMN_b_score);
+                    AddScore(psm, columns, DATA_COLUMN_b_ions);
+                    AddScore(psm, columns, DATA_COLUMN_Peptide_Intensity_LogI);
 
                     // This is the base-10 log of the expectation value
-                    if (double.TryParse(objPSM.GetScore(DATA_COLUMN_Peptide_Expectation_Value_LogE), out var dblLogEValue))
+                    if (double.TryParse(psm.GetScore(DATA_COLUMN_Peptide_Expectation_Value_LogE), out var logEValue))
                     {
                         // Record the original E-value
-                        objPSM.SetScore("Peptide_Expectation_Value", Math.Pow(10, dblLogEValue).ToString("0.00e+000"));
+                        psm.SetScore("Peptide_Expectation_Value", Math.Pow(10, logEValue).ToString("0.00e+000"));
                     }
                 }
             }
             catch (Exception ex)
             {
-                HandleException("Error parsing line " + intLinesRead + " in the X!Tandem data file", ex);
+                HandleException("Error parsing line " + linesRead + " in the X!Tandem data file", ex);
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        private static string XMLTextReaderGetAttributeValue(XmlReader objXMLReader, string strAttributeName, string strValueIfMissing)
+        private static string XMLTextReaderGetAttributeValue(XmlReader xmlReader, string attributeName, string valueIfMissing)
         {
-            objXMLReader.MoveToAttribute(strAttributeName);
-            if (objXMLReader.ReadAttributeValue())
+            xmlReader.MoveToAttribute(attributeName);
+            if (xmlReader.ReadAttributeValue())
             {
-                return objXMLReader.Value;
+                return xmlReader.Value;
             }
 
-            return string.Copy(strValueIfMissing);
+            return string.Copy(valueIfMissing);
         }
 
-        private static string XMLTextReaderGetInnerText(XmlReader objXMLReader)
+        private static string XMLTextReaderGetInnerText(XmlReader xmlReader)
         {
-            var strValue = string.Empty;
-            bool blnSuccess;
+            var value = string.Empty;
+            bool success;
 
-            if (objXMLReader.NodeType == XmlNodeType.Element)
+            if (xmlReader.NodeType == XmlNodeType.Element)
             {
                 // Advance the reader so that we can read the value
-                blnSuccess = objXMLReader.Read();
+                success = xmlReader.Read();
             }
             else
             {
-                blnSuccess = true;
+                success = true;
             }
 
-            if (blnSuccess && objXMLReader.NodeType != XmlNodeType.Whitespace & objXMLReader.HasValue)
+            if (success && xmlReader.NodeType != XmlNodeType.Whitespace & xmlReader.HasValue)
             {
-                strValue = objXMLReader.Value;
+                value = xmlReader.Value;
             }
 
-            return strValue;
+            return value;
         }
 
-        private static void XMLTextReaderSkipWhitespace(XmlReader objXMLReader)
+        private static void XMLTextReaderSkipWhitespace(XmlReader xmlReader)
         {
-            if (objXMLReader.NodeType == XmlNodeType.Whitespace)
+            if (xmlReader.NodeType == XmlNodeType.Whitespace)
             {
                 // Whitespace; read the next node
-                objXMLReader.Read();
+                xmlReader.Read();
             }
         }
     }

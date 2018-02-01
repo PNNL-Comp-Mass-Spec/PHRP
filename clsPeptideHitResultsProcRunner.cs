@@ -122,24 +122,24 @@ namespace PeptideHitResultsProcRunner
 
         public override IList<string> GetDefaultExtensionsToParse()
         {
-            var strExtensionsToParse = new string[2];
+            var extensionsToParse = new string[2];
 
             // Note: If mPeptideHitResultsFileFormat = .AutoDetermine
             //  then this class will only parse .txt files if they match
             // PeptideHitResultsProcessor.clsSequestResultsProcessor.SEQUEST_FIRST_HITS_FILE_SUFFIX or
             // PeptideHitResultsProcessor.clsSequestResultsProcessor.SEQUEST_SYNOPSIS_FILE_SUFFIX
 
-            strExtensionsToParse[0] = ".txt";
-            strExtensionsToParse[1] = ".xml";
+            extensionsToParse[0] = ".txt";
+            extensionsToParse[1] = ".xml";
 
-            return strExtensionsToParse;
+            return extensionsToParse;
         }
 
         public override string GetErrorMessage()
         {
             // Returns "" if no error
 
-            string strErrorMessage;
+            string errorMessage;
 
             if (ErrorCode == eProcessFilesErrorCodes.LocalizedError |
                 ErrorCode == eProcessFilesErrorCodes.NoError)
@@ -147,23 +147,23 @@ namespace PeptideHitResultsProcRunner
                 switch (mLocalErrorCode)
                 {
                     case eResultsProcessorErrorCodes.NoError:
-                        strErrorMessage = "";
+                        errorMessage = "";
                         break;
                     case eResultsProcessorErrorCodes.UnspecifiedError:
-                        strErrorMessage = "Unspecified localized error";
+                        errorMessage = "Unspecified localized error";
                         break;
                     default:
                         // This shouldn't happen
-                        strErrorMessage = "Unknown error state";
+                        errorMessage = "Unknown error state";
                         break;
                 }
             }
             else
             {
-                strErrorMessage = GetBaseClassErrorMessage();
+                errorMessage = GetBaseClassErrorMessage();
             }
 
-            return strErrorMessage;
+            return errorMessage;
         }
 
         private void InitializeLocalVariables()
@@ -261,7 +261,7 @@ namespace PeptideHitResultsProcRunner
         {
             const string OPTIONS_SECTION = "PeptideHitResultsProcRunner";
 
-            var objSettingsFile = new XmlSettingsFileAccessor();
+            var settingsFile = new XmlSettingsFileAccessor();
 
             try
             {
@@ -289,21 +289,21 @@ namespace PeptideHitResultsProcRunner
                     }
                 }
 
-                if (objSettingsFile.LoadSettings(parameterFilePath))
+                if (settingsFile.LoadSettings(parameterFilePath))
                 {
-                    if (!objSettingsFile.SectionPresent(OPTIONS_SECTION))
+                    if (!settingsFile.SectionPresent(OPTIONS_SECTION))
                     {
                         ShowErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + parameterFilePath);
                         SetBaseClassErrorCode(eProcessFilesErrorCodes.InvalidParameterFile);
                         return false;
                     }
 
-                    mObtainModificationDefinitionsFromDMS = objSettingsFile.GetParam(OPTIONS_SECTION, "ObtainModificationDefinitionsFromDMS", mObtainModificationDefinitionsFromDMS);
+                    mObtainModificationDefinitionsFromDMS = settingsFile.GetParam(OPTIONS_SECTION, "ObtainModificationDefinitionsFromDMS", mObtainModificationDefinitionsFromDMS);
 
-                    var intValue = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideHitResultsFileFormat", Convert.ToInt32(mPeptideHitResultsFileFormat));
+                    var value = settingsFile.GetParam(OPTIONS_SECTION, "PeptideHitResultsFileFormat", Convert.ToInt32(mPeptideHitResultsFileFormat));
                     try
                     {
-                        mPeptideHitResultsFileFormat = (clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants) intValue;
+                        mPeptideHitResultsFileFormat = (clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants) value;
                     }
                     catch (Exception)
                     {
@@ -340,8 +340,8 @@ namespace PeptideHitResultsProcRunner
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                var strStatusMessage = "Parameter file load error: " + parameterFilePath;
-                ShowErrorMessage(strStatusMessage);
+                var statusMessage = "Parameter file load error: " + parameterFilePath;
+                ShowErrorMessage(statusMessage);
 
                 if (ErrorCode == eProcessFilesErrorCodes.NoError)
                 {

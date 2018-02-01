@@ -162,8 +162,8 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="searchEngineName"></param>
-        /// <param name="objModInfo"></param>
-        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> objModInfo) : this(searchEngineName, objModInfo, null)
+        /// <param name="modInfo"></param>
+        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> modInfo) : this(searchEngineName, modInfo, null)
         {
         }
 
@@ -171,18 +171,18 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="searchEngineName"></param>
-        /// <param name="objModInfo"></param>
+        /// <param name="modInfo"></param>
         /// <param name="Parameters"></param>
-        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> objModInfo, Dictionary<string, string> Parameters)
+        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> modInfo, Dictionary<string, string> Parameters)
         {
             InitializeDefaults();
 
             mSearchEngineName = searchEngineName;
             mSearchEngineParamFilePath = string.Empty;
 
-            mModInfo = objModInfo;
+            mModInfo = modInfo;
 
-            mModInfo = objModInfo ?? new List<clsModificationDefinition>();
+            mModInfo = modInfo ?? new List<clsModificationDefinition>();
 
             if (mParameters == null)
             {
@@ -197,10 +197,10 @@ namespace PHRPReader
         /// <summary>
         /// Add a new dynamic or static modification
         /// </summary>
-        /// <param name="objModInfo"></param>
-        public void AddModification(clsModificationDefinition objModInfo)
+        /// <param name="modInfo"></param>
+        public void AddModification(clsModificationDefinition modInfo)
         {
-            mModInfo.Add(objModInfo);
+            mModInfo.Add(modInfo);
         }
 
         /// <summary>
@@ -276,19 +276,19 @@ namespace PHRPReader
         /// <summary>
         /// Update the search engine version
         /// </summary>
-        /// <param name="strSearchEngineVersion"></param>
-        public void UpdateSearchEngineVersion(string strSearchEngineVersion)
+        /// <param name="searchEngineVersion"></param>
+        public void UpdateSearchEngineVersion(string searchEngineVersion)
         {
-            mSearchEngineVersion = string.Copy(strSearchEngineVersion);
+            mSearchEngineVersion = string.Copy(searchEngineVersion);
         }
 
         /// <summary>
         /// Update the search date
         /// </summary>
-        /// <param name="dtSearchDate"></param>
-        public void UpdateSearchDate(DateTime dtSearchDate)
+        /// <param name="searchDate"></param>
+        public void UpdateSearchDate(DateTime searchDate)
         {
-            mSearchDate = dtSearchDate;
+            mSearchDate = searchDate;
         }
     }
 }

@@ -73,8 +73,8 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        public clsSearchResultsXTandem(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
-            : base(objPeptideMods, peptideSeqMassCalculator)
+        public clsSearchResultsXTandem(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(peptideMods, peptideSeqMassCalculator)
         {
         }
 
@@ -102,37 +102,37 @@ namespace PeptideHitResultsProcessor
 
         public void ComputeDelMCorrectedXT()
         {
-            double dblDelM = 0;
+            double delM = 0;
 
-            double dblPrecursorMonoMass = 0;
+            double precursorMonoMass = 0;
 
-            var blnParseError = false;
+            var parseError = false;
 
             // Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
             // (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
-            if (double.TryParse(PeptideDeltaMass, out dblDelM))
+            if (double.TryParse(PeptideDeltaMass, out delM))
             {
-                // Negate dblDelM so that it represents observed - theoretical
-                dblDelM = -dblDelM;
+                // Negate delM so that it represents observed - theoretical
+                delM = -delM;
 
                 // Compute the original value for the precursor monoisotopic mass
-                double dblParentIonMH = 0;
-                if (double.TryParse(base.ParentIonMH, out dblParentIonMH))
+                double parentIonMH = 0;
+                if (double.TryParse(base.ParentIonMH, out parentIonMH))
                 {
-                    dblPrecursorMonoMass = dblParentIonMH - PHRPReader.clsPeptideMassCalculator.MASS_PROTON;
+                    precursorMonoMass = parentIonMH - PHRPReader.clsPeptideMassCalculator.MASS_PROTON;
                 }
                 else
                 {
-                    blnParseError = true;
+                    parseError = true;
                 }
 
-                if (blnParseError)
+                if (parseError)
                 {
-                    dblPrecursorMonoMass = PeptideMonoisotopicMass + dblDelM;
+                    precursorMonoMass = PeptideMonoisotopicMass + delM;
                 }
 
-                const bool blnAdjustPrecursorMassForC13 = true;
-                PeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(dblDelM, dblPrecursorMonoMass, blnAdjustPrecursorMassForC13, PeptideMonoisotopicMass);
+                const bool adjustPrecursorMassForC13 = true;
+                PeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, adjustPrecursorMassForC13, PeptideMonoisotopicMass);
             }
             else
             {

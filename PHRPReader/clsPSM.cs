@@ -376,23 +376,23 @@ namespace PHRPReader
         /// <summary>
         /// Add an additional scan number to associate with this PSM
         /// </summary>
-        /// <param name="intScanNumber"></param>
-        public void AddCombinedScan(int intScanNumber)
+        /// <param name="scanNumber"></param>
+        public void AddCombinedScan(int scanNumber)
         {
-            if (!mScanList.Contains(intScanNumber))
+            if (!mScanList.Contains(scanNumber))
             {
-                mScanList.Add(intScanNumber);
+                mScanList.Add(scanNumber);
             }
         }
 
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="objModInfo">Modification info class</param>
+        /// <param name="modInfo">Modification info class</param>
         /// <remarks></remarks>
-        public void AddModifiedResidue(clsAminoAcidModInfo objModInfo)
+        public void AddModifiedResidue(clsAminoAcidModInfo modInfo)
         {
-            mModifiedPeptideResidues.Add(objModInfo);
+            mModifiedPeptideResidues.Add(modInfo);
         }
 
         /// <summary>
@@ -525,7 +525,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public clsPSM Clone()
         {
-            var objNew = new clsPSM
+            var newPSM = new clsPSM
             {
                 ResultID = ResultID,
                 ScoreRank = ScoreRank,
@@ -533,48 +533,48 @@ namespace PHRPReader
                 ElutionTimeMinutes = ElutionTimeMinutes
             };
 
-            foreach (var intScanNumber in mScanList)
+            foreach (var scanNumber in mScanList)
             {
-                objNew.AddCombinedScan(intScanNumber);
+                newPSM.AddCombinedScan(scanNumber);
             }
 
-            // Note: this call will auto-update mPeptideCleanSequence in objNew
-            objNew.SetPeptide(mPeptide);
+            // Note: this call will auto-update mPeptideCleanSequence in newPSM
+            newPSM.SetPeptide(mPeptide);
 
-            objNew.PeptideWithNumericMods = mPeptideWithNumericMods;
-            objNew.Charge = Charge;
-            objNew.CollisionMode = CollisionMode;
-            objNew.MSGFSpecEValue = MSGFSpecEValue;
+            newPSM.PeptideWithNumericMods = mPeptideWithNumericMods;
+            newPSM.Charge = Charge;
+            newPSM.CollisionMode = CollisionMode;
+            newPSM.MSGFSpecEValue = MSGFSpecEValue;
 
-            objNew.CleavageState = CleavageState;
-            objNew.NumMissedCleavages = NumMissedCleavages;
-            objNew.NumTrypticTerminii = NumTrypticTerminii;
+            newPSM.CleavageState = CleavageState;
+            newPSM.NumMissedCleavages = NumMissedCleavages;
+            newPSM.NumTrypticTerminii = NumTrypticTerminii;
 
-            objNew.PrecursorNeutralMass = PrecursorNeutralMass;
-            objNew.MassErrorDa = MassErrorDa;
-            objNew.MassErrorPPM = MassErrorPPM;
+            newPSM.PrecursorNeutralMass = PrecursorNeutralMass;
+            newPSM.MassErrorDa = MassErrorDa;
+            newPSM.MassErrorPPM = MassErrorPPM;
 
             foreach (var protein in mProteins)
             {
-                objNew.AddProtein(protein);
+                newPSM.AddProtein(protein);
             }
 
             foreach (var item in mProteinDetails.Values)
             {
-                objNew.AddProteinDetail(item);
+                newPSM.AddProteinDetail(item);
             }
 
-            foreach (var objItem in mModifiedPeptideResidues)
+            foreach (var item in mModifiedPeptideResidues)
             {
-                objNew.AddModifiedResidue(objItem.Residue, objItem.ResidueLocInPeptide, objItem.ResidueTerminusState, objItem.ModDefinition);
+                newPSM.AddModifiedResidue(item.Residue, item.ResidueLocInPeptide, item.ResidueTerminusState, item.ModDefinition);
             }
 
-            foreach (var objScore in mAdditionalScores)
+            foreach (var score in mAdditionalScores)
             {
-                objNew.SetScore(objScore.Key, objScore.Value);
+                newPSM.SetScore(score.Key, score.Value);
             }
 
-            return objNew;
+            return newPSM;
         }
 
         /// <summary>
@@ -623,14 +623,14 @@ namespace PHRPReader
         /// </summary>
         /// <param name="scoreName">Score name</param>
         /// <param name="valueIfMissing">Value to return if the score is not defined</param>
-        /// <returns>Score if defined, otherwise dblValueIfMissing</returns>
+        /// <returns>Score if defined, otherwise valueIfMissing</returns>
         /// <remarks></remarks>
         public double GetScoreDbl(string scoreName, double valueIfMissing)
         {
             var scoreValue = GetScore(scoreName);
-            if (!string.IsNullOrEmpty(scoreValue) && double.TryParse(scoreValue, out var dblScore))
+            if (!string.IsNullOrEmpty(scoreValue) && double.TryParse(scoreValue, out var score))
             {
-                return dblScore;
+                return score;
             }
 
             return valueIfMissing;
@@ -651,18 +651,18 @@ namespace PHRPReader
         ///  Returns the value stored for the specified score (as an integer)
         /// </summary>
         /// <param name="scoreName">Score name</param>
-        /// <param name="intValueIfMissing">Value to return if the score is not defined</param>
-        /// <returns>Score if defined, otherwise intValueIfMissing</returns>
+        /// <param name="valueIfMissing">Value to return if the score is not defined</param>
+        /// <returns>Score if defined, otherwise valueIfMissing</returns>
         /// <remarks></remarks>
-        public int GetScoreInt(string scoreName, int intValueIfMissing)
+        public int GetScoreInt(string scoreName, int valueIfMissing)
         {
             var scoreValue = GetScore(scoreName);
-            if (!string.IsNullOrEmpty(scoreValue) && int.TryParse(scoreValue, out var intScore))
+            if (!string.IsNullOrEmpty(scoreValue) && int.TryParse(scoreValue, out var score))
             {
-                return intScore;
+                return score;
             }
 
-            return intValueIfMissing;
+            return valueIfMissing;
         }
 
         /// <summary>

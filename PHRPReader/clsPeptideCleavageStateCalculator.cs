@@ -163,12 +163,12 @@ namespace PHRPReader
             /// <summary>
             /// Constructor
             /// </summary>
-            /// <param name="strLeftResidueRegEx"></param>
-            /// <param name="strRightResidueRegEx"></param>
-            public udtEnzymeMatchSpecType(string strLeftResidueRegEx, string strRightResidueRegEx)
+            /// <param name="leftResidueRegEx"></param>
+            /// <param name="rightResidueRegEx"></param>
+            public udtEnzymeMatchSpecType(string leftResidueRegEx, string rightResidueRegEx)
             {
-                LeftResidueRegEx = strLeftResidueRegEx;
-                RightResidueRegEx = strRightResidueRegEx;
+                LeftResidueRegEx = leftResidueRegEx;
+                RightResidueRegEx = rightResidueRegEx;
             }
         }
 
@@ -309,14 +309,14 @@ namespace PHRPReader
             else
             {
                 // Check whether prefix matches mLeftRegEx and chSequenceStart matches mRightRegEx
-                var blnRuleMatchStart = TestCleavageRule(prefix, chSequenceStart);
-                var blnRuleMatchEnd = TestCleavageRule(chSequenceEnd, suffix);
+                var ruleMatchStart = TestCleavageRule(prefix, chSequenceStart);
+                var ruleMatchEnd = TestCleavageRule(chSequenceEnd, suffix);
 
-                if (blnRuleMatchStart && blnRuleMatchEnd)
+                if (ruleMatchStart && ruleMatchEnd)
                 {
                     ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
                 }
-                else if (blnRuleMatchStart || blnRuleMatchEnd)
+                else if (ruleMatchStart || ruleMatchEnd)
                 {
                     ePeptideCleavageState = ePeptideCleavageStateConstants.Partial;
                 }
@@ -346,9 +346,9 @@ namespace PHRPReader
                 return numMissedCleavages;
 
             var previousLetter = "";
-            for (var intIndex = 0; intIndex <= primarySequence.Length - 1; intIndex++)
+            for (var index = 0; index <= primarySequence.Length - 1; index++)
             {
-                var chCurrent = primarySequence[intIndex];
+                var chCurrent = primarySequence[index];
 
                 if (!clsPHRPReader.IsLetterAtoZ(chCurrent))
                     continue;
@@ -459,13 +459,13 @@ namespace PHRPReader
         /// <summary>
         /// Removes all modification symbols (*, #, +, 8, etc.) from the peptide; optionally removes prefix and suffix letters
         /// </summary>
-        /// <param name="strSequenceWithMods"></param>
-        /// <param name="blnCheckForPrefixAndSuffixResidues"></param>
+        /// <param name="sequenceWithMods"></param>
+        /// <param name="checkForPrefixAndSuffixResidues"></param>
         /// <returns>Clean peptide sequence</returns>
         /// <remarks></remarks>
-        public static string ExtractCleanSequenceFromSequenceWithMods(string strSequenceWithMods, bool blnCheckForPrefixAndSuffixResidues)
+        public static string ExtractCleanSequenceFromSequenceWithMods(string sequenceWithMods, bool checkForPrefixAndSuffixResidues)
         {
-            if (strSequenceWithMods == null)
+            if (sequenceWithMods == null)
             {
                 return string.Empty;
             }
@@ -473,55 +473,55 @@ namespace PHRPReader
             // Use a RegEx to remove any characters that are not letters, then return the result
             // This method of string parsing is 4x faster than using a StringBuilder object
 
-            if (blnCheckForPrefixAndSuffixResidues)
+            if (checkForPrefixAndSuffixResidues)
             {
-                if (SplitPrefixAndSuffixFromSequence(strSequenceWithMods, out var primarySequence, out _, out _))
+                if (SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out _, out _))
                 {
                     return RegexNotLetter.Replace(primarySequence, string.Empty);
                 }
             }
 
-            return RegexNotLetter.Replace(strSequenceWithMods, string.Empty);
+            return RegexNotLetter.Replace(sequenceWithMods, string.Empty);
         }
 
-        private char FindLetterNearestEnd(string strText)
+        private char FindLetterNearestEnd(string text)
         {
             char chMatch;
 
-            if (string.IsNullOrEmpty(strText))
+            if (string.IsNullOrEmpty(text))
             {
                 chMatch = TERMINUS_SYMBOL_SEQUEST;
             }
             else
             {
-                var intIndex = strText.Length - 1;
-                chMatch = strText[intIndex];
-                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && intIndex > 0)
+                var index = text.Length - 1;
+                chMatch = text[index];
+                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && index > 0)
                 {
-                    intIndex -= 1;
-                    chMatch = strText[intIndex];
+                    index -= 1;
+                    chMatch = text[index];
                 }
             }
 
             return chMatch;
         }
 
-        private char FindLetterNearestStart(string strText)
+        private char FindLetterNearestStart(string text)
         {
             char chMatch;
 
-            if (string.IsNullOrEmpty(strText))
+            if (string.IsNullOrEmpty(text))
             {
                 chMatch = TERMINUS_SYMBOL_SEQUEST;
             }
             else
             {
-                var intIndex = 0;
-                chMatch = strText[intIndex];
-                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && intIndex < strText.Length - 1)
+                var index = 0;
+                chMatch = text[index];
+                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && index < text.Length - 1)
                 {
-                    intIndex += 1;
-                    chMatch = strText[intIndex];
+                    index += 1;
+                    chMatch = text[index];
                 }
             }
 
@@ -576,40 +576,40 @@ namespace PHRPReader
         /// <summary>
         /// Define custom enzyme match rules using RegEx strings
         /// </summary>
-        /// <param name="strLeftResidueRegEx"></param>
-        /// <param name="strRightResidueRegEx"></param>
+        /// <param name="leftResidueRegEx"></param>
+        /// <param name="rightResidueRegEx"></param>
         /// <remarks></remarks>
-        public void SetEnzymeMatchSpec(string strLeftResidueRegEx, string strRightResidueRegEx)
+        public void SetEnzymeMatchSpec(string leftResidueRegEx, string rightResidueRegEx)
         {
-            if (strLeftResidueRegEx != null && strRightResidueRegEx != null)
+            if (leftResidueRegEx != null && rightResidueRegEx != null)
             {
-                if (strLeftResidueRegEx.Length == 0)
-                    strLeftResidueRegEx = @"[A-Z]";
-                if (strRightResidueRegEx.Length == 0)
-                    strRightResidueRegEx = @"[A-Z]";
+                if (leftResidueRegEx.Length == 0)
+                    leftResidueRegEx = @"[A-Z]";
+                if (rightResidueRegEx.Length == 0)
+                    rightResidueRegEx = @"[A-Z]";
 
-                if (strLeftResidueRegEx == GENERIC_RESIDUE_SYMBOL.ToString() || strLeftResidueRegEx == @"[" + GENERIC_RESIDUE_SYMBOL + @"]")
+                if (leftResidueRegEx == GENERIC_RESIDUE_SYMBOL.ToString() || leftResidueRegEx == @"[" + GENERIC_RESIDUE_SYMBOL + @"]")
                 {
-                    strLeftResidueRegEx = @"[A-Z]";
+                    leftResidueRegEx = @"[A-Z]";
                 }
 
-                if (strRightResidueRegEx == GENERIC_RESIDUE_SYMBOL.ToString() || strRightResidueRegEx == @"[" + GENERIC_RESIDUE_SYMBOL + @"]")
+                if (rightResidueRegEx == GENERIC_RESIDUE_SYMBOL.ToString() || rightResidueRegEx == @"[" + GENERIC_RESIDUE_SYMBOL + @"]")
                 {
-                    strRightResidueRegEx = @"[A-Z]";
+                    rightResidueRegEx = @"[A-Z]";
                 }
 
-                if (strLeftResidueRegEx == @"[^" + GENERIC_RESIDUE_SYMBOL + @"]")
+                if (leftResidueRegEx == @"[^" + GENERIC_RESIDUE_SYMBOL + @"]")
                 {
-                    strLeftResidueRegEx = @"[^A-Z]";
+                    leftResidueRegEx = @"[^A-Z]";
                 }
 
-                if (strRightResidueRegEx == @"[^" + GENERIC_RESIDUE_SYMBOL + @"]")
+                if (rightResidueRegEx == @"[^" + GENERIC_RESIDUE_SYMBOL + @"]")
                 {
-                    strRightResidueRegEx = @"[^A-Z]";
+                    rightResidueRegEx = @"[^A-Z]";
                 }
 
-                mEnzymeMatchSpec.LeftResidueRegEx = strLeftResidueRegEx;
-                mEnzymeMatchSpec.RightResidueRegEx = strRightResidueRegEx;
+                mEnzymeMatchSpec.LeftResidueRegEx = leftResidueRegEx;
+                mEnzymeMatchSpec.RightResidueRegEx = rightResidueRegEx;
             }
 
             InitializeRegExObjects();
@@ -678,7 +678,7 @@ namespace PHRPReader
             out string prefix,
             out string suffix)
         {
-            var blnSuccess = false;
+            var success = false;
 
             prefix = string.Empty;
             suffix = string.Empty;
@@ -702,71 +702,71 @@ namespace PHRPReader
             primarySequence = string.Copy(sequenceIn);
 
             // See if sequenceIn contains two periods
-            var intPeriodLoc1 = sequenceIn.IndexOf('.');
-            if (intPeriodLoc1 >= 0)
+            var periodLoc1 = sequenceIn.IndexOf('.');
+            if (periodLoc1 >= 0)
             {
-                var intPeriodLoc2 = sequenceIn.LastIndexOf('.');
+                var periodLoc2 = sequenceIn.LastIndexOf('.');
 
-                if (intPeriodLoc2 > intPeriodLoc1 + 1)
+                if (periodLoc2 > periodLoc1 + 1)
                 {
                     // Sequence contains two periods with letters between the periods,
                     // For example, A.BCDEFGHIJK.L or ABCD.BCDEFGHIJK.L
                     // Extract out the text between the periods
-                    primarySequence = sequenceIn.Substring(intPeriodLoc1 + 1, intPeriodLoc2 - intPeriodLoc1 - 1);
-                    if (intPeriodLoc1 > 0)
+                    primarySequence = sequenceIn.Substring(periodLoc1 + 1, periodLoc2 - periodLoc1 - 1);
+                    if (periodLoc1 > 0)
                     {
-                        prefix = sequenceIn.Substring(0, intPeriodLoc1);
+                        prefix = sequenceIn.Substring(0, periodLoc1);
                     }
-                    suffix = sequenceIn.Substring(intPeriodLoc2 + 1);
+                    suffix = sequenceIn.Substring(periodLoc2 + 1);
 
-                    blnSuccess = true;
+                    success = true;
                 }
-                else if (intPeriodLoc2 == intPeriodLoc1 + 1)
+                else if (periodLoc2 == periodLoc1 + 1)
                 {
                     // Peptide contains two periods in a row
-                    if (intPeriodLoc1 <= 1)
+                    if (periodLoc1 <= 1)
                     {
                         primarySequence = string.Empty;
 
-                        if (intPeriodLoc1 > 0)
+                        if (periodLoc1 > 0)
                         {
-                            prefix = sequenceIn.Substring(0, intPeriodLoc1);
+                            prefix = sequenceIn.Substring(0, periodLoc1);
                         }
-                        suffix = sequenceIn.Substring(intPeriodLoc2 + 1);
+                        suffix = sequenceIn.Substring(periodLoc2 + 1);
 
-                        blnSuccess = true;
+                        success = true;
                     }
                     else
                     {
                         // Leave the sequence unchanged
                         primarySequence = string.Copy(sequenceIn);
-                        blnSuccess = false;
+                        success = false;
                     }
                 }
-                else if (intPeriodLoc1 == intPeriodLoc2)
+                else if (periodLoc1 == periodLoc2)
                 {
                     // Peptide only contains one period
-                    if (intPeriodLoc1 == 0)
+                    if (periodLoc1 == 0)
                     {
                         primarySequence = sequenceIn.Substring(1);
-                        blnSuccess = true;
+                        success = true;
                     }
-                    else if (intPeriodLoc1 == sequenceIn.Length - 1)
+                    else if (periodLoc1 == sequenceIn.Length - 1)
                     {
-                        primarySequence = sequenceIn.Substring(0, intPeriodLoc1);
-                        blnSuccess = true;
+                        primarySequence = sequenceIn.Substring(0, periodLoc1);
+                        success = true;
                     }
-                    else if (intPeriodLoc1 == 1 && sequenceIn.Length > 2)
+                    else if (periodLoc1 == 1 && sequenceIn.Length > 2)
                     {
-                        primarySequence = sequenceIn.Substring(intPeriodLoc1 + 1);
-                        prefix = sequenceIn.Substring(0, intPeriodLoc1);
-                        blnSuccess = true;
+                        primarySequence = sequenceIn.Substring(periodLoc1 + 1);
+                        prefix = sequenceIn.Substring(0, periodLoc1);
+                        success = true;
                     }
-                    else if (intPeriodLoc1 == sequenceIn.Length - 2)
+                    else if (periodLoc1 == sequenceIn.Length - 2)
                     {
-                        primarySequence = sequenceIn.Substring(0, intPeriodLoc1);
-                        suffix = sequenceIn.Substring(intPeriodLoc1 + 1);
-                        blnSuccess = true;
+                        primarySequence = sequenceIn.Substring(0, periodLoc1);
+                        suffix = sequenceIn.Substring(periodLoc1 + 1);
+                        success = true;
                     }
                     else
                     {
@@ -776,7 +776,7 @@ namespace PHRPReader
                 }
             }
 
-            return blnSuccess;
+            return success;
         }
 
         /// <summary>

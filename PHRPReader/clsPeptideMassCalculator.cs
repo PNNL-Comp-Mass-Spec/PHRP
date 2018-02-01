@@ -229,36 +229,36 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Compute the mass of peptide sequence strSequence (it cannot contain modification symbols)
+        /// Compute the mass of peptide sequence sequence (it cannot contain modification symbols)
         /// </summary>
-        /// <param name="strSequence">One letter amino acid symbols (no modification symbols or numbers); can have prefix and suffix letters</param>
+        /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers); can have prefix and suffix letters</param>
         /// <returns>Monoisotopic mass, or -1 if an error</returns>
         /// <remarks>
         /// Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True
         /// If modification symbols are present, returns -1</remarks>
-        public double ComputeSequenceMass(string strSequence)
+        public double ComputeSequenceMass(string sequence)
         {
-            var strPrimarySequence = strSequence;
-            double dblMass = 0;
-            short intValidResidueCount = 0;
+            var primarySequence = sequence;
+            double mass = 0;
+            short validResidueCount = 0;
 
             if (RemovePrefixAndSuffixIfPresent)
             {
-                if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, out strPrimarySequence, out _, out _))
+                if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out primarySequence, out _, out _))
                 {
-                    // Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
-                    strPrimarySequence = strSequence;
+                    // Prefix and suffix residues not present; simply copy sequence to primarySequence
+                    primarySequence = sequence;
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(strPrimarySequence))
+            if (string.IsNullOrWhiteSpace(primarySequence))
             {
                 // This code should never be reached; including this as a fail-safe
-                strPrimarySequence = strSequence;
+                primarySequence = sequence;
             }
 
             mErrorMessage = string.Empty;
-            foreach (var chChar in strPrimarySequence)
+            foreach (var chChar in primarySequence)
             {
                 // Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chChar);
@@ -267,14 +267,14 @@ namespace PHRPReader
                 {
                     if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
                     {
-                        mErrorMessage = "Unknown symbol " + chChar + " in sequence " + strPrimarySequence;
-                        intValidResidueCount = 0;
-                        dblMass = -1;
+                        mErrorMessage = "Unknown symbol " + chChar + " in sequence " + primarySequence;
+                        validResidueCount = 0;
+                        mass = -1;
                         break;
                     }
 
-                    dblMass += mAminoAcidMasses[aminoAcidIndex];
-                    intValidResidueCount += 1;
+                    mass += mAminoAcidMasses[aminoAcidIndex];
+                    validResidueCount += 1;
                 }
                 catch (Exception)
                 {
@@ -282,51 +282,51 @@ namespace PHRPReader
                 }
             }
 
-            if (intValidResidueCount > 0)
+            if (validResidueCount > 0)
             {
-                dblMass += PeptideNTerminusMass + PeptideCTerminusMass;
+                mass += PeptideNTerminusMass + PeptideCTerminusMass;
             }
 
-            return dblMass;
+            return mass;
         }
 
         /// <summary>
-        /// Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
+        /// Compute the mass of peptide sequence sequence; uses the information in udtResidueModificationInfo() to determine modification masses
         /// </summary>
-        /// <param name="strSequence"></param>
-        /// <param name="intModCount"></param>
-        /// <param name="udtResidueModificationInfo">Array of modified residues; index 0 to intModCount-1</param>
+        /// <param name="sequence"></param>
+        /// <param name="modCount"></param>
+        /// <param name="udtResidueModificationInfo">Array of modified residues; index 0 to modCount-1</param>
         /// <returns>The computed mass, or -1 if an error</returns>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         [Obsolete("This version uses an array for modified residues; use the version that takes a list")]
-        public double ComputeSequenceMass(string strSequence, int intModCount, ref udtPeptideSequenceModInfoType[] udtResidueModificationInfo)
+        public double ComputeSequenceMass(string sequence, int modCount, ref udtPeptideSequenceModInfoType[] udtResidueModificationInfo)
         {
             var modifiedResidues = new List<udtPeptideSequenceModInfoType>();
 
-            if (intModCount > 0)
+            if (modCount > 0)
             {
-                for (var intIndex = 0; intIndex <= intModCount - 1; intIndex++)
+                for (var index = 0; index <= modCount - 1; index++)
                 {
-                    modifiedResidues.Add(udtResidueModificationInfo[intIndex]);
+                    modifiedResidues.Add(udtResidueModificationInfo[index]);
                 }
             }
 
-            return ComputeSequenceMass(strSequence, modifiedResidues);
+            return ComputeSequenceMass(sequence, modifiedResidues);
         }
 
         /// <summary>
-        /// Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
+        /// Compute the mass of peptide sequence sequence; uses the information in udtResidueModificationInfo() to determine modification masses
         /// </summary>
-        /// <param name="strSequence">One letter amino acid symbols (no modification symbols or numbers)</param>
+        /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers)</param>
         /// <param name="modifiedResidues">List of modified residues</param>
         /// <returns>The computed mass, or -1 if an error</returns>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
-        public double ComputeSequenceMass(string strSequence, List<udtPeptideSequenceModInfoType> modifiedResidues)
+        public double ComputeSequenceMass(string sequence, List<udtPeptideSequenceModInfoType> modifiedResidues)
         {
             // Note that this call to ComputeSequenceMass will reset mErrorMessage
-            var dblMass = ComputeSequenceMass(strSequence);
+            var mass = ComputeSequenceMass(sequence);
 
-            if (dblMass >= 0 && modifiedResidues != null && modifiedResidues.Count > 0)
+            if (mass >= 0 && modifiedResidues != null && modifiedResidues.Count > 0)
             {
                 var empiricalFormula = new clsEmpiricalFormula();
 
@@ -337,8 +337,8 @@ namespace PHRPReader
                     if (modifiedResidue.AffectedAtom == default(char) || modifiedResidue.AffectedAtom == NO_AFFECTED_ATOM_SYMBOL)
                     {
                         // Positional modification (static or dynamic mod)
-                        // Simply add the modification mass to dblMass
-                        dblMass += modifiedResidue.ModificationMass;
+                        // Simply add the modification mass to mass
+                        mass += modifiedResidue.ModificationMass;
                         continue;
                     }
 
@@ -346,96 +346,96 @@ namespace PHRPReader
                     if (empiricalFormula.ElementCounts.Count == 0)
                     {
                         // Initialize empiricalFormula using the amino acid sequence
-                        var empiricalFormulaToAdd = ConvertAminoAcidSequenceToEmpiricalFormula(strSequence);
+                        var empiricalFormulaToAdd = ConvertAminoAcidSequenceToEmpiricalFormula(sequence);
                         empiricalFormula.AddElements(empiricalFormulaToAdd);
                     }
 
                     if (!mElementMonoMasses.ContainsKey(modifiedResidue.AffectedAtom.ToString()))
                     {
                         mErrorMessage = "Unknown Affected Atom '" + modifiedResidue.AffectedAtom + "'";
-                        dblMass = -1;
+                        mass = -1;
                         break;
                     }
 
                     var elementCount = empiricalFormula.GetElementCount(modifiedResidue.AffectedAtom);
                     if (elementCount == 0)
                     {
-                        Console.WriteLine("Warning: no amino acids in {0} contain element {1}", strSequence, modifiedResidue.AffectedAtom);
+                        Console.WriteLine("Warning: no amino acids in {0} contain element {1}", sequence, modifiedResidue.AffectedAtom);
                     }
                     else
                     {
-                        dblMass += elementCount * modifiedResidue.ModificationMass;
+                        mass += elementCount * modifiedResidue.ModificationMass;
                     }
                 }
             }
 
-            return dblMass;
+            return mass;
         }
 
         private static readonly Regex RegexModMasses = new Regex(@"[+-][0-9.]+", RegexOptions.Compiled);
 
         /// <summary>
-        /// Compute the mass of peptide sequence strSequence.  Supports peptide sequences with with numeric mod masses
+        /// Compute the mass of peptide sequence sequence.  Supports peptide sequences with with numeric mod masses
         /// Examples of numeric mods:
         ///  R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
         ///  K.Q-17.0265QIEESTSDYDKEK.L
         /// </summary>
-        /// <param name="strSequence"></param>
+        /// <param name="sequence"></param>
         /// <returns></returns>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
-        public double ComputeSequenceMassNumericMods(string strSequence)
+        public double ComputeSequenceMassNumericMods(string sequence)
         {
-            string strPrimarySequence;
+            string primarySequence;
 
             if (RemovePrefixAndSuffixIfPresent)
             {
-                if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strSequence, out strPrimarySequence, out _, out _))
+                if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out primarySequence, out _, out _))
                 {
-                    // Prefix and suffix residues not present; simply copy strSequence to strPrimarySequence
-                    strPrimarySequence = string.Copy(strSequence);
+                    // Prefix and suffix residues not present; simply copy sequence to primarySequence
+                    primarySequence = string.Copy(sequence);
                 }
             }
             else
             {
-                strPrimarySequence = string.Copy(strSequence);
+                primarySequence = string.Copy(sequence);
             }
 
-            var reMatch = RegexModMasses.Match(strPrimarySequence);
+            var reMatch = RegexModMasses.Match(primarySequence);
 
             var sbSequenceWithoutMods = new StringBuilder();
-            var intStartIndex = 0;
-            double dblModMassTotal = 0;
+            var startIndex = 0;
+            double modMassTotal = 0;
 
             while (reMatch.Success)
             {
-                if (reMatch.Index > intStartIndex)
+                if (reMatch.Index > startIndex)
                 {
-                    sbSequenceWithoutMods.Append(strPrimarySequence.Substring(intStartIndex, reMatch.Index - intStartIndex));
+                    sbSequenceWithoutMods.Append(primarySequence.Substring(startIndex, reMatch.Index - startIndex));
                 }
 
-                var strModMass = reMatch.ToString();
-                if (double.TryParse(strModMass, out var dblModMass))
+                var modMassText = reMatch.ToString();
+                if (double.TryParse(modMassText, out var modMass))
                 {
-                    dblModMassTotal += dblModMass;
+                    modMassTotal += modMass;
                 }
 
-                intStartIndex = reMatch.Index + strModMass.Length;
+                startIndex = reMatch.Index + modMassText.Length;
                 reMatch = reMatch.NextMatch();
             }
 
-            if (intStartIndex < strPrimarySequence.Length)
+            if (startIndex < primarySequence.Length)
             {
-                sbSequenceWithoutMods.Append(strPrimarySequence.Substring(intStartIndex, strPrimarySequence.Length - intStartIndex));
+                sbSequenceWithoutMods.Append(primarySequence.Substring(startIndex, primarySequence.Length - startIndex));
             }
 
-            var dblPeptideMass = ComputeSequenceMass(sbSequenceWithoutMods.ToString());
+            var peptideMass = ComputeSequenceMass(sbSequenceWithoutMods.ToString());
 
-            if (dblPeptideMass < 0)
+            if (peptideMass < 0)
             {
                 return -1;
             }
 
-            return dblPeptideMass + dblModMassTotal;
+            return peptideMass + modMassTotal;
         }
 
         private short ConvertAminoAcidCharToIndex(char aminoAcidSymbol)
@@ -451,55 +451,55 @@ namespace PHRPReader
         /// <summary>
         /// Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
         /// </summary>
-        /// <param name="dblMassMZ"></param>
-        /// <param name="intCurrentCharge"></param>
-        /// <param name="intDesiredCharge"></param>
+        /// <param name="massMZ"></param>
+        /// <param name="currentCharge"></param>
+        /// <param name="desiredCharge"></param>
         /// <returns></returns>
         /// <remarks>Uses the charge carrier mass defined by ChargeCarrierMass</remarks>
-        public double ConvoluteMass(double dblMassMZ, int intCurrentCharge, int intDesiredCharge = 1)
+        public double ConvoluteMass(double massMZ, int currentCharge, int desiredCharge = 1)
         {
-            return ConvoluteMass(dblMassMZ, intCurrentCharge, intDesiredCharge, ChargeCarrierMass);
+            return ConvoluteMass(massMZ, currentCharge, desiredCharge, ChargeCarrierMass);
         }
 
         /// <summary>
         /// Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
         /// </summary>
-        /// <param name="dblMassMZ">m/z</param>
-        /// <param name="intCurrentCharge">Current charge; if 0, assumes dblMassMZ is the neutral, monoisotopic mass</param>
-        /// <param name="intDesiredCharge">Desired charge</param>
-        /// <param name="dblChargeCarrierMass">Charge carrier mass (Default is the mass of a proton)</param>
+        /// <param name="massMZ">m/z</param>
+        /// <param name="currentCharge">Current charge; if 0, assumes massMZ is the neutral, monoisotopic mass</param>
+        /// <param name="desiredCharge">Desired charge</param>
+        /// <param name="chargeCarrierMass">Charge carrier mass (Default is the mass of a proton)</param>
         /// <returns></returns>
-        /// <remarks>To return the neutral mass, set intDesiredCharge to 0</remarks>
-        public double ConvoluteMass(double dblMassMZ, int intCurrentCharge, int intDesiredCharge, double dblChargeCarrierMass)
+        /// <remarks>To return the neutral mass, set desiredCharge to 0</remarks>
+        public double ConvoluteMass(double massMZ, int currentCharge, int desiredCharge, double chargeCarrierMass)
         {
-            double dblNewMZ;
+            double newMZ;
 
-            if (Math.Abs(dblChargeCarrierMass) < float.Epsilon)
+            if (Math.Abs(chargeCarrierMass) < float.Epsilon)
             {
-                dblChargeCarrierMass = MASS_PROTON;
+                chargeCarrierMass = MASS_PROTON;
             }
 
             try
             {
-                if (intCurrentCharge == intDesiredCharge)
+                if (currentCharge == desiredCharge)
                 {
-                    dblNewMZ = dblMassMZ;
+                    newMZ = massMZ;
                 }
                 else
                 {
-                    if (intCurrentCharge == 1)
+                    if (currentCharge == 1)
                     {
-                        dblNewMZ = dblMassMZ;
+                        newMZ = massMZ;
                     }
-                    else if (intCurrentCharge > 1)
+                    else if (currentCharge > 1)
                     {
-                        // Convert dblMassMZ to M+H
-                        dblNewMZ = dblMassMZ * intCurrentCharge - dblChargeCarrierMass * (intCurrentCharge - 1);
+                        // Convert massMZ to M+H
+                        newMZ = massMZ * currentCharge - chargeCarrierMass * (currentCharge - 1);
                     }
-                    else if (intCurrentCharge == 0)
+                    else if (currentCharge == 0)
                     {
-                        // Convert dblMassMZ (which is neutral) to M+H and store in dblNewMZ
-                        dblNewMZ = dblMassMZ + dblChargeCarrierMass;
+                        // Convert massMZ (which is neutral) to M+H and store in newMZ
+                        newMZ = massMZ + chargeCarrierMass;
                     }
                     else
                     {
@@ -507,45 +507,45 @@ namespace PHRPReader
                         return 0;
                     }
 
-                    if (intDesiredCharge > 1)
+                    if (desiredCharge > 1)
                     {
-                        dblNewMZ = (dblNewMZ + dblChargeCarrierMass * (intDesiredCharge - 1)) / intDesiredCharge;
+                        newMZ = (newMZ + chargeCarrierMass * (desiredCharge - 1)) / desiredCharge;
                     }
-                    else if (intDesiredCharge == 1)
+                    else if (desiredCharge == 1)
                     {
-                        // Return M+H, which is currently stored in dblNewMZ
+                        // Return M+H, which is currently stored in newMZ
                     }
-                    else if (intDesiredCharge == 0)
+                    else if (desiredCharge == 0)
                     {
                         // Return the neutral mass
-                        dblNewMZ -= dblChargeCarrierMass;
+                        newMZ -= chargeCarrierMass;
                     }
                     else
                     {
                         // Negative charges are not supported; return 0
-                        dblNewMZ = 0;
+                        newMZ = 0;
                     }
                 }
             }
             catch (Exception)
             {
                 // Error occurred
-                dblNewMZ = 0;
+                newMZ = 0;
             }
 
-            return dblNewMZ;
+            return newMZ;
         }
 
         /// <summary>
         /// Convert an amino acid sequence into an empirical formula
         /// </summary>
-        /// <param name="strSequence">One letter amino acid symbols (no modification symbols or numbers)</param>
+        /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers)</param>
         /// <returns></returns>
-        private clsEmpiricalFormula ConvertAminoAcidSequenceToEmpiricalFormula(string strSequence)
+        private clsEmpiricalFormula ConvertAminoAcidSequenceToEmpiricalFormula(string sequence)
         {
             var empiricalFormula = new clsEmpiricalFormula();
 
-            foreach (var chAminoAcidSymbol in strSequence)
+            foreach (var chAminoAcidSymbol in sequence)
             {
                 // Use Convert.ToInt32 to convert to the Ascii value, then subtract 65
                 var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
@@ -554,7 +554,7 @@ namespace PHRPReader
                 {
                     if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
                     {
-                        mErrorMessage = "Unknown symbol " + chAminoAcidSymbol + " in sequence " + strSequence;
+                        mErrorMessage = "Unknown symbol " + chAminoAcidSymbol + " in sequence " + sequence;
                         break;
                     }
 
@@ -854,14 +854,14 @@ namespace PHRPReader
         ///  C3H3NOS4
         ///  CH23NO-5S+4
         /// </summary>
-        /// <param name="strEmpiricalformula"></param>
+        /// <param name="empiricalformula"></param>
         /// <returns>EmpiricalFormula instnance tracking the element symbols and counts</returns>
-        public static clsEmpiricalFormula GetEmpiricalFormulaComponents(string strEmpiricalformula)
+        public static clsEmpiricalFormula GetEmpiricalFormulaComponents(string empiricalformula)
         {
             // Originally MSGF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
             // It now allows for any element
 
-            var reMatches = mAtomicFormulaRegEx.Matches(strEmpiricalformula);
+            var reMatches = mAtomicFormulaRegEx.Matches(empiricalformula);
 
             var empiricalFormula = new clsEmpiricalFormula();
 
@@ -877,7 +877,7 @@ namespace PHRPReader
                     {
                         if (!int.TryParse(elementCountText, out elementCount))
                         {
-                            throw new Exception("Error parsing empirical formula '" + strEmpiricalformula + "', number not found in " + elementCountText);
+                            throw new Exception("Error parsing empirical formula '" + empiricalformula + "', number not found in " + elementCountText);
                         }
                     }
 
@@ -902,52 +902,52 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Converts dblMassToConvert to ppm, based on the value of dblCurrentMZ
+        /// Converts massToConvert to ppm, based on the value of currentMZ
         /// </summary>
-        /// <param name="dblMassToConvert"></param>
-        /// <param name="dblCurrentMZ"></param>
+        /// <param name="massToConvert"></param>
+        /// <param name="currentMZ"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static double MassToPPM(double dblMassToConvert, double dblCurrentMZ)
+        public static double MassToPPM(double massToConvert, double currentMZ)
         {
-            return dblMassToConvert * 1000000.0 / dblCurrentMZ;
+            return massToConvert * 1000000.0 / currentMZ;
         }
 
         /// <summary>
         /// Converts and MH mass to the uncharged (neutral) mass
         /// </summary>
-        /// <param name="dblMH"></param>
+        /// <param name="mH"></param>
         /// <returns></returns>
-        /// <remarks>Equivalent to ConvoluteMass(dblMH, 1, 0)</remarks>
-        public double MHToMonoisotopicMass(double dblMH)
+        /// <remarks>Equivalent to ConvoluteMass(mH, 1, 0)</remarks>
+        public double MHToMonoisotopicMass(double mH)
         {
-            return ConvoluteMass(dblMH, 1, 0);
+            return ConvoluteMass(mH, 1, 0);
         }
 
         /// <summary>
         /// Converts an uncharged (neutral) mass to the m/z value for the specified charge
         /// </summary>
-        /// <param name="dblMonoisotopicMass"></param>
-        /// <param name="intDesiredCharge"></param>
+        /// <param name="monoisotopicMass"></param>
+        /// <param name="desiredCharge"></param>
         /// <returns></returns>
-        /// <remarks>Equivalent to ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge)</remarks>
-        public double MonoisotopicMassToMZ(double dblMonoisotopicMass, int intDesiredCharge)
+        /// <remarks>Equivalent to ConvoluteMass(monoisotopicMass, 0, desiredCharge)</remarks>
+        public double MonoisotopicMassToMZ(double monoisotopicMass, int desiredCharge)
         {
-            return ConvoluteMass(dblMonoisotopicMass, 0, intDesiredCharge);
+            return ConvoluteMass(monoisotopicMass, 0, desiredCharge);
         }
 
         /// <summary>
         /// Converts from a ppm value to a mass value, using the specified m/z as a reference point
         /// </summary>
-        /// <param name="dblPPMToConvert"></param>
-        /// <param name="dblCurrentMZ"></param>
+        /// <param name="ppmToConvert"></param>
+        /// <param name="currentMZ"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static double PPMToMass(double dblPPMToConvert, double dblCurrentMZ)
+        public static double PPMToMass(double ppmToConvert, double currentMZ)
         {
-            // Converts dblPPMToConvert to a mass value, which is dependent on dblCurrentMZ
+            // Converts ppmToConvert to a mass value, which is dependent on currentMZ
 
-            return dblPPMToConvert / 1000000.0 * dblCurrentMZ;
+            return ppmToConvert / 1000000.0 * currentMZ;
         }
 
         /// <summary>
@@ -1035,10 +1035,10 @@ namespace PHRPReader
         /// Defines a custom mass for an amino acid
         /// </summary>
         /// <param name="chAminoAcidSymbol"></param>
-        /// <param name="dblMass"></param>
+        /// <param name="mass"></param>
         /// <returns>True if success, False if an invalid amino acid symbol</returns>
         /// <remarks></remarks>
-        public bool SetAminoAcidMass(char chAminoAcidSymbol, double dblMass)
+        public bool SetAminoAcidMass(char chAminoAcidSymbol, double mass)
         {
             if (chAminoAcidSymbol != default(char))
             {
@@ -1049,7 +1049,7 @@ namespace PHRPReader
                     return false;
                 }
 
-                mAminoAcidMasses[aminoAcidIndex] = dblMass;
+                mAminoAcidMasses[aminoAcidIndex] = mass;
                 return true;
             }
 

@@ -61,10 +61,10 @@ namespace PHRPReader
         /// <remarks>If an entry already exists for a protein at a given start position, the end position will be updated</remarks>
         public void AddProtein(string proteinName, int residueStart, int residueEnd)
         {
-            if (ProteinMapInfo.TryGetValue(proteinName, out var lstLocations))
+            if (ProteinMapInfo.TryGetValue(proteinName, out var locations))
             {
                 // Protein mapping already exists; check residueStart
-                foreach (var udtLoc in lstLocations)
+                foreach (var udtLoc in locations)
                 {
                     if (udtLoc.ResidueStart == residueStart)
                     {
@@ -80,7 +80,7 @@ namespace PHRPReader
                     ResidueEnd = residueEnd
                 };
 
-                lstLocations.Add(udtLocInfoAddnl);
+                locations.Add(udtLocInfoAddnl);
                 return;
             }
 

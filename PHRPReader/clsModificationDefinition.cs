@@ -321,71 +321,71 @@ namespace PHRPReader
         /// <summary>
         /// Constructor that takes a mod symbol and mod mass
         /// </summary>
-        /// <param name="chModificationSymbol"></param>
-        /// <param name="dblModificationMass"></param>
-        public clsModificationDefinition(char chModificationSymbol, double dblModificationMass)
+        /// <param name="modificationSymbol"></param>
+        /// <param name="modificationMass"></param>
+        public clsModificationDefinition(char modificationSymbol, double modificationMass)
         {
             Clear();
 
-            ModificationSymbol = chModificationSymbol;
-            ModificationMass = dblModificationMass;
+            ModificationSymbol = modificationSymbol;
+            ModificationMass = modificationMass;
         }
 
         /// <summary>
         /// Constructor that takes a mod mass, target residues, and modification tye
         /// </summary>
-        /// <param name="dblModificationMass"></param>
-        /// <param name="strTargetResidues"></param>
+        /// <param name="modificationMass"></param>
+        /// <param name="targetResidues"></param>
         /// <param name="eModificationType"></param>
-        public clsModificationDefinition(double dblModificationMass, string strTargetResidues, eModificationTypeConstants eModificationType)
+        public clsModificationDefinition(double modificationMass, string targetResidues, eModificationTypeConstants eModificationType)
         {
             Clear();
 
-            ModificationMass = dblModificationMass;
-            TargetResidues = strTargetResidues;
+            ModificationMass = modificationMass;
+            TargetResidues = targetResidues;
             ModificationType = eModificationType;
         }
 
         /// <summary>
         /// Constructor that takes a mod symbol, mod mass, target residues, modification type, and mass correction tag
         /// </summary>
-        /// <param name="chModificationSymbol"></param>
-        /// <param name="dblModificationMass"></param>
-        /// <param name="strTargetResidues"></param>
+        /// <param name="modificationSymbol"></param>
+        /// <param name="modificationMass"></param>
+        /// <param name="targetResidues"></param>
         /// <param name="eModificationType"></param>
-        /// <param name="strMassCorrectionTag"></param>
-        public clsModificationDefinition(char chModificationSymbol, double dblModificationMass, string strTargetResidues, eModificationTypeConstants eModificationType, string strMassCorrectionTag)
+        /// <param name="massCorrectionTag"></param>
+        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, eModificationTypeConstants eModificationType, string massCorrectionTag)
         {
             Clear();
 
-            ModificationSymbol = chModificationSymbol;
-            ModificationMass = dblModificationMass;
-            TargetResidues = strTargetResidues;
+            ModificationSymbol = modificationSymbol;
+            ModificationMass = modificationMass;
+            TargetResidues = targetResidues;
             ModificationType = eModificationType;
-            MassCorrectionTag = strMassCorrectionTag;
+            MassCorrectionTag = massCorrectionTag;
         }
 
         /// <summary>
         /// Constructor that takes a mod symbol, mod mass, target residues, modification type, mass correction tag, and affected atom
         /// </summary>
-        /// <param name="chModificationSymbol"></param>
-        /// <param name="dblModificationMass"></param>
-        /// <param name="strTargetResidues"></param>
+        /// <param name="modificationSymbol"></param>
+        /// <param name="modificationMass"></param>
+        /// <param name="targetResidues"></param>
         /// <param name="eModificationType"></param>
-        /// <param name="strMassCorrectionTag"></param>
+        /// <param name="massCorrectionTag"></param>
         /// <param name="chAffectedAtom"></param>
-        /// <param name="blnUnknownModAutoDefined"></param>
-        public clsModificationDefinition(char chModificationSymbol, double dblModificationMass, string strTargetResidues, eModificationTypeConstants eModificationType, string strMassCorrectionTag, char chAffectedAtom, bool blnUnknownModAutoDefined)
+        /// <param name="unknownModAutoDefined"></param>
+        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, eModificationTypeConstants eModificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
         {
             Clear();
 
-            ModificationSymbol = chModificationSymbol;
-            ModificationMass = dblModificationMass;
-            TargetResidues = strTargetResidues;
+            ModificationSymbol = modificationSymbol;
+            ModificationMass = modificationMass;
+            TargetResidues = targetResidues;
             ModificationType = eModificationType;
-            MassCorrectionTag = strMassCorrectionTag;
+            MassCorrectionTag = massCorrectionTag;
             AffectedAtom = chAffectedAtom;
-            UnknownModAutoDefined = blnUnknownModAutoDefined;
+            UnknownModAutoDefined = unknownModAutoDefined;
         }
 
         /// <summary>
@@ -406,129 +406,129 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Compares objB to this object, ignoring .ModificationSymbol and ignoring .AffectedResidues
+        /// Compares b to this object, ignoring .ModificationSymbol and ignoring .AffectedResidues
         /// </summary>
-        /// <param name="objB"></param>
+        /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
         /// <remarks></remarks>
-        public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition objB)
+        public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition b)
         {
-            return EquivalentMassTypeTagAndAtom(this, objB);
+            return EquivalentMassTypeTagAndAtom(this, b);
         }
 
         /// <summary>
-        /// Compare objA to objB but ignore .ModificationSymbol and .AffectedResidues
+        /// Compare a to b but ignore .ModificationSymbol and .AffectedResidues
         /// </summary>
-        /// <param name="objA"></param>
-        /// <param name="objB"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
         /// <remarks></remarks>
-        public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition objA, clsModificationDefinition objB)
+        public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition a, clsModificationDefinition b)
         {
-            var blnEquivalent =
-                Math.Abs(Math.Round(objA.ModificationMass - objB.ModificationMass, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < float.Epsilon &&
-                objA.ModificationType == objB.ModificationType &&
-                objA.MassCorrectionTag == objB.MassCorrectionTag &&
-                objA.AffectedAtom == objB.AffectedAtom;
+            var equivalent =
+                Math.Abs(Math.Round(a.ModificationMass - b.ModificationMass, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < float.Epsilon &&
+                a.ModificationType == b.ModificationType &&
+                a.MassCorrectionTag == b.MassCorrectionTag &&
+                a.AffectedAtom == b.AffectedAtom;
 
-            return blnEquivalent;
+            return equivalent;
         }
 
         /// <summary>
-        /// Compares objB to this object, ignoring .ModificationSymbol
+        /// Compares b to this object, ignoring .ModificationSymbol
         /// </summary>
-        /// <param name="objB"></param>
+        /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
         /// <remarks></remarks>
-        public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition objB)
+        public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition b)
         {
-            return EquivalentMassTypeTagAtomAndResidues(this, objB);
+            return EquivalentMassTypeTagAtomAndResidues(this, b);
         }
 
         /// <summary>
-        /// Compares objB to this object
+        /// Compares b to this object
         /// </summary>
-        /// <param name="objA"></param>
-        /// <param name="objB"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
         /// <remarks></remarks>
-        public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition objA, clsModificationDefinition objB)
+        public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition a, clsModificationDefinition b)
         {
-            // First compare objA to objB but ignore .ModificationSymbol and .AffectedResidues
-            var blnEquivalent = EquivalentMassTypeTagAndAtom(objA, objB);
+            // First compare a to b but ignore .ModificationSymbol and .AffectedResidues
+            var equivalent = EquivalentMassTypeTagAndAtom(a, b);
 
-            if (blnEquivalent)
+            if (equivalent)
             {
                 // Mass, ModificationType, MassCorrectionTag, and AffectedAtom are identical
                 // What about the residues?
 
-                blnEquivalent = false;
-                if (objA.TargetResidues == null && objB.TargetResidues == null)
+                equivalent = false;
+                if (a.TargetResidues == null && b.TargetResidues == null)
                 {
-                    blnEquivalent = true;
+                    equivalent = true;
                 }
-                else if (objA.TargetResidues != null && objB.TargetResidues != null)
+                else if (a.TargetResidues != null && b.TargetResidues != null)
                 {
-                    if (objA.ModificationType == eModificationTypeConstants.DynamicMod ||
-                        objA.ModificationType == eModificationTypeConstants.StaticMod)
+                    if (a.ModificationType == eModificationTypeConstants.DynamicMod ||
+                        a.ModificationType == eModificationTypeConstants.StaticMod)
                     {
                         // Matching dynamic or static modification definitions
-                        // Make sure each of the residues in objB.TargetResidues is present in .TargetResidues
-                        if (EquivalentTargetResidues(objA.TargetResidues, objB.TargetResidues, false))
+                        // Make sure each of the residues in b.TargetResidues is present in .TargetResidues
+                        if (EquivalentTargetResidues(a.TargetResidues, b.TargetResidues, false))
                         {
-                            blnEquivalent = true;
+                            equivalent = true;
                         }
                     }
                     else
                     {
                         // Not a dynamic or static mod; require identical target residue lists in order to flag them as identical
-                        if (objA.TargetResidues == objB.TargetResidues)
+                        if (a.TargetResidues == b.TargetResidues)
                         {
-                            blnEquivalent = true;
+                            equivalent = true;
                         }
                     }
                 }
             }
 
-            return blnEquivalent;
+            return equivalent;
         }
 
         /// <summary>
         /// Compare the residue lists (ignoring order)
         /// </summary>
-        /// <param name="strResidues1"></param>
-        /// <param name="strResidues2"></param>
-        /// <param name="blnAllowResidues2ToBeSubsetOfResidues1"></param>
+        /// <param name="residues1"></param>
+        /// <param name="residues2"></param>
+        /// <param name="allowResidues2ToBeSubsetOfResidues1"></param>
         /// <returns>True if they contain the same residues</returns>
         /// <remarks></remarks>
-        public static bool EquivalentTargetResidues(string strResidues1, string strResidues2, bool blnAllowResidues2ToBeSubsetOfResidues1)
+        public static bool EquivalentTargetResidues(string residues1, string residues2, bool allowResidues2ToBeSubsetOfResidues1)
         {
-            var blnEquivalent = false;
+            var equivalent = false;
 
-            if (strResidues1 == null && strResidues2 == null)
+            if (residues1 == null && residues2 == null)
             {
                 // Both residues lists are blank
-                blnEquivalent = true;
+                equivalent = true;
             }
-            else if (!(strResidues1 == null || strResidues2 == null))
+            else if (!(residues1 == null || residues2 == null))
             {
-                if (strResidues1.Length == 0 && strResidues2.Length == 0)
+                if (residues1.Length == 0 && residues2.Length == 0)
                 {
-                    blnEquivalent = true;
+                    equivalent = true;
                 }
-                else if (strResidues1 == strResidues2)
+                else if (residues1 == residues2)
                 {
-                    blnEquivalent = true;
+                    equivalent = true;
                 }
-                else if (strResidues1.Length >= strResidues2.Length)
+                else if (residues1.Length >= residues2.Length)
                 {
-                    // See if each of the residues in strResidues2 is in strResidues1
-                    var intMatchCount = 0;
-                    foreach (var chChar in strResidues2)
+                    // See if each of the residues in residues2 is in residues1
+                    var matchCount = 0;
+                    foreach (var chChar in residues2)
                     {
-                        if (strResidues1.IndexOf(chChar) >= 0)
+                        if (residues1.IndexOf(chChar) >= 0)
                         {
-                            intMatchCount += 1;
+                            matchCount += 1;
                         }
                         else
                         {
@@ -536,18 +536,18 @@ namespace PHRPReader
                         }
                     }
 
-                    if (intMatchCount == strResidues1.Length)
+                    if (matchCount == residues1.Length)
                     {
-                        blnEquivalent = true;
+                        equivalent = true;
                     }
-                    else if (blnAllowResidues2ToBeSubsetOfResidues1 && intMatchCount > 0)
+                    else if (allowResidues2ToBeSubsetOfResidues1 && matchCount > 0)
                     {
-                        blnEquivalent = true;
+                        equivalent = true;
                     }
                 }
             }
 
-            return blnEquivalent;
+            return equivalent;
         }
 
         /// <summary>
@@ -558,7 +558,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool CanAffectPeptideOrProteinTerminus()
         {
-            var lstTerminalSymbols = GetTerminalSymbols();
+            var terminalSymbols = GetTerminalSymbols();
 
             if (mModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || mModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
             {
@@ -567,7 +567,7 @@ namespace PHRPReader
 
             foreach (var chChar in mTargetResidues)
             {
-                if (lstTerminalSymbols.Contains(chChar))
+                if (terminalSymbols.Contains(chChar))
                 {
                     return true;
                 }
@@ -582,7 +582,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public bool CanAffectPeptideResidues()
         {
-            var lstTerminalSymbols = GetTerminalSymbols();
+            var terminalSymbols = GetTerminalSymbols();
 
             if (mModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || mModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
             {
@@ -596,7 +596,7 @@ namespace PHRPReader
 
             foreach (var chChar in mTargetResidues)
             {
-                if (!lstTerminalSymbols.Contains(chChar))
+                if (!terminalSymbols.Contains(chChar))
                 {
                     return true;
                 }
@@ -612,7 +612,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public static SortedSet<char> GetTerminalSymbols()
         {
-            var lstTerminalSymbols = new SortedSet<char>
+            var terminalSymbols = new SortedSet<char>
             {
                 clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS,
                 clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS,
@@ -620,23 +620,23 @@ namespace PHRPReader
                 clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
             };
 
-            return lstTerminalSymbols;
+            return terminalSymbols;
         }
 
         /// <summary>
         /// Retrieve the modification type for the given modification type symbol
         /// </summary>
-        /// <param name="chModificationTypeSymbol">D, S, T, I, or P</param>
+        /// <param name="modificationTypeSymbol">D, S, T, I, or P</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static eModificationTypeConstants ModificationSymbolToModificationType(char chModificationTypeSymbol)
+        public static eModificationTypeConstants ModificationSymbolToModificationType(char modificationTypeSymbol)
         {
-            if (chModificationTypeSymbol == default(char))
+            if (modificationTypeSymbol == default(char))
             {
                 return eModificationTypeConstants.UnknownType;
             }
 
-            switch (chModificationTypeSymbol)
+            switch (modificationTypeSymbol)
             {
                 case 'D':
                     return eModificationTypeConstants.DynamicMod;

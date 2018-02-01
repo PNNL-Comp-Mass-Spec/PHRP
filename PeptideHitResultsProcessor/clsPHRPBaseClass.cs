@@ -559,7 +559,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected float CSngSafe(string value, float sngDefaultValue)
+        protected float CSngSafe(string value, float defaultValue)
         {
             try
             {
@@ -568,7 +568,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception)
             {
                 // Error converting value to a number; return the default
-                return sngDefaultValue;
+                return defaultValue;
             }
         }
 
@@ -645,12 +645,12 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Collapses a list of strings to a tab-delimited line of text
         /// </summary>
-        /// <param name="lstFields"></param>
+        /// <param name="fields"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected string CollapseList(List<string> lstFields)
+        protected string CollapseList(List<string> fields)
         {
-            return string.Join("\t", lstFields);
+            return string.Join("\t", fields);
         }
 
         /// <summary>
@@ -781,66 +781,66 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected void ComputePseudoPeptideLocInProtein(clsSearchResultsBaseClass objSearchResult)
+        protected void ComputePseudoPeptideLocInProtein(clsSearchResultsBaseClass searchResult)
         {
             // Set these to 1 and 10000 since MSGFDB, Sequest, and Inspect results files do not contain protein sequence information
             // If we find later that the peptide sequence spans the length of the protein, we'll revise .ProteinSeqResidueNumberEnd as needed
-            objSearchResult.ProteinSeqResidueNumberStart = 1;
-            objSearchResult.ProteinSeqResidueNumberEnd = 10000;
+            searchResult.ProteinSeqResidueNumberStart = 1;
+            searchResult.ProteinSeqResidueNumberEnd = 10000;
 
-            if (objSearchResult.PeptidePreResidues.Trim().EndsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST.ToString()))
+            if (searchResult.PeptidePreResidues.Trim().EndsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST.ToString()))
             {
                 // The peptide is at the N-Terminus of the protein
-                objSearchResult.PeptideLocInProteinStart = objSearchResult.ProteinSeqResidueNumberStart;
-                objSearchResult.PeptideLocInProteinEnd = objSearchResult.PeptideLocInProteinStart + objSearchResult.PeptideCleanSequence.Length - 1;
+                searchResult.PeptideLocInProteinStart = searchResult.ProteinSeqResidueNumberStart;
+                searchResult.PeptideLocInProteinEnd = searchResult.PeptideLocInProteinStart + searchResult.PeptideCleanSequence.Length - 1;
 
-                if (objSearchResult.PeptidePostResidues.Trim()[0] == clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST)
+                if (searchResult.PeptidePostResidues.Trim()[0] == clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST)
                 {
                     // The peptide spans the entire length of the protein
-                    objSearchResult.ProteinSeqResidueNumberEnd = objSearchResult.PeptideLocInProteinEnd;
+                    searchResult.ProteinSeqResidueNumberEnd = searchResult.PeptideLocInProteinEnd;
                 }
                 else
                 {
-                    if (objSearchResult.PeptideLocInProteinEnd > objSearchResult.ProteinSeqResidueNumberEnd)
+                    if (searchResult.PeptideLocInProteinEnd > searchResult.ProteinSeqResidueNumberEnd)
                     {
                         // The peptide is more than 10000 characters long; this is highly unlikely, but we'll update .ProteinSeqResidueNumberEnd as needed
-                        objSearchResult.ProteinSeqResidueNumberEnd = objSearchResult.PeptideLocInProteinEnd + 1;
+                        searchResult.ProteinSeqResidueNumberEnd = searchResult.PeptideLocInProteinEnd + 1;
                     }
                 }
             }
-            else if (objSearchResult.PeptidePostResidues.Trim().StartsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST.ToString()))
+            else if (searchResult.PeptidePostResidues.Trim().StartsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST.ToString()))
             {
                 // The peptide is at the C-Terminus of the protein
-                objSearchResult.PeptideLocInProteinEnd = objSearchResult.ProteinSeqResidueNumberEnd;
-                objSearchResult.PeptideLocInProteinStart = objSearchResult.PeptideLocInProteinEnd - objSearchResult.PeptideCleanSequence.Length + 1;
+                searchResult.PeptideLocInProteinEnd = searchResult.ProteinSeqResidueNumberEnd;
+                searchResult.PeptideLocInProteinStart = searchResult.PeptideLocInProteinEnd - searchResult.PeptideCleanSequence.Length + 1;
 
-                if (objSearchResult.PeptideLocInProteinStart < objSearchResult.ProteinSeqResidueNumberStart)
+                if (searchResult.PeptideLocInProteinStart < searchResult.ProteinSeqResidueNumberStart)
                 {
                     // The peptide is more than 10000 characters long; this is highly unlikely
-                    objSearchResult.ProteinSeqResidueNumberEnd = objSearchResult.ProteinSeqResidueNumberStart + 1 + objSearchResult.PeptideCleanSequence.Length;
-                    objSearchResult.PeptideLocInProteinEnd = objSearchResult.ProteinSeqResidueNumberEnd;
-                    objSearchResult.PeptideLocInProteinStart = objSearchResult.PeptideLocInProteinEnd - objSearchResult.PeptideCleanSequence.Length + 1;
+                    searchResult.ProteinSeqResidueNumberEnd = searchResult.ProteinSeqResidueNumberStart + 1 + searchResult.PeptideCleanSequence.Length;
+                    searchResult.PeptideLocInProteinEnd = searchResult.ProteinSeqResidueNumberEnd;
+                    searchResult.PeptideLocInProteinStart = searchResult.PeptideLocInProteinEnd - searchResult.PeptideCleanSequence.Length + 1;
                 }
             }
             else
             {
-                objSearchResult.PeptideLocInProteinStart = objSearchResult.ProteinSeqResidueNumberStart + 1;
-                objSearchResult.PeptideLocInProteinEnd = objSearchResult.PeptideLocInProteinStart + objSearchResult.PeptideCleanSequence.Length - 1;
+                searchResult.PeptideLocInProteinStart = searchResult.ProteinSeqResidueNumberStart + 1;
+                searchResult.PeptideLocInProteinEnd = searchResult.PeptideLocInProteinStart + searchResult.PeptideCleanSequence.Length - 1;
 
-                if (objSearchResult.PeptideLocInProteinEnd > objSearchResult.ProteinSeqResidueNumberEnd)
+                if (searchResult.PeptideLocInProteinEnd > searchResult.ProteinSeqResidueNumberEnd)
                 {
                     // The peptide is more than 10000 characters long; this is highly unlikely, but we'll update .ProteinSeqResidueNumberEnd as needed
-                    objSearchResult.ProteinSeqResidueNumberEnd = objSearchResult.PeptideLocInProteinEnd + 1;
+                    searchResult.ProteinSeqResidueNumberEnd = searchResult.PeptideLocInProteinEnd + 1;
                 }
             }
         }
 
-        protected virtual string ConstructPepToProteinMapFilePath(string inputFilePath, string outputFolderPath, bool MTS)
+        protected virtual string ConstructPepToProteinMapFilePath(string inputFilePath, string outputFolderPath, bool mts)
         {
             var pepToProteinMapBaseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
             string pepToProteinMapFileName;
-            if (MTS)
+            if (mts)
             {
                 pepToProteinMapFileName = pepToProteinMapBaseName + FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING + "MTS.txt";
             }
@@ -872,7 +872,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Use the PeptideToProteinMapEngine to create the Peptide to Protein map file for the file or files in lstSourcePHRPDataFiles
+        /// Use the PeptideToProteinMapEngine to create the Peptide to Protein map file for the file or files in sourcePHRPDataFiles
         /// </summary>
         /// <param name="sourcePHRPDataFiles"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
@@ -1078,13 +1078,13 @@ namespace PeptideHitResultsProcessor
             {
                 var inputFile = new FileInfo(phrpDataFilePath);
 
-                var lstSourcePHRPDataFiles = new List<string> {
+                var sourcePHRPDataFiles = new List<string> {
                     inputFile.FullName
                 };
 
-                var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputFolderPath, MTS: true);
+                var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputFolderPath, mts: true);
 
-                success = CreatePepToProteinMapFile(lstSourcePHRPDataFiles, mtsPepToProteinMapFilePath);
+                success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
 
                 if (success)
                 {
@@ -1109,7 +1109,7 @@ namespace PeptideHitResultsProcessor
             {
                 Console.WriteLine();
 
-                var sngProgressAtStart = mProgressPercentComplete;
+                var progressAtStart = mProgressPercentComplete;
                 UpdateProgress("Creating the Protein Mod Details file", PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE);
 
                 // Confirm that the PHRP data file exists
@@ -1129,20 +1129,20 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                // Initialize lstPepToProteinMapping
-                var lstPepToProteinMapping = new List<udtPepToProteinMappingType>();
+                // Initialize pepToProteinMapping
+                var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
                 // Read the _PepToProtMapMTS file
-                var success = LoadPeptideToProteinMapInfo(mtsPepToProteinMapFilePath, lstPepToProteinMapping, out _);
+                var success = LoadPeptideToProteinMapInfo(mtsPepToProteinMapFilePath, pepToProteinMapping, out _);
                 if (!success)
                 {
                     return false;
                 }
 
-                // Assure that lstPepToProteinMapping is sorted on peptide
-                if (lstPepToProteinMapping.Count > 1)
+                // Assure that pepToProteinMapping is sorted on peptide
+                if (pepToProteinMapping.Count > 1)
                 {
-                    lstPepToProteinMapping.Sort(new PepToProteinMappingComparer());
+                    pepToProteinMapping.Sort(new PepToProteinMappingComparer());
                 }
 
                 var proteinModsFilePath = ReplaceFilenameSuffix(phrpDataFile, FILENAME_SUFFIX_PROTEIN_MODS);
@@ -1185,18 +1185,18 @@ namespace PeptideHitResultsProcessor
                         PeptideMassCalculator = mPeptideSeqMassCalculator
                     };
 
-                    using (var objReader = new clsPHRPReader(phrpDataFilePath, ePHRPResultType, oStartupOptions))
+                    using (var reader = new clsPHRPReader(phrpDataFilePath, ePHRPResultType, oStartupOptions))
                     {
-                        objReader.EchoMessagesToConsole = false;
-                        objReader.SkipDuplicatePSMs = true;
+                        reader.EchoMessagesToConsole = false;
+                        reader.SkipDuplicatePSMs = true;
 
-                        foreach (var errorMessage in objReader.ErrorMessages)
+                        foreach (var errorMessage in reader.ErrorMessages)
                         {
                             OnErrorEvent(errorMessage);
                         }
-                        RegisterEvents(objReader);
+                        RegisterEvents(reader);
 
-                        foreach (var warningMessage in objReader.WarningMessages)
+                        foreach (var warningMessage in reader.WarningMessages)
                         {
                             var msg = warningMessage;
                             if (warningMessage.StartsWith("MSGF file not found", StringComparison.InvariantCultureIgnoreCase))
@@ -1206,13 +1206,13 @@ namespace PeptideHitResultsProcessor
                             ReportWarning(msg);
                         }
 
-                        objReader.ClearErrors();
-                        objReader.ClearWarnings();
+                        reader.ClearErrors();
+                        reader.ClearWarnings();
 
-                        while (objReader.MoveNext())
+                        while (reader.MoveNext())
                         {
-                            // Use binary search to find this peptide in lstPepToProteinMapping
-                            var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(lstPepToProteinMapping, objReader.CurrentPSM.Peptide);
+                            // Use binary search to find this peptide in pepToProteinMapping
+                            var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, reader.CurrentPSM.Peptide);
 
                             if (pepToProteinMapIndex >= 0)
                             {
@@ -1223,7 +1223,7 @@ namespace PeptideHitResultsProcessor
                                     var skipProtein = false;
                                     if (!ProteinModsFileIncludesReversedProteins)
                                     {
-                                        skipProtein = IsReversedProtein(lstPepToProteinMapping[pepToProteinMapIndex].Protein);
+                                        skipProtein = IsReversedProtein(pepToProteinMapping[pepToProteinMapIndex].Protein);
                                         if (skipProtein)
                                         {
                                             psmCountSkippedSinceReversedOrScrambledProtein += 1;
@@ -1232,65 +1232,65 @@ namespace PeptideHitResultsProcessor
 
                                     if (!skipProtein)
                                     {
-                                        foreach (var objMod in objReader.CurrentPSM.ModifiedResidues)
+                                        foreach (var mod in reader.CurrentPSM.ModifiedResidues)
                                         {
-                                            var residueLocInProtein = lstPepToProteinMapping[pepToProteinMapIndex].ResidueStart + objMod.ResidueLocInPeptide - 1;
+                                            var residueLocInProtein = pepToProteinMapping[pepToProteinMapIndex].ResidueStart + mod.ResidueLocInPeptide - 1;
                                             string residue;
 
-                                            if (IsLetterAtoZ(objMod.Residue))
+                                            if (IsLetterAtoZ(mod.Residue))
                                             {
-                                                residue = objMod.Residue.ToString();
+                                                residue = mod.Residue.ToString();
                                             }
                                             else
                                             {
-                                                var cleanSequence = objReader.CurrentPSM.PeptideCleanSequence;
+                                                var cleanSequence = reader.CurrentPSM.PeptideCleanSequence;
 
-                                                if (objMod.ResidueLocInPeptide < 1)
+                                                if (mod.ResidueLocInPeptide < 1)
                                                 {
                                                     // This shouldn't be the case, but we'll check for it anyway
                                                     residue = cleanSequence.Substring(0, 1);
                                                 }
-                                                else if (objMod.ResidueLocInPeptide > cleanSequence.Length)
+                                                else if (mod.ResidueLocInPeptide > cleanSequence.Length)
                                                 {
                                                     // This shouldn't be the case, but we'll check for it anyway
                                                     residue = cleanSequence.Substring(cleanSequence.Length - 1, 1);
                                                 }
                                                 else
                                                 {
-                                                    residue = cleanSequence.Substring(objMod.ResidueLocInPeptide - 1, 1);
+                                                    residue = cleanSequence.Substring(mod.ResidueLocInPeptide - 1, 1);
                                                 }
                                             }
 
-                                            if (lstPepToProteinMapping[pepToProteinMapIndex].Protein == PROTEIN_NAME_NO_MATCH && IsReversedProtein(objReader.CurrentPSM.ProteinFirst))
+                                            if (pepToProteinMapping[pepToProteinMapIndex].Protein == PROTEIN_NAME_NO_MATCH && IsReversedProtein(reader.CurrentPSM.ProteinFirst))
                                             {
                                                 // Skip this result
                                                 psmCountSkippedSinceReversedOrScrambledProtein += 1;
                                             }
                                             else
                                             {
-                                                swProteinModsFile.WriteLine(objReader.CurrentPSM.ResultID + "\t" +
-                                                                            objReader.CurrentPSM.Peptide + "\t" +
-                                                                            objReader.CurrentPSM.SeqID + "\t" +
-                                                                            lstPepToProteinMapping[pepToProteinMapIndex].Protein + "\t" +
+                                                swProteinModsFile.WriteLine(reader.CurrentPSM.ResultID + "\t" +
+                                                                            reader.CurrentPSM.Peptide + "\t" +
+                                                                            reader.CurrentPSM.SeqID + "\t" +
+                                                                            pepToProteinMapping[pepToProteinMapIndex].Protein + "\t" +
                                                                             residue + "\t" +
                                                                             residueLocInProtein + "\t" +
-                                                                            objMod.ModDefinition.MassCorrectionTag + "\t" +
-                                                                            objMod.ResidueLocInPeptide + "\t" +
-                                                                            objReader.CurrentPSM.MSGFSpecEValue);
+                                                                            mod.ModDefinition.MassCorrectionTag + "\t" +
+                                                                            mod.ResidueLocInPeptide + "\t" +
+                                                                            reader.CurrentPSM.MSGFSpecEValue);
                                             }
                                         }
                                     }
 
                                     pepToProteinMapIndex += 1;
-                                } while (pepToProteinMapIndex < lstPepToProteinMapping.Count &&
-                                         objReader.CurrentPSM.Peptide == lstPepToProteinMapping[pepToProteinMapIndex].Peptide);
+                                } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
+                                         reader.CurrentPSM.Peptide == pepToProteinMapping[pepToProteinMapIndex].Peptide);
                             }
                             else
                             {
-                                ReportWarning("Peptide not found in lstPepToProteinMapping: " + objReader.CurrentPSM.Peptide);
+                                ReportWarning("Peptide not found in pepToProteinMapping: " + reader.CurrentPSM.Peptide);
                             }
 
-                            UpdateProgress(sngProgressAtStart + objReader.PercentComplete * (100 - sngProgressAtStart) / 100);
+                            UpdateProgress(progressAtStart + reader.PercentComplete * (100 - progressAtStart) / 100);
                         }
 
                         if (psmCount > 0)
@@ -1336,32 +1336,32 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected void ExpandListIfRequired<T>(List<T> lstItems, int countToAdd, int largeListThreshold = 1000000)
+        protected void ExpandListIfRequired<T>(List<T> items, int countToAdd, int largeListThreshold = 1000000)
         {
-            if (lstItems.Count > largeListThreshold && lstItems.Count + countToAdd > lstItems.Capacity)
+            if (items.Count > largeListThreshold && items.Count + countToAdd > items.Capacity)
             {
                 // .NET by default will double the size of the list to accomodate these new items
                 // Instead, expand the list by 20% of the current size
-                lstItems.Capacity = lstItems.Capacity + Convert.ToInt32(lstItems.Count / 5);
+                items.Capacity = items.Capacity + Convert.ToInt32(items.Count / 5);
             }
         }
 
-        private readonly IComparer<udtPepToProteinMappingType> objPeptideSearchComparer = new PepToProteinMappingPeptideSearchComparer();
+        private readonly IComparer<udtPepToProteinMappingType> peptideSearchComparer = new PepToProteinMappingPeptideSearchComparer();
 
-        protected int FindFirstMatchInPepToProteinMapping(List<udtPepToProteinMappingType> lstPepToProteinMapping, string peptideToFind)
+        protected int FindFirstMatchInPepToProteinMapping(List<udtPepToProteinMappingType> pepToProteinMapping, string peptideToFind)
         {
-            // Use binary search to find this peptide in lstPepToProteinMapping
+            // Use binary search to find this peptide in pepToProteinMapping
             var udtItemToFind = new udtPepToProteinMappingType
             {
                 Peptide = peptideToFind
             };
 
-            var pepToProteinMapIndex = lstPepToProteinMapping.BinarySearch(udtItemToFind, objPeptideSearchComparer);
+            var pepToProteinMapIndex = pepToProteinMapping.BinarySearch(udtItemToFind, peptideSearchComparer);
 
             if (pepToProteinMapIndex > 0)
             {
                 // Step Backward until the first match is found
-                while (pepToProteinMapIndex > 0 && lstPepToProteinMapping[pepToProteinMapIndex - 1].Peptide == peptideToFind)
+                while (pepToProteinMapIndex > 0 && pepToProteinMapping[pepToProteinMapIndex - 1].Peptide == peptideToFind)
                 {
                     pepToProteinMapIndex -= 1;
                 }
@@ -1686,7 +1686,7 @@ namespace PeptideHitResultsProcessor
         {
             const string OPTIONS_SECTION = "PeptideHitResultsProcessorOptions";
 
-            var objSettingsFile = new PRISM.XmlSettingsFileAccessor();
+            var settingsFile = new PRISM.XmlSettingsFileAccessor();
 
             try
             {
@@ -1714,9 +1714,9 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                if (objSettingsFile.LoadSettings(parameterFilePath))
+                if (settingsFile.LoadSettings(parameterFilePath))
                 {
-                    if (!objSettingsFile.SectionPresent(OPTIONS_SECTION))
+                    if (!settingsFile.SectionPresent(OPTIONS_SECTION))
                     {
                         // Section OPTIONS_SECTION was not found in the parameter file; warn the user if mWarnMissingParameterFileSection = True
                         if (WarnMissingParameterFileSection)
@@ -1728,24 +1728,24 @@ namespace PeptideHitResultsProcessor
                         return true;
                     }
 
-                    MassCorrectionTagsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", MassCorrectionTagsFilePath);
-                    ModificationDefinitionsFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", ModificationDefinitionsFilePath);
-                    SearchToolParameterFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", SearchToolParameterFilePath);
+                    MassCorrectionTagsFilePath = settingsFile.GetParam(OPTIONS_SECTION, "MassCorrectionTagsFilePath", MassCorrectionTagsFilePath);
+                    ModificationDefinitionsFilePath = settingsFile.GetParam(OPTIONS_SECTION, "ModificationDefinitionsFilePath", ModificationDefinitionsFilePath);
+                    SearchToolParameterFilePath = settingsFile.GetParam(OPTIONS_SECTION, "SearchToolParameterFilePath", SearchToolParameterFilePath);
 
-                    CreateModificationSummaryFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", CreateModificationSummaryFile);
+                    CreateModificationSummaryFile = settingsFile.GetParam(OPTIONS_SECTION, "CreateModificationSummaryFile", CreateModificationSummaryFile);
 
-                    CreateProteinModsFile = objSettingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", CreateProteinModsFile);
-                    FastaFilePath = objSettingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", FastaFilePath);
-                    ProteinModsFileIncludesReversedProteins = objSettingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", ProteinModsFileIncludesReversedProteins);
-                    UseExistingMTSPepToProteinMapFile = objSettingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", UseExistingMTSPepToProteinMapFile);
+                    CreateProteinModsFile = settingsFile.GetParam(OPTIONS_SECTION, "CreateProteinModsFile", CreateProteinModsFile);
+                    FastaFilePath = settingsFile.GetParam(OPTIONS_SECTION, "FastaFilePath", FastaFilePath);
+                    ProteinModsFileIncludesReversedProteins = settingsFile.GetParam(OPTIONS_SECTION, "ProteinModsFileIncludesReversedProteins", ProteinModsFileIncludesReversedProteins);
+                    UseExistingMTSPepToProteinMapFile = settingsFile.GetParam(OPTIONS_SECTION, "UseExistingMTSPepToProteinMapFile", UseExistingMTSPepToProteinMapFile);
 
                     var leftResidueRegEx = string.Copy(EnzymeMatchSpec.LeftResidueRegEx);
                     var rightResidueRegEx = string.Copy(EnzymeMatchSpec.RightResidueRegEx);
 
-                    leftResidueRegEx = objSettingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecLeftResidue", leftResidueRegEx, out var valueNotPresent);
+                    leftResidueRegEx = settingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecLeftResidue", leftResidueRegEx, out var valueNotPresent);
                     if (!valueNotPresent)
                     {
-                        rightResidueRegEx = objSettingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecRightResidue", rightResidueRegEx, out valueNotPresent);
+                        rightResidueRegEx = settingsFile.GetParam(OPTIONS_SECTION, "EnzymeMatchSpecRightResidue", rightResidueRegEx, out valueNotPresent);
 
                         if (!valueNotPresent)
                         {
@@ -1753,8 +1753,8 @@ namespace PeptideHitResultsProcessor
                         }
                     }
 
-                    PeptideNTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", PeptideNTerminusMassChange);
-                    PeptideCTerminusMassChange = objSettingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", PeptideCTerminusMassChange);
+                    PeptideNTerminusMassChange = settingsFile.GetParam(OPTIONS_SECTION, "PeptideNTerminusMassChange", PeptideNTerminusMassChange);
+                    PeptideCTerminusMassChange = settingsFile.GetParam(OPTIONS_SECTION, "PeptideCTerminusMassChange", PeptideCTerminusMassChange);
                 }
             }
             catch (Exception ex)
@@ -1771,13 +1771,13 @@ namespace PeptideHitResultsProcessor
         /// Load the PeptideToProteinMap information
         /// </summary>
         /// <param name="pepToProteinMapFilePath">File to read</param>
-        /// <param name="lstPepToProteinMapping">Output parameter: peptide to protein mapping (calling function must pre-initialize the list)</param>
+        /// <param name="pepToProteinMapping">Output parameter: peptide to protein mapping (calling function must pre-initialize the list)</param>
         /// <param name="headerLine">Output parameter: Header line text</param>
         /// <returns></returns>
         /// <remarks></remarks>
         protected bool LoadPeptideToProteinMapInfo(
             string pepToProteinMapFilePath,
-            List<udtPepToProteinMappingType> lstPepToProteinMapping,
+            List<udtPepToProteinMappingType> pepToProteinMapping,
             out string headerLine)
         {
             headerLine = "";
@@ -1787,7 +1787,7 @@ namespace PeptideHitResultsProcessor
             try
             {
                 // Initialize the output parameters
-                lstPepToProteinMapping.Clear();
+                pepToProteinMapping.Clear();
                 headerLine = string.Empty;
 
                 if (string.IsNullOrWhiteSpace(pepToProteinMapFilePath))
@@ -1836,9 +1836,9 @@ namespace PeptideHitResultsProcessor
                                 int.TryParse(splitLine[2], out udtPepToProteinMappingEntry.ResidueStart);
                                 int.TryParse(splitLine[3], out udtPepToProteinMappingEntry.ResidueEnd);
 
-                                ExpandListIfRequired(lstPepToProteinMapping, 1);
+                                ExpandListIfRequired(pepToProteinMapping, 1);
 
-                                lstPepToProteinMapping.Add(udtPepToProteinMappingEntry);
+                                pepToProteinMapping.Add(udtPepToProteinMappingEntry);
                             }
                         }
                     }
@@ -2008,15 +2008,15 @@ namespace PeptideHitResultsProcessor
                 for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
                 {
                     var oModInfo = mPeptideMods.GetModificationByIndex(index);
-                    var objSearchResult = oModInfo;
-                    if (objSearchResult.OccurrenceCount > 0 || !objSearchResult.UnknownModAutoDefined)
+                    var searchResult = oModInfo;
+                    if (searchResult.OccurrenceCount > 0 || !searchResult.UnknownModAutoDefined)
                     {
-                        swOutFile.WriteLine(objSearchResult.ModificationSymbol + SEP_CHAR +
-                                            objSearchResult.ModificationMass.ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
-                                            objSearchResult.TargetResidues + SEP_CHAR +
-                                            clsModificationDefinition.ModificationTypeToModificationSymbol(objSearchResult.ModificationType) + SEP_CHAR +
-                                            objSearchResult.MassCorrectionTag + SEP_CHAR +
-                                            objSearchResult.OccurrenceCount);
+                        swOutFile.WriteLine(searchResult.ModificationSymbol + SEP_CHAR +
+                                            searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
+                                            searchResult.TargetResidues + SEP_CHAR +
+                                            clsModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType) + SEP_CHAR +
+                                            searchResult.MassCorrectionTag + SEP_CHAR +
+                                            searchResult.OccurrenceCount);
                     }
                 }
             }
@@ -2142,11 +2142,11 @@ namespace PeptideHitResultsProcessor
             return proteinNameAndDescription;
         }
 
-        protected void UpdatePepToProteinMapPeptide(List<udtPepToProteinMappingType> lstPepToProteinMapping, int index, string peptide)
+        protected void UpdatePepToProteinMapPeptide(List<udtPepToProteinMappingType> pepToProteinMapping, int index, string peptide)
         {
-            var udtItem = lstPepToProteinMapping[index];
+            var udtItem = pepToProteinMapping[index];
             udtItem.Peptide = peptide;
-            lstPepToProteinMapping[index] = udtItem;
+            pepToProteinMapping[index] = udtItem;
         }
 
         protected void UpdateProgress(string progressStepDescription)
@@ -2154,23 +2154,23 @@ namespace PeptideHitResultsProcessor
             UpdateProgress(progressStepDescription, mProgressPercentComplete);
         }
 
-        protected void UpdateProgress(float sngPercentComplete)
+        protected void UpdateProgress(float percentComplete)
         {
-            UpdateProgress(ProgressStepDescription, sngPercentComplete);
+            UpdateProgress(ProgressStepDescription, percentComplete);
         }
 
-        protected void UpdateProgress(string progressStepDescription, float sngPercentComplete)
+        protected void UpdateProgress(string progressStepDescription, float percentComplete)
         {
             mProgressStepDescription = string.Copy(progressStepDescription);
-            if (sngPercentComplete < 0)
+            if (percentComplete < 0)
             {
-                sngPercentComplete = 0;
+                percentComplete = 0;
             }
-            else if (sngPercentComplete > 100)
+            else if (percentComplete > 100)
             {
-                sngPercentComplete = 100;
+                percentComplete = 100;
             }
-            mProgressPercentComplete = sngPercentComplete;
+            mProgressPercentComplete = percentComplete;
 
             OnProgressUpdate(ProgressStepDescription, ProgressPercentComplete);
         }
@@ -2207,22 +2207,22 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-                var fiFileInfo = new FileInfo(filePath);
+                var fileInfo = new FileInfo(filePath);
 
-                if (!fiFileInfo.Exists)
+                if (!fileInfo.Exists)
                 {
-                    errorMessage = fileDescription + " file not found: " + fiFileInfo.Name;
+                    errorMessage = fileDescription + " file not found: " + fileInfo.Name;
                     return false;
                 }
 
-                if (fiFileInfo.Length == 0)
+                if (fileInfo.Length == 0)
                 {
                     errorMessage = fileDescription + " file is empty (zero-bytes)";
                     return false;
                 }
 
                 // Open the file and confirm it has data rows
-                using (var srInFile = new StreamReader(new FileStream(fiFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var srInFile = new StreamReader(new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     while (!srInFile.EndOfStream && !dataFound)
                     {
@@ -2434,8 +2434,8 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                var objFastaFile = new ProteinFileReader.FastaFileReader();
-                if (!objFastaFile.OpenFile(fastaFilePath))
+                var fastaFile = new ProteinFileReader.FastaFileReader();
+                if (!fastaFile.OpenFile(fastaFilePath))
                 {
                     Console.WriteLine();
                     warningMessage = "Error opening the fasta file: " + fastaFilePath;
@@ -2443,11 +2443,11 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Read the first 500 proteins and confirm that each contains amino acid residues
-                while (objFastaFile.ReadNextProteinEntry())
+                while (fastaFile.ReadNextProteinEntry())
                 {
-                    var definiteAminoAcidCount = reDefiniteAminoAcid.Matches(objFastaFile.ProteinSequence).Count;
-                    var potentialNucleicAcidCount = rePotentialNucleicAcid.Matches(objFastaFile.ProteinSequence).Count;
-                    var letterCount = reLetter.Matches(objFastaFile.ProteinSequence).Count;
+                    var definiteAminoAcidCount = reDefiniteAminoAcid.Matches(fastaFile.ProteinSequence).Count;
+                    var potentialNucleicAcidCount = rePotentialNucleicAcid.Matches(fastaFile.ProteinSequence).Count;
+                    var letterCount = reLetter.Matches(fastaFile.ProteinSequence).Count;
 
                     if (definiteAminoAcidCount > 0.1 * letterCount)
                     {

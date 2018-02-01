@@ -37,36 +37,36 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="strModSummaryFilePath"></param>
-        public clsPHRPModSummaryReader(string strModSummaryFilePath)
+        /// <param name="modSummaryFilePath"></param>
+        public clsPHRPModSummaryReader(string modSummaryFilePath)
         {
             mModificationDefs = new List<clsModificationDefinition>();
             mModDefMassesAsText = new Dictionary<string, string>();
 
             Success = false;
 
-            if (string.IsNullOrEmpty(strModSummaryFilePath))
+            if (string.IsNullOrEmpty(modSummaryFilePath))
             {
                 throw new Exception("ModSummaryFilePath is empty; unable to continue");
             }
 
-            if (!File.Exists(strModSummaryFilePath))
+            if (!File.Exists(modSummaryFilePath))
             {
-                throw new FileNotFoundException("ModSummary file not found: " + strModSummaryFilePath);
+                throw new FileNotFoundException("ModSummary file not found: " + modSummaryFilePath);
             }
 
-            Success = ReadModSummaryFile(strModSummaryFilePath, ref mModificationDefs);
+            Success = ReadModSummaryFile(modSummaryFilePath, ref mModificationDefs);
         }
 
         /// <summary>
         /// Returns the mass value associated with the given mass correction tag
         /// </summary>
-        /// <param name="strMassCorrectionTag"></param>
+        /// <param name="massCorrectionTag"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string GetModificationMassAsText(string strMassCorrectionTag)
+        public string GetModificationMassAsText(string massCorrectionTag)
         {
-            if (mModDefMassesAsText.TryGetValue(strMassCorrectionTag, out var modMass))
+            if (mModDefMassesAsText.TryGetValue(massCorrectionTag, out var modMass))
             {
                 return modMass;
             }
@@ -74,43 +74,43 @@ namespace PHRPReader
             return string.Empty;
         }
 
-        private bool ReadModSummaryFile(string strModSummaryFilePath, ref List<clsModificationDefinition> lstModInfo)
+        private bool ReadModSummaryFile(string modSummaryFilePath, ref List<clsModificationDefinition> modInfo)
         {
-            //string strLineIn = null;
+            //string lineIn = null;
             //string[] splitLine = null;
 
-            //var objColumnHeaders = default(SortedDictionary<string, int>);
+            //var columnHeaders = default(SortedDictionary<string, int>);
 
             //string modSymbol = null;
             //string modMass = null;
-            //string strTargetResidues = null;
+            //string targetResidues = null;
             //string modType = null;
-            //string strMassCorrectionTag = null;
+            //string massCorrectionTag = null;
 
-            //var chModSymbol = default(char);
-            //double dblModificationMass = 0;
+            //var modSymbol = default(char);
+            //double modificationMass = 0;
             //var eModificationType = default(clsModificationDefinition.eModificationTypeConstants);
 
-            //var blnSkipLine = false;
-            //var blnHeaderLineParsed = false;
+            //var skipLine = false;
+            //var headerLineParsed = false;
 
-            if (lstModInfo == null)
+            if (modInfo == null)
             {
-                lstModInfo = new List<clsModificationDefinition>();
+                modInfo = new List<clsModificationDefinition>();
             }
             else
             {
-                lstModInfo.Clear();
+                modInfo.Clear();
             }
 
-            if (string.IsNullOrEmpty(strModSummaryFilePath))
+            if (string.IsNullOrEmpty(modSummaryFilePath))
             {
                 return false;
             }
 
             // Initialize the column mapping
             // Using a case-insensitive comparer
-            var objColumnHeaders = new SortedDictionary<string, int>(StringComparer.CurrentCultureIgnoreCase)
+            var columnHeaders = new SortedDictionary<string, int>(StringComparer.CurrentCultureIgnoreCase)
             {
                 {MOD_SUMMARY_COLUMN_Modification_Symbol, 0},
                 {MOD_SUMMARY_COLUMN_Modification_Mass, 1},
@@ -124,7 +124,7 @@ namespace PHRPReader
             // The first line is typically a header line:
             // Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
 
-            using (var srModSummaryFile = new StreamReader(new FileStream(strModSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using (var srModSummaryFile = new StreamReader(new FileStream(modSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
                 var headerLineParsed = false;
 
@@ -144,12 +144,12 @@ namespace PHRPReader
                         {
                             // Parse the header line to confirm the column ordering
                             // The Occurrence_Count column was misspelled prior to December 2012; need to check for this
-                            for (var intIndex = 0; intIndex <= splitLine.Length - 1; intIndex++)
+                            for (var index = 0; index <= splitLine.Length - 1; index++)
                             {
-                                if (splitLine[intIndex] == "Occurence_Count")
-                                    splitLine[intIndex] = MOD_SUMMARY_COLUMN_Occurrence_Count;
+                                if (splitLine[index] == "Occurence_Count")
+                                    splitLine[index] = MOD_SUMMARY_COLUMN_Occurrence_Count;
                             }
-                            clsPHRPReader.ParseColumnHeaders(splitLine, objColumnHeaders);
+                            clsPHRPReader.ParseColumnHeaders(splitLine, columnHeaders);
                             skipLine = true;
                         }
 
@@ -159,17 +159,18 @@ namespace PHRPReader
                     if (skipLine || splitLine.Length < 4)
                         continue;
 
-                    var modSymbol = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, objColumnHeaders);
-                    var modMassText = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Mass, objColumnHeaders);
-                    var targetResidues = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Target_Residues, objColumnHeaders);
-                    var modType = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Type, objColumnHeaders);
-                    var massCorrectionTag = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, objColumnHeaders);
+                    var modSymbolText = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, columnHeaders);
+                    var modMassText = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Mass, columnHeaders);
+                    var targetResidues = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Target_Residues, columnHeaders);
+                    var modType = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Type, columnHeaders);
+                    var massCorrectionTag = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, columnHeaders);
 
-                    if (string.IsNullOrWhiteSpace(modSymbol))
+                    if (string.IsNullOrWhiteSpace(modSymbolText))
                     {
-                        modSymbol = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL.ToString();
+                        modSymbolText = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL.ToString();
                     }
-                    var chModSymbol = modSymbol[0];
+
+                    var modSymbol = modSymbolText[0];
 
                     if (!double.TryParse(modMassText, out var modificationMass))
                     {
@@ -186,13 +187,13 @@ namespace PHRPReader
                         eModificationType = clsModificationDefinition.ModificationSymbolToModificationType(modType[0]);
                     }
 
-                    var objModDef =
-                        new clsModificationDefinition(chModSymbol, modificationMass, targetResidues, eModificationType, massCorrectionTag)
+                    var modDef =
+                        new clsModificationDefinition(modSymbol, modificationMass, targetResidues, eModificationType, massCorrectionTag)
                         {
                             ModificationMassAsText = modMassText
                         };
 
-                    lstModInfo.Add(objModDef);
+                    modInfo.Add(modDef);
 
                     if (!mModDefMassesAsText.ContainsKey(massCorrectionTag))
                     {

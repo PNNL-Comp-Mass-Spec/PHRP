@@ -203,18 +203,18 @@ namespace PeptideHitResultsProcessor
 
         protected virtual void ProcessPeptideHitResultsFileWork()
         {
-            bool blnSuccess;
+            bool success;
 
             try
             {
-                blnSuccess = m_PeptideHitResultsProcessor.ProcessFile(m_PeptideHitResultsFilePath, OutputFolderPath, m_SettingsFilePath);
+                success = m_PeptideHitResultsProcessor.ProcessFile(m_PeptideHitResultsFilePath, OutputFolderPath, m_SettingsFilePath);
             }
             catch (Exception)
             {
-                blnSuccess = false;
+                success = false;
             }
 
-            if (blnSuccess)
+            if (success)
             {
                 m_Status = ProcessStatus.PH_COMPLETE;
             }
@@ -427,16 +427,16 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private void LogErrors(string strSource, string strMessage, Exception ex)
+        private void LogErrors(string source, string message, Exception ex)
         {
-            m_ErrMsg = string.Copy(strMessage).Replace("\n", "; ");
+            m_ErrMsg = string.Copy(message).Replace("\n", "; ");
 
             if (ex?.Message != null && ex.Message.Length > 0)
             {
                 m_ErrMsg += "; " + ex.Message;
             }
 
-            OnErrorEvent(strSource + ": " + m_ErrMsg);
+            OnErrorEvent(source + ": " + m_ErrMsg);
         }
 
         protected virtual bool VerifyDirExists(string TestDir)

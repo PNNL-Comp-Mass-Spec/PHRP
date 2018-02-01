@@ -54,10 +54,10 @@ namespace PeptideHitResultsProcessor
             this.Clear(DEFAULT_INITIAL_SEQ_ID);
         }
 
-        public void Clear(int intInitialSeqID)
+        public void Clear(int initialSeqID)
         {
-            // Clears htMasterSequences and resets mNextUniqueSeqID to intInitialSeqID
-            mNextUniqueSeqID = intInitialSeqID;
+            // Clears htMasterSequences and resets mNextUniqueSeqID to initialSeqID
+            mNextUniqueSeqID = initialSeqID;
             if (htMasterSequences == null)
             {
                 htMasterSequences = new Hashtable();
@@ -68,39 +68,39 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        public int GetNextUniqueSequenceID(string strSequence, string strModDescription, out bool blnExistingSequenceFound)
+        public int GetNextUniqueSequenceID(string sequence, string modDescription, out bool existingSequenceFound)
         {
-            int intUniqueSeqID;
+            int uniqueSeqID;
 
-            blnExistingSequenceFound = false;
+            existingSequenceFound = false;
 
             try
             {
-                if (strSequence == null)
-                    strSequence = string.Empty;
-                if (strModDescription == null)
-                    strModDescription = string.Empty;
+                if (sequence == null)
+                    sequence = string.Empty;
+                if (modDescription == null)
+                    modDescription = string.Empty;
 
-                var strKey = strSequence + SEQUENCE_MOD_DESC_SEP + strModDescription;
+                var key = sequence + SEQUENCE_MOD_DESC_SEP + modDescription;
 
-                if (htMasterSequences.ContainsKey(strKey))
+                if (htMasterSequences.ContainsKey(key))
                 {
-                    intUniqueSeqID = Convert.ToInt32(htMasterSequences[strKey]);
-                    blnExistingSequenceFound = true;
+                    uniqueSeqID = Convert.ToInt32(htMasterSequences[key]);
+                    existingSequenceFound = true;
                 }
                 else
                 {
-                    htMasterSequences.Add(strKey, mNextUniqueSeqID);
-                    intUniqueSeqID = mNextUniqueSeqID;
+                    htMasterSequences.Add(key, mNextUniqueSeqID);
+                    uniqueSeqID = mNextUniqueSeqID;
                     mNextUniqueSeqID += 1;
                 }
             }
             catch (Exception)
             {
-                intUniqueSeqID = 0;
+                uniqueSeqID = 0;
             }
 
-            return intUniqueSeqID;
+            return uniqueSeqID;
         }
 
         protected void InitializeLocalVariables()

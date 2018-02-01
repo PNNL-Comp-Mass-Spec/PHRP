@@ -42,8 +42,8 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        public clsSearchResultsMSGFDB(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
-            : base(objPeptideMods, peptideSeqMassCalculator)
+        public clsSearchResultsMSGFDB(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(peptideMods, peptideSeqMassCalculator)
         {
         }
 

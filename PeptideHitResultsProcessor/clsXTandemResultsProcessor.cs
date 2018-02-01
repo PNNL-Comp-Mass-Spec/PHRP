@@ -115,79 +115,79 @@ namespace PeptideHitResultsProcessor
         #region "Properties"
         #endregion
 
-        private bool AddModificationsAndComputeMass(clsSearchResultsXTandem objSearchResult, bool blnUpdateModOccurrenceCounts)
+        private bool AddModificationsAndComputeMass(clsSearchResultsXTandem searchResult, bool updateModOccurrenceCounts)
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = false;
-            bool blnSuccess;
+            bool success;
 
             try
             {
                 // If any modifications of type IsotopicMod are defined we would add them to the Search Result Mods now
                 // However, since X!Tandem doesn't support Isotopic Mods, this step is currently skipped
                 //
-                // objSearchResult.SearchResultAddIsotopicModifications(blnUpdateModOccurrenceCounts)
+                // searchResult.SearchResultAddIsotopicModifications(updateModOccurrenceCounts)
 
                 // Add the protein terminus static mods (if defined and if the peptide is at a protein terminus)
                 // Function .SearchResultAddStaticTerminusMods() will only add the terminus mod if the terminus
                 //  is not already modified by the given terminus mod mass
                 // This function will also add peptide terminus static mods, if defined, though those are not supported by X!Tandem and therefore should not be defined
-                objSearchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, blnUpdateModOccurrenceCounts);
+                searchResult.SearchResultAddStaticTerminusMods(ALLOW_DUPLICATE_MOD_ON_TERMINUS, updateModOccurrenceCounts);
 
                 // Compute the monoisotopic mass for this peptide
-                objSearchResult.ComputeMonoisotopicMass();
+                searchResult.ComputeMonoisotopicMass();
 
                 // Update PeptideDeltaMassCorrectedPpm
-                objSearchResult.ComputeDelMCorrectedXT();
+                searchResult.ComputeDelMCorrectedXT();
 
                 // Populate .PeptideSequenceWithMods and .PeptideModDescription
                 // Note that this function will call .AddSearchResultModificationsToCleanSequence() then .UpdateModDescription()
-                objSearchResult.ApplyModificationInformation();
+                searchResult.ApplyModificationInformation();
 
-                blnSuccess = true;
+                success = true;
             }
             catch (Exception)
             {
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        private string ConvertEValueToBase10Log(string strExpectationValue)
+        private string ConvertEValueToBase10Log(string expectationValue)
         {
-            double dblEValue;
-            double dblLogEValue;
+            double eValue;
+            double logEValue;
 
             try
             {
-                dblEValue = double.Parse(strExpectationValue);
+                eValue = double.Parse(expectationValue);
             }
             catch (Exception)
             {
-                dblEValue = 0;
+                eValue = 0;
             }
 
             try
             {
-                if (dblEValue <= 0)
+                if (eValue <= 0)
                 {
-                    dblLogEValue = 0;
+                    logEValue = 0;
                 }
-                else if (dblEValue <= 1E-307)
+                else if (eValue <= 1E-307)
                 {
-                    dblLogEValue = -307;
+                    logEValue = -307;
                 }
                 else
                 {
-                    dblLogEValue = Math.Round(Math.Log10(dblEValue), 3);
+                    logEValue = Math.Round(Math.Log10(eValue), 3);
                 }
             }
             catch (Exception)
             {
-                dblLogEValue = 0;
+                logEValue = 0;
             }
 
-            return dblLogEValue.ToString("0.000");
+            return logEValue.ToString("0.000");
         }
 
         private void InitializeLocalVariables()
@@ -217,28 +217,34 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private bool ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants eModificationType, int intSortOrder, bool blnParsingMotifDef, string strParamValue, ref int intModInfoCount, ref udtSearchOptionModificationInfoType[] udtModInfo)
+        private bool ParseXTandemInputParameterModInfo(
+            clsModificationDefinition.eModificationTypeConstants eModificationType, 
+            int sortOrder, 
+            bool parsingMotifDef, 
+            string paramValue, 
+            ref int modInfoCount, 
+            ref udtSearchOptionModificationInfoType[] udtModInfo)
         {
-            // Parse out the mod information defined in strParamValue
+            // Parse out the mod information defined in paramValue
             // Add each entry to udtModInfo
-            // If blnParsingMotifDef = True, then do not try to determine .TargetResidues
+            // If parsingMotifDef = True, then do not try to determine .TargetResidues
 
             const char MOD_LIST_SEP_CHAR = ',';
 
-            bool blnSuccess;
+            bool success;
 
             try
             {
-                if (string.IsNullOrWhiteSpace(strParamValue))
+                if (string.IsNullOrWhiteSpace(paramValue))
                 {
                     // Empty parameter; no definition to parse
                 }
                 else
                 {
-                    // Parse strParamValue
-                    // Each modification entry can have multiple modification definitions separated separated by commas, so we first split strParamValue
-                    var strModDefs = strParamValue.Split(MOD_LIST_SEP_CHAR);
-                    for (var intIndex = 0; intIndex <= strModDefs.Length - 1; intIndex++)
+                    // Parse paramValue
+                    // Each modification entry can have multiple modification definitions separated separated by commas, so we first split paramValue
+                    var modDefs = paramValue.Split(MOD_LIST_SEP_CHAR);
+                    for (var index = 0; index <= modDefs.Length - 1; index++)
                     {
                         // Modification definitions typically look like "15.9949@M"
                         // However, a neutral loss can be specified using "79.9663:-97.98@STY"
@@ -246,170 +252,175 @@ namespace PeptideHitResultsProcessor
                         // Target residues are the residues after the @
                         // If the Target residues contain an X, then the modification can apply to any residue
 
-                        var dblModificationMass = 0.0;
+                        var modificationMass = 0.0;
 
                         // Look for a colon and an @ sign
-                        var intColonIndex = strModDefs[intIndex].IndexOf(':');
-                        var intAtSignIndex = strModDefs[intIndex].IndexOf('@');
+                        var colonIndex = modDefs[index].IndexOf(':');
+                        var atSignIndex = modDefs[index].IndexOf('@');
 
-                        if (intAtSignIndex < 0)
+                        if (atSignIndex < 0)
                         {
                             // At sign not found; skip this mod def
                         }
                         else
                         {
-                            if (intColonIndex > intAtSignIndex)
+                            if (colonIndex > atSignIndex)
                             {
                                 // Ignore this colon since it's present after the @ sign
-                                intColonIndex = -1;
+                                colonIndex = -1;
                             }
 
-                            if (intColonIndex > 0)
+                            if (colonIndex > 0)
                             {
-                                // Colon found; see if the text up to intColonIndex is a number
-                                if (clsPHRPParser.IsNumber(strModDefs[intIndex].Substring(0, intColonIndex)))
+                                // Colon found; see if the text up to colonIndex is a number
+                                if (clsPHRPParser.IsNumber(modDefs[index].Substring(0, colonIndex)))
                                 {
-                                    dblModificationMass = double.Parse(strModDefs[intIndex].Substring(0, intColonIndex));
+                                    modificationMass = double.Parse(modDefs[index].Substring(0, colonIndex));
                                 }
                             }
                             else
                             {
-                                // Colon not found; see if the text up to intAtSignIndex is a number
-                                if (clsPHRPParser.IsNumber(strModDefs[intIndex].Substring(0, intAtSignIndex)))
+                                // Colon not found; see if the text up to atSignIndex is a number
+                                if (clsPHRPParser.IsNumber(modDefs[index].Substring(0, atSignIndex)))
                                 {
-                                    dblModificationMass = double.Parse(strModDefs[intIndex].Substring(0, intAtSignIndex));
+                                    modificationMass = double.Parse(modDefs[index].Substring(0, atSignIndex));
                                 }
                             }
 
-                            if (Math.Abs(dblModificationMass) > float.Epsilon)
+                            if (Math.Abs(modificationMass) > float.Epsilon)
                             {
-                                string strTargetResidues;
+                                string targetResidues;
 
                                 // Valid mass found; now extract the target residues
-                                if (!blnParsingMotifDef && intAtSignIndex + 1 < strModDefs[intIndex].Length)
+                                if (!parsingMotifDef && atSignIndex + 1 < modDefs[index].Length)
                                 {
-                                    strTargetResidues = strModDefs[intIndex].Substring(intAtSignIndex + 1);
+                                    targetResidues = modDefs[index].Substring(atSignIndex + 1);
                                 }
                                 else
                                 {
-                                    strTargetResidues = string.Empty;
+                                    targetResidues = string.Empty;
                                 }
 
-                                if (strTargetResidues.IndexOf('X') >= 0)
+                                if (targetResidues.IndexOf('X') >= 0)
                                 {
-                                    // Modification can affect any residue; set strTargetResidues to ""
-                                    strTargetResidues = string.Empty;
+                                    // Modification can affect any residue; set targetResidues to ""
+                                    targetResidues = string.Empty;
                                 }
 
-                                if (strTargetResidues.Length > 0)
+                                if (targetResidues.Length > 0)
                                 {
                                     // Convert from X!Tandem-style N-Terminus notation to DMS-style notation
-                                    strTargetResidues = strTargetResidues.Replace(clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS);
-                                    strTargetResidues = strTargetResidues.Replace(clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS);
+                                    targetResidues = targetResidues.Replace(clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS);
+                                    targetResidues = targetResidues.Replace(clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS);
                                 }
 
                                 // Append the new mod information to udtModInfo
-                                if (intModInfoCount >= udtModInfo.Length)
+                                if (modInfoCount >= udtModInfo.Length)
                                 {
                                     Array.Resize(ref udtModInfo, udtModInfo.Length * 2);
                                 }
 
-                                var modInfo = udtModInfo[intModInfoCount];
-                                modInfo.SortOrder = intSortOrder;
-                                modInfo.ModificationMass = dblModificationMass;
-                                modInfo.TargetResidues = strTargetResidues;
+                                var modInfo = udtModInfo[modInfoCount];
+                                modInfo.SortOrder = sortOrder;
+                                modInfo.ModificationMass = modificationMass;
+                                modInfo.TargetResidues = targetResidues;
                                 modInfo.ModificationType = eModificationType;
-                                udtModInfo[intModInfoCount] = modInfo;
-                                intModInfoCount += 1;
+                                udtModInfo[modInfoCount] = modInfo;
+                                modInfoCount += 1;
                             }
                         }
                     }
                 }
 
-                blnSuccess = true;
+                success = true;
             }
             catch (Exception)
             {
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        private bool ParseXTandemInputParameterProteinTerminusMod(int intSortOrder, bool blnNTerminus, string strParamValue, ref int intModInfoCount, ref udtSearchOptionModificationInfoType[] udtModInfo)
+        private bool ParseXTandemInputParameterProteinTerminusMod(
+            int sortOrder, 
+            bool nTerminus, 
+            string paramValue, 
+            ref int modInfoCount, 
+            ref udtSearchOptionModificationInfoType[] udtModInfo)
         {
-            // Parse out the mass defined in strParamValue
+            // Parse out the mass defined in paramValue
             // Add the entry to udtModInfo if non-zero
-            // if blnNTerminus = True then mod applies to the protein's N-Terminus; otherwise, applies to the protein's C-Terminus
+            // if nTerminus = True then mod applies to the protein's N-Terminus; otherwise, applies to the protein's C-Terminus
 
-            bool blnSuccess;
+            bool success;
 
             try
             {
-                if (string.IsNullOrWhiteSpace(strParamValue))
+                if (string.IsNullOrWhiteSpace(paramValue))
                 {
                     // Empty parameter; no definition to parse
                 }
                 else
                 {
-                    // See if strParamValue is a non-zero number
+                    // See if paramValue is a non-zero number
 
-                    var dblModificationMass = 0.0;
-                    if (clsPHRPParser.IsNumber(strParamValue))
+                    var modificationMass = 0.0;
+                    if (clsPHRPParser.IsNumber(paramValue))
                     {
-                        dblModificationMass = double.Parse(strParamValue);
+                        modificationMass = double.Parse(paramValue);
                     }
 
-                    if (Math.Abs(dblModificationMass) > float.Epsilon)
+                    if (Math.Abs(modificationMass) > float.Epsilon)
                     {
                         // Append the new mod information to udtModInfo
-                        if (intModInfoCount >= udtModInfo.Length)
+                        if (modInfoCount >= udtModInfo.Length)
                         {
                             Array.Resize(ref udtModInfo, udtModInfo.Length * 2);
                         }
 
-                        var modInfo = udtModInfo[intModInfoCount];
-                        modInfo.SortOrder = intSortOrder;
-                        string strTargetResidues;
-                        if (blnNTerminus)
+                        var modInfo = udtModInfo[modInfoCount];
+                        modInfo.SortOrder = sortOrder;
+                        string targetResidues;
+                        if (nTerminus)
                         {
-                            strTargetResidues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                            targetResidues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
                         }
                         else
                         {
-                            strTargetResidues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                            targetResidues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
                         }
 
-                        modInfo.ModificationMass = dblModificationMass;
-                        modInfo.TargetResidues = strTargetResidues;
+                        modInfo.ModificationMass = modificationMass;
+                        modInfo.TargetResidues = targetResidues;
                         modInfo.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
-                        udtModInfo[intModInfoCount] = modInfo;
-                        intModInfoCount += 1;
+                        udtModInfo[modInfoCount] = modInfo;
+                        modInfoCount += 1;
                     }
                 }
 
-                blnSuccess = true;
+                success = true;
             }
             catch (Exception)
             {
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        protected bool ParseXTandemResultsFile(string strInputFilePath, string strOutputFilePath, bool blnResetMassCorrectionTagsAndModificationDefinitions = true)
+        protected bool ParseXTandemResultsFile(string inputFilePath, string outputFilePath, bool resetMassCorrectionTagsAndModificationDefinitions = true)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile
 
-            var intResultsProcessed = 0;
+            var resultsProcessed = 0;
 
-            bool blnSuccess;
+            bool success;
 
             try
             {
                 // Possibly reset the mass correction tags and Mod Definitions
-                if (blnResetMassCorrectionTagsAndModificationDefinitions)
+                if (resetMassCorrectionTagsAndModificationDefinitions)
                 {
                     ResetMassCorrectionTagsAndModificationDefinitions();
                 }
@@ -417,17 +428,17 @@ namespace PeptideHitResultsProcessor
                 // Reset .OccurrenceCount
                 mPeptideMods.ResetOccurrenceCountStats();
 
-                // Initialize the objSearchResults() array; initially reserve space for 4 proteins
-                // Note: The number of valid entries in objSearchResults[) is given by intSearchResultCount; objSearchResults(] is expanded but never shrunk
-                // There is a separate entry in objSearchResults() for each protein encountered
+                // Initialize the searchResults[] array; initially reserve space for 4 proteins
+                // Note: The number of valid entries in searchResults[] is given by searchResultCount; searchResults[] is expanded but never shrunk
+                // There is a separate entry in searchResults[] for each protein encountered
 
-                var intSearchResultCount = 0;
-                var objSearchResults = new clsSearchResultsXTandem[4];
+                var searchResultCount = 0;
+                var searchResults = new clsSearchResultsXTandem[4];
 
-                int intSearchResultIndex;
-                for (intSearchResultIndex = 0; intSearchResultIndex <= objSearchResults.Length - 1; intSearchResultIndex++)
+                int searchResultIndex;
+                for (searchResultIndex = 0; searchResultIndex <= searchResults.Length - 1; searchResultIndex++)
                 {
-                    objSearchResults[intSearchResultIndex] = new clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator);
+                    searchResults[searchResultIndex] = new clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator);
                 }
 
                 // Reset mNextResultID and mLookForReverseSequenceTag
@@ -435,33 +446,33 @@ namespace PeptideHitResultsProcessor
 
                 try
                 {
-                    // Read the input parameters from the end of the X!Tandem results file (strInputFilePath)
-                    blnSuccess = ParseXTandemResultsFileInputParameters(strInputFilePath);
-                    if (!blnSuccess)
+                    // Read the input parameters from the end of the X!Tandem results file (inputFilePath)
+                    success = ParseXTandemResultsFileInputParameters(inputFilePath);
+                    if (!success)
                     {
                         SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile, true);
                         return false;
                     }
 
-                    for (intSearchResultIndex = 0; intSearchResultIndex <= objSearchResults.Length - 1; intSearchResultIndex++)
+                    for (searchResultIndex = 0; searchResultIndex <= searchResults.Length - 1; searchResultIndex++)
                     {
-                        objSearchResults[intSearchResultIndex].UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                        searchResults[searchResultIndex].UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
                     }
 
-                    var strErrorLog = string.Empty;
+                    var errorLog = string.Empty;
 
                     // Open the input file and parse it
 
                     // Initialize the stream reader and the XML Text Reader
                     eCurrentXMLDataFileSectionConstants eCurrentXMLDataFileSection;
-                    using (var srDataFile = new StreamReader(strInputFilePath))
+                    using (var srDataFile = new StreamReader(inputFilePath))
                     {
-                        using (var objXMLReader = new XmlTextReader(srDataFile))
+                        using (var xmlReader = new XmlTextReader(srDataFile))
                         {
-                            intResultsProcessed = 0;
+                            resultsProcessed = 0;
 
                             // Create the output file
-                            using (var swPeptideResultsFile = new StreamWriter(strOutputFilePath, false))
+                            using (var swPeptideResultsFile = new StreamWriter(outputFilePath, false))
                             {
                                 // Write the header line to swPeptideResultsFile
                                 swPeptideResultsFile.WriteLine("Result_ID" + SEP_CHAR +
@@ -483,51 +494,51 @@ namespace PeptideHitResultsProcessor
                                                                "DelM_PPM");
 
                                 // Create the additional output files
-                                blnSuccess = InitializeSequenceOutputFiles(strOutputFilePath);
+                                success = InitializeSequenceOutputFiles(outputFilePath);
 
                                 // Parse the input file
                                 eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
 
-                                while (objXMLReader.Read() & !AbortProcessing)
+                                while (xmlReader.Read() & !AbortProcessing)
                                 {
-                                    XMLTextReaderSkipWhitespace(objXMLReader);
-                                    if (objXMLReader.ReadState != ReadState.Interactive)
+                                    XMLTextReaderSkipWhitespace(xmlReader);
+                                    if (xmlReader.ReadState != ReadState.Interactive)
                                         break;
 
-                                    if (objXMLReader.Depth < 2)
+                                    if (xmlReader.Depth < 2)
                                     {
-                                        if (objXMLReader.NodeType == XmlNodeType.Element)
+                                        if (xmlReader.NodeType == XmlNodeType.Element)
                                         {
-                                            switch (objXMLReader.Name.ToLower())
+                                            switch (xmlReader.Name.ToLower())
                                             {
                                                 case XTANDEM_XML_ELEMENT_NAME_GROUP:
-                                                    if (objXMLReader.HasAttributes)
+                                                    if (xmlReader.HasAttributes)
                                                     {
                                                         // Cache the XML reader depth before reading any of the element's attributes
-                                                        var intGroupElementReaderDepth = objXMLReader.Depth;
+                                                        var groupElementReaderDepth = xmlReader.Depth;
 
                                                         // See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
-                                                        var strCurrentGroupType = XMLTextReaderGetAttributeValue(objXMLReader, "type", string.Empty);
-                                                        if (strCurrentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL)
+                                                        var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
+                                                        if (currentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL)
                                                         {
                                                             eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults;
 
-                                                            ParseXTandemResultsFileEntry(objXMLReader, swPeptideResultsFile, ref intSearchResultCount, ref objSearchResults, ref strErrorLog, intGroupElementReaderDepth);
-                                                            intResultsProcessed += 1;
+                                                            ParseXTandemResultsFileEntry(xmlReader, swPeptideResultsFile, ref searchResultCount, ref searchResults, ref errorLog, groupElementReaderDepth);
+                                                            resultsProcessed += 1;
 
                                                             // Update the progress
-                                                            var sngPercentComplete = Convert.ToSingle(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100);
+                                                            var percentComplete = Convert.ToSingle(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100);
                                                             if (CreateProteinModsFile)
                                                             {
-                                                                sngPercentComplete = sngPercentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
+                                                                percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                                                             }
-                                                            UpdateProgress(sngPercentComplete);
+                                                            UpdateProgress(percentComplete);
                                                         }
                                                     }
                                                     else
                                                     {
                                                         // Group doesn't have any attributes; ignore it
-                                                        objXMLReader.Skip();
+                                                        xmlReader.Skip();
                                                     }
 
                                                     break;
@@ -544,36 +555,36 @@ namespace PeptideHitResultsProcessor
 
                     if (eCurrentXMLDataFileSection == eCurrentXMLDataFileSectionConstants.UnknownFile)
                     {
-                        mErrorMessage = "Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: " + "\n" + strInputFilePath;
+                        mErrorMessage = "Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: " + "\n" + inputFilePath;
                     }
                     else
                     {
                         if (CreateModificationSummaryFile)
                         {
                             // Create the modification summary file
-                            var inputFile = new FileInfo(strInputFilePath);
-                            var outputFile = new FileInfo(strOutputFilePath);
+                            var inputFile = new FileInfo(inputFilePath);
+                            var outputFile = new FileInfo(outputFilePath);
 
-                            var strModificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
-                            strModificationSummaryFilePath = Path.Combine(outputFile.DirectoryName, strModificationSummaryFilePath);
+                            var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
+                            modificationSummaryFilePath = Path.Combine(outputFile.DirectoryName, modificationSummaryFilePath);
 
-                            SaveModificationSummaryFile(strModificationSummaryFilePath);
+                            SaveModificationSummaryFile(modificationSummaryFilePath);
                         }
 
                         // Inform the user if any errors occurred
-                        if (strErrorLog.Length > 0)
+                        if (errorLog.Length > 0)
                         {
-                            SetErrorMessage("Invalid Lines: " + "\n" + strErrorLog);
+                            SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
                         }
                     }
 
-                    blnSuccess = true;
+                    success = true;
                 }
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
-                    blnSuccess = false;
+                    success = false;
                 }
                 finally
                 {
@@ -584,19 +595,19 @@ namespace PeptideHitResultsProcessor
             {
                 SetErrorMessage(ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
         }
 
         // The following are static to avoid re-reserving space for them for every XTandem results file entry
         Hashtable htSeqsWithMods;
         Hashtable htSeqsWithoutMods;
-        private bool ParseXTandemResultsFileEntry(XmlReader objXMLReader, StreamWriter swPeptideResultsFile, ref int intSearchResultCount, ref clsSearchResultsXTandem[] objSearchResults, ref string strErrorLog, int intGroupElementReaderDepth)
+        private bool ParseXTandemResultsFileEntry(XmlReader xmlReader, StreamWriter swPeptideResultsFile, ref int searchResultCount, ref clsSearchResultsXTandem[] searchResults, ref string errorLog, int groupElementReaderDepth)
         {
-            // Note: The number of valid entries in objSearchResults[) is given by intSearchResultCount; objSearchResults(] is expanded but never shrunk
-            // There is a separate entry in objSearchResults() for each protein encountered
+            // Note: The number of valid entries in searchResults[) is given by searchResultCount; searchResults(] is expanded but never shrunk
+            // There is a separate entry in searchResults() for each protein encountered
 
             const string GROUP_LABEL_PROTEIN = "protein";
             const string GROUP_LABEL_FRAG_ION = "fragment ion mass spectrum";
@@ -623,119 +634,119 @@ namespace PeptideHitResultsProcessor
 
             // Scan: <xsl:value-of select="substring-before(concat(substring-after(./group/note,'scan='),' '), ' ')" />
 
-            var strGroupIDInXMLFile = string.Empty;
+            var groupIDInXMLFile = string.Empty;
 
-            var blnProteinSequenceParsed = false;
-            var blnDomainParsed = false;
-            var blnSuccess = false;
+            var proteinSequenceParsed = false;
+            var domainParsed = false;
+            var success = false;
 
-            var strCurrentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL;
-            var strCurrentGroupLabel = GROUP_LABEL_PROTEIN;
+            var currentGroupType = XTANDEM_XML_GROUP_TYPE_MODEL;
+            var currentGroupLabel = GROUP_LABEL_PROTEIN;
 
             try
             {
-                // Reset the first entry in objSearchResults
-                intSearchResultCount = 0;
-                objSearchResults[0].Clear();
+                // Reset the first entry in searchResults
+                searchResultCount = 0;
+                searchResults[0].Clear();
 
-                strGroupIDInXMLFile = XMLTextReaderGetAttributeValue(objXMLReader, "id", string.Empty);
-                var objSearchResult = objSearchResults[0];
-                // Initially set .ResultID to strGroupIDInXMLFile
+                groupIDInXMLFile = XMLTextReaderGetAttributeValue(xmlReader, "id", string.Empty);
+                var searchResult = searchResults[0];
+                // Initially set .ResultID to groupIDInXMLFile
                 // ResultID will get updated to a sequentially assigned number (mNextResultID) if we write the result out to the _xt.txt file
-                objSearchResult.ResultID = int.Parse(strGroupIDInXMLFile);
-                objSearchResult.GroupID = objSearchResult.ResultID;
+                searchResult.ResultID = int.Parse(groupIDInXMLFile);
+                searchResult.GroupID = searchResult.ResultID;
 
-                objSearchResult.ParentIonMH = XMLTextReaderGetAttributeValue(objXMLReader, "mh", string.Empty);
-                objSearchResult.Charge = XMLTextReaderGetAttributeValue(objXMLReader, "z", string.Empty);
+                searchResult.ParentIonMH = XMLTextReaderGetAttributeValue(xmlReader, "mh", string.Empty);
+                searchResult.Charge = XMLTextReaderGetAttributeValue(xmlReader, "z", string.Empty);
 
                 // Note: This will get updated for each protein encountered
-                objSearchResult.PeptideExpectationValue = ConvertEValueToBase10Log(XMLTextReaderGetAttributeValue(objXMLReader, "expect", string.Empty));
+                searchResult.PeptideExpectationValue = ConvertEValueToBase10Log(XMLTextReaderGetAttributeValue(xmlReader, "expect", string.Empty));
 
                 // Note: we truncate .ProteinName at the first space
-                objSearchResult.ProteinName = XMLTextReaderGetAttributeValue(objXMLReader, "label", string.Empty);
-                var intIndex = objSearchResult.ProteinName.IndexOf(' ');
-                if (intIndex > 0)
+                searchResult.ProteinName = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
+                var index = searchResult.ProteinName.IndexOf(' ');
+                if (index > 0)
                 {
-                    objSearchResult.ProteinName = objSearchResult.ProteinName.Substring(0, intIndex);
+                    searchResult.ProteinName = searchResult.ProteinName.Substring(0, index);
                 }
 
-                objSearchResult.PeptideIntensity = XMLTextReaderGetAttributeValue(objXMLReader, "sumI", string.Empty);
-                objSearchResult.PeptideIntensityMax = XMLTextReaderGetAttributeValue(objXMLReader, "maxI", string.Empty);
-                objSearchResult.fI = XMLTextReaderGetAttributeValue(objXMLReader, "fI", string.Empty);
+                searchResult.PeptideIntensity = XMLTextReaderGetAttributeValue(xmlReader, "sumI", string.Empty);
+                searchResult.PeptideIntensityMax = XMLTextReaderGetAttributeValue(xmlReader, "maxI", string.Empty);
+                searchResult.fI = XMLTextReaderGetAttributeValue(xmlReader, "fI", string.Empty);
 
                 // Continue reading the XML file, loading the information
 
-                while (objXMLReader.Read() & !AbortProcessing)
+                while (xmlReader.Read() & !AbortProcessing)
                 {
-                    XMLTextReaderSkipWhitespace(objXMLReader);
-                    if (objXMLReader.ReadState != ReadState.Interactive)
+                    XMLTextReaderSkipWhitespace(xmlReader);
+                    if (xmlReader.ReadState != ReadState.Interactive)
                         break;
 
-                    if (objXMLReader.NodeType == XmlNodeType.Element)
+                    if (xmlReader.NodeType == XmlNodeType.Element)
                     {
-                        clsSearchResultsXTandem objResult;
-                        switch (objXMLReader.Name.ToLower())
+                        clsSearchResultsXTandem result;
+                        switch (xmlReader.Name.ToLower())
                         {
                             case XTANDEM_XML_ELEMENT_NAME_PROTEIN:
-                                intSearchResultCount += 1;
-                                if (intSearchResultCount > objSearchResults.Length)
+                                searchResultCount += 1;
+                                if (searchResultCount > searchResults.Length)
                                 {
-                                    // Double the length of objSearchResults
-                                    Array.Resize(ref objSearchResults, objSearchResults.Length * 2);
-                                    for (var intSearchResultIndex = intSearchResultCount - 1; intSearchResultIndex <= objSearchResults.Length - 1; intSearchResultIndex++)
+                                    // Double the length of searchResults
+                                    Array.Resize(ref searchResults, searchResults.Length * 2);
+                                    for (var searchResultIndex = searchResultCount - 1; searchResultIndex <= searchResults.Length - 1; searchResultIndex++)
                                     {
-                                        objSearchResults[intSearchResultIndex] = new clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator);
-                                        objSearchResults[intSearchResultIndex].UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
+                                        searchResults[searchResultIndex] = new clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator);
+                                        searchResults[searchResultIndex].UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
                                     }
                                 }
 
-                                objResult = objSearchResults[intSearchResultCount - 1];
-                                if (intSearchResultCount > 1)
+                                result = searchResults[searchResultCount - 1];
+                                if (searchResultCount > 1)
                                 {
-                                    // Copy the info from objSearchResults[0] to this search result
+                                    // Copy the info from searchResults[0] to this search result
                                     // ResultID will get updated to a sequentially assigned number (mNextResultID) if we write the result out to the _xt.txt file
-                                    objResult.ResultID = objSearchResults[0].ResultID;
-                                    objResult.GroupID = objSearchResults[0].GroupID;
-                                    objResult.ParentIonMH = objSearchResults[0].ParentIonMH;
-                                    objResult.Charge = objSearchResults[0].Charge;
+                                    result.ResultID = searchResults[0].ResultID;
+                                    result.GroupID = searchResults[0].GroupID;
+                                    result.ParentIonMH = searchResults[0].ParentIonMH;
+                                    result.Charge = searchResults[0].Charge;
 
-                                    objResult.PeptideExpectationValue = objSearchResults[0].PeptideExpectationValue;
+                                    result.PeptideExpectationValue = searchResults[0].PeptideExpectationValue;
 
-                                    objResult.PeptideIntensity = objSearchResults[0].PeptideIntensity;
-                                    objResult.PeptideIntensityMax = objSearchResults[0].PeptideIntensityMax;
-                                    objResult.fI = objSearchResults[0].fI;
+                                    result.PeptideIntensity = searchResults[0].PeptideIntensity;
+                                    result.PeptideIntensityMax = searchResults[0].PeptideIntensityMax;
+                                    result.fI = searchResults[0].fI;
                                 }
 
-                                objResult.ProteinExpectationValue = XMLTextReaderGetAttributeValue(objXMLReader, "expect", string.Empty);
-                                objResult.ProteinIntensity = XMLTextReaderGetAttributeValue(objXMLReader, "sumI", string.Empty);
+                                result.ProteinExpectationValue = XMLTextReaderGetAttributeValue(xmlReader, "expect", string.Empty);
+                                result.ProteinIntensity = XMLTextReaderGetAttributeValue(xmlReader, "sumI", string.Empty);
 
                                 // Update the protein name for this protein entry
 
                                 // Note: we truncate .ProteinName at the first space
                                 // However, if mLookForReverseSequenceTag = True then we need to look for ":reversed" at the end of the description
-                                objResult.ProteinName = XMLTextReaderGetAttributeValue(objXMLReader, "label", string.Empty);
-                                objResult.ProteinName = TruncateProteinName(objResult.ProteinName);
+                                result.ProteinName = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
+                                result.ProteinName = TruncateProteinName(result.ProteinName);
 
                                 // For proteins with long descriptions, the ":reversed" tag is not present in the label attribute
                                 //  and is instead in the <note label="description"> element (a sub-element of the <protein> element
                                 // We'll check for this case later in this function
 
                                 // Reset the Protein Sequence Parsed and Domain Parsed flags
-                                blnProteinSequenceParsed = false;
-                                blnDomainParsed = false;
+                                proteinSequenceParsed = false;
+                                domainParsed = false;
 
                                 // Clear the protein sequence info and peptide details info
-                                objResult.ClearProteinSequenceInfo();
-                                objResult.ClearPeptideDetailsInfo();
+                                result.ClearProteinSequenceInfo();
+                                result.ClearPeptideDetailsInfo();
 
                                 break;
                             case XTANDEM_XML_ELEMENT_NAME_PEPTIDE:
-                                if (!blnProteinSequenceParsed)
+                                if (!proteinSequenceParsed)
                                 {
-                                    blnProteinSequenceParsed = true;
-                                    objResult = objSearchResults[intSearchResultCount - 1];
-                                    objResult.ProteinSeqResidueNumberStart = XMLTextReaderGetAttributeValue(objXMLReader, "start", 0);
-                                    objResult.ProteinSeqResidueNumberEnd = XMLTextReaderGetAttributeValue(objXMLReader, "end", 0);
+                                    proteinSequenceParsed = true;
+                                    result = searchResults[searchResultCount - 1];
+                                    result.ProteinSeqResidueNumberStart = XMLTextReaderGetAttributeValue(xmlReader, "start", 0);
+                                    result.ProteinSeqResidueNumberEnd = XMLTextReaderGetAttributeValue(xmlReader, "end", 0);
                                 }
                                 break;
                             case XTANDEM_XML_ELEMENT_NAME_DOMAIN:
@@ -744,130 +755,130 @@ namespace PeptideHitResultsProcessor
                                 // Additionally, if X!Tandem decides a given modification could occur on either of two residues, it repeats the domain information
                                 //   Again, in this situation, we'll only keep the first domain
 
-                                if (!blnDomainParsed)
+                                if (!domainParsed)
                                 {
-                                    blnDomainParsed = true;
+                                    domainParsed = true;
 
                                     // Cache the XML reader depth before reading any of the element's attributes
-                                    var intDomainElementReaderDepth = objXMLReader.Depth;
+                                    var domainElementReaderDepth = xmlReader.Depth;
 
-                                    // Read the information for this domain, storing in objSearchResult
-                                    objSearchResult = objSearchResults[intSearchResultCount - 1];
-                                    objSearchResult.PeptideLocInProteinStart = XMLTextReaderGetAttributeValue(objXMLReader, "start", 0);
-                                    objSearchResult.PeptideLocInProteinEnd = XMLTextReaderGetAttributeValue(objXMLReader, "end", 0);
+                                    // Read the information for this domain, storing in searchResult
+                                    searchResult = searchResults[searchResultCount - 1];
+                                    searchResult.PeptideLocInProteinStart = XMLTextReaderGetAttributeValue(xmlReader, "start", 0);
+                                    searchResult.PeptideLocInProteinEnd = XMLTextReaderGetAttributeValue(xmlReader, "end", 0);
 
                                     // Note: the expectation value was already populated from the group level; we'll update it to the value stored for each protein in case it's different for different proteins
-                                    objSearchResult.PeptideExpectationValue = ConvertEValueToBase10Log(XMLTextReaderGetAttributeValue(objXMLReader, "expect", string.Empty));
+                                    searchResult.PeptideExpectationValue = ConvertEValueToBase10Log(XMLTextReaderGetAttributeValue(xmlReader, "expect", string.Empty));
 
                                     // Note: This is the theoretical, monoisotopic MH+ mass for the peptide
-                                    objSearchResult.PeptideMH = XMLTextReaderGetAttributeValue(objXMLReader, "mh", string.Empty);
+                                    searchResult.PeptideMH = XMLTextReaderGetAttributeValue(xmlReader, "mh", string.Empty);
 
-                                    objSearchResult.PeptideDeltaMass = XMLTextReaderGetAttributeValue(objXMLReader, "delta", string.Empty);
+                                    searchResult.PeptideDeltaMass = XMLTextReaderGetAttributeValue(xmlReader, "delta", string.Empty);
 
                                     // Note: .peptideDeltaMass is stored in the X!Tandem XML file as "Observed_Mass - Theoretical_Mass"
                                     // However, in MTS .peptideDeltaMass is "Theoretical - Observed"
                                     // Therefore, we will negate .peptideDeltaMass
                                     try
                                     {
-                                        objSearchResult.PeptideDeltaMass = (-double.Parse(objSearchResult.PeptideDeltaMass)).ToString();
+                                        searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString();
                                     }
                                     catch (Exception)
                                     {
                                         // Error; Leave .peptideDeltaMass unchanged
                                     }
 
-                                    objSearchResult.PeptideHyperscore = XMLTextReaderGetAttributeValue(objXMLReader, "hyperscore", string.Empty);
+                                    searchResult.PeptideHyperscore = XMLTextReaderGetAttributeValue(xmlReader, "hyperscore", string.Empty);
 
                                     // Note that updating .PeptideNextScore will automatically populate .DeltaCn2
-                                    objSearchResult.PeptideNextScore = XMLTextReaderGetAttributeValue(objXMLReader, "nextscore", string.Empty);
+                                    searchResult.PeptideNextScore = XMLTextReaderGetAttributeValue(xmlReader, "nextscore", string.Empty);
 
                                     // Note that calling .PeptidePreResidues, .PeptidePostResidues, and .PeptideCleanSequence will call ComputePeptideCleavageStateInProtein() each time
-                                    objSearchResult.PeptidePreResidues = XMLTextReaderGetAttributeValue(objXMLReader, "pre", string.Empty);
-                                    objSearchResult.PeptidePostResidues = XMLTextReaderGetAttributeValue(objXMLReader, "post", string.Empty);
-                                    objSearchResult.PeptideCleanSequence = XMLTextReaderGetAttributeValue(objXMLReader, "seq", string.Empty);
+                                    searchResult.PeptidePreResidues = XMLTextReaderGetAttributeValue(xmlReader, "pre", string.Empty);
+                                    searchResult.PeptidePostResidues = XMLTextReaderGetAttributeValue(xmlReader, "post", string.Empty);
+                                    searchResult.PeptideCleanSequence = XMLTextReaderGetAttributeValue(xmlReader, "seq", string.Empty);
 
-                                    objSearchResult.PeptideYScore = XMLTextReaderGetAttributeValue(objXMLReader, "y_score", string.Empty);
-                                    objSearchResult.PeptideYIons = XMLTextReaderGetAttributeValue(objXMLReader, "y_ions", string.Empty);
-                                    objSearchResult.PeptideBScore = XMLTextReaderGetAttributeValue(objXMLReader, "b_score", string.Empty);
-                                    objSearchResult.PeptideBIons = XMLTextReaderGetAttributeValue(objXMLReader, "b_ions", string.Empty);
+                                    searchResult.PeptideYScore = XMLTextReaderGetAttributeValue(xmlReader, "y_score", string.Empty);
+                                    searchResult.PeptideYIons = XMLTextReaderGetAttributeValue(xmlReader, "y_ions", string.Empty);
+                                    searchResult.PeptideBScore = XMLTextReaderGetAttributeValue(xmlReader, "b_score", string.Empty);
+                                    searchResult.PeptideBIons = XMLTextReaderGetAttributeValue(xmlReader, "b_ions", string.Empty);
 
                                     // Now read all of the mods for this domain
                                     // If this is the first search result, then update the mod occurrence counts; otherwise, do not
-                                    if (intSearchResultCount == 1)
+                                    if (searchResultCount == 1)
                                     {
-                                        ParseXTandemResultsFileReadDomainMods(objXMLReader, objSearchResults[intSearchResultCount - 1], intDomainElementReaderDepth, true);
+                                        ParseXTandemResultsFileReadDomainMods(xmlReader, searchResults[searchResultCount - 1], domainElementReaderDepth, true);
                                     }
                                     else
                                     {
-                                        ParseXTandemResultsFileReadDomainMods(objXMLReader, objSearchResults[intSearchResultCount - 1], intDomainElementReaderDepth, false);
+                                        ParseXTandemResultsFileReadDomainMods(xmlReader, searchResults[searchResultCount - 1], domainElementReaderDepth, false);
                                     }
                                 }
 
                                 break;
                             case XTANDEM_XML_ELEMENT_NAME_GROUP:
-                                var strValue = XMLTextReaderGetAttributeValue(objXMLReader, "type", string.Empty);
-                                if (strValue.Length > 0)
+                                var value = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
+                                if (value.Length > 0)
                                 {
-                                    strCurrentGroupType = string.Copy(strValue);
-                                    strCurrentGroupLabel = XMLTextReaderGetAttributeValue(objXMLReader, "label", string.Empty);
+                                    currentGroupType = string.Copy(value);
+                                    currentGroupLabel = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
                                 }
                                 else
                                 {
-                                    // Leave strGroupType unchanged
+                                    // Leave groupType unchanged
                                 }
 
                                 break;
                             case XTANDEM_XML_ELEMENT_NAME_NOTE:
-                                if (strCurrentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL &&
-                                    strCurrentGroupLabel == GROUP_LABEL_PROTEIN && mLookForReverseSequenceTag)
+                                if (currentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL &&
+                                    currentGroupLabel == GROUP_LABEL_PROTEIN && mLookForReverseSequenceTag)
                                 {
                                     // Examine the label attribute of this note
 
-                                    strValue = XMLTextReaderGetAttributeValue(objXMLReader, "label", string.Empty);
+                                    value = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
 
-                                    if (strValue == PROTEIN_DESCRIPTION_LABEL)
+                                    if (value == PROTEIN_DESCRIPTION_LABEL)
                                     {
                                         // Check whether this note ends in ":reversed"
-                                        // If it does, then make sure objSearchResults[intSearchResultCount - 1].ProteinName ends in :reversed
+                                        // If it does, then make sure searchResults[searchResultCount - 1].ProteinName ends in :reversed
 
                                         // Advance the reader before grabbing the inner text
-                                        if (objXMLReader.Read())
+                                        if (xmlReader.Read())
                                         {
                                             // Read the note's inner text
-                                            strValue = XMLTextReaderGetInnerText(objXMLReader);
+                                            value = XMLTextReaderGetInnerText(xmlReader);
 
-                                            if (strValue.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR))
+                                            if (value.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR))
                                             {
-                                                if (!objSearchResults[intSearchResultCount - 1].ProteinName.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR))
+                                                if (!searchResults[searchResultCount - 1].ProteinName.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR))
                                                 {
-                                                    objSearchResults[intSearchResultCount - 1].ProteinName += REVERSED_PROTEIN_SEQUENCE_INDICATOR;
+                                                    searchResults[searchResultCount - 1].ProteinName += REVERSED_PROTEIN_SEQUENCE_INDICATOR;
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                else if (strCurrentGroupType == XTANDEM_XML_GROUP_TYPE_SUPPORT &&
-                                         strCurrentGroupLabel == GROUP_LABEL_FRAG_ION)
+                                else if (currentGroupType == XTANDEM_XML_GROUP_TYPE_SUPPORT &&
+                                         currentGroupLabel == GROUP_LABEL_FRAG_ION)
                                 {
                                     // This note should contain the scan number
                                     // For _Dta.txt files created at PNNL, it should look something like: "   scan=15118 cs=3"
                                     // For DTA-based files converted to .MGF and processed by X!Tandem: "MyDataset.300.300.2.dta"
 
                                     // Read the note's inner text
-                                    strValue = XMLTextReaderGetInnerText(objXMLReader);
-                                    if (strValue != null)
+                                    value = XMLTextReaderGetInnerText(xmlReader);
+                                    if (value != null)
                                     {
-                                        var blnScanFound = false;
+                                        var scanFound = false;
 
                                         // Look for the word "scan" followed by an equals sign, followed by a number
                                         // For example, "   scan=15118 cs=3"
                                         try
                                         {
-                                            var match = mScanNumberRegExA.Match(strValue);
+                                            var match = mScanNumberRegExA.Match(value);
                                             if (match.Success && match.Groups.Count > 1)
                                             {
-                                                objSearchResults[0].Scan = match.Groups[1].Value;
-                                                blnScanFound = true;
+                                                searchResults[0].Scan = match.Groups[1].Value;
+                                                scanFound = true;
                                             }
                                         }
                                         catch (Exception)
@@ -875,17 +886,17 @@ namespace PeptideHitResultsProcessor
                                             // Ignore errors here
                                         }
 
-                                        if (!blnScanFound)
+                                        if (!scanFound)
                                         {
                                             // No match; look for the word "scan" followed by whitespace, followed by a number
                                             // For example, "scan 300"
                                             try
                                             {
-                                                var match = mScanNumberRegExB.Match(strValue);
+                                                var match = mScanNumberRegExB.Match(value);
                                                 if (match.Success && match.Groups.Count > 1)
                                                 {
-                                                    objSearchResults[0].Scan = match.Groups[1].Value;
-                                                    blnScanFound = true;
+                                                    searchResults[0].Scan = match.Groups[1].Value;
+                                                    scanFound = true;
                                                 }
                                             }
                                             catch (Exception)
@@ -894,17 +905,17 @@ namespace PeptideHitResultsProcessor
                                             }
                                         }
 
-                                        if (!blnScanFound)
+                                        if (!scanFound)
                                         {
                                             // No match; see if the description resembles a .Dta file name
                                             // For example, "MyDataset.300.300.2.dta"
                                             try
                                             {
-                                                var match = mScanNumberRegExC.Match(strValue);
+                                                var match = mScanNumberRegExC.Match(value);
                                                 if (match.Success && match.Groups.Count > 1)
                                                 {
-                                                    objSearchResults[0].Scan = match.Groups[1].Value;
-                                                    blnScanFound = true;
+                                                    searchResults[0].Scan = match.Groups[1].Value;
+                                                    scanFound = true;
                                                 }
                                             }
                                             catch (Exception)
@@ -913,19 +924,19 @@ namespace PeptideHitResultsProcessor
                                             }
                                         }
 
-                                        if (!blnScanFound)
+                                        if (!scanFound)
                                         {
                                             // Still no match; extract out the first number present
                                             try
                                             {
-                                                var match = mScanNumberRegExD.Match(strValue);
+                                                var match = mScanNumberRegExD.Match(value);
                                                 if (match.Success)
                                                 {
-                                                    objSearchResults[0].Scan = match.Value;
+                                                    searchResults[0].Scan = match.Value;
                                                 }
                                                 else
                                                 {
-                                                    objSearchResults[0].Scan = strValue;
+                                                    searchResults[0].Scan = value;
                                                 }
                                             }
                                             catch (Exception)
@@ -935,9 +946,9 @@ namespace PeptideHitResultsProcessor
                                         }
 
                                         // Copy the scan value from the first result to the other results
-                                        for (var intSearchResultIndex = 1; intSearchResultIndex <= intSearchResultCount - 1; intSearchResultIndex++)
+                                        for (var searchResultIndex = 1; searchResultIndex <= searchResultCount - 1; searchResultIndex++)
                                         {
-                                            objSearchResults[intSearchResultIndex].Scan = objSearchResults[0].Scan;
+                                            searchResults[searchResultIndex].Scan = searchResults[0].Scan;
                                         }
                                     }
                                 }
@@ -947,11 +958,11 @@ namespace PeptideHitResultsProcessor
                                 break;
                         }
                     }
-                    else if (objXMLReader.NodeType == XmlNodeType.EndElement)
+                    else if (xmlReader.NodeType == XmlNodeType.EndElement)
                     {
-                        if (objXMLReader.Name == XTANDEM_XML_ELEMENT_NAME_GROUP)
+                        if (xmlReader.Name == XTANDEM_XML_ELEMENT_NAME_GROUP)
                         {
-                            if (objXMLReader.Depth <= intGroupElementReaderDepth)
+                            if (xmlReader.Depth <= groupElementReaderDepth)
                             {
                                 // End element found for the current group
 
@@ -974,122 +985,122 @@ namespace PeptideHitResultsProcessor
 
                                 // First step through the results to compute the mass, construct the modification description,
                                 //  and determine the number of proteins listed for each
-                                string strSequenceWithMods;
-                                for (var intSearchResultIndex = 0; intSearchResultIndex <= intSearchResultCount - 1; intSearchResultIndex++)
+                                string sequenceWithMods;
+                                for (var searchResultIndex = 0; searchResultIndex <= searchResultCount - 1; searchResultIndex++)
                                 {
-                                    bool blnUpdateModOccurrenceCounts;
-                                    if (intSearchResultIndex == 0)
+                                    bool updateModOccurrenceCounts;
+                                    if (searchResultIndex == 0)
                                     {
-                                        // Always set blnUpdateModOccurrenceCounts to True for the first result in the group
-                                        blnUpdateModOccurrenceCounts = true;
-                                        htSeqsWithoutMods.Add(objSearchResults[intSearchResultIndex].PeptideCleanSequence, 1);
+                                        // Always set updateModOccurrenceCounts to True for the first result in the group
+                                        updateModOccurrenceCounts = true;
+                                        htSeqsWithoutMods.Add(searchResults[searchResultIndex].PeptideCleanSequence, 1);
                                     }
                                     else
                                     {
-                                        if (htSeqsWithoutMods.ContainsKey(objSearchResults[intSearchResultIndex].PeptideCleanSequence))
+                                        if (htSeqsWithoutMods.ContainsKey(searchResults[searchResultIndex].PeptideCleanSequence))
                                         {
-                                            blnUpdateModOccurrenceCounts = false;
+                                            updateModOccurrenceCounts = false;
                                         }
                                         else
                                         {
-                                            blnUpdateModOccurrenceCounts = true;
-                                            htSeqsWithoutMods.Add(objSearchResults[intSearchResultIndex].PeptideCleanSequence, 1);
+                                            updateModOccurrenceCounts = true;
+                                            htSeqsWithoutMods.Add(searchResults[searchResultIndex].PeptideCleanSequence, 1);
                                         }
                                     }
 
-                                    blnSuccess = AddModificationsAndComputeMass(objSearchResults[intSearchResultIndex], blnUpdateModOccurrenceCounts);
-                                    if (!blnSuccess)
+                                    success = AddModificationsAndComputeMass(searchResults[searchResultIndex], updateModOccurrenceCounts);
+                                    if (!success)
                                     {
-                                        if (strErrorLog.Length < MAX_ERROR_LOG_LENGTH)
+                                        if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                         {
-                                            strErrorLog += "Error adding modifications to sequence for Group ID '" + strGroupIDInXMLFile + "'" + "\n";
+                                            errorLog += "Error adding modifications to sequence for Group ID '" + groupIDInXMLFile + "'" + "\n";
                                         }
                                     }
 
-                                    strSequenceWithMods = objSearchResults[intSearchResultIndex].PeptideCleanSequence + "_" + objSearchResults[intSearchResultIndex].PeptideModDescription;
+                                    sequenceWithMods = searchResults[searchResultIndex].PeptideCleanSequence + "_" + searchResults[searchResultIndex].PeptideModDescription;
 
-                                    if (intSearchResultIndex == 0)
+                                    if (searchResultIndex == 0)
                                     {
                                         // Always add the first result in the group htSeqsWithMods
-                                        htSeqsWithMods.Add(strSequenceWithMods, 1);
+                                        htSeqsWithMods.Add(sequenceWithMods, 1);
                                     }
                                     else
                                     {
-                                        // See if htSeqsWithMods contains strSequenceWithMods
-                                        if (htSeqsWithMods.ContainsKey(strSequenceWithMods))
+                                        // See if htSeqsWithMods contains sequenceWithMods
+                                        if (htSeqsWithMods.ContainsKey(sequenceWithMods))
                                         {
                                             // Increment the protein count for this peptide
-                                            htSeqsWithMods[strSequenceWithMods] = (int)htSeqsWithMods[strSequenceWithMods] + 1;
+                                            htSeqsWithMods[sequenceWithMods] = (int)htSeqsWithMods[sequenceWithMods] + 1;
                                         }
                                         else
                                         {
-                                            htSeqsWithMods.Add(strSequenceWithMods, 1);
+                                            htSeqsWithMods.Add(sequenceWithMods, 1);
                                         }
                                     }
                                 }
 
                                 // Now step through the list again and update the MultipleProteinCount value for each search result
-                                for (var intSearchResultIndex = 0; intSearchResultIndex <= intSearchResultCount - 1; intSearchResultIndex++)
+                                for (var searchResultIndex = 0; searchResultIndex <= searchResultCount - 1; searchResultIndex++)
                                 {
-                                    strSequenceWithMods = objSearchResults[intSearchResultIndex].PeptideCleanSequence + "_" + objSearchResults[intSearchResultIndex].PeptideModDescription;
+                                    sequenceWithMods = searchResults[searchResultIndex].PeptideCleanSequence + "_" + searchResults[searchResultIndex].PeptideModDescription;
 
-                                    int intProteinCount;
+                                    int proteinCount;
                                     try
                                     {
-                                        intProteinCount = (int)htSeqsWithMods[strSequenceWithMods];
+                                        proteinCount = (int)htSeqsWithMods[sequenceWithMods];
                                     }
                                     catch (Exception)
                                     {
-                                        intProteinCount = 1;
+                                        proteinCount = 1;
                                     }
 
-                                    if (intProteinCount < 1)
-                                        intProteinCount = 1;
+                                    if (proteinCount < 1)
+                                        proteinCount = 1;
 
                                     // Note: Multiple protein count is 0 if the peptide is only in 1 protein; 1 if the protein is in 2 proteins, etc.
-                                    objSearchResults[intSearchResultIndex].MultipleProteinCount = (intProteinCount - 1).ToString();
+                                    searchResults[searchResultIndex].MultipleProteinCount = (proteinCount - 1).ToString();
                                 }
 
                                 // Clear htSeqsWithMods again since we need to re-use it to determine which results to write out
                                 htSeqsWithMods.Clear();
 
                                 // Write out the results
-                                for (var intSearchResultIndex = 0; intSearchResultIndex <= intSearchResultCount - 1; intSearchResultIndex++)
+                                for (var searchResultIndex = 0; searchResultIndex <= searchResultCount - 1; searchResultIndex++)
                                 {
-                                    strSequenceWithMods = objSearchResults[intSearchResultIndex].PeptideCleanSequence + "_" + objSearchResults[intSearchResultIndex].PeptideModDescription;
+                                    sequenceWithMods = searchResults[searchResultIndex].PeptideCleanSequence + "_" + searchResults[searchResultIndex].PeptideModDescription;
 
-                                    bool blnUpdateResultToSeqMapFile;
-                                    if (intSearchResultIndex == 0)
+                                    bool updateResultToSeqMapFile;
+                                    if (searchResultIndex == 0)
                                     {
                                         // Always save the first result in the group to the _xt.txt and _ResultToSeqMap.txt files
-                                        htSeqsWithMods.Add(strSequenceWithMods, 1);
-                                        blnUpdateResultToSeqMapFile = true;
+                                        htSeqsWithMods.Add(sequenceWithMods, 1);
+                                        updateResultToSeqMapFile = true;
                                     }
                                     else
                                     {
-                                        // See if htSeqsWithMods contains strSequenceWithMods
-                                        if (htSeqsWithMods.ContainsKey(strSequenceWithMods))
+                                        // See if htSeqsWithMods contains sequenceWithMods
+                                        if (htSeqsWithMods.ContainsKey(sequenceWithMods))
                                         {
-                                            blnUpdateResultToSeqMapFile = false;
+                                            updateResultToSeqMapFile = false;
                                         }
                                         else
                                         {
-                                            htSeqsWithMods.Add(strSequenceWithMods, 1);
-                                            blnUpdateResultToSeqMapFile = true;
+                                            htSeqsWithMods.Add(sequenceWithMods, 1);
+                                            updateResultToSeqMapFile = true;
                                         }
                                     }
 
-                                    if (blnUpdateResultToSeqMapFile)
+                                    if (updateResultToSeqMapFile)
                                     {
                                         // Only save the first result for each peptide in the group to the _xt.txt and _ResultToSeqMap.txt files
                                         // Note: This function will update .ResultID to the next available ID value (mNextResultID)
-                                        SaveXTandemResultsFileEntry(objSearchResults[intSearchResultIndex], ref swPeptideResultsFile);
+                                        SaveXTandemResultsFileEntry(searchResults[searchResultIndex], ref swPeptideResultsFile);
                                     }
 
-                                    SaveResultsFileEntrySeqInfo(objSearchResults[intSearchResultIndex], blnUpdateResultToSeqMapFile);
+                                    SaveResultsFileEntrySeqInfo(searchResults[searchResultIndex], updateResultToSeqMapFile);
                                 }
 
-                                blnSuccess = true;
+                                success = true;
                                 break;
                             }
                         }
@@ -1099,76 +1110,76 @@ namespace PeptideHitResultsProcessor
             catch (Exception)
             {
                 // Error parsing values from this group ID in the XML file
-                if (strErrorLog.Length < MAX_ERROR_LOG_LENGTH)
+                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    strErrorLog += "Error parsing value for Group ID '" + strGroupIDInXMLFile + "'" + "\n";
+                    errorLog += "Error parsing value for Group ID '" + groupIDInXMLFile + "'" + "\n";
                 }
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        private bool ParseXTandemResultsFileInputParameters(string strInputFilePath)
+        private bool ParseXTandemResultsFileInputParameters(string inputFilePath)
         {
             // Pre-read the XML file and look for the Input Parameters section
             // Read the parameters and validate that each of the mods defined is present in mPeptideMods
 
             const string GROUP_LABEL_INPUT_PARAMETERS = "input parameters";
 
-            bool blnSuccess;
+            bool success;
 
             try
             {
                 // Open the input file and parse it
                 // Initialize the stream reader and the XML Text Reader
                 eCurrentXMLDataFileSectionConstants eCurrentXMLDataFileSection;
-                using (var objXMLReader = new XmlTextReader(strInputFilePath))
+                using (var xmlReader = new XmlTextReader(inputFilePath))
                 {
                     // Parse the file
                     eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
 
-                    while (objXMLReader.Read() & !AbortProcessing)
+                    while (xmlReader.Read() & !AbortProcessing)
                     {
-                        XMLTextReaderSkipWhitespace(objXMLReader);
-                        if (objXMLReader.ReadState != ReadState.Interactive)
+                        XMLTextReaderSkipWhitespace(xmlReader);
+                        if (xmlReader.ReadState != ReadState.Interactive)
                             break;
 
-                        if (objXMLReader.Depth < 2)
+                        if (xmlReader.Depth < 2)
                         {
-                            if (objXMLReader.NodeType == XmlNodeType.Element)
+                            if (xmlReader.NodeType == XmlNodeType.Element)
                             {
-                                switch (objXMLReader.Name.ToLower())
+                                switch (xmlReader.Name.ToLower())
                                 {
                                     case XTANDEM_XML_ELEMENT_NAME_GROUP:
-                                        if (objXMLReader.HasAttributes)
+                                        if (xmlReader.HasAttributes)
                                         {
-                                            var intParametersGroupDepth = objXMLReader.Depth;
+                                            var parametersGroupDepth = xmlReader.Depth;
 
                                             // See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_PARAMETERS
-                                            var strCurrentGroupType = XMLTextReaderGetAttributeValue(objXMLReader, "type", string.Empty);
-                                            if (strCurrentGroupType == XTANDEM_XML_GROUP_TYPE_PARAMETERS)
+                                            var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
+                                            if (currentGroupType == XTANDEM_XML_GROUP_TYPE_PARAMETERS)
                                             {
                                                 eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.InputParameters;
 
                                                 // Read the Label for this group
-                                                var strCurrentGroupLabel = XMLTextReaderGetAttributeValue(objXMLReader, "label", string.Empty);
-                                                if (strCurrentGroupLabel == GROUP_LABEL_INPUT_PARAMETERS)
+                                                var currentGroupLabel = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
+                                                if (currentGroupLabel == GROUP_LABEL_INPUT_PARAMETERS)
                                                 {
                                                     // Read the input parameters
-                                                    ParseXTandemResultsFileInputParametersWork(objXMLReader, intParametersGroupDepth);
+                                                    ParseXTandemResultsFileInputParametersWork(xmlReader, parametersGroupDepth);
                                                 }
                                             }
                                             else
                                             {
                                                 // Skip this group
-                                                objXMLReader.Skip();
+                                                xmlReader.Skip();
                                             }
                                         }
                                         else
                                         {
                                             // Group doesn't have any attributes; ignore it
-                                            objXMLReader.Skip();
+                                            xmlReader.Skip();
                                         }
 
                                         break;
@@ -1177,7 +1188,7 @@ namespace PeptideHitResultsProcessor
                                         break;
                                     default:
                                         // Skip this element
-                                        objXMLReader.Skip();
+                                        xmlReader.Skip();
                                         break;
                                 }
                             }
@@ -1187,25 +1198,25 @@ namespace PeptideHitResultsProcessor
 
                 if (eCurrentXMLDataFileSection == eCurrentXMLDataFileSectionConstants.UnknownFile)
                 {
-                    SetErrorMessage("Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: " + strInputFilePath);
-                    blnSuccess = false;
+                    SetErrorMessage("Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: " + inputFilePath);
+                    success = false;
                 }
                 else
                 {
-                    blnSuccess = true;
+                    success = true;
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
-                blnSuccess = false;
+                success = false;
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        private void ParseXTandemResultsFileInputParametersWork(XmlReader objXMLReader, int intParametersGroupDepth)
+        private void ParseXTandemResultsFileInputParametersWork(XmlReader xmlReader, int parametersGroupDepth)
         {
             // Read the input parameters
             // Each parameter is an element with name "note" with attributes "type" and "label"
@@ -1217,10 +1228,10 @@ namespace PeptideHitResultsProcessor
             const char XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END = '}';
 
             // Initialize the Mod Info array
-            var intModInfoCount = 0;
+            var modInfoCount = 0;
             var udtModInfo = new udtSearchOptionModificationInfoType[20];
 
-            var blnStaticModsAreResetForRefinement = true;
+            var staticModsAreResetForRefinement = true;
 
 
             // Initialize udtParamLabels; this specifies the parameters to examine
@@ -1242,127 +1253,127 @@ namespace PeptideHitResultsProcessor
             udtParamLabels[(int)eInputParamLabelNames.Scoring_Include_Reverse] = "scoring, include reverse".ToLower();
 
             // Make sure all of the text in udtParamLabels() is lowercase
-            for (var intIndex = 0; intIndex <= udtParamLabels.Length - 1; intIndex++)
+            for (var index = 0; index <= udtParamLabels.Length - 1; index++)
             {
-                udtParamLabels[intIndex] = udtParamLabels[intIndex].ToLower();
+                udtParamLabels[index] = udtParamLabels[index].ToLower();
             }
 
-            while (objXMLReader.Read())
+            while (xmlReader.Read())
             {
-                XMLTextReaderSkipWhitespace(objXMLReader);
-                if (objXMLReader.ReadState != ReadState.Interactive)
+                XMLTextReaderSkipWhitespace(xmlReader);
+                if (xmlReader.ReadState != ReadState.Interactive)
                     break;
 
-                if (objXMLReader.NodeType == XmlNodeType.Element)
+                if (xmlReader.NodeType == XmlNodeType.Element)
                 {
-                    switch (objXMLReader.Name.ToLower())
+                    switch (xmlReader.Name.ToLower())
                     {
                         case XTANDEM_XML_ELEMENT_NAME_NOTE:
                             // Read the note's type
-                            var strNoteType = XMLTextReaderGetAttributeValue(objXMLReader, "type", string.Empty);
+                            var noteType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
 
-                            if (strNoteType == NOTE_TYPE_INPUT)
+                            if (noteType == NOTE_TYPE_INPUT)
                             {
                                 // Read the note's label and inner text
-                                var strNoteLabel = XMLTextReaderGetAttributeValue(objXMLReader, "label", string.Empty);
+                                var noteLabel = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
 
                                 // Need to advance the reader before calling XMLTextReaderGetInnerText
-                                objXMLReader.Read();
-                                var strValue = XMLTextReaderGetInnerText(objXMLReader);
+                                xmlReader.Read();
+                                var value = XMLTextReaderGetInnerText(xmlReader);
 
-                                if (strValue != null)
+                                if (value != null)
                                 {
-                                    var strNoteLabelLower = strNoteLabel.ToLower();
-                                    if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_StaticModMass]))
+                                    var noteLabelLower = noteLabel.ToLower();
+                                    if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_StaticModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.StaticMod, Convert.ToInt32(eInputParamLabelNames.Residue_StaticModMass), false, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.StaticMod, Convert.ToInt32(eInputParamLabelNames.Residue_StaticModMass), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_PotentialModMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Residue_PotentialModMass), false, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Residue_PotentialModMass), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_PotentialModMotif]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Residue_PotentialModMotif), true, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Residue_PotentialModMotif), true, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialModMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialModMass), false, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialModMass), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialModMotif]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialModMotif), true, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialModMotif), true, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialNTerminusMods]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialNTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialNTerminusMods), false, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialNTerminusMods), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialCTerminusMods]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialCTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialCTerminusMods), false, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialCTerminusMods), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_NTerminal_ResidueModMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_NTerminal_ResidueModMass]))
                                     {
-                                        ParseXTandemInputParameterProteinTerminusMod(Convert.ToInt32(eInputParamLabelNames.Protein_NTerminal_ResidueModMass), true, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterProteinTerminusMod(Convert.ToInt32(eInputParamLabelNames.Protein_NTerminal_ResidueModMass), true, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_CTerminal_ResidueModMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_CTerminal_ResidueModMass]))
                                     {
-                                        ParseXTandemInputParameterProteinTerminusMod(Convert.ToInt32(eInputParamLabelNames.Protein_CTerminal_ResidueModMass), false, strValue, ref intModInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterProteinTerminusMod(Convert.ToInt32(eInputParamLabelNames.Protein_CTerminal_ResidueModMass), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_NTerminalMassChange]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_NTerminalMassChange]))
                                     {
-                                        if (clsPHRPParser.IsNumber(strValue))
+                                        if (clsPHRPParser.IsNumber(value))
                                         {
-                                            PeptideNTerminusMassChange = double.Parse(strValue);
+                                            PeptideNTerminusMassChange = double.Parse(value);
                                         }
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_CTerminalMassChange]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_CTerminalMassChange]))
                                     {
-                                        if (clsPHRPParser.IsNumber(strValue))
+                                        if (clsPHRPParser.IsNumber(value))
                                         {
-                                            PeptideCTerminusMassChange = double.Parse(strValue);
+                                            PeptideCTerminusMassChange = double.Parse(value);
                                         }
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_Site]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_Site]))
                                     {
                                         // In X!Tandem the LeftSpec and RightSpec values are separated by a vertical bar (CLEAVAGE_SPEC_SEP)
-                                        // Look for CLEAVAGE_SPEC_SEP in strValue
-                                        var intBarLoc = strValue.IndexOf(CLEAVAGE_SPEC_SEP);
-                                        if (intBarLoc > 0 & intBarLoc < strValue.Length - 1)
+                                        // Look for CLEAVAGE_SPEC_SEP in value
+                                        var barLoc = value.IndexOf(CLEAVAGE_SPEC_SEP);
+                                        if (barLoc > 0 & barLoc < value.Length - 1)
                                         {
-                                            var strLeftSpec = strValue.Substring(0, intBarLoc);
-                                            var strRightSpec = strValue.Substring(intBarLoc + 1);
+                                            var leftSpec = value.Substring(0, barLoc);
+                                            var rightSpec = value.Substring(barLoc + 1);
 
-                                            // Look for curly braces in strLeftSpec and strRightSpec
+                                            // Look for curly braces in leftSpec and rightSpec
                                             // In X!Tandem curly braces mean to not match a residue
                                             // If found, change to standard RegEx notation, e.g. from {P} to [^P]
-                                            if (strLeftSpec.IndexOf(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START) >= 0)
+                                            if (leftSpec.IndexOf(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START) >= 0)
                                             {
-                                                strLeftSpec = strLeftSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START.ToString(), "[^");
-                                                strLeftSpec = strLeftSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END.ToString(), "]");
+                                                leftSpec = leftSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START.ToString(), "[^");
+                                                leftSpec = leftSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END.ToString(), "]");
                                             }
 
-                                            if (strRightSpec.IndexOf(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START) >= 0)
+                                            if (rightSpec.IndexOf(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START) >= 0)
                                             {
-                                                strRightSpec = strRightSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START.ToString(), "[^");
-                                                strRightSpec = strRightSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END.ToString(), "]");
+                                                rightSpec = rightSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_START.ToString(), "[^");
+                                                rightSpec = rightSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END.ToString(), "]");
                                             }
 
-                                            EnzymeMatchSpec = new clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType(strLeftSpec, strRightSpec);
+                                            EnzymeMatchSpec = new clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType(leftSpec, rightSpec);
                                         }
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_ModificationMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_ModificationMass]))
                                     {
-                                        if (strValue != null && strValue.Trim().Length > 0)
+                                        if (value != null && value.Trim().Length > 0)
                                         {
-                                            blnStaticModsAreResetForRefinement = true;
+                                            staticModsAreResetForRefinement = true;
                                         }
                                     }
-                                    else if (strNoteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Scoring_Include_Reverse]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Scoring_Include_Reverse]))
                                     {
-                                        if (strValue != null && strValue.Trim().Length > 0)
+                                        if (value != null && value.Trim().Length > 0)
                                         {
-                                            if (strValue.Trim().ToLower() == "yes")
+                                            if (value.Trim().ToLower() == "yes")
                                             {
                                                 mLookForReverseSequenceTag = true;
                                             }
@@ -1377,9 +1388,9 @@ namespace PeptideHitResultsProcessor
                             break;
                     }
                 }
-                else if (objXMLReader.NodeType == XmlNodeType.EndElement)
+                else if (xmlReader.NodeType == XmlNodeType.EndElement)
                 {
-                    if (objXMLReader.Depth == intParametersGroupDepth && objXMLReader.Name == XTANDEM_XML_ELEMENT_NAME_GROUP)
+                    if (xmlReader.Depth == parametersGroupDepth && xmlReader.Name == XTANDEM_XML_ELEMENT_NAME_GROUP)
                     {
                         // Reached the end of this group
                         break;
@@ -1387,65 +1398,65 @@ namespace PeptideHitResultsProcessor
                 }
             }
 
-            if (intModInfoCount > 0)
+            if (modInfoCount > 0)
             {
                 // Validate that each of the mods in udtModInfo is present in mPeptideMods
-                if (intModInfoCount > 1)
+                if (modInfoCount > 1)
                 {
                     // Sort udtModInfo
-                    Array.Sort(udtModInfo, 0, intModInfoCount, new ISearchOptionModificationInfoComparer());
+                    Array.Sort(udtModInfo, 0, modInfoCount, new ISearchOptionModificationInfoComparer());
                 }
 
                 // Before continuing, look for Static residue mods in udtModInfo
                 // If any are found, and if an identical dynamic residue mod is already present, then delete the static residue mod
                 // Additionally, if 	<note type="input" label="refine, modification mass">none</note> was prsent in the XTandem results file then
                 //  auto update all static mods to dynamic mods since they are reset during refinement
-                for (var intIndex = 0; intIndex < intModInfoCount;)
+                for (var index = 0; index < modInfoCount;)
                 {
-                    var blnModDeleted = false;
-                    if (udtModInfo[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                    var modDeleted = false;
+                    if (udtModInfo[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod)
                     {
-                        var intIndexCompare = 0;
-                        while (intIndexCompare < intModInfoCount)
+                        var indexCompare = 0;
+                        while (indexCompare < modInfoCount)
                         {
-                            if (intIndexCompare != intIndex && udtModInfo[intIndexCompare].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod)
+                            if (indexCompare != index && udtModInfo[indexCompare].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod)
                             {
                                 // See if this modification has a similar mass (within MASS_DIGITS_OF_PRECISION digits of precision)
-                                if (Math.Abs(Math.Round(Math.Abs(udtModInfo[intIndexCompare].ModificationMass - udtModInfo[intIndex].ModificationMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)) < float.Epsilon)
+                                if (Math.Abs(Math.Round(Math.Abs(udtModInfo[indexCompare].ModificationMass - udtModInfo[index].ModificationMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)) < float.Epsilon)
                                 {
                                     // Matching mass
                                     // Compare .TargetResidues
-                                    if (clsModificationDefinition.EquivalentTargetResidues(udtModInfo[intIndexCompare].TargetResidues, udtModInfo[intIndex].TargetResidues, true))
+                                    if (clsModificationDefinition.EquivalentTargetResidues(udtModInfo[indexCompare].TargetResidues, udtModInfo[index].TargetResidues, true))
                                     {
                                         // Yes, the modifications match; delete the static version of the modification
-                                        for (var intIndexCopy = intIndex; intIndexCopy <= intModInfoCount - 2; intIndexCopy++)
+                                        for (var indexCopy = index; indexCopy <= modInfoCount - 2; indexCopy++)
                                         {
-                                            udtModInfo[intIndexCopy] = udtModInfo[intIndexCopy + 1];
+                                            udtModInfo[indexCopy] = udtModInfo[indexCopy + 1];
                                         }
-                                        intModInfoCount -= 1;
-                                        blnModDeleted = true;
+                                        modInfoCount -= 1;
+                                        modDeleted = true;
                                         break;
                                     }
                                 }
                             }
-                            intIndexCompare += 1;
+                            indexCompare += 1;
                         }
                     }
 
-                    if (!blnModDeleted)
+                    if (!modDeleted)
                     {
-                        if (udtModInfo[intIndex].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod && blnStaticModsAreResetForRefinement)
+                        if (udtModInfo[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod && staticModsAreResetForRefinement)
                         {
                             // Update this static mod to be a dynamic mod
-                            udtModInfo[intIndex].ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
+                            udtModInfo[index].ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
                         }
-                        intIndex += 1;
+                        index += 1;
                     }
                 }
 
-                for (var intIndex = 0; intIndex <= intModInfoCount - 1; intIndex++)
+                for (var index = 0; index <= modInfoCount - 1; index++)
                 {
-                    var modInfo = udtModInfo[intIndex];
+                    var modInfo = udtModInfo[index];
                     mPeptideMods.VerifyModificationPresent(modInfo.ModificationMass, modInfo.TargetResidues, modInfo.ModificationType);
                 }
             }
@@ -1454,55 +1465,55 @@ namespace PeptideHitResultsProcessor
             mPeptideMods.AppendStandardRefinmentModifications();
         }
 
-        private void ParseXTandemResultsFileReadDomainMods(XmlReader objXMLReader, clsSearchResultsBaseClass objSearchResult, int intDomainElementReaderDepth, bool blnUpdateModOccurrenceCounts)
+        private void ParseXTandemResultsFileReadDomainMods(XmlReader xmlReader, clsSearchResultsBaseClass searchResult, int domainElementReaderDepth, bool updateModOccurrenceCounts)
         {
             // Continue reading the XML file, loading the information
 
-            while (objXMLReader.Read() && objXMLReader.Depth >= intDomainElementReaderDepth)
+            while (xmlReader.Read() && xmlReader.Depth >= domainElementReaderDepth)
             {
-                if (objXMLReader.ReadState != ReadState.Interactive)
+                if (xmlReader.ReadState != ReadState.Interactive)
                     break;
 
-                if (objXMLReader.NodeType == XmlNodeType.Element)
+                if (xmlReader.NodeType == XmlNodeType.Element)
                 {
-                    switch (objXMLReader.Name.ToLower())
+                    switch (xmlReader.Name.ToLower())
                     {
                         case XTANDEM_XML_ELEMENT_NAME_AMINOACID:
-                            var strValue = XMLTextReaderGetAttributeValue(objXMLReader, "type", "").Trim();
-                            char chTargetResidue;
-                            if (string.IsNullOrWhiteSpace(strValue))
+                            var value = XMLTextReaderGetAttributeValue(xmlReader, "type", "").Trim();
+                            char targetResidue;
+                            if (string.IsNullOrWhiteSpace(value))
                             {
-                                chTargetResidue = default(char);
+                                targetResidue = default(char);
                             }
                             else
                             {
-                                chTargetResidue = strValue[0];
+                                targetResidue = value[0];
                             }
 
-                            var intModifiedResiduePosInProtein = XMLTextReaderGetAttributeValue(objXMLReader, "at", 0);
+                            var modifiedResiduePosInProtein = XMLTextReaderGetAttributeValue(xmlReader, "at", 0);
 
-                            if (intModifiedResiduePosInProtein > 0)
+                            if (modifiedResiduePosInProtein > 0)
                             {
-                                var dblModificationMass = XMLTextReaderGetAttributeValueDbl(objXMLReader, "modified", 0);
+                                var modificationMass = XMLTextReaderGetAttributeValueDbl(xmlReader, "modified", 0);
 
-                                if (Math.Abs(dblModificationMass - 0) > float.Epsilon)
+                                if (Math.Abs(modificationMass - 0) > float.Epsilon)
                                 {
-                                    var intResidueLocInPeptide = intModifiedResiduePosInProtein - objSearchResult.PeptideLocInProteinStart + 1;
-                                    var eResidueTerminusState = objSearchResult.DetermineResidueTerminusState(intResidueLocInPeptide);
+                                    var residueLocInPeptide = modifiedResiduePosInProtein - searchResult.PeptideLocInProteinStart + 1;
+                                    var eResidueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
 
-                                    objSearchResult.SearchResultAddModification(dblModificationMass,
-                                                                                chTargetResidue,
-                                                                                intResidueLocInPeptide,
-                                                                                eResidueTerminusState,
-                                                                                blnUpdateModOccurrenceCounts);
+                                    searchResult.SearchResultAddModification(modificationMass,
+                                                                             targetResidue,
+                                                                             residueLocInPeptide,
+                                                                             eResidueTerminusState,
+                                                                             updateModOccurrenceCounts);
                                 }
                             }
                             break;
                     }
                 }
-                else if (objXMLReader.NodeType == XmlNodeType.EndElement)
+                else if (xmlReader.NodeType == XmlNodeType.EndElement)
                 {
-                    if (objXMLReader.Name == XTANDEM_XML_ELEMENT_NAME_DOMAIN)
+                    if (xmlReader.Name == XTANDEM_XML_ELEMENT_NAME_DOMAIN)
                     {
                         break;
                     }
@@ -1513,15 +1524,15 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="strInputFilePath">X!Tandem results file</param>
-        /// <param name="strOutputFolderPath">Output folder</param>
-        /// <param name="strParameterFilePath">Parameter file</param>
+        /// <param name="inputFilePath">X!Tandem results file</param>
+        /// <param name="outputFolderPath">Output folder</param>
+        /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if success, False if failure</returns>
-        public override bool ProcessFile(string strInputFilePath, string strOutputFolderPath, string strParameterFilePath)
+        public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath)
         {
-            var blnSuccess = false;
+            var success = false;
 
-            if (!LoadParameterFileSettings(strParameterFilePath))
+            if (!LoadParameterFileSettings(parameterFilePath))
             {
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, true);
                 return false;
@@ -1529,22 +1540,22 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-                if (string.IsNullOrWhiteSpace(strInputFilePath))
+                if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
                     SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath);
                     return false;
                 }
 
-                blnSuccess = ResetMassCorrectionTagsAndModificationDefinitions();
-                if (!blnSuccess)
+                success = ResetMassCorrectionTagsAndModificationDefinitions();
+                if (!success)
                 {
                     return false;
                 }
 
-                ResetProgress("Parsing " + Path.GetFileName(strInputFilePath));
+                ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref strInputFilePath, ref strOutputFolderPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
                 {
                     return false;
                 }
@@ -1552,21 +1563,21 @@ namespace PeptideHitResultsProcessor
                 try
                 {
                     // Obtain the full path to the input file
-                    var inputFile = new FileInfo(strInputFilePath);
+                    var inputFile = new FileInfo(inputFilePath);
 
-                    // Define the output file name based on strInputFilePath
+                    // Define the output file name based on inputFilePath
                     // The name will be DatasetName_xt.txt
 
-                    var strXtandemXTFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, ".txt"));
-                    strXtandemXTFilePath = Path.Combine(strOutputFolderPath, strXtandemXTFilePath);
-                    blnSuccess = ParseXTandemResultsFile(inputFile.FullName, strXtandemXTFilePath, false);
+                    var xtandemXTFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, ".txt"));
+                    xtandemXTFilePath = Path.Combine(outputFolderPath, xtandemXTFilePath);
+                    success = ParseXTandemResultsFile(inputFile.FullName, xtandemXTFilePath, false);
 
-                    if (blnSuccess && CreateProteinModsFile)
+                    if (success && CreateProteinModsFile)
                     {
-                        blnSuccess = CreateProteinModsFileWork(inputFile, strOutputFolderPath, strXtandemXTFilePath);
+                        success = CreateProteinModsFileWork(inputFile, outputFolderPath, xtandemXTFilePath);
                     }
 
-                    if (blnSuccess)
+                    if (success)
                     {
                         OperationComplete();
                     }
@@ -1583,43 +1594,43 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
             }
 
-            return blnSuccess;
+            return success;
         }
 
-        private bool CreateProteinModsFileWork(FileInfo inputFile, string strOutputFolderPath, string strXtandemXTFilePath)
+        private bool CreateProteinModsFileWork(FileInfo inputFile, string outputFolderPath, string xtandemXTFilePath)
         {
-            bool blnSuccess;
+            bool success;
 
             // First create the MTS PepToProteinMap file using inputFile
-            var lstSourcePHRPDataFiles = new List<string> {
-                strXtandemXTFilePath
+            var sourcePHRPDataFiles = new List<string> {
+                xtandemXTFilePath
             };
 
-            var strMTSPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, strOutputFolderPath, MTS: true);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputFolderPath, mts: true);
 
-            if (File.Exists(strMTSPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
+            if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
             {
-                blnSuccess = true;
+                success = true;
             }
             else
             {
-                blnSuccess = CreatePepToProteinMapFile(lstSourcePHRPDataFiles, strMTSPepToProteinMapFilePath);
-                if (!blnSuccess)
+                success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
+                if (!success)
                 {
                     ReportWarning("Skipping creation of the ProteinMods file since CreatePepToProteinMapFile returned False");
                 }
             }
 
-            if (blnSuccess)
+            if (success)
             {
                 // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(strXtandemXTFilePath)), strOutputFolderPath);
+                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(xtandemXTFilePath)), outputFolderPath);
 
                 // Now create the Protein Mods file
-                blnSuccess = CreateProteinModDetailsFile(strXtandemXTFilePath, strOutputFolderPath, strMTSPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem);
+                success = CreateProteinModDetailsFile(xtandemXTFilePath, outputFolderPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem);
             }
 
-            if (!blnSuccess)
+            if (!success)
             {
                 // Do not treat this as a fatal error
                 return true;
@@ -1627,117 +1638,117 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private void SaveXTandemResultsFileEntry(clsSearchResultsXTandem objSearchResult, ref StreamWriter swPeptideResultsFile)
+        private void SaveXTandemResultsFileEntry(clsSearchResultsXTandem searchResult, ref StreamWriter swPeptideResultsFile)
         {
             // Update .ResultID to the next available number
-            objSearchResult.ResultID = mNextResultID;
+            searchResult.ResultID = mNextResultID;
             mNextResultID += 1;
 
             // Write the results to the output file
-            swPeptideResultsFile.WriteLine(objSearchResult.ResultID + SEP_CHAR +
-                                           objSearchResult.GroupID + SEP_CHAR +
-                                           objSearchResult.Scan + SEP_CHAR +
-                                           objSearchResult.Charge + SEP_CHAR +
-                                           objSearchResult.PeptideMH + SEP_CHAR +
-                                           objSearchResult.PeptideHyperscore + SEP_CHAR +
-                                           objSearchResult.PeptideExpectationValue + SEP_CHAR +
-                                           objSearchResult.MultipleProteinCount + SEP_CHAR +
-                                           objSearchResult.SequenceWithPrefixAndSuffix(true) + SEP_CHAR +
-                                           Math.Round(objSearchResult.PeptideDeltaCn2, 4).ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
-                                           objSearchResult.PeptideYScore + SEP_CHAR +
-                                           objSearchResult.PeptideYIons + SEP_CHAR +
-                                           objSearchResult.PeptideBScore + SEP_CHAR +
-                                           objSearchResult.PeptideBIons + SEP_CHAR +
-                                           objSearchResult.PeptideDeltaMass + SEP_CHAR +
-                                           objSearchResult.PeptideIntensity + SEP_CHAR +
-                                           PRISM.StringUtilities.DblToString(objSearchResult.PeptideDeltaMassCorrectedPpm, 5, 0.00005));
+            swPeptideResultsFile.WriteLine(searchResult.ResultID + SEP_CHAR +
+                                           searchResult.GroupID + SEP_CHAR +
+                                           searchResult.Scan + SEP_CHAR +
+                                           searchResult.Charge + SEP_CHAR +
+                                           searchResult.PeptideMH + SEP_CHAR +
+                                           searchResult.PeptideHyperscore + SEP_CHAR +
+                                           searchResult.PeptideExpectationValue + SEP_CHAR +
+                                           searchResult.MultipleProteinCount + SEP_CHAR +
+                                           searchResult.SequenceWithPrefixAndSuffix(true) + SEP_CHAR +
+                                           Math.Round(searchResult.PeptideDeltaCn2, 4).ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
+                                           searchResult.PeptideYScore + SEP_CHAR +
+                                           searchResult.PeptideYIons + SEP_CHAR +
+                                           searchResult.PeptideBScore + SEP_CHAR +
+                                           searchResult.PeptideBIons + SEP_CHAR +
+                                           searchResult.PeptideDeltaMass + SEP_CHAR +
+                                           searchResult.PeptideIntensity + SEP_CHAR +
+                                           PRISM.StringUtilities.DblToString(searchResult.PeptideDeltaMassCorrectedPpm, 5, 0.00005));
         }
 
-        protected override string TruncateProteinName(string strProteinNameAndDescription)
+        protected override string TruncateProteinName(string proteinNameAndDescription)
         {
-            var blnIsReversed = false;
+            var isReversed = false;
 
             if (mLookForReverseSequenceTag)
             {
-                blnIsReversed = strProteinNameAndDescription.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR);
+                isReversed = proteinNameAndDescription.EndsWith(REVERSED_PROTEIN_SEQUENCE_INDICATOR);
             }
 
-            strProteinNameAndDescription = base.TruncateProteinName(strProteinNameAndDescription);
+            proteinNameAndDescription = base.TruncateProteinName(proteinNameAndDescription);
 
-            if (blnIsReversed)
+            if (isReversed)
             {
-                return strProteinNameAndDescription + REVERSED_PROTEIN_SEQUENCE_INDICATOR;
+                return proteinNameAndDescription + REVERSED_PROTEIN_SEQUENCE_INDICATOR;
             }
-            return strProteinNameAndDescription;
+            return proteinNameAndDescription;
         }
 
-        private string XMLTextReaderGetAttributeValue(XmlReader objXMLReader, string strAttributeName, string strValueIfMissing)
+        private string XMLTextReaderGetAttributeValue(XmlReader xmlReader, string attributeName, string valueIfMissing)
         {
-            objXMLReader.MoveToAttribute(strAttributeName);
-            if (objXMLReader.ReadAttributeValue())
+            xmlReader.MoveToAttribute(attributeName);
+            if (xmlReader.ReadAttributeValue())
             {
-                return objXMLReader.Value;
+                return xmlReader.Value;
             }
-            return string.Copy(strValueIfMissing);
+            return string.Copy(valueIfMissing);
         }
 
-        private int XMLTextReaderGetAttributeValue(XmlReader objXMLReader, string strAttributeName, int intValueIfMissing)
+        private int XMLTextReaderGetAttributeValue(XmlReader xmlReader, string attributeName, int valueIfMissing)
         {
-            objXMLReader.MoveToAttribute(strAttributeName);
-            if (objXMLReader.ReadAttributeValue())
+            xmlReader.MoveToAttribute(attributeName);
+            if (xmlReader.ReadAttributeValue())
             {
-                if (clsPHRPParser.IsNumber(objXMLReader.Value))
+                if (clsPHRPParser.IsNumber(xmlReader.Value))
                 {
-                    return Convert.ToInt32(objXMLReader.Value);
+                    return Convert.ToInt32(xmlReader.Value);
                 }
-                return intValueIfMissing;
+                return valueIfMissing;
             }
-            return intValueIfMissing;
+            return valueIfMissing;
         }
 
-        private double XMLTextReaderGetAttributeValueDbl(XmlReader objXMLReader, string strAttributeName, double dblValueIfMissing)
+        private double XMLTextReaderGetAttributeValueDbl(XmlReader xmlReader, string attributeName, double valueIfMissing)
         {
-            objXMLReader.MoveToAttribute(strAttributeName);
-            if (objXMLReader.ReadAttributeValue())
+            xmlReader.MoveToAttribute(attributeName);
+            if (xmlReader.ReadAttributeValue())
             {
-                if (clsPHRPParser.IsNumber(objXMLReader.Value))
+                if (clsPHRPParser.IsNumber(xmlReader.Value))
                 {
-                    return Convert.ToDouble(objXMLReader.Value);
+                    return Convert.ToDouble(xmlReader.Value);
                 }
-                return dblValueIfMissing;
+                return valueIfMissing;
             }
-            return dblValueIfMissing;
+            return valueIfMissing;
         }
 
-        private string XMLTextReaderGetInnerText(XmlReader objXMLReader)
+        private string XMLTextReaderGetInnerText(XmlReader xmlReader)
         {
-            var strValue = string.Empty;
-            bool blnSuccess;
+            var value = string.Empty;
+            bool success;
 
-            if (objXMLReader.NodeType == XmlNodeType.Element)
+            if (xmlReader.NodeType == XmlNodeType.Element)
             {
                 // Advance the reader so that we can read the value
-                blnSuccess = objXMLReader.Read();
+                success = xmlReader.Read();
             }
             else
             {
-                blnSuccess = true;
+                success = true;
             }
 
-            if (blnSuccess && objXMLReader.NodeType != XmlNodeType.Whitespace & objXMLReader.HasValue)
+            if (success && xmlReader.NodeType != XmlNodeType.Whitespace & xmlReader.HasValue)
             {
-                strValue = objXMLReader.Value;
+                value = xmlReader.Value;
             }
 
-            return strValue;
+            return value;
         }
 
-        private void XMLTextReaderSkipWhitespace(XmlReader objXMLReader)
+        private void XMLTextReaderSkipWhitespace(XmlReader xmlReader)
         {
-            if (objXMLReader.NodeType == XmlNodeType.Whitespace)
+            if (xmlReader.NodeType == XmlNodeType.Whitespace)
             {
                 // Whitespace; read the next node
-                objXMLReader.Read();
+                xmlReader.Read();
             }
         }
     }

@@ -97,13 +97,13 @@ namespace PHRPReader
         #endregion
 
         /// <summary>
-        /// Constructor; assumes blnLoadModsAndSeqInfo=True
+        /// Constructor; assumes loadModsAndSeqInfo=True
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
-        /// <param name="strInputFilePath">Input file path</param>
+        /// <param name="inputFilePath">Input file path</param>
         /// <remarks></remarks>
-        public clsPHRPParserMODPlus(string datasetName, string strInputFilePath)
-            : this(datasetName, strInputFilePath, blnLoadModsAndSeqInfo: true)
+        public clsPHRPParserMODPlus(string datasetName, string inputFilePath)
+            : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
         }
 
@@ -111,11 +111,11 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
-        /// <param name="strInputFilePath">Input file path</param>
-        /// <param name="blnLoadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
+        /// <param name="inputFilePath">Input file path</param>
+        /// <param name="loadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
-        public clsPHRPParserMODPlus(string datasetName, string strInputFilePath, bool blnLoadModsAndSeqInfo)
-            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus, blnLoadModsAndSeqInfo)
+        public clsPHRPParserMODPlus(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus, loadModsAndSeqInfo)
         {
         }
 
@@ -123,11 +123,11 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
-        /// <param name="strInputFilePath">Input file path</param>
+        /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
-        public clsPHRPParserMODPlus(string datasetName, string strInputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, strInputFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus, startupOptions)
+        public clsPHRPParserMODPlus(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
+            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus, startupOptions)
         {
         }
 
@@ -250,22 +250,22 @@ namespace PHRPReader
         /// <summary>
         /// Parses the specified MODp parameter file
         /// </summary>
-        /// <param name="strSearchEngineParamFileName"></param>
-        /// <param name="objSearchEngineParams"></param>
+        /// <param name="searchEngineParamFileName"></param>
+        /// <param name="searchEngineParams"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public override bool LoadSearchEngineParameters(string strSearchEngineParamFileName, out clsSearchEngineParameters objSearchEngineParams)
+        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
         {
-            objSearchEngineParams = new clsSearchEngineParameters(MODplus_SEARCH_ENGINE_NAME);
+            searchEngineParams = new clsSearchEngineParameters(MODplus_SEARCH_ENGINE_NAME);
 
-            var blnSuccess = ReadSearchEngineParamFile(strSearchEngineParamFileName, objSearchEngineParams);
+            var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
 
-            ReadSearchEngineVersion(mPeptideHitResultType, objSearchEngineParams);
+            ReadSearchEngineVersion(mPeptideHitResultType, searchEngineParams);
 
-            return blnSuccess;
+            return success;
         }
 
-        private bool ReadSearchEngineParamFile(string strSearchEngineParamFileName, clsSearchEngineParameters objSearchEngineParams)
+        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, clsSearchEngineParameters searchEngineParams)
         {
             try
             {
@@ -273,29 +273,29 @@ namespace PHRPReader
                 // But MODplus does not have a _ModDefs.txt file because it performs a blind search
                 // The user can define static mods on any of the residues, plus the peptide terminii; check for these now
 
-                var strParamFilePath = Path.Combine(mInputFolderPath, strSearchEngineParamFileName);
+                var paramFilePath = Path.Combine(mInputFolderPath, searchEngineParamFileName);
 
                 // Read the contents of the parameter file
                 var doc = new XmlDocument();
-                doc.Load(strParamFilePath);
+                doc.Load(paramFilePath);
 
                 var dbNodes = doc.SelectNodes("/search/database");
                 if (dbNodes != null && dbNodes.Count > 0)
                 {
-                    objSearchEngineParams.FastaFilePath = GetAttribute(dbNodes[0], "local_path");
+                    searchEngineParams.FastaFilePath = GetAttribute(dbNodes[0], "local_path");
                 }
 
                 var enzymeNodes = doc.SelectNodes("/search/enzyme_rule");
                 if (enzymeNodes != null && enzymeNodes.Count > 0)
                 {
-                    objSearchEngineParams.Enzyme = GetAttribute(enzymeNodes[0], "name");
+                    searchEngineParams.Enzyme = GetAttribute(enzymeNodes[0], "name");
                 }
 
                 var instrumentResolutionNodes = doc.SelectNodes("/search/instrument_resolution");
                 if (instrumentResolutionNodes != null && instrumentResolutionNodes.Count > 0)
                 {
-                    objSearchEngineParams.PrecursorMassType = ConvertResolutionModeToMassType(GetAttribute(instrumentResolutionNodes[0], "ms"));
-                    objSearchEngineParams.FragmentMassType = ConvertResolutionModeToMassType(GetAttribute(instrumentResolutionNodes[0], "msms"));
+                    searchEngineParams.PrecursorMassType = ConvertResolutionModeToMassType(GetAttribute(instrumentResolutionNodes[0], "ms"));
+                    searchEngineParams.FragmentMassType = ConvertResolutionModeToMassType(GetAttribute(instrumentResolutionNodes[0], "msms"));
                 }
 
                 var enzymeConstraintNodes = doc.SelectNodes("/search/parameters/enzyme_constraint");
@@ -303,11 +303,11 @@ namespace PHRPReader
                 {
                     if (int.TryParse(GetAttribute(enzymeConstraintNodes[0], "max_miss_cleavages"), out var maxNumberInternalCleavages))
                     {
-                        objSearchEngineParams.MaxNumberInternalCleavages = maxNumberInternalCleavages;
+                        searchEngineParams.MaxNumberInternalCleavages = maxNumberInternalCleavages;
                     }
                     if (int.TryParse(GetAttribute(enzymeConstraintNodes[0], "min_number_termini"), out var minNumberTermini))
                     {
-                        objSearchEngineParams.MinNumberTermini = minNumberTermini;
+                        searchEngineParams.MinNumberTermini = minNumberTermini;
                     }
                 }
 
@@ -315,28 +315,28 @@ namespace PHRPReader
 
                 if (massTolParamNode != null && massTolParamNode.Count > 0)
                 {
-                    var strTolerance = GetAttribute(massTolParamNode[0], "value");
+                    var tolerance = GetAttribute(massTolParamNode[0], "value");
                     var massUnits = GetAttribute(massTolParamNode[0], "unit");
 
                     if (massUnits.ToLower() == "ppm")
                     {
                         // Parent mass tolerance, in ppm
 
-                        if (double.TryParse(strTolerance, out var precursorMassTolerancePpm))
+                        if (double.TryParse(tolerance, out var precursorMassTolerancePpm))
                         {
-                            objSearchEngineParams.PrecursorMassTolerancePpm = precursorMassTolerancePpm;
-                            objSearchEngineParams.PrecursorMassToleranceDa = clsPeptideMassCalculator.PPMToMass(objSearchEngineParams.PrecursorMassTolerancePpm, 2000);
+                            searchEngineParams.PrecursorMassTolerancePpm = precursorMassTolerancePpm;
+                            searchEngineParams.PrecursorMassToleranceDa = clsPeptideMassCalculator.PPMToMass(searchEngineParams.PrecursorMassTolerancePpm, 2000);
                         }
                     }
                     else if (massUnits.ToLower() == "da")
                     {
-                        if (double.TryParse(strTolerance, out var precursorMassToleranceDa))
+                        if (double.TryParse(tolerance, out var precursorMassToleranceDa))
                         {
-                            objSearchEngineParams.PrecursorMassToleranceDa = precursorMassToleranceDa;
+                            searchEngineParams.PrecursorMassToleranceDa = precursorMassToleranceDa;
                         }
 
                         // Convert from dalton to PPM (assuming a mass of 2000 m/z)
-                        objSearchEngineParams.PrecursorMassToleranceDa = clsPeptideMassCalculator.MassToPPM(objSearchEngineParams.PrecursorMassToleranceDa, 2000);
+                        searchEngineParams.PrecursorMassToleranceDa = clsPeptideMassCalculator.MassToPPM(searchEngineParams.PrecursorMassToleranceDa, 2000);
                     }
                 }
 
@@ -349,15 +349,15 @@ namespace PHRPReader
                 foreach (XmlNode node in modNodes)
                 {
                     // var modName = GetAttribute(node, "name");
-                    var strResidue = GetAttribute(node, "site").Trim();
+                    var residue = GetAttribute(node, "site").Trim();
                     // var modPosition = GetAttribute(node, "position");
                     var modMass = GetAttribute(node, "massdiff");
 
                     // Replace N-Term or C-Term with < or >
-                    if (strResidue.ToLower() == "n-term")
-                        strResidue = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                    if (strResidue.ToLower() == "c-term")
-                        strResidue = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                    if (residue.ToLower() == "n-term")
+                        residue = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                    if (residue.ToLower() == "c-term")
+                        residue = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
 
                     if (!double.TryParse(modMass, out var modMassDa))
                         continue;
@@ -366,19 +366,19 @@ namespace PHRPReader
                         continue;
 
                     var eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod;
-                    if (strResidue == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || strResidue == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
+                    if (residue == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residue == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
                         eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
                     }
 
-                    var objModDef = new clsModificationDefinition(
+                    var modDef = new clsModificationDefinition(
                         clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                         modMassDa,
-                        strResidue,
+                        residue,
                         eModType,
                         "Mod" + modMassDa.ToString("0"));
 
-                    objSearchEngineParams.AddModification(objModDef);
+                    searchEngineParams.AddModification(modDef);
                 }
 
                 return true;
@@ -431,84 +431,84 @@ namespace PHRPReader
         /// <summary>
         /// Parse the data line read from a PHRP results file
         /// </summary>
-        /// <param name="strLine">Data line</param>
-        /// <param name="intLinesRead">Number of lines read so far (used for error reporting)</param>
-        /// <param name="objPSM">clsPSM object (output)</param>
+        /// <param name="line">Data line</param>
+        /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
+        /// <param name="psm">clsPSM object (output)</param>
         /// <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if success, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-        public override bool ParsePHRPDataLine(string strLine, int intLinesRead, out clsPSM objPSM, bool fastReadMode)
+        public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
-            var strColumns = strLine.Split('\t');
+            var columns = line.Split('\t');
 
-            var blnSuccess = false;
+            var success = false;
 
-            objPSM = new clsPSM();
+            psm = new clsPSM();
 
             try
             {
-                objPSM.DataLineText = strLine;
-                objPSM.ScanNumber = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (objPSM.ScanNumber == -100)
+                psm.DataLineText = line;
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
+                if (psm.ScanNumber == -100)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    objPSM.ResultID = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                    objPSM.ScoreRank = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Rank_Score, mColumnHeaders, 1);
+                    psm.ResultID = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+                    psm.ScoreRank = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Rank_Score, mColumnHeaders, 1);
 
-                    var strPeptide = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var peptide = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
 
                     if (fastReadMode)
                     {
-                        objPSM.SetPeptide(strPeptide, updateCleanSequence: false);
+                        psm.SetPeptide(peptide, updateCleanSequence: false);
                     }
                     else
                     {
-                        objPSM.SetPeptide(strPeptide, mCleavageStateCalculator);
+                        psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    objPSM.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
-                    var strProtein = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_Protein, mColumnHeaders);
-                    objPSM.AddProtein(strProtein);
+                    var protein = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    psm.AddProtein(protein);
 
-                    var dblPrecursorMZ = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
-                    objPSM.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(dblPrecursorMZ, objPSM.Charge, 0);
+                    var precursorMZ = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                    objPSM.MassErrorDa = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_DelM, mColumnHeaders);
-                    objPSM.MassErrorPPM = clsPHRPReader.LookupColumnValue(strColumns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorDa = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
+                    psm.MassErrorPPM = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
 
-                    blnSuccess = true;
+                    success = true;
                 }
 
-                if (blnSuccess)
+                if (success)
                 {
                     if (!fastReadMode)
                     {
-                        UpdatePSMUsingSeqInfo(objPSM);
+                        UpdatePSMUsingSeqInfo(psm);
                     }
 
                     // Store the remaining scores
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Spectrum_Index);
+                    AddScore(psm, columns, DATA_COLUMN_Spectrum_Index);
 
-                    AddScore(objPSM, strColumns, DATA_COLUMN_MH);
+                    AddScore(psm, columns, DATA_COLUMN_MH);
 
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Modification_Annotation);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Peptide_Position);
+                    AddScore(psm, columns, DATA_COLUMN_Modification_Annotation);
+                    AddScore(psm, columns, DATA_COLUMN_Peptide_Position);
 
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Score);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_Probability);
-                    AddScore(objPSM, strColumns, DATA_COLUMN_QValue);
+                    AddScore(psm, columns, DATA_COLUMN_Score);
+                    AddScore(psm, columns, DATA_COLUMN_Probability);
+                    AddScore(psm, columns, DATA_COLUMN_QValue);
                 }
             }
             catch (Exception ex)
             {
-                ReportError("Error parsing line " + intLinesRead + " in the MODPlus data file: " + ex.Message);
+                ReportError("Error parsing line " + linesRead + " in the MODPlus data file: " + ex.Message);
             }
 
-            return blnSuccess;
+            return success;
         }
     }
 }

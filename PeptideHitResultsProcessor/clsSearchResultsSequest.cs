@@ -55,8 +55,8 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
-        public clsSearchResultsSequest(clsPeptideModificationContainer objPeptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
-            : base(objPeptideMods, peptideSeqMassCalculator)
+        public clsSearchResultsSequest(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+            : base(peptideMods, peptideSeqMassCalculator)
         {
         }
 
@@ -84,15 +84,15 @@ namespace PeptideHitResultsProcessor
 
         protected void ComputePeptideXCorrNext()
         {
-            float sngXCorr = 0;
-            float sngDelCN2 = 0;
+            float xCorr = 0;
+            float delCN2 = 0;
 
             try
             {
-                if (float.TryParse(PeptideXCorr, out sngXCorr) &&
-                    float.TryParse(PeptideDeltaCn2, out sngDelCN2))
+                if (float.TryParse(PeptideXCorr, out xCorr) &&
+                    float.TryParse(PeptideDeltaCn2, out delCN2))
                 {
-                    mPeptideXCorrNext = (sngXCorr - sngDelCN2 * sngXCorr).ToString();
+                    mPeptideXCorrNext = (xCorr - delCN2 * xCorr).ToString();
                 }
                 else
                 {

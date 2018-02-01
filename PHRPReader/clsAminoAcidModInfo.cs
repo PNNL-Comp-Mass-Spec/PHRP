@@ -110,10 +110,10 @@
         /// <param name="residue"></param>
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
-        /// <param name="objModDefinition"></param>
-        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, eResidueTerminusStateConstants residueTerminusState, clsModificationDefinition objModDefinition)
+        /// <param name="modDefinition"></param>
+        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, eResidueTerminusStateConstants residueTerminusState, clsModificationDefinition modDefinition)
         {
-            ModDefinition = objModDefinition;
+            ModDefinition = modDefinition;
             Residue = residue;
             ResidueLocInPeptide = residueLocInPeptide;
             EndResidueLocInPeptide = ResidueLocInPeptide;
@@ -126,11 +126,11 @@
         /// <param name="residue"></param>
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
-        /// <param name="objModDefinition"></param>
+        /// <param name="modDefinition"></param>
         /// <param name="endResidueLocInPeptide"></param>
-        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, eResidueTerminusStateConstants residueTerminusState, clsModificationDefinition objModDefinition, int endResidueLocInPeptide)
+        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, eResidueTerminusStateConstants residueTerminusState, clsModificationDefinition modDefinition, int endResidueLocInPeptide)
         {
-            ModDefinition = objModDefinition;
+            ModDefinition = modDefinition;
             Residue = residue;
             ResidueLocInPeptide = residueLocInPeptide;
             EndResidueLocInPeptide = endResidueLocInPeptide;

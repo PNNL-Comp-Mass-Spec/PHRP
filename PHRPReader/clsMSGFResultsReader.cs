@@ -62,9 +62,9 @@ namespace PHRPReader
             mColumnHeaders = new SortedDictionary<string, int>();
         }
 
-        private void AddHeaderColumn(string strColumnName)
+        private void AddHeaderColumn(string columnName)
         {
-            mColumnHeaders.Add(strColumnName, mColumnHeaders.Count);
+            mColumnHeaders.Add(columnName, mColumnHeaders.Count);
         }
 
         private void DefineColumnHeaders()
@@ -84,11 +84,11 @@ namespace PHRPReader
         /// <summary>
         /// Open a tab-delimited MSGF results file and read the data
         /// </summary>
-        /// <param name="strInputFilePath">Input file path</param>
+        /// <param name="inputFilePath">Input file path</param>
         /// <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
-        public Dictionary<int, string> ReadMSGFData(string strInputFilePath)
+        public Dictionary<int, string> ReadMSGFData(string inputFilePath)
         {
-            var lstMSGFData = new Dictionary<int, string>();
+            var mSGFData = new Dictionary<int, string>();
 
             try
             {
@@ -96,43 +96,43 @@ namespace PHRPReader
 
                 mErrorMessage = string.Empty;
 
-                using (var srInFile = new StreamReader(new FileStream(strInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var srInFile = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    var blnHeaderLineParsed = false;
+                    var headerLineParsed = false;
 
                     while (!srInFile.EndOfStream)
                     {
-                        var strLineIn = srInFile.ReadLine();
-                        var blnSkipLine = false;
+                        var lineIn = srInFile.ReadLine();
+                        var skipLine = false;
 
-                        if (string.IsNullOrWhiteSpace(strLineIn))
+                        if (string.IsNullOrWhiteSpace(lineIn))
                             continue;
 
-                        var strSplitLine = strLineIn.Split('\t');
+                        var splitLine = lineIn.Split('\t');
 
-                        if (!blnHeaderLineParsed)
+                        if (!headerLineParsed)
                         {
-                            if (!clsPHRPReader.IsNumber(strSplitLine[0]))
+                            if (!clsPHRPReader.IsNumber(splitLine[0]))
                             {
                                 // Parse the header line to confirm the column ordering
-                                clsPHRPReader.ParseColumnHeaders(strSplitLine, mColumnHeaders);
-                                blnSkipLine = true;
+                                clsPHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
+                                skipLine = true;
                             }
 
-                            blnHeaderLineParsed = true;
+                            headerLineParsed = true;
                         }
 
-                        if (!blnSkipLine && strSplitLine.Length >= 4)
+                        if (!skipLine && splitLine.Length >= 4)
                         {
-                            var intResultID = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
+                            var resultID = clsPHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
 
-                            if (intResultID >= 0)
+                            if (resultID >= 0)
                             {
-                                var strMSGFSpecProb = clsPHRPReader.LookupColumnValue(strSplitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
+                                var mSGFSpecProb = clsPHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
 
-                                if (!string.IsNullOrEmpty(strMSGFSpecProb) && !lstMSGFData.ContainsKey(intResultID))
+                                if (!string.IsNullOrEmpty(mSGFSpecProb) && !mSGFData.ContainsKey(resultID))
                                 {
-                                    lstMSGFData.Add(intResultID, strMSGFSpecProb);
+                                    mSGFData.Add(resultID, mSGFSpecProb);
                                 }
                             }
                         }
@@ -144,7 +144,7 @@ namespace PHRPReader
                 mErrorMessage = "Error reading the MSGF data: " + ex.Message;
             }
 
-            return lstMSGFData;
+            return mSGFData;
         }
     }
 }

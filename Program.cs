@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "January 8, 2018";
+        public const string PROGRAM_DATE = "January 31, 2018";
 
         private static string mInputFilePath;
         private static string mOutputFolderPath;                         // Optional
@@ -75,8 +75,8 @@ namespace PeptideHitResultsProcRunner
         {
             // Returns 0 if no error, error code if an error
 
-            int intReturnCode;
-            var objParseCommandLine = new clsParseCommandLine();
+            int returnCode;
+            var parseCommandLine = new clsParseCommandLine();
 
             mInputFilePath = string.Empty;
             mOutputFolderPath = string.Empty;
@@ -112,20 +112,20 @@ namespace PeptideHitResultsProcRunner
 
             try
             {
-                var blnProceed = false;
-                if (objParseCommandLine.ParseCommandLine())
+                var proceed = false;
+                if (parseCommandLine.ParseCommandLine())
                 {
-                    if (SetOptionsUsingCommandLineParameters(objParseCommandLine))
-                        blnProceed = true;
+                    if (SetOptionsUsingCommandLineParameters(parseCommandLine))
+                        proceed = true;
                 }
 
-                if (!blnProceed ||
-                    objParseCommandLine.NeedToShowHelp ||
-                    objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount == 0 ||
+                if (!proceed ||
+                    parseCommandLine.NeedToShowHelp ||
+                    parseCommandLine.ParameterCount + parseCommandLine.NonSwitchParameterCount == 0 ||
                     string.IsNullOrWhiteSpace(mInputFilePath))
                 {
                     ShowProgramHelp();
-                    intReturnCode = -1;
+                    returnCode = -1;
                 }
                 else
                 {
@@ -163,25 +163,25 @@ namespace PeptideHitResultsProcRunner
                     {
                         if (mPeptideHitResultsProcRunner.ProcessFilesAndRecurseFolders(mInputFilePath, mOutputFolderPath, mOutputFolderAlternatePath, mRecreateFolderHierarchyInAlternatePath, mParameterFilePath, mRecurseFoldersMaxLevels))
                         {
-                            intReturnCode = 0;
+                            returnCode = 0;
                         }
                         else
                         {
-                            intReturnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
+                            returnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
                         }
                     }
                     else
                     {
                         if (mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputFolderPath, mParameterFilePath))
                         {
-                            intReturnCode = 0;
+                            returnCode = 0;
                         }
                         else
                         {
-                            intReturnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
-                            if (intReturnCode == 0)
+                            returnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
+                            if (returnCode == 0)
                             {
-                                intReturnCode = -1;
+                                returnCode = -1;
                                 ShowErrorMessage("ProcessFilesWildcard returned Success=False");
                             }
                             else
@@ -197,23 +197,23 @@ namespace PeptideHitResultsProcRunner
             catch (Exception ex)
             {
                 ShowErrorMessage("Error occurred in modMain->Main: " + Environment.NewLine + ex.Message);
-                intReturnCode = -1;
+                returnCode = -1;
             }
 
-            return intReturnCode;
+            return returnCode;
         }
 
-        private static void DisplayProgressPercent(int intPercentComplete, bool blnAddCarriageReturn)
+        private static void DisplayProgressPercent(int percentComplete, bool addCarriageReturn)
         {
-            if (blnAddCarriageReturn)
+            if (addCarriageReturn)
             {
                 Console.WriteLine();
             }
-            if (intPercentComplete > 100)
-                intPercentComplete = 100;
-            Console.Write("Processing: " + intPercentComplete + "% ");
+            if (percentComplete > 100)
+                percentComplete = 100;
+            Console.Write("Processing: " + percentComplete + "% ");
 
-            if (blnAddCarriageReturn)
+            if (addCarriageReturn)
             {
                 Console.WriteLine();
             }
@@ -225,47 +225,49 @@ namespace PeptideHitResultsProcRunner
         }
 
         /// <summary>
-        /// Parse out True/False or Yes/No or T/F or Y/N or 1/0 from strValue
+        /// Parse out True/False or Yes/No or T/F or Y/N or 1/0 from value
         /// </summary>
-        /// <param name="strValue">Text to parse</param>
-        /// <param name="blnValue">Output parameter</param>
-        /// <returns>True if successfully parsed strValue; the result of the parse is in blnValue</returns>
+        /// <param name="valueText">Text to parse</param>
+        /// <param name="value">Output parameter</param>
+        /// <returns>True if successfully parsed value; the result of the parse is in value</returns>
         /// <remarks></remarks>
-        private static bool ParseBoolean(string strValue, ref bool blnValue)
+        private static bool ParseBoolean(string valueText, out bool value)
         {
-            if (string.IsNullOrEmpty(strValue))
+            if (string.IsNullOrEmpty(valueText))
+            {
+                value = false;
                 return false;
+            }
 
-            if (bool.TryParse(strValue, out blnValue))
+            if (bool.TryParse(valueText, out value))
             {
                 return true;
             }
 
-            switch (strValue.ToUpper()[0])
+            switch (valueText.ToUpper()[0])
             {
                 case 'T':
                 case 'Y':
                 case '1':
                     // True or Yes or 1
-                    blnValue = true;
+                    value = true;
                     return true;
                 case 'F':
                 case 'N':
                 case '0':
                     // False or No or 0
-                    blnValue = false;
+                    value = false;
                     return true;
             }
 
             return false;
         }
 
-        private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine objParseCommandLine)
+        private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine parseCommandLine)
         {
             // Returns True if no problems; otherwise, returns false
 
-            var blnValue = false;
-            var lstValidParameters = new List<string> { "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods",
+            var validParameters = new List<string> { "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods",
                 "F", "Fasta", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
                 "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPvalue", "InsFHT", "InsSyn", "SynProb", "S", "A",
                 "R", "L" };
@@ -273,139 +275,138 @@ namespace PeptideHitResultsProcRunner
             try
             {
                 // Make sure no invalid parameters are present
-                if (objParseCommandLine.InvalidParametersPresent(lstValidParameters))
+                if (parseCommandLine.InvalidParametersPresent(validParameters))
                 {
                     ShowErrorMessage("Invalid commmand line parameters",
-                        (from item in objParseCommandLine.InvalidParameters(lstValidParameters) select "/" + item).ToList());
+                        (from item in parseCommandLine.InvalidParameters(validParameters) select "/" + item).ToList());
                     return false;
                 }
 
-                // Query objParseCommandLine to see if various parameters are present
-                if (objParseCommandLine.RetrieveValueForParameter("I", out var strValue))
+                // Query parseCommandLine to see if various parameters are present
+                if (parseCommandLine.RetrieveValueForParameter("I", out var value))
                 {
-                    mInputFilePath = string.Copy(strValue);
+                    mInputFilePath = string.Copy(value);
                 }
-                else if (objParseCommandLine.NonSwitchParameterCount > 0)
+                else if (parseCommandLine.NonSwitchParameterCount > 0)
                 {
-                    mInputFilePath = objParseCommandLine.RetrieveNonSwitchParameter(0);
+                    mInputFilePath = parseCommandLine.RetrieveNonSwitchParameter(0);
                 }
 
-                if (objParseCommandLine.RetrieveValueForParameter("O", out strValue))
-                    mOutputFolderPath = string.Copy(strValue);
+                if (parseCommandLine.RetrieveValueForParameter("O", out value))
+                    mOutputFolderPath = string.Copy(value);
 
                 // Future
-                // If .RetrieveValueForParameter("Folder", strValue) Then mDatasetFolderPath = String.Copy(strValue)
+                // If .RetrieveValueForParameter("Folder", value) Then mDatasetFolderPath = String.Copy(value)
                 //
 
-                if (objParseCommandLine.RetrieveValueForParameter("P", out strValue))
-                    mParameterFilePath = string.Copy(strValue);
-                if (objParseCommandLine.RetrieveValueForParameter("M", out strValue))
-                    mModificationDefinitionsFilePath = string.Copy(strValue);
-                if (objParseCommandLine.RetrieveValueForParameter("T", out strValue))
-                    mMassCorrectionTagsFilePath = string.Copy(strValue);
-                if (objParseCommandLine.RetrieveValueForParameter("N", out strValue))
-                    mSearchToolParameterFilePath = string.Copy(strValue);
+                if (parseCommandLine.RetrieveValueForParameter("P", out value))
+                    mParameterFilePath = string.Copy(value);
+                if (parseCommandLine.RetrieveValueForParameter("M", out value))
+                    mModificationDefinitionsFilePath = string.Copy(value);
+                if (parseCommandLine.RetrieveValueForParameter("T", out value))
+                    mMassCorrectionTagsFilePath = string.Copy(value);
+                if (parseCommandLine.RetrieveValueForParameter("N", out value))
+                    mSearchToolParameterFilePath = string.Copy(value);
 
-                if (objParseCommandLine.IsParameterPresent("ProteinMods"))
+                if (parseCommandLine.IsParameterPresent("ProteinMods"))
                 {
                     mCreateProteinModsFile = true;
                 }
 
-                if (objParseCommandLine.IsParameterPresent("ProteinModsViaPHRP"))
+                if (parseCommandLine.IsParameterPresent("ProteinModsViaPHRP"))
                 {
                     mCreateProteinModsUsingPHRPDataFile = true;
                 }
 
-                if (objParseCommandLine.RetrieveValueForParameter("F", out strValue))
-                    mFastaFilePath = string.Copy(strValue);
-                if (objParseCommandLine.RetrieveValueForParameter("Fasta", out strValue))
-                    mFastaFilePath = string.Copy(strValue);
+                if (parseCommandLine.RetrieveValueForParameter("F", out value))
+                    mFastaFilePath = string.Copy(value);
+                if (parseCommandLine.RetrieveValueForParameter("Fasta", out value))
+                    mFastaFilePath = string.Copy(value);
 
-                if (objParseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
+                if (parseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
                     mIgnorePeptideToProteinMapperErrors = true;
-                if (objParseCommandLine.IsParameterPresent("ProteinModsIncludeReversed"))
+                if (parseCommandLine.IsParameterPresent("ProteinModsIncludeReversed"))
                     mProteinModsFileIncludesReversedProteins = true;
-                if (objParseCommandLine.IsParameterPresent("UseExistingPepToProteinMapFile"))
+                if (parseCommandLine.IsParameterPresent("UseExistingPepToProteinMapFile"))
                     mUseExistingMTSPepToProteinMapFile = true;
 
-                if (objParseCommandLine.RetrieveValueForParameter("InsFHT", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("InsFHT", out value))
                 {
-                    if (ParseBoolean(strValue, ref blnValue ))
+                    if (ParseBoolean(value, out var blnValue))
                     {
                         mCreateInspectOrMSGFDBFirstHitsFile = blnValue;
                     }
                 }
 
-                if (objParseCommandLine.RetrieveValueForParameter("InsSyn", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("InsSyn", out value))
                 {
-                    if (ParseBoolean(strValue, ref blnValue ))
+                    if (ParseBoolean(value, out var blnValue ))
                     {
                         mCreateInspectOrMSGFDBSynopsisFile = blnValue;
                     }
                 }
 
-                float sngValue;
-                if (objParseCommandLine.RetrieveValueForParameter("MSGFPlusEValue", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("MSGFPlusEValue", out value))
                 {
-                    if (float.TryParse(strValue, out sngValue))
+                    if (float.TryParse(value, out var floatValue))
                     {
-                        mMsgfPlusEValueThreshold = sngValue;
+                        mMsgfPlusEValueThreshold = floatValue;
                     }
                 }
 
-                if (objParseCommandLine.RetrieveValueForParameter("MSGFPlusSpecEValue", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("MSGFPlusSpecEValue", out value))
                 {
-                    if (float.TryParse(strValue, out sngValue))
+                    if (float.TryParse(value, out var floatValue))
                     {
-                        mMsgfPlusSpecEValueThreshold = sngValue;
+                        mMsgfPlusSpecEValueThreshold = floatValue;
                     }
                 }
 
-                if (objParseCommandLine.RetrieveValueForParameter("SynPvalue", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("SynPvalue", out value))
                 {
-                    if (float.TryParse(strValue, out sngValue))
+                    if (float.TryParse(value, out var floatValue))
                     {
-                        mInspectSynopsisFilePValueThreshold = sngValue;
+                        mInspectSynopsisFilePValueThreshold = floatValue;
                     }
                 }
 
-                if (objParseCommandLine.RetrieveValueForParameter("SynProb", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("SynProb", out value))
                 {
-                    if (float.TryParse(strValue, out sngValue))
+                    if (float.TryParse(value, out var floatValue))
                     {
-                        mMODaMODPlusSynopsisFileProbabilityThreshold = sngValue;
+                        mMODaMODPlusSynopsisFileProbabilityThreshold = floatValue;
                     }
                 }
 
-                if (objParseCommandLine.RetrieveValueForParameter("S", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("S", out value))
                 {
                     mRecurseFolders = true;
-                    if (int.TryParse(strValue, out var intValue))
+                    if (int.TryParse(value, out var intValue))
                     {
                         mRecurseFoldersMaxLevels = intValue;
                     }
                 }
-                if (objParseCommandLine.RetrieveValueForParameter("A", out strValue))
-                    mOutputFolderAlternatePath = string.Copy(strValue);
-                if (objParseCommandLine.IsParameterPresent("R"))
+                if (parseCommandLine.RetrieveValueForParameter("A", out value))
+                    mOutputFolderAlternatePath = string.Copy(value);
+                if (parseCommandLine.IsParameterPresent("R"))
                     mRecreateFolderHierarchyInAlternatePath = true;
 
-                if (objParseCommandLine.RetrieveValueForParameter("L", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("L", out value))
                 {
                     mLogMessagesToFile = true;
 
-                    if (!string.IsNullOrEmpty(strValue))
+                    if (!string.IsNullOrEmpty(value))
                     {
-                        mLogFilePath = string.Copy(strValue).Trim('"');
+                        mLogFilePath = string.Copy(value).Trim('"');
                     }
                 }
 
-                if (objParseCommandLine.RetrieveValueForParameter("LogFolder", out strValue))
+                if (parseCommandLine.RetrieveValueForParameter("LogFolder", out value))
                 {
                     mLogMessagesToFile = true;
-                    if (!string.IsNullOrEmpty(strValue))
+                    if (!string.IsNullOrEmpty(value))
                     {
-                        mLogFolderPath = string.Copy(strValue);
+                        mLogFolderPath = string.Copy(value);
                     }
                 }
 
