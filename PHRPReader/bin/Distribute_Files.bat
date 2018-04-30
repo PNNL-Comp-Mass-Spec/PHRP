@@ -30,7 +30,6 @@ call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\PeptideListT
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\x86"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\x64"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\AnyCPU"
-call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x86"
 call Distribute_Files_Work.bat "F:\My Documents\projects\dataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x64"
 call Distribute_Files_Work.bat "F:\My Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\AnyCPU"
 pause
