@@ -42,7 +42,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "January 9, 2018";
+            mFileDate = "April 30, 2018";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -941,8 +941,7 @@ namespace PeptideHitResultsProcessor
                     ProteinInputFilePath = FastaFilePath,
                     SaveProteinToPeptideMappingFile = true,
                     SearchAllProteinsForPeptideSequence = true,
-                    SearchAllProteinsSkipCoverageComputationSteps = true,
-                    ShowMessages = true
+                    SearchAllProteinsSkipCoverageComputationSteps = true
                 };
 
                 RegisterEvents(peptideToProteinMapper);
