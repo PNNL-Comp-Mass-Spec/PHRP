@@ -1012,32 +1012,32 @@ namespace PeptideHitResultsProcessor
                             if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.FHTFile)
                             {
                                 // Update the protein names in searchResultsPrefiltered using scanChargeFirstHit
-                                // This step is likely unnecessary, thus the "Unexpected code reached" message below
+                                // This step is typically not necessary, but is often required for SplitFasta results
 
                                 for (var index = 0; index <= searchResultsPrefiltered.Count - 1; index++)
                                 {
                                     var scanChargeKey = searchResultsPrefiltered[index].Scan + "_" + searchResultsPrefiltered[index].Charge;
 
-                                    if (scanChargeFirstHit.TryGetValue(scanChargeKey, out var firstHitPeptide))
-                                    {
-                                        if (!searchResultsPrefiltered[index].Protein.Equals(firstHitPeptide.ProteinName))
-                                        {
-                                            Console.WriteLine("Unexpected code reached; possible logic error in clsMSGFDBResultsProcessor.CreateFHTorSYNCResultsFile");
+                                    if (!scanChargeFirstHit.TryGetValue(scanChargeKey, out var firstHitPeptide))
+                                        continue;
 
-                                            if (firstHitPeptide.CleanSequence.Equals(GetCleanSequence(searchResultsPrefiltered[index].Peptide)))
-                                            {
-                                                var updatedSearchResult = searchResultsPrefiltered[index];
-                                                updatedSearchResult.Peptide = firstHitPeptide.SequenceWithModsAndContext;
-                                                updatedSearchResult.Protein = string.Copy(firstHitPeptide.ProteinName);
-                                                searchResultsPrefiltered[index] = updatedSearchResult;
-                                            }
-                                            else
-                                            {
-                                                Console.WriteLine("Possible programming bug; " +
-                                                                  "mix of peptides tracked for a given scan/charge combo when caching data for First Hits files; " +
-                                                                  $"see scan_charge {scanChargeKey}");
-                                            }
-                                        }
+                                    if (searchResultsPrefiltered[index].Protein.Equals(firstHitPeptide.ProteinName))
+                                        continue;
+
+                                    // Protein name doesn't match the expected name
+                                    if (firstHitPeptide.CleanSequence.Equals(GetCleanSequence(searchResultsPrefiltered[index].Peptide)))
+                                    {
+                                        // Update the protein name
+                                        var updatedSearchResult = searchResultsPrefiltered[index];
+                                        updatedSearchResult.Peptide = firstHitPeptide.SequenceWithModsAndContext;
+                                        updatedSearchResult.Protein = string.Copy(firstHitPeptide.ProteinName);
+                                        searchResultsPrefiltered[index] = updatedSearchResult;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Possible programming bug; " +
+                                                          "mix of peptides tracked for a given scan/charge combo when caching data for First Hits files; " +
+                                                          $"see scan_charge {scanChargeKey}");
                                     }
                                 }
                             }
