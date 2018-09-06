@@ -46,12 +46,6 @@ namespace PeptideHitResultsProcessor
         public const string N_TERMINUS_SYMBOL_MSGFDB = "_.";
         public const string C_TERMINUS_SYMBOL_MSGFDB = "._";
 
-        [Obsolete("Used by MSGF-DB; renamed to SpecEValue in MSGF+")]
-        public const float DEFAULT_SYN_FILE_MSGF_SPECPROB_THRESHOLD = 5E-07f;
-
-        [Obsolete("Used by MSGF-DB; renamed to EValue in MSGF+")]
-        public const float DEFAULT_SYN_FILE_PVALUE_THRESHOLD = 0.75f;
-
         /// <summary>
         /// Filter passing peptides have MSGFDB_SpecEValue less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
         /// This filter is also used by MSPathFinder
