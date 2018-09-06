@@ -50,13 +50,13 @@ namespace PHRPReader
 
         // This RegEx is used to extract parent ion m/z from a filter string that does not contain msx
         // ${ParentMZ} will hold the last parent ion m/z found
-        //  For example, 756.71 in FTMS + p NSI d Full ms3 850.70@cid35.00 756.71@cid35.00 [195.00-2000.00]
-        private const string PARENTION_ONLY_NONMSX_REGEX = @"[Mm][Ss]\d*[^\[\r\n]* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*(\[[^\]\r\n]\])?";
+        // For example, 756.71 in FTMS + p NSI d Full ms3 850.70@cid35.00 756.71@cid35.00 [195.00-2000.00]
+        private const string PARENT_ION_ONLY_NON_MSX_REGEX = @"[Mm][Ss]\d*[^\[\r\n]* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*(\[[^\]\r\n]\])?";
 
-        //  This RegEx is used to extract parent ion m/z from a filter string that does contain msx
-        //  ${ParentMZ} will hold the first parent ion m/z found (the first parent ion m/z corresponds to the highest peak)
-        //  For example, 636.04 in FTMS + p NSI Full msx ms2 636.04@hcd28.00 641.04@hcd28.00 654.05@hcd28.00 [88.00-1355.00]
-        private const string PARENTION_ONLY_MSX_REGEX = @"[Mm][Ss]\d* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*[^\[\r\n]*(\[[^\]\r\n]+\])?";
+        // This RegEx is used to extract parent ion m/z from a filter string that does contain msx
+        // ${ParentMZ} will hold the first parent ion m/z found (the first parent ion m/z corresponds to the highest peak)
+        // For example, 636.04 in FTMS + p NSI Full msx ms2 636.04@hcd28.00 641.04@hcd28.00 654.05@hcd28.00 [88.00-1355.00]
+        private const string PARENT_ION_ONLY_MSX_REGEX = @"[Mm][Ss]\d* (?<ParentMZ>[0-9.]+)@?[A-Za-z]*\d*\.?\d*[^\[\r\n]*(\[[^\]\r\n]+\])?";
 
 #pragma warning disable 1591
 
@@ -160,13 +160,13 @@ namespace PHRPReader
         /// RegEx to extract parent ions from filter strings that do not have Full msx
         /// </summary>
         /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
-        private static readonly Regex mParentIonMzMatchNonMsx = new Regex(PARENTION_ONLY_NONMSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex mFindParentIonOnlyNonMsx = new Regex(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// RegEx to extract parent ions from filter strings that have Full msx
         /// </summary>
         /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
-        private static readonly Regex mParentIonMzMatchMsx = new Regex(PARENTION_ONLY_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex mFindParentIonOnlyMsx = new Regex(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         #endregion
 
@@ -1482,7 +1482,7 @@ namespace PHRPReader
                 }
 
                 var index = 0;
-                var chMostRecentResidue = '.';
+                var mostRecentResidue = '.';
                 while (index < peptide.Length)
                 {
                     if (index < indexStart || index > indexEnd)
@@ -1496,7 +1496,7 @@ namespace PHRPReader
 
                         if (IsLetterAtoZ(peptide[index]))
                         {
-                            chMostRecentResidue = peptide[index];
+                            mostRecentResidue = peptide[index];
                             residueLocInPeptide += 1;
 
                             if (residueLocInPeptide == 1)
@@ -1513,12 +1513,12 @@ namespace PHRPReader
                             }
 
                             // Character is a letter; append it
-                            mNewPeptide.Append(chMostRecentResidue);
+                            mNewPeptide.Append(mostRecentResidue);
 
                             if (mStaticMods.Count > 0)
                             {
                                 // See if it is present in mStaticMods (this is a case-sensitive search)
-                                AddStaticModIfPresent(mStaticMods, chMostRecentResidue, residueLocInPeptide, eResidueTerminusState, mNewPeptide, peptideMods);
+                                AddStaticModIfPresent(mStaticMods, mostRecentResidue, residueLocInPeptide, eResidueTerminusState, mNewPeptide, peptideMods);
 
                                 if (index == indexStart && mStaticMods.Count > 0)
                                 {
@@ -1538,7 +1538,7 @@ namespace PHRPReader
                         else
                         {
                             // Not a letter; see if it is present in mDynamicMods
-                            AddDynamicModIfPresent(mDynamicMods, chMostRecentResidue, peptide[index], residueLocInPeptide, eResidueTerminusState, mNewPeptide, peptideMods);
+                            AddDynamicModIfPresent(mDynamicMods, mostRecentResidue, peptide[index], residueLocInPeptide, eResidueTerminusState, mNewPeptide, peptideMods);
                         }
 
                         if (index == indexEnd && mStaticMods.Count > 0)
@@ -2392,25 +2392,26 @@ namespace PHRPReader
         /// <param name="filterText"></param>
         /// <param name="parentIonMz"></param>
         /// <returns>True if parsing successful</returns>
-        /// <remarks>The original version of this code (C#) is in ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(string, out double)</remarks>
+        /// <remarks>The original version of this code is in ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(string, out double)</remarks>
         private bool ExtractParentIonMzFromFilterText(string filterText, out double parentIonMz)
         {
             Regex matcher;
 
             if (filterText.ToLower().Contains("msx"))
             {
-                matcher = mParentIonMzMatchMsx;
+                matcher = mFindParentIonOnlyMsx;
             }
             else
             {
-                matcher = mParentIonMzMatchNonMsx;
+                matcher = mFindParentIonOnlyNonMsx;
             }
 
-            var reMatch = matcher.Match(filterText);
+            var match = matcher.Match(filterText);
 
-            if (reMatch.Success)
+            if (match.Success)
             {
-                var parentIonMzText = reMatch.Groups["ParentMZ"].Value;
+                var parentIonMzText = match.Groups["ParentMZ"].Value;
+
                 var success = double.TryParse(parentIonMzText, out parentIonMz);
                 return success;
             }

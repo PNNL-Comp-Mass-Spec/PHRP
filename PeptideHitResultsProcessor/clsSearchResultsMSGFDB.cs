@@ -29,6 +29,7 @@ namespace PeptideHitResultsProcessor
         public string RankSpecEValue { get; set; }
         public string EValue { get; set; }          // PValue in MSGFDB; EValue in MSGF+
 
+        // ReSharper disable once CommentTypo
         public string QValue { get; set; }          // Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
         public string PepQValue { get; set; }       // Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+
 
