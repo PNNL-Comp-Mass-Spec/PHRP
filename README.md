@@ -104,11 +104,13 @@ Use /L to specify that a log file should be created.  Use /L:LogFilePath to spec
 ## Contacts
 
 Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) \
-E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov\
+E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov \
 Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
 
 ## License
 
-Peptide Hit Results Processor is licensed under the Apache License, Version 2.0; you may not use this 
-file except in compliance with the License.  You may obtain a copy of the 
-License at https://opensource.org/licenses/Apache-2.0
+The Peptide Hit Results Processor is licensed under the 2-Clause BSD License; 
+you may not use this file except in compliance with the License.  You may obtain 
+a copy of the License at https://opensource.org/licenses/BSD-2-Clause
+
+Copyright 2018 Battelle Memorial Institute

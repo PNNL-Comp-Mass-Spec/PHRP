@@ -1,30 +1,25 @@
-// This class is used to track the peptide details for an InSpecT search result
-// See clsSearchResultsBaseClass for additional information
-//
 // -------------------------------------------------------------------------------
 // Written by John Sandoval for the Department of Energy (PNNL, Richland, WA)
 // Program started August 19, 2008
 //
-// E-mail: john.sandoval@pnnl.gov
-// Website: https://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
+// Website: https://omics.pnl.gov/ or https://www.pnnl.gov/sysbio/ or https://panomics.pnnl.gov/
 // -------------------------------------------------------------------------------
 //
-// Licensed under the Apache License, Version 2.0; you may not use this file except
+// Licensed under the 2-Clause BSD License; you may not use this file except
 // in compliance with the License.  You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
+// https://opensource.org/licenses/BSD-2-Clause
 //
-// Notice: This computer software was prepared by Battelle Memorial Institute,
-// hereinafter the Contractor, under Contract No. DE-AC05-76RL0 1830 with the
-// Department of Energy (DOE).  All rights in the computer software are reserved
-// by DOE on behalf of the United States Government and the Contractor as
-// provided in the Contract.  NEITHER THE GOVERNMENT NOR THE CONTRACTOR MAKES ANY
-// WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS
-// SOFTWARE.  This notice including this sentence must appear on any copies of
-// this computer software.
+// Copyright 2018 Battelle Memorial Institute
+
 using PHRPReader;
 
 namespace PeptideHitResultsProcessor
 {
+    /// <summary>
+    /// This class is used to track the peptide details for an InSpecT search result
+    /// See clsSearchResultsBaseClass for additional information
+    /// </summary>
     public class clsSearchResultsInSpecT : clsSearchResultsBaseClass
     {
         #region "Classwide Variables"
