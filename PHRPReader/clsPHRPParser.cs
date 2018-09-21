@@ -20,7 +20,7 @@ namespace PHRPReader
     /// <summary>
     /// PHRP parser base class
     /// </summary>
-    public abstract class clsPHRPParser : PRISM.clsEventNotifier
+    public abstract class clsPHRPParser : PRISM.EventNotifier
     {
         #region "Structures"
 

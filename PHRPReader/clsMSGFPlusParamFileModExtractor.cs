@@ -41,7 +41,7 @@ namespace PHRPReader
     /// This class reads a DMS-based parameter file for MSGF+ or MSPathFinder to extract the dynamic and static modification information
     /// </summary>
     /// <remarks>See above for an example parameter file</remarks>
-    public class clsMSGFPlusParamFileModExtractor : PRISM.clsEventNotifier
+    public class clsMSGFPlusParamFileModExtractor : PRISM.EventNotifier
     {
         #region "Constants and Enums"
 

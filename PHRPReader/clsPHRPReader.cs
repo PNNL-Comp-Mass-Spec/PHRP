@@ -23,7 +23,7 @@ namespace PHRPReader
     ///  It also integrates MSGF results with the peptide hit search results
     ///  And, it integrates scan stats values (to determine elution time)
     /// </summary>
-    public class clsPHRPReader : PRISM.clsEventNotifier, IDisposable
+    public class clsPHRPReader : PRISM.EventNotifier, IDisposable
     {
         #region "Constants"
 

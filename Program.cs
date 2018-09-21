@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "April 30, 2018";
+        public const string PROGRAM_DATE = "September 20, 2018";
 
         private static string mInputFilePath;
         private static string mOutputFolderPath;                         // Optional
@@ -277,7 +277,7 @@ namespace PeptideHitResultsProcRunner
                 // Make sure no invalid parameters are present
                 if (parseCommandLine.InvalidParametersPresent(validParameters))
                 {
-                    ShowErrorMessage("Invalid commmand line parameters",
+                    ShowErrorMessage("Invalid command line parameters",
                         (from item in parseCommandLine.InvalidParameters(validParameters) select "/" + item).ToList());
                     return false;
                 }

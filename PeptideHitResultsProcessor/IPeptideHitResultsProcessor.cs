@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PeptideHitResultsProcessor
 {
-    public abstract class IPeptideHitResultsProcessor : PRISM.clsEventNotifier
+    public abstract class IPeptideHitResultsProcessor : PRISM.EventNotifier
     {
         //Defines minimum required functionality for classes that will process peptide hit results files
         //Note that the peptide hit results file format will determined using AnalysisToolName

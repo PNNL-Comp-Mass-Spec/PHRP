@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor
     /// <summary>
     /// This class can be used as a base class for peptide hit results processor classes
     /// </summary>
-    public abstract class clsPHRPBaseClass : PRISM.clsEventNotifier
+    public abstract class clsPHRPBaseClass : PRISM.EventNotifier
     {
         /// <summary>
         /// Constructor
@@ -36,7 +36,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "April 30, 2018";
+            mFileDate = "September 20, 2018";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 

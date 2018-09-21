@@ -382,7 +382,7 @@ namespace PeptideHitResultsProcRunner
             return success;
         }
 
-        private void RegisterResultsProcessEvents(clsEventNotifier resultsProcessor)
+        private void RegisterResultsProcessEvents(EventNotifier resultsProcessor)
         {
             resultsProcessor.ErrorEvent += mPeptideHitResultsProcessor_ErrorOccurred;
             resultsProcessor.StatusEvent += mPeptideHitResultsProcessor_MessageEvent;
