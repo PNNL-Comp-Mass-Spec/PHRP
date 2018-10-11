@@ -257,7 +257,7 @@ namespace PeptideHitResultsProcessor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var srDataFile = new StreamReader(inputFilePath))
+                    using (var reader = new StreamReader(inputFilePath))
                     {
                         resultsProcessed = 0;
                         var headerParsed = false;
@@ -267,9 +267,9 @@ namespace PeptideHitResultsProcessor
                         var success = InitializeSequenceOutputFiles(baseOutputFilePath);
 
                         // Parse the input file
-                        while (!srDataFile.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream & !AbortProcessing)
                         {
-                            var lineIn = srDataFile.ReadLine();
+                            var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
                             {
                                 continue;
@@ -354,7 +354,7 @@ namespace PeptideHitResultsProcessor
                             }
 
                             // Update the progress
-                            var percentComplete = Convert.ToSingle(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100);
+                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
                             if (CreateProteinModsFile)
                             {
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);

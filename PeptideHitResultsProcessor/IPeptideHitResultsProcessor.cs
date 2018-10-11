@@ -3,60 +3,181 @@ using System.Collections.Generic;
 
 namespace PeptideHitResultsProcessor
 {
+    /// <summary>
+    /// Defines minimum required functionality for classes that will process peptide hit results files
+    /// </summary>
+    /// <remarks>Note that the peptide hit results file format will determined using AnalysisToolName</remarks>
     public abstract class IPeptideHitResultsProcessor : PRISM.EventNotifier
     {
-        //Defines minimum required functionality for classes that will process peptide hit results files
-        //Note that the peptide hit results file format will determined using AnalysisToolName
 
         #region "Enums"
+
+        /// <summary>
+        /// /Return values for Start and Abort functions
+        /// </summary>
         public enum ProcessResults
         {
-            //Return values for Start and Abort functions
-            PH_SUCCESS = 0,   //Operation succeeded
-            PH_FAILURE = -1,  //Operation failed
-            PH_ABORTED = -2   //Spectra file creation aborted
+            /// <summary>
+            /// /Operation succeeded
+            /// </summary>
+            PH_SUCCESS = 0,
+
+            /// <summary>
+            /// Operation failed
+            /// </summary>
+            PH_FAILURE = -1,
+
+            /// <summary>
+            /// Spectra file creation aborted
+            /// </summary>
+            PH_ABORTED = -2
         }
 
+        /// <summary>
+        /// Return value for status property
+        /// </summary>
         public enum ProcessStatus
         {
-            //Return value for status property
-            PH_STARTING,  //Plugin initialization in progress
-            PH_RUNNING,   //Plugin is attempting to do its job
-            PH_COMPLETE,  //Plugin successfully completed its job
-            PH_ERROR,     //There was an error somewhere
-            PH_ABORTING   //An ABORT command has been received; plugin shutdown in progress
+            /// <summary>
+            /// Plugin initialization in progress
+            /// </summary>
+            PH_STARTING,
+
+            /// <summary>
+            /// Plugin is attempting to do its job
+            /// </summary>
+            PH_RUNNING,
+
+            /// <summary>
+            /// Plugin successfully completed its job
+            /// </summary>
+            PH_COMPLETE,
+
+            /// <summary>
+            /// There was an error somewhere
+            /// </summary>
+            PH_ERROR,
+
+            /// <summary>
+            /// An ABORT command has been received; plugin shutdown in progress
+            /// </summary>
+            PH_ABORTING
         }
         #endregion
 
         #region "Structures"
         public struct InitializationParams
         {
+
+            /// <summary>
+            /// Source directory path
+            /// </summary>
             public string SourceFolderPath;
+
+            /// <summary>
+            /// Output directory path
+            /// </summary>
             public string OutputFolderPath;
-            public string PeptideHitResultsFileName;             // If this is empty then it will be auto-defined using: DatasetName & XTANDEM_RESULTS_FILE_SUFFIX
-            public string MassCorrectionTagsFileName;            // If this is empty then it will be auto-defined using: Const DEFAULT_MASS_CORRECTION_TAGS_FILENAME = "Mass_Correction_Tags.txt"
-            public string ModificationDefinitionsFileName;       // If this is empty then it will be auto-defined using: Path.GetFileNameWithoutExtension(ParameterFileName) & MODIFICATION_DEFINITIONS_FILE_SUFFIX where MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt"
+
+            /// <summary>
+            /// Peptide hit results filename
+            /// </summary>
+            /// <remarks>If this is empty, it will be auto-defined using: DatasetName + TOOL_NAME_RESULTS_FILE_SUFFIX</remarks>
+            public string PeptideHitResultsFileName;
+
+            /// <summary>
+            /// Mass correction tags filename
+            /// </summary>
+            /// <remarks>
+            /// If this is empty, it will be auto-defined using: Const DEFAULT_MASS_CORRECTION_TAGS_FILENAME = "Mass_Correction_Tags.txt"
+            /// </remarks>
+            public string MassCorrectionTagsFileName;
+
+            /// <summary>
+            /// Modification definitions filename
+            /// </summary>
+            /// <remarks>
+            /// If this is empty, it will be auto-defined using:
+            /// Path.GetFileNameWithoutExtension(ParameterFileName) + MODIFICATION_DEFINITIONS_FILE_SUFFIX
+            /// where MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt"
+            /// </remarks>
+            public string ModificationDefinitionsFileName;
+
+            /// <summary>
+            /// Miscellaneous parameters
+            /// </summary>
             public Dictionary<string, string> MiscParams;
+
+            /// <summary>
+            /// Debug level
+            /// </summary>
+            /// <remarks>0=minimum, 5=maximum verbosity</remarks>
             public int DebugLevel;
 
+            /// <summary>
+            /// Tool name
+            /// </summary>
             public string AnalysisToolName;
-            public string DatasetName;
-            public string ParameterFileName;                     // Parameter file for the job
-            public string SettingsFileName;                      // Contains XML settings for PeptideHitResultsProcessor
 
+            /// <summary>
+            /// Dataset name
+            /// </summary>
+            public string DatasetName;
+
+            /// <summary>
+            /// Parameter file for the job
+            /// </summary>
+            public string ParameterFileName;
+
+            /// <summary>
+            /// Contains XML settings for PeptideHitResultsProcessor
+            /// </summary>
+            public string SettingsFileName;
+
+            /// <summary>
+            /// When true, create the Inspect synopsis file
+            /// </summary>
             public bool CreateInspectSynopsisFile;
+
+            /// <summary>
+            /// When true, create the Inspect first hits file
+            /// </summary>
             public bool CreateInspectFirstHitsFile;
         }
         #endregion
 
         #region "Properties"
-        public virtual string SourceFolderPath { get; set; } // (in) - path to folder containing the peptide hit results file
-        public virtual string OutputFolderPath { get; set; } // (in) - path to folder where processed file is to be placed
-        public virtual string PeptideHitResultsFileName { get; set; } // (in) - Filename containing the peptide hit results; See comment for PeptideHitResultsFileName in Structure InitializationParams above
-        public virtual string MassCorrectionTagsFileName { get; set; } // (in) - Filename containing the global mass correction tags list; See comment for PeptideHitResultsFileName in Structure InitializationParams above
-        public virtual string ModificationDefinitionsFileName { get; set; } // (in) - Filename containing modification definitions for this peptide hit results file; See comment for PeptideHitResultsFileName in Structure InitializationParams above
+
+        /// <summary>
+        /// Input: path to folder containing the peptide hit results file
+        /// </summary>
+        public virtual string SourceFolderPath { get; set; }
+
+        /// <summary>
+        /// Input: path to folder where processed file is to be placed
+        /// </summary>
+        public virtual string OutputFolderPath { get; set; }
+
+        /// <summary>
+        /// Input: Filename containing the peptide hit results;
+        /// See comment for PeptideHitResultsFileName in Structure InitializationParams above
+        /// </summary>
+        public virtual string PeptideHitResultsFileName { get; set; }
+
+        /// <summary>
+        /// Input: Filename containing the global mass correction tags list;
+        /// See comment for PeptideHitResultsFileName in Structure InitializationParams above
+        /// </summary>
+        public virtual string MassCorrectionTagsFileName { get; set; }
+
+        /// <summary>
+        /// Input: Filename containing modification definitions for this peptide hit results file;
+        /// See comment for PeptideHitResultsFileName in Structure InitializationParams above
+        /// </summary>
+        public virtual string ModificationDefinitionsFileName { get; set; }
 
         public virtual string AnalysisToolName { get; set; }
+
         public virtual string DatasetName { get; set; }
 
         /// <summary>
@@ -72,24 +193,63 @@ namespace PeptideHitResultsProcessor
         public virtual string SettingsFileName { get; set; }
 
         public virtual bool CreateInspectSynopsisFile { get; set; }
+
         public virtual bool CreateInspectFirstHitsFile { get; set; }
 
+        /// <summary>
+        /// For passing miscellaneous parameters (not presently used)
+        /// </summary>
         [Obsolete("Unused")]
-        public virtual Dictionary<string, string> MiscParams { get; set; }    //For passing miscelleneous parameters (not presently used)
-        public abstract ProcessStatus Status { get; } //Allows calling program to get current status
-        public abstract ProcessResults Results { get; }  //Allows calling program to determine if processing succeeded
-        public abstract string ErrMsg { get; }  //Error message describing any errors encountered
-        public abstract float PercentComplete { get; }   // Progress indicator, value between 0 and 100
-        public virtual int DebugLevel { get; set; } //Allows control of debug information verbosity; 0=minimum, 5=maximum verbosity
+        public virtual Dictionary<string, string> MiscParams { get; set; }
+
+        /// <summary>
+        /// Allows calling program to get current status
+        /// </summary>
+        public abstract ProcessStatus Status { get; }
+
+        /// <summary>
+        /// Allows calling program to determine if processing succeeded
+        /// </summary>
+        public abstract ProcessResults Results { get; }
+
+        /// <summary>
+        /// Error message describing any errors encountered
+        /// </summary>
+        public abstract string ErrMsg { get; }
+
+        /// <summary>
+        /// Progress indicator, value between 0 and 100
+        /// </summary>
+        public abstract float PercentComplete { get; }
+
+        /// <summary>
+        /// Allows control of debug information verbosity
+        /// </summary>
+        /// <remarks>0=minimum, 5=maximum verbosity</remarks>
+        public virtual int DebugLevel { get; set; }
 
         #endregion
 
         #region "Methods"
-        public abstract void Setup(InitializationParams InitParams);  //Initializes parameters. Must be called before executing Start()
 
-        public abstract ProcessStatus Start();  //Starts the spectra file creation process
+        /// <summary>
+        /// Initializes parameters. Must be called before executing Start()
+        /// </summary>
+        /// <param name="InitParams"></param>
+        public abstract void Setup(InitializationParams InitParams);
 
-        public abstract ProcessStatus Abort();  //Aborts spectra file creation
+        /// <summary>
+        /// Starts the spectra file creation process
+        /// </summary>
+        /// <returns></returns>
+        public abstract ProcessStatus Start();
+
+        /// <summary>
+        /// Aborts spectra file creation
+        /// </summary>
+        /// <returns></returns>
+        public abstract ProcessStatus Abort();
+
         #endregion
     }
 }

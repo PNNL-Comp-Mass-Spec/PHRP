@@ -75,7 +75,7 @@ namespace PeptideHitResultsProcessor
 
         public override void Setup(InitializationParams options)
         {
-            //Copies all input data required for plugin operation to appropriate memory variables
+            // Copies all input data required for plugin operation to appropriate memory variables
             SourceFolderPath = options.SourceFolderPath;
             OutputFolderPath = options.OutputFolderPath;
 
@@ -101,7 +101,7 @@ namespace PeptideHitResultsProcessor
         {
             m_Status = ProcessStatus.PH_STARTING;
 
-            //Verify necessary files are in specified locations
+            // Verify necessary files are in specified locations
             if (!InitSetup())
             {
                 m_Results = ProcessResults.PH_FAILURE;
@@ -129,7 +129,7 @@ namespace PeptideHitResultsProcessor
         {
             try
             {
-                //Initialize m_PeptideHitResultsProcessor
+                // Initialize m_PeptideHitResultsProcessor
                 switch (m_PeptideHitResultsFileFormat)
                 {
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
@@ -141,7 +141,7 @@ namespace PeptideHitResultsProcessor
                         m_PeptideHitResultsProcessor = new clsSequestResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile:
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InspectTXTFile:
                         m_PeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
                         break;
 
@@ -237,16 +237,16 @@ namespace PeptideHitResultsProcessor
 
         protected virtual bool InitSetup()
         {
-            //Initializes module variables and verifies mandatory parameters have been propery specified
+            // Initializes module variables and verifies that mandatory parameters have been properly specified
 
-            //Output folder name
+            // Output folder name
             if (string.IsNullOrEmpty(OutputFolderPath))
             {
                 m_ErrMsg = "Output folder path not specified";
                 return false;
             }
 
-            //Source folder name
+            // Source folder name
             if (string.IsNullOrEmpty(SourceFolderPath))
             {
                 m_ErrMsg = "Source folder not specified";
@@ -259,82 +259,86 @@ namespace PeptideHitResultsProcessor
                 OnDebugEvent("Setup params: SourceFolderPath = " + SourceFolderPath);
             }
 
-            //Source directory exists?
+            // Source directory exists?
             if (!VerifyDirExists(SourceFolderPath))
-                return false; //Error msg handled by VerifyDirExists
+                return false; // Error msg handled by VerifyDirExists
 
-            //Output directory exists?
+            // Output directory exists?
             if (!VerifyDirExists(OutputFolderPath))
-                return false; //Error msg handled by VerifyDirExists
+                return false; // Error msg handled by VerifyDirExists
 
-            //Analysis tool name defined?
+            // Analysis tool name defined?
             if (string.IsNullOrWhiteSpace(AnalysisToolName))
             {
                 m_ErrMsg = "Analysis tool name not specified";
                 return false;
             }
 
-            //Dataset name defined?
+            // Dataset name defined?
             if (string.IsNullOrWhiteSpace(DatasetName))
             {
                 m_ErrMsg = "Dataset name not specified";
                 return false;
             }
 
-            //Settings file name defined?
+            // Settings file name defined?
             if (string.IsNullOrWhiteSpace(SettingsFileName))
             {
                 m_ErrMsg = "Settings file name not specified";
                 return false;
             }
 
-            //Parameter file name defined?
+            // Parameter file name defined?
             if (string.IsNullOrWhiteSpace(ParameterFileName))
             {
                 m_ErrMsg = "Parameter file name not specified";
                 return false;
             }
 
-            //Define the parameter file path; this is passed as the search tool parameter file
+            // Define the parameter file path; this is passed as the search tool parameter file
             m_ParameterFilePath = Path.Combine(SourceFolderPath, ParameterFileName);
 
-            //Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
+            // Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
             m_SettingsFilePath = Path.Combine(SourceFolderPath, SettingsFileName);
 
-            //Define the peptide hit results format based on the analysis tool name
-            if (AnalysisToolName.IndexOf("xtandem", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            // Define the peptide hit results format based on the analysis tool name
+            if (AnalysisToolName.IndexOf("xtandem", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile;
             }
-            else if (AnalysisToolName.IndexOf("sequest", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf("sequest", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile;
             }
-            else if (AnalysisToolName.IndexOf("inspect", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf("inspect", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile;
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InspectTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("msgfdb", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf("msgfdb", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("msalign", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf("msgfplus", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile;
+            }
+            else if (AnalysisToolName.IndexOf("msalign", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("moda", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf("moda", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("modplus", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf("ModPlus", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("mspathfinder", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf("MSPathFinder", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
             }
-            else if (AnalysisToolName.IndexOf("dataextractor", StringComparison.InvariantCultureIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf("DataExtractor", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 // Data Extractor step-tool; we'll need to auto-determine the results format
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
@@ -355,7 +359,7 @@ namespace PeptideHitResultsProcessor
                 OnDebugEvent("Setup params: ParameterFilePath = " + m_ParameterFilePath);
             }
 
-            //Define the peptide hit results file name
+            // Define the peptide hit results file name
             if (string.IsNullOrWhiteSpace(PeptideHitResultsFileName))
             {
                 m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, SourceFolderPath, DatasetName);
@@ -370,13 +374,13 @@ namespace PeptideHitResultsProcessor
                 OnDebugEvent("Setup params: PeptideHitResultsFilePath = " + m_PeptideHitResultsFilePath);
             }
 
-            //Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
+            // Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
             if (m_PeptideHitResultsFileFormat == clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.DetermineResultsFileFormat(m_PeptideHitResultsFilePath);
             }
 
-            //Define the mass correction tags file path
+            // Define the mass correction tags file path
             if (string.IsNullOrWhiteSpace(MassCorrectionTagsFileName))
             {
                 m_MassCorrectionTagsFilePath = Path.Combine(SourceFolderPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME);
@@ -386,7 +390,7 @@ namespace PeptideHitResultsProcessor
                 m_MassCorrectionTagsFilePath = Path.Combine(SourceFolderPath, MassCorrectionTagsFileName);
             }
 
-            //Define the modification definitions file path
+            // Define the modification definitions file path
             if (string.IsNullOrWhiteSpace(ModificationDefinitionsFileName))
             {
                 m_ModificationDefinitionsFilePath = Path.Combine(SourceFolderPath, Path.GetFileNameWithoutExtension(ParameterFileName) + MODIFICATION_DEFINITIONS_FILE_SUFFIX);
@@ -403,27 +407,27 @@ namespace PeptideHitResultsProcessor
                 OnDebugEvent("Setup params: ModificationDefinitionsFilePath = " + m_ModificationDefinitionsFilePath);
             }
 
-            //Parameter file exists?
+            // Parameter file exists?
             if (!VerifyFileExists(m_ParameterFilePath))
-                return false; //Error msg handled by VerifyFileExists
+                return false; // Error msg handled by VerifyFileExists
 
-            //Settings file exists?
+            // Settings file exists?
             if (!VerifyFileExists(m_SettingsFilePath))
-                return false; //Error msg handled by VerifyFileExists
+                return false; // Error msg handled by VerifyFileExists
 
-            //Peptide hit results file exists?
+            // Peptide hit results file exists?
             if (!VerifyFileExists(m_PeptideHitResultsFilePath))
-                return false; //Error msg handled by VerifyFileExists
+                return false; // Error msg handled by VerifyFileExists
 
-            //Modification definitions file exists?
+            // Modification definitions file exists?
             if (!VerifyFileExists(m_ModificationDefinitionsFilePath))
-                return false; //Error msg handled by VerifyFileExists
+                return false; // Error msg handled by VerifyFileExists
 
-            //Mass correction tags file exists?
+            // Mass correction tags file exists?
             if (!VerifyFileExists(m_MassCorrectionTagsFilePath))
-                return false; //Error msg handled by VerifyFileExists
+                return false; // Error msg handled by VerifyFileExists
 
-            //If we got here, everything's OK
+            // If we got here, everything's OK
             return true;
         }
 
@@ -441,7 +445,7 @@ namespace PeptideHitResultsProcessor
 
         protected virtual bool VerifyDirExists(string TestDir)
         {
-            //Verifies that the specified directory exists
+            // Verifies that the specified directory exists
             if (Directory.Exists(TestDir))
             {
                 m_ErrMsg = "";
@@ -454,7 +458,7 @@ namespace PeptideHitResultsProcessor
 
         protected virtual bool VerifyFileExists(string TestFile)
         {
-            //Verifies specified file exists
+            // Verifies specified file exists
             if (File.Exists(TestFile))
             {
                 m_ErrMsg = "";

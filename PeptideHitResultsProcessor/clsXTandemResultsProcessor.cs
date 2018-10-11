@@ -460,9 +460,9 @@ namespace PeptideHitResultsProcessor
 
                     // Initialize the stream reader and the XML Text Reader
                     eCurrentXMLDataFileSectionConstants eCurrentXMLDataFileSection;
-                    using (var srDataFile = new StreamReader(inputFilePath))
+                    using (var reader = new StreamReader(inputFilePath))
                     {
-                        using (var xmlReader = new XmlTextReader(srDataFile))
+                        using (var xmlReader = new XmlTextReader(reader))
                         {
                             resultsProcessed = 0;
 
@@ -522,7 +522,7 @@ namespace PeptideHitResultsProcessor
                                                             resultsProcessed += 1;
 
                                                             // Update the progress
-                                                            var percentComplete = Convert.ToSingle(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100);
+                                                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
                                                             if (CreateProteinModsFile)
                                                             {
                                                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);

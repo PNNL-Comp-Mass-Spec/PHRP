@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "October 10, 2018";
+        public const string PROGRAM_DATE = "October 11, 2018";
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional
@@ -56,13 +56,17 @@ namespace PeptideHitResultsProcRunner
         private static float mMODaMODPlusSynopsisFileProbabilityThreshold;
 
         private static string mOutputDirectoryAlternatePath;                // Optional
-        private static bool mRecreateFolderHierarchyInAlternatePath;     // Optional
+        private static bool mRecreateDirectoryHierarchyInAlternatePath;     // Optional
 
-        private static bool mRecurseFolders;
+        private static bool mRecurseDirectories;
         private static int mMaxLevelsToRecurse;
 
         private static bool mLogMessagesToFile;
         private static string mLogFilePath = string.Empty;
+
+        /// <summary>
+        /// Log directory path (ignored if LogFilePath is rooted)
+        /// </summary>
         private static string mLogDirectoryPath = string.Empty;
 
         private static clsPeptideHitResultsProcRunner mPeptideHitResultsProcRunner;
@@ -159,10 +163,10 @@ namespace PeptideHitResultsProcRunner
                     mPeptideHitResultsProcRunner.ProgressReset += PeptideHitResultsProcRunner_ProgressReset;
                     mPeptideHitResultsProcRunner.WarningEvent += PeptideHitResultsProcRunner_WarningEvent;
 
-                    if (mRecurseFolders)
+                    if (mRecurseDirectories)
                     {
                         if (mPeptideHitResultsProcRunner.ProcessFilesAndRecurseDirectories(mInputFilePath, mOutputDirectoryPath, mOutputDirectoryAlternatePath,
-                                                                                           mRecreateFolderHierarchyInAlternatePath, mParameterFilePath,
+                                                                                           mRecreateDirectoryHierarchyInAlternatePath, mParameterFilePath,
                                                                                            mMaxLevelsToRecurse))
                         {
                             returnCode = 0;
@@ -269,9 +273,9 @@ namespace PeptideHitResultsProcRunner
         {
             // Returns True if no problems; otherwise, returns false
 
-            var validParameters = new List<string> { "I", "O", "Folder", "P", "M", "T", "N", "ProteinMods",
+            var validParameters = new List<string> { "I", "O", "P", "M", "T", "N", "ProteinMods",
                 "F", "Fasta", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
-                "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPvalue", "InsFHT", "InsSyn", "SynProb", "S", "A",
+                "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "InsFHT", "InsSyn", "SynProb", "S", "A",
                 "R", "L" };
 
             try
@@ -298,7 +302,7 @@ namespace PeptideHitResultsProcRunner
                     mOutputDirectoryPath = string.Copy(value);
 
                 // Future
-                // If .RetrieveValueForParameter("Folder", value) Then mDatasetFolderPath = String.Copy(value)
+                // If .RetrieveValueForParameter("DatasetDir", value) Then mDatasetDirectoryPath = String.Copy(value)
                 //
 
                 if (parseCommandLine.RetrieveValueForParameter("P", out value))
@@ -364,7 +368,7 @@ namespace PeptideHitResultsProcRunner
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("SynPvalue", out value))
+                if (parseCommandLine.RetrieveValueForParameter("SynPValue", out value))
                 {
                     if (float.TryParse(value, out var floatValue))
                     {
@@ -382,7 +386,7 @@ namespace PeptideHitResultsProcRunner
 
                 if (parseCommandLine.RetrieveValueForParameter("S", out value))
                 {
-                    mRecurseFolders = true;
+                    mRecurseDirectories = true;
                     if (int.TryParse(value, out var intValue))
                     {
                         mMaxLevelsToRecurse = intValue;
@@ -391,7 +395,7 @@ namespace PeptideHitResultsProcRunner
                 if (parseCommandLine.RetrieveValueForParameter("A", out value))
                     mOutputDirectoryAlternatePath = string.Copy(value);
                 if (parseCommandLine.IsParameterPresent("R"))
-                    mRecreateFolderHierarchyInAlternatePath = true;
+                    mRecreateDirectoryHierarchyInAlternatePath = true;
 
                 if (parseCommandLine.RetrieveValueForParameter("L", out value))
                 {
@@ -403,7 +407,7 @@ namespace PeptideHitResultsProcRunner
                     }
                 }
 
-                if (parseCommandLine.RetrieveValueForParameter("LogFolder", out value))
+                if (parseCommandLine.RetrieveValueForParameter("LogDir", out value))
                 {
                     mLogMessagesToFile = true;
                     if (!string.IsNullOrEmpty(value))
@@ -436,63 +440,134 @@ namespace PeptideHitResultsProcRunner
         {
             try
             {
-                Console.WriteLine("This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, Inspect search result file, MSGF+ search result file, or MSAlign results file then creates a tab-delimited text file with the data in a standard format used at PNNL.");
-                Console.WriteLine("It will insert modification symbols into the peptide sequences for modified peptides. Parallel files will be created containing sequence info and modification details.");
-                Console.WriteLine("The user can optionally provide a modification definition file which specifies the symbol to use for each modification mass.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, " +
+                                      "Inspect search result file, MSGF+ search result file, or MSAlign results file then creates " +
+                                      "a tab-delimited text file with the data in a standard format used at PNNL."));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "It will insert modification symbols into the peptide sequences for modified peptides. " +
+                                      "Parallel files will be created containing sequence info and modification details."));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "The user can optionally provide a modification definition file " +
+                                      "that specifies the symbol to use for each modification mass."));
                 Console.WriteLine();
                 Console.WriteLine("Program syntax:" + Environment.NewLine +
                                   Path.GetFileName(Assembly.GetExecutingAssembly().Location) +
                                   " InputFilePath [/O:OutputDirectoryPath]");
                 // Future:
-                // Console.WriteLine(" [/Folder:DatasetFolderPath]")
+                // Console.WriteLine(" [/DatasetDir:DatasetDirectoryPath]")
                 //
                 Console.WriteLine(" [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]");
                 Console.WriteLine(" [/ProteinMods] [/F:FastaFilePath] [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]");
                 Console.WriteLine(" [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]");
                 Console.WriteLine(" [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath]");
                 Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]");
-                Console.WriteLine(" [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
+                Console.WriteLine(" [/SynPValue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
                 Console.WriteLine(" [/SynProb:0.05]");
-                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]]");
+                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]");
                 Console.WriteLine();
-                Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)");
-                Console.WriteLine("The output folder switch is optional. If omitted, the output file will be created in the same folder as the input file.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "The input file should be an XTandem Results file (_xt.xml), " +
+                                      "a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), " +
+                                      "an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), " +
+                                      "an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), " +
+                                      "or an MSAlign results file (_MSAlign_ResultTable.txt)"));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "The output directory switch is optional. If omitted, the output file will be created " +
+                                      "in the same directory as the input file."));
                 Console.WriteLine();
                 // Future:
-                // Console.WriteLine("As an alternative to specifying an input file, you can specify an input folder. In this case the program will look for the best file to process from that folder, and will auto-determine /T and /N")
+                // Console.WriteLine("As an alternative to specifying an input file, you can specify an input directory. " +
+                //                   "In this case the program will look for the best file to process from that directory, and will auto-determine /T and /N")
                 //
                 Console.WriteLine();
-                Console.WriteLine("The parameter file path is optional. If included, it should point to a valid XML parameter file.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "The parameter file path is optional. If included, it should point to a valid XML parameter file."));
                 Console.WriteLine();
-                Console.WriteLine("Use /M to specify the file containing the modification definitions. This file should be tab delimited, with the first column containing the modification symbol, the second column containing the modification mass, plus optionally a third column listing the residues that can be modified with the given mass (1 letter residue symbols, no need to separated with commas or spaces).");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /M to specify the file containing the modification definitions. " +
+                                      "This file should be tab delimited, with the first column containing the modification symbol, " +
+                                      "the second column containing the modification mass, plus optionally a third column " +
+                                      "listing the residues that can be modified with the given mass " +
+                                      "(1 letter residue symbols, no need to separated with commas or spaces)."));
                 Console.WriteLine();
-                Console.WriteLine("Use /ProteinMods to indicate that the _ProteinMods.txt file should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F");
-                Console.WriteLine("Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file and thus the PHRP data files should not be re-created; only the _ProteinMods.txt file should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined using /F");
-                Console.WriteLine("Use /F to specify the path to the fasta file. When provided, the order of the proteins in the FASTA file dictates which protein is listed for each peptide in the First Hits file");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /ProteinMods to indicate that the _ProteinMods.txt file should be created. " +
+                                      "This requires that either an existing _PepToProtMapMTS.txt file exist, " +
+                                      "or that the Fasta file be defined using /F"));
                 Console.WriteLine();
-                Console.WriteLine("Use /IgnorePepToProtMapErrors to ignore peptide to protein mapping errors that occur when creating a missing _PepToProtMapMTS.txt file");
-                Console.WriteLine("Use /ProteinModsIncludeReversed to include Reversed proteins in the _ProteinMods.txt file");
-                Console.WriteLine("Use /UseExistingPepToProteinMapFile to use an existing _PepToProtMapMTS.txt file if it exists");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file " +
+                                      "and thus the PHRP data files should not be re-created; only the _ProteinMods.txt file " +
+                                      "should be created. This requires that either an existing _PepToProtMapMTS.txt file exist, " +
+                                      "or that the Fasta file be defined using /F"));
                 Console.WriteLine();
-                Console.WriteLine("Use /T to specify the file containing the mass correction tag info. This file should be tab delimited, with the first column containing the mass correction tag name and the second column containing the mass (the name cannot contain commas or colons and can be, at most, 8 characters long).");
-                Console.WriteLine("Use /N to specify the parameter file provided to the search tool. This is only used when processing Inspect or MSGF+ files.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /F to specify the path to the fasta file. When provided, the order of the proteins " +
+                                      "in the FASTA file dictates which protein is listed for each peptide in the First Hits file"));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /IgnorePepToProtMapErrors to ignore peptide to protein mapping errors " +
+                                      "that occur when creating a missing _PepToProtMapMTS.txt file"));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /ProteinModsIncludeReversed to include Reversed proteins in the _ProteinMods.txt file"));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /UseExistingPepToProteinMapFile to use an existing _PepToProtMapMTS.txt file if it exists"));
+                Console.WriteLine();
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /T to specify the file containing the mass correction tag info. This file " +
+                                      "should be tab delimited, with the first column containing the mass correction tag name " +
+                                      "and the second column containing the mass (the name cannot contain commas or colons " +
+                                      "and can be, at most, 8 characters long)."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /N to specify the parameter file provided to the search tool. " +
+                                      "This is only used when processing Inspect or MSGF+ files."));
                 Console.WriteLine();
 
-                Console.WriteLine("When processing an MSGF+ results file, use /MSGFPlusSpecEValue and /MSGFPlusEValue to customize the thresholds used to determine which peptides are written to the the synopsis file");
-                Console.WriteLine("Defaults are /MSGFPlusSpecEValue:" + PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +
-                                  " and /MSGFPlusEValue:" + PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD);
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "When processing an MSGF+ results file, use /MSGFPlusSpecEValue and /MSGFPlusEValue " +
+                                      "to customize the thresholds used to determine which peptides are written to the the synopsis file"));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Defaults are /MSGFPlusSpecEValue:" +
+                                      PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +
+                                      " and /MSGFPlusEValue:" +
+                                      PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD));
                 Console.WriteLine();
-                Console.WriteLine("When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used to determine which peptides are written to the the synopsis file. The default is /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= " + PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD + " or an FScore >= " + PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD + " will also be included in the synopsis file.");
-                Console.WriteLine("Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when processing Inspect or MSGF+ results (default is /InsFHT:True)");
-                Console.WriteLine("Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when processing Inspect or MSGF+ results (default is /InsSyn:True)");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "When processing an Inspect results file, use /SynPValue to customize " +
+                                      "the PValue threshold used to determine which peptides are written to the synopsis file. " +
+                                      "The default is /SynPValue:0.2  Note that peptides with a " +
+                                      "TotalPRMScore >= " + PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD +
+                                      " or an FScore >= " + PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD +
+                                      " will also be included in the synopsis file."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) " +
+                                      "when processing Inspect or MSGF+ results (default is /InsFHT:True)"));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) " +
+                                      "when processing Inspect or MSGF+ results (default is /InsSyn:True)"));
                 Console.WriteLine();
-                Console.WriteLine("When processing a MODPlus or MODa results file, use /SynProb to customize the Probability threshold used to determine which peptides are written to the the synopsis file. The default is /Synprob:0.05");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "When processing a MODPlus or MODa results file, use /SynProb to customize " +
+                                      "the Probability threshold used to determine which peptides are written to the synopsis file. " +
+                                      "The default is /SynProb:0.05"));
                 Console.WriteLine();
-                Console.WriteLine("Use /S to process all valid files in the input folder and subfolders. Include a number after /S (like /S:2) to limit the level of subfolders to examine.");
-                Console.WriteLine("When using /S, you can redirect the output of the results using /A.");
-                Console.WriteLine("When using /S, you can use /R to re-create the input folder hierarchy in the alternate output folder (if defined).");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /S to process all valid files in the input directory and subdirectories. " +
+                                      "Include a number after /S (like /S:2) to limit the level of subdirectories to examine."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "When using /S, you can redirect the output of the results using /A."));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "When using /S, you can use /R to re-create the input directory hierarchy " +
+                                      "in the alternate output directory (if defined)."));
                 Console.WriteLine();
-                Console.WriteLine("Use /L to specify that a log file should be created. Use /L:LogFilePath to specify the name (or full path) for the log file.");
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
+                                      "Use /L to specify that a log file should be created. " +
+                                      "Use /L:LogFilePath to specify the name (or full path) for the log file. " +
+                                      "Use /LogDir to specify the directory to create the log file (ignored if the LogFilePath is rooted)"));
                 Console.WriteLine();
 
                 Console.WriteLine("Program written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA) in 2006");

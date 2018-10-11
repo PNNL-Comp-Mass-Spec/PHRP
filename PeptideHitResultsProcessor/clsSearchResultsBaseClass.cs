@@ -738,7 +738,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="residueLocInPeptide"></param>
         /// <param name="eResidueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <param name="modMassDigitsOfPrecision">Digits of precision to use when comparinig modificationMass to the masses of known mods</param>
+        /// <param name="modMassDigitsOfPrecision">Digits of precision to use when comparing modificationMass to the masses of known mods</param>
         /// <returns>True if mod successfully added</returns>
         /// <remarks></remarks>
         public bool SearchResultAddModification(
@@ -1133,7 +1133,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Define standard RegEx values for finding enzyming cleavage sites
+        /// Define standard RegEx values for finding enzyme cleavage sites
         /// </summary>
         /// <param name="eStandardCleavageAgent"></param>
         /// <remarks>Define custom RegEx values using SetEnzymeMatchSpec</remarks>

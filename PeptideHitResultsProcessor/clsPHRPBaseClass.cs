@@ -107,14 +107,50 @@ namespace PeptideHitResultsProcessor
         public enum ePeptideHitResultsFileFormatConstants
         {
             AutoDetermine = 0,
+
+            /// <summary>
+            /// SEQUEST synopsis hits file
+            /// </summary>
             SequestSynopsisFile = 1,
+
+            /// <summary>
+            /// SEQUEST first hits file
+            /// </summary>
             SequestFirstHitsFile = 2,
+
+            /// <summary>
+            /// X!Tandem
+            /// </summary>
             XTandemXMLFile = 3,
-            InSpectTXTFile = 4,
+
+            /// <summary>
+            /// Inspect
+            /// </summary>
+            InspectTXTFile = 4,
+
+            /// <summary>
+            /// MSGFDB, MS-GF+, MSGF+
+            /// </summary>
             MSGFDbTXTFile = 5,
+
+            /// <summary>
+            /// MSAlign
+            /// </summary>
             MSAlignTXTFile = 6,
+
+            /// <summary>
+            /// MODa
+            /// </summary>
             MODaTXTFile = 7,
+
+            /// <summary>
+            /// MODPlus
+            /// </summary>
             MODPlusTXTFile = 8,
+
+            /// <summary>
+            /// MSPathFinder
+            /// </summary>
             MSPathFinderTSVFile = 9
         }
 
@@ -375,7 +411,7 @@ namespace PeptideHitResultsProcessor
                 case ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
 
                     return Path.Combine(sourceFolderPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX);
-                case ePeptideHitResultsFileFormatConstants.InSpectTXTFile:
+                case ePeptideHitResultsFileFormatConstants.InspectTXTFile:
 
                     return Path.Combine(sourceFolderPath, baseName + INSPECT_RESULTS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile:
@@ -678,7 +714,7 @@ namespace PeptideHitResultsProcessor
 
             if (baseFileName.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE, StringComparison.InvariantCultureIgnoreCase))
             {
-                return ePeptideHitResultsFileFormatConstants.InSpectTXTFile;
+                return ePeptideHitResultsFileFormatConstants.InspectTXTFile;
             }
 
             if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.InvariantCultureIgnoreCase))

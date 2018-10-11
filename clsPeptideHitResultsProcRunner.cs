@@ -224,6 +224,8 @@ namespace PeptideHitResultsProcRunner
             // ToDo: Contact DMS to get the modification information
             // The results of this query will need to be filtered to get the info for just this analysis job
 
+            // ReSharper disable CommentTypo
+
             //SELECT D.Dataset_Num,
             //    AJ.AJ_jobID, PFMI.Local_Symbol,
             //    PFMI.Monoisotopic_Mass_Correction, PFMI.Residue_Symbol,
@@ -249,6 +251,8 @@ namespace PeptideHitResultsProcRunner
             //    AJ.AJ_parmFileName = PFMI.Param_File_Name
             //WHERE (AJ.AJ_jobID = 47703)
             //ORDER BY AJ.AJ_jobID, PFMI.Local_Symbol
+
+            // ReSharper restore CommentTypo
         }
 
         private bool LoadParameterFileSettings(string parameterFilePath)
@@ -465,7 +469,7 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected X!Tandem XML file");
 
                         break;
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile:
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InspectTXTFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Inspect;
                         LogMessage("Detected Inspect results file");
 
@@ -616,7 +620,7 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected X!Tandem XML file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InSpectTXTFile:
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InspectTXTFile:
                         mPeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
                         LogMessage("Detected Inspect results file");
                         break;

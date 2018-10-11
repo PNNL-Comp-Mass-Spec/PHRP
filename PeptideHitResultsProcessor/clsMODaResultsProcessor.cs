@@ -10,6 +10,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -153,34 +154,23 @@ namespace PeptideHitResultsProcessor
         {
             const char NO_RESIDUE = '-';
 
-            var modIndex = 0;
-            var chChar = default(char);
-            var modificationDefinition = default(clsModificationDefinition);
-
-            string sequence = null;
-
             var parsingModMass = false;
-
-            var mostRecentResidue = default(char);
-            var residueLocInPeptide = 0;
-
-            parsingModMass = false;
             var modMassDigits = string.Empty;
 
-            mostRecentResidue = NO_RESIDUE;
-            residueLocInPeptide = 0;
+            var mostRecentResidue = NO_RESIDUE;
+            var residueLocInPeptide = 0;
 
-            sequence = searchResult.PeptideSequenceWithMods;
+            var sequence = searchResult.PeptideSequenceWithMods;
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
-                chChar = sequence[index];
+                var chChar = sequence[index];
 
                 if (IsLetterAtoZ(chChar))
                 {
                     if (parsingModMass)
                     {
                         // Associate the mod mass in modMassDigits with the previous residue
-                        AssociateDynamicModWithResidue(searchResult, mostRecentResidue, residueLocInPeptide, 
+                        AssociateDynamicModWithResidue(searchResult, mostRecentResidue, residueLocInPeptide,
                             modMassDigits, updateModOccurrenceCounts);
                         parsingModMass = false;
                     }
@@ -189,11 +179,11 @@ namespace PeptideHitResultsProcessor
                     residueLocInPeptide += 1;
 
                     // Look for static mods to associate with this residue
-                    for (modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
+                    for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
                         if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.eModificationTypeConstants.StaticMod)
                         {
-                            modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+                            var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
                             if (modificationDefinition.TargetResiduesContain(chChar))
                             {
@@ -240,7 +230,7 @@ namespace PeptideHitResultsProcessor
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = true;
 
-            var success = false;
+            bool success;
 
             try
             {
@@ -343,13 +333,13 @@ namespace PeptideHitResultsProcessor
         //        bool headersParsed = false;
         //        bool swapFiles = true;
         //
-        //        using (var srDataFile = new StreamReader(new FileStream(synOutputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+        //        using (var reader = new StreamReader(new FileStream(synOutputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
         //        {
         //            using (var swOutfile = new StreamWriter(new FileStream(synOutputFilePathNew, FileMode.Create, FileAccess.Write, FileShare.Read)))
         //            {
-        //                while (!srDataFile.EndOfStream)
+        //                while (!reader.EndOfStream)
         //                {
-        //                    var lineIn = srDataFile.ReadLine();
+        //                    var lineIn = reader.ReadLine();
         //
         //                    var splitLine = lineIn.Split('\t');
         //
@@ -426,16 +416,10 @@ namespace PeptideHitResultsProcessor
             string modMassDigits,
             bool updateModOccurrenceCounts)
         {
-            var success = false;
+            var residueForMod = mostRecentResidue;
+            var residueLocForMod = residueLocInPeptide;
 
-            var residueForMod = default(char);
-            var residueLocForMod = 0;
-            double modMass = 0;
-
-            residueForMod = mostRecentResidue;
-            residueLocForMod = residueLocInPeptide;
-
-            if (double.TryParse(modMassDigits, out modMass))
+            if (double.TryParse(modMassDigits, out var modMass))
             {
                 if (residueLocForMod == 0)
                 {
@@ -443,7 +427,10 @@ namespace PeptideHitResultsProcessor
                     residueLocForMod = 1;
                 }
 
-                success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts, MODA_MASS_DIGITS_OF_PRECISION);
+                var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod,
+                                                                       searchResult.DetermineResidueTerminusState(residueLocForMod),
+                                                                       updateModOccurrenceCounts,
+                                                                       MODA_MASS_DIGITS_OF_PRECISION);
 
                 if (!success)
                 {
@@ -616,8 +603,9 @@ namespace PeptideHitResultsProcessor
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputFolderPath, bool mts)
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath.EndsWith("_MODa_syn", StringComparison.InvariantCultureIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_MODa_fht", StringComparison.InvariantCultureIgnoreCase))
+            if (pepToProteinMapFilePath != null &&
+                  (pepToProteinMapFilePath.EndsWith("_MODa_syn", StringComparison.InvariantCultureIgnoreCase) ||
+                   pepToProteinMapFilePath.EndsWith("_MODa_fht", StringComparison.InvariantCultureIgnoreCase)))
             {
                 // Remove _syn or _fht
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
@@ -646,9 +634,9 @@ namespace PeptideHitResultsProcessor
 
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
-                using (var srDataFile = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    using (var swResultFile = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                     {
                         var resultsProcessed = 0;
 
@@ -659,9 +647,9 @@ namespace PeptideHitResultsProcessor
                         var filteredSearchResults = new List<udtMODaSearchResultType>();
 
                         // Parse the input file
-                        while (!srDataFile.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream & !AbortProcessing)
                         {
-                            var lineIn = srDataFile.ReadLine();
+                            var lineIn = reader.ReadLine();
                             var skipLine = false;
 
                             if (string.IsNullOrWhiteSpace(lineIn))
@@ -677,7 +665,7 @@ namespace PeptideHitResultsProcessor
                                 skipLine = ParseMODaResultsFileHeaderLine(lineIn, out columnMapping);
 
                                 // Write the header line to the output file
-                                WriteSynFHTFileHeader(swResultFile, ref errorLog);
+                                WriteSynFHTFileHeader(writer, ref errorLog);
                             }
 
                             if (!skipLine)
@@ -692,7 +680,7 @@ namespace PeptideHitResultsProcessor
                                 }
 
                                 // Update the progress
-                                var percentComplete = Convert.ToSingle(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100);
+                                var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
                                 if (CreateProteinModsFile)
                                 {
                                     percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
@@ -726,7 +714,7 @@ namespace PeptideHitResultsProcessor
                         }
 
                         // Sort the data in udtFilteredSearchResults then write out to disk
-                        SortAndWriteFilteredSearchResults(swResultFile, filteredSearchResults, ref errorLog);
+                        SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                     }
                 }
 
@@ -755,10 +743,6 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private bool ExtractModInfoFromMODaParamFile(string mODaParamFilePath, ref List<clsModificationDefinition> modInfo)
         {
-            var kvSetting = default(KeyValuePair<string, string>);
-
-            var modDef = default(clsModificationDefinition);
-
             var success = false;
 
             try
@@ -787,11 +771,11 @@ namespace PeptideHitResultsProcessor
                 else
                 {
                     // Read the contents of the parameter (or mods) file
-                    using (var srInFile = new StreamReader(new FileStream(mODaParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var reader = new StreamReader(new FileStream(mODaParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
-                        while (!srInFile.EndOfStream)
+                        while (!reader.EndOfStream)
                         {
-                            var lineIn = srInFile.ReadLine();
+                            var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
                                 continue;
 
@@ -806,7 +790,7 @@ namespace PeptideHitResultsProcessor
                             }
 
                             // Split the line on the equals sign
-                            kvSetting = clsPHRPParser.ParseKeyValueSetting(dataLine, '=', "#");
+                            var kvSetting = clsPHRPParser.ParseKeyValueSetting(dataLine, '=', "#");
 
                             if (string.IsNullOrEmpty(kvSetting.Key))
                             {
@@ -825,9 +809,9 @@ namespace PeptideHitResultsProcessor
                                 value = value.Substring(commaIndex + 1).Trim();
 
                                 // Replace NTerm or CTerm with < or >
-                                if (residue.ToLower() == "nterm")
+                                if (residue.Equals("NTerm", StringComparison.OrdinalIgnoreCase))
                                     residue = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                                if (residue.ToLower() == "cterm")
+                                if (residue.Equals("CTerm", StringComparison.OrdinalIgnoreCase))
                                     residue = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
 
                                 if (double.TryParse(value, out var modMass))
@@ -836,7 +820,11 @@ namespace PeptideHitResultsProcessor
                                     {
                                         var massCorrectionTag = mPeptideMods.LookupMassCorrectionTagByMass(modMass);
 
-                                        modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMass, residue, clsModificationDefinition.eModificationTypeConstants.StaticMod, massCorrectionTag);
+                                        var modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                                                                                   modMass,
+                                                                                   residue,
+                                                                                   clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                                                                   massCorrectionTag);
                                         modInfo.Add(modDef);
                                     }
                                 }
@@ -867,6 +855,12 @@ namespace PeptideHitResultsProcessor
         private bool LoadMGFIndexToScanMapFile(FileInfo inputFile)
         {
             var indexToScanMapFilePath = string.Empty;
+
+            if (inputFile.Directory == null)
+            {
+                ReportWarning("LoadMGFIndexToScanMapFile: Could not determine the parent directory of " + inputFile.FullName);
+                return false;
+            }
 
             try
             {
@@ -1004,7 +998,7 @@ namespace PeptideHitResultsProcessor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var srDataFile = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
                         var resultsProcessed = 0;
                         var headerParsed = false;
@@ -1014,9 +1008,9 @@ namespace PeptideHitResultsProcessor
                         success = InitializeSequenceOutputFiles(baseOutputFilePath);
 
                         // Parse the input file
-                        while (!srDataFile.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream & !AbortProcessing)
                         {
-                            var lineIn = srDataFile.ReadLine();
+                            var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
                             {
                                 continue;
@@ -1048,7 +1042,7 @@ namespace PeptideHitResultsProcessor
                             }
 
                             var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
-                            var firstMatchForGroup = false;
+                            bool firstMatchForGroup;
 
                             if (searchResult.Probability == previousProbability)
                             {
@@ -1089,7 +1083,7 @@ namespace PeptideHitResultsProcessor
                                 }
                             }
 
-                            SaveResultsFileEntrySeqInfo((clsSearchResultsBaseClass) searchResult, firstMatchForGroup);
+                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
 
                             if (pepToProteinMapping.Count > 0)
                             {
@@ -1107,7 +1101,7 @@ namespace PeptideHitResultsProcessor
                                         if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
                                         {
                                             searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
-                                            SaveResultsFileEntrySeqInfo((clsSearchResultsBaseClass)searchResult, false);
+                                            SaveResultsFileEntrySeqInfo(searchResult, false);
                                         }
 
                                         pepToProteinMapIndex += 1;
@@ -1121,7 +1115,7 @@ namespace PeptideHitResultsProcessor
                             }
 
                             // Update the progress
-                            var percentComplete = Convert.ToSingle(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100);
+                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
                             if (CreateProteinModsFile)
                             {
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
@@ -1180,14 +1174,6 @@ namespace PeptideHitResultsProcessor
             // Parses an entry from the MODa results file
 
             var rowIndex = "?";
-            double precursorMonoMass = 0;           // Observed m/z, converted to monoisotopic mass
-            double peptideMonoMassMODa = 0;         // Theoretical peptide monoisotopic mass, including mods, as computed by MODa
-            double peptideMonoMassPHRP = 0;         // Theoretical peptide monoisotopic mass, including mods, as computed by PHRP
-
-            double precursorMZ = 0;
-            double delM = 0;
-
-            double totalModMass = 0;
 
             var validSearchResult = false;
 
@@ -1212,8 +1198,7 @@ namespace PeptideHitResultsProcessor
                         rowIndex = udtSearchResult.SpectrumIndex;
                     }
 
-                    var spectrumIndex = 0;
-                    if (!int.TryParse(udtSearchResult.SpectrumIndex, out spectrumIndex))
+                    if (!int.TryParse(udtSearchResult.SpectrumIndex, out var spectrumIndex))
                     {
                         ReportError("Index column is not numeric", true);
                     }
@@ -1228,17 +1213,20 @@ namespace PeptideHitResultsProcessor
                     GetColumnValue(splitLine, columnMapping[(int)eMODaResultsFileColumns.Charge], out udtSearchResult.Charge);
                     udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
-                    if (double.TryParse(udtSearchResult.Precursor_mass, out precursorMonoMass))
+                    // Observed m/z, converted to monoisotopic mass
+                    if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
                     {
                         if (udtSearchResult.ChargeNum > 0)
                         {
-                            precursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, udtSearchResult.ChargeNum);
+                            var precursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, udtSearchResult.ChargeNum);
                             udtSearchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(precursorMZ, 6);
                         }
                     }
 
                     GetColumnValue(splitLine, columnMapping[(int)eMODaResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
-                    double.TryParse(udtSearchResult.CalculatedMonoMass, out peptideMonoMassMODa);
+
+                    // Theoretical peptide monoisotopic mass, including mods, as computed by MODa
+                    double.TryParse(udtSearchResult.CalculatedMonoMass, out var peptideMonoMassMODa);
 
                     GetColumnValue(splitLine, columnMapping[(int)eMODaResultsFileColumns.DeltaMass], out udtSearchResult.DeltaMass);
                     GetColumnValue(splitLine, columnMapping[(int)eMODaResultsFileColumns.Score], out udtSearchResult.Score);
@@ -1259,10 +1247,11 @@ namespace PeptideHitResultsProcessor
                     // Parse the sequence to determine the total mod mass
                     // Note that we do not remove any of the mod symbols since MODa identifies mods by mass alone
                     // Note that static mods are implied (thus are not explicitly displayed by MODa)
-                    totalModMass = ComputeTotalModMass(udtSearchResult.Peptide);
+                    var totalModMass = ComputeTotalModMass(udtSearchResult.Peptide);
 
                     // Compute monoisotopic mass of the peptide
-                    peptideMonoMassPHRP = ComputePeptideMass(udtSearchResult.Peptide, totalModMass);
+                    // Theoretical peptide monoisotopic mass, including mods, as computed by PHRP
+                    var peptideMonoMassPHRP = ComputePeptideMass(udtSearchResult.Peptide, totalModMass);
 
                     if (Math.Abs(peptideMonoMassMODa) < double.Epsilon)
                     {
@@ -1276,7 +1265,7 @@ namespace PeptideHitResultsProcessor
                     if (Math.Abs(peptideMonoMassPHRP - peptideMonoMassMODa) > massDiffThreshold)
                     {
                         // Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
-                        string first30Residues = null;
+                        string first30Residues;
                         if (udtSearchResult.Peptide.Length < 27)
                         {
                             first30Residues = udtSearchResult.Peptide;
@@ -1291,7 +1280,7 @@ namespace PeptideHitResultsProcessor
                     if (peptideMonoMassMODa > 0)
                     {
                         // Compute DelM and DelM_PPM
-                        delM = precursorMonoMass - peptideMonoMassMODa;
+                        var delM = precursorMonoMass - peptideMonoMassMODa;
                         udtSearchResult.DelM = MassErrorToString(delM);
 
                         var peptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, true, peptideMonoMassMODa);
@@ -1302,13 +1291,11 @@ namespace PeptideHitResultsProcessor
                     // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                     udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                    double probability = 0;
-
                     if (udtSearchResult.Probability.ToLower() == "infinity")
                     {
                         udtSearchResult.Probability = "0";
                     }
-                    else if (!string.IsNullOrEmpty(udtSearchResult.Probability) & !double.TryParse(udtSearchResult.Probability, out probability))
+                    else if (!string.IsNullOrEmpty(udtSearchResult.Probability) & !double.TryParse(udtSearchResult.Probability, out _))
                     {
                         udtSearchResult.Probability = "";
                     }
@@ -1378,10 +1365,9 @@ namespace PeptideHitResultsProcessor
                 var splitLine = lineIn.Split('\t');
                 var useDefaultHeaders = false;
 
-                var value = 0;
                 if (splitLine.Length >= 2)
                 {
-                    if (int.TryParse(splitLine[1], out value))
+                    if (int.TryParse(splitLine[1], out _))
                     {
                         // Second column has a number; this is not a header line
                         useDefaultHeaders = true;
@@ -1390,13 +1376,10 @@ namespace PeptideHitResultsProcessor
                     {
                         for (var index = 0; index <= splitLine.Length - 1; index++)
                         {
-                            var eResultFileColumn = default(eMODaResultsFileColumns);
-
-                            if (columnNames.TryGetValue(splitLine[index], out eResultFileColumn))
+                            if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
                             {
                                 // Recognized column name; update columnMapping
                                 columnMapping[(int)eResultFileColumn] = index;
-                                useDefaultHeaders = false;
                             }
                             else
                             {
@@ -1552,7 +1535,7 @@ namespace PeptideHitResultsProcessor
                 // Therefore, we will negate .peptideDeltaMass
                 try
                 {
-                    searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString();
+                    searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString(CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -1562,8 +1545,7 @@ namespace PeptideHitResultsProcessor
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
-                var searchResultBase = default(clsSearchResultsBaseClass);
-                searchResultBase = (clsSearchResultsBaseClass) searchResult;
+                var searchResultBase = searchResult as clsSearchResultsBaseClass;
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 
@@ -1618,12 +1600,6 @@ namespace PeptideHitResultsProcessor
         /// <returns>True if success, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath)
         {
-            var baseName = string.Empty;
-            var synOutputFilePath = string.Empty;
-
-            var mODaModInfo = default(List<clsModificationDefinition>);
-            var pepToProteinMapping = default(List<udtPepToProteinMappingType>);
-
             var success = false;
 
             if (!LoadParameterFileSettings(parameterFilePath))
@@ -1659,8 +1635,8 @@ namespace PeptideHitResultsProcessor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
-                    mODaModInfo = new List<clsModificationDefinition>();
-                    pepToProteinMapping = new List<udtPepToProteinMappingType>();
+                    var mODaModInfo = new List<clsModificationDefinition>();
+                    var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
                     // Load the MODa Parameter File to look for any static mods
                     ExtractModInfoFromMODaParamFile(SearchToolParameterFilePath, ref mODaModInfo);
@@ -1669,7 +1645,7 @@ namespace PeptideHitResultsProcessor
                     ResolveMODaModsWithModDefinitions(mODaModInfo);
 
                     // Define the base output filename using inputFilePath
-                    baseName = Path.GetFileNameWithoutExtension(inputFilePath);
+                    var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "_moda.id" with "_moda"
                     if (baseName.EndsWith("_moda.id", StringComparison.InvariantCultureIgnoreCase))
@@ -1686,7 +1662,7 @@ namespace PeptideHitResultsProcessor
                     ResetProgress("Creating the SYN file", true);
 
                     // The synopsis file name will be of the form BasePath_moda_syn.txt
-                    synOutputFilePath = Path.Combine(outputFolderPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+                    var synOutputFilePath = Path.Combine(outputFolderPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath);
 
@@ -1736,12 +1712,17 @@ namespace PeptideHitResultsProcessor
             string synOutputFilePath,
             string outputFolderPath)
         {
-            var success = false;
-            string mtsPepToProteinMapFilePath = null;
+            bool success;
+
+            if (inputFile.Directory == null)
+            {
+                ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                return false;
+            }
 
             // Create the MTSPepToProteinMap file
 
-            mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputFolderPath, mts: true);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputFolderPath, mts: true);
 
             var sourcePHRPDataFiles = new List<string>();
 
@@ -1777,19 +1758,27 @@ namespace PeptideHitResultsProcessor
 
             if (success)
             {
-                // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(synOutputFilePath)), outputFolderPath);
+                if (string.IsNullOrWhiteSpace(synOutputFilePath))
+                {
+                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                }
+                else
+                {
+                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
+                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputFolderPath);
 
-                // Create the Protein Mods file
-                success = CreateProteinModDetailsFile(synOutputFilePath, outputFolderPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MODa);
+                    // Create the Protein Mods file
+                    success = CreateProteinModDetailsFile(synOutputFilePath, outputFolderPath, mtsPepToProteinMapFilePath,
+                                                          clsPHRPReader.ePeptideHitResultType.MODa);
+                }
             }
 
             if (!success)
             {
                 // Do not treat this as a fatal error
-                success = true;
             }
-            return success;
+
+            return true;
         }
 
         private void ResolveMODaModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> mODaModInfo)
@@ -1815,7 +1804,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private void SortAndWriteFilteredSearchResults(
-            TextWriter swResultFile,
+            TextWriter writer,
             List<udtMODaSearchResultType> filteredSearchResults,
             ref string errorLog)
         {
@@ -1827,7 +1816,7 @@ namespace PeptideHitResultsProcessor
 
             for (var index = 0; index <= filteredSearchResults.Count - 1; index++)
             {
-                WriteSearchResultToFile(index + 1, swResultFile, filteredSearchResults[index], ref errorLog);
+                WriteSearchResultToFile(index + 1, writer, filteredSearchResults[index], ref errorLog);
             }
         }
 
@@ -1923,7 +1912,7 @@ namespace PeptideHitResultsProcessor
             IList<udtMODaSearchResultType> searchResults,
             int startIndex,
             int endIndex,
-            IList<udtMODaSearchResultType> filteredSearchResults)
+            ICollection<udtMODaSearchResultType> filteredSearchResults)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
 
@@ -1940,7 +1929,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private void WriteSynFHTFileHeader(
-            TextWriter swResultFile,
+            TextWriter writer,
             ref string errorLog)
         {
             // Write out the header line for synopsis / first hits files
@@ -1965,7 +1954,7 @@ namespace PeptideHitResultsProcessor
                     clsPHRPParserMODa.DATA_COLUMN_QValue
                 };
 
-                swResultFile.WriteLine(CollapseList(data));
+                writer.WriteLine(CollapseList(data));
             }
             catch (Exception)
             {
@@ -1980,13 +1969,13 @@ namespace PeptideHitResultsProcessor
         /// Writes an entry to the synopsis file
         /// </summary>
         /// <param name="resultID"></param>
-        /// <param name="swResultFile"></param>
+        /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
         /// <remarks></remarks>
         private void WriteSearchResultToFile(
             int resultID,
-            TextWriter swResultFile,
+            TextWriter writer,
             udtMODaSearchResultType udtSearchResult,
             ref string errorLog)
         {
@@ -2016,7 +2005,7 @@ namespace PeptideHitResultsProcessor
                     PRISM.StringUtilities.DblToString(udtSearchResult.QValue, 5, 0.00005)
                 };
 
-                swResultFile.WriteLine(CollapseList(data));
+                writer.WriteLine(CollapseList(data));
             }
             catch (Exception)
             {
@@ -2037,45 +2026,42 @@ namespace PeptideHitResultsProcessor
                 {
                     return 1;
                 }
-                else if (x.ScanNum < y.ScanNum)
+
+                if (x.ScanNum < y.ScanNum)
                 {
                     return -1;
                 }
-                else
+
+                // Scan is the same, check charge
+                if (x.ChargeNum > y.ChargeNum)
                 {
-                    // Scan is the same, check charge
-                    if (x.ChargeNum > y.ChargeNum)
-                    {
-                        return 1;
-                    }
-                    else if (x.ChargeNum < y.ChargeNum)
-                    {
-                        return -1;
-                    }
-                    else
-                    {
-                        // Charge is the same; check ProbabilityNum
-                        if (x.ProbabilityNum < y.ProbabilityNum)
-                        {
-                            return 1;
-                        }
-                        else if (x.ProbabilityNum > y.ProbabilityNum)
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            // Probability is the same; check peptide
-                            var result = x.Peptide.CompareTo(y.Peptide);
-                            if (result == 0)
-                            {
-                                // Peptide is the same, check Protein
-                                result = x.Protein.CompareTo(y.Protein);
-                            }
-                            return result;
-                        }
-                    }
+                    return 1;
                 }
+
+                if (x.ChargeNum < y.ChargeNum)
+                {
+                    return -1;
+                }
+
+                // Charge is the same; check ProbabilityNum
+                if (x.ProbabilityNum < y.ProbabilityNum)
+                {
+                    return 1;
+                }
+
+                if (x.ProbabilityNum > y.ProbabilityNum)
+                {
+                    return -1;
+                }
+
+                // Probability is the same; check peptide
+                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
+                if (result == 0)
+                {
+                    // Peptide is the same, check Protein
+                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
+                }
+                return result;
             }
         }
 
@@ -2087,45 +2073,42 @@ namespace PeptideHitResultsProcessor
                 {
                     return 1;
                 }
-                else if (x.ProbabilityNum > y.ProbabilityNum)
+
+                if (x.ProbabilityNum > y.ProbabilityNum)
                 {
                     return -1;
                 }
-                else
+
+                // PValue is the same; check scan number
+                if (x.ScanNum > y.ScanNum)
                 {
-                    // Pvalue is the same; check scan number
-                    if (x.ScanNum > y.ScanNum)
-                    {
-                        return 1;
-                    }
-                    else if (x.ScanNum < y.ScanNum)
-                    {
-                        return -1;
-                    }
-                    else
-                    {
-                        // Scan is the same, check charge
-                        if (x.ChargeNum > y.ChargeNum)
-                        {
-                            return 1;
-                        }
-                        else if (x.ChargeNum < y.ChargeNum)
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            // Charge is the same; check peptide
-                            var result = x.Peptide.CompareTo(y.Peptide);
-                            if (result == 0)
-                            {
-                                // Peptide is the same, check Protein
-                                result = x.Protein.CompareTo(y.Protein);
-                            }
-                            return result;
-                        }
-                    }
+                    return 1;
                 }
+
+                if (x.ScanNum < y.ScanNum)
+                {
+                    return -1;
+                }
+
+                // Scan is the same, check charge
+                if (x.ChargeNum > y.ChargeNum)
+                {
+                    return 1;
+                }
+
+                if (x.ChargeNum < y.ChargeNum)
+                {
+                    return -1;
+                }
+
+                // Charge is the same; check peptide
+                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
+                if (result == 0)
+                {
+                    // Peptide is the same, check Protein
+                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
+                }
+                return result;
             }
         }
 

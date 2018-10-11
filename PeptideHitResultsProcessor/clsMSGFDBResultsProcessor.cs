@@ -818,7 +818,6 @@ namespace PeptideHitResultsProcessor
             IDictionary<string, int> specIdToIndex,
             eFilteredOutputFileTypeConstants eFilteredOutputFileType)
         {
-            //string lineIn = null;
 
             var searchResultsCurrentScan = new List<udtMSGFDBSearchResultType>();
             var searchResultsPrefiltered = new List<udtMSGFDBSearchResultType>();
@@ -862,9 +861,9 @@ namespace PeptideHitResultsProcessor
                     // Initialize the stream reader and the stream Text writer
                     string errorLog;
 
-                    using (var srDataFile = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
-                        using (var swResultFile = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                        using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                         {
                             errorLog = string.Empty;
                             var headerParsed = false;
@@ -887,9 +886,9 @@ namespace PeptideHitResultsProcessor
                             int[] columnMapping = null;
 
                             // Parse the input file
-                            while (!srDataFile.EndOfStream & !AbortProcessing)
+                            while (!reader.EndOfStream & !AbortProcessing)
                             {
-                                var lineIn = srDataFile.ReadLine();
+                                var lineIn = reader.ReadLine();
                                 if (string.IsNullOrWhiteSpace(lineIn))
                                 {
                                     continue;
@@ -926,7 +925,7 @@ namespace PeptideHitResultsProcessor
                                     }
 
                                     // Write the header line
-                                    WriteSynFHTFileHeader(swResultFile, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields,
+                                    WriteSynFHTFileHeader(writer, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields,
                                         isMsgfPlus);
                                     continue;
                                 }
@@ -989,7 +988,7 @@ namespace PeptideHitResultsProcessor
                                 }
 
                                 // Update the progress
-                                var percentComplete = Convert.ToSingle(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100);
+                                var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
                                 if (CreateProteinModsFile)
                                 {
                                     percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
@@ -1063,7 +1062,7 @@ namespace PeptideHitResultsProcessor
                             }
 
                             // Sort the data in udtFilteredSearchResults then write out to disk
-                            SortAndWriteFilteredSearchResults(swResultFile, filteredSearchResults, ref errorLog,
+                            SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog,
                                                               includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
                         }
                     }
@@ -1455,7 +1454,7 @@ namespace PeptideHitResultsProcessor
 
                     // Open the input file and parse it
                     // Initialize the stream reader
-                    using (var srDataFile = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
                         var resultsProcessed = 0;
                         var headerParsed = false;
@@ -1467,9 +1466,9 @@ namespace PeptideHitResultsProcessor
                         int[] columnMapping = null;
 
                         // Parse the input file
-                        while (!srDataFile.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream & !AbortProcessing)
                         {
-                            var lineIn = srDataFile.ReadLine();
+                            var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
                             {
                                 continue;
@@ -1570,7 +1569,7 @@ namespace PeptideHitResultsProcessor
                             }
 
                             // Update the progress
-                            var percentComplete = Convert.ToSingle(srDataFile.BaseStream.Position / srDataFile.BaseStream.Length * 100);
+                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
                             if (CreateProteinModsFile)
                             {
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
@@ -2579,13 +2578,8 @@ namespace PeptideHitResultsProcessor
             var prefix = string.Empty;
             var suffix = string.Empty;
 
-            //string modSymbols;
-            //string dynModSymbols;
-
             var possibleCTerminalMod = false;
             bool containsStaticMod;
-
-            //double modMassFound = 0;
 
             // Reset the total mod mass
             totalModMass = 0;
@@ -2864,7 +2858,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private void SortAndWriteFilteredSearchResults(
-            TextWriter swResultFile,
+            TextWriter writer,
             List<udtMSGFDBSearchResultType> filteredSearchResults,
             ref string errorLog,
             bool includeFDRandPepFDR,
@@ -2877,7 +2871,7 @@ namespace PeptideHitResultsProcessor
 
             for (var index = 0; index <= filteredSearchResults.Count - 1; index++)
             {
-                WriteSearchResultToFile(index + 1, swResultFile, filteredSearchResults[index], ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+                WriteSearchResultToFile(index + 1, writer, filteredSearchResults[index], ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
             }
         }
 
@@ -3035,7 +3029,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private void WriteSynFHTFileHeader(
-            TextWriter swResultFile,
+            TextWriter writer,
             ref string errorLog,
             bool includeFDRandPepFDR,
             bool includeEFDR,
@@ -3107,7 +3101,7 @@ namespace PeptideHitResultsProcessor
                     data.Add(clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time);
                 }
 
-                swResultFile.WriteLine(CollapseList(data));
+                writer.WriteLine(CollapseList(data));
             }
             catch (Exception)
             {
@@ -3122,7 +3116,7 @@ namespace PeptideHitResultsProcessor
         /// Writes an entry to a synopsis or first hits file
         /// </summary>
         /// <param name="resultID"></param>
-        /// <param name="swResultFile"></param>
+        /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
         /// <param name="includeFDRandPepFDR"></param>
@@ -3132,7 +3126,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private void WriteSearchResultToFile(
             int resultID,
-            TextWriter swResultFile,
+            TextWriter writer,
             udtMSGFDBSearchResultType udtSearchResult,
             ref string errorLog,
             bool includeFDRandPepFDR,
@@ -3193,7 +3187,7 @@ namespace PeptideHitResultsProcessor
                     data.Add(udtSearchResult.IMSDriftTime);
                 }
 
-                swResultFile.WriteLine(CollapseList(data));
+                writer.WriteLine(CollapseList(data));
             }
             catch (Exception)
             {

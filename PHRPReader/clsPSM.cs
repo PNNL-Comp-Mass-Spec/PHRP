@@ -44,7 +44,7 @@ namespace PHRPReader
         private string mPeptideWithNumericMods;
 
         /// <summary>
-        /// Pepide sequence without any mod symbols
+        /// Peptide sequence without any mod symbols
         /// </summary>
         private string mPeptideCleanSequence;
 
@@ -398,7 +398,7 @@ namespace PHRPReader
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="Residue">Amino acid letter; use angle brackets or square brackes for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+        /// <param name="Residue">Amino acid letter; use angle brackets or square brackets for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
         /// <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
         /// <param name="ResidueTerminusState">Terminus state of residue</param>
         /// <param name="ModDefinition">Modification details</param>
@@ -411,7 +411,7 @@ namespace PHRPReader
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="Residue">Amino acid letter; use angle brackets or square brackes for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+        /// <param name="Residue">Amino acid letter; use angle brackets or square brackets for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
         /// <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
         /// <param name="ResidueTerminusState">Terminus state of residue</param>
         /// <param name="ModDefinition">Modification details</param>
