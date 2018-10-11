@@ -8,7 +8,7 @@ Imports System.Threading
 Imports PHRPReader
 Imports PRISM
 
-' This program reads a PHRP-compatible _msgfdb_fht.txt file and creates the 
+' This program reads a PHRP-compatible _msgfdb_fht.txt file and creates the
 ' equivalent tab-delimited _msgfplus.tsv file that would have been created
 ' by MSGFPlus when converting the .mzIdentML file to a .tsv file
 '
@@ -32,7 +32,7 @@ Module modMain
     Public Function Main() As Integer
 
         Dim intReturnCode As Integer
-        Dim objParseCommandLine As New clsParseCommandLine
+        Dim commandLineParser As New clsParseCommandLine
         Dim blnProceed As Boolean
 
         intReturnCode = 0
@@ -41,13 +41,13 @@ Module modMain
 
         Try
             blnProceed = False
-            If objParseCommandLine.ParseCommandLine Then
-                If SetOptionsUsingCommandLineParameters(objParseCommandLine) Then blnProceed = True
+            If commandLineParser.ParseCommandLine Then
+                If SetOptionsUsingCommandLineParameters(commandLineParser) Then blnProceed = True
             End If
 
-            If Not blnProceed OrElse _
-               objParseCommandLine.NeedToShowHelp OrElse _
-               objParseCommandLine.ParameterCount + objParseCommandLine.NonSwitchParameterCount = 0 OrElse _
+            If Not blnProceed OrElse
+               commandLineParser.NeedToShowHelp OrElse
+               commandLineParser.ParameterCount + commandLineParser.NonSwitchParameterCount = 0 OrElse
                mInputFilePath.Length = 0 Then
                 ShowProgramHelp()
                 intReturnCode = -1
@@ -58,7 +58,7 @@ Module modMain
             End If
 
         Catch ex As Exception
-            ShowErrorMessage("Error occurred in modMain->Main: " & Environment.NewLine & ex.Message)
+            ShowErrorMessage("Error occurred in modMain->Main", ex)
             intReturnCode = -1
         End Try
 
@@ -172,7 +172,7 @@ Module modMain
             Console.WriteLine("Created file " & mOutputFilePath)
 
         Catch ex As Exception
-            ShowErrorMessage("Error occurred in modMain->ConvertFile: " & Environment.NewLine & ex.Message)
+            ShowErrorMessage("Error occurred in modMain->ConvertFile", ex)
             Return False
         End Try
 
@@ -248,7 +248,7 @@ Module modMain
 
     End Function
 
-    Private Function SetOptionsUsingCommandLineParameters(objParseCommandLine As clsParseCommandLine) As Boolean
+    Private Function SetOptionsUsingCommandLineParameters(commandLineParser As clsParseCommandLine) As Boolean
         ' Returns True if no problems; otherwise, returns false
 
         Dim strValue As String = String.Empty
@@ -256,13 +256,13 @@ Module modMain
 
         Try
             ' Make sure no invalid parameters are present
-            If objParseCommandLine.InvalidParametersPresent(lstValidParameters) Then
+            If commandLineParser.InvalidParametersPresent(lstValidParameters) Then
                 ShowErrorMessage("Invalid command line parameters",
-                  (From item In objParseCommandLine.InvalidParameters(lstValidParameters) Select "/" + item).ToList())
+                  (From item In commandLineParser.InvalidParameters(lstValidParameters) Select "/" + item).ToList())
                 Return False
             Else
-                With objParseCommandLine
-                    ' Query objParseCommandLine to see if various parameters are present
+                With commandLineParser
+                    ' Query commandLineParser to see if various parameters are present
                     If .RetrieveValueForParameter("I", strValue) Then
                         mInputFilePath = String.Copy(strValue)
                     ElseIf .NonSwitchParameterCount > 0 Then
@@ -277,42 +277,19 @@ Module modMain
             End If
 
         Catch ex As Exception
-            ShowErrorMessage("Error parsing the command line parameters: " & Environment.NewLine & ex.Message)
+            ShowErrorMessage("Error parsing the command line parameters", ex)
         End Try
 
         Return False
 
     End Function
 
-    Private Sub ShowErrorMessage(strMessage As String)
-        Dim strSeparator = "------------------------------------------------------------------------------"
-
-        Console.WriteLine()
-        Console.WriteLine(strSeparator)
-        Console.WriteLine(strMessage)
-        Console.WriteLine(strSeparator)
-        Console.WriteLine()
-
-        WriteToErrorStream(strMessage)
+    Private Sub ShowErrorMessage(message As String, Optional ex As Exception = Nothing)
+        ConsoleMsgUtils.ShowError(message, ex)
     End Sub
 
-    Private Sub ShowErrorMessage(strTitle As String, items As List(Of String))
-        Dim strSeparator = "------------------------------------------------------------------------------"
-        Dim strMessage As String
-
-        Console.WriteLine()
-        Console.WriteLine(strSeparator)
-        Console.WriteLine(strTitle)
-        strMessage = strTitle & ":"
-
-        For Each item As String In items
-            Console.WriteLine("   " + item)
-            strMessage &= " " & item
-        Next
-        Console.WriteLine(strSeparator)
-        Console.WriteLine()
-
-        WriteToErrorStream(strMessage)
+    Private Sub ShowErrorMessage(title As String, errorMessages As List(Of String))
+        ConsoleMsgUtils.ShowErrors(title, errorMessages)
     End Sub
 
     Private Sub ShowProgramHelp()
@@ -337,31 +314,20 @@ Module modMain
             Thread.Sleep(750)
 
         Catch ex As Exception
-            ShowErrorMessage("Error displaying the program syntax: " & ex.Message)
+            ShowErrorMessage("Error displaying the program syntax", ex)
         End Try
 
     End Sub
 
-    Private Sub WriteToErrorStream(strErrorMessage As String)
-        Try
-            Using swErrorStream = New StreamWriter(Console.OpenStandardError())
-                swErrorStream.WriteLine(strErrorMessage)
-                swErrorStream.WriteLine()
-            End Using
-        Catch ex As Exception
-            ' Ignore errors here
-        End Try
+    Private Sub PHRPReader_ErrorEvent(message As String, ex As Exception) Handles mPHRPReader.ErrorEvent
+        ShowErrorMessage(message, ex)
     End Sub
 
-    Private Sub mPHRPReader_ErrorEvent(strErrorMessage As String) Handles mPHRPReader.ErrorEvent
-        ShowErrorMessage(strErrorMessage)
+    Private Sub PHRPReader_StatusEvent(message As String) Handles mPHRPReader.StatusEvent
+        Console.WriteLine(message)
     End Sub
 
-    Private Sub mPHRPReader_MessageEvent(strMessage As String) Handles mPHRPReader.MessageEvent
-        Console.WriteLine(strMessage)
-    End Sub
-
-    Private Sub mPHRPReader_WarningEvent(strWarningMessage As String) Handles mPHRPReader.WarningEvent
+    Private Sub PHRPReader_WarningEvent(strWarningMessage As String) Handles mPHRPReader.WarningEvent
         Console.WriteLine("Warning: " & strWarningMessage)
     End Sub
 End Module
