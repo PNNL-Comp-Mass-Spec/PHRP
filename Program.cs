@@ -1,5 +1,5 @@
 ﻿// This program processes search results from several LC-MS/MS search engines to
-// determine the modifications present, determine the cleaveage and terminus state
+// determine the modifications present, determine the cleavage and terminus state
 // of each peptide, and compute the monoisotopic mass of each peptide. See
 // clsSequestSynopsisFileProcessor and clsXTandemResultsConverter for
 // additional information
@@ -25,10 +25,10 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "September 20, 2018";
+        public const string PROGRAM_DATE = "October 10, 2018";
 
         private static string mInputFilePath;
-        private static string mOutputFolderPath;                         // Optional
+        private static string mOutputDirectoryPath;                      // Optional
         private static string mParameterFilePath;                        // Optional
 
         private static string mMassCorrectionTagsFilePath;               // Optional
@@ -55,15 +55,15 @@ namespace PeptideHitResultsProcRunner
 
         private static float mMODaMODPlusSynopsisFileProbabilityThreshold;
 
-        private static string mOutputFolderAlternatePath;                // Optional
+        private static string mOutputDirectoryAlternatePath;                // Optional
         private static bool mRecreateFolderHierarchyInAlternatePath;     // Optional
 
         private static bool mRecurseFolders;
-        private static int mRecurseFoldersMaxLevels;
+        private static int mMaxLevelsToRecurse;
 
         private static bool mLogMessagesToFile;
         private static string mLogFilePath = string.Empty;
-        private static string mLogFolderPath = string.Empty;
+        private static string mLogDirectoryPath = string.Empty;
 
         private static clsPeptideHitResultsProcRunner mPeptideHitResultsProcRunner;
 
@@ -79,7 +79,7 @@ namespace PeptideHitResultsProcRunner
             var parseCommandLine = new clsParseCommandLine();
 
             mInputFilePath = string.Empty;
-            mOutputFolderPath = string.Empty;
+            mOutputDirectoryPath = string.Empty;
             mParameterFilePath = string.Empty;
 
             mMassCorrectionTagsFilePath = string.Empty;
@@ -104,11 +104,11 @@ namespace PeptideHitResultsProcRunner
 
             mMODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
-            mRecurseFoldersMaxLevels = 0;
+            mMaxLevelsToRecurse = 0;
 
             mLogMessagesToFile = false;
             mLogFilePath = string.Empty;
-            mLogFolderPath = string.Empty;
+            mLogDirectoryPath = string.Empty;
 
             try
             {
@@ -134,7 +134,7 @@ namespace PeptideHitResultsProcRunner
                     {
                         LogMessagesToFile = mLogMessagesToFile,
                         LogFilePath = mLogFilePath,
-                        LogFolderPath = mLogFolderPath,
+                        LogDirectoryPath = mLogDirectoryPath,
                         MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath,
                         ModificationDefinitionsFilePath = mModificationDefinitionsFilePath,
                         SearchToolParameterFilePath = mSearchToolParameterFilePath,
@@ -153,15 +153,17 @@ namespace PeptideHitResultsProcRunner
                         MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
                     };
 
-                    mPeptideHitResultsProcRunner.ErrorEvent += mPeptideHitResultsProcRunner_ErrorEvent;
-                    mPeptideHitResultsProcRunner.StatusEvent += mPeptideHitResultsProcRunner_MessageEvent;
-                    mPeptideHitResultsProcRunner.ProgressUpdate += mPeptideHitResultsProcRunner_ProgressChanged;
-                    mPeptideHitResultsProcRunner.ProgressReset += mPeptideHitResultsProcRunner_ProgressReset;
-                    mPeptideHitResultsProcRunner.WarningEvent += mPeptideHitResultsProcRunner_WarningEvent;
+                    mPeptideHitResultsProcRunner.ErrorEvent += PeptideHitResultsProcRunner_ErrorEvent;
+                    mPeptideHitResultsProcRunner.StatusEvent += PeptideHitResultsProcRunner_MessageEvent;
+                    mPeptideHitResultsProcRunner.ProgressUpdate += PeptideHitResultsProcRunner_ProgressChanged;
+                    mPeptideHitResultsProcRunner.ProgressReset += PeptideHitResultsProcRunner_ProgressReset;
+                    mPeptideHitResultsProcRunner.WarningEvent += PeptideHitResultsProcRunner_WarningEvent;
 
                     if (mRecurseFolders)
                     {
-                        if (mPeptideHitResultsProcRunner.ProcessFilesAndRecurseFolders(mInputFilePath, mOutputFolderPath, mOutputFolderAlternatePath, mRecreateFolderHierarchyInAlternatePath, mParameterFilePath, mRecurseFoldersMaxLevels))
+                        if (mPeptideHitResultsProcRunner.ProcessFilesAndRecurseDirectories(mInputFilePath, mOutputDirectoryPath, mOutputDirectoryAlternatePath,
+                                                                                           mRecreateFolderHierarchyInAlternatePath, mParameterFilePath,
+                                                                                           mMaxLevelsToRecurse))
                         {
                             returnCode = 0;
                         }
@@ -172,7 +174,7 @@ namespace PeptideHitResultsProcRunner
                     }
                     else
                     {
-                        if (mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputFolderPath, mParameterFilePath))
+                        if (mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputDirectoryPath, mParameterFilePath))
                         {
                             returnCode = 0;
                         }
@@ -221,7 +223,7 @@ namespace PeptideHitResultsProcRunner
 
         private static string GetAppVersion()
         {
-            return PRISM.FileProcessor.ProcessFilesOrFoldersBase.GetAppVersion(PROGRAM_DATE);
+            return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
         }
 
         /// <summary>
@@ -293,7 +295,7 @@ namespace PeptideHitResultsProcRunner
                 }
 
                 if (parseCommandLine.RetrieveValueForParameter("O", out value))
-                    mOutputFolderPath = string.Copy(value);
+                    mOutputDirectoryPath = string.Copy(value);
 
                 // Future
                 // If .RetrieveValueForParameter("Folder", value) Then mDatasetFolderPath = String.Copy(value)
@@ -383,11 +385,11 @@ namespace PeptideHitResultsProcRunner
                     mRecurseFolders = true;
                     if (int.TryParse(value, out var intValue))
                     {
-                        mRecurseFoldersMaxLevels = intValue;
+                        mMaxLevelsToRecurse = intValue;
                     }
                 }
                 if (parseCommandLine.RetrieveValueForParameter("A", out value))
-                    mOutputFolderAlternatePath = string.Copy(value);
+                    mOutputDirectoryAlternatePath = string.Copy(value);
                 if (parseCommandLine.IsParameterPresent("R"))
                     mRecreateFolderHierarchyInAlternatePath = true;
 
@@ -406,7 +408,7 @@ namespace PeptideHitResultsProcRunner
                     mLogMessagesToFile = true;
                     if (!string.IsNullOrEmpty(value))
                     {
-                        mLogFolderPath = string.Copy(value);
+                        mLogDirectoryPath = string.Copy(value);
                     }
                 }
 
@@ -440,7 +442,7 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine();
                 Console.WriteLine("Program syntax:" + Environment.NewLine +
                                   Path.GetFileName(Assembly.GetExecutingAssembly().Location) +
-                                  " InputFilePath [/O:OutputFolderPath]");
+                                  " InputFilePath [/O:OutputDirectoryPath]");
                 // Future:
                 // Console.WriteLine(" [/Folder:DatasetFolderPath]")
                 //
@@ -451,7 +453,7 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine(" [/MSGFPlusSpecEValue:0.0000005] [/MSGFPlusEValue:0.75]");
                 Console.WriteLine(" [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]");
                 Console.WriteLine(" [/SynProb:0.05]");
-                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]]");
+                Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]]");
                 Console.WriteLine();
                 Console.WriteLine("The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or an MSAlign results files (_MSAlign_ResultTable.txt)");
                 Console.WriteLine("The output folder switch is optional. If omitted, the output file will be created in the same folder as the input file.");
@@ -511,17 +513,17 @@ namespace PeptideHitResultsProcRunner
             }
         }
 
-        private static void mPeptideHitResultsProcRunner_ErrorEvent(string message, Exception ex)
+        private static void PeptideHitResultsProcRunner_ErrorEvent(string message, Exception ex)
         {
             ShowErrorMessage(message, ex);
         }
 
-        private static void mPeptideHitResultsProcRunner_MessageEvent(string message)
+        private static void PeptideHitResultsProcRunner_MessageEvent(string message)
         {
             Console.WriteLine(message);
         }
 
-        private static void mPeptideHitResultsProcRunner_ProgressChanged(string taskDescription, float percentComplete)
+        private static void PeptideHitResultsProcRunner_ProgressChanged(string taskDescription, float percentComplete)
         {
             const int PERCENT_REPORT_INTERVAL = 25;
             const int PROGRESS_DOT_INTERVAL_MSEC = 250;
@@ -556,14 +558,14 @@ namespace PeptideHitResultsProcRunner
             }
         }
 
-        private static void mPeptideHitResultsProcRunner_ProgressReset()
+        private static void PeptideHitResultsProcRunner_ProgressReset()
         {
             mLastProgressReportTime = DateTime.UtcNow;
             mLastProgressReportValueTime = DateTime.UtcNow;
             mLastProgressReportValue = 0;
         }
 
-        private static void mPeptideHitResultsProcRunner_WarningEvent(string message)
+        private static void PeptideHitResultsProcRunner_WarningEvent(string message)
         {
             if (message.StartsWith("Warning", StringComparison.InvariantCultureIgnoreCase))
                 ConsoleMsgUtils.ShowWarning(message);

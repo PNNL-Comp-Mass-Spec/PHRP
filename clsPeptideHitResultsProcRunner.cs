@@ -135,8 +135,8 @@ namespace PeptideHitResultsProcRunner
 
             string errorMessage;
 
-            if (ErrorCode == eProcessFilesErrorCodes.LocalizedError |
-                ErrorCode == eProcessFilesErrorCodes.NoError)
+            if (ErrorCode == ProcessFilesErrorCodes.LocalizedError |
+                ErrorCode == ProcessFilesErrorCodes.NoError)
             {
                 switch (mLocalErrorCode)
                 {
@@ -271,14 +271,14 @@ namespace PeptideHitResultsProcRunner
                     var appFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                     if (string.IsNullOrWhiteSpace(appFolderPath))
                     {
-                        SetBaseClassErrorCode(eProcessFilesErrorCodes.ParameterFileNotFound);
+                        SetBaseClassErrorCode(ProcessFilesErrorCodes.ParameterFileNotFound);
                         return false;
                     }
 
                     parameterFilePath = Path.Combine(appFolderPath, Path.GetFileName(parameterFilePath));
                     if (!File.Exists(parameterFilePath))
                     {
-                        SetBaseClassErrorCode(eProcessFilesErrorCodes.ParameterFileNotFound);
+                        SetBaseClassErrorCode(ProcessFilesErrorCodes.ParameterFileNotFound);
                         return false;
                     }
                 }
@@ -288,7 +288,7 @@ namespace PeptideHitResultsProcRunner
                     if (!settingsFile.SectionPresent(OPTIONS_SECTION))
                     {
                         ShowErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + parameterFilePath);
-                        SetBaseClassErrorCode(eProcessFilesErrorCodes.InvalidParameterFile);
+                        SetBaseClassErrorCode(ProcessFilesErrorCodes.InvalidParameterFile);
                         return false;
                     }
 
@@ -337,9 +337,9 @@ namespace PeptideHitResultsProcRunner
                 var statusMessage = "Parameter file load error: " + parameterFilePath;
                 ShowErrorMessage(statusMessage);
 
-                if (ErrorCode == eProcessFilesErrorCodes.NoError)
+                if (ErrorCode == ProcessFilesErrorCodes.NoError)
                 {
-                    SetBaseClassErrorCode(eProcessFilesErrorCodes.InvalidParameterFile);
+                    SetBaseClassErrorCode(ProcessFilesErrorCodes.InvalidParameterFile);
                 }
                 return false;
             }
@@ -349,14 +349,14 @@ namespace PeptideHitResultsProcRunner
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     ShowErrorMessage("Input file name is empty");
-                    SetBaseClassErrorCode(eProcessFilesErrorCodes.InvalidInputFilePath);
+                    SetBaseClassErrorCode(ProcessFilesErrorCodes.InvalidInputFilePath);
                 }
                 else
                 {
                     // Note that CleanupFilePaths() will update mOutputFolderPath, which is used by LogMessage()
                     if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
                     {
-                        SetBaseClassErrorCode(eProcessFilesErrorCodes.FilePathError);
+                        SetBaseClassErrorCode(ProcessFilesErrorCodes.FilePathError);
                     }
                     else
                     {
@@ -384,10 +384,10 @@ namespace PeptideHitResultsProcRunner
 
         private void RegisterResultsProcessEvents(EventNotifier resultsProcessor)
         {
-            resultsProcessor.ErrorEvent += mPeptideHitResultsProcessor_ErrorOccurred;
-            resultsProcessor.StatusEvent += mPeptideHitResultsProcessor_MessageEvent;
-            resultsProcessor.ProgressUpdate += mPeptideHitResultsProcessor_ProgressChanged;
-            resultsProcessor.WarningEvent += mPeptideHitResultsProcessor_WarningMessageEvent;
+            resultsProcessor.ErrorEvent += PeptideHitResultsProcessor_ErrorOccurred;
+            resultsProcessor.StatusEvent += PeptideHitResultsProcessor_MessageEvent;
+            resultsProcessor.ProgressUpdate += PeptideHitResultsProcessor_ProgressChanged;
+            resultsProcessor.WarningEvent += PeptideHitResultsProcessor_WarningMessageEvent;
         }
 
         /// <summary>
@@ -430,14 +430,14 @@ namespace PeptideHitResultsProcRunner
 
                 if (eNewErrorCode == eResultsProcessorErrorCodes.NoError)
                 {
-                    if (ErrorCode == eProcessFilesErrorCodes.LocalizedError)
+                    if (ErrorCode == ProcessFilesErrorCodes.LocalizedError)
                     {
-                        SetBaseClassErrorCode(eProcessFilesErrorCodes.NoError);
+                        SetBaseClassErrorCode(ProcessFilesErrorCodes.NoError);
                     }
                 }
                 else
                 {
-                    SetBaseClassErrorCode(eProcessFilesErrorCodes.LocalizedError);
+                    SetBaseClassErrorCode(ProcessFilesErrorCodes.LocalizedError);
                 }
             }
         }
@@ -682,7 +682,7 @@ namespace PeptideHitResultsProcRunner
 
         }
 
-        private void mPeptideHitResultsProcessor_ErrorOccurred(string message, Exception ex)
+        private void PeptideHitResultsProcessor_ErrorOccurred(string message, Exception ex)
         {
             if (ex != null && !message.Contains(ex.Message))
             {
@@ -695,17 +695,17 @@ namespace PeptideHitResultsProcRunner
 
         }
 
-        private void mPeptideHitResultsProcessor_MessageEvent(string message)
+        private void PeptideHitResultsProcessor_MessageEvent(string message)
         {
             LogMessage(message);
         }
 
-        private void mPeptideHitResultsProcessor_ProgressChanged(string taskDescription, float percentComplete)
+        private void PeptideHitResultsProcessor_ProgressChanged(string taskDescription, float percentComplete)
         {
             UpdateProgress(taskDescription, percentComplete);
         }
 
-        private void mPeptideHitResultsProcessor_WarningMessageEvent(string warningMessage)
+        private void PeptideHitResultsProcessor_WarningMessageEvent(string warningMessage)
         {
             LogMessage(warningMessage, eMessageTypeConstants.Warning);
         }
