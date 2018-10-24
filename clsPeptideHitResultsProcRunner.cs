@@ -690,11 +690,11 @@ namespace PeptideHitResultsProcRunner
         {
             if (ex != null && !message.Contains(ex.Message))
             {
-                LogMessage(message + ": " + ex.Message, eMessageTypeConstants.ErrorMsg);
+                LogMessage(message + ": " + ex.Message, MessageTypeConstants.ErrorMsg);
             }
             else
             {
-                LogMessage(message, eMessageTypeConstants.ErrorMsg);
+                LogMessage(message, MessageTypeConstants.ErrorMsg);
             }
 
         }
@@ -711,7 +711,7 @@ namespace PeptideHitResultsProcRunner
 
         private void PeptideHitResultsProcessor_WarningMessageEvent(string warningMessage)
         {
-            LogMessage(warningMessage, eMessageTypeConstants.Warning);
+            LogMessage(warningMessage, MessageTypeConstants.Warning);
         }
     }
 }
