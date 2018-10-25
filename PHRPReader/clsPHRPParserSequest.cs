@@ -345,7 +345,7 @@ namespace PHRPReader
 
             try
             {
-                var paramFilePath = Path.Combine(mInputFolderPath, searchEngineParamFileName);
+                var paramFilePath = Path.Combine(mInputDirectoryPath, searchEngineParamFileName);
 
                 if (!File.Exists(paramFilePath))
                 {
@@ -353,11 +353,11 @@ namespace PHRPReader
                 }
                 else
                 {
-                    using (var srInFile = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var reader = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
-                        while (!srInFile.EndOfStream)
+                        while (!reader.EndOfStream)
                         {
-                            var lineIn = srInFile.ReadLine();
+                            var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
                                 continue;
 

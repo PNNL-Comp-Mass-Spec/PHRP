@@ -122,13 +122,13 @@ namespace PHRPReader
                 DefineColumnHeaders();
                 mErrorMessage = string.Empty;
 
-                using (var srInFile = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     var headerLineParsed = false;
 
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         var skipLine = false;
 
                         if (string.IsNullOrWhiteSpace(lineIn))

@@ -448,7 +448,7 @@ namespace PeptideHitResultsProcessor
             return totalModMass;
         }
 
-        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputFolderPath, bool MTS)
+        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool MTS)
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
             if (pepToProteinMapFilePath.EndsWith("_msalign_syn", StringComparison.InvariantCultureIgnoreCase) ||
@@ -458,7 +458,7 @@ namespace PeptideHitResultsProcessor
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
             }
 
-            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputFolderPath, MTS);
+            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputDirectoryPath, MTS);
         }
 
         /// <summary>
@@ -673,11 +673,9 @@ namespace PeptideHitResultsProcessor
             // Nothing to do at present
         }
 
-        protected bool ParseMSAlignSynopsisFile(string inputFilePath, string outputFolderPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
+        protected bool ParseMSAlignSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
-
-            string previousPValue = null;
 
             // Note that MSAlign synopsis files are normally sorted on PValue value, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
@@ -729,7 +727,7 @@ namespace PeptideHitResultsProcessor
                         var headerParsed = false;
 
                         // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputFolderPath, Path.GetFileName(inputFilePath));
+                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                         success = InitializeSequenceOutputFiles(baseOutputFilePath);
 
                         // Parse the input file
@@ -757,7 +755,7 @@ namespace PeptideHitResultsProcessor
 
                             var validSearchResult = ParseMSAlignSynFileEntry(lineIn, searchResult, ref errorLog,
                                                                             resultsProcessed, columnMapping,
-                                                                            out currentPeptideWithMods);
+                                                                            out var currentPeptideWithMods);
 
                             if (validSearchResult)
                             {
@@ -852,7 +850,7 @@ namespace PeptideHitResultsProcessor
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
                         var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
-                        modificationSummaryFilePath = Path.Combine(outputFolderPath, modificationSummaryFilePath);
+                        modificationSummaryFilePath = Path.Combine(outputDirectoryPath, modificationSummaryFilePath);
 
                         SaveModificationSummaryFile(modificationSummaryFilePath);
                     }
@@ -1380,10 +1378,10 @@ namespace PeptideHitResultsProcessor
         /// Main processing function
         /// </summary>
         /// <param name="inputFilePath">MSAlign results file</param>
-        /// <param name="outputFolderPath">Output folder</param>
+        /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if success, False if failure</returns>
-        public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath)
+        public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
 
@@ -1410,7 +1408,7 @@ namespace PeptideHitResultsProcessor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                 {
                     return false;
                 }
@@ -1444,7 +1442,7 @@ namespace PeptideHitResultsProcessor
                     ResetProgress("Creating the SYN file", true);
 
                     // The synopsis file name will be of the form BasePath_msalign_syn.txt
-                    var synOutputFilePath = Path.Combine(outputFolderPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+                    var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath);
 
@@ -1452,7 +1450,7 @@ namespace PeptideHitResultsProcessor
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                     // Now parse the _syn.txt file that we just created to next create the other PHRP files
-                    success = ParseMSAlignSynopsisFile(synOutputFilePath, outputFolderPath, ref pepToProteinMapping, false);
+                    success = ParseMSAlignSynopsisFile(synOutputFilePath, outputDirectoryPath, ref pepToProteinMapping, false);
 
                     // Remove all items from pepToProteinMapping to reduce memory overhead
                     pepToProteinMapping.Clear();
@@ -1460,7 +1458,7 @@ namespace PeptideHitResultsProcessor
 
                     if (success && CreateProteinModsFile)
                     {
-                        success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputFolderPath);
+                        success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
                     }
 
                     if (success)
@@ -1483,14 +1481,13 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        private bool CreateProteinModsFileWork(string baseName, FileInfo inputFile, string synOutputFilePath, string outputFolderPath)
+        private bool CreateProteinModsFileWork(string baseName, FileInfo inputFile, string synOutputFilePath, string outputDirectoryPath)
         {
-            var success = false;
-            string mtsPepToProteinMapFilePath = null;
+            bool success;
 
             // Create the MTSPepToProteinMap file
 
-            mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputFolderPath, MTS: true);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, MTS: true);
 
             var sourcePHRPDataFiles = new List<string>();
 
@@ -1559,8 +1556,6 @@ namespace PeptideHitResultsProcessor
 
         protected void ResolveMSAlignModsWithModDefinitions(ref List<clsModificationDefinition> mSAlignModInfo)
         {
-            clsModificationDefinition modDef;
-
             if (mSAlignModInfo != null)
             {
                 // Call .LookupModificationDefinitionByMass for each entry in mSAlignModInfo
@@ -1568,7 +1563,7 @@ namespace PeptideHitResultsProcessor
                 {
                     if (string.IsNullOrEmpty(modInfo.TargetResidues))
                     {
-                        modDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(
+                        mPeptideMods.LookupModificationDefinitionByMassAndModType(
                             modInfo.ModificationMass, modInfo.ModificationType, default(char),
                             clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
                     }
@@ -1576,7 +1571,7 @@ namespace PeptideHitResultsProcessor
                     {
                         foreach (var chTargetResidue in modInfo.TargetResidues)
                         {
-                            modDef = mPeptideMods.LookupModificationDefinitionByMassAndModType(
+                            mPeptideMods.LookupModificationDefinitionByMassAndModType(
                                 modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
                                 clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
                         }
@@ -1590,7 +1585,7 @@ namespace PeptideHitResultsProcessor
             List<udtMSAlignSearchResultType> filteredSearchResults,
             ref string errorLog)
         {
-            // Sort udtFilteredSearchResults by ascending PVAlue, ascending scan, ascending charge, ascending peptide, and ascending protein
+            // Sort udtFilteredSearchResults by ascending PValue, ascending scan, ascending charge, ascending peptide, and ascending protein
             filteredSearchResults.Sort(new MSAlignSearchResultsComparerPValueScanChargePeptide());
 
             for (var index = 0; index <= filteredSearchResults.Count - 1; index++)

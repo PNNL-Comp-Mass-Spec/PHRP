@@ -76,8 +76,8 @@ namespace PeptideHitResultsProcessor
         public override void Setup(InitializationParams options)
         {
             // Copies all input data required for plugin operation to appropriate memory variables
-            SourceFolderPath = options.SourceFolderPath;
-            OutputFolderPath = options.OutputFolderPath;
+            SourceDirectoryPath = options.SourceDirectoryPath;
+            OutputDirectoryPath = options.OutputDirectoryPath;
 
             PeptideHitResultsFileName = options.PeptideHitResultsFileName;
             MassCorrectionTagsFileName = options.MassCorrectionTagsFileName;
@@ -207,7 +207,7 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-                success = m_PeptideHitResultsProcessor.ProcessFile(m_PeptideHitResultsFilePath, OutputFolderPath, m_SettingsFilePath);
+                success = m_PeptideHitResultsProcessor.ProcessFile(m_PeptideHitResultsFilePath, OutputDirectoryPath, m_SettingsFilePath);
             }
             catch (Exception)
             {
@@ -239,32 +239,32 @@ namespace PeptideHitResultsProcessor
         {
             // Initializes module variables and verifies that mandatory parameters have been properly specified
 
-            // Output folder name
-            if (string.IsNullOrEmpty(OutputFolderPath))
+            // Output directory name
+            if (string.IsNullOrEmpty(OutputDirectoryPath))
             {
-                m_ErrMsg = "Output folder path not specified";
+                m_ErrMsg = "Output directory path not specified";
                 return false;
             }
 
-            // Source folder name
-            if (string.IsNullOrEmpty(SourceFolderPath))
+            // Source directory name
+            if (string.IsNullOrEmpty(SourceDirectoryPath))
             {
-                m_ErrMsg = "Source folder not specified";
+                m_ErrMsg = "Source directory not specified";
                 return false;
             }
 
             if (DebugLevel >= 3)
             {
-                OnDebugEvent("Setup params: OutFolderPath = " + OutputFolderPath);
-                OnDebugEvent("Setup params: SourceFolderPath = " + SourceFolderPath);
+                OnDebugEvent("Setup params: OutputDirectoryPath = " + OutputDirectoryPath);
+                OnDebugEvent("Setup params: SourceDirectoryPath = " + SourceDirectoryPath);
             }
 
             // Source directory exists?
-            if (!VerifyDirExists(SourceFolderPath))
+            if (!VerifyDirExists(SourceDirectoryPath))
                 return false; // Error msg handled by VerifyDirExists
 
             // Output directory exists?
-            if (!VerifyDirExists(OutputFolderPath))
+            if (!VerifyDirExists(OutputDirectoryPath))
                 return false; // Error msg handled by VerifyDirExists
 
             // Analysis tool name defined?
@@ -296,10 +296,10 @@ namespace PeptideHitResultsProcessor
             }
 
             // Define the parameter file path; this is passed as the search tool parameter file
-            m_ParameterFilePath = Path.Combine(SourceFolderPath, ParameterFileName);
+            m_ParameterFilePath = Path.Combine(SourceDirectoryPath, ParameterFileName);
 
             // Define the settings file path; this is passed as the parameter file name to m_PeptideHitResultsProcessor
-            m_SettingsFilePath = Path.Combine(SourceFolderPath, SettingsFileName);
+            m_SettingsFilePath = Path.Combine(SourceDirectoryPath, SettingsFileName);
 
             // Define the peptide hit results format based on the analysis tool name
             if (AnalysisToolName.IndexOf("xtandem", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -362,11 +362,11 @@ namespace PeptideHitResultsProcessor
             // Define the peptide hit results file name
             if (string.IsNullOrWhiteSpace(PeptideHitResultsFileName))
             {
-                m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, SourceFolderPath, DatasetName);
+                m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, SourceDirectoryPath, DatasetName);
             }
             else
             {
-                m_PeptideHitResultsFilePath = Path.Combine(SourceFolderPath, PeptideHitResultsFileName);
+                m_PeptideHitResultsFilePath = Path.Combine(SourceDirectoryPath, PeptideHitResultsFileName);
             }
 
             if (DebugLevel >= 3)
@@ -383,21 +383,21 @@ namespace PeptideHitResultsProcessor
             // Define the mass correction tags file path
             if (string.IsNullOrWhiteSpace(MassCorrectionTagsFileName))
             {
-                m_MassCorrectionTagsFilePath = Path.Combine(SourceFolderPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME);
+                m_MassCorrectionTagsFilePath = Path.Combine(SourceDirectoryPath, DEFAULT_MASS_CORRECTION_TAGS_FILENAME);
             }
             else
             {
-                m_MassCorrectionTagsFilePath = Path.Combine(SourceFolderPath, MassCorrectionTagsFileName);
+                m_MassCorrectionTagsFilePath = Path.Combine(SourceDirectoryPath, MassCorrectionTagsFileName);
             }
 
             // Define the modification definitions file path
             if (string.IsNullOrWhiteSpace(ModificationDefinitionsFileName))
             {
-                m_ModificationDefinitionsFilePath = Path.Combine(SourceFolderPath, Path.GetFileNameWithoutExtension(ParameterFileName) + MODIFICATION_DEFINITIONS_FILE_SUFFIX);
+                m_ModificationDefinitionsFilePath = Path.Combine(SourceDirectoryPath, Path.GetFileNameWithoutExtension(ParameterFileName) + MODIFICATION_DEFINITIONS_FILE_SUFFIX);
             }
             else
             {
-                m_ModificationDefinitionsFilePath = Path.Combine(SourceFolderPath, ModificationDefinitionsFileName);
+                m_ModificationDefinitionsFilePath = Path.Combine(SourceDirectoryPath, ModificationDefinitionsFileName);
             }
 
             if (DebugLevel >= 3)

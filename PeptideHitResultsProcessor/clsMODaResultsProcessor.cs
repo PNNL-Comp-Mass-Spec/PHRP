@@ -334,7 +334,7 @@ namespace PeptideHitResultsProcessor
         //
         //        using (var reader = new StreamReader(new FileStream(synOutputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
         //        {
-        //            using (var swOutfile = new StreamWriter(new FileStream(synOutputFilePathNew, FileMode.Create, FileAccess.Write, FileShare.Read)))
+        //            using (var writer = new StreamWriter(new FileStream(synOutputFilePathNew, FileMode.Create, FileAccess.Write, FileShare.Read)))
         //            {
         //                while (!reader.EndOfStream)
         //                {
@@ -352,7 +352,7 @@ namespace PeptideHitResultsProcessor
         //                            break;
         //                        }
         //
-        //                        swOutfile.WriteLine(lineIn + "\t" + SYNOPSIS_FILE_COLUMN_DELM_PPM_REFINED);
+        //                        writer.WriteLine(lineIn + "\t" + SYNOPSIS_FILE_COLUMN_DELM_PPM_REFINED);
         //                        headersParsed = true;
         //                    }
         //                    else
@@ -369,7 +369,7 @@ namespace PeptideHitResultsProcessor
         //                            }
         //                        }
         //
-        //                        swOutfile.WriteLine(lineIn + "\t" + delMPPMRefined);
+        //                        writer.WriteLine(lineIn + "\t" + delMPPMRefined);
         //                    }
         //                }
         //            }
@@ -599,7 +599,7 @@ namespace PeptideHitResultsProcessor
             return totalModMass;
         }
 
-        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputFolderPath, bool mts)
+        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
             if (pepToProteinMapFilePath != null &&
@@ -610,7 +610,7 @@ namespace PeptideHitResultsProcessor
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
             }
 
-            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputFolderPath, mts);
+            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputDirectoryPath, mts);
         }
 
         /// <summary>
@@ -890,12 +890,12 @@ namespace PeptideHitResultsProcessor
                 }
                 else if (scanMapFiles.Count == 0)
                 {
-                    ReportWarning("Did not find a mgf_IndexToScanMap file for " + sourceFileDescription + " in folder " + inputFile.Directory.FullName + "; scan numbers will be 0 in the synopsis file");
+                    ReportWarning("Did not find a mgf_IndexToScanMap file for " + sourceFileDescription + " in directory " + inputFile.Directory.FullName + "; scan numbers will be 0 in the synopsis file");
                     return false;
                 }
                 else
                 {
-                    ReportWarning("Found more than one potential mgf_IndexToScanMap file for " + sourceFileDescription + " in folder " + inputFile.Directory.FullName + " scan numbers will be 0 in the synopsis file");
+                    ReportWarning("Found more than one potential mgf_IndexToScanMap file for " + sourceFileDescription + " in directory " + inputFile.Directory.FullName + " scan numbers will be 0 in the synopsis file");
                     return false;
                 }
 
@@ -953,7 +953,7 @@ namespace PeptideHitResultsProcessor
 
         private bool ParseMODaSynopsisFile(
             string inputFilePath,
-            string outputFolderPath,
+            string outputDirectoryPath,
             List<udtPepToProteinMappingType> pepToProteinMapping,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
@@ -1003,7 +1003,7 @@ namespace PeptideHitResultsProcessor
                         var headerParsed = false;
 
                         // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputFolderPath, Path.GetFileName(inputFilePath));
+                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                         success = InitializeSequenceOutputFiles(baseOutputFilePath);
 
                         // Parse the input file
@@ -1130,7 +1130,7 @@ namespace PeptideHitResultsProcessor
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
                         var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
-                        modificationSummaryFilePath = Path.Combine(outputFolderPath, modificationSummaryFilePath);
+                        modificationSummaryFilePath = Path.Combine(outputDirectoryPath, modificationSummaryFilePath);
 
                         SaveModificationSummaryFile(modificationSummaryFilePath);
                     }
@@ -1174,7 +1174,7 @@ namespace PeptideHitResultsProcessor
 
             var rowIndex = "?";
 
-            var validSearchResult = false;
+            bool validSearchResult;
 
             try
             {
@@ -1594,10 +1594,10 @@ namespace PeptideHitResultsProcessor
         /// Main processing function
         /// </summary>
         /// <param name="inputFilePath">MODa results file (Dataset_moda.id.txt)</param>
-        /// <param name="outputFolderPath">Output folder</param>
+        /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if success, False if failure</returns>
-        public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath)
+        public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
 
@@ -1624,7 +1624,7 @@ namespace PeptideHitResultsProcessor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                 {
                     return false;
                 }
@@ -1661,7 +1661,7 @@ namespace PeptideHitResultsProcessor
                     ResetProgress("Creating the SYN file", true);
 
                     // The synopsis file name will be of the form BasePath_moda_syn.txt
-                    var synOutputFilePath = Path.Combine(outputFolderPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+                    var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath);
 
@@ -1669,7 +1669,7 @@ namespace PeptideHitResultsProcessor
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                     // Now parse the _syn.txt file that we just created to next create the other PHRP files
-                    success = ParseMODaSynopsisFile(synOutputFilePath, outputFolderPath, pepToProteinMapping, false);
+                    success = ParseMODaSynopsisFile(synOutputFilePath, outputDirectoryPath, pepToProteinMapping, false);
 
                     // This step is not necessary
                     //If success Then
@@ -1682,7 +1682,7 @@ namespace PeptideHitResultsProcessor
 
                     if (success && CreateProteinModsFile)
                     {
-                        success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputFolderPath);
+                        success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
                     }
 
                     if (success)
@@ -1709,7 +1709,7 @@ namespace PeptideHitResultsProcessor
             string baseName,
             FileInfo inputFile,
             string synOutputFilePath,
-            string outputFolderPath)
+            string outputDirectoryPath)
         {
             bool success;
 
@@ -1721,7 +1721,7 @@ namespace PeptideHitResultsProcessor
 
             // Create the MTSPepToProteinMap file
 
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputFolderPath, mts: true);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, mts: true);
 
             var sourcePHRPDataFiles = new List<string>();
 
@@ -1763,11 +1763,11 @@ namespace PeptideHitResultsProcessor
                 }
                 else
                 {
-                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputFolderPath);
+                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
+                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
 
                     // Create the Protein Mods file
-                    success = CreateProteinModDetailsFile(synOutputFilePath, outputFolderPath, mtsPepToProteinMapFilePath,
+                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
                                                           clsPHRPReader.ePeptideHitResultType.MODa);
                 }
             }

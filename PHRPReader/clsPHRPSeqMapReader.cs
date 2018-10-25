@@ -30,7 +30,7 @@ namespace PHRPReader
 
         #region "Module-wide variables"
         private readonly string mDatasetName;
-        private readonly string mInputFolderPath;
+        private readonly string mInputDirectoryPath;
 
         private readonly string mResultToSeqMapFilename;
         private readonly string mSeqToProteinMapFilename;
@@ -55,9 +55,15 @@ namespace PHRPReader
         public string ErrorMessage => mErrorMessage;
 
         /// <summary>
-        /// Input folder path
+        /// Input directory path
         /// </summary>
-        public string InputFolderPath => mInputFolderPath;
+        public string InputDirectoryPath => mInputDirectoryPath;
+
+        /// <summary>
+        /// Input directory path
+        /// </summary>
+        [Obsolete("Use InputDirectoryPath")]
+        public string InputFolderPath => mInputDirectoryPath;
 
         /// <summary>
         /// Max proteins to track for each SeqID
@@ -90,10 +96,10 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
-        /// <param name="inputFolderPath">Input file path</param>
+        /// <param name="inputDirectoryPath">Input file path</param>
         /// <param name="ePeptideHitResultType">Peptide Hit result type</param>
         /// <remarks></remarks>
-        public clsPHRPSeqMapReader(string datasetName, string inputFolderPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType) : this(datasetName, inputFolderPath, ePeptideHitResultType, clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, datasetName))
+        public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType) : this(datasetName, inputDirectoryPath, ePeptideHitResultType, clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, datasetName))
         {
         }
 
@@ -101,11 +107,11 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
-        /// <param name="inputFolderPath">Input file path</param>
+        /// <param name="inputDirectoryPath">Input file path</param>
         /// <param name="ePeptideHitResultType">Peptide Hit result type</param>
         /// <param name="phrpDataFileName">The base PHRP data file name; used when calling AutoSwitchToLegacyMSGFDBIfRequired and AutoSwitchToFHTIfRequired</param>
         /// <remarks></remarks>
-        public clsPHRPSeqMapReader(string datasetName, string inputFolderPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, string phrpDataFileName)
+        public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, string phrpDataFileName)
         {
             mDatasetName = datasetName;
 
@@ -115,10 +121,10 @@ namespace PHRPReader
                 throw new Exception(mErrorMessage);
             }
 
-            mInputFolderPath = inputFolderPath;
-            if (string.IsNullOrEmpty(mInputFolderPath))
+            mInputDirectoryPath = inputDirectoryPath;
+            if (string.IsNullOrEmpty(mInputDirectoryPath))
             {
-                mInputFolderPath = string.Empty;
+                mInputDirectoryPath = string.Empty;
             }
 
             mPeptideHitResultType = ePeptideHitResultType;
@@ -166,18 +172,18 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="inputFolderPath">Input folder path</param>
+        /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="resultToSeqMapFilename">ResultToSeqMap filename</param>
         /// <param name="seqToProteinMapFilename"></param>
         /// <param name="seqInfoFilename">SeqInfo filename</param>
         /// <remarks></remarks>
-        public clsPHRPSeqMapReader(string inputFolderPath, string resultToSeqMapFilename, string seqToProteinMapFilename, string seqInfoFilename)
+        public clsPHRPSeqMapReader(string inputDirectoryPath, string resultToSeqMapFilename, string seqToProteinMapFilename, string seqInfoFilename)
         {
-            mInputFolderPath = inputFolderPath;
+            mInputDirectoryPath = inputDirectoryPath;
 
-            if (string.IsNullOrEmpty(mInputFolderPath))
+            if (string.IsNullOrEmpty(mInputDirectoryPath))
             {
-                mInputFolderPath = string.Empty;
+                mInputDirectoryPath = string.Empty;
             }
 
             mPeptideHitResultType = clsPHRPReader.AutoDetermineResultType(resultToSeqMapFilename);
@@ -249,7 +255,7 @@ namespace PHRPReader
             }
             else
             {
-                filePath = Path.Combine(mInputFolderPath, mResultToSeqMapFilename);
+                filePath = Path.Combine(mInputDirectoryPath, mResultToSeqMapFilename);
                 if (!File.Exists(filePath))
                 {
                     mErrorMessage = "SeqInfo file not found: " + filePath;
@@ -265,7 +271,7 @@ namespace PHRPReader
             {
                 if (!string.IsNullOrEmpty(mSeqInfoFilename))
                 {
-                    filePath = Path.Combine(mInputFolderPath, mSeqInfoFilename);
+                    filePath = Path.Combine(mInputDirectoryPath, mSeqInfoFilename);
                     if (File.Exists(filePath))
                     {
                         LoadSeqInfo(filePath, seqInfo);
@@ -274,7 +280,7 @@ namespace PHRPReader
 
                 if (!string.IsNullOrEmpty(mSeqToProteinMapFilename))
                 {
-                    filePath = Path.Combine(mInputFolderPath, mSeqToProteinMapFilename);
+                    filePath = Path.Combine(mInputDirectoryPath, mSeqToProteinMapFilename);
                     if (!File.Exists(filePath))
                     {
                         mErrorMessage = "SeqInfo file not found: " + filePath;
@@ -292,7 +298,7 @@ namespace PHRPReader
 
                 if (success && !string.IsNullOrEmpty(mPepToProteinMapFilename))
                 {
-                    filePath = Path.Combine(mInputFolderPath, mPepToProteinMapFilename);
+                    filePath = Path.Combine(mInputDirectoryPath, mPepToProteinMapFilename);
                     if (!File.Exists(filePath))
                     {
                         var filePathAlternate = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(filePath, "Dataset_msgfdb.txt");
@@ -333,11 +339,11 @@ namespace PHRPReader
             try
             {
                 // Read the data from the PepToProtMap file
-                using (var srInFile = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         linesRead += 1;
 
                         if (!string.IsNullOrEmpty(lineIn))
@@ -354,18 +360,18 @@ namespace PHRPReader
                                     {
                                         var peptide = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(splitLine[0], true);
 
-                                        if (pepToProteinMap.TryGetValue(peptide, out var oPepToProtMapInfo))
+                                        if (pepToProteinMap.TryGetValue(peptide, out var pepToProtMapInfo))
                                         {
-                                            if (MaxProteinsPerSeqID == 0 || oPepToProtMapInfo.ProteinCount < MaxProteinsPerSeqID)
+                                            if (MaxProteinsPerSeqID == 0 || pepToProtMapInfo.ProteinCount < MaxProteinsPerSeqID)
                                             {
-                                                oPepToProtMapInfo.AddProtein(splitLine[1], residueStart, residueEnd);
+                                                pepToProtMapInfo.AddProtein(splitLine[1], residueStart, residueEnd);
                                             }
                                         }
                                         else
                                         {
-                                            oPepToProtMapInfo = new clsPepToProteinMapInfo(splitLine[1], residueStart, residueEnd);
+                                            pepToProtMapInfo = new clsPepToProteinMapInfo(splitLine[1], residueStart, residueEnd);
 
-                                            pepToProteinMap.Add(peptide, oPepToProtMapInfo);
+                                            pepToProteinMap.Add(peptide, pepToProtMapInfo);
                                         }
                                     }
                                 }
@@ -375,7 +381,7 @@ namespace PHRPReader
                             {
                                 if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds >= 5)
                                 {
-                                    var pctComplete = srInFile.BaseStream.Position / Convert.ToDouble(srInFile.BaseStream.Length) * 100;
+                                    var pctComplete = reader.BaseStream.Position / Convert.ToDouble(reader.BaseStream.Length) * 100;
                                     Console.WriteLine(" ... caching PepToProtMapData: " + pctComplete.ToString("0.0") + "% complete");
                                     lastProgress = DateTime.UtcNow;
                                     notifyComplete = true;
@@ -411,11 +417,11 @@ namespace PHRPReader
             try
             {
                 // Read the data from the result to sequence map file
-                using (var srInFile = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
 
                         if (string.IsNullOrEmpty(lineIn))
                             continue;
@@ -473,11 +479,11 @@ namespace PHRPReader
                 };
 
                 // Read the data from the sequence info file
-                using (var srInFile = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         var skipLine = false;
 
                         if (string.IsNullOrEmpty(lineIn))
@@ -548,11 +554,11 @@ namespace PHRPReader
 
 
                 // Read the data from the sequence to protein map file
-                using (var srInFile = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         var skipLine = false;
 
                         if (string.IsNullOrEmpty(lineIn))

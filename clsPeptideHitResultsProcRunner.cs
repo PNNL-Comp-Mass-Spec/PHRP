@@ -321,11 +321,11 @@ namespace PeptideHitResultsProcRunner
         /// Main processing function
         /// </summary>
         /// <param name="inputFilePath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <param name="parameterFilePath"></param>
         /// <param name="resetErrorCode"></param>
         /// <returns>True if success, False if failure</returns>
-        public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath, bool resetErrorCode)
+        public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath, bool resetErrorCode)
         {
 
             var success = false;
@@ -356,8 +356,8 @@ namespace PeptideHitResultsProcRunner
                 }
                 else
                 {
-                    // Note that CleanupFilePaths() will update mOutputFolderPath, which is used by LogMessage()
-                    if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
+                    // Note that CleanupFilePaths() will update mOutputDirectoryPath, which is used by LogMessage()
+                    if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                     {
                         SetBaseClassErrorCode(ProcessFilesErrorCodes.FilePathError);
                     }
@@ -368,11 +368,11 @@ namespace PeptideHitResultsProcRunner
 
                         if (CreateProteinModsUsingPHRPDataFile)
                         {
-                            success = StartCreateProteinModsViaPHRPData(inputFilePath, outputFolderPath);
+                            success = StartCreateProteinModsViaPHRPData(inputFilePath, outputDirectoryPath);
                         }
                         else
                         {
-                            success = StartPHRP(inputFilePath, outputFolderPath, parameterFilePath);
+                            success = StartPHRP(inputFilePath, outputDirectoryPath, parameterFilePath);
                         }
                     }
                 }
@@ -395,13 +395,13 @@ namespace PeptideHitResultsProcRunner
 
         /// <summary>
         /// Looks for file fileNameOrPath in the current working directory
-        /// If not found, then looks in sourceFolderPath
+        /// If not found, then looks in sourceDirectoryPath
         /// </summary>
-        /// <param name="sourceFolderPath">Path to the folder containing the input file</param>
+        /// <param name="sourceDirectoryPath">Path to the directory containing the input file</param>
         /// <param name="fileNameOrPath">File to find (either filename or full file path)</param>
         /// <returns>The path to the file if found, or fileNameOrPath if not found</returns>
         /// <remarks></remarks>
-        protected string ResolveFilePath(string sourceFolderPath, string fileNameOrPath)
+        protected string ResolveFilePath(string sourceDirectoryPath, string fileNameOrPath)
         {
             if (File.Exists(fileNameOrPath))
             {
@@ -412,7 +412,7 @@ namespace PeptideHitResultsProcRunner
             if (string.IsNullOrWhiteSpace(fileName))
                 return fileNameOrPath;
 
-            var newFilePath = Path.Combine(sourceFolderPath, fileName);
+            var newFilePath = Path.Combine(sourceDirectoryPath, fileName);
             if (File.Exists(newFilePath))
             {
                 return newFilePath;
@@ -445,7 +445,7 @@ namespace PeptideHitResultsProcRunner
             }
         }
 
-        private bool StartCreateProteinModsViaPHRPData(string inputFilePath, string outputFolderPath)
+        private bool StartCreateProteinModsViaPHRPData(string inputFilePath, string outputDirectoryPath)
         {
 
             try
@@ -549,7 +549,7 @@ namespace PeptideHitResultsProcRunner
 
                 InitializePeptideHitResultsProcessor(inputFilePath);
 
-                var success = mPeptideHitResultsProcessor.CreateProteinModDetailsFile(inputFilePath, outputFolderPath);
+                var success = mPeptideHitResultsProcessor.CreateProteinModDetailsFile(inputFilePath, outputDirectoryPath);
 
                 if (!success)
                 {
@@ -569,7 +569,7 @@ namespace PeptideHitResultsProcRunner
 
         }
 
-        private bool StartPHRP(string inputFilePath, string outputFolderPath, string parameterFilePath)
+        private bool StartPHRP(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
 
             try
@@ -666,7 +666,7 @@ namespace PeptideHitResultsProcRunner
 
                 InitializePeptideHitResultsProcessor(inputFilePath);
 
-                var success = mPeptideHitResultsProcessor.ProcessFile(inputFilePath, outputFolderPath, parameterFilePath);
+                var success = mPeptideHitResultsProcessor.ProcessFile(inputFilePath, outputDirectoryPath, parameterFilePath);
                 if (!success)
                 {
                     ShowErrorMessage(mPeptideHitResultsProcessor.ErrorMessage);

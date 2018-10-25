@@ -42,7 +42,7 @@ namespace PeptideHitResultsProcessor
         private const string XTANDEM_XML_ELEMENT_NAME_PROTEIN = "protein";
         private const string XTANDEM_XML_ELEMENT_NAME_PEPTIDE = "peptide";
         private const string XTANDEM_XML_ELEMENT_NAME_DOMAIN = "domain";
-        private const string XTANDEM_XML_ELEMENT_NAME_AMINOACID = "aa";
+        private const string XTANDEM_XML_ELEMENT_NAME_AMINO_ACID = "aa";
         private const string XTANDEM_XML_ELEMENT_NAME_NOTE = "note";
 
         private const string XTANDEM_XML_GROUP_TYPE_MODEL = "model";
@@ -93,6 +93,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Classwide Variables"
+
         protected int mNextResultID;
         protected bool mLookForReverseSequenceTag;
 
@@ -479,26 +480,26 @@ namespace PeptideHitResultsProcessor
                             resultsProcessed = 0;
 
                             // Create the output file
-                            using (var swPeptideResultsFile = new StreamWriter(outputFilePath, false))
+                            using (var writer = new StreamWriter(outputFilePath, false))
                             {
                                 // Write the header line to swPeptideResultsFile
-                                swPeptideResultsFile.WriteLine("Result_ID" + SEP_CHAR +
-                                                               "Group_ID" + SEP_CHAR +
-                                                               "Scan" + SEP_CHAR +
-                                                               "Charge" + SEP_CHAR +
-                                                               "Peptide_MH" + SEP_CHAR +
-                                                               "Peptide_Hyperscore" + SEP_CHAR +
-                                                               "Peptide_Expectation_Value_Log(e)" + SEP_CHAR +
-                                                               "Multiple_Protein_Count" + SEP_CHAR +
-                                                               "Peptide_Sequence" + SEP_CHAR +
-                                                               "DeltaCn2" + SEP_CHAR +
-                                                               "y_score" + SEP_CHAR +
-                                                               "y_ions" + SEP_CHAR +
-                                                               "b_score" + SEP_CHAR +
-                                                               "b_ions" + SEP_CHAR +
-                                                               "Delta_Mass" + SEP_CHAR +
-                                                               "Peptide_Intensity_Log(I)" + SEP_CHAR +
-                                                               "DelM_PPM");
+                                writer.WriteLine("Result_ID" + SEP_CHAR +
+                                                 "Group_ID" + SEP_CHAR +
+                                                 "Scan" + SEP_CHAR +
+                                                 "Charge" + SEP_CHAR +
+                                                 "Peptide_MH" + SEP_CHAR +
+                                                 "Peptide_Hyperscore" + SEP_CHAR +
+                                                 "Peptide_Expectation_Value_Log(e)" + SEP_CHAR +
+                                                 "Multiple_Protein_Count" + SEP_CHAR +
+                                                 "Peptide_Sequence" + SEP_CHAR +
+                                                 "DeltaCn2" + SEP_CHAR +
+                                                 "y_score" + SEP_CHAR +
+                                                 "y_ions" + SEP_CHAR +
+                                                 "b_score" + SEP_CHAR +
+                                                 "b_ions" + SEP_CHAR +
+                                                 "Delta_Mass" + SEP_CHAR +
+                                                 "Peptide_Intensity_Log(I)" + SEP_CHAR +
+                                                 "DelM_PPM");
 
                                 // Create the additional output files
                                 success = InitializeSequenceOutputFiles(outputFilePath);
@@ -530,7 +531,7 @@ namespace PeptideHitResultsProcessor
                                                         {
                                                             eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults;
 
-                                                            ParseXTandemResultsFileEntry(xmlReader, swPeptideResultsFile, ref searchResultCount, ref searchResults, ref errorLog, groupElementReaderDepth);
+                                                            ParseXTandemResultsFileEntry(xmlReader, writer, ref searchResultCount, ref searchResults, ref errorLog, groupElementReaderDepth);
                                                             resultsProcessed += 1;
 
                                                             // Update the progress
@@ -572,10 +573,23 @@ namespace PeptideHitResultsProcessor
                             var inputFile = new FileInfo(inputFilePath);
                             var outputFile = new FileInfo(outputFilePath);
 
-                            var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
-                            modificationSummaryFilePath = Path.Combine(outputFile.DirectoryName, modificationSummaryFilePath);
+                            if (outputFile.Directory == null)
+                            {
+                                ReportWarning("ParseXTandemResultsFile: Could not determine the parent directory of the output file, " + outputFile.FullName);
+                            }
+                            else
+                            {
+                                var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
 
-                            SaveModificationSummaryFile(modificationSummaryFilePath);
+                                if (string.IsNullOrWhiteSpace(modificationSummaryFilePath))
+                                {
+                                    ReportWarning("ParseXTandemResultsFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
+                                }
+                                else
+                                {
+                                    SaveModificationSummaryFile(Path.Combine(outputFile.Directory.FullName, modificationSummaryFilePath));
+                                }
+                            }
                         }
 
                         // Inform the user if any errors occurred
@@ -608,7 +622,7 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        private bool ParseXTandemResultsFileEntry(XmlReader xmlReader, StreamWriter swPeptideResultsFile, ref int searchResultCount, ref clsSearchResultsXTandem[] searchResults, ref string errorLog, int groupElementReaderDepth)
+        private bool ParseXTandemResultsFileEntry(XmlReader xmlReader, StreamWriter writer, ref int searchResultCount, ref clsSearchResultsXTandem[] searchResults, ref string errorLog, int groupElementReaderDepth)
         {
             // Note: The number of valid entries in searchResults[) is given by searchResultCount; searchResults(] is expanded but never shrunk
             // There is a separate entry in searchResults() for each protein encountered
@@ -1082,7 +1096,7 @@ namespace PeptideHitResultsProcessor
                                     {
                                         // Only save the first result for each peptide in the group to the _xt.txt and _ResultToSeqMap.txt files
                                         // Note: This function will update .ResultID to the next available ID value (mNextResultID)
-                                        SaveXTandemResultsFileEntry(searchResults[searchResultIndex], ref swPeptideResultsFile);
+                                        SaveXTandemResultsFileEntry(searchResults[searchResultIndex], ref writer);
                                     }
 
                                     SaveResultsFileEntrySeqInfo(searchResults[searchResultIndex], updateResultToSeqMapFile);
@@ -1450,7 +1464,7 @@ namespace PeptideHitResultsProcessor
             }
 
             // In addition, verify that the standard refinement modifications are present in mPeptideMods
-            mPeptideMods.AppendStandardRefinmentModifications();
+            mPeptideMods.AppendStandardRefinementModifications();
         }
 
         private void ParseXTandemResultsFileReadDomainMods(XmlReader xmlReader, clsSearchResultsBaseClass searchResult, int domainElementReaderDepth, bool updateModOccurrenceCounts)
@@ -1466,7 +1480,7 @@ namespace PeptideHitResultsProcessor
                 {
                     switch (xmlReader.Name.ToLower())
                     {
-                        case XTANDEM_XML_ELEMENT_NAME_AMINOACID:
+                        case XTANDEM_XML_ELEMENT_NAME_AMINO_ACID:
                             var value = XMLTextReaderGetAttributeValue(xmlReader, "type", "").Trim();
                             char targetResidue;
                             if (string.IsNullOrWhiteSpace(value))
@@ -1513,10 +1527,10 @@ namespace PeptideHitResultsProcessor
         /// Main processing function
         /// </summary>
         /// <param name="inputFilePath">X!Tandem results file</param>
-        /// <param name="outputFolderPath">Output folder</param>
+        /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if success, False if failure</returns>
-        public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath)
+        public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
 
@@ -1543,7 +1557,7 @@ namespace PeptideHitResultsProcessor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                 {
                     return false;
                 }
@@ -1557,12 +1571,12 @@ namespace PeptideHitResultsProcessor
                     // The name will be DatasetName_xt.txt
 
                     var xtandemXTFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, ".txt"));
-                    xtandemXTFilePath = Path.Combine(outputFolderPath, xtandemXTFilePath);
+                    xtandemXTFilePath = Path.Combine(outputDirectoryPath, xtandemXTFilePath);
                     success = ParseXTandemResultsFile(inputFile.FullName, xtandemXTFilePath, false);
 
                     if (success && CreateProteinModsFile)
                     {
-                        success = CreateProteinModsFileWork(inputFile, outputFolderPath, xtandemXTFilePath);
+                        success = CreateProteinModsFileWork(inputFile, outputDirectoryPath, xtandemXTFilePath);
                     }
 
                     if (success)
@@ -1585,7 +1599,7 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        private bool CreateProteinModsFileWork(FileInfo inputFile, string outputFolderPath, string xtandemXTFilePath)
+        private bool CreateProteinModsFileWork(FileInfo inputFile, string outputDirectoryPath, string xtandemXTFilePath)
         {
             bool success;
 
@@ -1594,7 +1608,7 @@ namespace PeptideHitResultsProcessor
                 xtandemXTFilePath
             };
 
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputFolderPath, mts: true);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputDirectoryPath, mts: true);
 
             if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
             {
@@ -1626,30 +1640,30 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private void SaveXTandemResultsFileEntry(clsSearchResultsXTandem searchResult, ref StreamWriter swPeptideResultsFile)
+        private void SaveXTandemResultsFileEntry(clsSearchResultsXTandem searchResult, ref StreamWriter writer)
         {
             // Update .ResultID to the next available number
             searchResult.ResultID = mNextResultID;
             mNextResultID += 1;
 
             // Write the results to the output file
-            swPeptideResultsFile.WriteLine(searchResult.ResultID + SEP_CHAR +
-                                           searchResult.GroupID + SEP_CHAR +
-                                           searchResult.Scan + SEP_CHAR +
-                                           searchResult.Charge + SEP_CHAR +
-                                           searchResult.PeptideMH + SEP_CHAR +
-                                           searchResult.PeptideHyperscore + SEP_CHAR +
-                                           searchResult.PeptideExpectationValue + SEP_CHAR +
-                                           searchResult.MultipleProteinCount + SEP_CHAR +
-                                           searchResult.SequenceWithPrefixAndSuffix(true) + SEP_CHAR +
-                                           Math.Round(searchResult.PeptideDeltaCn2, 4).ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
-                                           searchResult.PeptideYScore + SEP_CHAR +
-                                           searchResult.PeptideYIons + SEP_CHAR +
-                                           searchResult.PeptideBScore + SEP_CHAR +
-                                           searchResult.PeptideBIons + SEP_CHAR +
-                                           searchResult.PeptideDeltaMass + SEP_CHAR +
-                                           searchResult.PeptideIntensity + SEP_CHAR +
-                                           PRISM.StringUtilities.DblToString(searchResult.PeptideDeltaMassCorrectedPpm, 5, 0.00005));
+            writer.WriteLine(searchResult.ResultID + SEP_CHAR +
+                             searchResult.GroupID + SEP_CHAR +
+                             searchResult.Scan + SEP_CHAR +
+                             searchResult.Charge + SEP_CHAR +
+                             searchResult.PeptideMH + SEP_CHAR +
+                             searchResult.PeptideHyperscore + SEP_CHAR +
+                             searchResult.PeptideExpectationValue + SEP_CHAR +
+                             searchResult.MultipleProteinCount + SEP_CHAR +
+                             searchResult.SequenceWithPrefixAndSuffix(true) + SEP_CHAR +
+                             Math.Round(searchResult.PeptideDeltaCn2, 4).ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
+                             searchResult.PeptideYScore + SEP_CHAR +
+                             searchResult.PeptideYIons + SEP_CHAR +
+                             searchResult.PeptideBScore + SEP_CHAR +
+                             searchResult.PeptideBIons + SEP_CHAR +
+                             searchResult.PeptideDeltaMass + SEP_CHAR +
+                             searchResult.PeptideIntensity + SEP_CHAR +
+                             PRISM.StringUtilities.DblToString(searchResult.PeptideDeltaMassCorrectedPpm, 5, 0.00005));
         }
 
         protected override string TruncateProteinName(string proteinNameAndDescription)

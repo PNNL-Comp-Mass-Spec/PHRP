@@ -74,13 +74,13 @@ namespace PHRPReader
                     }
                 }
 
-                var udtLocInfoAddnl = new udtProteinLocationInfo
+                var udtLocInfoAdditional = new udtProteinLocationInfo
                 {
                     ResidueStart = residueStart,
                     ResidueEnd = residueEnd
                 };
 
-                locations.Add(udtLocInfoAddnl);
+                locations.Add(udtLocInfoAdditional);
                 return;
             }
 

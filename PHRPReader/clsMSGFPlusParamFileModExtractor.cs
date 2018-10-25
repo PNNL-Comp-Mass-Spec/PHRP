@@ -63,7 +63,7 @@ namespace PHRPReader
         /// <summary>
         /// Custom amino acid definition parameter file keyword
         /// </summary>
-        public const string PARAM_TAG_CUSTOMAA = "CustomAA";
+        public const string PARAM_TAG_CUSTOM_AA = "CustomAA";
 
         private const string MSGFPLUS_COMMENT_CHAR = "#";
 
@@ -208,7 +208,7 @@ namespace PHRPReader
             }
         }
 
-        private double ComputeMass(string empiricalformula)
+        private double ComputeMass(string empiricalFormula)
         {
             // Originally only C, H, N, O, S, and P were allowed
             // We now support any element symbol
@@ -224,7 +224,7 @@ namespace PHRPReader
             //     H-1N-1O
             //     C3H6N2O0S1
 
-            if (string.Equals(empiricalformula, "HexNAc", StringComparison.InvariantCultureIgnoreCase))
+            if (string.Equals(empiricalFormula, "HexNAc", StringComparison.InvariantCultureIgnoreCase))
             {
                 // This is a special-case modification that MSGF+ and MSPathFinder recognize
                 // It is listed in DMS as Hexosam, which means N-Acetylhexosamine
@@ -232,11 +232,11 @@ namespace PHRPReader
                 return 203.079376;
             }
 
-            clsEmpiricalFormula empiricalFormula;
+            clsEmpiricalFormula empiricalFormulaInstance;
 
             try
             {
-                empiricalFormula = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalformula);
+                empiricalFormulaInstance = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalFormula);
             }
             catch (Exception ex)
             {
@@ -244,11 +244,11 @@ namespace PHRPReader
                 return 0;
             }
 
-            var monoisotopicMass = clsPeptideMassCalculator.ComputeMonoistopicMass(empiricalFormula.ElementCounts, out var unknownSymbols);
+            var monoisotopicMass = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormulaInstance.ElementCounts, out var unknownSymbols);
 
             if (unknownSymbols != null && unknownSymbols.Count > 0)
             {
-                var errMsg = "Error parsing empirical formula '" + empiricalformula + "', ";
+                var errMsg = "Error parsing empirical formula '" + empiricalFormula + "', ";
                 if (unknownSymbols.Count == 1)
                 {
                     ReportError(errMsg + "unknown element " + unknownSymbols.First());
@@ -271,13 +271,12 @@ namespace PHRPReader
         /// <param name="modInfo"></param>
         /// <returns>True if success; false if a problem</returns>
         /// <remarks></remarks>
-        public bool ExtractModInfoFromParamFile(string paramFilePath,
-            out List<udtModInfoType> modInfo)
+        public bool ExtractModInfoFromParamFile(string paramFilePath, out List<udtModInfoType> modInfo)
         {
             var tagNamesToFind = new List<string> {
                 PARAM_TAG_MOD_STATIC,
                 PARAM_TAG_MOD_DYNAMIC,
-                PARAM_TAG_CUSTOMAA };
+                PARAM_TAG_CUSTOM_AA };
 
             // Initialization
             modInfo = new List<udtModInfoType>();
@@ -301,11 +300,11 @@ namespace PHRPReader
                 }
 
                 // Read the contents of the parameter (or mods) file
-                using (var srInFile = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(paramFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var dataLine = srInFile.ReadLine();
+                        var dataLine = reader.ReadLine();
 
                         if (string.IsNullOrWhiteSpace(dataLine))
                             continue;
@@ -506,19 +505,19 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Resod
+        /// Resolve MSGF+ mods with mod definitions
         /// </summary>
-        /// <param name="mSGFDBModInfo"></param>
+        /// <param name="modInfo"></param>
         /// <param name="oPeptideMods"></param>
-        public void ResolveMSGFDBModsWithModDefinitions(List<udtModInfoType> mSGFDBModInfo, clsPeptideModificationContainer oPeptideMods)
+        public void ResolveMSGFDBModsWithModDefinitions(List<udtModInfoType> modInfo, clsPeptideModificationContainer oPeptideMods)
         {
-            if (mSGFDBModInfo != null)
+            if (modInfo != null)
             {
-                // Call .LookupModificationDefinitionByMass for each entry in mSGFDBModInfo
+                // Call .LookupModificationDefinitionByMass for each entry in msgfdbModInfo
 
-                for (var index = 0; index <= mSGFDBModInfo.Count - 1; index++)
+                for (var index = 0; index <= modInfo.Count - 1; index++)
                 {
-                    var udtModInfo = mSGFDBModInfo[index];
+                    var udtModInfo = modInfo[index];
                     int resIndexStart;
                     int resIndexEnd;
 
@@ -612,7 +611,7 @@ namespace PHRPReader
                         }
                     }
 
-                    mSGFDBModInfo[index] = udtModInfo;
+                    modInfo[index] = udtModInfo;
                 }
             }
         }

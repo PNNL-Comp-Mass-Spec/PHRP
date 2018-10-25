@@ -517,7 +517,7 @@ namespace PHRPReader
                 searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
 
                 // Look for Custom Amino Acid definitions
-                if (searchEngineParams.Parameters.All(paramEntry => paramEntry.Key != clsMSGFPlusParamFileModExtractor.PARAM_TAG_CUSTOMAA))
+                if (searchEngineParams.Parameters.All(paramEntry => paramEntry.Key != clsMSGFPlusParamFileModExtractor.PARAM_TAG_CUSTOM_AA))
                 {
                     // No custom amino acid entries
                     return true;
@@ -560,14 +560,14 @@ namespace PHRPReader
             {
                 var columns = line.Split('\t');
 
-                bool mSGFPlusResults;
+                bool msgfPlusResults;
                 if (clsPHRPReader.LookupColumnIndex(DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders) >= 0)
                 {
-                    mSGFPlusResults = true;
+                    msgfPlusResults = true;
                 }
                 else
                 {
-                    mSGFPlusResults = false;
+                    msgfPlusResults = false;
                 }
 
                 psm.DataLineText = line;
@@ -580,7 +580,7 @@ namespace PHRPReader
 
                 psm.ResultID = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
 
-                if (mSGFPlusResults)
+                if (msgfPlusResults)
                 {
                     psm.ScoreRank = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue, mColumnHeaders, 1);
                 }
@@ -613,7 +613,7 @@ namespace PHRPReader
                 psm.MassErrorDa = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
                 psm.MassErrorPPM = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
 
-                if (mSGFPlusResults)
+                if (msgfPlusResults)
                 {
                     psm.MSGFSpecEValue = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders);
                 }
@@ -641,7 +641,7 @@ namespace PHRPReader
 
                 AddScore(psm, columns, DATA_COLUMN_MSGFScore);
 
-                if (mSGFPlusResults)
+                if (msgfPlusResults)
                 {
                     AddScore(psm, columns, DATA_COLUMN_MSGFPlus_SpecEValue);
                     AddScore(psm, columns, DATA_COLUMN_Rank_MSGFPlus_SpecEValue);

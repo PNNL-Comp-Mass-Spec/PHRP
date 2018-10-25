@@ -124,13 +124,13 @@ namespace PHRPReader
             // The first line is typically a header line:
             // Modification_Symbol  Modification_Mass  Target_Residues  Modification_Type  Mass_Correction_Tag  Occurrence_Count
 
-            using (var srModSummaryFile = new StreamReader(new FileStream(modSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            using (var modSummaryReader = new StreamReader(new FileStream(modSummaryFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
                 var headerLineParsed = false;
 
-                while (!srModSummaryFile.EndOfStream)
+                while (!modSummaryReader.EndOfStream)
                 {
-                    var lineIn = srModSummaryFile.ReadLine();
+                    var lineIn = modSummaryReader.ReadLine();
                     var skipLine = false;
 
                     if (string.IsNullOrEmpty(lineIn))

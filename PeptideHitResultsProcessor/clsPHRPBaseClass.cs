@@ -157,7 +157,7 @@ namespace PeptideHitResultsProcessor
         {
             NoError = 0,
             InvalidInputFilePath = 1,
-            InvalidOutputFolderPath = 2,
+            InvalidOutputDirectoryPath = 2,
             ParameterFileNotFound = 3,
             MassCorrectionTagsFileNotFound = 4,
             ModificationDefinitionFileNotFound = 5,
@@ -393,49 +393,51 @@ namespace PeptideHitResultsProcessor
             AbortProcessing = true;
         }
 
-        public static string AutoDefinePeptideHitResultsFilePath(ePeptideHitResultsFileFormatConstants ePeptideHitResultFileFormat,
-            string sourceFolderPath, string baseName)
+        public static string AutoDefinePeptideHitResultsFilePath(
+            ePeptideHitResultsFileFormatConstants ePeptideHitResultFileFormat,
+            string sourceDirectoryPath,
+            string baseName)
         {
             if (string.IsNullOrEmpty(baseName))
-                return AutoDefinePeptideHitResultsFilePath(sourceFolderPath);
+                return AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath);
 
             switch (ePeptideHitResultFileFormat)
             {
                 case ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.SequestSynopsisFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.InspectTXTFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + INSPECT_RESULTS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + INSPECT_RESULTS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + MSALIGN_RESULTS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + MSALIGN_RESULTS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.MODaTXTFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + MODa_RESULTS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + MODa_RESULTS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.MODPlusTXTFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + MODPlus_RESULTS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + MODPlus_RESULTS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
 
-                    return Path.Combine(sourceFolderPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX);
+                    return Path.Combine(sourceDirectoryPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX);
             }
 
-            return AutoDefinePeptideHitResultsFilePath(sourceFolderPath);
+            return AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath);
         }
 
-        public static string AutoDefinePeptideHitResultsFilePath(string sourceFolderPath)
+        public static string AutoDefinePeptideHitResultsFilePath(string sourceDirectoryPath)
         {
-            // Looks for a file ending in _syn.txt, _fht.txt, _xt.xml, or _inspect.txt in folder sourceFolderPath
+            // Looks for a file ending in _syn.txt, _fht.txt, _xt.xml, or _inspect.txt in directory sourceDirectoryPath
             // Returns the first matching file found
 
             var matchSpec = string.Empty;
@@ -460,8 +462,8 @@ namespace PeptideHitResultsProcessor
                             break;
                     }
 
-                    var sourceFolder = new DirectoryInfo(sourceFolderPath);
-                    foreach (var resultsFile in sourceFolder.GetFiles(matchSpec))
+                    var sourceDirectory = new DirectoryInfo(sourceDirectoryPath);
+                    foreach (var resultsFile in sourceDirectory.GetFiles(matchSpec))
                     {
                         // If we get here, a match was found; return its path
                         return resultsFile.FullName;
@@ -602,12 +604,12 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Validate the input file and output folder paths
+        /// Validate the input file and output directory paths
         /// </summary>
         /// <param name="inputFilePath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <returns>True if success, False if failure</returns>
-        protected bool CleanupFilePaths(ref string inputFilePath, ref string outputFolderPath)
+        protected bool CleanupFilePaths(ref string inputFilePath, ref string outputDirectoryPath)
         {
 
             try
@@ -622,42 +624,42 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (string.IsNullOrWhiteSpace(outputFolderPath))
+                if (string.IsNullOrWhiteSpace(outputDirectoryPath))
                 {
-                    // Define outputFolderPath based on inputFilePath
-                    outputFolderPath = inputFile.DirectoryName;
+                    // Define outputDirectoryPath based on inputFilePath
+                    outputDirectoryPath = inputFile.DirectoryName;
                 }
 
-                // Make sure outputFolderPath points to a folder
-                DirectoryInfo outputFolder;
+                // Make sure outputDirectoryPath points to a directory
+                DirectoryInfo outputDirectory;
 
-                if (string.IsNullOrWhiteSpace(outputFolderPath))
+                if (string.IsNullOrWhiteSpace(outputDirectoryPath))
                 {
-                    outputFolder = inputFile.Directory;
+                    outputDirectory = inputFile.Directory;
                 }
                 else
                 {
-                    outputFolder = new DirectoryInfo(outputFolderPath);
+                    outputDirectory = new DirectoryInfo(outputDirectoryPath);
                 }
 
-                if (outputFolder == null)
+                if (outputDirectory == null)
                 {
-                    outputFolderPath = ".";
+                    outputDirectoryPath = ".";
                     return true;
                 }
 
-                if (outputFolder.Exists)
+                if (outputDirectory.Exists)
                     return true;
 
-                // outputFolderPath points to a non-existent folder; attempt to create it
+                // outputDirectoryPath points to a non-existent directory; attempt to create it
                 try
                 {
-                    outputFolder.Create();
+                    outputDirectory.Create();
                 }
                 catch (Exception ex2)
                 {
-                    SetErrorMessage("Invalid output folder: " + outputFolderPath, ex2);
-                    SetErrorCode(ePHRPErrorCodes.InvalidOutputFolderPath);
+                    SetErrorMessage("Invalid output directory: " + outputDirectoryPath, ex2);
+                    SetErrorCode(ePHRPErrorCodes.InvalidOutputDirectoryPath);
                     return false;
                 }
 
@@ -864,7 +866,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected virtual string ConstructPepToProteinMapFilePath(string inputFilePath, string outputFolderPath, bool mts)
+        protected virtual string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var pepToProteinMapBaseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
@@ -880,7 +882,7 @@ namespace PeptideHitResultsProcessor
 
             string pepToProteinMapFilePath;
 
-            if (string.IsNullOrWhiteSpace(outputFolderPath))
+            if (string.IsNullOrWhiteSpace(outputDirectoryPath))
             {
                 var inputFile = new FileInfo(inputFilePath);
                 if (string.IsNullOrWhiteSpace(inputFile.DirectoryName))
@@ -894,7 +896,7 @@ namespace PeptideHitResultsProcessor
             }
             else
             {
-                pepToProteinMapFilePath = Path.Combine(outputFolderPath, pepToProteinMapFileName);
+                pepToProteinMapFilePath = Path.Combine(outputDirectoryPath, pepToProteinMapFileName);
             }
 
             return pepToProteinMapFilePath;
@@ -947,12 +949,12 @@ namespace PeptideHitResultsProcessor
 
                 // Initialize items
                 var mtsPepToProteinMapFile = new FileInfo(mtsPepToProteinMapFilePath);
-                string outputFolderPath;
+                string outputDirectoryPath;
 
                 if (string.IsNullOrWhiteSpace(mtsPepToProteinMapFile.DirectoryName))
-                    outputFolderPath = "";
+                    outputDirectoryPath = "";
                 else
-                    outputFolderPath = mtsPepToProteinMapFile.DirectoryName;
+                    outputDirectoryPath = mtsPepToProteinMapFile.DirectoryName;
 
                 var peptideToProteinMapResults = new SortedSet<string>();
 
@@ -980,15 +982,14 @@ namespace PeptideHitResultsProcessor
                 peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
                 peptideToProteinMapper.SkipConsoleWriteIfNoProgressListener = true;
 
-                using (var pepToProtMapWriter =
-                       new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using (var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     foreach (var inputFilePath in sourcePHRPDataFiles)
                     {
                         var resultsFilePath = Path.GetFileNameWithoutExtension(inputFilePath) +
                             clsPeptideToProteinMapEngine.FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING;
 
-                        resultsFilePath = Path.Combine(outputFolderPath, resultsFilePath);
+                        resultsFilePath = Path.Combine(outputDirectoryPath, resultsFilePath);
 
                         // Make sure the results file doesn't already exist
                         DeleteFileIgnoreErrors(resultsFilePath);
@@ -996,7 +997,7 @@ namespace PeptideHitResultsProcessor
                         peptideToProteinMapper.ProgressUpdate += PeptideToProteinMapper_ProgressChanged;
                         mNextPeptideToProteinMapperLevel = 25;
 
-                        success = peptideToProteinMapper.ProcessFile(inputFilePath, outputFolderPath, string.Empty, true);
+                        success = peptideToProteinMapper.ProcessFile(inputFilePath, outputDirectoryPath, string.Empty, true);
 
                         peptideToProteinMapper.ProgressUpdate -= PeptideToProteinMapper_ProgressChanged;
 
@@ -1070,6 +1071,7 @@ namespace PeptideHitResultsProcessor
                                 if (!peptideToProteinMapResults.Contains(peptideAndProteinKey))
                                 {
                                     peptideToProteinMapResults.Add(peptideAndProteinKey);
+                                    writer.WriteLine(lineIn);
                                 }
                             }
                         }
@@ -1094,10 +1096,10 @@ namespace PeptideHitResultsProcessor
         /// Create the protein mod details file for the specified PHRP data file
         /// </summary>
         /// <param name="phrpDataFilePath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool CreateProteinModDetailsFile(string phrpDataFilePath, string outputFolderPath)
+        public bool CreateProteinModDetailsFile(string phrpDataFilePath, string outputDirectoryPath)
         {
             var success = false;
 
@@ -1109,13 +1111,13 @@ namespace PeptideHitResultsProcessor
                     inputFile.FullName
                 };
 
-                var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputFolderPath, mts: true);
+                var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputDirectoryPath, mts: true);
 
                 success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
 
                 if (success)
                 {
-                    success = CreateProteinModDetailsFile(phrpDataFilePath, outputFolderPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Unknown);
+                    success = CreateProteinModDetailsFile(phrpDataFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Unknown);
                 }
             }
             catch (Exception ex)
@@ -1128,7 +1130,7 @@ namespace PeptideHitResultsProcessor
 
         public bool CreateProteinModDetailsFile(
             string phrpDataFilePath,
-            string outputFolderPath,
+            string outputDirectoryPath,
             string mtsPepToProteinMapFilePath,
             clsPHRPReader.ePeptideHitResultType ePHRPResultType)
         {
@@ -1173,32 +1175,32 @@ namespace PeptideHitResultsProcessor
                 }
 
                 var proteinModsFilePath = ReplaceFilenameSuffix(phrpDataFile, FILENAME_SUFFIX_PROTEIN_MODS);
-                if (!string.IsNullOrEmpty(outputFolderPath))
+                if (!string.IsNullOrEmpty(outputDirectoryPath))
                 {
                     var proteinModsFile = Path.GetFileName(proteinModsFilePath);
                     if (string.IsNullOrEmpty(proteinModsFile))
                     {
                         proteinModsFile = Path.GetFileNameWithoutExtension(phrpDataFile.Name) + FILENAME_SUFFIX_PROTEIN_MODS;
                     }
-                    proteinModsFilePath = Path.Combine(outputFolderPath, proteinModsFile);
+                    proteinModsFilePath = Path.Combine(outputDirectoryPath, proteinModsFile);
                 }
 
                 var psmCount = 0;
                 var psmCountSkippedSinceReversedOrScrambledProtein = 0;
 
                 // Create a ProteinMods file parallel to the PHRP file
-                using (var swProteinModsFile = new StreamWriter(new FileStream(proteinModsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using (var writer = new StreamWriter(new FileStream(proteinModsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     // Write the header line
-                    swProteinModsFile.WriteLine(COLUMN_NAME_RESULTID + "\t" +
-                                                COLUMN_NAME_PEPTIDE + "\t" +
-                                                COLUMN_NAME_UNIQUE_SEQ_ID + "\t" +
-                                                COLUMN_NAME_PROTEIN_NAME + "\t" +
-                                                COLUMN_NAME_RESIDUE + "\t" +
-                                                COLUMN_NAME_PROTEIN_RESIDUE_NUMBER + "\t" +
-                                                COLUMN_NAME_RESIDUE_MOD_NAME + "\t" +
-                                                COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
-                                                COLUMN_NAME_MSGF_SPECPROB);
+                    writer.WriteLine(COLUMN_NAME_RESULTID + "\t" +
+                                     COLUMN_NAME_PEPTIDE + "\t" +
+                                     COLUMN_NAME_UNIQUE_SEQ_ID + "\t" +
+                                     COLUMN_NAME_PROTEIN_NAME + "\t" +
+                                     COLUMN_NAME_RESIDUE + "\t" +
+                                     COLUMN_NAME_PROTEIN_RESIDUE_NUMBER + "\t" +
+                                     COLUMN_NAME_RESIDUE_MOD_NAME + "\t" +
+                                     COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
+                                     COLUMN_NAME_MSGF_SPECPROB);
 
                     var loadMSGFResults = ePHRPResultType != clsPHRPReader.ePeptideHitResultType.MSGFDB;
 
@@ -1295,15 +1297,15 @@ namespace PeptideHitResultsProcessor
                                             }
                                             else
                                             {
-                                                swProteinModsFile.WriteLine(reader.CurrentPSM.ResultID + "\t" +
-                                                                            reader.CurrentPSM.Peptide + "\t" +
-                                                                            reader.CurrentPSM.SeqID + "\t" +
-                                                                            pepToProteinMapping[pepToProteinMapIndex].Protein + "\t" +
-                                                                            residue + "\t" +
-                                                                            residueLocInProtein + "\t" +
-                                                                            mod.ModDefinition.MassCorrectionTag + "\t" +
-                                                                            mod.ResidueLocInPeptide + "\t" +
-                                                                            reader.CurrentPSM.MSGFSpecEValue);
+                                                writer.WriteLine(reader.CurrentPSM.ResultID + "\t" +
+                                                                 reader.CurrentPSM.Peptide + "\t" +
+                                                                 reader.CurrentPSM.SeqID + "\t" +
+                                                                 pepToProteinMapping[pepToProteinMapIndex].Protein + "\t" +
+                                                                 residue + "\t" +
+                                                                 residueLocInProtein + "\t" +
+                                                                 mod.ModDefinition.MassCorrectionTag + "\t" +
+                                                                 mod.ResidueLocInPeptide + "\t" +
+                                                                 reader.CurrentPSM.MSGFSpecEValue);
                                             }
                                         }
                                     }
@@ -1499,8 +1501,8 @@ namespace PeptideHitResultsProcessor
                 case ePHRPErrorCodes.InvalidInputFilePath:
                     message = "Invalid input file path";
                     break;
-                case ePHRPErrorCodes.InvalidOutputFolderPath:
-                    message = "Invalid output folder path";
+                case ePHRPErrorCodes.InvalidOutputDirectoryPath:
+                    message = "Invalid output directory path";
                     break;
                 case ePHRPErrorCodes.ParameterFileNotFound:
                     message = "Parameter file not found";
@@ -1898,16 +1900,16 @@ namespace PeptideHitResultsProcessor
             ProgressComplete?.Invoke();
         }
 
-        public bool ProcessFile(string inputFilePath, string outputFolderPath)
+        public bool ProcessFile(string inputFilePath, string outputDirectoryPath)
         {
-            return ProcessFile(inputFilePath, outputFolderPath, string.Empty);
+            return ProcessFile(inputFilePath, outputDirectoryPath, string.Empty);
         }
 
-        public abstract bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath);
+        public abstract bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath);
 
         protected string ReplaceFilenameSuffix(FileInfo originalFile, string newSuffix)
         {
-            // Appends newSuffix to the base name of the original file, then returns a full path to the file using the folder associated with originalFilePath
+            // Appends newSuffix to the base name of the original file, then returns a full path to the file using the directory associated with originalFilePath
             // Note that newSuffix may contain a file extension though it does not have to
             //  If newSuffix does not contain an extension, then the path returned will end in the same extension as originalFilePath
 
@@ -2022,15 +2024,15 @@ namespace PeptideHitResultsProcessor
 
         protected void SaveModificationSummaryFile(string modificationSummaryFilePath)
         {
-            using (var swOutFile = new StreamWriter(modificationSummaryFilePath, false))
+            using (var writer = new StreamWriter(modificationSummaryFilePath, false))
             {
                 // Write the header line
-                swOutFile.WriteLine(clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol + SEP_CHAR +
-                                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass + SEP_CHAR +
-                                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues + SEP_CHAR +
-                                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type + SEP_CHAR +
-                                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag + SEP_CHAR +
-                                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count);
+                writer.WriteLine(clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol + SEP_CHAR +
+                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass + SEP_CHAR +
+                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues + SEP_CHAR +
+                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type + SEP_CHAR +
+                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag + SEP_CHAR +
+                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count);
 
                 for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
                 {
@@ -2038,12 +2040,12 @@ namespace PeptideHitResultsProcessor
                     var searchResult = oModInfo;
                     if (searchResult.OccurrenceCount > 0 || !searchResult.UnknownModAutoDefined)
                     {
-                        swOutFile.WriteLine(searchResult.ModificationSymbol + SEP_CHAR +
-                                            searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
-                                            searchResult.TargetResidues + SEP_CHAR +
-                                            clsModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType) + SEP_CHAR +
-                                            searchResult.MassCorrectionTag + SEP_CHAR +
-                                            searchResult.OccurrenceCount);
+                        writer.WriteLine(searchResult.ModificationSymbol + SEP_CHAR +
+                                         searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
+                                         searchResult.TargetResidues + SEP_CHAR +
+                                         clsModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType) + SEP_CHAR +
+                                         searchResult.MassCorrectionTag + SEP_CHAR +
+                                         searchResult.OccurrenceCount);
                     }
                 }
             }
@@ -2378,18 +2380,18 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        protected void ValidatePHRPReaderSupportFiles(string phrpDataFilePath, string outputFolderPath)
+        protected void ValidatePHRPReaderSupportFiles(string phrpDataFilePath, string outputDirectoryPath)
         {
 
             try
             {
-                if (string.IsNullOrWhiteSpace(outputFolderPath))
+                if (string.IsNullOrWhiteSpace(outputDirectoryPath))
                     return;
 
                 var phrpDataFile = new FileInfo(phrpDataFilePath);
-                var outputFolder = new DirectoryInfo(outputFolderPath);
+                var outputDirectory = new DirectoryInfo(outputDirectoryPath);
 
-                if (string.Equals(phrpDataFile.DirectoryName, outputFolder.FullName, StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(phrpDataFile.DirectoryName, outputDirectory.FullName, StringComparison.CurrentCultureIgnoreCase))
                     return;
 
                 var msgfFileName = Path.GetFileName(ReplaceFilenameSuffix(phrpDataFile, FILENAME_SUFFIX_MSGF));
@@ -2404,7 +2406,7 @@ namespace PeptideHitResultsProcessor
                 else
                     sourcePath = Path.Combine(phrpDataFile.DirectoryName, msgfFileName);
 
-                var targetPath = Path.Combine(outputFolder.FullName, msgfFileName);
+                var targetPath = Path.Combine(outputDirectory.FullName, msgfFileName);
 
                 if (File.Exists(sourcePath) & !File.Exists(targetPath))
                 {

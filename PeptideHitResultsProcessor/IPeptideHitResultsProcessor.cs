@@ -72,12 +72,32 @@ namespace PeptideHitResultsProcessor
             /// <summary>
             /// Source directory path
             /// </summary>
-            public string SourceFolderPath;
+            public string SourceDirectoryPath;
 
             /// <summary>
             /// Output directory path
             /// </summary>
-            public string OutputFolderPath;
+            public string OutputDirectoryPath;
+
+            /// <summary>
+            /// Source directory path
+            /// </summary>
+            [Obsolete("Use SourceDirectoryPath")]
+            public string SourceFolderPath
+            {
+                get => SourceDirectoryPath;
+                set => SourceDirectoryPath = value;
+            }
+
+            /// <summary>
+            /// Output directory path
+            /// </summary>
+            [Obsolete("Use OutputDirectoryPath")]
+            public string OutputFolderPath
+            {
+                get => OutputDirectoryPath;
+                set => OutputDirectoryPath = value;
+            }
 
             /// <summary>
             /// Peptide hit results filename
@@ -149,14 +169,34 @@ namespace PeptideHitResultsProcessor
         #region "Properties"
 
         /// <summary>
-        /// Input: path to folder containing the peptide hit results file
+        /// Input: path to directory containing the peptide hit results file
         /// </summary>
-        public virtual string SourceFolderPath { get; set; }
+        public virtual string SourceDirectoryPath { get; set; }
 
         /// <summary>
-        /// Input: path to folder where processed file is to be placed
+        /// Input: path to directory where processed file is to be placed
         /// </summary>
-        public virtual string OutputFolderPath { get; set; }
+        public virtual string OutputDirectoryPath { get; set; }
+
+        /// <summary>
+        /// Input: path to directory containing the peptide hit results file
+        /// </summary>
+        [Obsolete("Use SourceDirectoryPath")]
+        public virtual string SourceFolderPath
+        {
+            get => SourceDirectoryPath;
+            set => SourceDirectoryPath = value;
+        }
+
+        /// <summary>
+        /// Input: path to directory where processed file is to be placed
+        /// </summary>
+        [Obsolete("Use OutputDirectoryPath")]
+        public virtual string OutputFolderPath
+        {
+            get => OutputDirectoryPath;
+            set => OutputDirectoryPath = value;
+        }
 
         /// <summary>
         /// Input: Filename containing the peptide hit results;
@@ -235,8 +275,8 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Initializes parameters. Must be called before executing Start()
         /// </summary>
-        /// <param name="InitParams"></param>
-        public abstract void Setup(InitializationParams InitParams);
+        /// <param name="options"></param>
+        public abstract void Setup(InitializationParams options);
 
         /// <summary>
         /// Starts the spectra file creation process

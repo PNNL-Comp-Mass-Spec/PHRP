@@ -366,7 +366,7 @@ namespace PHRPReader
             return fileNames;
         }
 
-        private static string GetFastaFileFromTaxonomyFile(string inputFolderPath, string taxononomyFilename, out string errorMessage)
+        private static string GetFastaFileFromTaxonomyFile(string inputDirectoryPath, string taxonomyFilename, out string errorMessage)
         {
             var fastaFile = string.Empty;
 
@@ -374,7 +374,7 @@ namespace PHRPReader
 
             try
             {
-                var taxonomyFilePath = Path.Combine(inputFolderPath, taxononomyFilename);
+                var taxonomyFilePath = Path.Combine(inputDirectoryPath, taxonomyFilename);
                 if (!File.Exists(taxonomyFilePath))
                 {
                     errorMessage = AppendToString(errorMessage, "Warning, taxonomy file not found: " + taxonomyFilePath);
@@ -445,7 +445,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Parses the specified X!Tandem parameter file
-        /// Note that the file specified by parameter "list path, default parameters" will also be auto-parsed (if found in folder mInputFolderPath)
+        /// Note that the file specified by parameter "list path, default parameters" will also be auto-parsed (if found in directory mInputDirectoryPath)
         /// </summary>
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
@@ -478,7 +478,7 @@ namespace PHRPReader
 
             try
             {
-                var paramFilePath = Path.Combine(mInputFolderPath, paramFileName);
+                var paramFilePath = Path.Combine(mInputDirectoryPath, paramFileName);
 
                 if (!File.Exists(paramFilePath))
                 {
@@ -488,7 +488,7 @@ namespace PHRPReader
                 {
                     try
                     {
-                        success = ParseXTandemParamFileWork(mInputFolderPath, paramFileName, searchEngineParams, determineFastaFileNameUsingTaxonomyFile, lookForDefaultParamsFileName, ref errorMessage);
+                        success = ParseXTandemParamFileWork(mInputDirectoryPath, paramFileName, searchEngineParams, determineFastaFileNameUsingTaxonomyFile, lookForDefaultParamsFileName, ref errorMessage);
                     }
                     catch (Exception ex)
                     {
@@ -516,7 +516,7 @@ namespace PHRPReader
         }
 
         private static bool ParseXTandemParamFileWork(
-            string inputFolderPath,
+            string inputDirectoryPath,
             string paramFileName,
             clsSearchEngineParameters searchEngineParams,
             bool determineFastaFileNameUsingTaxonomyFile,
@@ -525,7 +525,7 @@ namespace PHRPReader
         {
             // Note: Do not put a Try/Catch block in this function
 
-            var paramFilePath = Path.Combine(inputFolderPath, paramFileName);
+            var paramFilePath = Path.Combine(inputDirectoryPath, paramFileName);
 
             if (lookForDefaultParamsFileName)
             {
@@ -546,9 +546,9 @@ namespace PHRPReader
                     // Do this by recursively calling this function
 
                     // First confirm that the file exists
-                    if (File.Exists(Path.Combine(inputFolderPath, defaultParamsFilename)))
+                    if (File.Exists(Path.Combine(inputDirectoryPath, defaultParamsFilename)))
                     {
-                        ParseXTandemParamFileWork(inputFolderPath, defaultParamsFilename, searchEngineParams, determineFastaFileNameUsingTaxonomyFile, false, ref errorMessage);
+                        ParseXTandemParamFileWork(inputDirectoryPath, defaultParamsFilename, searchEngineParams, determineFastaFileNameUsingTaxonomyFile, false, ref errorMessage);
                     }
                     else
                     {
@@ -573,7 +573,7 @@ namespace PHRPReader
                                 if (determineFastaFileNameUsingTaxonomyFile)
                                 {
                                     // Open the taxonomy file to determine the fasta file used
-                                    var setting = GetFastaFileFromTaxonomyFile(inputFolderPath, Path.GetFileName(kvSetting.Value), out errorMessage);
+                                    var setting = GetFastaFileFromTaxonomyFile(inputDirectoryPath, Path.GetFileName(kvSetting.Value), out errorMessage);
 
                                     if (!string.IsNullOrEmpty(setting))
                                     {

@@ -117,11 +117,11 @@ namespace PHRPReader
                 linesRead = 0;
                 mErrorMessage = string.Empty;
 
-                using (var srInFile = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        lineIn = srInFile.ReadLine();
+                        lineIn = reader.ReadLine();
                         linesRead += 1;
                         skipLine = false;
 

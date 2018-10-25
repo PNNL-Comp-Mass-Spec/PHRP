@@ -104,14 +104,13 @@ namespace PHRP_UnitTests
         public void TestComputeEmpiricalFormulaMassMethod1(string strEmpiricalFormula, double expectedMass)
         {
             var empiricalFormula = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(strEmpiricalFormula);
-            var computedMass = clsPeptideMassCalculator.ComputeMonoistopicMass(empiricalFormula);
+            var computedMass = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula);
 
-            List<string> unknownSymbols = null;
-            var computedMassAlt = clsPeptideMassCalculator.ComputeMonoistopicMass(empiricalFormula.ElementCounts, out unknownSymbols);
+            var computedMassAlt = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula.ElementCounts, out _);
 
             Console.WriteLine("{0,-30} is {1:F5}; expected {2:F5}", strEmpiricalFormula, computedMass, expectedMass);
 
-            Assert.AreEqual(computedMass, computedMassAlt, 1E-05, "The two overloads ComputeMonoistopicMass reported conflicting mass values");
+            Assert.AreEqual(computedMass, computedMassAlt, 1E-05, "The two overloads for ComputeMonoisotopicMass reported conflicting mass values");
 
             Assert.AreEqual(expectedMass, computedMass, 0.0001, "Unexpected mass for the empirical formula");
         }
@@ -189,11 +188,11 @@ namespace PHRP_UnitTests
             var empiricalFormula = new clsEmpiricalFormula();
             empiricalFormula.AddElements(mPeptideMassCalculator.GetAminoAcidEmpiricalFormula(aminoAcidSymbol));
 
-            var computedMassAlt = clsPeptideMassCalculator.ComputeMonoistopicMass(empiricalFormula);
+            var computedMassAlt = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula);
 
             Assert.AreEqual(expectedMass, computedMass, 0.0001, "Amino acid does not match the expected value");
 
-            Assert.AreEqual(computedMass, computedMassAlt, 1E-05, "GetAminoAcidMass and ComputeMonoistopicMass do not agree on the mass for the amino acid");
+            Assert.AreEqual(computedMass, computedMassAlt, 1E-05, "GetAminoAcidMass and ComputeMonoisotopicMass do not agree on the mass for the amino acid");
         }
 
         [Test]

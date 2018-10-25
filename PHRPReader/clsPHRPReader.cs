@@ -96,7 +96,7 @@ namespace PHRPReader
         #region "Module variables"
         private string mDatasetName;
         private string mInputFilePath;
-        private string mInputFolderPath;
+        private string mInputDirectoryPath;
 
         private bool mSkipDuplicatePSMs;
 
@@ -203,8 +203,8 @@ namespace PHRPReader
                     return null;
                 }
 
-                mPHRPParser.SeqInfo.TryGetValue(mPSMCurrent.SeqID, out var oSeqInfo);
-                return oSeqInfo;
+                mPHRPParser.SeqInfo.TryGetValue(mPSMCurrent.SeqID, out var seqInfo);
+                return seqInfo;
             }
         }
 
@@ -649,11 +649,11 @@ namespace PHRPReader
             try
             {
                 totalLines = 0;
-                using (var srReader = new StreamReader(new FileStream(textFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(textFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srReader.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        srReader.ReadLine();
+                        reader.ReadLine();
                         totalLines += 1;
                     }
                 }
@@ -697,7 +697,7 @@ namespace PHRPReader
         {
             mDatasetName = string.Empty;
             mInputFilePath = string.Empty;
-            mInputFolderPath = string.Empty;
+            mInputDirectoryPath = string.Empty;
 
             mCanRead = false;
             mModSummaryFileLoaded = false;
@@ -923,42 +923,41 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified folder
+        /// Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified directory
         /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
-        /// <param name="inputFolderPath">Input folder path</param>
+        /// <param name="inputDirectoryPath">Input directory path</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         /// <remarks></remarks>
-        public static string AutoDetermineBestInputFile(string inputFolderPath)
+        public static string AutoDetermineBestInputFile(string inputDirectoryPath)
         {
-            return AutoDetermineBestInputFile(inputFolderPath, out _);
+            return AutoDetermineBestInputFile(inputDirectoryPath, out _);
         }
 
         /// <summary>
-        /// Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified folder
+        /// Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified directory
         /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
-        /// <param name="inputFolderPath">Input folder path</param>
+        /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         /// <remarks></remarks>
-        public static string AutoDetermineBestInputFile(string inputFolderPath,
-            out ePeptideHitResultType eMatchedResultType)
+        public static string AutoDetermineBestInputFile(string inputDirectoryPath, out ePeptideHitResultType eMatchedResultType)
         {
-            // Find candidate dataset names in inputFolderPath
+            // Find candidate dataset names in inputDirectoryPath
 
             var datasetNames = new SortedSet<string>(StringComparer.CurrentCultureIgnoreCase);
             var filesToFind = new List<string>();
 
-            if (string.IsNullOrWhiteSpace(inputFolderPath))
+            if (string.IsNullOrWhiteSpace(inputDirectoryPath))
             {
-                throw new DirectoryNotFoundException("Input folder path is empty");
+                throw new DirectoryNotFoundException("Input directory path is empty");
             }
 
-            var inputFolder = new DirectoryInfo(inputFolderPath);
-            if (!inputFolder.Exists)
+            var inputDirectory = new DirectoryInfo(inputDirectoryPath);
+            if (!inputDirectory.Exists)
             {
-                throw new DirectoryNotFoundException("Input folder not found: " + inputFolderPath);
+                throw new DirectoryNotFoundException("Input directory not found: " + inputDirectoryPath);
             }
 
             // MSGF+
@@ -1001,7 +1000,7 @@ namespace PHRPReader
 
             foreach (var fileSpec in filesToFind)
             {
-                foreach (var dataFile in inputFolder.GetFiles("*" + fileSpec))
+                foreach (var dataFile in inputDirectory.GetFiles("*" + fileSpec))
                 {
                     var dataset = dataFile.Name;
 
@@ -1021,7 +1020,7 @@ namespace PHRPReader
             if (datasetNames.Count == 0)
             {
                 Console.WriteLine("Did not find any files matching the expected filename suffixes");
-                Console.WriteLine("Looked for the following in " + inputFolderPath);
+                Console.WriteLine("Looked for the following in " + inputDirectoryPath);
                 foreach (var fileSpec in filesToFind)
                 {
                     Console.WriteLine("  " + fileSpec);
@@ -1030,51 +1029,51 @@ namespace PHRPReader
                 return string.Empty;
             }
 
-            return AutoDetermineBestInputFile(inputFolderPath, datasetNames.ToList(), out eMatchedResultType);
+            return AutoDetermineBestInputFile(inputDirectoryPath, datasetNames.ToList(), out eMatchedResultType);
         }
 
         /// <summary>
-        /// Looks for a valid _syn.txt or _fht.txt file for the specified dataset in the specified folder
+        /// Looks for a valid _syn.txt or _fht.txt file for the specified dataset in the specified directory
         /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
-        /// <param name="inputFolderPath">Input folder path</param>
+        /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="datasetName">Dataset name</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         /// <remarks></remarks>
-        public static string AutoDetermineBestInputFile(string inputFolderPath, string datasetName)
+        public static string AutoDetermineBestInputFile(string inputDirectoryPath, string datasetName)
         {
-            return AutoDetermineBestInputFile(inputFolderPath, datasetName, out _);
+            return AutoDetermineBestInputFile(inputDirectoryPath, datasetName, out _);
         }
 
         /// <summary>
-        /// Looks for a valid _syn.txt or _fht.txt file for the specified dataset in the specified folder
+        /// Looks for a valid _syn.txt or _fht.txt file for the specified dataset in the specified directory
         /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
-        /// <param name="inputFolderPath">Input folder path</param>
+        /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         /// <remarks></remarks>
-        public static string AutoDetermineBestInputFile(string inputFolderPath, string datasetName,
+        public static string AutoDetermineBestInputFile(string inputDirectoryPath, string datasetName,
             out ePeptideHitResultType eMatchedResultType)
         {
             var datasetNames = new List<string> {
                 datasetName
             };
 
-            return AutoDetermineBestInputFile(inputFolderPath, datasetNames, out eMatchedResultType);
+            return AutoDetermineBestInputFile(inputDirectoryPath, datasetNames, out eMatchedResultType);
         }
 
         /// <summary>
-        /// Looks for a valid _syn.txt or _fht.txt file for the given list of datasets in the specified folder
+        /// Looks for a valid _syn.txt or _fht.txt file for the given list of datasets in the specified directory
         /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
-        /// <param name="inputFolderPath">Input folder path</param>
+        /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="datasetNames">List of dataset names to search for</param>
         /// <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         /// <remarks></remarks>
-        public static string AutoDetermineBestInputFile(string inputFolderPath, List<string> datasetNames,
+        public static string AutoDetermineBestInputFile(string inputDirectoryPath, List<string> datasetNames,
             out ePeptideHitResultType eMatchedResultType)
         {
             // This list contains the standard PHRP file suffixes
@@ -1086,15 +1085,15 @@ namespace PHRPReader
             // Set the matched result type to Unknown for now
             eMatchedResultType = ePeptideHitResultType.Unknown;
 
-            if (string.IsNullOrWhiteSpace(inputFolderPath))
+            if (string.IsNullOrWhiteSpace(inputDirectoryPath))
             {
-                throw new DirectoryNotFoundException("Input folder path is empty");
+                throw new DirectoryNotFoundException("Input directory path is empty");
             }
 
-            var inputFolder = new DirectoryInfo(inputFolderPath);
-            if (!inputFolder.Exists)
+            var inputDirectory = new DirectoryInfo(inputDirectoryPath);
+            if (!inputDirectory.Exists)
             {
-                throw new DirectoryNotFoundException("Input folder not found: " + inputFolderPath);
+                throw new DirectoryNotFoundException("Input directory not found: " + inputDirectoryPath);
             }
 
             if (datasetNames == null || datasetNames.Count == 0)
@@ -1149,9 +1148,9 @@ namespace PHRPReader
             {
                 if (!string.IsNullOrEmpty(kvFileToFind.Key))
                 {
-                    var synOrFHTFile = new FileInfo(Path.Combine(inputFolder.FullName, kvFileToFind.Key));
+                    var synOrFHTFile = new FileInfo(Path.Combine(inputDirectory.FullName, kvFileToFind.Key));
 
-                    if (synOrFHTFile.Exists)
+                    if (synOrFHTFile.Exists && synOrFHTFile.Directory != null)
                     {
                         // Match found
                         // Look for PHRP-related auxiliary files
@@ -1373,11 +1372,11 @@ namespace PHRPReader
                     }
                     else
                     {
-                        using (var srInFile = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                        using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                         {
-                            if (!srInFile.EndOfStream)
+                            if (!reader.EndOfStream)
                             {
-                                var headerLine = srInFile.ReadLine();
+                                var headerLine = reader.ReadLine();
 
                                 if (LineContainsValues(headerLine, clsPHRPParserInspect.DATA_COLUMN_MQScore, clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore))
                                 {
@@ -1412,7 +1411,7 @@ namespace PHRPReader
 
         private static bool AutoTrimExtraSuffix(string filePath, out string filePathTrimmed)
         {
-            // Check whether strfilePathLCase ends in other known PHRP extensions
+            // Check whether filePath ends in other known PHRP extensions
             var extraSuffixes = GetPHRPAuxiliaryFileSuffixes();
 
             foreach (var suffix in extraSuffixes)
@@ -1819,8 +1818,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPFirstHitsFileName(ePeptideHitResultType eResultType, string datasetName)
         {
-            var oParser = GetPHRPFileFreeParser(eResultType, datasetName);
-            var phrpResultsFileName = oParser.PHRPFirstHitsFileName;
+            var parser = GetPHRPFileFreeParser(eResultType, datasetName);
+            var phrpResultsFileName = parser.PHRPFirstHitsFileName;
 
             return phrpResultsFileName;
         }
@@ -1833,8 +1832,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPModSummaryFileName(ePeptideHitResultType eResultType, string datasetName)
         {
-            var oParser = GetPHRPFileFreeParser(eResultType, datasetName);
-            var phrpModSummaryFileName = oParser.PHRPModSummaryFileName;
+            var parser = GetPHRPFileFreeParser(eResultType, datasetName);
+            var phrpModSummaryFileName = parser.PHRPModSummaryFileName;
 
             return phrpModSummaryFileName;
         }
@@ -1847,8 +1846,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPPepToProteinMapFileName(ePeptideHitResultType eResultType, string datasetName)
         {
-            var oParser = GetPHRPFileFreeParser(eResultType, datasetName);
-            var pepToProteinMapFileName = oParser.PHRPPepToProteinMapFileName;
+            var parser = GetPHRPFileFreeParser(eResultType, datasetName);
+            var pepToProteinMapFileName = parser.PHRPPepToProteinMapFileName;
 
             return pepToProteinMapFileName;
         }
@@ -1861,8 +1860,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPProteinModsFileName(ePeptideHitResultType eResultType, string datasetName)
         {
-            var oParser = GetPHRPFileFreeParser(eResultType, datasetName);
-            var proteinModsFileName = oParser.PHRPProteinModsFileName;
+            var parser = GetPHRPFileFreeParser(eResultType, datasetName);
+            var proteinModsFileName = parser.PHRPProteinModsFileName;
 
             return proteinModsFileName;
         }
@@ -1875,8 +1874,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPSynopsisFileName(ePeptideHitResultType eResultType, string datasetName)
         {
-            var oParser = GetPHRPFileFreeParser(eResultType, datasetName);
-            var phrpResultsFileName = oParser.PHRPSynopsisFileName;
+            var parser = GetPHRPFileFreeParser(eResultType, datasetName);
+            var phrpResultsFileName = parser.PHRPSynopsisFileName;
 
             return phrpResultsFileName;
         }
@@ -1889,8 +1888,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPResultToSeqMapFileName(ePeptideHitResultType eResultType, string datasetName)
         {
-            var oParser = GetPHRPFileFreeParser(eResultType, datasetName);
-            var resultToSeqMapFilename = oParser.PHRPResultToSeqMapFileName;
+            var parser = GetPHRPFileFreeParser(eResultType, datasetName);
+            var resultToSeqMapFilename = parser.PHRPResultToSeqMapFileName;
 
             return resultToSeqMapFilename;
         }
@@ -1903,8 +1902,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPSeqInfoFileName(ePeptideHitResultType eResultType, string datasetName)
         {
-            var oParser = GetPHRPFileFreeParser(eResultType, datasetName);
-            var seqInfoFilename = oParser.PHRPSeqInfoFileName;
+            var parser = GetPHRPFileFreeParser(eResultType, datasetName);
+            var seqInfoFilename = parser.PHRPSeqInfoFileName;
 
             return seqInfoFilename;
         }
@@ -1917,8 +1916,8 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPSeqToProteinMapFileName(ePeptideHitResultType eResultType, string datasetName)
         {
-            var oParser = GetPHRPFileFreeParser(eResultType, datasetName);
-            var seqToProteinMapFileName = oParser.PHRPSeqToProteinMapFileName;
+            var parser = GetPHRPFileFreeParser(eResultType, datasetName);
+            var seqToProteinMapFileName = parser.PHRPSeqToProteinMapFileName;
 
             return seqToProteinMapFileName;
         }
@@ -2334,15 +2333,18 @@ namespace PHRPReader
                         }
                     }
 
-                    if (isDuplicate) {
+                    if (isDuplicate)
+                    {
                         // Update the protein list
-                        var addnlProteins = newPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.CurrentCultureIgnoreCase).ToList();
-                        if (addnlProteins.Any())
+                        var additionalProteins = newPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.CurrentCultureIgnoreCase).ToList();
+                        if (additionalProteins.Any())
                         {
-                            foreach (var item in addnlProteins)
+                            foreach (var item in additionalProteins)
                                 mPSMCurrent.AddProtein(item);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         readNext = false;
                         mCachedLine = string.Copy(lineIn);
                         mCachedLineAvailable = true;
@@ -2469,10 +2471,10 @@ namespace PHRPReader
 
             try
             {
-                var mSGFFilePath = GetMSGFFileName(mInputFilePath);
-                mSGFFilePath = Path.Combine(mInputFolderPath, mSGFFilePath);
+                var msgfFilePath = GetMSGFFileName(mInputFilePath);
+                msgfFilePath = Path.Combine(mInputDirectoryPath, msgfFilePath);
 
-                ReadAndCacheMSGFData(mSGFFilePath);
+                ReadAndCacheMSGFData(msgfFilePath);
             }
             catch (Exception ex)
             {
@@ -2481,27 +2483,27 @@ namespace PHRPReader
 
         }
 
-        private void ReadAndCacheMSGFData(string mSGFFilePath)
+        private void ReadAndCacheMSGFData(string msgfFilePath)
         {
 
             try
             {
-                mSGFFilePath = AutoSwitchToLegacyMSGFDBIfRequired(mSGFFilePath, mInputFilePath);
-                mSGFFilePath = AutoSwitchToFHTIfRequired(mSGFFilePath, mInputFilePath);
+                msgfFilePath = AutoSwitchToLegacyMSGFDBIfRequired(msgfFilePath, mInputFilePath);
+                msgfFilePath = AutoSwitchToFHTIfRequired(msgfFilePath, mInputFilePath);
 
-                if (File.Exists(mSGFFilePath))
+                if (File.Exists(msgfFilePath))
                 {
-                    var oMSGFReader = new clsMSGFResultsReader();
-                    mMSGFCachedResults = oMSGFReader.ReadMSGFData(mSGFFilePath);
+                    var msgfReader = new clsMSGFResultsReader();
+                    mMSGFCachedResults = msgfReader.ReadMSGFData(msgfFilePath);
 
-                    if (oMSGFReader.ErrorMessage.Length > 0)
+                    if (msgfReader.ErrorMessage.Length > 0)
                     {
-                        ReportError("Error reading MSGF data: " + oMSGFReader.ErrorMessage);
+                        ReportError("Error reading MSGF data: " + msgfReader.ErrorMessage);
                     }
                 }
                 else
                 {
-                    ReportWarning("MSGF file not found: " + mSGFFilePath);
+                    ReportWarning("MSGF file not found: " + msgfFilePath);
                 }
             }
             catch (Exception ex)
@@ -2667,7 +2669,7 @@ namespace PHRPReader
             try
             {
                 var scanStatsFilePath = GetScanStatsFilename(mDatasetName);
-                scanStatsFilePath = Path.Combine(mInputFolderPath, scanStatsFilePath);
+                scanStatsFilePath = Path.Combine(mInputDirectoryPath, scanStatsFilePath);
 
                 ReadScanStatsData(scanStatsFilePath);
             }
@@ -2684,12 +2686,12 @@ namespace PHRPReader
             {
                 if (File.Exists(scanStatsFilePath))
                 {
-                    var oScanStatsReader = new clsScanStatsReader();
-                    mScanStats = oScanStatsReader.ReadScanStatsData(scanStatsFilePath);
+                    var scanStatsReader = new clsScanStatsReader();
+                    mScanStats = scanStatsReader.ReadScanStatsData(scanStatsFilePath);
 
-                    if (oScanStatsReader.ErrorMessage.Length > 0)
+                    if (scanStatsReader.ErrorMessage.Length > 0)
                     {
-                        ReportError("Error reading ScanStats data: " + oScanStatsReader.ErrorMessage);
+                        ReportError("Error reading ScanStats data: " + scanStatsReader.ErrorMessage);
                     }
                 }
                 else
@@ -2709,7 +2711,7 @@ namespace PHRPReader
             try
             {
                 var extendedScanStatsFilePath = GetExtendedScanStatsFilename(mDatasetName);
-                extendedScanStatsFilePath = Path.Combine(mInputFolderPath, extendedScanStatsFilePath);
+                extendedScanStatsFilePath = Path.Combine(mInputDirectoryPath, extendedScanStatsFilePath);
 
                 ReadExtendedScanStatsData(extendedScanStatsFilePath);
             }
@@ -2726,12 +2728,12 @@ namespace PHRPReader
             {
                 if (File.Exists(extendedScanStatsFilePath))
                 {
-                    var oExtendedScanStatsReader = new clsExtendedScanStatsReader();
-                    mScanStatsEx = oExtendedScanStatsReader.ReadExtendedScanStatsData(extendedScanStatsFilePath);
+                    var extendedScanStatsReader = new clsExtendedScanStatsReader();
+                    mScanStatsEx = extendedScanStatsReader.ReadExtendedScanStatsData(extendedScanStatsFilePath);
 
-                    if (oExtendedScanStatsReader.ErrorMessage.Length > 0)
+                    if (extendedScanStatsReader.ErrorMessage.Length > 0)
                     {
-                        ReportError("Error reading Extended ScanStats data: " + oExtendedScanStatsReader.ErrorMessage);
+                        ReportError("Error reading Extended ScanStats data: " + extendedScanStatsReader.ErrorMessage);
                     }
                 }
                 else

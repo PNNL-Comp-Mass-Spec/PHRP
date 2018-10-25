@@ -617,7 +617,7 @@ namespace PeptideHitResultsProcessor
             return mass;
         }
 
-        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputFolderPath, bool mts)
+        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
 
@@ -633,7 +633,7 @@ namespace PeptideHitResultsProcessor
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
             }
 
-            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputFolderPath, mts);
+            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputDirectoryPath, mts);
         }
 
         /// <summary>
@@ -1237,7 +1237,7 @@ namespace PeptideHitResultsProcessor
         /// Load the PeptideToProteinMap information; in addition, creates the _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
         /// </summary>
         /// <param name="pepToProteinMapFilePath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <param name="msgfDbModInfo"></param>
         /// <param name="isMsgfPlus">Should be set to True if processing MSGF+ results</param>
         /// <param name="pepToProteinMapping"></param>
@@ -1246,7 +1246,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private bool LoadPeptideToProteinMapInfoMSGFDB(
             string pepToProteinMapFilePath,
-            string outputFolderPath,
+            string outputDirectoryPath,
             IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfDbModInfo,
             bool isMsgfPlus,
             List<udtPepToProteinMappingType> pepToProteinMapping,
@@ -1293,16 +1293,15 @@ namespace PeptideHitResultsProcessor
                 }
 
                 mtsPepToProteinMapFilePath =
-                    Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(pepToProteinMapFilePath) + "MTS.txt");
+                    Path.Combine(outputDirectoryPath, Path.GetFileNameWithoutExtension(pepToProteinMapFilePath) + "MTS.txt");
 
-                using (var swOutFile =
-                    new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                using (var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
                 )
                 {
                     if (!string.IsNullOrEmpty(headerLine))
                     {
                         // Header line
-                        swOutFile.WriteLine(headerLine);
+                        writer.WriteLine(headerLine);
                     }
 
                     for (var index = 0; index <= pepToProteinMapping.Count - 1; index++)
@@ -1317,10 +1316,10 @@ namespace PeptideHitResultsProcessor
                             UpdatePepToProteinMapPeptide(pepToProteinMapping, index, mtsCompatiblePeptide);
                         }
 
-                        swOutFile.WriteLine(pepToProteinMapping[index].Peptide + "\t" +
-                                            pepToProteinMapping[index].Protein + "\t" +
-                                            pepToProteinMapping[index].ResidueStart + "\t" +
-                                            pepToProteinMapping[index].ResidueEnd);
+                        writer.WriteLine(pepToProteinMapping[index].Peptide + "\t" +
+                                         pepToProteinMapping[index].Protein + "\t" +
+                                         pepToProteinMapping[index].ResidueStart + "\t" +
+                                         pepToProteinMapping[index].ResidueEnd);
                     }
                 }
 
@@ -1406,7 +1405,7 @@ namespace PeptideHitResultsProcessor
 
         private bool ParseMSGFDBSynopsisFile(
             string inputFilePath,
-            string outputFolderPath,
+            string outputDirectoryPath,
             List<udtPepToProteinMappingType> pepToProteinMapping,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
@@ -1460,7 +1459,7 @@ namespace PeptideHitResultsProcessor
                         var headerParsed = false;
 
                         // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputFolderPath, Path.GetFileName(inputFilePath));
+                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                         InitializeSequenceOutputFiles(baseOutputFilePath);
 
                         int[] columnMapping = null;
@@ -1585,7 +1584,7 @@ namespace PeptideHitResultsProcessor
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
                         var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
-                        modificationSummaryFilePath = Path.Combine(outputFolderPath, modificationSummaryFilePath);
+                        modificationSummaryFilePath = Path.Combine(outputDirectoryPath, modificationSummaryFilePath);
 
                         SaveModificationSummaryFile(modificationSummaryFilePath);
                     }
@@ -2307,11 +2306,11 @@ namespace PeptideHitResultsProcessor
         /// Main processing function
         /// </summary>
         /// <param name="inputFilePath">MSGFDB results file</param>
-        /// <param name="outputFolderPath">Output folder</param>
+        /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file for data processing</param>
         /// <returns>True if success, False if failure</returns>
         /// <remarks>Use SearchToolParameterFilePath to define the search engine parameter file</remarks>
-        public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath)
+        public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
 
             var success = false;
@@ -2343,7 +2342,7 @@ namespace PeptideHitResultsProcessor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                 {
                     return false;
                 }
@@ -2411,7 +2410,7 @@ namespace PeptideHitResultsProcessor
                         // Create the first hits output file
                         ResetProgress("Creating the FHT file", true);
 
-                        fhtOutputFilePath = Path.Combine(outputFolderPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX);
+                        fhtOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX);
 
                         var scanGroupFilePath = string.Empty;
 
@@ -2430,9 +2429,9 @@ namespace PeptideHitResultsProcessor
                         ResetProgress("Creating the SYN file", true);
 
                         // The synopsis file name will be of the form BasePath_msgfplus_syn.txt
-                        var synOutputFilePath = Path.Combine(outputFolderPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+                        var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
-                        var scanGroupFilePath = Path.Combine(outputFolderPath, baseName + "_ScanGroupInfo.txt");
+                        var scanGroupFilePath = Path.Combine(outputDirectoryPath, baseName + "_ScanGroupInfo.txt");
 
                         success = CreateFHTorSYNResultsFile(
                             inputFilePath, synOutputFilePath, scanGroupFilePath, msgfdbModInfo,
@@ -2440,17 +2439,17 @@ namespace PeptideHitResultsProcessor
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
                         // LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
-                        var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(outputFolderPath, baseName) + ".txt", outputFolderPath, mts: false);
+                        var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(outputDirectoryPath, baseName) + ".txt", outputDirectoryPath, mts: false);
 
                         ResetProgress("Loading the PepToProtein map file: " + Path.GetFileName(pepToProteinMapFilePath), true);
 
-                        LoadPeptideToProteinMapInfoMSGFDB(pepToProteinMapFilePath, outputFolderPath, msgfdbModInfo, isMsgfPlus, pepToProteinMapping, out var mtsPepToProteinMapFilePath);
+                        LoadPeptideToProteinMapInfoMSGFDB(pepToProteinMapFilePath, outputDirectoryPath, msgfdbModInfo, isMsgfPlus, pepToProteinMapping, out var mtsPepToProteinMapFilePath);
 
                         // Create the other PHRP-specific files
                         ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                         // Now parse the _syn.txt file that we just created to create the other PHRP files
-                        success = ParseMSGFDBSynopsisFile(synOutputFilePath, outputFolderPath, pepToProteinMapping, false);
+                        success = ParseMSGFDBSynopsisFile(synOutputFilePath, outputDirectoryPath, pepToProteinMapping, false);
 
                         // Remove all items from pepToProteinMapping to reduce memory overhead
                         pepToProteinMapping.Clear();
@@ -2458,7 +2457,7 @@ namespace PeptideHitResultsProcessor
 
                         if (success && CreateProteinModsFile)
                         {
-                            success = CreateProteinModsFileWork(baseName, inputFile, fhtOutputFilePath, synOutputFilePath, outputFolderPath, mtsPepToProteinMapFilePath);
+                            success = CreateProteinModsFileWork(baseName, inputFile, fhtOutputFilePath, synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath);
                         }
                     }
 
@@ -2487,7 +2486,7 @@ namespace PeptideHitResultsProcessor
             FileInfo inputFile,
             string fhtOutputFilePath,
             string synOutputFilePath,
-            string outputFolderPath,
+            string outputDirectoryPath,
             string mtsPepToProteinMapFilePath)
         {
             var success = true;
@@ -2498,7 +2497,7 @@ namespace PeptideHitResultsProcessor
 
                 if (string.IsNullOrEmpty(mtsPepToProteinMapFilePath))
                 {
-                    mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputFolderPath, mts: true);
+                    mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, mts: true);
                 }
 
                 var sourcePHRPDataFiles = new List<string>();
@@ -2895,13 +2894,13 @@ namespace PeptideHitResultsProcessor
 
                 if (createFile)
                 {
-                    using (var swScanGroupFile = new StreamWriter(new FileStream(scanGroupFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    using (var writer = new StreamWriter(new FileStream(scanGroupFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                     {
-                        swScanGroupFile.WriteLine("Scan_Group_ID" + "\t" + "Charge" + "\t" + "Scan");
+                        writer.WriteLine("Scan_Group_ID" + "\t" + "Charge" + "\t" + "Scan");
 
                         foreach (var udtScanGroupInfo in scanGroupDetails)
                         {
-                            swScanGroupFile.WriteLine(udtScanGroupInfo.ScanGroupID + "\t" + udtScanGroupInfo.Charge + "\t" + udtScanGroupInfo.Scan);
+                            writer.WriteLine(udtScanGroupInfo.ScanGroupID + "\t" + udtScanGroupInfo.Charge + "\t" + udtScanGroupInfo.Scan);
                         }
                     }
                 }

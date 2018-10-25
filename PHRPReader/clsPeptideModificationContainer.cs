@@ -1109,13 +1109,13 @@ namespace PHRPReader
                 }
                 else
                 {
-                    using (var srMassCorrectionTagsFile = new StreamReader(filePath))
+                    using (var massCorrectionTagsReader = new StreamReader(filePath))
                     {
                         mMassCorrectionTags.Clear();
 
-                        while (!srMassCorrectionTagsFile.EndOfStream)
+                        while (!massCorrectionTagsReader.EndOfStream)
                         {
-                            var lineIn = srMassCorrectionTagsFile.ReadLine();
+                            var lineIn = massCorrectionTagsReader.ReadLine();
                             if (string.IsNullOrEmpty(lineIn))
                                 continue;
 
@@ -1187,13 +1187,13 @@ namespace PHRPReader
                 }
                 else
                 {
-                    using (var srModificationFile = new StreamReader(filePath))
+                    using (var modFileReader = new StreamReader(filePath))
                     {
                         ClearModifications();
 
-                        while (!srModificationFile.EndOfStream)
+                        while (!modFileReader.EndOfStream)
                         {
-                            var lineIn = srModificationFile.ReadLine();
+                            var lineIn = modFileReader.ReadLine();
                             if (string.IsNullOrEmpty(lineIn))
                                 continue;
 

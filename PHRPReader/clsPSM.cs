@@ -398,28 +398,37 @@ namespace PHRPReader
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="Residue">Amino acid letter; use angle brackets or square brackets for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
-        /// <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
-        /// <param name="ResidueTerminusState">Terminus state of residue</param>
-        /// <param name="ModDefinition">Modification details</param>
+        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+        /// <param name="residueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
+        /// <param name="residueTerminusState">Terminus state of residue</param>
+        /// <param name="modDefinition">Modification details</param>
         /// <remarks></remarks>
-        public void AddModifiedResidue(char Residue, int ResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants ResidueTerminusState, clsModificationDefinition ModDefinition)
+        public void AddModifiedResidue(
+            char residue,
+            int residueLocInPeptide,
+            clsAminoAcidModInfo.eResidueTerminusStateConstants residueTerminusState,
+            clsModificationDefinition modDefinition)
         {
-            mModifiedPeptideResidues.Add(new clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition));
+            ModifiedResidues.Add(new clsAminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDefinition));
         }
 
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="Residue">Amino acid letter; use angle brackets or square brackets for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
-        /// <param name="ResidueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
-        /// <param name="ResidueTerminusState">Terminus state of residue</param>
-        /// <param name="ModDefinition">Modification details</param>
-        /// <param name="EndResidueLocInPeptide">For ambiguous mods, the residue number of the last residue that could have this modification</param>
+        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+        /// <param name="residueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
+        /// <param name="residueTerminusState">Terminus state of residue</param>
+        /// <param name="modDefinition">Modification details</param>
+        /// <param name="endResidueLocInPeptide">For ambiguous mods, the residue number of the last residue that could have this modification</param>
         /// <remarks></remarks>
-        public void AddModifiedResidue(char Residue, int ResidueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants ResidueTerminusState, clsModificationDefinition ModDefinition, int EndResidueLocInPeptide)
+        public void AddModifiedResidue(
+            char residue,
+            int residueLocInPeptide,
+            clsAminoAcidModInfo.eResidueTerminusStateConstants residueTerminusState,
+            clsModificationDefinition modDefinition,
+            int endResidueLocInPeptide)
         {
-            mModifiedPeptideResidues.Add(new clsAminoAcidModInfo(Residue, ResidueLocInPeptide, ResidueTerminusState, ModDefinition, EndResidueLocInPeptide));
+            ModifiedResidues.Add(new clsAminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDefinition, endResidueLocInPeptide));
         }
 
         /// <summary>

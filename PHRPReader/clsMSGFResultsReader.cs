@@ -88,7 +88,7 @@ namespace PHRPReader
         /// <returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
         public Dictionary<int, string> ReadMSGFData(string inputFilePath)
         {
-            var mSGFData = new Dictionary<int, string>();
+            var msgfData = new Dictionary<int, string>();
 
             try
             {
@@ -96,13 +96,13 @@ namespace PHRPReader
 
                 mErrorMessage = string.Empty;
 
-                using (var srInFile = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     var headerLineParsed = false;
 
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         var skipLine = false;
 
                         if (string.IsNullOrWhiteSpace(lineIn))
@@ -128,11 +128,11 @@ namespace PHRPReader
 
                             if (resultID >= 0)
                             {
-                                var mSGFSpecProb = clsPHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
+                                var msgfSpecProb = clsPHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
 
-                                if (!string.IsNullOrEmpty(mSGFSpecProb) && !mSGFData.ContainsKey(resultID))
+                                if (!string.IsNullOrEmpty(msgfSpecProb) && !msgfData.ContainsKey(resultID))
                                 {
-                                    mSGFData.Add(resultID, mSGFSpecProb);
+                                    msgfData.Add(resultID, msgfSpecProb);
                                 }
                             }
                         }
@@ -144,7 +144,7 @@ namespace PHRPReader
                 mErrorMessage = "Error reading the MSGF data: " + ex.Message;
             }
 
-            return mSGFData;
+            return msgfData;
         }
     }
 }

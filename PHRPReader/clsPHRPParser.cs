@@ -59,9 +59,9 @@ namespace PHRPReader
         private string mInputFilePath;
 
         /// <summary>
-        /// Input folder path
+        /// Input directory path
         /// </summary>
-        protected string mInputFolderPath;
+        protected string mInputDirectoryPath;
 
         /// <summary>
         /// True if initialized
@@ -132,12 +132,18 @@ namespace PHRPReader
         public string InputFilePath => mInputFilePath;
 
         /// <summary>
-        /// Input folder path
+        /// Input directory path
         /// </summary>
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string InputFolderPath => mInputFolderPath;
+        public string InputDirectoryPath => mInputDirectoryPath;
+
+        /// <summary>
+        /// Input directory path
+        /// </summary>
+        [Obsolete("Use InputDirectoryPath")]
+        public string InputFolderPath => mInputDirectoryPath;
 
         /// <summary>
         /// Maximum number of proteins to associate with each PSM
@@ -320,7 +326,7 @@ namespace PHRPReader
                 // User instantiated the class without a filename
                 // Functions that solely require a dataset name will be callable, but cannot call functions that read a data line
                 mInputFilePath = string.Empty;
-                mInputFolderPath = string.Empty;
+                mInputDirectoryPath = string.Empty;
 
                 startupOptions.LoadModsAndSeqInfo = false;
             }
@@ -328,7 +334,10 @@ namespace PHRPReader
             {
                 var inputFile = new FileInfo(inputFilePath);
                 mInputFilePath = inputFile.FullName;
-                mInputFolderPath = inputFile.DirectoryName;
+                if (inputFile.Directory != null)
+                {
+                    mInputDirectoryPath = inputFile.Directory.FullName;
+                }
 
                 var expectedSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
                 expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(expectedSynopsisName, inputFile.Name);
@@ -375,8 +384,8 @@ namespace PHRPReader
 
                     if (!string.IsNullOrEmpty(resultToSeqMapFilePath))
                     {
-                        if (!string.IsNullOrWhiteSpace(mInputFolderPath))
-                            resultToSeqMapFilePath = Path.Combine(mInputFolderPath, resultToSeqMapFilePath);
+                        if (!string.IsNullOrWhiteSpace(mInputDirectoryPath))
+                            resultToSeqMapFilePath = Path.Combine(mInputDirectoryPath, resultToSeqMapFilePath);
 
                         resultToSeqMapFilePath = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(resultToSeqMapFilePath, mInputFilePath);
                         resultToSeqMapFilePath = clsPHRPReader.AutoSwitchToFHTIfRequired(resultToSeqMapFilePath, mInputFilePath);
@@ -531,9 +540,9 @@ namespace PHRPReader
 
         /// <summary>
         /// Parses the specified parameter file
-        /// Also reads the Tool_Version_Info file in the same folder (if present)
+        /// Also reads the Tool_Version_Info file in the same directory (if present)
         /// </summary>
-        /// <param name="searchEngineParamFileName">Name of the parameter file to parse (must reside in InputFolderPath)</param>
+        /// <param name="searchEngineParamFileName">Name of the parameter file to parse (must reside in InputDirectoryPath)</param>
         /// <param name="searchEngineParams">Search engine parameters class (output)</param>
         /// <returns></returns>
         /// <remarks></remarks>
@@ -784,7 +793,7 @@ namespace PHRPReader
                     return;
                 }
 
-                modSummaryFilePath = Path.Combine(mInputFolderPath, modSummaryFilePath);
+                modSummaryFilePath = Path.Combine(mInputDirectoryPath, modSummaryFilePath);
 
                 modSummaryFilePath = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(modSummaryFilePath, mInputFilePath);
                 var modSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(modSummaryFilePath, mInputFilePath);
@@ -830,7 +839,7 @@ namespace PHRPReader
 
                 // Instantiate the reader
                 var reader =
-                    new clsPHRPSeqMapReader(mDatasetName, mInputFolderPath, mPeptideHitResultType, mInputFilePath)
+                    new clsPHRPSeqMapReader(mDatasetName, mInputDirectoryPath, mPeptideHitResultType, mInputFilePath)
                     {
                         MaxProteinsPerSeqID = MaxProteinsPerPSM
                     };
@@ -1006,7 +1015,7 @@ namespace PHRPReader
         /// Read a Search Engine parameter file where settings are stored as key/value pairs
         /// </summary>
         /// <param name="searchEngineName">Search engine name (e.g. MSGF+)</param>
-        /// <param name="searchEngineParamFileName">Search engine parameter file name (must exist in mInputFolderPath)</param>
+        /// <param name="searchEngineParamFileName">Search engine parameter file name (must exist in mInputDirectoryPath)</param>
         /// <param name="ePeptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
         /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
         /// <returns>True if success, false if an error</returns>
@@ -1016,7 +1025,7 @@ namespace PHRPReader
             clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
             clsSearchEngineParameters searchEngineParams)
         {
-            var paramFilePath = Path.Combine(mInputFolderPath, searchEngineParamFileName);
+            var paramFilePath = Path.Combine(mInputDirectoryPath, searchEngineParamFileName);
 
             var success = ReadKeyValuePairSearchEngineParamFile(searchEngineName, paramFilePath, ePeptideHitResultType, searchEngineParams,
                 out var errorMessage, out var warningMessage);
@@ -1068,11 +1077,11 @@ namespace PHRPReader
 
                 searchEngineParams.UpdateSearchEngineParamFilePath(paramFilePath);
 
-                using (var srInFile = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(paramFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         if (string.IsNullOrEmpty(lineIn))
                             continue;
 
@@ -1139,12 +1148,12 @@ namespace PHRPReader
             try
             {
                 // Read the Tool_Version_Info file to determine the analysis time and the tool version
-                var toolVersionInfoFilePath = Path.Combine(mInputFolderPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType));
+                var toolVersionInfoFilePath = Path.Combine(mInputDirectoryPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType));
 
                 if (!File.Exists(toolVersionInfoFilePath) && ePeptideHitResultType == clsPHRPReader.ePeptideHitResultType.MSGFDB)
                 {
                     // This could be an older MSGF+ job; check for a _MSGFDB.txt tool version file
-                    var alternativeVersionInfoFilePath = Path.Combine(mInputFolderPath, "Tool_Version_Info_MSGFDB.txt");
+                    var alternativeVersionInfoFilePath = Path.Combine(mInputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");
                     if (File.Exists(alternativeVersionInfoFilePath))
                     {
                         toolVersionInfoFilePath = alternativeVersionInfoFilePath;
@@ -1162,11 +1171,11 @@ namespace PHRPReader
                 var validDate = false;
                 var validVersion = false;
 
-                using (var srInFile = new StreamReader(new FileStream(toolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(toolVersionInfoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         if (string.IsNullOrEmpty(lineIn))
                             continue;
 
@@ -1423,9 +1432,9 @@ namespace PHRPReader
                     }
 
                     // Make sure all of the proteins in currentPSM.Proteins are defined in currentPSM.ProteinDetails
-                    var addnlProteins1 = currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase).ToList();
+                    var additionalProteins1 = currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase).ToList();
 
-                    foreach (var proteinName in addnlProteins1)
+                    foreach (var proteinName in additionalProteins1)
                     {
                         if (MaxProteinsPerPSM > 0 && currentPSM.ProteinDetails.Count > MaxProteinsPerPSM)
                         {
@@ -1441,16 +1450,16 @@ namespace PHRPReader
                     {
                         // Make sure the residue start/end locations are up-to-date in currentPSM.ProteinDetails
 
-                        if (mPepToProteinMap.TryGetValue(currentPSM.PeptideCleanSequence, out var oPepToProteinMapInfo))
+                        if (mPepToProteinMap.TryGetValue(currentPSM.PeptideCleanSequence, out var pepToProteinMapInfo))
                         {
-                            foreach (var oProtein in currentPSM.ProteinDetails)
+                            foreach (var protein in currentPSM.ProteinDetails)
                             {
                                 // Find the matching protein in oPepToProteinMapInfo
 
-                                if (oPepToProteinMapInfo.ProteinMapInfo.TryGetValue(oProtein.Key, out var locations))
+                                if (pepToProteinMapInfo.ProteinMapInfo.TryGetValue(protein.Key, out var locations))
                                 {
                                     var udtFirstLocation = locations.First();
-                                    oProtein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd);
+                                    protein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd);
                                 }
                             }
                         }

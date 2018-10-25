@@ -181,9 +181,20 @@ namespace PHRPReader
         /// Compute the monoisotopic mass of the given empirical formula
         /// </summary>
         /// <param name="empiricalFormula"></param>
+        [Obsolete("Use ComputeMonoisotopicMass")]
+        // ReSharper disable once IdentifierTypo
+        public static double ComputeMonoistopicMass(clsEmpiricalFormula empiricalFormula)
+        {
+            return ComputeMonoisotopicMass(empiricalFormula);
+        }
+
+        /// <summary>
+        /// Compute the monoisotopic mass of the given empirical formula
+        /// </summary>
+        /// <param name="empiricalFormula"></param>
         /// <returns></returns>
         /// <remarks>Throws an exception if an unknown symbol is encountered</remarks>
-        public static double ComputeMonoistopicMass(clsEmpiricalFormula empiricalFormula)
+        public static double ComputeMonoisotopicMass(clsEmpiricalFormula empiricalFormula)
         {
             double monoisotopicMass = 0;
 
@@ -207,9 +218,24 @@ namespace PHRPReader
         /// </summary>
         /// <param name="elementalComposition"></param>
         /// <param name="unknownSymbols"></param>
-        /// <returns></returns>
+        [Obsolete("Use ComputeMonoisotopicMass")]
+        // ReSharper disable once IdentifierTypo
+
         public static double ComputeMonoistopicMass(Dictionary<string, int> elementalComposition,
-            out List<string> unknownSymbols)
+                                                    out List<string> unknownSymbols)
+        {
+            return ComputeMonoisotopicMass(elementalComposition, out unknownSymbols);
+
+        }
+
+        /// <summary>
+        /// Compute the monoisotopic mass of the compound represented by elementalComposition
+        /// </summary>
+        /// <param name="elementalComposition"></param>
+        /// <param name="unknownSymbols"></param>
+        /// <returns></returns>
+        public static double ComputeMonoisotopicMass(Dictionary<string, int> elementalComposition,
+                                                    out List<string> unknownSymbols)
         {
             double monoisotopicMass = 0;
 
@@ -802,7 +828,7 @@ namespace PHRPReader
                     break;
             }
 
-            var computedMass = ComputeMonoistopicMass(empiricalFormula);
+            var computedMass = ComputeMonoisotopicMass(empiricalFormula);
             if (Math.Abs(computedMass - monoMass) > 0.00001)
             {
                 Console.WriteLine("Mass discrepancy for amino acid {0}. DMS uses {1:F4} but this class computed {2:F4}", aminoAcidSymbol, monoMass, computedMass);
@@ -863,9 +889,9 @@ namespace PHRPReader
             // Originally MSGF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
             // It now allows for any element
 
-            var reMatches = mAtomicFormulaRegEx.Matches(empiricalformula);
+            var reMatches = mAtomicFormulaRegEx.Matches(empiricalFormula);
 
-            var empiricalFormula = new clsEmpiricalFormula();
+            var empiricalFormulaInstance = new clsEmpiricalFormula();
 
             if (reMatches.Count > 0)
             {
@@ -879,15 +905,15 @@ namespace PHRPReader
                     {
                         if (!int.TryParse(elementCountText, out elementCount))
                         {
-                            throw new Exception("Error parsing empirical formula '" + empiricalformula + "', number not found in " + elementCountText);
+                            throw new Exception("Error parsing empirical formula '" + empiricalFormula + "', number not found in " + elementCountText);
                         }
                     }
 
-                    empiricalFormula.AddElement(elementSymbol, elementCount);
+                    empiricalFormulaInstance.AddElement(elementSymbol, elementCount);
                 }
             }
 
-            return empiricalFormula;
+            return empiricalFormulaInstance;
         }
 
         private void InitializeAminoAcidData()

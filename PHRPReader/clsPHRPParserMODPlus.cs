@@ -42,7 +42,7 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_SYN = "_modp_syn.txt";
         public const string FILENAME_SUFFIX_FHT = "_modp_fht.txt";
 
-        private const string MODplus_SEARCH_ENGINE_NAME = "MODplus";
+        private const string MODPlus_SEARCH_ENGINE_NAME = "MODPlus";
 #pragma warning restore 1591
 
         #endregion
@@ -165,7 +165,7 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetPHRPFirstHitsFileName(string datasetName)
         {
-            // MODplus does not have a first-hits file; just the _syn.txt file
+            // MODPlus does not have a first-hits file; just the _syn.txt file
             return string.Empty;
         }
 
@@ -244,7 +244,7 @@ namespace PHRPReader
         /// </summary>
         public static string GetSearchEngineName()
         {
-            return MODplus_SEARCH_ENGINE_NAME;
+            return MODPlus_SEARCH_ENGINE_NAME;
         }
 
         /// <summary>
@@ -256,7 +256,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
         {
-            searchEngineParams = new clsSearchEngineParameters(MODplus_SEARCH_ENGINE_NAME);
+            searchEngineParams = new clsSearchEngineParameters(MODPlus_SEARCH_ENGINE_NAME);
 
             var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
 
@@ -270,10 +270,10 @@ namespace PHRPReader
             try
             {
                 // For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
-                // But MODplus does not have a _ModDefs.txt file because it performs a blind search
+                // But MODPlus does not have a _ModDefs.txt file because it performs a blind search
                 // The user can define static mods on any of the residues, plus the peptide terminii; check for these now
 
-                var paramFilePath = Path.Combine(mInputFolderPath, searchEngineParamFileName);
+                var paramFilePath = Path.Combine(mInputDirectoryPath, searchEngineParamFileName);
 
                 // Read the contents of the parameter file
                 var doc = new XmlDocument();

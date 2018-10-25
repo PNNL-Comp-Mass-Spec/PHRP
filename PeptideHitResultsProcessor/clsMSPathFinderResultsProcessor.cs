@@ -354,13 +354,13 @@ namespace PeptideHitResultsProcessor
             string baseName,
             FileInfo inputFile,
             string synOutputFilePath,
-            string outputFolderPath)
+            string outputDirectoryPath)
         {
             bool success;
 
             // Create the MTSPepToProteinMap file
 
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputFolderPath, mts: true);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, mts: true);
 
             var sourcePHRPDataFiles = new List<string>();
 
@@ -537,7 +537,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private bool ExtractModInfoFromParamFile(string mSGFDBParamFilePath,
+        private bool ExtractModInfoFromParamFile(string msPathFinderParamFilePath,
             out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             // The DMS-based parameter file for MSPathFinder uses the same formatting as MSGF+
@@ -548,7 +548,7 @@ namespace PeptideHitResultsProcessor
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
             // Note that this call will initialize modInfo
-            var success = modFileProcessor.ExtractModInfoFromParamFile(mSGFDBParamFilePath, out modInfo);
+            var success = modFileProcessor.ExtractModInfoFromParamFile(msPathFinderParamFilePath, out modInfo);
 
             if (!success || mErrorCode != ePHRPErrorCodes.NoError)
             {
@@ -569,14 +569,14 @@ namespace PeptideHitResultsProcessor
         /// Parse the Synopsis file to create the other PHRP-compatible files
         /// </summary>
         /// <param name="inputFilePath"></param>
-        /// <param name="outputFolderPath"></param>
+        /// <param name="outputDirectoryPath"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
         /// <param name="modInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         protected bool ParseMSPathfinderSynopsisFile(
             string inputFilePath,
-            string outputFolderPath,
+            string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions,
             List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
@@ -626,7 +626,7 @@ namespace PeptideHitResultsProcessor
                         var headerParsed = false;
 
                         // Create the output files
-                        var baseOutputFilePath = Path.Combine(outputFolderPath, Path.GetFileName(inputFilePath));
+                        var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                         success = InitializeSequenceOutputFiles(baseOutputFilePath);
 
                         // Parse the input file
@@ -1186,10 +1186,10 @@ namespace PeptideHitResultsProcessor
         /// Main processing function
         /// </summary>
         /// <param name="inputFilePath">MSPathFinder results file (Dataset_IcTda.tsv)</param>
-        /// <param name="outputFolderPath">Output folder</param>
+        /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
         /// <returns>True if success, False if failure</returns>
-        public override bool ProcessFile(string inputFilePath, string outputFolderPath, string parameterFilePath)
+        public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
 
@@ -1216,7 +1216,7 @@ namespace PeptideHitResultsProcessor
 
                 ResetProgress("Parsing " + Path.GetFileName(inputFilePath));
 
-                if (!CleanupFilePaths(ref inputFilePath, ref outputFolderPath))
+                if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                 {
                     return false;
                 }
@@ -1249,7 +1249,7 @@ namespace PeptideHitResultsProcessor
                     ResetProgress("Creating the SYN file", true);
 
                     // The synopsis file name will be of the form BasePath_mspath_syn.txt
-                    var synOutputFilePath = Path.Combine(outputFolderPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+                    var synOutputFilePath = Path.Combine(outputDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
 
                     success = CreateSynResultsFile(inputFilePath, synOutputFilePath, modInfo);
 
@@ -1257,7 +1257,7 @@ namespace PeptideHitResultsProcessor
                     ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                     // Now parse the _syn.txt file that we just created to create the other PHRP files
-                    success = ParseMSPathfinderSynopsisFile(synOutputFilePath, outputFolderPath, false, modInfo);
+                    success = ParseMSPathfinderSynopsisFile(synOutputFilePath, outputDirectoryPath, false, modInfo);
 
                     if (success && CreateProteinModsFile)
                     {
@@ -1268,7 +1268,7 @@ namespace PeptideHitResultsProcessor
                         }
                         else
                         {
-                            success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputFolderPath);
+                            success = CreateProteinModsFileWork(baseName, inputFile, synOutputFilePath, outputDirectoryPath);
                         }
                     }
 
