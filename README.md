@@ -11,7 +11,7 @@ the symbol to use for each modification mass.
 
 ## Example Data
 
-Example input and output files are in the Data folder:
+Example input and output files are in the Data directory:
 * MSGFPlus_Example has MSGF+ results
 * XTandem_Example has X!Tandem results
 
@@ -28,14 +28,14 @@ PeptideHitResultsProcRunner.exe /I:Dataset_msgfplus.tsv /M:MSGFDB_PartTryp_MetOx
 PHRP is a console application, and must be run from the Windows command prompt.
 
 ```
-PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputFolderPath]
+PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputDirectoryPath]
  [/P:ParameterFilePath] [/M:ModificationDefinitionFilePath]
  [/ProteinMods] [/F:FastaFilePath] 
  [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]
  [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]
  [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] 
  [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]
- [/S:[MaxLevel]] [/A:AlternateOutputFolderPath] [/R] [/L:[LogFilePath]]
+ [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]]
 ```
 
 The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File 
@@ -43,8 +43,8 @@ The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis F
 MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or 
 an MSAlign results files (_MSAlign_ResultTable.txt)
 
-The output folder switch is optional.  If omitted, the output file will be created in the same 
-folder as the input file.
+The output directory switch is optional.  If omitted, the output file will be created in the same 
+directory as the input file.
 
 The parameter file path is optional.  If included, it should point to a valid XML parameter 
 file.
@@ -90,13 +90,13 @@ processing Inspect or MSGF-DB results (default is /InsFHT:True)
 Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when 
 processing Inspect or MSGF-DB results (default is /InsSyn:True)
 
-Use /S to process all valid files in the input folder and subfolders. Include a number after 
-/S (like /S:2) to limit the level of subfolders to examine.
+Use /S to process all valid files in the input directory and subdirectories. Include a 
+number after /S (like /S:2) to limit the level of subdirectories to examine.
 
 When using /S, you can redirect the output of the results using /A.
 
-When using /S, you can use /R to re-create the input folder hierarchy in the alternate output 
-folder (if defined).
+When using /S, you can use /R to re-create the input directory hierarchy in the alternate output 
+directory (if defined).
 
 Use /L to specify that a log file should be created.  Use /L:LogFilePath to specify the name 
 (or full path) for the log file.
