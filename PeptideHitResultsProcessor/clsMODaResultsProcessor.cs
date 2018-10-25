@@ -21,7 +21,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODaResultsProcessor()
         {
-            mFileDate = "October 13, 2017";
+            mFileDate = "October 24, 2018";
             InitializeLocalVariables();
         }
 
@@ -29,9 +29,13 @@ namespace PeptideHitResultsProcessor
 
         public const string FILENAME_SUFFIX_MODA_FILE = "_moda.id";
 
+        // ReSharper disable once UnusedMember.Global
         public const string N_TERMINUS_SYMBOL_MODA = "-";
+
+        // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_MODA = "-";
 
+        // ReSharper disable once UnusedMember.Global
         public const float DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
         private const int MAX_ERROR_LOG_LENGTH = 4096;

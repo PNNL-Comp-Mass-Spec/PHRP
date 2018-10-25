@@ -14,6 +14,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+// ReSharper disable UnusedMember.Global
+
 namespace PHRPReader
 {
     /// <summary>

@@ -58,6 +58,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>Update scores using SetScore</remarks>
+        // ReSharper disable once UnusedMember.Global
         public IReadOnlyDictionary<string, string> AdditionalScores => mAdditionalScores;
 
         /// <summary>
@@ -242,6 +243,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>Retrieve full list of proteins using the Proteins property</remarks>
+        // ReSharper disable once UnusedMember.Global
         public string ProteinFirst
         {
             get
@@ -315,11 +317,13 @@ namespace PHRPReader
         /// <summary>
         /// First scan number
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public int ScanNumberStart => ScanList.Min;
 
         /// <summary>
         /// Last scan number
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public int ScanNumberEnd => ScanList.Max;
 
         /// <summary>
@@ -514,6 +518,7 @@ namespace PHRPReader
         /// </summary>
         /// <returns></returns>
         /// <remarks></remarks>
+        // ReSharper disable once UnusedMember.Global
         public clsPSM Clone()
         {
             var newPSM = new clsPSM
@@ -604,6 +609,7 @@ namespace PHRPReader
         /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise 0</returns>
         /// <remarks></remarks>
+        // ReSharper disable once UnusedMember.Global
         public double GetScoreDbl(string scoreName)
         {
             return GetScoreDbl(scoreName, 0);
@@ -633,6 +639,7 @@ namespace PHRPReader
         /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise 0</returns>
         /// <remarks></remarks>
+        // ReSharper disable once UnusedMember.Global
         public int GetScoreInt(string scoreName)
         {
             return GetScoreInt(scoreName, 0);

@@ -33,7 +33,10 @@ namespace PeptideHitResultsProcessor
 
         public const string FILENAME_SUFFIX_MSPathFinder_FILE = "_IcTda";
 
+        // ReSharper disable once UnusedMember.Global
         public const string N_TERMINUS_SYMBOL_MSPATHFINDER = "-";
+
+        // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_MSPATHFINDER = "-";
 
         private const int MAX_ERROR_LOG_LENGTH = 4096;
@@ -825,7 +828,9 @@ namespace PeptideHitResultsProcessor
         {
             // Parses an entry from the MSPathFinder results file
 
-            double sequenceMonoMassMSPathFinder = 0;    // Theoretical peptide monoisotopic mass, including mods, as computed by MSPathFinder
+            // Theoretical peptide monoisotopic mass, including mods, as computed by MSPathFinder
+            // ReSharper disable once NotAccessedVariable
+            double sequenceMonoMassMSPathFinder = 0;
 
             bool validSearchResult;
 

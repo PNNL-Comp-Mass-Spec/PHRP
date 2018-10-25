@@ -29,7 +29,10 @@ namespace PeptideHitResultsProcessor
 
         public const string FILENAME_SUFFIX_MODPlus_FILE = "_modp.id";
 
+        // ReSharper disable once UnusedMember.Global
         public const string N_TERMINUS_SYMBOL_MODPlus = "-";
+
+        // ReSharper disable once UnusedMember.Global
         public const string C_TERMINUS_SYMBOL_MODPlus = "-";
 
         // This is used for filtering both MODa and MODPlus results

@@ -62,6 +62,7 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_SYN = "_msgfplus_syn.txt";
         public const string FILENAME_SUFFIX_FHT = "_msgfplus_fht.txt";
 
+        // ReSharper disable once CommentTypo
         // Renamed from "MS-GFDB" to "MS-GF+" in November 2016
         private const string MSGFDB_SEARCH_ENGINE_NAME = "MS-GF+";
 

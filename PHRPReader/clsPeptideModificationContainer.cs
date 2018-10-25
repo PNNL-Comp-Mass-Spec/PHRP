@@ -54,12 +54,13 @@ namespace PHRPReader
         /// <summary>
         /// Symbol used by Inspect for tracking a modification at the peptide N-terminus
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public const char N_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT = '[';
-
 
         /// <summary>
         /// Symbol used by Inspect for tracking a modification at the peptide C-terminus
         /// </summary>
+        // ReSharper disable once UnusedMember.Global
         public const char C_TERMINAL_PEPTIDE_MOD_SYMBOL_INSPECT = ']';
 
         #endregion
@@ -463,6 +464,7 @@ namespace PHRPReader
         /// Searches known mods using massDigitsOfPrecision digits of precision, then massDigitsOfPrecision-1 digits, ... 1 digit
         /// If no match, adds as a new, unknown modification
         /// </remarks>
+        // ReSharper disable once UnusedMember.Global
         public string LookupMassCorrectionTagByMass(double modificationMass, byte massDigitsOfPrecision)
         {
             const bool addToModificationListIfUnknown = true;
