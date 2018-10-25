@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using PRISM;
 
 namespace PHRPReader
 {
@@ -340,11 +341,20 @@ namespace PHRPReader
 
                     try
                     {
-                        ParseXTandemParamFileWork(paramFile.DirectoryName, paramFile.Name, searchEngineParams, false, true, ref errorMessage);
-
-                        if (searchEngineParams.Parameters.TryGetValue(TAXONOMY_INFO_KEY_NAME, out var taxonomyFilename))
+                        if (paramFile.Directory == null)
                         {
-                            fileNames.Add(Path.GetFileName(taxonomyFilename));
+                            ConsoleMsgUtils.ShowWarning("Unable to determine the parent directory of " + paramFile.FullName);
+                        }
+                        else
+                        {
+
+                            ParseXTandemParamFileWork(paramFile.Directory.FullName, paramFile.Name, searchEngineParams, false, true,
+                                                      ref errorMessage);
+
+                            if (searchEngineParams.Parameters.TryGetValue(TAXONOMY_INFO_KEY_NAME, out var taxonomyFilename))
+                            {
+                                fileNames.Add(Path.GetFileName(taxonomyFilename));
+                            }
                         }
                     }
                     catch (Exception ex)

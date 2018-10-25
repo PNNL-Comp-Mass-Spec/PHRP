@@ -1366,14 +1366,14 @@ namespace PeptideHitResultsProcessor
                                     }
                                     else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_ModificationMass]))
                                     {
-                                        if (value != null && value.Trim().Length > 0)
+                                        if (!string.IsNullOrWhiteSpace(value))
                                         {
                                             staticModsAreResetForRefinement = true;
                                         }
                                     }
                                     else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Scoring_Include_Reverse]))
                                     {
-                                        if (value != null && value.Trim().Length > 0)
+                                        if (!string.IsNullOrWhiteSpace(value))
                                         {
                                             if (value.Trim().ToLower() == "yes")
                                             {
@@ -1625,11 +1625,23 @@ namespace PeptideHitResultsProcessor
 
             if (success)
             {
-                // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(xtandemXTFilePath)), outputFolderPath);
+                if (inputFile.Directory == null)
+                {
+                    ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                }
+                else if (string.IsNullOrWhiteSpace(xtandemXTFilePath))
+                {
+                    ReportWarning("CreateProteinModsFileWork: xtandemXTFilePath is null; cannot call CreateProteinModDetailsFile");
+                }
+                else
+                {
+                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
+                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(xtandemXTFilePath)), outputDirectoryPath);
 
-                // Now create the Protein Mods file
-                success = CreateProteinModDetailsFile(xtandemXTFilePath, outputFolderPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.XTandem);
+                    // Now create the Protein Mods file
+                    success = CreateProteinModDetailsFile(xtandemXTFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
+                                                          clsPHRPReader.ePeptideHitResultType.XTandem);
+                }
             }
 
             if (!success)

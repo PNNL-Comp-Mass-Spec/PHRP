@@ -22,7 +22,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODPlusResultsProcessor()
         {
-            mFileDate = "October 13, 2017";
+            mFileDate = "October 24, 2018";
         }
 
         #region "Constants and Enums"
@@ -1451,6 +1451,12 @@ namespace PeptideHitResultsProcessor
         {
             bool success;
 
+            if (inputFile.Directory == null)
+            {
+                ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                return false;
+            }
+
             // Create the MTSPepToProteinMap file
 
             var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, MTS: true);
@@ -1489,11 +1495,19 @@ namespace PeptideHitResultsProcessor
 
             if (success)
             {
-                // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(synOutputFilePath)), outputFolderPath);
+                if (string.IsNullOrWhiteSpace(synOutputFilePath))
+                {
+                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                }
+                else
+                {
+                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
+                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
 
-                // Create the Protein Mods file
-                success = CreateProteinModDetailsFile(synOutputFilePath, outputFolderPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MODPlus);
+                    // Create the Protein Mods file
+                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
+                                                          clsPHRPReader.ePeptideHitResultType.MODPlus);
+                }
             }
 
             if (!success)

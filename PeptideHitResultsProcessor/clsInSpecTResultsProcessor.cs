@@ -31,7 +31,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsInSpecTResultsProcessor()
         {
-            mFileDate = "October 13, 2017";
+            mFileDate = "October 24, 2018";
             InitializeLocalVariables();
         }
 
@@ -1531,6 +1531,12 @@ namespace PeptideHitResultsProcessor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
+                    if (inputFile.Directory == null)
+                    {
+                        ReportWarning("clsInSpecTResultsProcessor.ProcessFile: Could not determine the parent directory of " + inputFile.FullName);
+                        return false;
+                    }
+
                     var udtInspectModInfo = new udtModInfoType[0];
                     var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
@@ -1603,11 +1609,20 @@ namespace PeptideHitResultsProcessor
 
                         if (success && CreateProteinModsFile)
                         {
-                            // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                            ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(synOutputFilePath)), outputFolderPath);
+                            if (string.IsNullOrWhiteSpace(synOutputFilePath))
+                            {
+                                ReportWarning("clsInSpecTResultsProcessor.ProcessFile: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                            }
+                            else
+                            {
+                                // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
+                                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)),
+                                                               outputDirectoryPath);
 
-                            // Create the Protein Mods file
-                            success = CreateProteinModDetailsFile(synOutputFilePath, outputFolderPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Inspect);
+                                // Create the Protein Mods file
+                                success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
+                                                                      clsPHRPReader.ePeptideHitResultType.Inspect);
+                            }
                         }
                     }
 

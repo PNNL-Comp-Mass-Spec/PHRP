@@ -579,7 +579,7 @@ namespace PHRPReader
             {
                 // basePHRPFileName is first-hits-file based
 
-                var firstHitsFile= new FileInfo(filePath);
+                var firstHitsFile = new FileInfo(filePath);
                 var synIndex = firstHitsFile.Name.LastIndexOf("_syn", StringComparison.InvariantCultureIgnoreCase);
                 if (synIndex > 0)
                 {
@@ -588,9 +588,9 @@ namespace PHRPReader
 
                     var filePathFHT = firstHitsFile.Name.Substring(0, synIndex) + "_fht" + firstHitsFile.Name.Substring(synIndex + "_syn".Length);
 
-                    if (Path.IsPathRooted(filePath))
+                    if (Path.IsPathRooted(filePath) && firstHitsFile.Directory != null)
                     {
-                        return Path.Combine(firstHitsFile.DirectoryName, filePathFHT);
+                        return Path.Combine(firstHitsFile.Directory.FullName, filePathFHT);
                     }
 
                     return filePathFHT;
@@ -620,9 +620,9 @@ namespace PHRPReader
 
                     var filePathNew = dataFile.Name.Substring(0, charIndex) + "_msgfdb" + dataFile.Name.Substring(charIndex + "_msgfplus".Length);
 
-                    if (Path.IsPathRooted(filePath))
+                    if (Path.IsPathRooted(filePath) && dataFile.Directory != null)
                     {
-                        return Path.Combine(dataFile.DirectoryName, filePathNew);
+                        return Path.Combine(dataFile.Directory.FullName, filePathNew);
                     }
 
                     return filePathNew;
@@ -731,7 +731,16 @@ namespace PHRPReader
                 // Make sure inputFilePath points to a valid file
                 var inputFile = new FileInfo(inputFilePath);
 
-                mInputFolderPath = inputFile.DirectoryName;
+                if (inputFile.Directory == null)
+                {
+                    ReportError("Unable to determine the parent directory of " + inputFile.FullName);
+                    SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
+                    if (!mInitialized)
+                        throw new FileNotFoundException(mErrorMessage);
+                    return;
+                }
+
+                mInputDirectoryPath = inputFile.Directory.FullName;
                 mInputFilePath = inputFile.FullName;
 
                 if (!inputFile.Exists)
@@ -2860,7 +2869,11 @@ namespace PHRPReader
             if (mStartupOptions.LoadModsAndSeqInfo)
             {
                 modSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName);
-                modSummaryFilePath = Path.Combine(inputFile.DirectoryName, modSummaryFilePath);
+
+                if (inputFile.Directory != null)
+                {
+                    modSummaryFilePath = Path.Combine(inputFile.Directory.FullName, modSummaryFilePath);
+                }
 
                 modSummaryFilePath = AutoSwitchToLegacyMSGFDBIfRequired(modSummaryFilePath, inputFile.Name);
                 var modSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(modSummaryFilePath, inputFile.Name);

@@ -21,7 +21,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMSAlignResultsProcessor()
         {
-            mFileDate = "October 13, 2017";
+            mFileDate = "October 24, 2018";
             InitializeLocalVariables();
         }
 
@@ -685,9 +685,7 @@ namespace PeptideHitResultsProcessor
 
             int[] columnMapping = null;
 
-            var currentPeptideWithMods = string.Empty;
-
-            var success = false;
+            bool success;
 
             try
             {
@@ -1523,11 +1521,23 @@ namespace PeptideHitResultsProcessor
 
             if (success)
             {
-                // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output folder
-                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(synOutputFilePath)), outputFolderPath);
+                if (inputFile.Directory == null)
+                {
+                    ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                }
+                else if (string.IsNullOrWhiteSpace(synOutputFilePath))
+                {
+                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                }
+                else
+                {
+                    // If necessary, copy various PHRPReader support files (in particular, the MSGF file) to the output directory
+                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
 
-                // Create the Protein Mods file
-                success = CreateProteinModDetailsFile(synOutputFilePath, outputFolderPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSAlign);
+                    // Create the Protein Mods file
+                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
+                                                          clsPHRPReader.ePeptideHitResultType.MSAlign);
+                }
             }
 
             if (!success)

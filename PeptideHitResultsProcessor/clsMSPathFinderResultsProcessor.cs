@@ -24,7 +24,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSPathFinderResultsProcessor()
         {
-            mFileDate = "October 15, 2017";
+            mFileDate = "October 24, 2018";
 
             mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }
@@ -393,11 +393,23 @@ namespace PeptideHitResultsProcessor
 
             if (success)
             {
-                // If necessary, copy various PHRPReader support files to the output folder
-                ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.DirectoryName, Path.GetFileName(synOutputFilePath)), outputFolderPath);
+                if (inputFile.Directory == null)
+                {
+                    ReportWarning("CreateProteinModsFileWork: Could not determine the parent directory of " + inputFile.FullName);
+                }
+                else if (string.IsNullOrWhiteSpace(synOutputFilePath))
+                {
+                    ReportWarning("CreateProteinModsFileWork: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                }
+                else
+                {
+                    // If necessary, copy various PHRPReader support files to the output directory
+                    ValidatePHRPReaderSupportFiles(Path.Combine(inputFile.Directory.FullName, Path.GetFileName(synOutputFilePath)), outputDirectoryPath);
 
-                // Create the Protein Mods file
-                success = CreateProteinModDetailsFile(synOutputFilePath, outputFolderPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.MSPathFinder);
+                    // Create the Protein Mods file
+                    success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
+                                                          clsPHRPReader.ePeptideHitResultType.MSPathFinder);
+                }
             }
 
             if (!success)
@@ -750,9 +762,17 @@ namespace PeptideHitResultsProcessor
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
                         var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
-                        modificationSummaryFilePath = Path.Combine(outputFolderPath, modificationSummaryFilePath);
 
-                        SaveModificationSummaryFile(modificationSummaryFilePath);
+                        if (string.IsNullOrWhiteSpace(modificationSummaryFilePath))
+                        {
+                            ReportWarning("ParseMSPathfinderSynopsisFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
+                        }
+                        else
+                        {
+                            modificationSummaryFilePath = Path.Combine(outputDirectoryPath, modificationSummaryFilePath);
+
+                            SaveModificationSummaryFile(modificationSummaryFilePath);
+                        }
                     }
 
                     // Inform the user if any errors occurred

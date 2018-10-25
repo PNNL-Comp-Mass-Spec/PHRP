@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsSequestResultsProcessor()
         {
-            mFileDate = "October 13, 2017";
+            mFileDate = "October 24, 2018";
             InitializeLocalVariables();
         }
 
@@ -369,9 +369,16 @@ namespace PeptideHitResultsProcessor
                         // Create the modification summary file
                         var inputFile = new FileInfo(inputFilePath);
                         var modificationSummaryFilePath = Path.GetFileName(ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_MOD_SUMMARY));
-                        modificationSummaryFilePath = Path.Combine(outputFolderPath, modificationSummaryFilePath);
 
-                        SaveModificationSummaryFile(modificationSummaryFilePath);
+                        if (string.IsNullOrWhiteSpace(modificationSummaryFilePath))
+                        {
+                            ReportWarning("ParseSynopsisOrFirstHitsFile: modificationSummaryFilePath is empty; cannot call SaveModificationSummaryFile");
+                        }
+                        else
+                        {
+                            SaveModificationSummaryFile(Path.Combine(outputDirectoryPath, modificationSummaryFilePath));
+                        }
+
                     }
 
                     // Inform the user if any errors occurred
