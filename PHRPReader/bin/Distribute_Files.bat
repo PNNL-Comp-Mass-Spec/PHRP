@@ -1,3 +1,8 @@
+@echo off
+echo Be sure to build PHRPReader.dll in Release mode
+pause
+
+@echo on
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\CodeTestCS\lib"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\CodeTestCS\bin"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common"
