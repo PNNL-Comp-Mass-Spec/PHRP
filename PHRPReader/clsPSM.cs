@@ -29,29 +29,10 @@ namespace PHRPReader
         private int mScanNumber;
 
         /// <summary>
-        /// List of scans that were combined prior to identifying this peptide
-        /// </summary>
-        private readonly SortedSet<int> mScanList;
-
-        /// <summary>
-        /// Peptide sequence, with or without prefix and suffix residues; may contain mod symbols; example: R.RM*VNSGSGADSAVDLNSIPVAMIAR.V
-        /// </summary>
-        private string mPeptide;
-
-        /// <summary>
-        /// Peptide sequence where modified residues have the modification mass indicated as a number, example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
+        /// Peptide sequence where modified residues have the modification mass indicated as a number
+        /// Example: R.N+144.102063SNPVIAELSQAINSGTLLSK+144.102063PS+79.9663PPLPPK+144.102063.R
         /// </summary>
         private string mPeptideWithNumericMods;
-
-        /// <summary>
-        /// Peptide sequence without any mod symbols
-        /// </summary>
-        private string mPeptideCleanSequence;
-
-        /// <summary>
-        /// Modified residues
-        /// </summary>
-        private readonly List<clsAminoAcidModInfo> mModifiedPeptideResidues;
 
         /// <summary>
         /// Protein names
@@ -155,7 +136,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>A given residue is allowed to have more than one modification</remarks>
-        public List<clsAminoAcidModInfo> ModifiedResidues => mModifiedPeptideResidues;
+        public List<clsAminoAcidModInfo> ModifiedResidues { get; }
 
         /// <summary>
         /// MSGF Spectral E-Value associated with this peptide (aka SpecEValue or SpecProb)
@@ -207,12 +188,13 @@ namespace PHRPReader
 
         /// <summary>
         /// Peptide sequence, including any modification symbols that were assigned by the search engine
-        /// For example, R.AAS*PQDLAGGYTSSLACHR.A
+        /// Peptide sequence, with or without prefix and suffix residues; may contain mod symbols
+        /// Example, R.AAS*PQDLAGGYTSSLACHR.A
         /// </summary>
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string Peptide => mPeptide;
+        public string Peptide { get; private set; }
 
         /// <summary>
         /// Peptide residues without any modification symbols or flanking residues
@@ -221,7 +203,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string PeptideCleanSequence => mPeptideCleanSequence;
+        public string PeptideCleanSequence { get; private set; }
 
         /// <summary>
         /// Computed monoisotopic mass (uncharged, theoretical mass, including mods)
@@ -308,7 +290,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public SortedSet<int> ScanList => mScanList;
+        public SortedSet<int> ScanList { get; }
 
         /// <summary>
         /// Scan number of the mass spectrum in which this peptide was identified
@@ -323,9 +305,9 @@ namespace PHRPReader
             set
             {
                 mScanNumber = value;
-                if (!mScanList.Contains(value))
+                if (!ScanList.Contains(value))
                 {
-                    mScanList.Add(value);
+                    ScanList.Add(value);
                 }
             }
         }
@@ -333,12 +315,12 @@ namespace PHRPReader
         /// <summary>
         /// First scan number
         /// </summary>
-        public int ScanNumberStart => mScanList.Min;
+        public int ScanNumberStart => ScanList.Min;
 
         /// <summary>
         /// Last scan number
         /// </summary>
-        public int ScanNumberEnd => mScanList.Max;
+        public int ScanNumberEnd => ScanList.Max;
 
         /// <summary>
         /// Rank of this peptide in the given spectrum
@@ -365,10 +347,10 @@ namespace PHRPReader
         /// <remarks></remarks>
         public clsPSM()
         {
-            mScanList = new SortedSet<int>();
+            ScanList = new SortedSet<int>();
             mProteins = new List<string>();
             mProteinDetails = new Dictionary<string, clsProteinInfo>(StringComparer.CurrentCultureIgnoreCase);
-            mModifiedPeptideResidues = new List<clsAminoAcidModInfo>();
+            ModifiedResidues = new List<clsAminoAcidModInfo>();
             mAdditionalScores = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
             Clear();
         }
@@ -379,9 +361,9 @@ namespace PHRPReader
         /// <param name="scanNumber"></param>
         public void AddCombinedScan(int scanNumber)
         {
-            if (!mScanList.Contains(scanNumber))
+            if (!ScanList.Contains(scanNumber))
             {
-                mScanList.Add(scanNumber);
+                ScanList.Add(scanNumber);
             }
         }
 
@@ -392,7 +374,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public void AddModifiedResidue(clsAminoAcidModInfo modInfo)
         {
-            mModifiedPeptideResidues.Add(modInfo);
+            ModifiedResidues.Add(modInfo);
         }
 
         /// <summary>
@@ -490,11 +472,11 @@ namespace PHRPReader
             mScanNumber = 0;
             ElutionTimeMinutes = 0;
 
-            mScanList.Clear();
+            ScanList.Clear();
 
-            mPeptide = string.Empty;
+            Peptide = string.Empty;
             mPeptideWithNumericMods = string.Empty;
-            mPeptideCleanSequence = string.Empty;
+            PeptideCleanSequence = string.Empty;
             Charge = 0;
             ResultID = 0;
             ScoreRank = 0;
@@ -515,7 +497,7 @@ namespace PHRPReader
             mProteins.Clear();
             mProteinDetails.Clear();
 
-            mModifiedPeptideResidues.Clear();
+            ModifiedResidues.Clear();
             mAdditionalScores.Clear();
         }
 
@@ -524,7 +506,7 @@ namespace PHRPReader
         /// </summary>
         public void ClearModifiedResidues()
         {
-            mModifiedPeptideResidues.Clear();
+            ModifiedResidues.Clear();
         }
 
         /// <summary>
@@ -542,13 +524,13 @@ namespace PHRPReader
                 ElutionTimeMinutes = ElutionTimeMinutes
             };
 
-            foreach (var scanNumber in mScanList)
+            foreach (var scanNumber in ScanList)
             {
                 newPSM.AddCombinedScan(scanNumber);
             }
 
             // Note: this call will auto-update mPeptideCleanSequence in newPSM
-            newPSM.SetPeptide(mPeptide);
+            newPSM.SetPeptide(Peptide);
 
             newPSM.PeptideWithNumericMods = mPeptideWithNumericMods;
             newPSM.Charge = Charge;
@@ -573,7 +555,7 @@ namespace PHRPReader
                 newPSM.AddProteinDetail(item);
             }
 
-            foreach (var item in mModifiedPeptideResidues)
+            foreach (var item in ModifiedResidues)
             {
                 newPSM.AddModifiedResidue(item.Residue, item.ResidueLocInPeptide, item.ResidueTerminusState, item.ModDefinition);
             }
@@ -591,13 +573,13 @@ namespace PHRPReader
         /// </summary>
         public void UpdateCleanSequence()
         {
-            if (string.IsNullOrEmpty(mPeptide))
+            if (string.IsNullOrEmpty(Peptide))
             {
-                mPeptideCleanSequence = string.Empty;
+                PeptideCleanSequence = string.Empty;
             }
             else
             {
-                mPeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(mPeptide, true);
+                PeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(Peptide, true);
             }
         }
 
@@ -684,11 +666,11 @@ namespace PHRPReader
         {
             if (string.IsNullOrEmpty(peptideSequence))
             {
-                mPeptide = string.Empty;
+                Peptide = string.Empty;
             }
             else
             {
-                mPeptide = peptideSequence;
+                Peptide = peptideSequence;
             }
 
             if (updateCleanSequence)
@@ -752,9 +734,9 @@ namespace PHRPReader
         /// <remarks></remarks>
         public void UpdateCleavageInfo(clsPeptideCleavageStateCalculator cleavageStateCalculator)
         {
-            NumMissedCleavages = cleavageStateCalculator.ComputeNumberOfMissedCleavages(mPeptide);
+            NumMissedCleavages = cleavageStateCalculator.ComputeNumberOfMissedCleavages(Peptide);
 
-            CleavageState = cleavageStateCalculator.ComputeCleavageState(mPeptide);
+            CleavageState = cleavageStateCalculator.ComputeCleavageState(Peptide);
 
             if (CleavageState == clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)
             {

@@ -74,11 +74,6 @@ namespace PHRPReader
         // List of known mass correction tags
         private readonly Dictionary<string, double> mMassCorrectionTags;
 
-        // List of known modifications
-        private readonly List<clsModificationDefinition> mModifications;
-
-        private string mErrorMessage;
-
         // This array holds modifications that Sequest or XTandem will often use but for
         // which the auto-addition method sometimes incorrectly notes
         private List<clsModificationDefinition> mStandardRefinementModifications;
@@ -92,17 +87,17 @@ namespace PHRPReader
         /// <summary>
         /// Error message
         /// </summary>
-        public string ErrorMessage => mErrorMessage;
+        public string ErrorMessage { get; private set; }
 
         /// <summary>
         /// Modification count
         /// </summary>
-        public int ModificationCount => mModifications.Count;
+        public int ModificationCount => Modifications.Count;
 
         /// <summary>
         /// Modification list
         /// </summary>
-        public List<clsModificationDefinition> Modifications => mModifications;
+        public List<clsModificationDefinition> Modifications { get; }
 
         /// <summary>
         /// When true, take the mod symbol into account when finding identical mods
@@ -117,7 +112,7 @@ namespace PHRPReader
         public clsPeptideModificationContainer()
         {
             mMassCorrectionTags = new Dictionary<string, double>();
-            mModifications = new List<clsModificationDefinition>();
+            Modifications = new List<clsModificationDefinition>();
 
             InitializeLocalVariables();
         }
@@ -138,15 +133,15 @@ namespace PHRPReader
             var matchFound = false;
 
             // See if any of the existing modifications match modificationDefinition, ignoring .TargetResidues and possibly ignoring .ModificationSymbol
-            for (modificationIndex = 0; modificationIndex <= mModifications.Count - 1; modificationIndex++)
+            for (modificationIndex = 0; modificationIndex <= Modifications.Count - 1; modificationIndex++)
             {
-                if (mModifications[modificationIndex].EquivalentMassTypeTagAndAtom(modificationDefinition))
+                if (Modifications[modificationIndex].EquivalentMassTypeTagAndAtom(modificationDefinition))
                 {
                     matchFound = true;
 
                     if (ConsiderModSymbolWhenFindingIdenticalMods)
                     {
-                        if (modificationDefinition.ModificationSymbol != mModifications[modificationIndex].ModificationSymbol)
+                        if (modificationDefinition.ModificationSymbol != Modifications[modificationIndex].ModificationSymbol)
                         {
                             // Symbols differ; add this as a new modification definition
                             matchFound = false;
@@ -155,7 +150,7 @@ namespace PHRPReader
 
                     if (matchFound)
                     {
-                        var mod = mModifications[modificationIndex];
+                        var mod = Modifications[modificationIndex];
                         if (mod.ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mod.ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod)
                         {
                             // Matching dynamic or static modification definitions
@@ -192,9 +187,9 @@ namespace PHRPReader
                 modificationDefinition.ModificationSymbol = Convert.ToChar(mDefaultModificationSymbols.Dequeue());
             }
 
-            mModifications.Add(modificationDefinition);
+            Modifications.Add(modificationDefinition);
 
-            return mModifications.Count - 1;
+            return Modifications.Count - 1;
         }
 
         private clsModificationDefinition AddUnknownModification(
@@ -268,7 +263,7 @@ namespace PHRPReader
 
             if (newModIndex >= 0)
             {
-                return mModifications[newModIndex];
+                return Modifications[newModIndex];
             }
 
             return modificationDefinition;
@@ -280,7 +275,7 @@ namespace PHRPReader
         /// <summary>
         /// Append standard refinement modifications
         /// </summary>
-        public void AppendStandardRefinmentModifications()
+        public void AppendStandardRefinementModifications()
         {
             for (var index = 0; index <= mStandardRefinementModifications.Count - 1; index++)
             {
@@ -295,7 +290,7 @@ namespace PHRPReader
         public void ClearModifications()
         {
             UpdateDefaultModificationSymbols(DEFAULT_MODIFICATION_SYMBOLS);
-            mModifications.Clear();
+            Modifications.Clear();
         }
 
         /// <summary>
@@ -418,9 +413,9 @@ namespace PHRPReader
         /// <returns></returns>
         public clsModificationDefinition GetModificationByIndex(int index)
         {
-            if (index >= 0 & index < mModifications.Count)
+            if (index >= 0 & index < Modifications.Count)
             {
-                return mModifications[index];
+                return Modifications[index];
             }
 
             return new clsModificationDefinition();
@@ -433,9 +428,9 @@ namespace PHRPReader
         /// <returns></returns>
         public clsModificationDefinition.eModificationTypeConstants GetModificationTypeByIndex(int index)
         {
-            if (index >= 0 & index < mModifications.Count)
+            if (index >= 0 & index < Modifications.Count)
             {
-                return mModifications[index].ModificationType;
+                return Modifications[index].ModificationType;
             }
 
             return clsModificationDefinition.eModificationTypeConstants.UnknownType;
@@ -610,15 +605,15 @@ namespace PHRPReader
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
-                for (var index = 0; index <= mModifications.Count - 1; index++)
+                for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if ((mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && mModifications[index].TargetResidues.Length > 0)
+                    if ((Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && Modifications[index].TargetResidues.Length > 0)
                     {
-                        if (mModifications[index].ModificationSymbol == modificationSymbol)
+                        if (Modifications[index].ModificationSymbol == modificationSymbol)
                         {
                             // Matching modification symbol found
                             // Now see if .TargetResidues contains chTargetResidue
-                            if (mModifications[index].TargetResiduesContain(chTargetResidue))
+                            if (Modifications[index].TargetResiduesContain(chTargetResidue))
                             {
                                 existingModFound = true;
                             }
@@ -629,13 +624,13 @@ namespace PHRPReader
                                 {
                                     case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus:
                                     case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus:
-                                        if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS))
+                                        if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS))
                                         {
                                             existingModFound = true;
                                         }
                                         break;
                                     case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus:
-                                        if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                        if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                         {
                                             existingModFound = true;
                                         }
@@ -648,13 +643,13 @@ namespace PHRPReader
                                     {
                                         case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus:
                                         case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus:
-                                            if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS))
+                                            if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS))
                                             {
                                                 existingModFound = true;
                                             }
                                             break;
                                         case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus:
-                                            if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                            if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                             {
                                                 existingModFound = true;
                                             }
@@ -665,7 +660,7 @@ namespace PHRPReader
                                 if (!existingModFound && (eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus || eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus))
                                 {
                                     // Protein N-Terminus residue could also match a Peptide N-terminal mod; check for this
-                                    if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                    if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                     {
                                         existingModFound = true;
                                     }
@@ -674,7 +669,7 @@ namespace PHRPReader
                                 if (!existingModFound && (eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus || eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus))
                                 {
                                     // Protein C-Terminus residue could also match a Peptide C-terminal mod; check for this
-                                    if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                    if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                     {
                                         existingModFound = true;
                                     }
@@ -684,7 +679,7 @@ namespace PHRPReader
                             if (existingModFound)
                             {
                                 // Match found
-                                return mModifications[index];
+                                return Modifications[index];
                             }
                         }
                     }
@@ -698,17 +693,17 @@ namespace PHRPReader
 
             while (true)
             {
-                for (var index = 0; index <= mModifications.Count - 1; index++)
+                for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType)
+                    if (Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType)
                     {
-                        if (considerTargetResidues && string.IsNullOrWhiteSpace(mModifications[index].TargetResidues) || !considerTargetResidues)
+                        if (considerTargetResidues && string.IsNullOrWhiteSpace(Modifications[index].TargetResidues) || !considerTargetResidues)
                         {
-                            if (mModifications[index].ModificationSymbol == modificationSymbol)
+                            if (Modifications[index].ModificationSymbol == modificationSymbol)
                             {
                                 // Matching mass found
                                 existingModFound = true;
-                                return mModifications[index];
+                                return Modifications[index];
                             }
                         }
                     }
@@ -758,24 +753,24 @@ namespace PHRPReader
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
-                for (var index = 0; index <= mModifications.Count - 1; index++)
+                for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (mModifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.DynamicMod &&
-                        mModifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.StaticMod &&
-                        mModifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.UnknownType ||
-                        mModifications[index].TargetResidues.Length <= 0)
+                    if (Modifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.DynamicMod &&
+                        Modifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.StaticMod &&
+                        Modifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.UnknownType ||
+                        Modifications[index].TargetResidues.Length <= 0)
                     {
                         continue;
                     }
 
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) > float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) > float.Epsilon)
                     {
                         continue;
                     }
 
                     // Matching mass found
                     // Now see if .TargetResidues contains chTargetResidue
-                    if (mModifications[index].TargetResiduesContain(chTargetResidue))
+                    if (Modifications[index].TargetResiduesContain(chTargetResidue))
                     {
                         existingModFound = true;
                     }
@@ -787,14 +782,14 @@ namespace PHRPReader
                             case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus:
                             case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus:
                             case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus:
-                                if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                 {
                                     existingModFound = true;
                                 }
                                 break;
                             case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus:
                             case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus:
-                                if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                 {
                                     existingModFound = true;
                                 }
@@ -805,21 +800,21 @@ namespace PHRPReader
                     if (existingModFound)
                     {
                         // Match found
-                        return mModifications[index];
+                        return Modifications[index];
                     }
                 }
             }
 
             // No match was found
             // Compare against modifications with empty .TargetResidues
-            for (var index = 0; index <= mModifications.Count - 1; index++)
+            for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if ((mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && string.IsNullOrWhiteSpace(mModifications[index].TargetResidues))
+                if ((Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
-                        return mModifications[index];
+                        return Modifications[index];
                     }
                 }
             }
@@ -847,7 +842,7 @@ namespace PHRPReader
                                 var newModIndex = AddModification(modificationDefinition, true);
                                 if (newModIndex >= 0)
                                 {
-                                    return mModifications[newModIndex];
+                                    return Modifications[newModIndex];
                                 }
 
                                 return modificationDefinition;
@@ -863,20 +858,20 @@ namespace PHRPReader
 
             // Still no match
             // Compare against dynamic and unknown-type modifications, but ignore .TargetResidues
-            for (var index = 0; index <= mModifications.Count - 1; index++)
+            for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if (mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType)
+                if (Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType)
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
                         // Assure that the target residues contain chTargetResidue
-                        if (chTargetResidue != default(char) && !mModifications[index].TargetResiduesContain(chTargetResidue))
+                        if (chTargetResidue != default(char) && !Modifications[index].TargetResiduesContain(chTargetResidue))
                         {
-                            mModifications[index].TargetResidues += chTargetResidue;
+                            Modifications[index].TargetResidues += chTargetResidue;
                         }
 
-                        return mModifications[index];
+                        return Modifications[index];
                     }
                 }
             }
@@ -942,15 +937,15 @@ namespace PHRPReader
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
-                for (var index = 0; index <= mModifications.Count - 1; index++)
+                for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (mModifications[index].ModificationType == eModType && (mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && mModifications[index].TargetResidues.Length > 0)
+                    if (Modifications[index].ModificationType == eModType && (Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && Modifications[index].TargetResidues.Length > 0)
                     {
-                        if (Math.Abs(Math.Round(Math.Abs(mModifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
+                        if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
                         {
                             // Matching mass found
                             // Now see if .TargetResidues contains chTargetResidue
-                            if (chTargetResidue != default(char) && mModifications[index].TargetResiduesContain(chTargetResidue))
+                            if (chTargetResidue != default(char) && Modifications[index].TargetResiduesContain(chTargetResidue))
                             {
                                 existingModFound = true;
                             }
@@ -962,14 +957,14 @@ namespace PHRPReader
                                     case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus:
                                     case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus:
                                     case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus:
-                                        if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                        if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                         {
                                             existingModFound = true;
                                         }
                                         break;
                                     case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus:
                                     case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus:
-                                        if (mModifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                                        if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                         {
                                             existingModFound = true;
                                         }
@@ -980,7 +975,7 @@ namespace PHRPReader
                             if (existingModFound)
                             {
                                 // Match found
-                                return mModifications[index];
+                                return Modifications[index];
                             }
                         }
                     }
@@ -989,14 +984,14 @@ namespace PHRPReader
 
             // No match was found
             // Compare against modifications with empty .TargetResidues
-            for (var index = 0; index <= mModifications.Count - 1; index++)
+            for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if (mModifications[index].ModificationType == eModType && (mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod || mModifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && string.IsNullOrWhiteSpace(mModifications[index].TargetResidues))
+                if (Modifications[index].ModificationType == eModType && (Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
-                        return mModifications[index];
+                        return Modifications[index];
                     }
                 }
             }
@@ -1025,7 +1020,7 @@ namespace PHRPReader
                                 var newModIndex = AddModification(modificationDefinition, true);
                                 if (newModIndex >= 0)
                                 {
-                                    return mModifications[newModIndex];
+                                    return Modifications[newModIndex];
                                 }
 
                                 return modificationDefinition;
@@ -1041,20 +1036,20 @@ namespace PHRPReader
 
             // No match was found
             // Compare against modifications of the same type, but ignore .TargetResidues
-            for (var index = 0; index <= mModifications.Count - 1; index++)
+            for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if (mModifications[index].ModificationType == eModType)
+                if (Modifications[index].ModificationType == eModType)
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
                     {
                         // Matching mass found
                         // Assure that the target residues contain chTargetResidue
-                        if (chTargetResidue != default(char) && !mModifications[index].TargetResiduesContain(chTargetResidue))
+                        if (chTargetResidue != default(char) && !Modifications[index].TargetResiduesContain(chTargetResidue))
                         {
-                            mModifications[index].TargetResidues += chTargetResidue;
+                            Modifications[index].TargetResidues += chTargetResidue;
                         }
 
-                        return mModifications[index];
+                        return Modifications[index];
                     }
                 }
             }
@@ -1067,7 +1062,7 @@ namespace PHRPReader
 
         private void InitializeLocalVariables()
         {
-            mErrorMessage = string.Empty;
+            ErrorMessage = string.Empty;
             SetDefaultMassCorrectionTags();
 
             // Note that this sub will call UpdateDefaultModificationSymbols()
@@ -1102,7 +1097,7 @@ namespace PHRPReader
                 }
                 else if (!File.Exists(filePath))
                 {
-                    mErrorMessage = "Mass CorrectionTags File Not Found: " + filePath;
+                    ErrorMessage = "Mass CorrectionTags File Not Found: " + filePath;
                     SetDefaultMassCorrectionTags();
                     fileNotFound = true;
                     success = false;
@@ -1143,7 +1138,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                mErrorMessage = "Error reading Mass Correction Tags file (" + filePath + "): " + ex.Message;
+                ErrorMessage = "Error reading Mass Correction Tags file (" + filePath + "): " + ex.Message;
                 success = false;
             }
 
@@ -1180,7 +1175,7 @@ namespace PHRPReader
                 }
                 else if (!File.Exists(filePath))
                 {
-                    mErrorMessage = "Modification Definition File Not Found: " + filePath;
+                    ErrorMessage = "Modification Definition File Not Found: " + filePath;
                     ClearModifications();
                     fileNotFound = true;
                     success = false;
@@ -1337,7 +1332,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                mErrorMessage = "Error reading Modification Definition file (" + filePath + "): " + ex.Message;
+                ErrorMessage = "Error reading Modification Definition file (" + filePath + "): " + ex.Message;
                 success = false;
             }
 
@@ -1349,9 +1344,9 @@ namespace PHRPReader
         /// </summary>
         public void ResetOccurrenceCountStats()
         {
-            for (var index = 0; index <= mModifications.Count - 1; index++)
+            for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                mModifications[index].OccurrenceCount = 0;
+                Modifications[index].OccurrenceCount = 0;
             }
         }
 
@@ -1577,12 +1572,12 @@ namespace PHRPReader
                 var defaultModificationSymbolCount = chDefaultModificationSymbols.Length;
 
                 // Step through mModifications and make sure each of the modification symbols is not present in mDefaultModificationChars
-                for (var index = 0; index <= mModifications.Count - 1; index++)
+                for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
                     var indexCompare = 0;
                     while (indexCompare < defaultModificationSymbolCount)
                     {
-                        if (mModifications[index].ModificationSymbol == chDefaultModificationSymbols[indexCompare])
+                        if (Modifications[index].ModificationSymbol == chDefaultModificationSymbols[indexCompare])
                         {
                             // Remove this symbol from chDefaultModificationSymbols
                             for (var indexCopy = indexCompare; indexCopy <= defaultModificationSymbolCount - 2; indexCopy++)
@@ -1641,18 +1636,18 @@ namespace PHRPReader
 
             try
             {
-                for (var index = 0; index <= mModifications.Count - 1; index++)
+                for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (mModifications[index].ModificationType != eModificationType)
+                    if (Modifications[index].ModificationType != eModificationType)
                         continue;
 
                     // Matching modification type
-                    if (Math.Abs(Math.Round(Math.Abs(mModifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) > float.Epsilon)
+                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) > float.Epsilon)
                         continue;
 
                     // Matching mass
                     // Compare .TargetResidues
-                    matchFound = clsModificationDefinition.EquivalentTargetResidues(mModifications[index].TargetResidues, targetResidues, true);
+                    matchFound = clsModificationDefinition.EquivalentTargetResidues(Modifications[index].TargetResidues, targetResidues, true);
                     if (matchFound)
                     {
                         break;
