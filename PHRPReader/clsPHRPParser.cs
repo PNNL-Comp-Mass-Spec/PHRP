@@ -1184,32 +1184,30 @@ namespace PHRPReader
                         // Split the line on a colon
                         var kvSetting = ParseKeyValueSetting(dataLine, ':');
 
-                        switch (kvSetting.Key.ToLower())
+                        if (kvSetting.Key.Equals("date", StringComparison.OrdinalIgnoreCase))
                         {
-                            case "date":
-                                validDate = DateTime.TryParse(kvSetting.Value, out searchDate);
-
-                                break;
-                            case "toolversioninfo":
-                                if (!string.IsNullOrEmpty(kvSetting.Value))
+                            validDate = DateTime.TryParse(kvSetting.Value, out searchDate);
+                        }
+                        else if (kvSetting.Key.Equals("ToolVersionInfo", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (!string.IsNullOrEmpty(kvSetting.Value))
+                            {
+                                searchEngineVersion = string.Copy(kvSetting.Value);
+                                validVersion = true;
+                            }
+                            else
+                            {
+                                // The next line contains the search engine version
+                                if (!reader.EndOfStream)
                                 {
-                                    searchEngineVersion = string.Copy(kvSetting.Value);
-                                    validVersion = true;
-                                }
-                                else
-                                {
-                                    // The next line contains the search engine version
-                                    if (!srInFile.EndOfStream)
+                                    var searchEngineLine = reader.ReadLine();
+                                    if (!string.IsNullOrEmpty(searchEngineLine))
                                     {
-                                        var searchEngineLine = srInFile.ReadLine();
-                                        if (!string.IsNullOrEmpty(searchEngineLine))
-                                        {
-                                            searchEngineVersion = string.Copy(searchEngineLine.Trim());
-                                            validVersion = true;
-                                        }
+                                        searchEngineVersion = string.Copy(searchEngineLine.Trim());
+                                        validVersion = true;
                                     }
                                 }
-                                break;
+                            }
                         }
                     }
                 }

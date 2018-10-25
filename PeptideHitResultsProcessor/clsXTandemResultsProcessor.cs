@@ -798,7 +798,7 @@ namespace PeptideHitResultsProcessor
                                     // Therefore, we will negate .peptideDeltaMass
                                     try
                                     {
-                                        searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString();
+                                        searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString(CultureInfo.InvariantCulture);
                                     }
                                     catch (Exception)
                                     {
@@ -1235,7 +1235,6 @@ namespace PeptideHitResultsProcessor
             var udtModInfo = new udtSearchOptionModificationInfoType[20];
 
             var staticModsAreResetForRefinement = true;
-
 
             // Initialize udtParamLabels; this specifies the parameters to examine
             // Note: When populating this we use .ToLower() to make sure all of the text is lowercase
