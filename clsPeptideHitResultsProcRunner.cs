@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using PeptideHitResultsProcessor;
 using PHRPReader;
 using PRISM;
@@ -272,14 +271,14 @@ namespace PeptideHitResultsProcRunner
                 if (!File.Exists(parameterFilePath))
                 {
                     // See if parameterFilePath points to a file in the same directory as the application
-                    var appFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                    if (string.IsNullOrWhiteSpace(appFolderPath))
+                    var appDirPath = GetAppDirectoryPath();
+                    if (string.IsNullOrWhiteSpace(appDirPath))
                     {
                         SetBaseClassErrorCode(ProcessFilesErrorCodes.ParameterFileNotFound);
                         return false;
                     }
 
-                    parameterFilePath = Path.Combine(appFolderPath, Path.GetFileName(parameterFilePath));
+                    parameterFilePath = Path.Combine(appDirPath, Path.GetFileName(parameterFilePath));
                     if (!File.Exists(parameterFilePath))
                     {
                         SetBaseClassErrorCode(ProcessFilesErrorCodes.ParameterFileNotFound);

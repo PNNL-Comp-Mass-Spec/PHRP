@@ -1726,14 +1726,14 @@ namespace PeptideHitResultsProcessor
                 if (!File.Exists(parameterFilePath))
                 {
                     // See if parameterFilePath points to a file in the same directory as the application
-                    var appFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                    if (string.IsNullOrWhiteSpace(appFolderPath))
+                    var appDirPath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppDirectoryPath();
+                    if (string.IsNullOrWhiteSpace(appDirPath))
                     {
                         SetErrorCode(ePHRPErrorCodes.ParameterFileNotFound);
                         return false;
                     }
 
-                    parameterFilePath = Path.Combine(appFolderPath, Path.GetFileName(parameterFilePath));
+                    parameterFilePath = Path.Combine(appDirPath, Path.GetFileName(parameterFilePath));
                     if (!File.Exists(parameterFilePath))
                     {
                         SetErrorCode(ePHRPErrorCodes.ParameterFileNotFound);
