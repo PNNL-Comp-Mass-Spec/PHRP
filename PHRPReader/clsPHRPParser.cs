@@ -270,7 +270,7 @@ namespace PHRPReader
 
             mPeptideMassCalculator = new clsPeptideMassCalculator();
 
-            var startupOptions = new clsPHRPStartupOptions {LoadModsAndSeqInfo = loadModsAndSeqInfo};
+            var startupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = loadModsAndSeqInfo };
 
             InitializeParser(datasetName, inputFilePath, ePeptideHitResultType, startupOptions);
         }
@@ -1354,7 +1354,7 @@ namespace PHRPReader
 
                 if (mModInfo == null)
                 {
-                    matchedModDef = new clsModificationDefinition {MassCorrectionTag = massCorrectionTag};
+                    matchedModDef = new clsModificationDefinition { MassCorrectionTag = massCorrectionTag };
                     matchFound = true;
                 }
                 else

@@ -226,11 +226,11 @@ namespace PeptideHitResultsProcessor
         }
 
         private bool ParseXTandemInputParameterModInfo(
-            clsModificationDefinition.eModificationTypeConstants eModificationType, 
-            int sortOrder, 
-            bool parsingMotifDef, 
-            string paramValue, 
-            ref int modInfoCount, 
+            clsModificationDefinition.eModificationTypeConstants eModificationType,
+            int sortOrder,
+            bool parsingMotifDef,
+            string paramValue,
+            ref int modInfoCount,
             ref udtSearchOptionModificationInfoType[] udtModInfo)
         {
             // Parse out the mod information defined in paramValue
@@ -351,10 +351,10 @@ namespace PeptideHitResultsProcessor
         }
 
         private bool ParseXTandemInputParameterProteinTerminusMod(
-            int sortOrder, 
-            bool nTerminus, 
-            string paramValue, 
-            ref int modInfoCount, 
+            int sortOrder,
+            bool nTerminus,
+            string paramValue,
+            ref int modInfoCount,
             ref udtSearchOptionModificationInfoType[] udtModInfo)
         {
             // Parse out the mass defined in paramValue

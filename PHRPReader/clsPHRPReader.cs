@@ -2231,7 +2231,8 @@ namespace PHRPReader
             if (!mHeaderLineParsed)
             {
                 var splitLine = lineIn.Split('\t');
-                if (!IsNumber(splitLine[0])) {
+                if (!IsNumber(splitLine[0]))
+                {
                     // Parse the header line to confirm the column ordering
                     mPHRPParser.ParseColumnHeaders(splitLine);
 
@@ -2242,7 +2243,8 @@ namespace PHRPReader
                 mHeaderLineParsed = true;
             }
 
-            if (!usingCachedPSM) {
+            if (!usingCachedPSM)
+            {
                 mPSMCurrent = null;
 
                 success = mPHRPParser.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out mPSMCurrent, mFastReadMode);
@@ -2254,7 +2256,8 @@ namespace PHRPReader
                 mExtendedScanStatsValid = false;
             }
 
-            if (!success) {
+            if (!success)
+            {
                 return false;
             }
 
@@ -2263,59 +2266,73 @@ namespace PHRPReader
             // The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
             // If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods
             // by inferring the mods using mDynamicMods and mStaticMods (which were populated using the PHRP ModSummary file)
-            if (!mFastReadMode && mStartupOptions.LoadModsAndSeqInfo && string.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods)) {
+            if (!mFastReadMode && mStartupOptions.LoadModsAndSeqInfo && string.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods))
+            {
                 MarkupPeptideWithMods();
             }
 
             var scanStatsValid = TryGetScanStats(mPSMCurrent.ScanNumber, out var scanStatsInfo);
             mExtendedScanStatsValid = TryGetExtendedScanStats(mPSMCurrent.ScanNumber, out mExtendedScanStatsInfo);
 
-            if (scanStatsValid) {
+            if (scanStatsValid)
+            {
                 // Update the elution time
                 mPSMCurrent.ElutionTimeMinutes = scanStatsInfo.ScanTimeMinutes;
             }
 
-            if (string.IsNullOrEmpty(mPSMCurrent.CollisionMode) || mPSMCurrent.CollisionMode == clsPSM.UNKNOWN_COLLISION_MODE) {
+            if (string.IsNullOrEmpty(mPSMCurrent.CollisionMode) || mPSMCurrent.CollisionMode == clsPSM.UNKNOWN_COLLISION_MODE)
+            {
                 // Determine the ScanTypeName using the the ScanStats or ExtendedScanStats info
-                if (scanStatsValid && !string.IsNullOrEmpty(scanStatsInfo.ScanTypeName)) {
+                if (scanStatsValid && !string.IsNullOrEmpty(scanStatsInfo.ScanTypeName))
+                {
                     mPSMCurrent.CollisionMode = GetCollisionMode(scanStatsInfo.ScanTypeName);
                 }
 
-                if (string.IsNullOrEmpty(mPSMCurrent.CollisionMode) && mExtendedScanStatsValid && mExtendedScanStatsInfo != null) {
+                if (string.IsNullOrEmpty(mPSMCurrent.CollisionMode) && mExtendedScanStatsValid && mExtendedScanStatsInfo != null)
+                {
                     // Scan type still not determined, but Extended Scan Stats data is available
-                    if (!string.IsNullOrEmpty(mExtendedScanStatsInfo.CollisionMode)) {
+                    if (!string.IsNullOrEmpty(mExtendedScanStatsInfo.CollisionMode))
+                    {
                         // Check for Collision mode being "0"
                         // This is often the case for the first scan in a Thermo .Raw file
-                        if (mExtendedScanStatsInfo.CollisionMode != "0") {
+                        if (mExtendedScanStatsInfo.CollisionMode != "0")
+                        {
                             mPSMCurrent.CollisionMode = mExtendedScanStatsInfo.CollisionMode.ToUpper();
                         }
                     }
                 }
             }
 
-            if (!mFastReadMode) {
-                if (mPHRPParser.PeptideHitResultType == ePeptideHitResultType.Sequest || mPHRPParser.PeptideHitResultType == ePeptideHitResultType.XTandem) {
+            if (!mFastReadMode)
+            {
+                if (mPHRPParser.PeptideHitResultType == ePeptideHitResultType.Sequest || mPHRPParser.PeptideHitResultType == ePeptideHitResultType.XTandem)
+                {
                     ComputePrecursorNeutralMass();
                 }
             }
 
-            if (mMSGFCachedResults != null && mMSGFCachedResults.Count > 0) {
-                if (mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, out var specEValueText)) {
+            if (mMSGFCachedResults != null && mMSGFCachedResults.Count > 0)
+            {
+                if (mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, out var specEValueText))
+                {
                     mPSMCurrent.MSGFSpecEValue = specEValueText;
                     if (specEValueText.Length > 12)
                     {
                         // Attempt to shorten the SpecEValue value
-                        if (double.TryParse(specEValueText, out var specEValue)) {
+                        if (double.TryParse(specEValueText, out var specEValue))
+                        {
                             mPSMCurrent.MSGFSpecEValue = specEValue.ToString("0.00000E-00");
                         }
                     }
                 }
             }
 
-            if (mSkipDuplicatePSMs) {
+            if (mSkipDuplicatePSMs)
+            {
                 // Read the next line and check whether it's the same hit, but a different protein
                 var readNext = true;
-                while (readNext && !mSourceFile.EndOfStream) {
+                while (readNext && !mSourceFile.EndOfStream)
+                {
                     lineIn = mSourceFile.ReadLine();
                     mSourceFileLinesRead += 1;
 
@@ -2331,13 +2348,19 @@ namespace PHRPReader
 
                     var isDuplicate = false;
 
-                    if (mPSMCurrent.ScanNumber == newPSM.ScanNumber && mPSMCurrent.Charge == newPSM.Charge) {
-                        if (string.Equals(mPSMCurrent.Peptide, newPSM.Peptide)) {
+                    if (mPSMCurrent.ScanNumber == newPSM.ScanNumber && mPSMCurrent.Charge == newPSM.Charge)
+                    {
+                        if (string.Equals(mPSMCurrent.Peptide, newPSM.Peptide))
+                        {
                             isDuplicate = true;
-                        } else {
+                        }
+                        else
+                        {
                             if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(mPSMCurrent.Peptide, out var peptide1, out _, out _) &&
-                                clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(newPSM.Peptide, out var peptide2, out _, out _)) {
-                                if (string.Equals(peptide1, peptide2)) {
+                                clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(newPSM.Peptide, out var peptide2, out _, out _))
+                            {
+                                if (string.Equals(peptide1, peptide2))
+                                {
                                     isDuplicate = true;
                                 }
                             }

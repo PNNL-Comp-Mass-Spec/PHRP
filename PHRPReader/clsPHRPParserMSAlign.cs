@@ -319,8 +319,7 @@ namespace PHRPReader
                             case "C57":
                                 modDef = new clsModificationDefinition(
                                     clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
-                                    57.0215,
-                                    "C",
+                                    57.0215, "C",
                                     clsModificationDefinition.eModificationTypeConstants.StaticMod,
                                     "IodoAcet");
 
@@ -330,8 +329,7 @@ namespace PHRPReader
                             case "C58":
                                 modDef = new clsModificationDefinition(
                                     clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
-                                    58.0055,
-                                    "C",
+                                    58.0055, "C",
                                     clsModificationDefinition.eModificationTypeConstants.StaticMod,
                                     "IodoAcid");
 
