@@ -191,7 +191,7 @@ namespace PHRPReader
             mPeptideHitResultType = clsPHRPReader.AutoDetermineResultType(resultToSeqMapFilename);
             if (mPeptideHitResultType == clsPHRPReader.ePeptideHitResultType.Unknown)
             {
-                mErrorMessage = "Unable to auto-determine the PepthideHit result type based on filename " + resultToSeqMapFilename;
+                mErrorMessage = "Unable to auto-determine the PeptideHit result type based on filename " + resultToSeqMapFilename;
                 throw new Exception(mErrorMessage);
             }
 
@@ -231,7 +231,7 @@ namespace PHRPReader
         /// <param name="resultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
         /// <param name="seqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
         /// <param name="seqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
-        /// <param name="pepToProteinMap">PepToProteinMap list (ouput); keys are clean peptide sequences (no mods), Values are Protein name and residue start/end locations for the peptide</param>
+        /// <param name="pepToProteinMap">PepToProteinMap list (output); keys are clean peptide sequences (no mods), Values are Protein name and residue start/end locations for the peptide</param>
         /// <returns>True if success, false if an error</returns>
         /// <remarks></remarks>
         public bool GetProteinMapping(

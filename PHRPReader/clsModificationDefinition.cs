@@ -552,7 +552,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Returns True if this modification can affect the peptide or protein terminus
-        /// Note that some modifications can affect either peptide teriminii or internal residues
+        /// Note that some modifications can affect either peptide terminii or internal residues
         /// </summary>
         /// <returns></returns>
         /// <remarks></remarks>

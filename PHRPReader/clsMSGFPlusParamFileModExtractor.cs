@@ -214,7 +214,7 @@ namespace PHRPReader
             // We now support any element symbol
             //
             // Format is: C[Num]H[Num]N[Num]O[Num]S[Num]P[Num]
-            // 	- C (Carbon), H (Hydrogen), N (Nitrogen), O (Oxygen), S (Sulfer) and P (Phosphorus) are allowed.
+            // 	- C (Carbon), H (Hydrogen), N (Nitrogen), O (Oxygen), S (Sulfur) and P (Phosphorus) are allowed.
             // 	- Atom can be omitted.
             // 	- Negative numbers are allowed.
             // 	- Examples:

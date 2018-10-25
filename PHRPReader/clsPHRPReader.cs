@@ -460,7 +460,7 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
@@ -472,7 +472,7 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, then looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         /// <remarks></remarks>
@@ -497,7 +497,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// ''' <param name="eResultType">Source file PeptideHit result type</param>
-        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, ePeptideHitResultType eResultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
@@ -510,7 +510,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="eResultType">Source file PeptideHit result type</param>
-        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _moddefs.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, then looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         /// <remarks></remarks>
@@ -846,7 +846,7 @@ namespace PHRPReader
                 mCachedLine = string.Empty;
 
                 // Open the peptide-hit result file (from PHRP) for reading
-                // Instantiate the appropriare PHRP Parser
+                // Instantiate the appropriate PHRP Parser
                 switch (eResultType)
                 {
                     case ePeptideHitResultType.Sequest:

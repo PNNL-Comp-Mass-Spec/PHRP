@@ -808,6 +808,7 @@ namespace PeptideHitResultsProcessor
                                     searchResult.PeptideHyperscore = XMLTextReaderGetAttributeValue(xmlReader, "hyperscore", string.Empty);
 
                                     // Note that updating .PeptideNextScore will automatically populate .DeltaCn2
+                                    // ReSharper disable once StringLiteralTypo
                                     searchResult.PeptideNextScore = XMLTextReaderGetAttributeValue(xmlReader, "nextscore", string.Empty);
 
                                     // Note that calling .PeptidePreResidues, .PeptidePostResidues, and .PeptideCleanSequence will call ComputePeptideCleavageStateInProtein() each time
@@ -1411,7 +1412,7 @@ namespace PeptideHitResultsProcessor
 
                 // Before continuing, look for Static residue mods in udtModInfo
                 // If any are found, and if an identical dynamic residue mod is already present, then delete the static residue mod
-                // Additionally, if 	<note type="input" label="refine, modification mass">none</note> was prsent in the XTandem results file then
+                // Additionally, if 	<note type="input" label="refine, modification mass">none</note> was present in the XTandem results file then
                 //  auto update all static mods to dynamic mods since they are reset during refinement
                 for (var index = 0; index < modInfoCount;)
                 {

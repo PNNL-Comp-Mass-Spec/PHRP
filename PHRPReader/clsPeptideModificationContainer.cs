@@ -69,6 +69,7 @@ namespace PHRPReader
         #endregion
 
         #region "Classwide Variables"
+
         // List of available modification symbols
         private Queue mDefaultModificationSymbols;
 
@@ -319,7 +320,7 @@ namespace PHRPReader
 
             if (modificationMass > 9999999)
             {
-                // Modification mass is too positve; always return +9999999
+                // Modification mass is too positive; always return +9999999
                 return "+9999999";
             }
 
@@ -1165,7 +1166,7 @@ namespace PHRPReader
                 // Column 1 is the modification symbol
                 // Column 2 is the modification mass
                 // Column 3, which is optional, is the residues and/or terminii that can be modified; if omitted, then the modification can apply to any residues or terminii
-                //   For column 3, use 1 letter amino acid abbreviations; the residues can be a continous string, or can be separated by commas and/or spaces
+                //   For column 3, use 1 letter amino acid abbreviations; the residues can be a continuous string, or can be separated by commas and/or spaces
                 //   For column 3, use the *_SYMBOL_DMS constants for the terminii (< and > for the peptide terminii; [ and ] for the protein terminii)
                 // Column 4, which is optional, specifies the type of modification: D, S, T, I, or P (corresponding to clsModificationDefinition.eModificationTypeConstants)
                 // Column 5, which is optional, specifies the mass correction tag associated with the given modification
@@ -1363,6 +1364,8 @@ namespace PHRPReader
 
                 // Note: Function StoreMassCorrectionTag will remove spaces
                 // from the beginning or end of the mass correction tag names
+
+                // ReSharper disable StringLiteralTypo
                 StoreMassCorrectionTag("4xDeut  ", 4.025107);
                 StoreMassCorrectionTag("6C134N15", 10.008269);
                 StoreMassCorrectionTag("6xC13N15", 7.017164);
@@ -1439,6 +1442,8 @@ namespace PHRPReader
                 StoreMassCorrectionTag("Ubiq_02 ", 114.042931);
                 StoreMassCorrectionTag("Ubiq_L  ", 100.016045);
                 StoreMassCorrectionTag("ValToMet", 31.972071);
+
+                // ReSharper restore StringLiteralTypo
             }
             catch (Exception)
             {
@@ -1497,6 +1502,8 @@ namespace PHRPReader
 
         private void UpdateIntegerBasedModificationMap()
         {
+            // ReSharper disable StringLiteralTypo
+
             mIntegerMassCorrectionTagLookup = new Dictionary<int, string>
             {
                 {-18, "MinusH2O"},
@@ -1538,6 +1545,7 @@ namespace PHRPReader
                 {236, "ICAT_C13"},
                 {442, "ICAT_D0"}
             };
+            // ReSharper restore StringLiteralTypo
 
         }
 
@@ -1628,7 +1636,7 @@ namespace PHRPReader
             // Returns False if an error
 
             // Look for mods in mModifications with matching .ModificationType, .ModificationMass (within tolerance),
-            //   and .TargetResidues vs. udtModDefintion
+            //   and .TargetResidues vs. udtModDefinition
             // If not found, add a new entry to mModifications
 
             var matchFound = false;

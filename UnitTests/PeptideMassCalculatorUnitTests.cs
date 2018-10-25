@@ -17,6 +17,7 @@ namespace PHRP_UnitTests
         }
 
         [Test]
+        // ReSharper disable StringLiteralTypo
         [TestCase("A.LCDE.F", 478.17333)]
         [TestCase("-.LCDE.F", 478.17333)]
         [TestCase("A.LCDE.-", 478.17333)]
@@ -35,6 +36,7 @@ namespace PHRP_UnitTests
         [TestCase("A.VCDEFGHIJK.L", 1046.48547)]
         [TestCase("A.M*CDEFGHIJK.L", -1)]
         [TestCase("A.SCDEFGHIJK*.L", -1)]
+        // ReSharper restore StringLiteralTypo
         public void TestComputeAminoAcidMass(string strSequence, double expectedMass)
         {
             var computedMass = mPeptideMassCalculator.ComputeSequenceMass(strSequence);
@@ -45,6 +47,7 @@ namespace PHRP_UnitTests
         }
 
         [Test]
+        // ReSharper disable StringLiteralTypo
         [TestCase("E.TGMLTQKFARSLGMLAVDNQARV.R", "3:15.994; 11:79.996", 2602.3047)]
         [TestCase("..TGMLTQKFARSLGMLAVDNQARV.R", "3:15.994; 11:79.996", 2602.3047)]
         [TestCase("..TGMLTQKFARSLGMLAVDNQARV..", "3:15.994; 11:79.996", 2602.3047)]
@@ -53,6 +56,7 @@ namespace PHRP_UnitTests
         [TestCase("A.MCDEFGHIJK.L", "1:15.9994", 1094.45694)]
         [TestCase("A.M*CDEFGHIJK.L", "1:15.9994; 9:138.5", -1)]
         [TestCase("A.SCDEFGHIJK.L", "3:24.3", 1058.74908)]
+        // ReSharper restore StringLiteralTypo
         public void TestComputeAminoAcidMassModifiedResidues(string strSequence, string residueModList, double expectedMass)
         {
             var residueMods = residueModList.Split(';');
@@ -84,9 +88,11 @@ namespace PHRP_UnitTests
         }
 
         [Test]
+        // ReSharper disable StringLiteralTypo
         [TestCase("R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A", 2184.97443)]
         [TestCase("K.Q-17.0265QIEESTSDYDKEK.L", 1681.73186)]
         [TestCase("Q-17.0265QIEESTSDYDKEK", 1681.73186)]
+        // ReSharper restore StringLiteralTypo
         public void TestComputeAminoAcidMassNumericMods(string strSequence, double expectedMass)
         {
             var computedMass = mPeptideMassCalculator.ComputeSequenceMassNumericMods(strSequence);
@@ -97,10 +103,12 @@ namespace PHRP_UnitTests
         }
 
         [Test]
+        // ReSharper disable StringLiteralTypo
         [TestCase("CHNOSP", 105.9516)]
         [TestCase("C2H3N4OS", 131.0027)]
         [TestCase("C2H3N-2OS3N+3S-2", 88.99353)]
         [TestCase("CH53N-3Se4P2Xe3", 513.03752)]
+        // ReSharper restore StringLiteralTypo
         public void TestComputeEmpiricalFormulaMassMethod1(string strEmpiricalFormula, double expectedMass)
         {
             var empiricalFormula = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(strEmpiricalFormula);

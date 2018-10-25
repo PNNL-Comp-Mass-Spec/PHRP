@@ -14,7 +14,7 @@ namespace PHRP_UnitTests
         {
             var modInfo = new List<clsMSGFPlusParamFileModExtractor.udtModInfoType>
             {
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType()
+                new clsMSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "C2H3N1O1",
                     ModMassVal = 57.0214619,
@@ -23,7 +23,7 @@ namespace PHRP_UnitTests
                     ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.StaticMod,
                     Residues = "C",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType()
+                new clsMSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "229.1629",
                     ModMassVal = 229.1629,
@@ -32,7 +32,7 @@ namespace PHRP_UnitTests
                     ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.StaticMod,
                     Residues = "<",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType()
+                new clsMSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "229.1629",
                     ModMassVal = 229.1629,
@@ -41,7 +41,7 @@ namespace PHRP_UnitTests
                     ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.StaticMod,
                     Residues = "K",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType()
+                new clsMSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "O1",
                     ModMassVal = 15.9949141,
@@ -50,7 +50,7 @@ namespace PHRP_UnitTests
                     ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynamicMod,
                     Residues = "M",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType()
+                new clsMSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "-187.152366",
                     ModMassVal = -187.152366,
@@ -59,7 +59,7 @@ namespace PHRP_UnitTests
                     ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynamicMod,
                     Residues = "K",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType()
+                new clsMSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "-187.152366",
                     ModMassVal = -187.152366,
@@ -69,6 +69,8 @@ namespace PHRP_UnitTests
                     Residues = "<",
                 }
             };
+
+            // ReSharper disable StringLiteralTypo
 
             var peptide = "-187.152+229.163ATK-187.152+229.163QIFDC+57.021K+229.163";
             var processor = new clsMSGFDBResultsProcessor();
@@ -83,6 +85,8 @@ namespace PHRP_UnitTests
             Console.WriteLine("Original: {0}", peptide1);
             Console.WriteLine("Replaced: {0}", replaced1);
             Assert.AreEqual("ITVVGVGAVGM*ACAISILMK", replaced1);
+
+            // ReSharper restore StringLiteralTypo
         }
     }
 }

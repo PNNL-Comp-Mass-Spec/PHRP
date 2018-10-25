@@ -1,4 +1,4 @@
-﻿// This class reads in an MSalign results file (txt format) and creates
+﻿// This class reads in an MSAlign results file (txt format) and creates
 // a tab-delimited text file with the data.
 //
 // -------------------------------------------------------------------------------
@@ -30,6 +30,7 @@ namespace PeptideHitResultsProcessor
         public const string FILENAME_SUFFIX_MSALIGN_FILE = "_MSAlign_ResultTable";
 
         public const string N_TERMINUS_SYMBOL_MSALIGN = ".";
+
         public const string C_TERMINUS_SYMBOL_MSALIGN = ".";
 
         public const float DEFAULT_SYN_FILE_PVALUE_THRESHOLD = 0.95f;
@@ -264,7 +265,7 @@ namespace PeptideHitResultsProcessor
                         }
                         else
                         {
-                            // Ambigous mod
+                            // Ambiguous mod
                             // We'll associate it with the first residue of the mod group
                             residueForMod = chAmbiguousResidue;
                             residueLocForMod = ambiguousResidueLocInPeptide;
@@ -309,7 +310,7 @@ namespace PeptideHitResultsProcessor
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = true;
 
-            var success = false;
+            bool success;
 
             try
             {
@@ -634,16 +635,22 @@ namespace PeptideHitResultsProcessor
 
                                 if (string.Equals(kvSetting.Key, "cysteineProtection", StringComparison.CurrentCultureIgnoreCase))
                                 {
-                                    var modDef = default(clsModificationDefinition);
+                                    clsModificationDefinition modDef;
                                     switch (kvSetting.Value.ToUpper())
                                     {
                                         case "C57":
-                                            modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 57.0215, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcet");
+                                            modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                                                                                   57.0215, "C",
+                                                                                   clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                                                                   "IodoAcet");
                                             modInfo.Add(modDef);
                                             break;
 
                                         case "C58":
-                                            modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, 58.0055, "C", clsModificationDefinition.eModificationTypeConstants.StaticMod, "IodoAcid");
+                                            modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                                                                                   58.0055, "C",
+                                                                                   clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                                                                   "IodoAcid");
                                             modInfo.Add(modDef);
                                             break;
 
@@ -680,7 +687,7 @@ namespace PeptideHitResultsProcessor
             // Note that MSAlign synopsis files are normally sorted on PValue value, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique PValue encountered
-            // Although this was a possiblity with Inspect, it likely never occurs for MSAlign
+            // Although this was a possibility with Inspect, it likely never occurs for MSAlign
             //  But, we'll keep the check in place just in case
 
             int[] columnMapping = null;

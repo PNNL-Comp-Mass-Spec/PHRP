@@ -6,7 +6,7 @@
 //
 // This class parses data lines from Xtandem _xt.txt files
 //
-// Note: in order to fully extract the search parameters, you need to have these files in the same folder as the _xt.txt file
+// Note: in order to fully extract the search parameters, you need to have these files in the same directory as the _xt.txt file
 //	The file passed to LoadSearchEngineParameters()  (typically input.xml)
 //	The taxonomy file that it references             (typically taxonomy.xml)
 //   The default input file defined in input.xml      (typically default_input.xml)
@@ -234,7 +234,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Defeault ModSummary file name for the given dataset
+        /// Default ModSummary file name for the given dataset
         /// </summary>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>

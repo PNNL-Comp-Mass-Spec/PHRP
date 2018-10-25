@@ -197,7 +197,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Defeault ModSummary file name for the given dataset
+        /// Default ModSummary file name for the given dataset
         /// </summary>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>

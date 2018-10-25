@@ -1339,7 +1339,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="searchResults">Search results</param>
         /// <param name="startIndex">Start index for data in this scan</param>
         /// <param name="endIndex">End index for data in this scan</param>
-        /// <param name="filteredSearchResults">Output parmaeter: the actual filtered search results</param>
+        /// <param name="filteredSearchResults">Output parameter: the actual filtered search results</param>
         /// <remarks></remarks>
         private void StoreSynMatches(
             IList<udtMSPathFinderSearchResultType> searchResults,
@@ -1491,7 +1491,7 @@ namespace PeptideHitResultsProcessor
                     return -1;
                 }
 
-                // SpecEValue is the same; check qvalue
+                // SpecEValue is the same; check QValue
                 if (x.QValueNum > y.QValueNum)
                 {
                     return 1;

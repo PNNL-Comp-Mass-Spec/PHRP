@@ -25,7 +25,7 @@ namespace PHRPReader
         #region "Structures"
 
         /// <summary>
-        /// Tracks ambigious modifications
+        /// Tracks ambiguous modifications
         /// </summary>
         protected struct udtAmbiguousModInfo
         {
@@ -1241,7 +1241,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Repor an error
+        /// Report an error
         /// </summary>
         /// <param name="message"></param>
         protected void ReportError(string message)

@@ -648,7 +648,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Create a new clsEmpiricalFormula instnance with the specified number of atoms
+        /// Create a new clsEmpiricalFormula instance with the specified number of atoms
         /// </summary>
         /// <param name="countC"></param>
         /// <param name="countH"></param>
@@ -750,7 +750,7 @@ namespace PHRPReader
                     empiricalFormula = GetAminoAcidEmpiricalFormula(6, 11, 1, 1, 0);
                     break;
                 case 'J':
-                    // Could use mass of Ile/Leu, but we're instead treating this as an invalid, massless amino acid
+                    // Could use mass of Ile/Leu, but we're instead treating this as an invalid, zero-mass amino acid
                     monoMass = 0;
                     empiricalFormula = GetAminoAcidEmpiricalFormula(0, 0, 0, 0, 0);
                     break;
@@ -882,9 +882,9 @@ namespace PHRPReader
         ///  C3H3NOS4
         ///  CH23NO-5S+4
         /// </summary>
-        /// <param name="empiricalformula"></param>
-        /// <returns>EmpiricalFormula instnance tracking the element symbols and counts</returns>
-        public static clsEmpiricalFormula GetEmpiricalFormulaComponents(string empiricalformula)
+        /// <param name="empiricalFormula"></param>
+        /// <returns>EmpiricalFormula instance tracking the element symbols and counts</returns>
+        public static clsEmpiricalFormula GetEmpiricalFormulaComponents(string empiricalFormula)
         {
             // Originally MSGF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
             // It now allows for any element
