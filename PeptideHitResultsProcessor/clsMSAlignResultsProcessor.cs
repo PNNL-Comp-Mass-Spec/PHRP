@@ -8,7 +8,6 @@
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // -------------------------------------------------------------------------------
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -707,8 +706,8 @@ namespace PeptideHitResultsProcessor
                 var searchResult = new clsSearchResultsMSAlign(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize htPeptidesFoundForPValueLevel
-                var htPeptidesFoundForPValueLevel = new Hashtable();
-                previousPValue = string.Empty;
+                var peptidesFoundForPValueLevel = new SortedSet<string>();
+                var previousPValue = string.Empty;
 
                 // Assure that pepToProteinMapping is sorted on peptide
                 if (pepToProteinMapping.Count > 1)
@@ -770,13 +769,13 @@ namespace PeptideHitResultsProcessor
                                     // New result has the same PValue as the previous result
                                     // See if htPeptidesFoundForPValueLevel contains the peptide, scan and charge
 
-                                    if (htPeptidesFoundForPValueLevel.ContainsKey(key))
+                                    if (peptidesFoundForPValueLevel.Contains(key))
                                     {
                                         firstMatchForGroup = false;
                                     }
                                     else
                                     {
-                                        htPeptidesFoundForPValueLevel.Add(key, 1);
+                                        peptidesFoundForPValueLevel.Add(key);
                                         firstMatchForGroup = true;
                                     }
                                 }
@@ -784,13 +783,13 @@ namespace PeptideHitResultsProcessor
                                 {
                                     // New PValue
                                     // Reset htPeptidesFoundForPValueLevel
-                                    htPeptidesFoundForPValueLevel.Clear();
+                                    peptidesFoundForPValueLevel.Clear();
 
                                     // Update previousPValue
                                     previousPValue = searchResult.PValue;
 
                                     // Append a new entry to htPeptidesFoundForPValueLevel
-                                    htPeptidesFoundForPValueLevel.Add(key, 1);
+                                    peptidesFoundForPValueLevel.Add(key);
                                     firstMatchForGroup = true;
                                 }
 

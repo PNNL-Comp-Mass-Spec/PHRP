@@ -13,7 +13,6 @@
 // Copyright 2018 Battelle Memorial Institute
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -47,7 +46,7 @@ namespace PeptideHitResultsProcessor
             mUniqueSequences = new clsUniqueSequencesContainer();
 
             // Initialize mSeqToProteinMap
-            mSeqToProteinMap = new Hashtable();
+            mSeqToProteinMap = new SortedSet<string>();
 
             // Define a RegEx to replace all of the non-letter characters
             mReplaceSymbols = new Regex(@"[^A-Za-z]", RegexOptions.Compiled);
@@ -226,7 +225,7 @@ namespace PeptideHitResultsProcessor
 
         protected readonly clsPeptideModificationContainer mPeptideMods;
         private readonly clsUniqueSequencesContainer mUniqueSequences;
-        private readonly Hashtable mSeqToProteinMap;
+        private readonly SortedSet<string> mSeqToProteinMap;
 
         private StreamWriter mResultToSeqMapFile;
         private StreamWriter mSeqInfoFile;
@@ -543,13 +542,13 @@ namespace PeptideHitResultsProcessor
 
                 var key = uniqueSeqID + UNIQUE_SEQ_TO_PROTEIN_MAP_SEP + proteinName;
 
-                if (mSeqToProteinMap.ContainsKey(key))
+                if (mSeqToProteinMap.Contains(key))
                 {
                     existingMapFound = true;
                 }
                 else
                 {
-                    mSeqToProteinMap.Add(key, 1);
+                    mSeqToProteinMap.Add(key);
                     existingMapFound = false;
                 }
             }
@@ -955,7 +954,7 @@ namespace PeptideHitResultsProcessor
                 else
                     outputFolderPath = mtsPepToProteinMapFile.DirectoryName;
 
-                var htPeptideToProteinMapResults = new Hashtable();
+                var peptideToProteinMapResults = new SortedSet<string>();
 
                 var peptideToProteinMapper = new clsPeptideToProteinMapEngine
                 {
@@ -1068,10 +1067,9 @@ namespace PeptideHitResultsProcessor
 
                                 var peptideAndProteinKey = splitLine[0] + "_" + splitLine[1];
 
-                                if (!htPeptideToProteinMapResults.ContainsKey(peptideAndProteinKey))
+                                if (!peptideToProteinMapResults.Contains(peptideAndProteinKey))
                                 {
-                                    htPeptideToProteinMapResults.Add(peptideAndProteinKey, 0);
-                                    pepToProtMapWriter.WriteLine(lineIn);
+                                    peptideToProteinMapResults.Add(peptideAndProteinKey);
                                 }
                             }
                         }
@@ -2056,7 +2054,7 @@ namespace PeptideHitResultsProcessor
             // Note: Be sure to call Me.InitializeOutputFiles before calling this function
             // updateResultToSeqMapFile should be set to True only for the first protein of each peptide in each group
 
-            // This ID is assigned using a hashtable containing mPeptideCleanSequence and mPeptideModDescription
+            // This ID is assigned using a SortedSet containing mPeptideCleanSequence and mPeptideModDescription
             var uniqueSeqID = mUniqueSequences.GetNextUniqueSequenceID(
                 searchResult.PeptideCleanSequence,
                 searchResult.PeptideModDescription,

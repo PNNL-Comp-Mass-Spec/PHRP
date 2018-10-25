@@ -8,7 +8,6 @@
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // -------------------------------------------------------------------------------
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -604,9 +603,9 @@ namespace PeptideHitResultsProcessor
                 // Initialize searchResult
                 var searchResult = new clsSearchResultsMSPathFinder(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize two hashtables
-                var htPeptidesFoundForSpecEValue = new Hashtable();
-                var htPeptidesFoundForQValue = new Hashtable();
+                // Initialize two SortedSets
+                var peptidesFoundForSpecEValue = new SortedSet<string>();
+                var peptidesFoundForQValue = new SortedSet<string>();
 
                 var firstMatchForGroup = false;
 
@@ -672,15 +671,15 @@ namespace PeptideHitResultsProcessor
                                 if (searchResult.QValue == previousQValue)
                                 {
                                     // New result has the same QValue as the previous result
-                                    // See if htPeptidesFoundForQValue contains the peptide, scan and charge
+                                    // See if peptidesFoundForQValue contains the peptide, scan and charge
 
-                                    if (htPeptidesFoundForQValue.ContainsKey(key))
+                                    if (peptidesFoundForQValue.Contains(key))
                                     {
                                         firstMatchForGroup = false;
                                     }
                                     else
                                     {
-                                        htPeptidesFoundForQValue.Add(key, 1);
+                                        peptidesFoundForQValue.Add(key);
                                         firstMatchForGroup = true;
                                     }
 
@@ -690,15 +689,15 @@ namespace PeptideHitResultsProcessor
                             else if (searchResult.SpecEValue == previousSpecEValue)
                             {
                                 // New result has the same SpecEValue as the previous result
-                                // See if htPeptidesFoundForSpecEValue contains the peptide, scan and charge
+                                // See if peptidesFoundForSpecEValue contains the peptide, scan and charge
 
-                                if (htPeptidesFoundForSpecEValue.ContainsKey(key))
+                                if (peptidesFoundForSpecEValue.Contains(key))
                                 {
                                     firstMatchForGroup = false;
                                 }
                                 else
                                 {
-                                    htPeptidesFoundForSpecEValue.Add(key, 1);
+                                    peptidesFoundForSpecEValue.Add(key);
                                     firstMatchForGroup = true;
                                 }
 
@@ -708,17 +707,17 @@ namespace PeptideHitResultsProcessor
                             if (newValue)
                             {
                                 // New SpecEValue or new QValue
-                                // Reset the hashtables
-                                htPeptidesFoundForSpecEValue.Clear();
-                                htPeptidesFoundForQValue.Clear();
+                                // Reset the SortedSets
+                                peptidesFoundForSpecEValue.Clear();
+                                peptidesFoundForQValue.Clear();
 
                                 // Update the cached values
                                 previousSpecEValue = searchResult.SpecEValue;
                                 previousQValue = searchResult.QValue;
 
-                                // Append a new entry to the hashtables
-                                htPeptidesFoundForSpecEValue.Add(key, 1);
-                                htPeptidesFoundForQValue.Add(key, 1);
+                                // Append a new entry to the SortedSets
+                                peptidesFoundForSpecEValue.Add(key);
+                                peptidesFoundForQValue.Add(key);
 
                                 firstMatchForGroup = true;
                             }

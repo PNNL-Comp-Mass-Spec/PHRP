@@ -8,7 +8,6 @@
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // -------------------------------------------------------------------------------
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -980,8 +979,8 @@ namespace PeptideHitResultsProcessor
                 // Initialize searchResult
                 var searchResult = new clsSearchResultsMODa(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize htPeptidesFoundForProbabilityLevel
-                var htPeptidesFoundForProbabilityLevel = new Hashtable();
+                // Initialize peptidesFoundForProbabilityLevel
+                var peptidesFoundForProbabilityLevel = new SortedSet<string>();
                 var previousProbability = string.Empty;
 
                 // Assure that pepToProteinMapping is sorted on peptide
@@ -1047,29 +1046,29 @@ namespace PeptideHitResultsProcessor
                             if (searchResult.Probability == previousProbability)
                             {
                                 // New result has the same Probability as the previous result
-                                // See if htPeptidesFoundForProbabilityLevel contains the peptide, scan and charge
+                                // See if peptidesFoundForProbabilityLevel contains the peptide, scan and charge
 
-                                if (htPeptidesFoundForProbabilityLevel.ContainsKey(key))
+                                if (peptidesFoundForProbabilityLevel.Contains(key))
                                 {
                                     firstMatchForGroup = false;
                                 }
                                 else
                                 {
-                                    htPeptidesFoundForProbabilityLevel.Add(key, 1);
+                                    peptidesFoundForProbabilityLevel.Add(key);
                                     firstMatchForGroup = true;
                                 }
                             }
                             else
                             {
                                 // New Probability
-                                // Reset htPeptidesFoundForProbabilityLevel
-                                htPeptidesFoundForProbabilityLevel.Clear();
+                                // Reset peptidesFoundForProbabilityLevel
+                                peptidesFoundForProbabilityLevel.Clear();
 
                                 // Update previousProbability
                                 previousProbability = searchResult.Probability;
 
-                                // Append a new entry to htPeptidesFoundForProbabilityLevel
-                                htPeptidesFoundForProbabilityLevel.Add(key, 1);
+                                // Append a new entry to peptidesFoundForProbabilityLevel
+                                peptidesFoundForProbabilityLevel.Add(key);
                                 firstMatchForGroup = true;
                             }
 

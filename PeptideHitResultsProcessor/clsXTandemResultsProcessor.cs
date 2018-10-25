@@ -13,7 +13,6 @@
 // Copyright 2018 Battelle Memorial Institute
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -34,13 +33,9 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsXTandemResultsProcessor : clsPHRPBaseClass
     {
-        public clsXTandemResultsProcessor()
-        {
-            mFileDate = "October 13, 2017";
-            InitializeLocalVariables();
-        }
 
         #region "Constants and Enums"
+
         // Note: These names must all be lowercase
         private const string XTANDEM_XML_ROOT_ELEMENT = "bioml";
         private const string XTANDEM_XML_ELEMENT_NAME_GROUP = "group";
@@ -105,10 +100,27 @@ namespace PeptideHitResultsProcessor
         private Regex mScanNumberRegExB;
         private Regex mScanNumberRegExC;
         private Regex mScanNumberRegExD;
+
+        private readonly Dictionary<string, int> mSeqsWithMods;
+        private readonly SortedSet<string> mSeqsWithoutMods;
+
         #endregion
 
         #region "Properties"
         #endregion
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public clsXTandemResultsProcessor()
+        {
+            mFileDate = "October 24, 2018";
+
+            mSeqsWithMods = new Dictionary<string, int>();
+            mSeqsWithoutMods = new SortedSet<string>();
+
+            InitializeLocalVariables();
+        }
 
         private bool AddModificationsAndComputeMass(clsSearchResultsXTandem searchResult, bool updateModOccurrenceCounts)
         {
@@ -596,9 +608,6 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        // The following are static to avoid re-reserving space for them for every XTandem results file entry
-        Hashtable htSeqsWithMods;
-        Hashtable htSeqsWithoutMods;
         private bool ParseXTandemResultsFileEntry(XmlReader xmlReader, StreamWriter swPeptideResultsFile, ref int searchResultCount, ref clsSearchResultsXTandem[] searchResults, ref string errorLog, int groupElementReaderDepth)
         {
             // Note: The number of valid entries in searchResults[) is given by searchResultCount; searchResults(] is expanded but never shrunk
@@ -967,16 +976,8 @@ namespace PeptideHitResultsProcessor
                                 //  which entries should be written to the _xt.txt file and to the ResultToSeqMap file
                                 // We will also use this pointer array to keep track of the number of proteins listed for each peptide
 
-                                if (htSeqsWithMods == null)
-                                {
-                                    htSeqsWithMods = new Hashtable();
-                                    htSeqsWithoutMods = new Hashtable();
-                                }
-                                else
-                                {
-                                    htSeqsWithMods.Clear();
-                                    htSeqsWithoutMods.Clear();
-                                }
+                                mSeqsWithMods.Clear();
+                                mSeqsWithoutMods.Clear();
 
                                 // First step through the results to compute the mass, construct the modification description,
                                 //  and determine the number of proteins listed for each
@@ -988,18 +989,18 @@ namespace PeptideHitResultsProcessor
                                     {
                                         // Always set updateModOccurrenceCounts to True for the first result in the group
                                         updateModOccurrenceCounts = true;
-                                        htSeqsWithoutMods.Add(searchResults[searchResultIndex].PeptideCleanSequence, 1);
+                                        mSeqsWithoutMods.Add(searchResults[searchResultIndex].PeptideCleanSequence);
                                     }
                                     else
                                     {
-                                        if (htSeqsWithoutMods.ContainsKey(searchResults[searchResultIndex].PeptideCleanSequence))
+                                        if (mSeqsWithoutMods.Contains(searchResults[searchResultIndex].PeptideCleanSequence))
                                         {
                                             updateModOccurrenceCounts = false;
                                         }
                                         else
                                         {
                                             updateModOccurrenceCounts = true;
-                                            htSeqsWithoutMods.Add(searchResults[searchResultIndex].PeptideCleanSequence, 1);
+                                            mSeqsWithoutMods.Add(searchResults[searchResultIndex].PeptideCleanSequence);
                                         }
                                     }
 
@@ -1016,48 +1017,40 @@ namespace PeptideHitResultsProcessor
 
                                     if (searchResultIndex == 0)
                                     {
-                                        // Always add the first result in the group htSeqsWithMods
-                                        htSeqsWithMods.Add(sequenceWithMods, 1);
+                                        // Always add the first result in the group mSeqsWithMods
+                                        mSeqsWithMods.Add(sequenceWithMods, 1);
                                     }
                                     else
                                     {
-                                        // See if htSeqsWithMods contains sequenceWithMods
-                                        if (htSeqsWithMods.ContainsKey(sequenceWithMods))
+                                        // See if mSeqsWithMods contains sequenceWithMods
+                                        if (mSeqsWithMods.TryGetValue(sequenceWithMods, out var existingProteinCount))
                                         {
                                             // Increment the protein count for this peptide
-                                            htSeqsWithMods[sequenceWithMods] = (int)htSeqsWithMods[sequenceWithMods] + 1;
+                                            mSeqsWithMods[sequenceWithMods] = existingProteinCount + 1;
                                         }
                                         else
                                         {
-                                            htSeqsWithMods.Add(sequenceWithMods, 1);
+                                            mSeqsWithMods.Add(sequenceWithMods, 1);
                                         }
                                     }
                                 }
 
-                                // Now step through the list again and update the MultipleProteinCount value for each search result
+                                // Now step through the list again and update the ProteinCount value for each search result
                                 for (var searchResultIndex = 0; searchResultIndex <= searchResultCount - 1; searchResultIndex++)
                                 {
                                     sequenceWithMods = searchResults[searchResultIndex].PeptideCleanSequence + "_" + searchResults[searchResultIndex].PeptideModDescription;
 
-                                    int proteinCount;
-                                    try
-                                    {
-                                        proteinCount = (int)htSeqsWithMods[sequenceWithMods];
-                                    }
-                                    catch (Exception)
+                                    if (!mSeqsWithMods.TryGetValue(sequenceWithMods, out var proteinCount))
                                     {
                                         proteinCount = 1;
                                     }
-
-                                    if (proteinCount < 1)
-                                        proteinCount = 1;
 
                                     // Note: Multiple protein count is 0 if the peptide is only in 1 protein; 1 if the protein is in 2 proteins, etc.
                                     searchResults[searchResultIndex].MultipleProteinCount = (proteinCount - 1).ToString();
                                 }
 
-                                // Clear htSeqsWithMods again since we need to re-use it to determine which results to write out
-                                htSeqsWithMods.Clear();
+                                // Clear mSeqsWithMods again since we need to re-use it to determine which results to write out
+                                mSeqsWithMods.Clear();
 
                                 // Write out the results
                                 for (var searchResultIndex = 0; searchResultIndex <= searchResultCount - 1; searchResultIndex++)
@@ -1068,19 +1061,19 @@ namespace PeptideHitResultsProcessor
                                     if (searchResultIndex == 0)
                                     {
                                         // Always save the first result in the group to the _xt.txt and _ResultToSeqMap.txt files
-                                        htSeqsWithMods.Add(sequenceWithMods, 1);
+                                        mSeqsWithMods.Add(sequenceWithMods, 1);
                                         updateResultToSeqMapFile = true;
                                     }
                                     else
                                     {
-                                        // See if htSeqsWithMods contains sequenceWithMods
-                                        if (htSeqsWithMods.ContainsKey(sequenceWithMods))
+                                        // See if mSeqsWithMods contains sequenceWithMods
+                                        if (mSeqsWithMods.ContainsKey(sequenceWithMods))
                                         {
                                             updateResultToSeqMapFile = false;
                                         }
                                         else
                                         {
-                                            htSeqsWithMods.Add(sequenceWithMods, 1);
+                                            mSeqsWithMods.Add(sequenceWithMods, 1);
                                             updateResultToSeqMapFile = true;
                                         }
                                     }

@@ -13,7 +13,6 @@
 // Copyright 2018 Battelle Memorial Institute
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using PHRPReader;
@@ -246,7 +245,7 @@ namespace PeptideHitResultsProcessor
                 var searchResult = new clsSearchResultsSequest(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize htPeptidesFoundForXCorrLevel
-                var htPeptidesFoundForXCorrLevel = new Hashtable();
+                var peptidesFoundForXCorrLevel = new SortedSet<string>();
                 var previousXCorr = string.Empty;
 
                 try
@@ -312,13 +311,13 @@ namespace PeptideHitResultsProcessor
                                     // New result has the same XCorr as the previous results
                                     // See if htPeptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
 
-                                    if (htPeptidesFoundForXCorrLevel.ContainsKey(key))
+                                    if (peptidesFoundForXCorrLevel.Contains(key))
                                     {
                                         firstMatchForGroup = false;
                                     }
                                     else
                                     {
-                                        htPeptidesFoundForXCorrLevel.Add(key, 1);
+                                        peptidesFoundForXCorrLevel.Add(key);
                                         firstMatchForGroup = true;
                                     }
                                 }
@@ -326,13 +325,13 @@ namespace PeptideHitResultsProcessor
                                 {
                                     // New XCorr
                                     // Reset htPeptidesFoundForXCorrLevel
-                                    htPeptidesFoundForXCorrLevel.Clear();
+                                    peptidesFoundForXCorrLevel.Clear();
 
                                     // Update previousXCorr
                                     previousXCorr = searchResult.PeptideXCorr;
 
                                     // Append a new entry to htPeptidesFoundForXCorrLevel
-                                    htPeptidesFoundForXCorrLevel.Add(key, 1);
+                                    peptidesFoundForXCorrLevel.Add(key);
                                     firstMatchForGroup = true;
                                 }
 

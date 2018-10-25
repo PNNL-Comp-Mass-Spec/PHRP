@@ -1457,7 +1457,7 @@ namespace PHRPReader
             }
             catch (Exception)
             {
-                // If a duplicate is tag is entered into the mMassCorrectionTags hashtable, an error will occur; we'll ignore the error
+                // If a duplicate is tag is entered into the mMassCorrectionTags Dictionary, an error will occur; we'll ignore the error
                 // Ignore errors here
             }
         }

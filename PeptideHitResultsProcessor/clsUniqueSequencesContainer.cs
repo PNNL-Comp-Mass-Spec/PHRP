@@ -13,7 +13,7 @@
 // Copyright 2018 Battelle Memorial Institute
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace PeptideHitResultsProcessor
 {
@@ -29,37 +29,39 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Classwide Variables"
-        protected Hashtable htMasterSequences;
+
+        protected Dictionary<string, int> mMasterSequences;
+
         protected int mNextUniqueSeqID;
+
         #endregion
 
         #region "Properties"
-        public int UniqueSequenceCount => htMasterSequences.Count;
+
+        // ReSharper disable once UnusedMember.Global
+        public int UniqueSequenceCount => mMasterSequences.Count;
 
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public clsUniqueSequencesContainer()
         {
-            InitializeLocalVariables();
+            mMasterSequences = new Dictionary<string, int>();
+            Clear();
         }
 
         public void Clear()
         {
-            this.Clear(DEFAULT_INITIAL_SEQ_ID);
+            Clear(DEFAULT_INITIAL_SEQ_ID);
         }
 
         public void Clear(int initialSeqID)
         {
-            // Clears htMasterSequences and resets mNextUniqueSeqID to initialSeqID
+            // Clears mMasterSequences and resets mNextUniqueSeqID to initialSeqID
+            mMasterSequences.Clear();
             mNextUniqueSeqID = initialSeqID;
-            if (htMasterSequences == null)
-            {
-                htMasterSequences = new Hashtable();
-            }
-            else
-            {
-                htMasterSequences.Clear();
-            }
         }
 
         public int GetNextUniqueSequenceID(string sequence, string modDescription, out bool existingSequenceFound)
@@ -77,14 +79,14 @@ namespace PeptideHitResultsProcessor
 
                 var key = sequence + SEQUENCE_MOD_DESC_SEP + modDescription;
 
-                if (htMasterSequences.ContainsKey(key))
+                if (mMasterSequences.ContainsKey(key))
                 {
-                    uniqueSeqID = Convert.ToInt32(htMasterSequences[key]);
+                    uniqueSeqID = mMasterSequences[key];
                     existingSequenceFound = true;
                 }
                 else
                 {
-                    htMasterSequences.Add(key, mNextUniqueSeqID);
+                    mMasterSequences.Add(key, mNextUniqueSeqID);
                     uniqueSeqID = mNextUniqueSeqID;
                     mNextUniqueSeqID += 1;
                 }
@@ -97,9 +99,5 @@ namespace PeptideHitResultsProcessor
             return uniqueSeqID;
         }
 
-        protected void InitializeLocalVariables()
-        {
-            this.Clear();
-        }
     }
 }

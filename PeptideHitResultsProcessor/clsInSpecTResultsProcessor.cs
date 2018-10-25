@@ -13,7 +13,6 @@
 // Copyright 2018 Battelle Memorial Institute
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1011,7 +1010,7 @@ namespace PeptideHitResultsProcessor
                 var searchResult = new clsSearchResultsInSpecT(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize htPeptidesFoundForTotalPRMScoreLevel
-                var htPeptidesFoundForTotalPRMScoreLevel = new Hashtable();
+                var peptidesFoundForTotalPRMScoreLevel = new SortedSet<string>();
                 var previousTotalPRMScore = string.Empty;
 
                 // Assure that pepToProteinMapping is sorted on peptide
@@ -1084,13 +1083,13 @@ namespace PeptideHitResultsProcessor
                                     // New result has the same TotalPRMScore as the previous result
                                     // See if htPeptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
 
-                                    if (htPeptidesFoundForTotalPRMScoreLevel.ContainsKey(key))
+                                    if (peptidesFoundForTotalPRMScoreLevel.Contains(key))
                                     {
                                         firstMatchForGroup = false;
                                     }
                                     else
                                     {
-                                        htPeptidesFoundForTotalPRMScoreLevel.Add(key, 1);
+                                        peptidesFoundForTotalPRMScoreLevel.Add(key);
                                         firstMatchForGroup = true;
                                     }
                                 }
@@ -1098,7 +1097,7 @@ namespace PeptideHitResultsProcessor
                                 {
                                     // New TotalPRMScore
                                     // Reset htPeptidesFoundForTotalPRMScoreLevel
-                                    htPeptidesFoundForTotalPRMScoreLevel.Clear();
+                                    peptidesFoundForTotalPRMScoreLevel.Clear();
 
                                     // Update previousTotalPRMScore
                                     previousTotalPRMScore = searchResult.TotalPRMScore;
