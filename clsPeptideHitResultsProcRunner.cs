@@ -227,7 +227,7 @@ namespace PeptideHitResultsProcRunner
 
             //SELECT D.Dataset_Num,
             //    AJ.AJ_jobID, PFMI.Local_Symbol,
-            //    PFMI.Monoisotopic_Mass_Correction, PFMI.Residue_Symbol,
+            //    PFMI.Monoisotopic_Mass, PFMI.Residue_Symbol,
             //    PFMI.Mod_Type_Symbol, PFMI.Mass_Correction_Tag
             //FROM dbo.T_Analysis_Job AJ INNER JOIN
             //    dbo.T_Dataset D ON
@@ -240,7 +240,7 @@ namespace PeptideHitResultsProcRunner
 
             //SELECT D.Dataset_Num,
             //    AJ.AJ_jobID, PFMI.Local_Symbol,
-            //    PFMI.Monoisotopic_Mass_Correction, PFMI.Residue_Symbol,
+            //    PFMI.Monoisotopic_Mass, PFMI.Residue_Symbol,
             //    PFMI.Mod_Type_Symbol, PFMI.Mass_Correction_Tag
             //FROM dbo.T_Analysis_Job AJ INNER JOIN
             //    dbo.T_Dataset D ON
