@@ -488,7 +488,7 @@ namespace PHRPReader
                 case clsPHRPReader.ePeptideHitResultType.MSAlign:
                     return new clsPHRPParserMSAlign(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case clsPHRPReader.ePeptideHitResultType.MSGFDB:
+                case clsPHRPReader.ePeptideHitResultType.MSGFPlus:
                     return new clsPHRPParserMSGFDB(datasetName, inputFilePath, loadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.Sequest:
@@ -1150,7 +1150,7 @@ namespace PHRPReader
                 // Read the Tool_Version_Info file to determine the analysis time and the tool version
                 var toolVersionInfoFilePath = Path.Combine(mInputDirectoryPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType));
 
-                if (!File.Exists(toolVersionInfoFilePath) && ePeptideHitResultType == clsPHRPReader.ePeptideHitResultType.MSGFDB)
+                if (!File.Exists(toolVersionInfoFilePath) && ePeptideHitResultType == clsPHRPReader.ePeptideHitResultType.MSGFPlus)
                 {
                     // This could be an older MSGF+ job; check for a _MSGFDB.txt tool version file
                     var alternativeVersionInfoFilePath = Path.Combine(mInputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");

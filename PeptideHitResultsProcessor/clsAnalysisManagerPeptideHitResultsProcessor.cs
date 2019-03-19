@@ -145,7 +145,7 @@ namespace PeptideHitResultsProcessor
                         m_PeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile:
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
                         m_PeptideHitResultsProcessor = new clsMSGFDBResultsProcessor();
                         break;
 
@@ -316,11 +316,11 @@ namespace PeptideHitResultsProcessor
             }
             else if (AnalysisToolName.IndexOf("msgfdb", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile;
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
             else if (AnalysisToolName.IndexOf("msgfplus", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile;
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
             else if (AnalysisToolName.IndexOf("msalign", StringComparison.OrdinalIgnoreCase) >= 0)
             {

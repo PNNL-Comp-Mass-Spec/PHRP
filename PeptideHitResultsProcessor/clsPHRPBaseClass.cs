@@ -130,7 +130,13 @@ namespace PeptideHitResultsProcessor
             /// <summary>
             /// MSGFDB, MS-GF+, MSGF+
             /// </summary>
+            [Obsolete("Use MSGFPlusTXTFile")]
             MSGFDbTXTFile = 5,
+
+            /// <summary>
+            /// MS-GF+, MSGF+
+            /// </summary>
+            MSGFPlusTXTFile = 5,
 
             /// <summary>
             /// MSAlign
@@ -344,15 +350,39 @@ namespace PeptideHitResultsProcessor
         /// Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
         /// <returns></returns>
-        /// <remarks>Lower e-values are higher confidence results</remarks>
-        public float MSGFDBSynopsisFileEValueThreshold { get; set; }
+        /// <remarks>Lower E-values are higher confidence results</remarks>
+        [Obsolete("Use MSGFPlusSynopsisFileEValueThreshold")]
+        public float MSGFDBSynopsisFileEValueThreshold
+        {
+            get => MSGFPlusSynopsisFileEValueThreshold;
+            set => MSGFPlusSynopsisFileEValueThreshold = value;
+        }
 
         /// <summary>
         /// clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
-        public float MSGFDBSynopsisFileSpecEValueThreshold { get; set; }
+        [Obsolete("Use MSGFPlusSynopsisFileSpecEValueThreshold")]
+        public float MSGFDBSynopsisFileSpecEValueThreshold
+        {
+            get => MSGFPlusSynopsisFileSpecEValueThreshold;
+            set => MSGFPlusSynopsisFileSpecEValueThreshold = value;
+        }
+
+        /// <summary>
+        /// Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Lower E-values are higher confidence results</remarks>
+        public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
+
+        /// <summary>
+        /// clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
+        public float MSGFPlusSynopsisFileSpecEValueThreshold { get; set; }
 
         /// <summary>
         /// Typical non-zero value is 17.0027387
@@ -415,7 +445,7 @@ namespace PeptideHitResultsProcessor
                 case ePeptideHitResultsFileFormatConstants.InspectTXTFile:
 
                     return Path.Combine(sourceDirectoryPath, baseName + INSPECT_RESULTS_FILE_SUFFIX);
-                case ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile:
+                case ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
 
                     return Path.Combine(sourceDirectoryPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX);
                 case ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
@@ -720,12 +750,12 @@ namespace PeptideHitResultsProcessor
 
             if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.InvariantCultureIgnoreCase))
             {
-                return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile;
+                return ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
 
             if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.InvariantCultureIgnoreCase))
             {
-                return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile;
+                return ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
             if (baseFileName.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -750,7 +780,7 @@ namespace PeptideHitResultsProcessor
             if (extensionLCase == ".tsv")
             {
                 // Assume this is an MSGF+ TSV file
-                return ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile;
+                return ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
 
             // Unknown extension
@@ -1202,7 +1232,7 @@ namespace PeptideHitResultsProcessor
                                      COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
                                      COLUMN_NAME_MSGF_SPECPROB);
 
-                    var loadMSGFResults = ePHRPResultType != clsPHRPReader.ePeptideHitResultType.MSGFDB;
+                    var loadMSGFResults = ePHRPResultType != clsPHRPReader.ePeptideHitResultType.MSGFPlus;
 
                     // Update the Mass Calculator to use the one tracked by this class
                     // (since this class's calculator knows about custom amino acids and custom charge carriers)
@@ -1596,8 +1626,8 @@ namespace PeptideHitResultsProcessor
 
             MSAlignSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
-            MSGFDBSynopsisFileEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            MSGFDBSynopsisFileSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
+            MSGFPlusSynopsisFileEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
+            MSGFMSGFPlusSynopsisFileSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
             EnzymeMatchSpec = clsPeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
 

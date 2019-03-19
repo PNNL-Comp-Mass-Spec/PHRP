@@ -212,8 +212,8 @@ namespace PeptideHitResultsProcRunner
 
             mPeptideHitResultsProcessor.MODaMODPlusSynopsisFileProbabilityThreshold = MODaMODPlusSynopsisFileProbabilityThreshold;
 
-            mPeptideHitResultsProcessor.MSGFDBSynopsisFileEValueThreshold = MsgfPlusEValueThreshold;
-            mPeptideHitResultsProcessor.MSGFDBSynopsisFileSpecEValueThreshold = MsgfPlusSpecEValueThreshold;
+            mPeptideHitResultsProcessor.MSGFPlusSynopsisFileEValueThreshold = MsgfPlusEValueThreshold;
+            mPeptideHitResultsProcessor.MSGFPlusSynopsisFileSpecEValueThreshold = MsgfPlusSpecEValueThreshold;
 
             mPeptideHitResultsProcessor.WarnMissingParameterFileSection = WarnMissingParameterFileSection;
         }
@@ -473,8 +473,8 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected Inspect results file");
 
                         break;
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSGFDB;
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
+                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSGFPlus;
                         LogMessage("Detected MSGF+ results file");
 
                         break;
@@ -520,7 +520,7 @@ namespace PeptideHitResultsProcRunner
                         mPeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
                         break;
 
-                    case clsPHRPReader.ePeptideHitResultType.MSGFDB:
+                    case clsPHRPReader.ePeptideHitResultType.MSGFPlus:
                         mPeptideHitResultsProcessor = new clsMSGFDBResultsProcessor();
                         break;
 
@@ -624,7 +624,7 @@ namespace PeptideHitResultsProcRunner
                         LogMessage("Detected Inspect results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFDbTXTFile:
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
                         mPeptideHitResultsProcessor = new clsMSGFDBResultsProcessor();
                         LogMessage("Detected MSGFDB (or MSGF+) results file");
                         break;

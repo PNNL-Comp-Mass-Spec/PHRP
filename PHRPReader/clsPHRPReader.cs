@@ -71,7 +71,9 @@ namespace PHRPReader
             Sequest = 1,
             XTandem = 2,
             Inspect = 3,
-            MSGFDB = 4,      // Aka MSGF+
+            [Obsolete("Use MSGFPlus")]
+            MSGFDB = 4,
+            MSGFPlus = 4,      // Aka MSGF+
             MSAlign = 5,
             MODa = 6,
             MODPlus = 7,

@@ -4,7 +4,7 @@
 //
 // Created 04/04/2012
 //
-// This class parses data lines from MSGFDB msgfdb_syn.txt files
+// This class parses data lines from MS-GF+ msgfplus_syn.txt files
 //
 //*********************************************************************************************************
 using System;
@@ -139,7 +139,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
         public clsPHRPParserMSGFDB(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus, loadModsAndSeqInfo)
         {
         }
 
@@ -151,7 +151,7 @@ namespace PHRPReader
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
         public clsPHRPParserMSGFDB(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB, startupOptions)
+            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus, startupOptions)
         {
         }
 
@@ -407,7 +407,7 @@ namespace PHRPReader
             {
                 mPeptideMassCalculator.ResetAminoAcidMasses();
 
-                var success = ReadKeyValuePairSearchEngineParamFile(MSGFDB_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSGFDB, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MSGFDB_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSGFPlus, searchEngineParams);
 
                 if (!success)
                 {
@@ -514,7 +514,7 @@ namespace PHRPReader
                 }
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, clsPHRPReader.ePeptideHitResultType.MSGFDB);
+                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, clsPHRPReader.ePeptideHitResultType.MSGFPlus);
                 searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
 
                 // Look for Custom Amino Acid definitions

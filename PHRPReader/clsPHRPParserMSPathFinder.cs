@@ -270,7 +270,7 @@ namespace PHRPReader
         {
             try
             {
-                var success = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSGFDB, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSGFPlus, searchEngineParams);
 
                 if (!success)
                 {

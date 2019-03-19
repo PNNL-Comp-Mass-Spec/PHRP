@@ -1353,7 +1353,7 @@ namespace PeptideHitResultsProcessor
 
             var searchEngineParams = new clsSearchEngineParameters(SEARCH_ENGINE_NAME);
 
-            var success = clsPHRPParser.ReadKeyValuePairSearchEngineParamFile(SEARCH_ENGINE_NAME, msgfPlusParamFilePath, clsPHRPReader.ePeptideHitResultType.MSGFDB,
+            var success = clsPHRPParser.ReadKeyValuePairSearchEngineParamFile(SEARCH_ENGINE_NAME, msgfPlusParamFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus,
                                                                               searchEngineParams, out var localErrorMessage, out var localWarningMessage);
 
             if (!string.IsNullOrWhiteSpace(localErrorMessage))
@@ -1394,8 +1394,8 @@ namespace PeptideHitResultsProcessor
 
         private bool MSGFPlusResultPassesSynFilter(udtMSGFDBSearchResultType udtMsgfdbSearchResultType)
         {
-            if (udtMsgfdbSearchResultType.EValueNum <= MSGFDBSynopsisFileEValueThreshold ||
-                udtMsgfdbSearchResultType.SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold ||
+            if (udtMsgfdbSearchResultType.EValueNum <= MSGFPlusSynopsisFileEValueThreshold ||
+                udtMsgfdbSearchResultType.SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold ||
                 udtMsgfdbSearchResultType.QValueNum > 0 && udtMsgfdbSearchResultType.QValueNum < 0.01)
             {
                 return true;
@@ -2556,7 +2556,7 @@ namespace PeptideHitResultsProcessor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.ePeptideHitResultType.MSGFDB);
+                                                          clsPHRPReader.ePeptideHitResultType.MSGFPlus);
                 }
             }
 
