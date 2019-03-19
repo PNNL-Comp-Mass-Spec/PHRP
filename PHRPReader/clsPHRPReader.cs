@@ -864,7 +864,7 @@ namespace PHRPReader
                         mPHRPParser = new clsPHRPParserInspect(datasetName, mInputFilePath, mStartupOptions);
 
                         break;
-                    case ePeptideHitResultType.MSGFDB:
+                    case ePeptideHitResultType.MSGFPlus:
                         // MSGF+
                         mPHRPParser = new clsPHRPParserMSGFDB(datasetName, mInputFilePath, mStartupOptions);
 
@@ -1121,12 +1121,12 @@ namespace PHRPReader
             foreach (var dataset in datasetNames)
             {
                 // MSGF+
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.MSGFDB));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.MSGFDB));
+                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.MSGFPlus));
+                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.MSGFPlus));
 
                 // MSGF+ prior to November 2016
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(dataset)), ePeptideHitResultType.MSGFDB));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(dataset)), ePeptideHitResultType.MSGFDB));
+                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(dataset)), ePeptideHitResultType.MSGFPlus));
+                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(dataset)), ePeptideHitResultType.MSGFPlus));
 
                 // X!Tandem
                 filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserXTandem.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.XTandem));
@@ -1245,7 +1245,7 @@ namespace PHRPReader
             {
                 case ePeptideHitResultType.Sequest:
                 case ePeptideHitResultType.Inspect:
-                case ePeptideHitResultType.MSGFDB:
+                case ePeptideHitResultType.MSGFPlus:
                 case ePeptideHitResultType.MSAlign:
                 case ePeptideHitResultType.MODa:
                 case ePeptideHitResultType.MODPlus:
@@ -1263,7 +1263,7 @@ namespace PHRPReader
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_inspect".Length);
                             }
                         }
-                        else if (eResultType == ePeptideHitResultType.MSGFDB)
+                        else if (eResultType == ePeptideHitResultType.MSGFPlus)
                         {
                             if (datasetName.EndsWith("_msgfplus", StringComparison.InvariantCultureIgnoreCase))
                             {
@@ -1348,11 +1348,11 @@ namespace PHRPReader
             {
                 if (filePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN) || filePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT))
                 {
-                    eResultType = ePeptideHitResultType.MSGFDB;
+                    eResultType = ePeptideHitResultType.MSGFPlus;
                 }
                 else if (filePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_SYN) || filePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_FHT))
                 {
-                    eResultType = ePeptideHitResultType.MSGFDB;
+                    eResultType = ePeptideHitResultType.MSGFPlus;
                 }
                 else if (filePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN) || filePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_FHT))
                 {
@@ -1399,7 +1399,7 @@ namespace PHRPReader
                                          LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue) ||
                                          LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore))
                                 {
-                                    eResultType = ePeptideHitResultType.MSGFDB;
+                                    eResultType = ePeptideHitResultType.MSGFPlus;
                                 }
                                 else if (LineContainsValues(headerLine, clsPHRPParserSequest.DATA_COLUMN_XCorr, clsPHRPParserSequest.DATA_COLUMN_DelCn))
                                 {
@@ -1725,7 +1725,7 @@ namespace PHRPReader
                 //case "MSG_Peptide_Hit".ToLower():
                 case "msg_peptide_hit":
 
-                    return ePeptideHitResultType.MSGFDB;
+                    return ePeptideHitResultType.MSGFPlus;
                 //case "MSA_Peptide_Hit".ToLower():
                 case "msa_peptide_hit":
 
@@ -1793,7 +1793,7 @@ namespace PHRPReader
                     oCachedParser = new clsPHRPParserInspect(datasetName, string.Empty);
 
                     break;
-                case ePeptideHitResultType.MSGFDB:
+                case ePeptideHitResultType.MSGFPlus:
                     oCachedParser = new clsPHRPParserMSGFDB(datasetName, string.Empty);
 
                     break;
@@ -1978,7 +1978,7 @@ namespace PHRPReader
                     toolVersionInfoFilename = "Tool_Version_Info_Inspect.txt";
 
                     break;
-                case ePeptideHitResultType.MSGFDB:
+                case ePeptideHitResultType.MSGFPlus:
                     // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
                     toolVersionInfoFilename = "Tool_Version_Info_MSGFPlus.txt";
 
@@ -2775,7 +2775,7 @@ namespace PHRPReader
                 else
                 {
                     // Note: we do not need to raise a warning for MSGFDB results since the extended scan stats file isn't needed
-                    if (mPHRPParser.PeptideHitResultType != ePeptideHitResultType.MSGFDB)
+                    if (mPHRPParser.PeptideHitResultType != ePeptideHitResultType.MSGFPlus)
                     {
                         ReportWarning("Extended ScanStats file not found: " + extendedScanStatsFilePath);
                     }
