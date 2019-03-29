@@ -610,81 +610,87 @@ namespace PHRPReader
                 // First compare against modifications with 1 or more residues in .TargetResidues
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if ((Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType) && Modifications[index].TargetResidues.Length > 0)
+                    if (Modifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.DynamicMod &&
+                        Modifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.UnknownType ||
+                        Modifications[index].TargetResidues.Length <= 0)
                     {
-                        if (Modifications[index].ModificationSymbol == modificationSymbol)
+                        continue;
+                    }
+
+                    if (Modifications[index].ModificationSymbol != modificationSymbol)
+                    {
+                        continue;
+                    }
+
+                    // Matching modification symbol found
+                    // Now see if .TargetResidues contains chTargetResidue
+                    if (Modifications[index].TargetResiduesContain(chTargetResidue))
+                    {
+                        existingModFound = true;
+                    }
+
+                    if (!existingModFound && eResidueTerminusState != clsAminoAcidModInfo.eResidueTerminusStateConstants.None)
+                    {
+                        switch (eResidueTerminusState)
                         {
-                            // Matching modification symbol found
-                            // Now see if .TargetResidues contains chTargetResidue
-                            if (Modifications[index].TargetResiduesContain(chTargetResidue))
-                            {
-                                existingModFound = true;
-                            }
-
-                            if (!existingModFound && eResidueTerminusState != clsAminoAcidModInfo.eResidueTerminusStateConstants.None)
-                            {
-                                switch (eResidueTerminusState)
+                            case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus:
+                            case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus:
+                                if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS))
                                 {
-                                    case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus:
-                                    case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus:
-                                        if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS))
-                                        {
-                                            existingModFound = true;
-                                        }
-                                        break;
-                                    case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus:
-                                        if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
-                                        {
-                                            existingModFound = true;
-                                        }
-                                        break;
+                                    existingModFound = true;
                                 }
-
-                                if (!existingModFound)
+                                break;
+                            case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus:
+                                if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                 {
-                                    switch (eResidueTerminusState)
-                                    {
-                                        case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus:
-                                        case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus:
-                                            if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS))
-                                            {
-                                                existingModFound = true;
-                                            }
-                                            break;
-                                        case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus:
-                                            if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
-                                            {
-                                                existingModFound = true;
-                                            }
-                                            break;
-                                    }
+                                    existingModFound = true;
                                 }
+                                break;
+                        }
 
-                                if (!existingModFound && (eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus || eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus))
-                                {
-                                    // Protein N-Terminus residue could also match a Peptide N-terminal mod; check for this
-                                    if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                        if (!existingModFound)
+                        {
+                            switch (eResidueTerminusState)
+                            {
+                                case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus:
+                                case clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus:
+                                    if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS))
                                     {
                                         existingModFound = true;
                                     }
-                                }
-
-                                if (!existingModFound && (eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus || eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus))
-                                {
-                                    // Protein C-Terminus residue could also match a Peptide C-terminal mod; check for this
+                                    break;
+                                case clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus:
                                     if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
                                     {
                                         existingModFound = true;
                                     }
-                                }
-                            }
-
-                            if (existingModFound)
-                            {
-                                // Match found
-                                return Modifications[index];
+                                    break;
                             }
                         }
+
+                        if (!existingModFound && (eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus || eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus))
+                        {
+                            // Protein N-Terminus residue could also match a Peptide N-terminal mod; check for this
+                            if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                            {
+                                existingModFound = true;
+                            }
+                        }
+
+                        if (!existingModFound && (eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus || eResidueTerminusState == clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus))
+                        {
+                            // Protein C-Terminus residue could also match a Peptide C-terminal mod; check for this
+                            if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
+                            {
+                                existingModFound = true;
+                            }
+                        }
+                    }
+
+                    if (existingModFound)
+                    {
+                        // Match found
+                        return Modifications[index];
                     }
                 }
             }
@@ -698,16 +704,19 @@ namespace PHRPReader
             {
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType)
+                    if (Modifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.DynamicMod &&
+                        Modifications[index].ModificationType != clsModificationDefinition.eModificationTypeConstants.UnknownType)
                     {
-                        if (considerTargetResidues && string.IsNullOrWhiteSpace(Modifications[index].TargetResidues) || !considerTargetResidues)
+                        continue;
+                    }
+
+                    if (considerTargetResidues && string.IsNullOrWhiteSpace(Modifications[index].TargetResidues) || !considerTargetResidues)
+                    {
+                        if (Modifications[index].ModificationSymbol == modificationSymbol)
                         {
-                            if (Modifications[index].ModificationSymbol == modificationSymbol)
-                            {
-                                // Matching mass found
-                                existingModFound = true;
-                                return Modifications[index];
-                            }
+                            // Matching mass found
+                            existingModFound = true;
+                            return Modifications[index];
                         }
                     }
                 }
