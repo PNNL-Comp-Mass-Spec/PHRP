@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcessor
     /// This class reads in a TopPIC results file (txt format) and creates
     /// a tab-delimited text file with the data.
     /// </summary>
-    class clsTopPICResultsProcessor : clsPHRPBaseClass
+    public class clsTopPICResultsProcessor : clsPHRPBaseClass
     {
         public clsTopPICResultsProcessor()
         {

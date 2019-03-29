@@ -456,42 +456,46 @@ namespace PeptideHitResultsProcRunner
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Sequest;
                         LogMessage("Detected SEQUEST First Hits file");
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Sequest;
                         LogMessage("Detected SEQUEST Synopsis file");
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.XTandem;
                         LogMessage("Detected X!Tandem XML file");
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InspectTXTFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Inspect;
                         LogMessage("Detected Inspect results file");
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSGFPlus;
                         LogMessage("Detected MSGF+ results file");
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSAlign;
                         LogMessage("Detected MSAlign results file");
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MODPlus;
                         LogMessage("Detected MODPlus results file");
-
                         break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
                         ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSPathFinder;
                         LogMessage("Detected MSPathfinder results file");
+                        break;
 
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.TopPICTXTFile:
+                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.TopPIC;
+                        LogMessage("Detected TopPIC results file");
                         break;
 
                     default:
@@ -596,7 +600,8 @@ namespace PeptideHitResultsProcRunner
                                         clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE + ".txt, " +
                                         clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE + ".txt, " +
                                         clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE + ".txt, or" +
-                                        clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE + ".tsv";
+                                        clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE + ".tsv" +
+                                        clsTopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE + ".txt";
 
                     ShowErrorMessage(message);
                     return false;
@@ -648,6 +653,12 @@ namespace PeptideHitResultsProcRunner
                         mPeptideHitResultsProcessor = new clsMSPathFinderResultsProcessor();
                         LogMessage("Detected MSPathFinder results file");
                         break;
+
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.TopPICTXTFile:
+                        mPeptideHitResultsProcessor = new clsTopPICResultsProcessor();
+                        LogMessage("Detected TopPIC results file");
+                        break;
+
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine:
                         throw new Exception("This code should not be reached; logic error in AutoDetermine: branch of switch (ePeptideHitResultsFormat)");
                     default:

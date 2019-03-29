@@ -855,38 +855,42 @@ namespace PHRPReader
                 {
                     case ePeptideHitResultType.Sequest:
                         mPHRPParser = new clsPHRPParserSequest(datasetName, mInputFilePath, mStartupOptions);
-
                         break;
+
                     case ePeptideHitResultType.XTandem:
                         // Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
                         mPHRPParser = new clsPHRPParserXTandem(datasetName, mInputFilePath, mStartupOptions);
-
                         break;
+
                     case ePeptideHitResultType.Inspect:
                         mPHRPParser = new clsPHRPParserInspect(datasetName, mInputFilePath, mStartupOptions);
-
                         break;
+
                     case ePeptideHitResultType.MSGFPlus:
                         // MSGF+
                         mPHRPParser = new clsPHRPParserMSGFDB(datasetName, mInputFilePath, mStartupOptions);
-
                         break;
+
                     case ePeptideHitResultType.MSAlign:
                         mPHRPParser = new clsPHRPParserMSAlign(datasetName, mInputFilePath, mStartupOptions);
-
                         break;
+
                     case ePeptideHitResultType.MODa:
                         mPHRPParser = new clsPHRPParserMODa(datasetName, mInputFilePath, mStartupOptions);
-
                         break;
+
                     case ePeptideHitResultType.MODPlus:
                         mPHRPParser = new clsPHRPParserMODPlus(datasetName, mInputFilePath, mStartupOptions);
-
                         break;
+
                     case ePeptideHitResultType.MSPathFinder:
                         mPHRPParser = new clsPHRPParserMSPathFinder(datasetName, mInputFilePath, mStartupOptions);
-
                         break;
+
+                    case ePeptideHitResultType.TopPIC:
+                        mPHRPParser = new clsPHRPParserTopPIC(datasetName, mInputFilePath, mStartupOptions);
+                        break;
+
                     default:
                         //Should never get here; invalid result type specified
                         ReportError("Invalid PeptideHit ResultType specified: " + eResultType);
@@ -1050,6 +1054,10 @@ namespace PHRPReader
             // MSPathFinder
             filesToFind.Add(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_SYN);
             filesToFind.Add(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_FHT);
+
+            // TopPIC
+            filesToFind.Add(clsPHRPParserTopPIC.FILENAME_SUFFIX_SYN);
+            filesToFind.Add(clsPHRPParserTopPIC.FILENAME_SUFFIX_FHT);
 
             // *****************
             // ** Important: Sequest needs to be added last since files simply end in _syn.txt or _fht.txt)
@@ -1287,6 +1295,7 @@ namespace PHRPReader
                 case ePeptideHitResultType.MODa:
                 case ePeptideHitResultType.MODPlus:
                 case ePeptideHitResultType.MSPathFinder:
+                case ePeptideHitResultType.TopPIC:
 
                     if (inputFileName.EndsWith("_fht", StringComparison.OrdinalIgnoreCase) ||
                         inputFileName.EndsWith("_syn", StringComparison.OrdinalIgnoreCase))
@@ -1339,8 +1348,14 @@ namespace PHRPReader
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_mspath".Length);
                             }
                         }
+                        else if (eResultType == ePeptideHitResultType.TopPIC)
+                        {
+                            if (datasetName.EndsWith("_toppic", StringComparison.OrdinalIgnoreCase))
+                            {
+                                datasetName = datasetName.Substring(0, datasetName.Length - "_toppic".Length);
+                            }
+                        }
                     }
-
                     break;
 
                 case ePeptideHitResultType.XTandem:
@@ -1743,38 +1758,33 @@ namespace PHRPReader
         {
             switch (ResultTypeName.ToLower())
             {
-                //case "Peptide_Hit".ToLower():
                 case "peptide_hit":
-
                     return ePeptideHitResultType.Sequest;
-                //case "XT_Peptide_Hit".ToLower():
+
                 case "xt_peptide_hit":
-
                     return ePeptideHitResultType.XTandem;
-                //case "IN_Peptide_Hit".ToLower():
+
                 case "in_peptide_hit":
-
                     return ePeptideHitResultType.Inspect;
-                //case "MSG_Peptide_Hit".ToLower():
+
                 case "msg_peptide_hit":
-
                     return ePeptideHitResultType.MSGFPlus;
-                //case "MSA_Peptide_Hit".ToLower():
+
                 case "msa_peptide_hit":
-
                     return ePeptideHitResultType.MSAlign;
-                //case "MODa_Peptide_Hit".ToLower():
+
                 case "moda_peptide_hit":
-
                     return ePeptideHitResultType.MODa;
-                //case "MODPlus_Peptide_Hit".ToLower():
+
                 case "modplus_peptide_hit":
-
                     return ePeptideHitResultType.MODPlus;
-                //case "MSP_Peptide_Hit".ToLower():
-                case "msp_peptide_hit":
 
+                case "msp_peptide_hit":
                     return ePeptideHitResultType.MSPathFinder;
+
+                case "tpc_peptide_hit":
+                    return ePeptideHitResultType.TopPIC;
+
                 default:
                     return ePeptideHitResultType.Unknown;
             }
@@ -1801,59 +1811,63 @@ namespace PHRPReader
             return auxSuffixes;
         }
 
-        private static clsPHRPParser oCachedParser;
-        private static ePeptideHitResultType eCachedResultType = ePeptideHitResultType.Unknown;
-        private static string cachedDataset = string.Empty;
+        private static clsPHRPParser mCachedParser;
+        private static ePeptideHitResultType mCachedParserType = ePeptideHitResultType.Unknown;
+        private static string mCachedDataset = string.Empty;
 
         private static clsPHRPParser GetPHRPFileFreeParser(ePeptideHitResultType eResultType, string datasetName)
         {
-            if (eCachedResultType != ePeptideHitResultType.Unknown && eCachedResultType == eResultType && cachedDataset == datasetName)
+            if (mCachedParserType != ePeptideHitResultType.Unknown && mCachedParserType == eResultType && mCachedDataset == datasetName)
             {
-                return oCachedParser;
+                return mCachedParser;
             }
 
             switch (eResultType)
             {
                 case ePeptideHitResultType.Sequest:
-                    oCachedParser = new clsPHRPParserSequest(datasetName, string.Empty);
-
+                    mCachedParser = new clsPHRPParserSequest(datasetName, string.Empty);
                     break;
+
                 case ePeptideHitResultType.XTandem:
-                    oCachedParser = new clsPHRPParserXTandem(datasetName, string.Empty);
-
+                    mCachedParser = new clsPHRPParserXTandem(datasetName, string.Empty);
                     break;
+
                 case ePeptideHitResultType.Inspect:
-                    oCachedParser = new clsPHRPParserInspect(datasetName, string.Empty);
-
+                    mCachedParser = new clsPHRPParserInspect(datasetName, string.Empty);
                     break;
+
                 case ePeptideHitResultType.MSGFPlus:
-                    oCachedParser = new clsPHRPParserMSGFDB(datasetName, string.Empty);
-
+                    mCachedParser = new clsPHRPParserMSGFDB(datasetName, string.Empty);
                     break;
+
                 case ePeptideHitResultType.MSAlign:
-                    oCachedParser = new clsPHRPParserMSAlign(datasetName, string.Empty);
-
+                    mCachedParser = new clsPHRPParserMSAlign(datasetName, string.Empty);
                     break;
+
                 case ePeptideHitResultType.MODa:
-                    oCachedParser = new clsPHRPParserMODa(datasetName, string.Empty);
-
+                    mCachedParser = new clsPHRPParserMODa(datasetName, string.Empty);
                     break;
+
                 case ePeptideHitResultType.MODPlus:
-                    oCachedParser = new clsPHRPParserMODPlus(datasetName, string.Empty);
-
+                    mCachedParser = new clsPHRPParserMODPlus(datasetName, string.Empty);
                     break;
+
                 case ePeptideHitResultType.MSPathFinder:
-                    oCachedParser = new clsPHRPParserMSPathFinder(datasetName, string.Empty);
-
+                    mCachedParser = new clsPHRPParserMSPathFinder(datasetName, string.Empty);
                     break;
+
+                case ePeptideHitResultType.TopPIC:
+                    mCachedParser = new clsPHRPParserTopPIC(datasetName, string.Empty);
+                    break;
+
                 default:
                     throw new Exception("Unsupported ePeptideHitResultType value: " + eResultType);
             }
 
-            eCachedResultType = eResultType;
-            cachedDataset = string.Copy(datasetName);
+            mCachedParserType = eResultType;
+            mCachedDataset = string.Copy(datasetName);
 
-            return oCachedParser;
+            return mCachedParser;
         }
 
         /// <summary>
@@ -2001,36 +2015,39 @@ namespace PHRPReader
             {
                 case ePeptideHitResultType.Sequest:
                     toolVersionInfoFilename = "Tool_Version_Info_Sequest.txt";
-
                     break;
+
                 case ePeptideHitResultType.XTandem:
                     toolVersionInfoFilename = "Tool_Version_Info_XTandem.txt";
-
                     break;
+
                 case ePeptideHitResultType.Inspect:
                     toolVersionInfoFilename = "Tool_Version_Info_Inspect.txt";
-
                     break;
+
                 case ePeptideHitResultType.MSGFPlus:
                     // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
                     toolVersionInfoFilename = "Tool_Version_Info_MSGFPlus.txt";
-
                     break;
+
                 case ePeptideHitResultType.MSAlign:
                     toolVersionInfoFilename = "Tool_Version_Info_MSAlign.txt";
-
                     break;
+
                 case ePeptideHitResultType.MODa:
                     toolVersionInfoFilename = "Tool_Version_Info_MODa.txt";
-
                     break;
+
                 case ePeptideHitResultType.MODPlus:
                     toolVersionInfoFilename = "Tool_Version_Info_MODPlus.txt";
-
                     break;
+
                 case ePeptideHitResultType.MSPathFinder:
                     toolVersionInfoFilename = "Tool_Version_Info_MSPathFinder.txt";
+                    break;
 
+                case ePeptideHitResultType.TopPIC:
+                    toolVersionInfoFilename = "Tool_Version_Info_TopPIC.txt";
                     break;
             }
 

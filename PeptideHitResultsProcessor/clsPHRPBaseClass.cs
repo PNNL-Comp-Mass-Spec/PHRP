@@ -86,6 +86,7 @@ namespace PeptideHitResultsProcessor
         public const string MODa_RESULTS_FILE_SUFFIX = "_moda.id.txt";
         public const string MODPlus_RESULTS_FILE_SUFFIX = "_modp.id.txt";
         public const string MSPathFinder_RESULTS_FILE_SUFFIX = "_IcTda.tsv";
+        public const string TopPIC_RESULTS_FILE_SUFFIX = "_TopPIC_PrSMs.txt";
 
         public const string FILENAME_SUFFIX_RESULT_TO_SEQ_MAP = "_ResultToSeqMap.txt";
         public const string FILENAME_SUFFIX_SEQ_TO_PROTEIN_MAP = "_SeqToProteinMap.txt";
@@ -150,7 +151,13 @@ namespace PeptideHitResultsProcessor
             /// <summary>
             /// MSPathFinder
             /// </summary>
-            MSPathFinderTSVFile = 9
+            MSPathFinderTSVFile = 9,
+
+            /// <summary>
+            /// TopPIC
+            /// </summary>
+            // ReSharper disable once IdentifierTypo
+            TopPICTXTFile = 10
         }
 
         public enum ePHRPErrorCodes
@@ -428,32 +435,35 @@ namespace PeptideHitResultsProcessor
             switch (ePeptideHitResultFileFormat)
             {
                 case ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
-
                     return Path.Combine(sourceDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX);
+
                 case ePeptideHitResultsFileFormatConstants.SequestSynopsisFile:
-
                     return Path.Combine(sourceDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
+
                 case ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
-
                     return Path.Combine(sourceDirectoryPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX);
+
                 case ePeptideHitResultsFileFormatConstants.InspectTXTFile:
-
                     return Path.Combine(sourceDirectoryPath, baseName + INSPECT_RESULTS_FILE_SUFFIX);
+
                 case ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
-
                     return Path.Combine(sourceDirectoryPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX);
+
                 case ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
-
                     return Path.Combine(sourceDirectoryPath, baseName + MSALIGN_RESULTS_FILE_SUFFIX);
+
                 case ePeptideHitResultsFileFormatConstants.MODaTXTFile:
-
                     return Path.Combine(sourceDirectoryPath, baseName + MODa_RESULTS_FILE_SUFFIX);
+
                 case ePeptideHitResultsFileFormatConstants.MODPlusTXTFile:
-
                     return Path.Combine(sourceDirectoryPath, baseName + MODPlus_RESULTS_FILE_SUFFIX);
-                case ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
 
+                case ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
                     return Path.Combine(sourceDirectoryPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX);
+
+                case ePeptideHitResultsFileFormatConstants.TopPICTXTFile:
+                    return Path.Combine(sourceDirectoryPath, baseName + TopPIC_RESULTS_FILE_SUFFIX);
+
             }
 
             return AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath);
@@ -769,6 +779,11 @@ namespace PeptideHitResultsProcessor
             if (baseFileName.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
+            }
+
+            if (baseFileName.EndsWith(clsTopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE, StringComparison.OrdinalIgnoreCase))
+            {
+                return ePeptideHitResultsFileFormatConstants.TopPICTXTFile;
             }
 
             if (extensionLCase == ".tsv")

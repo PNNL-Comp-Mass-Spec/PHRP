@@ -165,6 +165,10 @@ namespace PeptideHitResultsProcessor
                         m_PeptideHitResultsProcessor = new clsMSPathFinderResultsProcessor();
                         break;
 
+                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.TopPICTXTFile:
+                        m_PeptideHitResultsProcessor = new clsTopPICResultsProcessor();
+                        break;
+
                     default:
                         // Unknown format; cannot continue
                         LogErrors("ProcessPeptideHitResultsFile", "Unknown peptide hit results file format: " + m_PeptideHitResultsFileFormat.ToString(), null);
@@ -337,6 +341,10 @@ namespace PeptideHitResultsProcessor
             else if (AnalysisToolName.IndexOf("MSPathFinder", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
+            }
+            else if (AnalysisToolName.IndexOf("TopPIC", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.TopPICTXTFile;
             }
             else if (AnalysisToolName.IndexOf("DataExtractor", StringComparison.OrdinalIgnoreCase) >= 0)
             {
