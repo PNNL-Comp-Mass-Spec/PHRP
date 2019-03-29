@@ -60,6 +60,7 @@
     <Compile Include="clsPHRPParserMSGFDB.cs" />
     <Compile Include="clsPHRPParserMSPathFinder.cs" />
     <Compile Include="clsPHRPParserSequest.cs" />
+    <Compile Include="clsPHRPParserTopPIC.cs" />
     <Compile Include="clsPHRPParserXTandem.cs" />
     <Compile Include="clsPHRPReader.cs" />
     <Compile Include="clsPHRPSeqMapReader.cs" />

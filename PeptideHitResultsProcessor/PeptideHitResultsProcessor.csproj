@@ -34,10 +34,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PeptideToProteinMapEngine">
-      <HintPath>..\PeptideHitResultsProcessor\Lib\PeptideToProteinMapEngine.dll</HintPath>
+      <HintPath>Lib\PeptideToProteinMapEngine.dll</HintPath>
     </Reference>
     <Reference Include="ProteinCoverageSummarizer">
-      <HintPath>..\PeptideHitResultsProcessor\Lib\ProteinCoverageSummarizer.dll</HintPath>
+      <HintPath>Lib\ProteinCoverageSummarizer.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -65,8 +65,10 @@
     <Compile Include="clsSearchResultsMSGFDB.cs" />
     <Compile Include="clsSearchResultsMSPathFinder.cs" />
     <Compile Include="clsSearchResultsSequest.cs" />
+    <Compile Include="clsSearchResultsTopPIC.cs" />
     <Compile Include="clsSearchResultsXTandem.cs" />
     <Compile Include="clsSequestResultsProcessor.cs" />
+    <Compile Include="clsTopPICResultsProcessor.cs" />
     <Compile Include="clsUniqueSequencesContainer.cs" />
     <Compile Include="clsXTandemResultsProcessor.cs" />
     <Compile Include="IPeptideHitResultsProcessor.cs" />
