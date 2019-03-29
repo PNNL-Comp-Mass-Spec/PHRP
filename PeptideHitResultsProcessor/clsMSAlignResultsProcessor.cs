@@ -452,8 +452,8 @@ namespace PeptideHitResultsProcessor
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool MTS)
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath.EndsWith("_msalign_syn", StringComparison.InvariantCultureIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_msalign_fht", StringComparison.InvariantCultureIgnoreCase))
+            if (pepToProteinMapFilePath.EndsWith("_msalign_syn", StringComparison.OrdinalIgnoreCase) ||
+                pepToProteinMapFilePath.EndsWith("_msalign_fht", StringComparison.OrdinalIgnoreCase))
             {
                 // Remove _syn or _fht
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
@@ -633,7 +633,7 @@ namespace PeptideHitResultsProcessor
                                 // Split the line on the equals sign
                                 var kvSetting = clsPHRPParser.ParseKeyValueSetting(dataLine, '=', "#");
 
-                                if (string.Equals(kvSetting.Key, "cysteineProtection", StringComparison.CurrentCultureIgnoreCase))
+                                if (string.Equals(kvSetting.Key, "cysteineProtection", StringComparison.OrdinalIgnoreCase))
                                 {
                                     clsModificationDefinition modDef;
                                     switch (kvSetting.Value.ToUpper())
@@ -1108,7 +1108,7 @@ namespace PeptideHitResultsProcessor
             // The expected header from MSAlign_Histone v0.9 is
             // Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Species_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR    FragMethod
 
-            var columnNames = new SortedDictionary<string, eMSAlignResultsFileColumns>(StringComparer.InvariantCultureIgnoreCase)
+            var columnNames = new SortedDictionary<string, eMSAlignResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"Data_file_name", eMSAlignResultsFileColumns.SpectrumFileName},
                 {"Prsm_ID", eMSAlignResultsFileColumns.Prsm_ID},
@@ -1436,7 +1436,7 @@ namespace PeptideHitResultsProcessor
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "_MSAlign_ResultTable" with "_msalign"
-                    if (baseName.EndsWith("_MSAlign_ResultTable", StringComparison.InvariantCultureIgnoreCase))
+                    if (baseName.EndsWith("_MSAlign_ResultTable", StringComparison.OrdinalIgnoreCase))
                     {
                         baseName = baseName.Substring(0, baseName.Length - "_MSAlign_ResultTable".Length) + "_msalign";
                     }

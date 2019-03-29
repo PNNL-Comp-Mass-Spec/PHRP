@@ -642,7 +642,7 @@ namespace PeptideHitResultsProcRunner
 
         private static void PeptideHitResultsProcRunner_WarningEvent(string message)
         {
-            if (message.StartsWith("Warning", StringComparison.InvariantCultureIgnoreCase))
+            if (message.StartsWith("Warning", StringComparison.OrdinalIgnoreCase))
                 ConsoleMsgUtils.ShowWarning(message);
             else
                 ConsoleMsgUtils.ShowWarning("Warning: " + message);

@@ -65,7 +65,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public clsScanStatsReader()
         {
-            mColumnHeaders = new SortedDictionary<string, int>();
+            mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
         private void AddHeaderColumn(string columnName)

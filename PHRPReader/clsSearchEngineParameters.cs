@@ -186,7 +186,7 @@ namespace PHRPReader
 
             if (mParameters == null)
             {
-                mParameters = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+                mParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
             else
             {

@@ -625,10 +625,10 @@ namespace PeptideHitResultsProcessor
             if (string.IsNullOrEmpty(pepToProteinMapFilePath))
                 return string.Empty;
 
-            if (pepToProteinMapFilePath.EndsWith("_msgfplus_syn", StringComparison.InvariantCultureIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_msgfplus_fht", StringComparison.InvariantCultureIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_msgfdb_syn", StringComparison.InvariantCultureIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_msgfdb_fht", StringComparison.InvariantCultureIgnoreCase))
+            if (pepToProteinMapFilePath.EndsWith("_msgfplus_syn", StringComparison.OrdinalIgnoreCase) ||
+                pepToProteinMapFilePath.EndsWith("_msgfplus_fht", StringComparison.OrdinalIgnoreCase) ||
+                pepToProteinMapFilePath.EndsWith("_msgfdb_syn", StringComparison.OrdinalIgnoreCase) ||
+                pepToProteinMapFilePath.EndsWith("_msgfdb_fht", StringComparison.OrdinalIgnoreCase))
             {
                 // Remove _syn or _fht
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
@@ -1974,36 +1974,36 @@ namespace PeptideHitResultsProcessor
             // or
             // #SpecFile    SpecID       ScanNum   FragMethod    Precursor    IsotopeError    PrecursorError(ppm)   Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecEValue    EValue    QValue    PepQValue
 
-            var columnNames = new SortedDictionary<string, eMSGFDBResultsFileColumns>(StringComparer.InvariantCultureIgnoreCase)
+            var columnNames = new SortedDictionary<string, eMSGFPlusResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {"#SpecFile", eMSGFDBResultsFileColumns.SpectrumFile},
-                {"SpecIndex", eMSGFDBResultsFileColumns.SpecIndex},
-                {"SpecID", eMSGFDBResultsFileColumns.SpecIndex},
-                {"Scan#", eMSGFDBResultsFileColumns.Scan},
-                {"ScanNum", eMSGFDBResultsFileColumns.Scan},
-                {"FragMethod", eMSGFDBResultsFileColumns.FragMethod},
-                {"Precursor", eMSGFDBResultsFileColumns.PrecursorMZ},
-                {"IsotopeError", eMSGFDBResultsFileColumns.IsotopeError},
-                {"PMError(Da)", eMSGFDBResultsFileColumns.PMErrorDa},
-                {"PrecursorError(Da)", eMSGFDBResultsFileColumns.PMErrorDa},
-                {"PMError(ppm)", eMSGFDBResultsFileColumns.PMErrorPPM},
-                {"PrecursorError(ppm)", eMSGFDBResultsFileColumns.PMErrorPPM},
-                {"Charge", eMSGFDBResultsFileColumns.Charge},
-                {"Peptide", eMSGFDBResultsFileColumns.Peptide},
-                {"Protein", eMSGFDBResultsFileColumns.Protein},
-                {"DeNovoScore", eMSGFDBResultsFileColumns.DeNovoScore},
-                {"MSGFScore", eMSGFDBResultsFileColumns.MSGFScore},
-                {"SpecProb", eMSGFDBResultsFileColumns.SpecProb_EValue},
-                {"SpecEValue", eMSGFDBResultsFileColumns.SpecProb_EValue},
-                {"P-value", eMSGFDBResultsFileColumns.PValue_EValue},
-                {"EValue", eMSGFDBResultsFileColumns.PValue_EValue},
-                {"FDR", eMSGFDBResultsFileColumns.FDR_QValue},
-                {"QValue", eMSGFDBResultsFileColumns.FDR_QValue},
-                {"PepFDR", eMSGFDBResultsFileColumns.PepFDR_PepQValue},
-                {"PepQValue", eMSGFDBResultsFileColumns.PepFDR_PepQValue},
-                {"EFDR", eMSGFDBResultsFileColumns.EFDR},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Scan, eMSGFDBResultsFileColumns.IMSScan},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time, eMSGFDBResultsFileColumns.IMSDriftTime}
+                {"#SpecFile", eMSGFPlusResultsFileColumns.SpectrumFile},
+                {"SpecIndex", eMSGFPlusResultsFileColumns.SpecIndex},
+                {"SpecID", eMSGFPlusResultsFileColumns.SpecIndex},
+                {"Scan#", eMSGFPlusResultsFileColumns.Scan},
+                {"ScanNum", eMSGFPlusResultsFileColumns.Scan},
+                {"FragMethod", eMSGFPlusResultsFileColumns.FragMethod},
+                {"Precursor", eMSGFPlusResultsFileColumns.PrecursorMZ},
+                {"IsotopeError", eMSGFPlusResultsFileColumns.IsotopeError},
+                {"PMError(Da)", eMSGFPlusResultsFileColumns.PMErrorDa},
+                {"PrecursorError(Da)", eMSGFPlusResultsFileColumns.PMErrorDa},
+                {"PMError(ppm)", eMSGFPlusResultsFileColumns.PMErrorPPM},
+                {"PrecursorError(ppm)", eMSGFPlusResultsFileColumns.PMErrorPPM},
+                {"Charge", eMSGFPlusResultsFileColumns.Charge},
+                {"Peptide", eMSGFPlusResultsFileColumns.Peptide},
+                {"Protein", eMSGFPlusResultsFileColumns.Protein},
+                {"DeNovoScore", eMSGFPlusResultsFileColumns.DeNovoScore},
+                {"MSGFScore", eMSGFPlusResultsFileColumns.MSGFScore},
+                {"SpecProb", eMSGFPlusResultsFileColumns.SpecProb_EValue},
+                {"SpecEValue", eMSGFPlusResultsFileColumns.SpecProb_EValue},
+                {"P-value", eMSGFPlusResultsFileColumns.PValue_EValue},
+                {"EValue", eMSGFPlusResultsFileColumns.PValue_EValue},
+                {"FDR", eMSGFPlusResultsFileColumns.FDR_QValue},
+                {"QValue", eMSGFPlusResultsFileColumns.FDR_QValue},
+                {"PepFDR", eMSGFPlusResultsFileColumns.PepFDR_PepQValue},
+                {"PepQValue", eMSGFPlusResultsFileColumns.PepFDR_PepQValue},
+                {"EFDR", eMSGFPlusResultsFileColumns.EFDR},
+                {clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Scan, eMSGFPlusResultsFileColumns.IMSScan},
+                {clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time, eMSGFPlusResultsFileColumns.IMSDriftTime}
             };
 
             columnMapping = new int[MSGFDBResultsFileColCount];
@@ -2392,7 +2392,7 @@ namespace PeptideHitResultsProcessor
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "_msgfdb" with "_msgfplus"
-                    if (baseName.EndsWith("_msgfdb", StringComparison.InvariantCultureIgnoreCase))
+                    if (baseName.EndsWith("_msgfdb", StringComparison.OrdinalIgnoreCase))
                     {
                         baseName = baseName.Substring(0, baseName.Length - "_msgfdb".Length) + "_msgfplus";
                     }

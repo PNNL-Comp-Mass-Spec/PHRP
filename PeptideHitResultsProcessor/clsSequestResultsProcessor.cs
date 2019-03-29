@@ -202,8 +202,8 @@ namespace PeptideHitResultsProcessor
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool MTS)
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath.EndsWith("_syn", StringComparison.InvariantCultureIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_fht", StringComparison.InvariantCultureIgnoreCase))
+            if (pepToProteinMapFilePath.EndsWith("_syn", StringComparison.OrdinalIgnoreCase) ||
+                pepToProteinMapFilePath.EndsWith("_fht", StringComparison.OrdinalIgnoreCase))
             {
                 // Remove _syn or _fht
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
@@ -613,7 +613,7 @@ namespace PeptideHitResultsProcessor
             var inputFileBaseName = Path.GetFileNameWithoutExtension(inputFile.Name);
 
             sourcePHRPDataFiles.Add(inputFile.FullName);
-            if (inputFileBaseName.EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (inputFileBaseName.EndsWith(FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 additionalFile = ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_FIRST_HITS_FILE);
                 if (File.Exists(additionalFile))
@@ -621,7 +621,7 @@ namespace PeptideHitResultsProcessor
                     sourcePHRPDataFiles.Add(additionalFile);
                 }
             }
-            else if (inputFileBaseName.EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.InvariantCultureIgnoreCase))
+            else if (inputFileBaseName.EndsWith(FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 additionalFile = ReplaceFilenameSuffix(inputFile, FILENAME_SUFFIX_SYNOPSIS_FILE);
                 if (File.Exists(additionalFile))

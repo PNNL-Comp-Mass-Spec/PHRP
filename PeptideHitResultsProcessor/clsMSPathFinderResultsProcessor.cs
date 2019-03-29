@@ -207,7 +207,7 @@ namespace PeptideHitResultsProcessor
 
                 foreach (var modDef in modInfo)
                 {
-                    if (string.Equals(modDef.ModName, modName, StringComparison.InvariantCultureIgnoreCase))
+                    if (string.Equals(modDef.ModName, modName, StringComparison.OrdinalIgnoreCase))
                     {
                         if (!int.TryParse(residueNumber, out var residueLocInPeptide))
                         {
@@ -336,7 +336,7 @@ namespace PeptideHitResultsProcessor
 
                 foreach (var modDef in modInfo)
                 {
-                    if (string.Equals(modDef.ModName, modName, StringComparison.InvariantCultureIgnoreCase))
+                    if (string.Equals(modDef.ModName, modName, StringComparison.OrdinalIgnoreCase))
                     {
                         totalModMass += modDef.ModMassVal;
                         matchFound = true;
@@ -930,7 +930,7 @@ namespace PeptideHitResultsProcessor
             // The expected column order from MassMSPathFinder:
             //   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	Probability SpecEValue    EValue    QValue    PepQValue
 
-            var columnNames = new SortedDictionary<string, eMSPathFinderResultsFileColumns>(StringComparer.InvariantCultureIgnoreCase)
+            var columnNames = new SortedDictionary<string, eMSPathFinderResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"Scan", eMSPathFinderResultsFileColumns.Scan},
                 {"Pre", eMSPathFinderResultsFileColumns.PrefixResidue},
@@ -1263,7 +1263,7 @@ namespace PeptideHitResultsProcessor
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "_IcTda.tsv" with "_mspath"
-                    if (baseName.EndsWith("_IcTda", StringComparison.InvariantCultureIgnoreCase))
+                    if (baseName.EndsWith("_IcTda", StringComparison.OrdinalIgnoreCase))
                     {
                         baseName = baseName.Substring(0, baseName.Length - "_IcTda".Length) + "_mspath";
                     }

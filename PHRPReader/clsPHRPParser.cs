@@ -342,7 +342,7 @@ namespace PHRPReader
                 var expectedSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
                 expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(expectedSynopsisName, inputFile.Name);
 
-                if (string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase))
                 {
                     isSynopsisFile = true;
                 }
@@ -352,7 +352,7 @@ namespace PHRPReader
 
             // Initialize the column mapping object
             // Using a case-insensitive comparer
-            mColumnHeaders = new SortedDictionary<string, int>(StringComparer.CurrentCultureIgnoreCase);
+            mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
             // Initialize the tracking lists
             // These will get updated via the call to reader.GetProteinMapping
@@ -710,7 +710,7 @@ namespace PHRPReader
             var key = kvSetting.Key;
             var value = kvSetting.Value;
 
-            if (!string.Equals(key, "ADD", StringComparison.CurrentCultureIgnoreCase))
+            if (!string.Equals(key, "ADD", StringComparison.OrdinalIgnoreCase))
             {
                 throw new Exception("Key name is not ADD; this is not a MODa Static Mod Setting");
             }
@@ -1101,7 +1101,7 @@ namespace PHRPReader
                         }
 
                         if (ePeptideHitResultType == clsPHRPReader.ePeptideHitResultType.MODa &&
-                            string.Equals(kvSetting.Key, "add", StringComparison.CurrentCultureIgnoreCase))
+                            string.Equals(kvSetting.Key, "add", StringComparison.OrdinalIgnoreCase))
                         {
                             // ModA defines all of its static modifications with the ADD keyword
                             // Split the value at the comma and create a new setting entry with the residue name
@@ -1430,7 +1430,7 @@ namespace PHRPReader
                     }
 
                     // Make sure all of the proteins in currentPSM.Proteins are defined in currentPSM.ProteinDetails
-                    var additionalProteins1 = currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.CurrentCultureIgnoreCase).ToList();
+                    var additionalProteins1 = currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.OrdinalIgnoreCase).ToList();
 
                     foreach (var proteinName in additionalProteins1)
                     {
@@ -1498,7 +1498,7 @@ namespace PHRPReader
 
             foreach (var mod in mModInfo)
             {
-                if (string.Equals(massCorrectionTag, mod.MassCorrectionTag, StringComparison.InvariantCultureIgnoreCase))
+                if (string.Equals(massCorrectionTag, mod.MassCorrectionTag, StringComparison.OrdinalIgnoreCase))
                 {
                     matchedDefs.Add(mod);
                 }

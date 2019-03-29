@@ -472,8 +472,8 @@ namespace PeptideHitResultsProcessor
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool MTS)
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath.EndsWith("_MODPlus_syn", StringComparison.InvariantCultureIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_MODPlus_fht", StringComparison.InvariantCultureIgnoreCase))
+            if (pepToProteinMapFilePath.EndsWith("_MODPlus_syn", StringComparison.OrdinalIgnoreCase) ||
+                pepToProteinMapFilePath.EndsWith("_MODPlus_fht", StringComparison.OrdinalIgnoreCase))
             {
                 // Remove _syn or _fht
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
@@ -1085,7 +1085,7 @@ namespace PeptideHitResultsProcessor
             // The expected column order from MODPlus:
             //   SpectrumFile   Index   ScanNo   ObservedMW   Charge   CalculatedMW   DeltaMass   Score   Probability   Peptide   NTT    Protein   ModificationAnnotation
 
-            var columnNames = new SortedDictionary<string, eMODPlusResultsFileColumns>(StringComparer.InvariantCultureIgnoreCase)
+            var columnNames = new SortedDictionary<string, eMODPlusResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"SpectrumFile", eMODPlusResultsFileColumns.SpectrumFileName},
                 {"Index", eMODPlusResultsFileColumns.SpectrumIndex},
@@ -1400,7 +1400,7 @@ namespace PeptideHitResultsProcessor
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "modp.id" with "_modp"
-                    if (baseName.EndsWith("_modp.id", StringComparison.InvariantCultureIgnoreCase))
+                    if (baseName.EndsWith("_modp.id", StringComparison.OrdinalIgnoreCase))
                     {
                         baseName = baseName.Substring(0, baseName.Length - "_modp.id".Length) + "_modp";
                     }

@@ -733,46 +733,46 @@ namespace PeptideHitResultsProcessor
                 return ePeptideHitResultsFileFormatConstants.XTandemXMLFile;
             }
 
-            if (baseFileName.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile;
             }
 
-            if (baseFileName.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.SequestSynopsisFile;
             }
 
-            if (baseFileName.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.InspectTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
-            if (baseFileName.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MSAlignTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MODaTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MODPlusTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE, StringComparison.InvariantCultureIgnoreCase))
+            if (baseFileName.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
             }
@@ -1258,7 +1258,7 @@ namespace PeptideHitResultsProcessor
                         foreach (var warningMessage in reader.WarningMessages)
                         {
                             var msg = warningMessage;
-                            if (warningMessage.StartsWith("MSGF file not found", StringComparison.InvariantCultureIgnoreCase))
+                            if (warningMessage.StartsWith("MSGF file not found", StringComparison.OrdinalIgnoreCase))
                             {
                                 msg = "MSGF file not found; column " + COLUMN_NAME_MSGF_SPECPROB + " will not have any data";
                             }
@@ -1703,36 +1703,36 @@ namespace PeptideHitResultsProcessor
 
         protected bool IsReversedProtein(string proteinName)
         {
-            if (proteinName.StartsWith("reversed_", StringComparison.InvariantCultureIgnoreCase))
+            if (proteinName.StartsWith("reversed_", StringComparison.OrdinalIgnoreCase))
             {
                 // Used in DMS-generated protein collections
                 return true;
             }
 
-            if (proteinName.StartsWith("REV_", StringComparison.InvariantCultureIgnoreCase))
+            if (proteinName.StartsWith("REV_", StringComparison.OrdinalIgnoreCase))
             {
                 // Used by MSGFDB
                 return true;
             }
 
-            if (proteinName.StartsWith("scrambled_", StringComparison.InvariantCultureIgnoreCase))
+            if (proteinName.StartsWith("scrambled_", StringComparison.OrdinalIgnoreCase))
             {
                 // Used in DMS-generated protein collections
                 return true;
             }
-            if (proteinName.StartsWith("xxx_", StringComparison.InvariantCultureIgnoreCase))
+            if (proteinName.StartsWith("xxx_", StringComparison.OrdinalIgnoreCase))
             {
                 // Used by MSGF+
                 return true;
             }
 
-            if (proteinName.StartsWith("xxx.", StringComparison.InvariantCultureIgnoreCase))
+            if (proteinName.StartsWith("xxx.", StringComparison.OrdinalIgnoreCase))
             {
                 // Used by Inspect
                 return true;
             }
 
-            if (proteinName.EndsWith(":reversed", StringComparison.InvariantCultureIgnoreCase))
+            if (proteinName.EndsWith(":reversed", StringComparison.OrdinalIgnoreCase))
             {
                 // Used by X!Tandem
                 return true;
@@ -2421,7 +2421,7 @@ namespace PeptideHitResultsProcessor
                 var phrpDataFile = new FileInfo(phrpDataFilePath);
                 var outputDirectory = new DirectoryInfo(outputDirectoryPath);
 
-                if (string.Equals(phrpDataFile.DirectoryName, outputDirectory.FullName, StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(phrpDataFile.DirectoryName, outputDirectory.FullName, StringComparison.OrdinalIgnoreCase))
                     return;
 
                 var msgfFileName = Path.GetFileName(ReplaceFilenameSuffix(phrpDataFile, FILENAME_SUFFIX_MSGF));

@@ -110,7 +110,7 @@ namespace PHRPReader
 
             // Initialize the column mapping
             // Using a case-insensitive comparer
-            var columnHeaders = new SortedDictionary<string, int>(StringComparer.CurrentCultureIgnoreCase)
+            var columnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase)
             {
                 {MOD_SUMMARY_COLUMN_Modification_Symbol, 0},
                 {MOD_SUMMARY_COLUMN_Modification_Mass, 1},

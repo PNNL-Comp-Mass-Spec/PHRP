@@ -472,7 +472,7 @@ namespace PHRPReader
             {
                 // Initialize the column mapping
                 // Using a case-insensitive comparer
-                var columnHeaders = new SortedDictionary<string, int>(StringComparer.CurrentCultureIgnoreCase)
+                var columnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase)
                 {
                     {SEQ_INFO_COLUMN_Unique_Seq_ID, 0},
                     {SEQ_INFO_COLUMN_Mod_Count, 1},
@@ -544,7 +544,7 @@ namespace PHRPReader
             {
                 // Initialize the column mapping
                 // Using a case-insensitive comparer
-                var columnHeaders = new SortedDictionary<string, int>(StringComparer.CurrentCultureIgnoreCase)
+                var columnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase)
                 {
                     {SEQ_PROT_MAP_COLUMN_Unique_Seq_ID, 0},
                     {SEQ_PROT_MAP_COLUMN_Cleavage_State, 1},

@@ -584,7 +584,7 @@ namespace PHRPReader
                 // basePHRPFileName is first-hits-file based
 
                 var firstHitsFile = new FileInfo(filePath);
-                var synIndex = firstHitsFile.Name.LastIndexOf("_syn", StringComparison.InvariantCultureIgnoreCase);
+                var synIndex = firstHitsFile.Name.LastIndexOf("_syn", StringComparison.OrdinalIgnoreCase);
                 if (synIndex > 0)
                 {
                     // filePath is synopsis-file based
@@ -617,7 +617,7 @@ namespace PHRPReader
             if (basePHRPFile.Name.ToLower().Contains("_msgfdb"))
             {
                 var dataFile = new FileInfo(filePath);
-                var charIndex = dataFile.Name.LastIndexOf("_msgfplus", StringComparison.InvariantCultureIgnoreCase);
+                var charIndex = dataFile.Name.LastIndexOf("_msgfplus", StringComparison.OrdinalIgnoreCase);
                 if (charIndex > 0)
                 {
                     // filePath has _msgfplus but should have _msgfdb
@@ -959,7 +959,7 @@ namespace PHRPReader
         {
             // Find candidate dataset names in inputDirectoryPath
 
-            var datasetNames = new SortedSet<string>(StringComparer.CurrentCultureIgnoreCase);
+            var datasetNames = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
             var filesToFind = new List<string>();
 
             if (string.IsNullOrWhiteSpace(inputDirectoryPath))
@@ -1251,53 +1251,53 @@ namespace PHRPReader
                 case ePeptideHitResultType.MODPlus:
                 case ePeptideHitResultType.MSPathFinder:
 
-                    if (inputFileName.EndsWith("_fht", StringComparison.InvariantCultureIgnoreCase) ||
-                        inputFileName.EndsWith("_syn", StringComparison.InvariantCultureIgnoreCase))
+                    if (inputFileName.EndsWith("_fht", StringComparison.OrdinalIgnoreCase) ||
+                        inputFileName.EndsWith("_syn", StringComparison.OrdinalIgnoreCase))
                     {
                         datasetName = inputFileName.Substring(0, inputFileName.Length - 4);
 
                         if (eResultType == ePeptideHitResultType.Inspect)
                         {
-                            if (datasetName.EndsWith("_inspect", StringComparison.InvariantCultureIgnoreCase))
+                            if (datasetName.EndsWith("_inspect", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_inspect".Length);
                             }
                         }
                         else if (eResultType == ePeptideHitResultType.MSGFPlus)
                         {
-                            if (datasetName.EndsWith("_msgfplus", StringComparison.InvariantCultureIgnoreCase))
+                            if (datasetName.EndsWith("_msgfplus", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_msgfplus".Length);
                             }
-                            else if (datasetName.EndsWith("_msgfdb", StringComparison.InvariantCultureIgnoreCase))
+                            else if (datasetName.EndsWith("_msgfdb", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_msgfdb".Length);
                             }
                         }
                         else if (eResultType == ePeptideHitResultType.MSAlign)
                         {
-                            if (datasetName.EndsWith("_msalign", StringComparison.InvariantCultureIgnoreCase))
+                            if (datasetName.EndsWith("_msalign", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_msalign".Length);
                             }
                         }
                         else if (eResultType == ePeptideHitResultType.MODa)
                         {
-                            if (datasetName.EndsWith("_moda", StringComparison.InvariantCultureIgnoreCase))
+                            if (datasetName.EndsWith("_moda", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_moda".Length);
                             }
                         }
                         else if (eResultType == ePeptideHitResultType.MODPlus)
                         {
-                            if (datasetName.EndsWith("_modp", StringComparison.InvariantCultureIgnoreCase))
+                            if (datasetName.EndsWith("_modp", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_modp".Length);
                             }
                         }
                         else if (eResultType == ePeptideHitResultType.MSPathFinder)
                         {
-                            if (datasetName.EndsWith("_mspath", StringComparison.InvariantCultureIgnoreCase))
+                            if (datasetName.EndsWith("_mspath", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_mspath".Length);
                             }
@@ -1306,7 +1306,7 @@ namespace PHRPReader
 
                     break;
                 case ePeptideHitResultType.XTandem:
-                    if (inputFileName.EndsWith("_xt", StringComparison.InvariantCultureIgnoreCase))
+                    if (inputFileName.EndsWith("_xt", StringComparison.OrdinalIgnoreCase))
                     {
                         datasetName = inputFileName.Substring(0, inputFileName.Length - 3);
                     }
@@ -1429,7 +1429,7 @@ namespace PHRPReader
 
             foreach (var suffix in extraSuffixes)
             {
-                if (filePath.EndsWith(suffix, StringComparison.InvariantCultureIgnoreCase))
+                if (filePath.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
                 {
                     filePathTrimmed = filePath.Substring(0, filePath.Length - suffix.Length) + ".txt";
                     return true;
@@ -2065,7 +2065,7 @@ namespace PHRPReader
 
             foreach (var item in valuesToFind)
             {
-                if (dataLine.IndexOf(item, StringComparison.CurrentCultureIgnoreCase) > -1)
+                if (dataLine.IndexOf(item, StringComparison.OrdinalIgnoreCase) > -1)
                 {
                     matchCount += 1;
                 }
@@ -2167,7 +2167,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="columns">Column names read from the input file</param>
         /// <param name="columnHeaders">Column mapping dictionary object to update</param>
-        /// <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.CurrentCultureIgnoreCase)</remarks>
+        /// <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.OrdinalIgnoreCase)</remarks>
         public static void ParseColumnHeaders(string[] columns, SortedDictionary<string, int> columnHeaders)
         {
             // Reset the column indices in columnHeaders
@@ -2372,7 +2372,7 @@ namespace PHRPReader
                     if (isDuplicate)
                     {
                         // Update the protein list
-                        var additionalProteins = newPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.CurrentCultureIgnoreCase).ToList();
+                        var additionalProteins = newPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.OrdinalIgnoreCase).ToList();
                         if (additionalProteins.Any())
                         {
                             foreach (var item in additionalProteins)

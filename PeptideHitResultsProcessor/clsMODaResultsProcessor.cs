@@ -607,8 +607,8 @@ namespace PeptideHitResultsProcessor
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
             if (pepToProteinMapFilePath != null &&
-                  (pepToProteinMapFilePath.EndsWith("_MODa_syn", StringComparison.InvariantCultureIgnoreCase) ||
-                   pepToProteinMapFilePath.EndsWith("_MODa_fht", StringComparison.InvariantCultureIgnoreCase)))
+                  (pepToProteinMapFilePath.EndsWith("_MODa_syn", StringComparison.OrdinalIgnoreCase) ||
+                   pepToProteinMapFilePath.EndsWith("_MODa_fht", StringComparison.OrdinalIgnoreCase)))
             {
                 // Remove _syn or _fht
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
@@ -800,7 +800,7 @@ namespace PeptideHitResultsProcessor
                                 continue;
                             }
 
-                            if (string.Equals(kvSetting.Key, "add", StringComparison.InvariantCultureIgnoreCase))
+                            if (string.Equals(kvSetting.Key, "add", StringComparison.OrdinalIgnoreCase))
                             {
                                 // ModA defines all of its static modifications with the ADD keyword
                                 // Split the value at the comma and create a new setting entry with the residue name
@@ -871,7 +871,7 @@ namespace PeptideHitResultsProcessor
 
                 // Look for the IndexToScanMap file that corresponds to inputFile
                 List<FileInfo> scanMapFiles;
-                var matchIndex = inputFile.Name.LastIndexOf("_moda", StringComparison.InvariantCultureIgnoreCase);
+                var matchIndex = inputFile.Name.LastIndexOf("_moda", StringComparison.OrdinalIgnoreCase);
                 string sourceFileDescription;
 
                 if (matchIndex > 0)
@@ -1340,7 +1340,7 @@ namespace PeptideHitResultsProcessor
             // The expected column order from MODa:
             //   SpectrumFile	Index	ObservedMonoMass	Charge	CalculatedMonoMass	DeltaMass	Score	Probability	Peptide	Protein	PeptidePosition
 
-            var columnNames = new SortedDictionary<string, eMODaResultsFileColumns>(StringComparer.InvariantCultureIgnoreCase)
+            var columnNames = new SortedDictionary<string, eMODaResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
                 {"SpectrumFile", eMODaResultsFileColumns.SpectrumFileName},
                 {"Index", eMODaResultsFileColumns.SpectrumIndex},
@@ -1651,7 +1651,7 @@ namespace PeptideHitResultsProcessor
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "_moda.id" with "_moda"
-                    if (baseName.EndsWith("_moda.id", StringComparison.InvariantCultureIgnoreCase))
+                    if (baseName.EndsWith("_moda.id", StringComparison.OrdinalIgnoreCase))
                     {
                         baseName = baseName.Substring(0, baseName.Length - "_moda.id".Length) + "_moda";
                     }

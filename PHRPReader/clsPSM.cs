@@ -353,9 +353,9 @@ namespace PHRPReader
         {
             ScanList = new SortedSet<int>();
             mProteins = new List<string>();
-            mProteinDetails = new Dictionary<string, clsProteinInfo>(StringComparer.CurrentCultureIgnoreCase);
+            mProteinDetails = new Dictionary<string, clsProteinInfo>(StringComparer.OrdinalIgnoreCase);
             ModifiedResidues = new List<clsAminoAcidModInfo>();
-            mAdditionalScores = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+            mAdditionalScores = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             Clear();
         }
 

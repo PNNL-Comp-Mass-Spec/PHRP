@@ -660,8 +660,8 @@ namespace PeptideHitResultsProcessor
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
             var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath.EndsWith("_inspect_syn", StringComparison.InvariantCultureIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_inspect_fht", StringComparison.InvariantCultureIgnoreCase))
+            if (pepToProteinMapFilePath.EndsWith("_inspect_syn", StringComparison.OrdinalIgnoreCase) ||
+                pepToProteinMapFilePath.EndsWith("_inspect_fht", StringComparison.OrdinalIgnoreCase))
             {
                 // Remove _syn or _fht
                 pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
@@ -707,7 +707,7 @@ namespace PeptideHitResultsProcessor
                             continue;
                         }
 
-                        if (!dataLine.StartsWith("mod", StringComparison.InvariantCultureIgnoreCase))
+                        if (!dataLine.StartsWith("mod", StringComparison.OrdinalIgnoreCase))
                             continue;
 
                         // Modification definition line

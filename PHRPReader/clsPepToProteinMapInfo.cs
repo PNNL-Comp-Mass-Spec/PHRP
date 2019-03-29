@@ -47,7 +47,7 @@ namespace PHRPReader
         /// <param name="residueEnd">Location that a peptide ends in the protein</param>
         public clsPepToProteinMapInfo(string proteinName, int residueStart, int residueEnd)
         {
-            mProteinMapInfo = new Dictionary<string, List<udtProteinLocationInfo>>(StringComparer.CurrentCultureIgnoreCase);
+            mProteinMapInfo = new Dictionary<string, List<udtProteinLocationInfo>>(StringComparer.OrdinalIgnoreCase);
 
             AddProtein(proteinName, residueStart, residueEnd);
         }

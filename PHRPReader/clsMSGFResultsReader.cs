@@ -59,7 +59,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public clsMSGFResultsReader()
         {
-            mColumnHeaders = new SortedDictionary<string, int>();
+            mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
         private void AddHeaderColumn(string columnName)
