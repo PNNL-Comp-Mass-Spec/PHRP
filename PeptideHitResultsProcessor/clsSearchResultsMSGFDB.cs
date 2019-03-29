@@ -1,17 +1,24 @@
-// This class is used to track the peptide details for an MSGF+ search result
-// See clsSearchResultsBaseClass for additional information
-//
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Created 8/12/2011
 //
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// Website: https://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/
+// Website: https://omics.pnl.gov/ or https://www.pnnl.gov/sysbio/ or https://panomics.pnnl.gov/
 // -------------------------------------------------------------------------------
+//
+// Licensed under the 2-Clause BSD License; you may not use this file except
+// in compliance with the License.  You may obtain a copy of the License at
+// https://opensource.org/licenses/BSD-2-Clause
+//
+// Copyright 2018 Battelle Memorial Institute
+
 using PHRPReader;
 
 namespace PeptideHitResultsProcessor
 {
+    /// <summary>
+    /// This class is used to track the peptide details for an MSGF+ search result
+    /// See clsSearchResultsBaseClass for additional information
+    /// </summary>
     public class clsSearchResultsMSGFDB : clsSearchResultsBaseClass
     {
         #region "Classwide Variables"
@@ -42,7 +49,7 @@ namespace PeptideHitResultsProcessor
         public bool MSGFPlusResults { get; set; }
         #endregion
 
-        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        // Note that the following call will call both the base class's Clear method and this class's Clear method
         public clsSearchResultsMSGFDB(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {

@@ -58,7 +58,7 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        // Note that the following call will call both the base class's Clear method and this class's Clear method
         public clsSearchResultsInSpecT(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {

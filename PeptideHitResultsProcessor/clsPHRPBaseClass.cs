@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "October 24, 2018";
+            mFileDate = "March 28, 2019";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -129,12 +129,6 @@ namespace PeptideHitResultsProcessor
 
             /// <summary>
             /// MSGFDB, MS-GF+, MSGF+
-            /// </summary>
-            [Obsolete("Use MSGFPlusTXTFile")]
-            MSGFDbTXTFile = 5,
-
-            /// <summary>
-            /// MS-GF+, MSGF+
             /// </summary>
             MSGFPlusTXTFile = 5,
 
@@ -316,11 +310,11 @@ namespace PeptideHitResultsProcessor
         public float MODaMODPlusSynopsisFileProbabilityThreshold { get; set; }
 
         /// <summary>
-        ///
+        /// Used by MSAlign and TopPIC
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lower p-values are higher confidence results</remarks>
-        public float MSAlignSynopsisFilePValueThreshold { get; set; }
+        public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
         ///
@@ -1085,11 +1079,11 @@ namespace PeptideHitResultsProcessor
                         }
 
                         // Read the newly created file and append new entries to mtsPepToProteinMapFilePath
-                        using (var srResultsFile = new StreamReader(new FileStream(resultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                        using (var reader = new StreamReader(new FileStream(resultsFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                         {
-                            while (!srResultsFile.EndOfStream)
+                            while (!reader.EndOfStream)
                             {
-                                var lineIn = srResultsFile.ReadLine();
+                                var lineIn = reader.ReadLine();
 
                                 if (string.IsNullOrWhiteSpace(lineIn)) continue;
 
@@ -1362,7 +1356,9 @@ namespace PeptideHitResultsProcessor
                             else if (psmCountSkippedSinceReversedOrScrambledProtein > 0)
                             {
                                 Console.WriteLine();
-                                Console.WriteLine("Note: skipped " + psmCountSkippedSinceReversedOrScrambledProtein + " / " + psmCount + " PSMs that map to reversed or scrambled proteins while creating the _ProteinMods.txt file");
+                                Console.WriteLine("Note: skipped {0:N0} / {1:N0} PSMs that map to reversed or scrambled proteins " +
+                                                  "while creating the _ProteinMods.txt file",
+                                                  psmCountSkippedSinceReversedOrScrambledProtein, psmCount);
                             }
                         }
                     }
@@ -1624,10 +1620,10 @@ namespace PeptideHitResultsProcessor
 
             MODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
-            MSAlignSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
+            MSAlignAndTopPICSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
             MSGFPlusSynopsisFileEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            MSGFMSGFPlusSynopsisFileSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
+            MSGFPlusSynopsisFileSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
             EnzymeMatchSpec = clsPeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
 
@@ -1864,12 +1860,12 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Open proteinToPeptideMappingFilePath for reading
-                using (var srInFile = new StreamReader(new FileStream(pepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(pepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     var linesRead = 0;
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(lineIn))
                             continue;
 
@@ -2281,11 +2277,11 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Open the file and confirm it has data rows
-                using (var srInFile = new StreamReader(new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream && !dataFound)
+                    while (!reader.EndOfStream && !dataFound)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         if (string.IsNullOrEmpty(lineIn))
                             continue;
 
@@ -2340,11 +2336,11 @@ namespace PeptideHitResultsProcessor
 
                 var lastPeptide = string.Empty;
 
-                using (var srInFile = new StreamReader(new FileStream(peptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(peptideToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         linesRead += 1;
 
                         if (linesRead <= 1 || string.IsNullOrEmpty(lineIn))
@@ -2382,7 +2378,7 @@ namespace PeptideHitResultsProcessor
                     // Value between 0 and 100
                     var errorPercent = peptideCountNoMatch / (double)peptideCount * 100.0;
 
-                    var message = string.Format("{0:0.00}% of the entries ({1} / {2}) in the peptide to protein map file ({3}) " +
+                    var message = string.Format("{0:0.00}% of the entries ({1:N0} / {2:N0}) in the peptide to protein map file ({3}) " +
                                                 "did not match to a protein in the FASTA file ({4})",
                                                 errorPercent, peptideCountNoMatch, peptideCount,
                                                 Path.GetFileName(peptideToProteinMapFilePath),

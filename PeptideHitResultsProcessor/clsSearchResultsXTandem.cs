@@ -67,7 +67,7 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        // Note that the following call will call both the base class's Clear sub and this class's Clear Sub
+        // Note that the following call will call both the base class's Clear method and this class's Clear method
         public clsSearchResultsXTandem(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
@@ -97,24 +97,21 @@ namespace PeptideHitResultsProcessor
 
         public void ComputeDelMCorrectedXT()
         {
-            double delM = 0;
-
             double precursorMonoMass = 0;
 
             var parseError = false;
 
             // Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
             // (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
-            if (double.TryParse(PeptideDeltaMass, out delM))
+            if (double.TryParse(PeptideDeltaMass, out var delM))
             {
                 // Negate delM so that it represents observed - theoretical
                 delM = -delM;
 
                 // Compute the original value for the precursor monoisotopic mass
-                double parentIonMH = 0;
-                if (double.TryParse(base.ParentIonMH, out parentIonMH))
+                if (double.TryParse(ParentIonMH, out var parentIonMH))
                 {
-                    precursorMonoMass = parentIonMH - PHRPReader.clsPeptideMassCalculator.MASS_PROTON;
+                    precursorMonoMass = parentIonMH - clsPeptideMassCalculator.MASS_PROTON;
                 }
                 else
                 {
@@ -127,7 +124,7 @@ namespace PeptideHitResultsProcessor
                 }
 
                 const bool adjustPrecursorMassForC13 = true;
-                PeptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, adjustPrecursorMassForC13, PeptideMonoisotopicMass);
+                PeptideDeltaMassCorrectedPpm = ComputeDelMCorrectedPPM(delM, precursorMonoMass, adjustPrecursorMassForC13, PeptideMonoisotopicMass);
             }
             else
             {

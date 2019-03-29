@@ -20,7 +20,7 @@ namespace PHRP_UnitTests
                     ModMassVal = 57.0214619,
                     ModName = "Carbamidomethyl",
                     ModSymbol = '-',
-                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.StaticMod,
+                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.StaticMod,
                     Residues = "C",
                 },
                 new clsMSGFPlusParamFileModExtractor.udtModInfoType
@@ -29,7 +29,7 @@ namespace PHRP_UnitTests
                     ModMassVal = 229.1629,
                     ModName = "TMT6plex",
                     ModSymbol = '-',
-                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.StaticMod,
+                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.StaticMod,
                     Residues = "<",
                 },
                 new clsMSGFPlusParamFileModExtractor.udtModInfoType
@@ -38,7 +38,7 @@ namespace PHRP_UnitTests
                     ModMassVal = 229.1629,
                     ModName = "TMT6plex",
                     ModSymbol = '-',
-                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.StaticMod,
+                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.StaticMod,
                     Residues = "K",
                 },
                 new clsMSGFPlusParamFileModExtractor.udtModInfoType
@@ -47,7 +47,7 @@ namespace PHRP_UnitTests
                     ModMassVal = 15.9949141,
                     ModName = "Oxidation",
                     ModSymbol = '*',
-                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynamicMod,
+                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.DynamicMod,
                     Residues = "M",
                 },
                 new clsMSGFPlusParamFileModExtractor.udtModInfoType
@@ -56,7 +56,7 @@ namespace PHRP_UnitTests
                     ModMassVal = -187.152366,
                     ModName = "AcNoTMT",
                     ModSymbol = '#',
-                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynamicMod,
+                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.DynamicMod,
                     Residues = "K",
                 },
                 new clsMSGFPlusParamFileModExtractor.udtModInfoType
@@ -65,7 +65,7 @@ namespace PHRP_UnitTests
                     ModMassVal = -187.152366,
                     ModName = "AcNoTMT",
                     ModSymbol = '#',
-                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynNTermPeptide,
+                    ModType = clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.DynNTermPeptide,
                     Residues = "<",
                 }
             };
