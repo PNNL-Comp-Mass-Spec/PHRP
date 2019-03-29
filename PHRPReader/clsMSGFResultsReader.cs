@@ -32,9 +32,14 @@ namespace PHRPReader
         #endregion
 
         #region "Class-wide variables"
-        // Column headers
+
+        /// <summary>
+        /// Column headers
+        /// </summary>
         private readonly SortedDictionary<string, int> mColumnHeaders;
+
         private string mErrorMessage = string.Empty;
+
         #endregion
 
         /// <summary>
@@ -67,6 +72,9 @@ namespace PHRPReader
             mColumnHeaders.Add(columnName, mColumnHeaders.Count);
         }
 
+        /// <summary>
+        /// Define header names for MSGF result files
+        /// </summary>
         private void DefineColumnHeaders()
         {
             mColumnHeaders.Clear();
