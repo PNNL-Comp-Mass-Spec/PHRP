@@ -8,6 +8,7 @@
 //
 //*********************************************************************************************************
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -64,10 +65,45 @@ namespace PHRPReader
 
         // ReSharper disable once CommentTypo
         // Renamed from "MS-GFDB" to "MS-GF+" in November 2016
-        private const string MSGFDB_SEARCH_ENGINE_NAME = "MS-GF+";
+        private const string MSGFPLUS_SEARCH_ENGINE_NAME = "MS-GF+";
 
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
+
+
+        /// <summary>
+        /// These columns correspond to the Synopsis file created by clsMSGFDBResultsProcessor
+        /// </summary>
+        public enum MSGFPlusSynFileColumns
+        {
+            ResultID = 0,
+            Scan = 1,
+            FragMethod = 2,
+            SpecIndex = 3,
+            Charge = 4,
+            PrecursorMZ = 5,
+            DelM = 6,                            // Precursor error, in Da; if the search used a tolerance less than 0.5 Da or less than 500 ppm, this value is computed from the DelMPPM value
+            DelMPPM = 7,                         // Precursor error, in ppm; corrected for isotope selection errors
+            MH = 8,                              // Theoretical monoisotopic peptide mass (computed by PHRP)
+            Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification symbols
+            Protein = 10,                        // Protein Name (remove description)
+            NTT = 11,                            // Number of tryptic terminii
+            DeNovoScore = 12,
+            MSGFScore = 13,
+            SpecProb_EValue = 14,
+            RankSpecProb = 15,                   // Rank 1 means lowest SpecEValue, 2 means next higher score, etc. (ties get the same rank)
+            PValue_EValue = 16,
+            FDR_QValue = 17,                     // Only present if searched using -tda 1
+            PepFDR_PepQValue = 18,               // Only present if searched using -tda 1
+            EFDR = 19,                           // Only present if did not search using -tda 1
+            // ReSharper disable UnusedMember.Global
+            IMSScan = 20,                        // Only present for MSGFDB_IMS results
+            IMSDriftTime = 21,                   // Only present for MSGFDB_IMS results
+            // ReSharper restore UnusedMember.Global
+            IsotopeError = 22
+        }
+
 #pragma warning restore 1591
+
 
         #endregion
 
@@ -156,49 +192,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Define column header names
-        /// </summary>
-        protected override void DefineColumnHeaders()
-        {
-            mColumnHeaders.Clear();
-
-            // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_ResultID);
-            AddHeaderColumn(DATA_COLUMN_Scan);
-            AddHeaderColumn(DATA_COLUMN_FragMethod);
-            AddHeaderColumn(DATA_COLUMN_SpecIndex);
-            AddHeaderColumn(DATA_COLUMN_Charge);
-            AddHeaderColumn(DATA_COLUMN_PrecursorMZ);
-            AddHeaderColumn(DATA_COLUMN_DelM);
-            AddHeaderColumn(DATA_COLUMN_DelM_PPM);
-            AddHeaderColumn(DATA_COLUMN_MH);
-            AddHeaderColumn(DATA_COLUMN_Peptide);
-            AddHeaderColumn(DATA_COLUMN_Protein);
-            AddHeaderColumn(DATA_COLUMN_NTT);
-            AddHeaderColumn(DATA_COLUMN_DeNovoScore);
-            AddHeaderColumn(DATA_COLUMN_MSGFScore);
-            AddHeaderColumn(DATA_COLUMN_MSGFDB_SpecProb);
-            AddHeaderColumn(DATA_COLUMN_Rank_MSGFDB_SpecProb);
-            AddHeaderColumn(DATA_COLUMN_PValue);
-            AddHeaderColumn(DATA_COLUMN_FDR);
-            AddHeaderColumn(DATA_COLUMN_EFDR);
-            AddHeaderColumn(DATA_COLUMN_PepFDR);
-
-            // Add the MSGF+ columns
-            AddHeaderColumn(DATA_COLUMN_MSGFPlus_SpecEValue);
-            AddHeaderColumn(DATA_COLUMN_Rank_MSGFPlus_SpecEValue);
-            AddHeaderColumn(DATA_COLUMN_EValue);
-
-            AddHeaderColumn(DATA_COLUMN_QValue);
-            AddHeaderColumn(DATA_COLUMN_PepQValue);
-
-            AddHeaderColumn(DATA_COLUMN_IMS_Scan);
-            AddHeaderColumn(DATA_COLUMN_IMS_Drift_Time);
-            AddHeaderColumn(DATA_COLUMN_Isotope_Error);
-        }
-
-        /// <summary>
-        /// Determines the precursor mass tolerance for either MSGF+ or MSPathFinder
+        /// Determines the precursor mass tolerance for either MSGF+, MSPathFinder, or TopPIC
         /// </summary>
         /// <param name="searchEngineParams"></param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
@@ -213,13 +207,28 @@ namespace PHRPReader
             var reExtraToleranceWithUnits = new Regex(@"([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var reExtraToleranceNoUnits = new Regex(@"([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+            string tolerance;
             double toleranceDa = 0;
 
             tolerancePPM = 0;
 
-            if (!searchEngineParams.Parameters.TryGetValue("PMTolerance", out var tolerance))
+            if (resultType == clsPHRPReader.ePeptideHitResultType.TopPIC)
             {
-                return toleranceDa;
+                // TopPIC
+                if (!searchEngineParams.Parameters.TryGetValue("ErrorTolerance", out tolerance))
+                {
+
+                    return toleranceDa;
+                }
+            }
+            else
+            {
+                // MS-GF+ or MSPathFinder
+                if (!searchEngineParams.Parameters.TryGetValue("PMTolerance", out tolerance))
+                {
+
+                    return toleranceDa;
+                }
             }
 
             // Parent mass tolerance
@@ -232,7 +241,8 @@ namespace PHRPReader
                     continue;
 
                 Match reMatch;
-                if (resultType == clsPHRPReader.ePeptideHitResultType.MSPathFinder)
+                if (resultType == clsPHRPReader.ePeptideHitResultType.MSPathFinder ||
+                    resultType == clsPHRPReader.ePeptideHitResultType.TopPIC)
                 {
                     reMatch = reExtraToleranceNoUnits.Match(item);
                 }
@@ -247,7 +257,8 @@ namespace PHRPReader
                 if (!double.TryParse(reMatch.Groups[1].Value, out var toleranceCurrent))
                     continue;
 
-                if (resultType == clsPHRPReader.ePeptideHitResultType.MSPathFinder)
+                if (resultType == clsPHRPReader.ePeptideHitResultType.MSPathFinder ||
+                    resultType == clsPHRPReader.ePeptideHitResultType.TopPIC)
                 {
                     // Units are always ppm
                     tolerancePPM = toleranceCurrent;
@@ -293,6 +304,57 @@ namespace PHRPReader
 
             chargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON;
             return false;
+        }
+
+        /// <summary>
+        /// Get the header names in the PHRP synopsis or first hits file for this tool
+        /// </summary>
+        /// <returns></returns>
+        protected override List<string> GetColumnHeaderNames()
+        {
+            var headerNames = new List<string>();
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            return headerNames;
+        }
+
+        /// <summary>
+        /// Header names and enums for the PHRP synopsis file for this tool
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>This includes headers for synopsis files from both MSGFDB and MSGF+</remarks>
+        public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            var headerColumns = new SortedDictionary<string, MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                {DATA_COLUMN_ResultID, MSGFPlusSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, MSGFPlusSynFileColumns.Scan},
+                {DATA_COLUMN_FragMethod, MSGFPlusSynFileColumns.FragMethod},
+                {DATA_COLUMN_SpecIndex, MSGFPlusSynFileColumns.SpecIndex},
+                {DATA_COLUMN_Charge, MSGFPlusSynFileColumns.Charge},
+                {DATA_COLUMN_PrecursorMZ, MSGFPlusSynFileColumns.PrecursorMZ},
+                {DATA_COLUMN_DelM, MSGFPlusSynFileColumns.DelM},
+                {DATA_COLUMN_DelM_PPM, MSGFPlusSynFileColumns.DelMPPM},
+                {DATA_COLUMN_MH, MSGFPlusSynFileColumns.MH},
+                {DATA_COLUMN_Peptide, MSGFPlusSynFileColumns.Peptide},
+                {DATA_COLUMN_Protein, MSGFPlusSynFileColumns.Protein},
+                {DATA_COLUMN_NTT, MSGFPlusSynFileColumns.NTT},
+                {DATA_COLUMN_DeNovoScore, MSGFPlusSynFileColumns.DeNovoScore},
+                {DATA_COLUMN_MSGFScore, MSGFPlusSynFileColumns.MSGFScore},
+                {DATA_COLUMN_MSGFDB_SpecProb, MSGFPlusSynFileColumns.SpecProb_EValue},
+                {DATA_COLUMN_MSGFPlus_SpecEValue, MSGFPlusSynFileColumns.SpecProb_EValue},
+                {DATA_COLUMN_Rank_MSGFDB_SpecProb, MSGFPlusSynFileColumns.RankSpecProb},
+                {DATA_COLUMN_Rank_MSGFPlus_SpecEValue, MSGFPlusSynFileColumns.RankSpecProb},
+                {DATA_COLUMN_PValue, MSGFPlusSynFileColumns.PValue_EValue},
+                {DATA_COLUMN_EValue, MSGFPlusSynFileColumns.PValue_EValue},
+                {DATA_COLUMN_FDR, MSGFPlusSynFileColumns.FDR_QValue},
+                {DATA_COLUMN_QValue, MSGFPlusSynFileColumns.FDR_QValue},
+                {DATA_COLUMN_PepFDR, MSGFPlusSynFileColumns.PepFDR_PepQValue},
+                {DATA_COLUMN_PepQValue, MSGFPlusSynFileColumns.PepFDR_PepQValue},
+                {DATA_COLUMN_EFDR, MSGFPlusSynFileColumns.EFDR},
+                {DATA_COLUMN_Isotope_Error, MSGFPlusSynFileColumns.IsotopeError}
+            };
+
+            return headerColumns;
         }
 
         /// <summary>
@@ -380,7 +442,7 @@ namespace PHRPReader
         /// </summary>
         public static string GetSearchEngineName()
         {
-            return MSGFDB_SEARCH_ENGINE_NAME;
+            return MSGFPLUS_SEARCH_ENGINE_NAME;
         }
 
         /// <summary>
@@ -392,7 +454,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
         {
-            searchEngineParams = new clsSearchEngineParameters(MSGFDB_SEARCH_ENGINE_NAME, mModInfo);
+            searchEngineParams = new clsSearchEngineParameters(MSGFPLUS_SEARCH_ENGINE_NAME, mModInfo);
 
             var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
 
@@ -407,7 +469,7 @@ namespace PHRPReader
             {
                 mPeptideMassCalculator.ResetAminoAcidMasses();
 
-                var success = ReadKeyValuePairSearchEngineParamFile(MSGFDB_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSGFPlus, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSGFPlus, searchEngineParams);
 
                 if (!success)
                 {
@@ -555,6 +617,8 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
+            const int SCAN_NOT_FOUND_FLAG = -100;
+
             psm = new clsPSM();
 
             try
@@ -572,8 +636,8 @@ namespace PHRPReader
                 }
 
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (psm.ScanNumber == -100)
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                     return false;
@@ -770,7 +834,7 @@ namespace PHRPReader
                 return false;
             }
 
-            var customAminoAcidDefs = (from item in modInfo where item.ModType == clsMSGFPlusParamFileModExtractor.eMSGFDBModType.CustomAA select item).ToList();
+            var customAminoAcidDefs = (from item in modInfo where item.ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.CustomAA select item).ToList();
             if (customAminoAcidDefs.Count == 0)
             {
                 // There are no custom amino acids

@@ -51,7 +51,33 @@ namespace PHRPReader
         private const string XT_SEARCH_ENGINE_NAME = "X! Tandem";
 
         private const string TAXONOMY_INFO_KEY_NAME = "list path, taxonomy information";
+
+        /// <summary>
+        /// These columns correspond to the Synopsis file created by clsXTandemResultsProcessor
+        /// </summary>
+        public enum XTandemSynFileColumns
+        {
+            ResultID = 0,
+            GroupID = 1,
+            Scan = 2,
+            Charge = 3,
+            MH = 4,
+            Hyperscore = 5,
+            EValue = 6,                 // Peptide_Expectation_Value_LogE
+            ProteinCount = 7,           // Multiple_Protein_Count
+            Peptide = 8,
+            DeltaCn2 = 9,
+            YScore = 10,
+            YIons = 11,
+            BScore = 12,
+            BIons = 13,
+            DelM = 14,
+            Intensity = 15,             // Peptide_Intensity_LogI
+            DelMPPM = 16
+        }
+
 #pragma warning restore 1591
+
 
         #endregion
 
@@ -149,33 +175,6 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Define column header names
-        /// </summary>
-        protected override void DefineColumnHeaders()
-        {
-            mColumnHeaders.Clear();
-
-            // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_Result_ID);
-            AddHeaderColumn(DATA_COLUMN_Group_ID);
-            AddHeaderColumn(DATA_COLUMN_Scan);
-            AddHeaderColumn(DATA_COLUMN_Charge);
-            AddHeaderColumn(DATA_COLUMN_Peptide_MH);
-            AddHeaderColumn(DATA_COLUMN_Peptide_Hyperscore);
-            AddHeaderColumn(DATA_COLUMN_Peptide_Expectation_Value_LogE);
-            AddHeaderColumn(DATA_COLUMN_Multiple_Protein_Count);
-            AddHeaderColumn(DATA_COLUMN_Peptide_Sequence);
-            AddHeaderColumn(DATA_COLUMN_DeltaCn2);
-            AddHeaderColumn(DATA_COLUMN_y_score);
-            AddHeaderColumn(DATA_COLUMN_y_ions);
-            AddHeaderColumn(DATA_COLUMN_b_score);
-            AddHeaderColumn(DATA_COLUMN_b_ions);
-            AddHeaderColumn(DATA_COLUMN_Delta_Mass);
-            AddHeaderColumn(DATA_COLUMN_Peptide_Intensity_LogI);
-            AddHeaderColumn(DATA_COLUMN_DelM_PPM);
-        }
-
-        /// <summary>
         /// Determines the precursor mass tolerance
         /// </summary>
         /// <param name="searchEngineParams"></param>
@@ -220,6 +219,47 @@ namespace PHRPReader
             }
 
             return tolerance;
+        }
+
+        /// <summary>
+        /// Get the header names in the PHRP synopsis or first hits file for this tool
+        /// </summary>
+        /// <returns></returns>
+        protected override List<string> GetColumnHeaderNames()
+        {
+            var headerNames = new List<string>();
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            return headerNames;
+        }
+
+        /// <summary>
+        /// Header names and enums for the PHRP synopsis file for this tool
+        /// </summary>
+        /// <returns></returns>
+        public static SortedDictionary<string, XTandemSynFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            var headerColumns = new SortedDictionary<string, XTandemSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                {DATA_COLUMN_Result_ID, XTandemSynFileColumns.ResultID},
+                {DATA_COLUMN_Group_ID, XTandemSynFileColumns.GroupID},
+                {DATA_COLUMN_Scan, XTandemSynFileColumns.Scan},
+                {DATA_COLUMN_Charge, XTandemSynFileColumns.Charge},
+                {DATA_COLUMN_Peptide_MH, XTandemSynFileColumns.MH},
+                {DATA_COLUMN_Peptide_Hyperscore, XTandemSynFileColumns.Hyperscore},
+                {DATA_COLUMN_Peptide_Expectation_Value_LogE, XTandemSynFileColumns.EValue},
+                {DATA_COLUMN_Multiple_Protein_Count, XTandemSynFileColumns.ProteinCount},
+                {DATA_COLUMN_Peptide_Sequence, XTandemSynFileColumns.Peptide},
+                {DATA_COLUMN_DeltaCn2, XTandemSynFileColumns.DeltaCn2},
+                {DATA_COLUMN_y_score, XTandemSynFileColumns.YScore},
+                {DATA_COLUMN_y_ions, XTandemSynFileColumns.YIons},
+                {DATA_COLUMN_b_score, XTandemSynFileColumns.BScore},
+                {DATA_COLUMN_b_ions, XTandemSynFileColumns.BIons},
+                {DATA_COLUMN_Delta_Mass, XTandemSynFileColumns.DelM},
+                {DATA_COLUMN_Peptide_Intensity_LogI, XTandemSynFileColumns.Intensity},
+                {DATA_COLUMN_DelM_PPM, XTandemSynFileColumns.DelMPPM}
+            };
+
+            return headerColumns;
         }
 
         /// <summary>
@@ -657,6 +697,8 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
+            const int SCAN_NOT_FOUND_FLAG = -100;
+
             var columns = line.Split('\t');
 
             var success = false;
@@ -666,8 +708,8 @@ namespace PHRPReader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (psm.ScanNumber == -100)
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }

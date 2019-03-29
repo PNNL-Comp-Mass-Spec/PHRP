@@ -410,7 +410,6 @@ namespace PHRPReader
                 }
             }
 
-            // The following will be overridden by a derived form of this class
             DefineColumnHeaders();
 
             mInitialized = true;
@@ -511,9 +510,26 @@ namespace PHRPReader
         #region "Functions overridden by derived classes"
 
         /// <summary>
-        /// Define column header names
+        /// Define header names for the PHRP synopsis or first hits file for the given tool
         /// </summary>
-        protected abstract void DefineColumnHeaders();
+        protected virtual void DefineColumnHeaders()
+        {
+            // Define the default column mapping
+            var headerNames = GetColumnHeaderNames();
+
+            mColumnHeaders.Clear();
+
+            foreach (var headerName in headerNames)
+            {
+                AddHeaderColumn(headerName);
+            }
+        }
+
+        /// <summary>
+        /// List of header names for the PHRP synopsis or first hits file for the given tool
+        /// </summary>
+        /// <returns></returns>
+        protected abstract List<string> GetColumnHeaderNames();
 
         /// <summary>
         /// Parse the data line read from a PHRP results file
@@ -551,9 +567,13 @@ namespace PHRPReader
         #endregion
 
         /// <summary>
-        /// Add a header column
+        /// Add a PHRP synopsis or first hits header column to mColumnHeaders
         /// </summary>
         /// <param name="columnName"></param>
+        /// <remarks>
+        /// The column index will be set to mColumnHeaders.Count
+        /// That value will be updated by ParseColumnHeaders
+        /// </remarks>
         protected void AddHeaderColumn(string columnName)
         {
             mColumnHeaders.Add(columnName, mColumnHeaders.Count);

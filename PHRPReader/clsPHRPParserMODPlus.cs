@@ -8,6 +8,7 @@
 //
 //*********************************************************************************************************
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -43,7 +44,34 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_FHT = "_modp_fht.txt";
 
         private const string MODPlus_SEARCH_ENGINE_NAME = "MODPlus";
+
+
+        /// <summary>
+        /// These columns correspond to the Synopsis file created by clsMODPlusResultsProcessor
+        /// </summary>
+        public enum MODPlusSynFileColumns
+        {
+            ResultID = 0,
+            Scan = 1,
+            Spectrum_Index = 2,
+            Charge = 3,
+            PrecursorMZ = 4,
+            DelM = 5,                            // Precursor error, in Da
+            DelM_PPM = 6,                        // Precursor error, in ppm
+            MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+            Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
+            NTT = 9,
+            ModificationAnnotation = 10,
+            Protein = 11,
+            Peptide_Position = 12,
+            Score = 13,
+            Probability = 14,
+            Rank_Score = 15,
+            QValue = 16
+        }
+
 #pragma warning restore 1591
+
 
         #endregion
 
@@ -132,30 +160,44 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Define column header names
+        /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
-        protected override void DefineColumnHeaders()
+        /// <returns></returns>
+        protected override List<string> GetColumnHeaderNames()
         {
-            mColumnHeaders.Clear();
+            var headerNames = new List<string>();
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            return headerNames;
+        }
 
-            // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_ResultID);
-            AddHeaderColumn(DATA_COLUMN_Scan);
-            AddHeaderColumn(DATA_COLUMN_Spectrum_Index);
-            AddHeaderColumn(DATA_COLUMN_Charge);
-            AddHeaderColumn(DATA_COLUMN_PrecursorMZ);
-            AddHeaderColumn(DATA_COLUMN_DelM);
-            AddHeaderColumn(DATA_COLUMN_DelM_PPM);
-            AddHeaderColumn(DATA_COLUMN_MH);
-            AddHeaderColumn(DATA_COLUMN_Peptide);
-            AddHeaderColumn(DATA_COLUMN_NTT);
-            AddHeaderColumn(DATA_COLUMN_Modification_Annotation);
-            AddHeaderColumn(DATA_COLUMN_Protein);
-            AddHeaderColumn(DATA_COLUMN_Peptide_Position);
-            AddHeaderColumn(DATA_COLUMN_Score);
-            AddHeaderColumn(DATA_COLUMN_Probability);
-            AddHeaderColumn(DATA_COLUMN_Rank_Score);
-            AddHeaderColumn(DATA_COLUMN_QValue);
+        /// <summary>
+        /// Header names and enums for the PHRP synopsis file for this tool
+        /// </summary>
+        /// <returns></returns>
+        public static SortedDictionary<string, MODPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            var headerColumns = new SortedDictionary<string, MODPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                {DATA_COLUMN_ResultID, MODPlusSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, MODPlusSynFileColumns.Scan},
+                {DATA_COLUMN_Spectrum_Index, MODPlusSynFileColumns.Spectrum_Index},
+                {DATA_COLUMN_Charge, MODPlusSynFileColumns.Charge},
+                {DATA_COLUMN_PrecursorMZ, MODPlusSynFileColumns.PrecursorMZ},
+                {DATA_COLUMN_DelM, MODPlusSynFileColumns.DelM},
+                {DATA_COLUMN_DelM_PPM, MODPlusSynFileColumns.DelM_PPM},
+                {DATA_COLUMN_MH, MODPlusSynFileColumns.MH},
+                {DATA_COLUMN_Peptide, MODPlusSynFileColumns.Peptide},
+                {DATA_COLUMN_NTT, MODPlusSynFileColumns.NTT},
+                {DATA_COLUMN_Modification_Annotation, MODPlusSynFileColumns.ModificationAnnotation},
+                {DATA_COLUMN_Protein, MODPlusSynFileColumns.Protein},
+                {DATA_COLUMN_Peptide_Position, MODPlusSynFileColumns.Peptide_Position},
+                {DATA_COLUMN_Score, MODPlusSynFileColumns.Score},
+                {DATA_COLUMN_Probability, MODPlusSynFileColumns.Probability},
+                {DATA_COLUMN_Rank_Score, MODPlusSynFileColumns.Rank_Score},
+                {DATA_COLUMN_QValue, MODPlusSynFileColumns.QValue}
+            };
+
+            return headerColumns;
         }
 
         /// <summary>
@@ -295,6 +337,8 @@ namespace PHRPReader
                 if (instrumentResolutionNodes != null && instrumentResolutionNodes.Count > 0)
                 {
                     searchEngineParams.PrecursorMassType = ConvertResolutionModeToMassType(GetAttribute(instrumentResolutionNodes[0], "ms"));
+
+                    // ReSharper disable once StringLiteralTypo
                     searchEngineParams.FragmentMassType = ConvertResolutionModeToMassType(GetAttribute(instrumentResolutionNodes[0], "msms"));
                 }
 
@@ -351,6 +395,8 @@ namespace PHRPReader
                     // var modName = GetAttribute(node, "name");
                     var residue = GetAttribute(node, "site").Trim();
                     // var modPosition = GetAttribute(node, "position");
+
+                    // ReSharper disable once StringLiteralTypo
                     var modMass = GetAttribute(node, "massdiff");
 
                     // Replace N-Term or C-Term with < or >
@@ -439,6 +485,8 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
+            const int SCAN_NOT_FOUND_FLAG = -100;
+
             var columns = line.Split('\t');
 
             var success = false;
@@ -448,8 +496,8 @@ namespace PHRPReader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (psm.ScanNumber == -100)
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }

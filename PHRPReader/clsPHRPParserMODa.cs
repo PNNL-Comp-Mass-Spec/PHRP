@@ -20,6 +20,7 @@ namespace PHRPReader
         #region "Constants"
 
 #pragma warning disable 1591
+
         public const string DATA_COLUMN_ResultID = "ResultID";
         public const string DATA_COLUMN_Scan = "Scan";
         public const string DATA_COLUMN_Spectrum_Index = "Spectrum_Index";
@@ -40,7 +41,32 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_FHT = "_moda_fht.txt";
 
         private const string MODa_SEARCH_ENGINE_NAME = "MODa";
+
+
+        /// <summary>
+        /// These columns correspond to the Synopsis file created by clsMODaResultsProcessor
+        /// </summary>
+        public enum MODaSynFileColumns
+        {
+            ResultID = 0,
+            Scan = 1,
+            Spectrum_Index = 2,
+            Charge = 3,
+            PrecursorMZ = 4,
+            DelM = 5,                            // Precursor error, in Da
+            DelM_PPM = 6,                        // Precursor error, in ppm
+            MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+            Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
+            Protein = 9,                         // Protein Name
+            Score = 10,
+            Probability = 11,
+            Rank_Probability = 12,
+            Peptide_Position = 13,
+            QValue = 14
+        }
+
 #pragma warning restore 1591
+
 
         #endregion
 
@@ -129,31 +155,6 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Define column header names
-        /// </summary>
-        protected override void DefineColumnHeaders()
-        {
-            mColumnHeaders.Clear();
-
-            // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_ResultID);
-            AddHeaderColumn(DATA_COLUMN_Scan);
-            AddHeaderColumn(DATA_COLUMN_Spectrum_Index);
-            AddHeaderColumn(DATA_COLUMN_Charge);
-            AddHeaderColumn(DATA_COLUMN_PrecursorMZ);
-            AddHeaderColumn(DATA_COLUMN_DelM);
-            AddHeaderColumn(DATA_COLUMN_DelM_PPM);
-            AddHeaderColumn(DATA_COLUMN_MH);
-            AddHeaderColumn(DATA_COLUMN_Peptide);
-            AddHeaderColumn(DATA_COLUMN_Protein);
-            AddHeaderColumn(DATA_COLUMN_Score);
-            AddHeaderColumn(DATA_COLUMN_Probability);
-            AddHeaderColumn(DATA_COLUMN_Rank_Probability);
-            AddHeaderColumn(DATA_COLUMN_Peptide_Position);
-            AddHeaderColumn(DATA_COLUMN_QValue);
-        }
-
-        /// <summary>
         /// Determines the precursor mass tolerance
         /// </summary>
         /// <param name="searchEngineParams"></param>
@@ -173,6 +174,8 @@ namespace PHRPReader
                     toleranceDa = clsPeptideMassCalculator.PPMToMass(tolerancePPM, 2000);
                 }
             }
+
+            // ReSharper disable once StringLiteralTypo
             else if (searchEngineParams.Parameters.TryGetValue("PeptTolerance", out tolerance))
             {
                 // Parent mass tolerance, in Da
@@ -183,6 +186,45 @@ namespace PHRPReader
             }
 
             return toleranceDa;
+        }
+
+        /// <summary>
+        /// Get the header names in the PHRP synopsis or first hits file for this tool
+        /// </summary>
+        /// <returns></returns>
+        protected override List<string> GetColumnHeaderNames()
+        {
+            var headerNames = new List<string>();
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            return headerNames;
+        }
+
+        /// <summary>
+        /// Header names and enums for the PHRP synopsis file for this tool
+        /// </summary>
+        /// <returns></returns>
+        public static SortedDictionary<string, MODaSynFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            var headerColumns = new SortedDictionary<string, MODaSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                {DATA_COLUMN_ResultID, MODaSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, MODaSynFileColumns.Scan},
+                {DATA_COLUMN_Spectrum_Index, MODaSynFileColumns.Spectrum_Index},
+                {DATA_COLUMN_Charge, MODaSynFileColumns.Charge},
+                {DATA_COLUMN_PrecursorMZ, MODaSynFileColumns.PrecursorMZ},
+                {DATA_COLUMN_DelM, MODaSynFileColumns.DelM},
+                {DATA_COLUMN_DelM_PPM, MODaSynFileColumns.DelM_PPM},
+                {DATA_COLUMN_MH, MODaSynFileColumns.MH},
+                {DATA_COLUMN_Peptide, MODaSynFileColumns.Peptide},
+                {DATA_COLUMN_Protein, MODaSynFileColumns.Protein},
+                {DATA_COLUMN_Score, MODaSynFileColumns.Score},
+                {DATA_COLUMN_Probability, MODaSynFileColumns.Probability},
+                {DATA_COLUMN_Rank_Probability, MODaSynFileColumns.Rank_Probability},
+                {DATA_COLUMN_Peptide_Position, MODaSynFileColumns.Peptide_Position},
+                {DATA_COLUMN_QValue, MODaSynFileColumns.QValue}
+            };
+
+            return headerColumns;
         }
 
         /// <summary>
@@ -374,6 +416,8 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
+            const int SCAN_NOT_FOUND_FLAG = -100;
+
             var columns = line.Split('\t');
 
             var success = false;
@@ -383,8 +427,8 @@ namespace PHRPReader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (psm.ScanNumber == -100)
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }

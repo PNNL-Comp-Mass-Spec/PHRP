@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using PHRPReader;
@@ -115,7 +116,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public clsXTandemResultsProcessor()
         {
-            mFileDate = "October 24, 2018";
+            mFileDate = "March 28, 2019";
 
             mSeqsWithMods = new Dictionary<string, int>();
             mSeqsWithoutMods = new SortedSet<string>();
@@ -482,24 +483,8 @@ namespace PeptideHitResultsProcessor
                             // Create the output file
                             using (var writer = new StreamWriter(outputFilePath, false))
                             {
-                                // Write the header line to swPeptideResultsFile
-                                writer.WriteLine("Result_ID" + SEP_CHAR +
-                                                 "Group_ID" + SEP_CHAR +
-                                                 "Scan" + SEP_CHAR +
-                                                 "Charge" + SEP_CHAR +
-                                                 "Peptide_MH" + SEP_CHAR +
-                                                 "Peptide_Hyperscore" + SEP_CHAR +
-                                                 "Peptide_Expectation_Value_Log(e)" + SEP_CHAR +
-                                                 "Multiple_Protein_Count" + SEP_CHAR +
-                                                 "Peptide_Sequence" + SEP_CHAR +
-                                                 "DeltaCn2" + SEP_CHAR +
-                                                 "y_score" + SEP_CHAR +
-                                                 "y_ions" + SEP_CHAR +
-                                                 "b_score" + SEP_CHAR +
-                                                 "b_ions" + SEP_CHAR +
-                                                 "Delta_Mass" + SEP_CHAR +
-                                                 "Peptide_Intensity_Log(I)" + SEP_CHAR +
-                                                 "DelM_PPM");
+                                // Write the header line
+                                WriteSynFHTFileHeader(writer, ref errorLog);
 
                                 // Create the additional output files
                                 success = InitializeSequenceOutputFiles(outputFilePath);
@@ -1659,23 +1644,28 @@ namespace PeptideHitResultsProcessor
             mNextResultID += 1;
 
             // Write the results to the output file
-            writer.WriteLine(searchResult.ResultID + SEP_CHAR +
-                             searchResult.GroupID + SEP_CHAR +
-                             searchResult.Scan + SEP_CHAR +
-                             searchResult.Charge + SEP_CHAR +
-                             searchResult.PeptideMH + SEP_CHAR +
-                             searchResult.PeptideHyperscore + SEP_CHAR +
-                             searchResult.PeptideExpectationValue + SEP_CHAR +
-                             searchResult.MultipleProteinCount + SEP_CHAR +
-                             searchResult.SequenceWithPrefixAndSuffix(true) + SEP_CHAR +
-                             Math.Round(searchResult.PeptideDeltaCn2, 4).ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
-                             searchResult.PeptideYScore + SEP_CHAR +
-                             searchResult.PeptideYIons + SEP_CHAR +
-                             searchResult.PeptideBScore + SEP_CHAR +
-                             searchResult.PeptideBIons + SEP_CHAR +
-                             searchResult.PeptideDeltaMass + SEP_CHAR +
-                             searchResult.PeptideIntensity + SEP_CHAR +
-                             PRISM.StringUtilities.DblToString(searchResult.PeptideDeltaMassCorrectedPpm, 5, 0.00005));
+            var data = new List<string>
+            {
+                searchResult.ResultID.ToString(),
+                searchResult.GroupID.ToString(),
+                searchResult.Scan,
+                searchResult.Charge,
+                searchResult.PeptideMH,
+                searchResult.PeptideHyperscore,
+                searchResult.PeptideExpectationValue,
+                searchResult.MultipleProteinCount,
+                searchResult.SequenceWithPrefixAndSuffix(true),
+                Math.Round(searchResult.PeptideDeltaCn2, 4).ToString(CultureInfo.InvariantCulture),
+                searchResult.PeptideYScore,
+                searchResult.PeptideYIons,
+                searchResult.PeptideBScore,
+                searchResult.PeptideBIons,
+                searchResult.PeptideDeltaMass,
+                searchResult.PeptideIntensity,
+                PRISM.StringUtilities.DblToString(searchResult.PeptideDeltaMassCorrectedPpm, 5, 0.00005)
+            };
+
+            writer.WriteLine(CollapseList(data));
         }
 
         protected override string TruncateProteinName(string proteinNameAndDescription)
@@ -1694,6 +1684,34 @@ namespace PeptideHitResultsProcessor
                 return proteinNameAndDescription + REVERSED_PROTEIN_SEQUENCE_INDICATOR;
             }
             return proteinNameAndDescription;
+        }
+
+        /// <summary>
+        ///  Write out the header line for synopsis / first hits file
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="errorLog"></param>
+        private void WriteSynFHTFileHeader(
+            TextWriter writer,
+            ref string errorLog)
+        {
+            try
+            {
+                // Get the synopsis file headers
+                // Keys are header name and values are enum IDs
+                var headerColumns = clsPHRPParserXTandem.GetColumnHeaderNamesAndIDs();
+
+                var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
+
+                writer.WriteLine(CollapseList(headerNames));
+            }
+            catch (Exception)
+            {
+                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                {
+                    errorLog += "Error writing synopsis / first hits header" + "\n";
+                }
+            }
         }
 
         private string XMLTextReaderGetAttributeValue(XmlReader xmlReader, string attributeName, string valueIfMissing)

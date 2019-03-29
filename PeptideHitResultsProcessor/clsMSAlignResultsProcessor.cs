@@ -1,13 +1,4 @@
-﻿// This class reads in an MSAlign results file (txt format) and creates
-// a tab-delimited text file with the data.
-//
-// -------------------------------------------------------------------------------
-// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started 11/28/2012
-//
-// E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
-// -------------------------------------------------------------------------------
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -17,11 +8,19 @@ using PHRPReader;
 
 namespace PeptideHitResultsProcessor
 {
+    /// <summary>
+    /// This class reads in an MSAlign results file (txt format) and creates
+    /// a tab-delimited text file with the data.
+    /// </summary>
+    /// <remarks>
+    /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
+    /// Started 11/28/2012
+    /// </remarks>
     public class clsMSAlignResultsProcessor : clsPHRPBaseClass
     {
         public clsMSAlignResultsProcessor()
         {
-            mFileDate = "October 24, 2018";
+            mFileDate = "March 28, 2019";
             InitializeLocalVariables();
         }
 
@@ -41,8 +40,9 @@ namespace PeptideHitResultsProcessor
 
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
-        // These columns correspond to the tab-delimited file created directly by MSAlign
-        protected const int MSAlignResultsFileColCount = 23;
+        /// <summary>
+        /// These columns correspond to the tab-delimited file created directly by MSAlign
+        /// </summary>
         public enum eMSAlignResultsFileColumns
         {
             SpectrumFileName = 0,
@@ -68,34 +68,6 @@ namespace PeptideHitResultsProcessor
             FDR = 20,
             Species_ID = 21,             // Present between Protein_ID and Protein_name in MSAlign_Histone result files
             FragMethod = 22              // Present as the last column in MSAlign_Histone result files
-        }
-
-        // These columns correspond to the Synopsis file created by this class
-        protected const int MSAlignSynFileColCount = 22;
-        public enum eMSAlignSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Prsm_ID = 2,
-            Spectrum_ID = 3,
-            Charge = 4,
-            PrecursorMZ = 5,
-            DelM = 6,                            // Precursor error, in Da
-            DelMPPM = 7,                         // Precursor error, in ppm
-            MH = 8,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-            Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
-            Protein = 10,                        // Protein Name
-            Protein_Mass = 11,
-            Unexpected_Mod_Count = 12,
-            Peak_Count = 13,
-            Matched_Peak_Count = 14,
-            Matched_Fragment_Ion_Count = 15,
-            PValue = 16,
-            Rank_PValue = 17,
-            EValue = 18,
-            FDR = 19,
-            Species_ID = 20,
-            FragMethod = 21
         }
 
         #endregion
@@ -476,7 +448,7 @@ namespace PeptideHitResultsProcessor
             string outputFilePath)
         {
 
-            int[] columnMapping = null;
+            var columnMapping = new Dictionary<eMSAlignResultsFileColumns, int>();
 
             try
             {
@@ -507,7 +479,7 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                var success = ParseMSAlignResultsFileHeaderLine(lineIn, out columnMapping);
+                                var success = ParseMSAlignResultsFileHeaderLine(lineIn, columnMapping);
                                 if (!success)
                                 {
                                     // Error parsing header
@@ -612,11 +584,11 @@ namespace PeptideHitResultsProcessor
                 else
                 {
                     // Read the contents of the parameter (or mods) file
-                    using (var srInFile = new StreamReader(new FileStream(mSAlignParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var reader = new StreamReader(new FileStream(mSAlignParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
-                        while (!srInFile.EndOfStream)
+                        while (!reader.EndOfStream)
                         {
-                            var lineIn = srInFile.ReadLine();
+                            var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
                                 continue;
 
@@ -690,7 +662,7 @@ namespace PeptideHitResultsProcessor
             // Although this was a possibility with Inspect, it likely never occurs for MSAlign
             //  But, we'll keep the check in place just in case
 
-            int[] columnMapping = null;
+            var columnMapping = new Dictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int>();
 
             bool success;
 
@@ -747,7 +719,7 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseMSAlignSynFileHeaderLine(lineIn, out columnMapping);
+                                success = ParseMSAlignSynFileHeaderLine(lineIn, columnMapping);
                                 if (!success)
                                 {
                                     // Error parsing header
@@ -893,7 +865,7 @@ namespace PeptideHitResultsProcessor
             string lineIn,
             ref udtMSAlignSearchResultType udtSearchResult,
             ref string errorLog,
-            IReadOnlyList<int> columnMapping)
+            IDictionary<eMSAlignResultsFileColumns, int> columnMapping)
         {
             // Parses an entry from the MSAlign results file
 
@@ -914,14 +886,14 @@ namespace PeptideHitResultsProcessor
 
                 if (splitLine.Length >= 13)
                 {
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
+                    if (!GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
                     {
                         ReportError("Prsm_ID column is missing or invalid", true);
                     }
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
 
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Scans], out udtSearchResult.Scans))
+                    if (!GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Scans], out udtSearchResult.Scans))
                     {
                         ReportError("Scan(s) column is missing or invalid", true);
                     }
@@ -944,12 +916,12 @@ namespace PeptideHitResultsProcessor
                         }
                     }
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Peaks], out udtSearchResult.Peaks);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Charge], out udtSearchResult.Charge);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Peaks], out udtSearchResult.Peaks);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Charge], out udtSearchResult.Charge);
                     udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
                     // Monoisotopic mass value of the observed precursor_mz
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
 
                     // precursorMonoMass is Observed m/z, converted to monoisotopic mass
                     if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
@@ -964,10 +936,10 @@ namespace PeptideHitResultsProcessor
                     // peptideMonoMassMSAlign is Theoretical peptide monoisotopic mass, including mods, as computed by MSAlign
                     double peptideMonoMassMSAlign;
 
-                    if (columnMapping[(int)eMSAlignResultsFileColumns.Adjusted_precursor_mass] >= 0)
+                    if (columnMapping[eMSAlignResultsFileColumns.Adjusted_precursor_mass] >= 0)
                     {
                         // Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
-                        GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
+                        GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
 
                         double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassMSAlign);
                     }
@@ -976,17 +948,17 @@ namespace PeptideHitResultsProcessor
                         peptideMonoMassMSAlign = 0;
                     }
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Protein_ID], out udtSearchResult.Protein_ID);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Species_ID], out udtSearchResult.Species_ID);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Protein_name], out udtSearchResult.Protein);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Protein_ID], out udtSearchResult.Protein_ID);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Species_ID], out udtSearchResult.Species_ID);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Protein_name], out udtSearchResult.Protein);
                     udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Protein_mass], out udtSearchResult.Protein_mass);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Protein_mass], out udtSearchResult.Protein_mass);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.First_residue], out udtSearchResult.First_residue);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Last_residue], out udtSearchResult.Last_residue);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.First_residue], out udtSearchResult.First_residue);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Last_residue], out udtSearchResult.Last_residue);
 
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Peptide], out udtSearchResult.Peptide))
+                    if (!GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Peptide], out udtSearchResult.Peptide))
                     {
                         ReportError("Peptide column is missing or invalid", true);
                     }
@@ -1044,10 +1016,10 @@ namespace PeptideHitResultsProcessor
                     // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                     udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_modifications);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_modifications);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
                     if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
                         udtSearchResult.PValueNum = 0;
 
@@ -1057,8 +1029,8 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Matched_peaks = AssureInteger(udtSearchResult.Matched_peaks, 0);                       // Matched_Peak_Count
                     udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0);       // Matched_Fragment_Ion_Count
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.Evalue], out udtSearchResult.Evalue);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.FDR], out udtSearchResult.FDR);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Evalue], out udtSearchResult.Evalue);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.FDR], out udtSearchResult.FDR);
 
                     if (udtSearchResult.FDR.ToLower() == "infinity")
                     {
@@ -1069,7 +1041,7 @@ namespace PeptideHitResultsProcessor
                         udtSearchResult.FDR = "";
                     }
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
 
                     validSearchResult = true;
                 }
@@ -1095,7 +1067,7 @@ namespace PeptideHitResultsProcessor
             return validSearchResult;
         }
 
-        private bool ParseMSAlignResultsFileHeaderLine(string lineIn, out int[] columnMapping)
+        private bool ParseMSAlignResultsFileHeaderLine(string lineIn, IDictionary<eMSAlignResultsFileColumns, int> columnMapping)
         {
             // Parse the header line
 
@@ -1135,23 +1107,23 @@ namespace PeptideHitResultsProcessor
                 {"FragMethod", eMSAlignResultsFileColumns.FragMethod}
             };
 
-            columnMapping = new int[MSAlignResultsFileColCount];
+            columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                for (var index = 0; index <= columnMapping.Length - 1; index++)
+                foreach (eMSAlignResultsFileColumns resultColumn in Enum.GetValues(typeof(eMSAlignResultsFileColumns)))
                 {
-                    columnMapping[index] = -1;
+                    columnMapping.Add(resultColumn, -1);
                 }
 
                 var splitLine = lineIn.Split('\t');
                 for (var index = 0; index <= splitLine.Length - 1; index++)
                 {
-                    if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
+                    if (columnNames.TryGetValue(splitLine[index], out var resultColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[(int)eResultFileColumn] = index;
+                        columnMapping[resultColumn] = index;
                     }
                     else
                     {
@@ -1170,44 +1142,20 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private bool ParseMSAlignSynFileHeaderLine(string lineIn, out int[] columnMapping)
+        private bool ParseMSAlignSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int> columnMapping)
         {
             // Parse the header line
 
-            var columnNames = new SortedDictionary<string, eMSAlignSynFileColumns>(StringComparer.InvariantCultureIgnoreCase)
-            {
-                {clsPHRPParserMSAlign.DATA_COLUMN_ResultID, eMSAlignSynFileColumns.ResultID},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Scan, eMSAlignSynFileColumns.Scan},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Prsm_ID, eMSAlignSynFileColumns.Prsm_ID},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Spectrum_ID, eMSAlignSynFileColumns.Spectrum_ID},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Charge, eMSAlignSynFileColumns.Charge},
-                {clsPHRPParserMSAlign.DATA_COLUMN_PrecursorMZ, eMSAlignSynFileColumns.PrecursorMZ},
-                {clsPHRPParserMSAlign.DATA_COLUMN_DelM, eMSAlignSynFileColumns.DelM},
-                {clsPHRPParserMSAlign.DATA_COLUMN_DelM_PPM, eMSAlignSynFileColumns.DelMPPM},
-                {clsPHRPParserMSAlign.DATA_COLUMN_MH, eMSAlignSynFileColumns.MH},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Peptide, eMSAlignSynFileColumns.Peptide},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Protein, eMSAlignSynFileColumns.Protein},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Protein_Mass, eMSAlignSynFileColumns.Protein_Mass},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Unexpected_Mod_Count, eMSAlignSynFileColumns.Unexpected_Mod_Count},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Peak_Count, eMSAlignSynFileColumns.Peak_Count},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Matched_Peak_Count, eMSAlignSynFileColumns.Matched_Peak_Count},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Matched_Fragment_Ion_Count, eMSAlignSynFileColumns.Matched_Fragment_Ion_Count},
-                {clsPHRPParserMSAlign.DATA_COLUMN_PValue, eMSAlignSynFileColumns.PValue},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue, eMSAlignSynFileColumns.Rank_PValue},
-                {clsPHRPParserMSAlign.DATA_COLUMN_EValue, eMSAlignSynFileColumns.EValue},
-                {clsPHRPParserMSAlign.DATA_COLUMN_FDR, eMSAlignSynFileColumns.FDR},
-                {clsPHRPParserMSAlign.DATA_COLUMN_Species_ID, eMSAlignSynFileColumns.Species_ID},
-                {clsPHRPParserMSAlign.DATA_COLUMN_FragMethod, eMSAlignSynFileColumns.FragMethod}
-            };
+            var columnNames = clsPHRPParserMSAlign.GetColumnHeaderNamesAndIDs();
 
-            columnMapping = new int[MSAlignSynFileColCount];
+            columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                for (var index = 0; index <= columnMapping.Length - 1; index++)
+                foreach (clsPHRPParserMSAlign.MSAlignSynFileColumns resultColumn in Enum.GetValues(typeof(clsPHRPParserMSAlign.MSAlignSynFileColumns)))
                 {
-                    columnMapping[index] = -1;
+                    columnMapping.Add(resultColumn, -1);
                 }
 
                 var splitLine = lineIn.Split('\t');
@@ -1216,7 +1164,7 @@ namespace PeptideHitResultsProcessor
                     if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[(int)eResultFileColumn] = index;
+                        columnMapping[eResultFileColumn] = index;
                     }
                 }
             }
@@ -1234,7 +1182,7 @@ namespace PeptideHitResultsProcessor
             clsSearchResultsMSAlign searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IReadOnlyList<int> columnMapping,
+            IDictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
             // Parses an entry from the MSAlign Synopsis file
@@ -1256,39 +1204,39 @@ namespace PeptideHitResultsProcessor
 
                 if (splitLine.Length >= 15)
                 {
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.ResultID], out string value))
+                    if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.ResultID], out string value))
                     {
                         if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                         {
-                            errorLog += "Error reading ResultID value from MSAlign Results line " + (resultsProcessed + 1).ToString() +
-                                           "\n";
+                            errorLog += "Error reading ResultID value from MSAlign Results line " +
+                                        (resultsProcessed + 1) + "\n";
                         }
                         return false;
                     }
 
                     searchResult.ResultID = int.Parse(value);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Scan], out string scan);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Charge], out string charge);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Scan], out string scan);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Charge], out string charge);
 
                     searchResult.Scan = scan;
                     searchResult.Charge = charge;
 
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Peptide], out peptideSequenceWithMods))
+                    if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Peptide], out peptideSequenceWithMods))
                     {
                         if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                         {
-                            errorLog += "Error reading Peptide sequence value from MSAlign Results line " + (resultsProcessed + 1).ToString() +
-                                           "\n";
+                            errorLog += "Error reading Peptide sequence value from MSAlign Results line " +
+                                        (resultsProcessed + 1) + "\n";
                         }
                         return false;
                     }
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Protein], out string proteinName);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Protein], out string proteinName);
                     searchResult.MultipleProteinCount = "0";
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.DelM], out string msAlignComputedDelM);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.DelM], out string msAlignComputedDelM);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
 
                     searchResult.ProteinName = proteinName;
                     searchResult.MSAlignComputedDelM = msAlignComputedDelM;
@@ -1321,24 +1269,24 @@ namespace PeptideHitResultsProcessor
                     searchResult.ComputePeptideCleavageStateInProtein();
 
                     // Read the remaining data values
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Prsm_ID], out string prsmId);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Spectrum_ID], out string spectrumId);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Prsm_ID], out string prsmId);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Spectrum_ID], out string spectrumId);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.PrecursorMZ], out string precursorMz);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.MH], out string parentIonMH);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.MH], out string parentIonMH);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Protein_Mass], out string proteinMass);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Peak_Count], out string peakCount);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.PValue], out string pValue);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Rank_PValue], out string rankPValue);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.EValue], out string eValue);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.FDR], out string fdr);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.Species_ID], out string speciesId);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSAlignSynFileColumns.FragMethod], out string fragMethod);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Protein_Mass], out string proteinMass);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Peak_Count], out string peakCount);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.PValue], out string pValue);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Rank_PValue], out string rankPValue);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.EValue], out string eValue);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.FDR], out string fdr);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Species_ID], out string speciesId);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.FragMethod], out string fragMethod);
 
                     searchResult.Prsm_ID = prsmId;
                     searchResult.Spectrum_ID = spectrumId;
@@ -1553,6 +1501,7 @@ namespace PeptideHitResultsProcessor
                 success = true;
             }
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             return success;
         }
 
@@ -1599,15 +1548,17 @@ namespace PeptideHitResultsProcessor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            List<udtMSAlignSearchResultType> filteredSearchResults,
+            IEnumerable<udtMSAlignSearchResultType> filteredSearchResults,
             ref string errorLog)
         {
-            // Sort udtFilteredSearchResults by ascending PValue, ascending scan, ascending charge, ascending peptide, and ascending protein
-            filteredSearchResults.Sort(new MSAlignSearchResultsComparerPValueScanChargePeptide());
+            // Sort filteredSearchResults by ascending PValue, ascending scan, ascending charge, ascending peptide, and ascending protein
+            var query = from item in filteredSearchResults orderby item.PValueNum, item.ScanNum, item.ChargeNum, item.Peptide, item.Protein select item;
 
-            for (var index = 0; index <= filteredSearchResults.Count - 1; index++)
+            var index = 1;
+            foreach (var result in query)
             {
-                WriteSearchResultToFile(index + 1, writer, filteredSearchResults[index], ref errorLog);
+                WriteSearchResultToFile(index, writer, result, ref errorLog);
+                index += 1;
             }
         }
 
@@ -1624,47 +1575,31 @@ namespace PeptideHitResultsProcessor
             // Now store or write out the matches that pass the filters
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].PValueNum <= MSAlignSynopsisFilePValueThreshold)
+                if (searchResults[index].PValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }
             }
         }
 
+        /// <summary>
+        /// Write out the header line for synopsis / first hits files
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="errorLog"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ref string errorLog)
         {
-            // Write out the header line for synopsis / first hits files
             try
             {
-                var data = new List<string>
-                {
-                    clsPHRPParserMSAlign.DATA_COLUMN_ResultID,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Scan,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Prsm_ID,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Spectrum_ID,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Charge,
-                    clsPHRPParserMSAlign.DATA_COLUMN_PrecursorMZ,
-                    clsPHRPParserMSAlign.DATA_COLUMN_DelM,
-                    clsPHRPParserMSAlign.DATA_COLUMN_DelM_PPM,
-                    clsPHRPParserMSAlign.DATA_COLUMN_MH,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Peptide,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Protein,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Protein_Mass,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Unexpected_Mod_Count,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Peak_Count,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Matched_Peak_Count,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Matched_Fragment_Ion_Count,
-                    clsPHRPParserMSAlign.DATA_COLUMN_PValue,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Rank_PValue,
-                    clsPHRPParserMSAlign.DATA_COLUMN_EValue,
-                    clsPHRPParserMSAlign.DATA_COLUMN_FDR,
-                    clsPHRPParserMSAlign.DATA_COLUMN_Species_ID,
-                    clsPHRPParserMSAlign.DATA_COLUMN_FragMethod
-                };
+                // Get the synopsis file headers
+                // Keys are header name and values are enum IDs
+                var headerColumns = clsPHRPParserMSAlign.GetColumnHeaderNamesAndIDs();
 
-                writer.WriteLine(CollapseList(data));
+                var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
+
+                writer.WriteLine(CollapseList(headerNames));
             }
             catch (Exception)
             {
@@ -1722,9 +1657,6 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.FragMethod
                 };
 
-
-
-
                 writer.WriteLine(CollapseList(data));
             }
             catch (Exception)
@@ -1776,48 +1708,6 @@ namespace PeptideHitResultsProcessor
                     }
                 }
                 return result;
-            }
-        }
-
-        protected class MSAlignSearchResultsComparerPValueScanChargePeptide : IComparer<udtMSAlignSearchResultType>
-        {
-            public int Compare(udtMSAlignSearchResultType x, udtMSAlignSearchResultType y)
-            {
-                var result1 = string.Compare(x.Pvalue, y.Pvalue, StringComparison.Ordinal);
-                if (result1 == 0)
-                {
-                    // Pvalue is the same; check scan number
-                    if (x.ScanNum > y.ScanNum)
-                    {
-                        return 1;
-                    }
-
-                    if (x.ScanNum < y.ScanNum)
-                    {
-                        return -1;
-                    }
-
-                    // Scan is the same, check charge
-                    if (x.ChargeNum > y.ChargeNum)
-                    {
-                        return 1;
-                    }
-
-                    if (x.ChargeNum < y.ChargeNum)
-                    {
-                        return -1;
-                    }
-
-                    // Charge is the same; check peptide
-                    var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
-                    if (result == 0)
-                    {
-                        // Peptide is the same, check Protein
-                        result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
-                    }
-                    return result;
-                }
-                return result1;
             }
         }
 

@@ -8,6 +8,7 @@
 //
 //*********************************************************************************************************
 using System;
+using System.Collections.Generic;
 
 namespace PHRPReader
 {
@@ -42,7 +43,35 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_FHT = "_mspath_fht.txt";
 
         private const string MSPathFinder_SEARCH_ENGINE_NAME = "MSPathFinder";
+
+
+        /// <summary>
+        /// These columns correspond to the Synopsis file created by clsMSPathFinderResultsProcessor
+        /// </summary>
+        public enum MSPathFinderSynFileColumns
+        {
+            ResultID = 0,
+            Scan = 1,
+            Charge = 2,
+            MostAbundantIsotopeMz = 3,
+            Mass = 4,
+            Sequence = 5,                // PrefixLetter.Sequence.SuffixLetter
+            Modifications = 6,
+            Composition = 7,
+            Protein = 8,
+            ProteinDesc = 9,
+            ProteinLength = 10,
+            ResidueStart = 11,
+            ResidueEnd = 12,
+            MatchedFragments = 13,
+            SpecEValue = 14,             // Column added 2015-08-25
+            EValue = 15,                 // Column added 2015-08-25
+            QValue = 16,
+            PepQValue = 17
+        }
+
 #pragma warning restore 1591
+
 
         #endregion
 
@@ -131,32 +160,45 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Define column header names
+        /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
-        protected override void DefineColumnHeaders()
+        /// <returns></returns>
+        protected override List<string> GetColumnHeaderNames()
         {
-            mColumnHeaders.Clear();
+            var headerNames = new List<string>();
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            return headerNames;
+        }
 
-            // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_ResultID);
+        /// <summary>
+        /// Header names and enums for the PHRP synopsis file for this tool
+        /// </summary>
+        /// <returns></returns>
+        public static SortedDictionary<string, MSPathFinderSynFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            var headerColumns = new SortedDictionary<string, MSPathFinderSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                {DATA_COLUMN_ResultID, MSPathFinderSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, MSPathFinderSynFileColumns.Scan},
+                {DATA_COLUMN_Charge, MSPathFinderSynFileColumns.Charge},
+                {DATA_COLUMN_MostAbundantIsotopeMz, MSPathFinderSynFileColumns.MostAbundantIsotopeMz},
+                {DATA_COLUMN_Mass, MSPathFinderSynFileColumns.Mass},
+                {DATA_COLUMN_Sequence, MSPathFinderSynFileColumns.Sequence},
+                {DATA_COLUMN_Modifications, MSPathFinderSynFileColumns.Modifications},
+                {DATA_COLUMN_Composition, MSPathFinderSynFileColumns.Composition},
+                {DATA_COLUMN_Protein, MSPathFinderSynFileColumns.Protein},
+                {DATA_COLUMN_ProteinDesc, MSPathFinderSynFileColumns.ProteinDesc},
+                {DATA_COLUMN_ProteinLength, MSPathFinderSynFileColumns.ProteinLength},
+                {DATA_COLUMN_ResidueStart, MSPathFinderSynFileColumns.ResidueStart},
+                {DATA_COLUMN_ResidueEnd, MSPathFinderSynFileColumns.ResidueEnd},
+                {DATA_COLUMN_MatchedFragments, MSPathFinderSynFileColumns.MatchedFragments},
+                {DATA_COLUMN_SpecEValue, MSPathFinderSynFileColumns.SpecEValue},
+                {DATA_COLUMN_EValue, MSPathFinderSynFileColumns.EValue},
+                {DATA_COLUMN_QValue, MSPathFinderSynFileColumns.QValue},
+                {DATA_COLUMN_PepQValue, MSPathFinderSynFileColumns.PepQValue}
+            };
 
-            AddHeaderColumn(DATA_COLUMN_Scan);
-            AddHeaderColumn(DATA_COLUMN_Charge);
-            AddHeaderColumn(DATA_COLUMN_MostAbundantIsotopeMz);
-            AddHeaderColumn(DATA_COLUMN_Mass);
-            AddHeaderColumn(DATA_COLUMN_Sequence);
-            AddHeaderColumn(DATA_COLUMN_Modifications);
-            AddHeaderColumn(DATA_COLUMN_Composition);
-            AddHeaderColumn(DATA_COLUMN_Protein);
-            AddHeaderColumn(DATA_COLUMN_ProteinDesc);
-            AddHeaderColumn(DATA_COLUMN_ProteinLength);
-            AddHeaderColumn(DATA_COLUMN_ResidueStart);
-            AddHeaderColumn(DATA_COLUMN_ResidueEnd);
-            AddHeaderColumn(DATA_COLUMN_MatchedFragments);
-            AddHeaderColumn(DATA_COLUMN_SpecEValue);
-            AddHeaderColumn(DATA_COLUMN_EValue);
-            AddHeaderColumn(DATA_COLUMN_QValue);
-            AddHeaderColumn(DATA_COLUMN_PepQValue);
+            return headerColumns;
         }
 
         /// <summary>
@@ -259,18 +301,19 @@ namespace PHRPReader
         {
             searchEngineParams = new clsSearchEngineParameters(MSPathFinder_SEARCH_ENGINE_NAME);
 
-            var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams, clsPHRPReader.ePeptideHitResultType.MSPathFinder);
+            var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
 
             ReadSearchEngineVersion(mPeptideHitResultType, searchEngineParams);
 
             return success;
         }
 
-        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, clsSearchEngineParameters searchEngineParams, clsPHRPReader.ePeptideHitResultType resultType)
+        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, clsSearchEngineParameters searchEngineParams)
         {
             try
             {
-                var success = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSGFPlus, searchEngineParams);
+                var resultType = clsPHRPReader.ePeptideHitResultType.MSPathFinder;
+                var success = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, searchEngineParamFileName, resultType, searchEngineParams);
 
                 if (!success)
                 {
@@ -304,6 +347,8 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
+            const int SCAN_NOT_FOUND_FLAG = -100;
+
             psm = new clsPSM();
 
             try
@@ -312,8 +357,8 @@ namespace PHRPReader
                 var success = false;
 
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (psm.ScanNumber == -100)
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
@@ -341,7 +386,7 @@ namespace PHRPReader
                     // Store the sequence mass as the "precursor" mass, though MSPathFinderT results are from MS1 spectra, and thus we didn't do MS/MS on a precursor
                     psm.PrecursorNeutralMass = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Mass, mColumnHeaders, 0.0);
 
-                    // Thus collision mode, precursor neutral mass, etc. are not applicable
+                    // Collision mode, precursor neutral mass, etc. are not applicable
                     // psm.CollisionMode =
                     // psm.MassErrorDa =
                     // psm.MassErrorPPM =

@@ -8,6 +8,7 @@
 //
 //*********************************************************************************************************
 using System;
+using System.Collections.Generic;
 
 namespace PHRPReader
 {
@@ -52,7 +53,44 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_FHT = "_inspect_fht.txt";
 
         private const string INS_SEARCH_ENGINE_NAME = "Inspect";
+
+        /// <summary>
+        /// These columns correspond to the Synopsis file created by clsInspectResultsProcessor
+        /// </summary>
+        public enum InspectSynFileColumns
+        {
+            ResultID = 0,
+            Scan = 1,
+            Peptide = 2,
+            Protein = 3,
+            Charge = 4,
+            MQScore = 5,
+            Length = 6,
+            TotalPRMScore = 7,
+            MedianPRMScore = 8,
+            FractionY = 9,
+            FractionB = 10,
+            Intensity = 11,
+            NTT = 12,
+            PValue = 13,
+            FScore = 14,
+            DeltaScore = 15,
+            DeltaScoreOther = 16,
+            DeltaNormMQScore = 17,                   // Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, then also storing 0.   This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
+            DeltaNormTotalPRMScore = 18,             // Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, then also storing 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
+            RankTotalPRMScore = 19,                  // Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
+            RankFScore = 20,                         // Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
+            MH = 21,                                 // Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
+            RecordNumber = 22,
+            DBFilePos = 23,
+            SpecFilePos = 24,
+            PrecursorMZ = 25,
+            PrecursorError = 26,
+            DelM_PPM = 27
+        }
+
 #pragma warning restore 1591
+
 
         #endregion
 
@@ -141,44 +179,6 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Define column header names
-        /// </summary>
-        protected override void DefineColumnHeaders()
-        {
-            mColumnHeaders.Clear();
-
-            // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_ResultID);
-            AddHeaderColumn(DATA_COLUMN_Scan);
-            AddHeaderColumn(DATA_COLUMN_Peptide);
-            AddHeaderColumn(DATA_COLUMN_Protein);
-            AddHeaderColumn(DATA_COLUMN_Charge);
-            AddHeaderColumn(DATA_COLUMN_MQScore);
-            AddHeaderColumn(DATA_COLUMN_Length);
-            AddHeaderColumn(DATA_COLUMN_TotalPRMScore);
-            AddHeaderColumn(DATA_COLUMN_MedianPRMScore);
-            AddHeaderColumn(DATA_COLUMN_FractionY);
-            AddHeaderColumn(DATA_COLUMN_FractionB);
-            AddHeaderColumn(DATA_COLUMN_Intensity);
-            AddHeaderColumn(DATA_COLUMN_NTT);
-            AddHeaderColumn(DATA_COLUMN_PValue);
-            AddHeaderColumn(DATA_COLUMN_FScore);
-            AddHeaderColumn(DATA_COLUMN_DeltaScore);
-            AddHeaderColumn(DATA_COLUMN_DeltaScoreOther);
-            AddHeaderColumn(DATA_COLUMN_DeltaNormMQScore);
-            AddHeaderColumn(DATA_COLUMN_DeltaNormTotalPRMScore);
-            AddHeaderColumn(DATA_COLUMN_RankTotalPRMScore);
-            AddHeaderColumn(DATA_COLUMN_RankFScore);
-            AddHeaderColumn(DATA_COLUMN_MH);
-            AddHeaderColumn(DATA_COLUMN_RecordNumber);
-            AddHeaderColumn(DATA_COLUMN_DBFilePos);
-            AddHeaderColumn(DATA_COLUMN_SpecFilePos);
-            AddHeaderColumn(DATA_COLUMN_PrecursorMZ);
-            AddHeaderColumn(DATA_COLUMN_PrecursorError);
-            AddHeaderColumn(DATA_COLUMN_DelM_PPM);
-        }
-
-        /// <summary>
         /// Determines the precursor mass tolerance
         /// </summary>
         /// <param name="searchEngineParams"></param>
@@ -212,6 +212,58 @@ namespace PHRPReader
             tolerance = Math.Max(tolerance, toleranceDa);
 
             return tolerance;
+        }
+
+        /// <summary>
+        /// Get the header names in the PHRP synopsis or first hits file for this tool
+        /// </summary>
+        /// <returns></returns>
+        protected override List<string> GetColumnHeaderNames()
+        {
+            var headerNames = new List<string>();
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            return headerNames;
+        }
+
+        /// <summary>
+        /// Header names and enums for the PHRP synopsis file for this tool
+        /// </summary>
+        /// <returns></returns>
+        public static SortedDictionary<string, InspectSynFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            var headerColumns = new SortedDictionary<string, InspectSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                {DATA_COLUMN_ResultID, InspectSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, InspectSynFileColumns.Scan},
+                {DATA_COLUMN_Peptide, InspectSynFileColumns.Peptide},
+                {DATA_COLUMN_Protein, InspectSynFileColumns.Protein},
+                {DATA_COLUMN_Charge, InspectSynFileColumns.Charge},
+                {DATA_COLUMN_MQScore, InspectSynFileColumns.MQScore},
+                {DATA_COLUMN_Length, InspectSynFileColumns.Length},
+                {DATA_COLUMN_TotalPRMScore, InspectSynFileColumns.TotalPRMScore},
+                {DATA_COLUMN_MedianPRMScore, InspectSynFileColumns.MedianPRMScore},
+                {DATA_COLUMN_FractionY, InspectSynFileColumns.FractionY},
+                {DATA_COLUMN_FractionB, InspectSynFileColumns.FractionB},
+                {DATA_COLUMN_Intensity, InspectSynFileColumns.Intensity},
+                {DATA_COLUMN_NTT, InspectSynFileColumns.NTT},
+                {DATA_COLUMN_PValue, InspectSynFileColumns.PValue},
+                {DATA_COLUMN_FScore, InspectSynFileColumns.FScore},
+                {DATA_COLUMN_DeltaScore, InspectSynFileColumns.DeltaScore},
+                {DATA_COLUMN_DeltaScoreOther, InspectSynFileColumns.DeltaScoreOther},
+                {DATA_COLUMN_DeltaNormMQScore, InspectSynFileColumns.DeltaNormMQScore},
+                {DATA_COLUMN_DeltaNormTotalPRMScore, InspectSynFileColumns.DeltaNormTotalPRMScore},
+                {DATA_COLUMN_RankTotalPRMScore, InspectSynFileColumns.RankTotalPRMScore},
+                {DATA_COLUMN_RankFScore, InspectSynFileColumns.RankFScore},
+                {DATA_COLUMN_MH, InspectSynFileColumns.MH},
+                {DATA_COLUMN_RecordNumber, InspectSynFileColumns.RecordNumber},
+                {DATA_COLUMN_DBFilePos, InspectSynFileColumns.DBFilePos},
+                {DATA_COLUMN_SpecFilePos, InspectSynFileColumns.SpecFilePos},
+                {DATA_COLUMN_PrecursorMZ, InspectSynFileColumns.PrecursorMZ},
+                {DATA_COLUMN_PrecursorError, InspectSynFileColumns.PrecursorError},
+                {DATA_COLUMN_DelM_PPM, InspectSynFileColumns.DelM_PPM}
+            };
+
+            return headerColumns;
         }
 
         /// <summary>
@@ -377,6 +429,8 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
+            const int SCAN_NOT_FOUND_FLAG = -100;
+
             var columns = line.Split('\t');
 
             var success = false;
@@ -386,8 +440,8 @@ namespace PHRPReader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (psm.ScanNumber == -100)
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }

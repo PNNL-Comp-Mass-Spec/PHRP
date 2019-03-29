@@ -1,12 +1,16 @@
-﻿// This class reads in a MSPathFinder results file (_IcTda.tsv) and creates
-// a tab-delimited text file with the data.
-//
-// -------------------------------------------------------------------------------
+﻿// -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
-// Started 05/01/2015
 //
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
+// Website: https://omics.pnl.gov/ or https://www.pnnl.gov/sysbio/ or https://panomics.pnnl.gov/
 // -------------------------------------------------------------------------------
+//
+// Licensed under the 2-Clause BSD License; you may not use this file except
+// in compliance with the License.  You may obtain a copy of the License at
+// https://opensource.org/licenses/BSD-2-Clause
+//
+// Copyright 2018 Battelle Memorial Institute
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,6 +20,10 @@ using PHRPReader;
 
 namespace PeptideHitResultsProcessor
 {
+    /// <summary>
+    /// This class reads in a MSPathFinder results file (_IcTda.tsv) and creates
+    /// a tab-delimited text file with the data.
+    /// </summary>
     public class clsMSPathFinderResultsProcessor : clsPHRPBaseClass
     {
         /// <summary>
@@ -24,7 +32,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSPathFinderResultsProcessor()
         {
-            mFileDate = "October 24, 2018";
+            mFileDate = "March 28, 2019";
 
             mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }
@@ -41,8 +49,9 @@ namespace PeptideHitResultsProcessor
 
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
-        // These columns correspond to the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
-        protected const int MSPathFinderResultsFileColCount = 21;
+        /// <summary>
+        /// These columns correspond to the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
+        /// </summary>
         public enum eMSPathFinderResultsFileColumns
         {
             Scan = 0,
@@ -68,29 +77,10 @@ namespace PeptideHitResultsProcessor
             PepQValue = 20
         }
 
-        // These columns correspond to the Synopsis file created by this class
-        protected const int MSPathFinderSynFileColCount = 18;
-        public enum eMSPathFinderSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Charge = 2,
-            MostAbundantIsotopeMz = 3,
-            Mass = 4,
-            Sequence = 5,                // PrefixLetter.Sequence.SuffixLetter
-            Modifications = 6,
-            Composition = 7,
-            Protein = 8,
-            ProteinDesc = 9,
-            ProteinLength = 10,
-            ResidueStart = 11,
-            ResidueEnd = 12,
-            MatchedFragments = 13,
-            SpecEValue = 14,             // Column added 2015-08-25
-            EValue = 15,                 // Column added 2015-08-25
-            QValue = 16,
-            PepQValue = 17
-        }
+        /// <summary>
+        /// These columns correspond to the Synopsis file created by this class
+        /// </summary>
+
 
         #endregion
 
@@ -440,7 +430,7 @@ namespace PeptideHitResultsProcessor
         {
             try
             {
-                int[] columnMapping = null;
+                var columnMapping = new Dictionary<eMSPathFinderResultsFileColumns, int>();
                 var errorLog = string.Empty;
 
                 // Open the input file and parse it
@@ -473,7 +463,7 @@ namespace PeptideHitResultsProcessor
                             {
                                 // Parse the header line
 
-                                var success = ParseMSPathFinderResultsFileHeaderLine(lineIn, out columnMapping);
+                                var success = ParseMSPathFinderResultsFileHeaderLine(lineIn, columnMapping);
                                 if (!success)
                                 {
                                     if (string.IsNullOrEmpty(mErrorMessage))
@@ -601,7 +591,7 @@ namespace PeptideHitResultsProcessor
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
 
-            int[] columnMapping = null;
+            var columnMapping = new Dictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int>();
             bool success;
 
             try
@@ -657,7 +647,7 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseMSPathFinderSynFileHeaderLine(lineIn, out columnMapping);
+                                success = ParseMSPathFinderSynFileHeaderLine(lineIn, columnMapping);
                                 if (!success)
                                 {
                                     // Error parsing header
@@ -822,7 +812,7 @@ namespace PeptideHitResultsProcessor
             string lineIn,
             ref udtMSPathFinderSearchResultType udtSearchResult,
             ref string errorLog,
-            IList<int> columnMapping,
+            IDictionary<eMSPathFinderResultsFileColumns, int> columnMapping,
             List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo,
             int rowNumber)
         {
@@ -844,7 +834,7 @@ namespace PeptideHitResultsProcessor
 
                 if (splitLine.Length >= 11)
                 {
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.Scan], out udtSearchResult.Scan))
+                    if (!GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Scan], out udtSearchResult.Scan))
                     {
                         ReportError("Scan column is missing or invalid in row " + rowNumber, true);
                     }
@@ -854,29 +844,29 @@ namespace PeptideHitResultsProcessor
                         ReportError("Scan column is not numeric in row " + rowNumber, true);
                     }
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.Charge], out udtSearchResult.Charge);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Charge], out udtSearchResult.Charge);
                     udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
                     // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MSPathFinder
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
                     double.TryParse(udtSearchResult.CalculatedMonoMass, out sequenceMonoMassMSPathFinder);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.PrefixResidue], out udtSearchResult.PrefixResidue);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.PrefixResidue], out udtSearchResult.PrefixResidue);
 
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.Sequence], out udtSearchResult.Sequence))
+                    if (!GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Sequence], out udtSearchResult.Sequence))
                     {
                         ReportError("Sequence column is missing or invalid in row " + rowNumber, true);
                     }
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.SuffixResidue], out udtSearchResult.SuffixResidue);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.SuffixResidue], out udtSearchResult.SuffixResidue);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.Modifications], out udtSearchResult.Modifications);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.Composition], out udtSearchResult.Composition);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.Protein], out udtSearchResult.Protein);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.ProteinDesc], out udtSearchResult.ProteinDesc);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.ProteinLength], out udtSearchResult.ProteinLength);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.ResidueEnd], out udtSearchResult.ResidueEnd);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.ResidueStart], out udtSearchResult.ResidueStart);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Modifications], out udtSearchResult.Modifications);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Composition], out udtSearchResult.Composition);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Protein], out udtSearchResult.Protein);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ProteinDesc], out udtSearchResult.ProteinDesc);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ProteinLength], out udtSearchResult.ProteinLength);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ResidueEnd], out udtSearchResult.ResidueEnd);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ResidueStart], out udtSearchResult.ResidueStart);
 
                     // Parse the list of modified residues to determine the total mod mass
                     var totalModMass = ComputeTotalModMass(udtSearchResult.Sequence, udtSearchResult.Modifications, modInfo);
@@ -884,20 +874,20 @@ namespace PeptideHitResultsProcessor
                     // Compute monoisotopic mass of the peptide
                     udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz], out udtSearchResult.MostAbundantIsotopeMz);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.NumMatchedFragments], out udtSearchResult.NumMatchedFragments);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz], out udtSearchResult.MostAbundantIsotopeMz);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.NumMatchedFragments], out udtSearchResult.NumMatchedFragments);
 
-                    if (GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.SpecEValue], out udtSearchResult.SpecEValue))
+                    if (GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.SpecEValue], out udtSearchResult.SpecEValue))
                     {
                         double.TryParse(udtSearchResult.SpecEValue, out udtSearchResult.SpecEValueNum);
                     }
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.EValue], out udtSearchResult.EValue);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.EValue], out udtSearchResult.EValue);
 
-                    if (GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.QValue], out udtSearchResult.QValue))
+                    if (GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.QValue], out udtSearchResult.QValue))
                     {
                         double.TryParse(udtSearchResult.QValue, out udtSearchResult.QValueNum);
                     }
-                    GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderResultsFileColumns.PepQValue], out udtSearchResult.PepQValue);
+                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.PepQValue], out udtSearchResult.PepQValue);
 
                     validSearchResult = true;
                 }
@@ -923,7 +913,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="columnMapping"></param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         /// <remarks></remarks>
-        private bool ParseMSPathFinderResultsFileHeaderLine(string lineIn, out int[] columnMapping)
+        private bool ParseMSPathFinderResultsFileHeaderLine(string lineIn, IDictionary<eMSPathFinderResultsFileColumns, int> columnMapping)
         {
             // Parse the header line
 
@@ -955,14 +945,14 @@ namespace PeptideHitResultsProcessor
                 {"PepQValue", eMSPathFinderResultsFileColumns.PepQValue}
             };
 
-            columnMapping = new int[MSPathFinderResultsFileColCount];
+            columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                for (var index = 0; index <= columnMapping.Length - 1; index++)
+                foreach (eMSPathFinderResultsFileColumns resultColumn in Enum.GetValues(typeof(eMSPathFinderResultsFileColumns)))
                 {
-                    columnMapping[index] = -1;
+                    columnMapping.Add(resultColumn, -1);
                 }
 
                 var splitLine = lineIn.Split('\t');
@@ -982,7 +972,7 @@ namespace PeptideHitResultsProcessor
                             if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
                             {
                                 // Recognized column name; update columnMapping
-                                columnMapping[(int)eResultFileColumn] = index;
+                                columnMapping[eResultFileColumn] = index;
                                 useDefaultHeaders = false;
                             }
                             else
@@ -997,9 +987,9 @@ namespace PeptideHitResultsProcessor
                 if (useDefaultHeaders)
                 {
                     // Use default column mappings
-                    for (var index = 0; index <= columnMapping.Length - 1; index++)
+                    foreach (eMSPathFinderResultsFileColumns resultColumn in Enum.GetValues(typeof(eMSPathFinderResultsFileColumns)))
                     {
-                        columnMapping[index] = index;
+                        columnMapping[resultColumn] = (int)resultColumn;
                     }
 
                     // This is not a header line; return false
@@ -1016,40 +1006,20 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private bool ParseMSPathFinderSynFileHeaderLine(string lineIn, out int[] columnMapping)
+        private bool ParseMSPathFinderSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int> columnMapping)
         {
             // Parse the header line
 
-            var columnNames = new SortedDictionary<string, eMSPathFinderSynFileColumns>(StringComparer.InvariantCultureIgnoreCase)
-            {
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_ResultID, eMSPathFinderSynFileColumns.ResultID},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_Scan, eMSPathFinderSynFileColumns.Scan},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_Charge, eMSPathFinderSynFileColumns.Charge},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_MostAbundantIsotopeMz, eMSPathFinderSynFileColumns.MostAbundantIsotopeMz},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_Mass, eMSPathFinderSynFileColumns.Mass},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_Sequence, eMSPathFinderSynFileColumns.Sequence},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_Modifications, eMSPathFinderSynFileColumns.Modifications},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_Composition, eMSPathFinderSynFileColumns.Composition},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_Protein, eMSPathFinderSynFileColumns.Protein},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_ProteinDesc, eMSPathFinderSynFileColumns.ProteinDesc},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_ProteinLength, eMSPathFinderSynFileColumns.ProteinLength},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_ResidueStart, eMSPathFinderSynFileColumns.ResidueStart},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_ResidueEnd, eMSPathFinderSynFileColumns.ResidueEnd},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_MatchedFragments, eMSPathFinderSynFileColumns.MatchedFragments},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_SpecEValue, eMSPathFinderSynFileColumns.SpecEValue},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_EValue, eMSPathFinderSynFileColumns.EValue},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_QValue, eMSPathFinderSynFileColumns.QValue},
-                {clsPHRPParserMSPathFinder.DATA_COLUMN_PepQValue, eMSPathFinderSynFileColumns.PepQValue}
-            };
+            var columnNames = clsPHRPParserMSPathFinder.GetColumnHeaderNamesAndIDs();
 
-            columnMapping = new int[MSPathFinderSynFileColCount];
+            columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                for (var index = 0; index <= columnMapping.Length - 1; index++)
+                foreach (clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns resultColumn in Enum.GetValues(typeof(clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns)))
                 {
-                    columnMapping[index] = -1;
+                    columnMapping.Add(resultColumn, -1);
                 }
 
                 var splitLine = lineIn.Split('\t');
@@ -1058,7 +1028,7 @@ namespace PeptideHitResultsProcessor
                     if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[(int)eResultFileColumn] = index;
+                        columnMapping[eResultFileColumn] = index;
                     }
                 }
             }
@@ -1076,7 +1046,7 @@ namespace PeptideHitResultsProcessor
             clsSearchResultsMSPathFinder searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IReadOnlyList<int> columnMapping,
+            IDictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int> columnMapping,
             out string peptideSequence)
         {
             // Parses an entry from the MSPathFinder Synopsis file
@@ -1097,33 +1067,35 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.ResultID], out string value))
+                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ResultID], out string value))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
-                        errorLog += "Error reading ResultID value from MSPathFinder Results line " + (resultsProcessed + 1).ToString() + "\n";
+                        errorLog += "Error reading ResultID value from MSPathFinder Results line " +
+                                    (resultsProcessed + 1) + "\n";
                     }
                     return false;
                 }
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.Sequence], out peptideSequence))
+                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Sequence], out peptideSequence))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
-                        errorLog += "Error reading Peptide sequence value from MSPathFinder Results line " + (resultsProcessed + 1).ToString() + "\n";
+                        errorLog += "Error reading Peptide sequence value from MSPathFinder Results line " +
+                                    (resultsProcessed + 1) + "\n";
                     }
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Protein], out string proteinName);
                 searchResult.ProteinName = proteinName;
                 searchResult.MultipleProteinCount = "0";
 
@@ -1142,23 +1114,23 @@ namespace PeptideHitResultsProcessor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.MostAbundantIsotopeMz], out string mostAbundantIsotopeMz);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.MostAbundantIsotopeMz], out string mostAbundantIsotopeMz);
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.Modifications], out string modifications);
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.Composition], out string composition);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Modifications], out string modifications);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Composition], out string composition);
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.ProteinDesc], out string proteinDesc);
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.ProteinLength], out string proteinLength);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ProteinDesc], out string proteinDesc);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ProteinLength], out string proteinLength);
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.ResidueStart], out string residueStart);
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.ResidueEnd], out string residueEnd);
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.MatchedFragments], out string matchedFragments);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ResidueStart], out string residueStart);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ResidueEnd], out string residueEnd);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.MatchedFragments], out string matchedFragments);
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.SpecEValue], out string specEValue);
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.EValue], out string eValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.SpecEValue], out string specEValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.EValue], out string eValue);
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.QValue], out string qValue);
-                GetColumnValue(splitLine, columnMapping[(int)eMSPathFinderSynFileColumns.PepQValue], out string pepQValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.QValue], out string qValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.PepQValue], out string pepQValue);
 
                 searchResult.MostAbundantIsotopeMz = mostAbundantIsotopeMz;
                 searchResult.Modifications = modifications;
@@ -1319,10 +1291,10 @@ namespace PeptideHitResultsProcessor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            List<udtMSPathFinderSearchResultType> filteredSearchResults,
+            IEnumerable<udtMSPathFinderSearchResultType> filteredSearchResults,
             ref string errorLog)
         {
-            // Sort udtFilteredSearchResults by ascending SpecEValue, QValue, Scan, Peptide, and Protein
+            // Sort filteredSearchResults by ascending SpecEValue, QValue, Scan, Peptide, and Protein
             var query = from item in filteredSearchResults orderby item.SpecEValueNum, item.QValueNum, item.ScanNum, item.Sequence, item.Protein select item;
 
             var index = 1;
@@ -1359,43 +1331,32 @@ namespace PeptideHitResultsProcessor
             //  or     QValue < 10
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].SpecEValueNum <= MSGFDBSynopsisFileSpecEValueThreshold || searchResults[index].QValueNum < 0.1)
+                if (searchResults[index].SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold || searchResults[index].QValueNum < 0.1)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }
             }
         }
 
+        /// <summary>
+        /// Write out the header line for synopsis / first hits files
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="errorLog"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ref string errorLog)
         {
-            // Write out the header line for synopsis / first hits files
             try
             {
-                var data = new List<string>
-                {
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_ResultID,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_Scan,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_Charge,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_MostAbundantIsotopeMz,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_Mass,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_Sequence,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_Modifications,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_Composition,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_Protein,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_ProteinDesc,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_ProteinLength,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_ResidueStart,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_ResidueEnd,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_MatchedFragments,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_SpecEValue,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_EValue,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_QValue,
-                    clsPHRPParserMSPathFinder.DATA_COLUMN_PepQValue
-                };
+                // Get the synopsis file headers
+                // Keys are header name and values are enum IDs
+                var headerColumns = clsPHRPParserMSPathFinder.GetColumnHeaderNamesAndIDs();
 
-                writer.WriteLine(CollapseList(data));
+                var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
+
+                writer.WriteLine(CollapseList(headerNames));
+
             }
             catch (Exception)
             {

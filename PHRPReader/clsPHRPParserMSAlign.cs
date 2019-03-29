@@ -8,6 +8,7 @@
 //
 //*********************************************************************************************************
 using System;
+using System.Collections.Generic;
 
 namespace PHRPReader
 {
@@ -46,6 +47,36 @@ namespace PHRPReader
         public const string FILENAME_SUFFIX_FHT = "_msalign_fht.txt";
 
         private const string MSAlign_SEARCH_ENGINE_NAME = "MSAlign";
+
+        /// <summary>
+        /// These columns correspond to the Synopsis file created by clsMSAlignResultsProcessor
+        /// </summary>
+        public enum MSAlignSynFileColumns
+        {
+            ResultID = 0,
+            Scan = 1,
+            Prsm_ID = 2,
+            Spectrum_ID = 3,
+            Charge = 4,
+            PrecursorMZ = 5,
+            DelM = 6,                            // Precursor error, in Da
+            DelMPPM = 7,                         // Precursor error, in ppm
+            MH = 8,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
+            Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
+            Protein = 10,                        // Protein Name
+            Protein_Mass = 11,
+            Unexpected_Mod_Count = 12,
+            Peak_Count = 13,
+            Matched_Peak_Count = 14,
+            Matched_Fragment_Ion_Count = 15,
+            PValue = 16,
+            Rank_PValue = 17,
+            EValue = 18,
+            FDR = 19,
+            Species_ID = 20,
+            FragMethod = 21
+        }
+
 #pragma warning restore 1591
 
         #endregion
@@ -135,38 +166,6 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Define column header names
-        /// </summary>
-        protected override void DefineColumnHeaders()
-        {
-            mColumnHeaders.Clear();
-
-            // Define the default column mapping
-            AddHeaderColumn(DATA_COLUMN_ResultID);
-            AddHeaderColumn(DATA_COLUMN_Scan);
-            AddHeaderColumn(DATA_COLUMN_Prsm_ID);
-            AddHeaderColumn(DATA_COLUMN_Spectrum_ID);
-            AddHeaderColumn(DATA_COLUMN_Charge);
-            AddHeaderColumn(DATA_COLUMN_PrecursorMZ);
-            AddHeaderColumn(DATA_COLUMN_DelM);
-            AddHeaderColumn(DATA_COLUMN_DelM_PPM);
-            AddHeaderColumn(DATA_COLUMN_MH);
-            AddHeaderColumn(DATA_COLUMN_Peptide);
-            AddHeaderColumn(DATA_COLUMN_Protein);
-            AddHeaderColumn(DATA_COLUMN_Protein_Mass);
-            AddHeaderColumn(DATA_COLUMN_Unexpected_Mod_Count);
-            AddHeaderColumn(DATA_COLUMN_Peak_Count);
-            AddHeaderColumn(DATA_COLUMN_Matched_Peak_Count);
-            AddHeaderColumn(DATA_COLUMN_Matched_Fragment_Ion_Count);
-            AddHeaderColumn(DATA_COLUMN_PValue);
-            AddHeaderColumn(DATA_COLUMN_Rank_PValue);
-            AddHeaderColumn(DATA_COLUMN_EValue);
-            AddHeaderColumn(DATA_COLUMN_FDR);
-            AddHeaderColumn(DATA_COLUMN_Species_ID);
-            AddHeaderColumn(DATA_COLUMN_FragMethod);
-        }
-
-        /// <summary>
         /// Determines the precursor mass tolerance
         /// </summary>
         /// <param name="searchEngineParams"></param>
@@ -182,13 +181,59 @@ namespace PHRPReader
             if (searchEngineParams.Parameters.TryGetValue("errorTolerance", out var tolerance))
             {
                 // Parent mass tolerance, in ppm
-                if (double.TryParse(tolerance, out tolerancePPM))
+                if (Double.TryParse(tolerance, out tolerancePPM))
                 {
                     toleranceDa = clsPeptideMassCalculator.PPMToMass(tolerancePPM, 2000);
                 }
             }
 
             return toleranceDa;
+        }
+
+        /// <summary>
+        /// Get the header names in the PHRP synopsis or first hits file for this tool
+        /// </summary>
+        /// <returns></returns>
+        protected override List<string> GetColumnHeaderNames()
+        {
+            var headerNames = new List<string>();
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            return headerNames;
+        }
+
+        /// <summary>
+        /// Header names and enums for the PHRP synopsis file for this tool
+        /// </summary>
+        /// <returns></returns>
+        public static SortedDictionary<string, MSAlignSynFileColumns> GetColumnHeaderNamesAndIDs()
+        {
+            var headerColumns = new SortedDictionary<string, MSAlignSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            {
+                {DATA_COLUMN_ResultID, MSAlignSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, MSAlignSynFileColumns.Scan},
+                {DATA_COLUMN_Prsm_ID, MSAlignSynFileColumns.Prsm_ID},
+                {DATA_COLUMN_Spectrum_ID, MSAlignSynFileColumns.Spectrum_ID},
+                {DATA_COLUMN_Charge, MSAlignSynFileColumns.Charge},
+                {DATA_COLUMN_PrecursorMZ, MSAlignSynFileColumns.PrecursorMZ},
+                {DATA_COLUMN_DelM, MSAlignSynFileColumns.DelM},
+                {DATA_COLUMN_DelM_PPM, MSAlignSynFileColumns.DelMPPM},
+                {DATA_COLUMN_MH, MSAlignSynFileColumns.MH},
+                {DATA_COLUMN_Peptide, MSAlignSynFileColumns.Peptide},
+                {DATA_COLUMN_Protein, MSAlignSynFileColumns.Protein},
+                {DATA_COLUMN_Protein_Mass, MSAlignSynFileColumns.Protein_Mass},
+                {DATA_COLUMN_Unexpected_Mod_Count, MSAlignSynFileColumns.Unexpected_Mod_Count},
+                {DATA_COLUMN_Peak_Count, MSAlignSynFileColumns.Peak_Count},
+                {DATA_COLUMN_Matched_Peak_Count, MSAlignSynFileColumns.Matched_Peak_Count},
+                {DATA_COLUMN_Matched_Fragment_Ion_Count, MSAlignSynFileColumns.Matched_Fragment_Ion_Count},
+                {DATA_COLUMN_PValue, MSAlignSynFileColumns.PValue},
+                {DATA_COLUMN_Rank_PValue, MSAlignSynFileColumns.Rank_PValue},
+                {DATA_COLUMN_EValue, MSAlignSynFileColumns.EValue},
+                {DATA_COLUMN_FDR, MSAlignSynFileColumns.FDR},
+                {DATA_COLUMN_Species_ID, MSAlignSynFileColumns.Species_ID},
+                {DATA_COLUMN_FragMethod, MSAlignSynFileColumns.FragMethod}
+            };
+
+            return headerColumns;
         }
 
         /// <summary>
@@ -362,6 +407,8 @@ namespace PHRPReader
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
+            const int SCAN_NOT_FOUND_FLAG = -100;
+
             var columns = line.Split('\t');
 
             var success = false;
@@ -371,8 +418,8 @@ namespace PHRPReader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, -100);
-                if (psm.ScanNumber == -100)
+                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }

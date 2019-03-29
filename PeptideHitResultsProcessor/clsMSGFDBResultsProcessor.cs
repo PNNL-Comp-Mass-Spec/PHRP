@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSGFDBResultsProcessor()
         {
-            mFileDate = "October 24, 2018";
+            mFileDate = "March 28, 2019";
             mModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
@@ -78,9 +78,10 @@ namespace PeptideHitResultsProcessor
 
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
-        // These columns correspond to the tab-delimited file created directly by MSGF+
-        private const int MSGFDBResultsFileColCount = 20;
-        public enum eMSGFDBResultsFileColumns
+        /// <summary>
+        /// These columns correspond to the tab-delimited file created directly by MSGF+
+        /// </summary>
+        public enum eMSGFPlusResultsFileColumns
         {
             SpectrumFile = 0,
             SpecIndex = 1,               // SpecID in MSGF+
@@ -104,37 +105,6 @@ namespace PeptideHitResultsProcessor
             IsotopeError = 19            // Only reported by MSGF+
         }
 
-        // These columns correspond to the Synopsis and First-Hits files created by this class
-        private const int MSGFDBSynFileColCount = 23;
-        public enum eMSFGDBSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            FragMethod = 2,
-            SpecIndex = 3,
-            Charge = 4,
-            PrecursorMZ = 5,
-            DelM = 6,                            // Precursor error, in Da; if the search used a tolerance less than 0.5 Da or less than 500 ppm, this value is computed from the DelMPPM value
-            DelMPPM = 7,                         // Precursor error, in ppm; corrected for isotope selection errors
-            MH = 8,                              // Theoretical monoisotopic peptide mass (computed by PHRP)
-            Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification symbols
-            Protein = 10,                        // Protein Name (remove description)
-            NTT = 11,                            // Number of tryptic terminii
-            DeNovoScore = 12,
-            MSGFScore = 13,
-            SpecProb_EValue = 14,
-            RankSpecProb = 15,                   // Rank 1 means lowest SpecEValue, 2 means next higher score, etc. (ties get the same rank)
-            PValue_EValue = 16,
-            FDR_QValue = 17,                     // Only present if searched using -tda 1
-            PepFDR_PepQValue = 18,               // Only present if searched using -tda 1
-            EFDR = 19,                           // Only present if did not search using -tda 1
-            // ReSharper disable UnusedMember.Global
-            IMSScan = 20,                        // Only present for MSGFDB_IMS results
-            IMSDriftTime = 21,                   // Only present for MSGFDB_IMS results
-            // ReSharper restore UnusedMember.Global
-            IsotopeError = 22
-        }
-
         private enum eFilteredOutputFileTypeConstants
         {
             SynFile = 0,
@@ -144,7 +114,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Structures"
-        private struct udtMSGFDBSearchResultType
+        private struct udtMSGFPlusSearchResultType
         {
             // ReSharper disable once NotAccessedField.Local
             public string SpectrumFileName;
@@ -427,8 +397,8 @@ namespace PeptideHitResultsProcessor
         }
 
         private void AppendToSearchResults(
-            ICollection<udtMSGFDBSearchResultType> searchResults,
-            udtMSGFDBSearchResultType udtSearchResult,
+            ICollection<udtMSGFPlusSearchResultType> searchResults,
+            udtMSGFPlusSearchResultType udtSearchResult,
             Dictionary<string, udtTerminusCharsType> proteinInfo)
         {
             if (proteinInfo.Count == 0)
@@ -455,7 +425,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="endIndex">End index for data in this scan</param>
         /// <remarks></remarks>
         private void AssignRankAndDeltaNormValues(
-            IList<udtMSGFDBSearchResultType> searchResults,
+            IList<udtMSGFPlusSearchResultType> searchResults,
             int startIndex,
             int endIndex)
         {
@@ -473,7 +443,7 @@ namespace PeptideHitResultsProcessor
 
             // Duplicate a portion of udtSearchResults so that we can sort by ascending Spectral Probability
 
-            var dctResultsSubset = new Dictionary<int, udtMSGFDBSearchResultType>();
+            var dctResultsSubset = new Dictionary<int, udtMSGFPlusSearchResultType>();
             for (var index = startIndex; index <= endIndex; index++)
             {
                 dctResultsSubset.Add(index, searchResults[index]);
@@ -644,7 +614,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modDigits">Example: +57.021 or +79.9663+14.0157 or -18.0106</param>
         /// <param name="modSymbols"></param>
         /// <param name="dynModSymbols"></param>
-        /// <param name="msgfDbModInfo"></param>
+        /// <param name="msgfPlusModInfo"></param>
         /// <param name="nTerminalMod"></param>
         /// <param name="possibleCTerminalMod"></param>
         /// <param name="modMassFound"></param>
@@ -656,7 +626,7 @@ namespace PeptideHitResultsProcessor
             string modDigits,
             out string modSymbols,
             out string dynModSymbols,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfDbModInfo,
+            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             bool nTerminalMod,
             bool possibleCTerminalMod,
             out double modMassFound,
@@ -690,15 +660,15 @@ namespace PeptideHitResultsProcessor
                     bestMatchIndex = -1;
 
                     // Step through the known modifications to find the closest match
-                    for (var index = 0; index <= msgfDbModInfo.Count - 1; index++)
+                    for (var index = 0; index <= msgfPlusModInfo.Count - 1; index++)
                     {
                         var testMod = true;
 
                         if (nTerminalMod)
                         {
                             // Only test N-terminal mods
-                            if (!(msgfDbModInfo[index].ModType == clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynNTermPeptide ||
-                                  msgfDbModInfo[index].ModType == clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynNTermProtein))
+                            if (!(msgfPlusModInfo[index].ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.DynNTermPeptide ||
+                                  msgfPlusModInfo[index].ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.DynNTermProtein))
                             {
                                 testMod = false;
                             }
@@ -706,8 +676,8 @@ namespace PeptideHitResultsProcessor
                         else if (!possibleCTerminalMod)
                         {
                             // Skip C-terminal mods since we're not at the C-terminus
-                            if (msgfDbModInfo[index].ModType == clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynCTermPeptide ||
-                                msgfDbModInfo[index].ModType == clsMSGFPlusParamFileModExtractor.eMSGFDBModType.DynCTermProtein)
+                            if (msgfPlusModInfo[index].ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.DynCTermPeptide ||
+                                msgfPlusModInfo[index].ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.DynCTermProtein)
                             {
                                 testMod = false;
                             }
@@ -716,7 +686,7 @@ namespace PeptideHitResultsProcessor
                         if (!testMod)
                             continue;
 
-                        var candidateMassDiff = Math.Abs(msgfDbModInfo[index].ModMassVal - modMass);
+                        var candidateMassDiff = Math.Abs(msgfPlusModInfo[index].ModMassVal - modMass);
                         if (!(candidateMassDiff < 0.25))
                             continue;
 
@@ -730,7 +700,7 @@ namespace PeptideHitResultsProcessor
                         }
                         else if (Math.Abs(candidateMassDiff - bestMassDiff) < float.Epsilon &&
                                  symbolBestMatch == '-' &&
-                                 msgfDbModInfo[index].ModSymbol != '-')
+                                 msgfPlusModInfo[index].ModSymbol != '-')
                         {
                             // Masses are the same, but the existing candidate is a static mod
 
@@ -738,7 +708,7 @@ namespace PeptideHitResultsProcessor
                             // the residues for the new candidate does contain the residue
 
                             if (!residuesBestBatch.Contains(currentResidue) &&
-                                msgfDbModInfo[index].Residues.Contains(currentResidue))
+                                msgfPlusModInfo[index].Residues.Contains(currentResidue))
                             {
                                 updateCandidate = true;
                             }
@@ -748,8 +718,8 @@ namespace PeptideHitResultsProcessor
                         {
                             bestMatchIndex = index;
                             bestMassDiff = candidateMassDiff;
-                            symbolBestMatch = msgfDbModInfo[index].ModSymbol;
-                            residuesBestBatch = string.Copy(msgfDbModInfo[index].Residues);
+                            symbolBestMatch = msgfPlusModInfo[index].ModSymbol;
+                            residuesBestBatch = string.Copy(msgfPlusModInfo[index].Residues);
                             matchFound = true;
                         }
                     }
@@ -774,16 +744,16 @@ namespace PeptideHitResultsProcessor
                 if (matchFound)
                 {
                     // Match found; use the mod symbol
-                    modSymbols += msgfDbModInfo[bestMatchIndex].ModSymbol;
+                    modSymbols += msgfPlusModInfo[bestMatchIndex].ModSymbol;
                     modSymbolsFound += 1;
 
-                    if (msgfDbModInfo[bestMatchIndex].ModType == clsMSGFPlusParamFileModExtractor.eMSGFDBModType.StaticMod)
+                    if (msgfPlusModInfo[bestMatchIndex].ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.StaticMod)
                     {
                         containsStaticMod = true;
                     }
                     else
                     {
-                        dynModSymbols += msgfDbModInfo[bestMatchIndex].ModSymbol;
+                        dynModSymbols += msgfPlusModInfo[bestMatchIndex].ModSymbol;
                     }
                 }
                 else
@@ -804,7 +774,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
         /// <param name="scanGroupFilePath"></param>
-        /// <param name="msgfDbModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
+        /// <param name="msgfPlusModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
         /// <param name="isMsgfPlus">Output parameter: this function will set this to True if we're processing MSGF+ results</param>
         /// <param name="specIdToIndex"></param>
         /// <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
@@ -814,14 +784,14 @@ namespace PeptideHitResultsProcessor
             string inputFilePath,
             string outputFilePath,
             string scanGroupFilePath,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfDbModInfo,
+            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             out bool isMsgfPlus,
             IDictionary<string, int> specIdToIndex,
             eFilteredOutputFileTypeConstants eFilteredOutputFileType)
         {
 
-            var searchResultsCurrentScan = new List<udtMSGFDBSearchResultType>();
-            var searchResultsPrefiltered = new List<udtMSGFDBSearchResultType>();
+            var searchResultsCurrentScan = new List<udtMSGFPlusSearchResultType>();
+            var searchResultsPrefiltered = new List<udtMSGFPlusSearchResultType>();
 
             isMsgfPlus = false;
 
@@ -833,9 +803,9 @@ namespace PeptideHitResultsProcessor
                 mPrecursorMassErrorWarningCount = 0;
 
                 // Look for custom amino acids
-                var customAA = (from item in msgfDbModInfo
-                                   where item.ModType == clsMSGFPlusParamFileModExtractor.eMSGFDBModType.CustomAA
-                                   select item).ToList();
+                var customAA = (from item in msgfPlusModInfo
+                                where item.ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.CustomAA
+                                select item).ToList();
 
                 foreach (var customAADef in customAA)
                 {
@@ -877,14 +847,14 @@ namespace PeptideHitResultsProcessor
                             scanGroupCombo.Clear();
 
                             // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                            var filteredSearchResults = new List<udtMSGFDBSearchResultType>();
+                            var filteredSearchResults = new List<udtMSGFPlusSearchResultType>();
 
                             // Initialize a dictionary that tracks the peptide sequence for each combo of scan and charge
                             // Keys are Scan_Charge, values track the clean sequence, the associated protein name, and the protein number for that name
                             // Note that we can only track protein numbers if the FASTA file path was provided at the command line
                             var scanChargeFirstHit = new Dictionary<string, clsFirstHitInfo>();
 
-                            int[] columnMapping = null;
+                            var columnMapping = new Dictionary<eMSGFPlusResultsFileColumns, int>();
 
                             // Parse the input file
                             while (!reader.EndOfStream & !AbortProcessing)
@@ -897,7 +867,7 @@ namespace PeptideHitResultsProcessor
 
                                 if (!headerParsed)
                                 {
-                                    var success = ParseMSGFDBResultsFileHeaderLine(lineIn, out columnMapping);
+                                    var success = ParseMSGFPlusResultsFileHeaderLine(lineIn, columnMapping);
                                     if (!success)
                                     {
                                         // Error parsing header
@@ -906,32 +876,32 @@ namespace PeptideHitResultsProcessor
                                     }
                                     headerParsed = true;
 
-                                    if (columnMapping[(int)eMSGFDBResultsFileColumns.FDR_QValue] >= 0 || columnMapping[(int)eMSGFDBResultsFileColumns.PepFDR_PepQValue] >= 0)
+                                    if (columnMapping[eMSGFPlusResultsFileColumns.FDR_QValue] >= 0 || columnMapping[eMSGFPlusResultsFileColumns.PepFDR_PepQValue] >= 0)
                                     {
                                         includeFDRandPepFDR = true;
                                     }
-                                    else if (columnMapping[(int)eMSGFDBResultsFileColumns.EFDR] >= 0)
+                                    else if (columnMapping[eMSGFPlusResultsFileColumns.EFDR] >= 0)
                                     {
                                         includeEFDR = true;
                                     }
 
-                                    if (columnMapping[(int)eMSGFDBResultsFileColumns.IMSDriftTime] >= 0)
+                                    if (columnMapping[eMSGFPlusResultsFileColumns.IMSDriftTime] >= 0)
                                     {
                                         includeIMSFields = true;
                                     }
 
-                                    if (columnMapping[(int)eMSGFDBResultsFileColumns.IsotopeError] >= 0)
+                                    if (columnMapping[eMSGFPlusResultsFileColumns.IsotopeError] >= 0)
                                     {
                                         isMsgfPlus = true;
                                     }
 
                                     // Write the header line
-                                    WriteSynFHTFileHeader(writer, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields,
-                                        isMsgfPlus);
+                                    WriteSynFHTFileHeader(writer, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+
                                     continue;
                                 }
 
-                                var validSearchResult = ParseMSGFDBResultsFileEntry(lineIn, isMsgfPlus, msgfDbModInfo,
+                                var validSearchResult = ParseMSGFPlusResultsFileEntry(lineIn, isMsgfPlus, msgfPlusModInfo,
                                                                                    searchResultsCurrentScan, ref errorLog,
                                                                                    columnMapping, ref nextScanGroupID, scanGroupDetails, scanGroupCombo, specIdToIndex);
 
@@ -1239,7 +1209,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="pepToProteinMapFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
-        /// <param name="msgfDbModInfo"></param>
+        /// <param name="msgfPlusModInfo"></param>
         /// <param name="isMsgfPlus">Should be set to True if processing MSGF+ results</param>
         /// <param name="pepToProteinMapping"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
@@ -1248,7 +1218,7 @@ namespace PeptideHitResultsProcessor
         private bool LoadPeptideToProteinMapInfoMSGFDB(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfDbModInfo,
+            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             bool isMsgfPlus,
             List<udtPepToProteinMappingType> pepToProteinMapping,
             out string mtsPepToProteinMapFilePath)
@@ -1310,7 +1280,7 @@ namespace PeptideHitResultsProcessor
                         // Replace any mod text names in the peptide sequence with the appropriate mod symbols
                         // In addition, replace the * terminus symbols with dashes
                         var mtsCompatiblePeptide = ReplaceMSGFModTextWithSymbol(ReplaceTerminus(pepToProteinMapping[index].Peptide),
-                                                                               msgfDbModInfo, isMsgfPlus, out _);
+                                                                               msgfPlusModInfo, isMsgfPlus, out _);
 
                         if (pepToProteinMapping[index].Peptide != mtsCompatiblePeptide)
                         {
@@ -1392,11 +1362,11 @@ namespace PeptideHitResultsProcessor
             SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
         }
 
-        private bool MSGFPlusResultPassesSynFilter(udtMSGFDBSearchResultType udtMsgfdbSearchResultType)
+        private bool MSGFPlusResultPassesSynFilter(udtMSGFPlusSearchResultType udtMSGFPlusSearchResultType)
         {
-            if (udtMsgfdbSearchResultType.EValueNum <= MSGFPlusSynopsisFileEValueThreshold ||
-                udtMsgfdbSearchResultType.SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold ||
-                udtMsgfdbSearchResultType.QValueNum > 0 && udtMsgfdbSearchResultType.QValueNum < 0.01)
+            if (udtMSGFPlusSearchResultType.EValueNum <= MSGFPlusSynopsisFileEValueThreshold ||
+                udtMSGFPlusSearchResultType.SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold ||
+                udtMSGFPlusSearchResultType.QValueNum > 0 && udtMSGFPlusSearchResultType.QValueNum < 0.01)
             {
                 return true;
             }
@@ -1404,7 +1374,7 @@ namespace PeptideHitResultsProcessor
             return false;
         }
 
-        private bool ParseMSGFDBSynopsisFile(
+        private bool ParseMSGFPlusSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
             List<udtPepToProteinMappingType> pepToProteinMapping,
@@ -1463,7 +1433,7 @@ namespace PeptideHitResultsProcessor
                         var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
                         InitializeSequenceOutputFiles(baseOutputFilePath);
 
-                        int[] columnMapping = null;
+                        var columnMapping = new Dictionary<clsPHRPParserMSGFDB.MSGFPlusSynFileColumns, int>();
 
                         // Parse the input file
                         while (!reader.EndOfStream & !AbortProcessing)
@@ -1476,7 +1446,7 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                var success = ParseMSGFDBSynFileHeaderLine(lineIn, out columnMapping);
+                                var success = ParseMSGFPlusSynFileHeaderLine(lineIn, columnMapping);
                                 if (!success)
                                 {
                                     // Error parsing header
@@ -1487,7 +1457,7 @@ namespace PeptideHitResultsProcessor
                                 continue;
                             }
 
-                            var validSearchResult = ParseMSGFDBSynFileEntry(lineIn, searchResult, ref errorLog,
+                            var validSearchResult = ParseMSGFPlusSynFileEntry(lineIn, searchResult, ref errorLog,
                                                                            resultsProcessed, columnMapping,
                                                                            out var currentPeptideWithMods);
 
@@ -1618,13 +1588,13 @@ namespace PeptideHitResultsProcessor
 
         }
 
-        private bool ParseMSGFDBResultsFileEntry(
+        private bool ParseMSGFPlusResultsFileEntry(
             string lineIn,
             bool isMsgfPlus,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfDbModInfo,
-            ICollection<udtMSGFDBSearchResultType> searchResultsCurrentScan,
+            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            ICollection<udtMSGFPlusSearchResultType> searchResultsCurrentScan,
             ref string errorLog,
-            IList<int> columnMapping,
+            IDictionary<eMSGFPlusResultsFileColumns, int> columnMapping,
             ref int nextScanGroupID,
             ICollection<udtScanGroupInfoType> scanGroupDetails,
             IDictionary<string, bool> scanGroupCombo,
@@ -1632,10 +1602,10 @@ namespace PeptideHitResultsProcessor
         {
             // Parses an entry from the MSGF+ results file
 
-            var udtSearchResult = new udtMSGFDBSearchResultType();
+            var udtSearchResult = new udtMSGFPlusSearchResultType();
             string rowIndex = null;
 
-            udtMSGFDBSearchResultType[] udtMergedScanInfo = null;
+            udtMSGFPlusSearchResultType[] udtMergedScanInfo = null;
 
             try
             {
@@ -1656,12 +1626,12 @@ namespace PeptideHitResultsProcessor
 
                 rowIndex = splitLine[0];
 
-                if (!GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.SpectrumFile],
+                if (!GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.SpectrumFile],
                                     out udtSearchResult.SpectrumFileName))
                 {
                     ReportError("SpectrumFile column is missing or invalid", true);
                 }
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.SpecIndex], out udtSearchResult.SpecIndex);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.SpecIndex], out udtSearchResult.SpecIndex);
 
                 if (isMsgfPlus)
                 {
@@ -1694,12 +1664,12 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.Scan], out udtSearchResult.Scan))
+                if (!GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.Scan], out udtSearchResult.Scan))
                 {
                     ReportError("Scan column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
 
                 var slashIndex = udtSearchResult.Scan.IndexOf('/');
                 int scanCount;
@@ -1711,11 +1681,11 @@ namespace PeptideHitResultsProcessor
 
                     var splitResult = udtSearchResult.Scan.Split('/');
                     scanCount = splitResult.Length;
-                    udtMergedScanInfo = new udtMSGFDBSearchResultType[scanCount];
+                    udtMergedScanInfo = new udtMSGFPlusSearchResultType[scanCount];
 
                     for (var index = 0; index <= scanCount - 1; index++)
                     {
-                        udtMergedScanInfo[index] = new udtMSGFDBSearchResultType();
+                        udtMergedScanInfo[index] = new udtMSGFPlusSearchResultType();
                         udtMergedScanInfo[index].Clear();
                         udtMergedScanInfo[index].Scan = splitResult[index];
                         udtMergedScanInfo[index].ScanNum = CIntSafe(splitResult[index], 0);
@@ -1753,9 +1723,9 @@ namespace PeptideHitResultsProcessor
                     scanCount = 1;
                 }
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.PrecursorMZ], out udtSearchResult.PrecursorMZ);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.PrecursorMZ], out udtSearchResult.PrecursorMZ);
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.Charge], out udtSearchResult.Charge);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
                 udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
                 // Precursor mass error could be in PPM or Da
@@ -1763,23 +1733,23 @@ namespace PeptideHitResultsProcessor
                 //   In MSGF+,  the header line will have PrecursorError(ppm) or PrecursorError(Da)
                 double precursorErrorDa = 0;
 
-                if (columnMapping[(int)eMSGFDBResultsFileColumns.PMErrorPPM] >= 0)
+                if (columnMapping[eMSGFPlusResultsFileColumns.PMErrorPPM] >= 0)
                 {
-                    GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.PMErrorPPM], out udtSearchResult.PMErrorPPM);
+                    GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.PMErrorPPM], out udtSearchResult.PMErrorPPM);
                 }
                 else
                 {
-                    GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.PMErrorDa], out udtSearchResult.PMErrorDa);
+                    GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.PMErrorDa], out udtSearchResult.PMErrorDa);
                     precursorErrorDa = CDblSafe(udtSearchResult.PMErrorDa, 0);
                     udtSearchResult.PMErrorPPM = string.Empty; // We'll populate this column later in this function
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.Peptide], out udtSearchResult.Peptide))
+                if (!GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.Peptide], out udtSearchResult.Peptide))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.Protein], out udtSearchResult.Protein);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.Protein], out udtSearchResult.Protein);
 
                 // MSGF+ .tsv files may have a semicolon separated list of protein names; check for this
                 udtSearchResult.Protein = SplitProteinList(udtSearchResult.Protein, proteinInfo);
@@ -1793,7 +1763,7 @@ namespace PeptideHitResultsProcessor
                 // Replace any mod text values in the peptide sequence with the appropriate mod symbols
                 // In addition, replace the terminus symbols with dashes
                 udtSearchResult.Peptide =
-                    ReplaceMSGFModTextWithSymbol(ReplaceTerminus(udtSearchResult.Peptide), msgfDbModInfo, isMsgfPlus,
+                    ReplaceMSGFModTextWithSymbol(ReplaceTerminus(udtSearchResult.Peptide), msgfPlusModInfo, isMsgfPlus,
                                                  out var totalModMass);
 
                 // Compute monoisotopic mass of the peptide
@@ -1870,35 +1840,35 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.DeNovoScore], out udtSearchResult.DeNovoScore);
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.MSGFScore], out udtSearchResult.MSGFScore);
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.SpecProb_EValue], out udtSearchResult.SpecEValue);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.DeNovoScore], out udtSearchResult.DeNovoScore);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.MSGFScore], out udtSearchResult.MSGFScore);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.SpecProb_EValue], out udtSearchResult.SpecEValue);
                 if (!double.TryParse(udtSearchResult.SpecEValue, out udtSearchResult.SpecEValueNum))
                     udtSearchResult.SpecEValueNum = 0;
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.PValue_EValue], out udtSearchResult.EValue);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.PValue_EValue], out udtSearchResult.EValue);
                 if (!double.TryParse(udtSearchResult.EValue, out udtSearchResult.EValueNum))
                     udtSearchResult.EValueNum = 0;
 
-                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.FDR_QValue],
+                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.FDR_QValue],
                                                             out udtSearchResult.QValue);
                 if (!double.TryParse(udtSearchResult.QValue, out udtSearchResult.QValueNum))
                     udtSearchResult.QValueNum = 0;
 
                 if (targetDecoyFDRValid)
                 {
-                    GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.PepFDR_PepQValue],
+                    GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.PepFDR_PepQValue],
                                    out udtSearchResult.PepQValue);
                 }
                 else
                 {
-                    GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.EFDR], out udtSearchResult.QValue);
+                    GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.EFDR], out udtSearchResult.QValue);
                 }
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.IsotopeError], out udtSearchResult.IsotopeError);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.IsotopeError], out udtSearchResult.IsotopeError);
 
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.IMSScan], out udtSearchResult.IMSScan);
-                GetColumnValue(splitLine, columnMapping[(int)eMSGFDBResultsFileColumns.IMSDriftTime], out udtSearchResult.IMSDriftTime);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.IMSScan], out udtSearchResult.IMSScan);
+                GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.IMSDriftTime], out udtSearchResult.IMSDriftTime);
 
                 udtSearchResult.NTT = ComputeCleavageState(udtSearchResult.Peptide).ToString();
 
@@ -1947,12 +1917,12 @@ namespace PeptideHitResultsProcessor
                 {
                     if (!string.IsNullOrEmpty(rowIndex))
                     {
-                        errorLog += "Error parsing MSGF+ Results in ParseMSGFDBResultsFileEntry for RowIndex '" + rowIndex + "'" +
+                        errorLog += "Error parsing MSGF+ Results in ParseMSGFPlusResultsFileEntry for RowIndex '" + rowIndex + "'" +
                                        "\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing MSGF+ Results in ParseMSGFDBResultsFileEntry" + "\n";
+                        errorLog += "Error parsing MSGF+ Results in ParseMSGFPlusResultsFileEntry" + "\n";
                     }
                 }
                 return false;
@@ -1960,7 +1930,7 @@ namespace PeptideHitResultsProcessor
 
         }
 
-        private bool ParseMSGFDBResultsFileHeaderLine(string lineIn, out int[] columnMapping)
+        private bool ParseMSGFPlusResultsFileHeaderLine(string lineIn, IDictionary<eMSGFPlusResultsFileColumns, int> columnMapping)
         {
             // Parse the header line
 
@@ -2006,14 +1976,14 @@ namespace PeptideHitResultsProcessor
                 {clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time, eMSGFPlusResultsFileColumns.IMSDriftTime}
             };
 
-            columnMapping = new int[MSGFDBResultsFileColCount];
+            columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                for (var index = 0; index <= columnMapping.Length - 1; index++)
+                foreach (eMSGFPlusResultsFileColumns resultColumn in Enum.GetValues(typeof(eMSGFPlusResultsFileColumns)))
                 {
-                    columnMapping[index] = -1;
+                    columnMapping.Add(resultColumn, -1);
                 }
 
                 var splitLine = lineIn.Split('\t');
@@ -2022,66 +1992,38 @@ namespace PeptideHitResultsProcessor
                     if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[(int)eResultFileColumn] = index;
+                        columnMapping[eResultFileColumn] = index;
                     }
                     else
                     {
                         // Unrecognized column name
-                        Console.WriteLine("Warning: Unrecognized column header name '" + splitLine[index] + "' in ParseMSGFDBResultsFileHeaderLine");
+                        Console.WriteLine("Warning: Unrecognized column header name '" + splitLine[index] + "' in ParseMSGFPlusResultsFileHeaderLine");
                     }
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MSGFDB results file: " + ex.Message, ex);
+                SetErrorMessage("Error parsing header in MSGFPlus results file: " + ex.Message, ex);
                 return false;
             }
 
             return true;
         }
 
-        private bool ParseMSGFDBSynFileHeaderLine(string lineIn, out int[] columnMapping)
+        private bool ParseMSGFPlusSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSGFDB.MSGFPlusSynFileColumns, int> columnMapping)
         {
             // Parse the header line
 
-            var columnNames = new SortedDictionary<string, eMSFGDBSynFileColumns>(StringComparer.InvariantCultureIgnoreCase)
-            {
-                {clsPHRPParserMSGFDB.DATA_COLUMN_ResultID, eMSFGDBSynFileColumns.ResultID},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_Scan, eMSFGDBSynFileColumns.Scan},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_FragMethod, eMSFGDBSynFileColumns.FragMethod},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_SpecIndex, eMSFGDBSynFileColumns.SpecIndex},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_Charge, eMSFGDBSynFileColumns.Charge},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_PrecursorMZ, eMSFGDBSynFileColumns.PrecursorMZ},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_DelM, eMSFGDBSynFileColumns.DelM},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_DelM_PPM, eMSFGDBSynFileColumns.DelMPPM},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_MH, eMSFGDBSynFileColumns.MH},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_Peptide, eMSFGDBSynFileColumns.Peptide},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_Protein, eMSFGDBSynFileColumns.Protein},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_NTT, eMSFGDBSynFileColumns.NTT},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore, eMSFGDBSynFileColumns.DeNovoScore},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, eMSFGDBSynFileColumns.MSGFScore},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb, eMSFGDBSynFileColumns.SpecProb_EValue},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue, eMSFGDBSynFileColumns.SpecProb_EValue},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFDB_SpecProb, eMSFGDBSynFileColumns.RankSpecProb},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, eMSFGDBSynFileColumns.RankSpecProb},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_PValue, eMSFGDBSynFileColumns.PValue_EValue},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_EValue, eMSFGDBSynFileColumns.PValue_EValue},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_FDR, eMSFGDBSynFileColumns.FDR_QValue},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_QValue, eMSFGDBSynFileColumns.FDR_QValue},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_PepFDR, eMSFGDBSynFileColumns.PepFDR_PepQValue},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_PepQValue, eMSFGDBSynFileColumns.PepFDR_PepQValue},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_EFDR, eMSFGDBSynFileColumns.EFDR},
-                {clsPHRPParserMSGFDB.DATA_COLUMN_Isotope_Error, eMSFGDBSynFileColumns.IsotopeError}
-            };
+            var columnNames = clsPHRPParserMSGFDB.GetColumnHeaderNamesAndIDs();
 
-            columnMapping = new int[MSGFDBSynFileColCount];
+            columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                for (var index = 0; index <= columnMapping.Length - 1; index++)
+                foreach (clsPHRPParserMSGFDB.MSGFPlusSynFileColumns resultColumn in Enum.GetValues(typeof(clsPHRPParserMSGFDB.MSGFPlusSynFileColumns)))
                 {
-                    columnMapping[index] = -1;
+                    columnMapping.Add(resultColumn, -1);
                 }
 
                 var splitLine = lineIn.Split('\t');
@@ -2090,25 +2032,25 @@ namespace PeptideHitResultsProcessor
                     if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[(int)eResultFileColumn] = index;
+                        columnMapping[eResultFileColumn] = index;
                     }
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error parsing header in MSGFDB synopsis file: " + ex.Message, ex);
+                SetErrorMessage("Error parsing header in MSGFPlus synopsis file: " + ex.Message, ex);
                 return false;
             }
 
             return true;
         }
 
-        private bool ParseMSGFDBSynFileEntry(
+        private bool ParseMSGFPlusSynFileEntry(
             string lineIn,
             clsSearchResultsMSGFDB searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IReadOnlyList<int> columnMapping,
+            IDictionary<clsPHRPParserMSGFDB.MSGFPlusSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
             // Parses an entry from the MSGFDB Synopsis file
@@ -2130,39 +2072,39 @@ namespace PeptideHitResultsProcessor
 
                 if (splitLine.Length >= 15)
                 {
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.ResultID], out string value))
+                    if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.ResultID], out string value))
                     {
                         if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                         {
-                            errorLog += "Error reading ResultID value from MSGFDB Results line " + (resultsProcessed + 1) +
-                                           "\n";
+                            errorLog += "Error reading ResultID value from MSGF+ Results line " +
+                                        (resultsProcessed + 1) + "\n";
                         }
                         return false;
                     }
 
                     searchResult.ResultID = int.Parse(value);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.Scan], out string scan);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.Charge], out string charge);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.Scan], out string scan);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.Charge], out string charge);
 
                     searchResult.Scan = scan;
                     searchResult.Charge = charge;
 
-                    if (!GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.Peptide], out peptideSequenceWithMods))
+                    if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
                     {
                         if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                         {
-                            errorLog += "Error reading Peptide sequence value from MSGFDB Results line " + (resultsProcessed + 1) +
-                                           "\n";
+                            errorLog += "Error reading Peptide sequence value from MSGF+ Results line " +
+                                        (resultsProcessed + 1) + "\n";
                         }
                         return false;
                     }
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.Protein], out string proteinName);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.Protein], out string proteinName);
                     searchResult.MultipleProteinCount = "0";
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.DelM], out string msgfPlusComputedDelM);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.DelMPPM], out string msgfPlusComputedDelMppm);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.DelM], out string msgfPlusComputedDelM);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.DelMPPM], out string msgfPlusComputedDelMppm);
 
                     searchResult.ProteinName = proteinName;
                     searchResult.MSGFPlusComputedDelM = msgfPlusComputedDelM;
@@ -2195,18 +2137,18 @@ namespace PeptideHitResultsProcessor
                     searchResult.ComputePeptideCleavageStateInProtein();
 
                     // Read the remaining data values
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.FragMethod], out string fragMethod);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.PrecursorMZ], out string precursorMz);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.FragMethod], out string fragMethod);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.MH], out string peptideMh);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.NTT], out string ntt);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.DeNovoScore], out string deNovoScore);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.MSGFScore], out string msgfScore);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.SpecProb_EValue], out string specEValue);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.RankSpecProb], out string rankSpecEValue);
-                    GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.PValue_EValue], out string eValue);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.MH], out string peptideMh);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.NTT], out string ntt);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.DeNovoScore], out string deNovoScore);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.MSGFScore], out string msgfScore);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.SpecProb_EValue], out string specEValue);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.RankSpecProb], out string rankSpecEValue);
+                    GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.PValue_EValue], out string eValue);
 
-                    var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.FDR_QValue], out string qValue);
+                    var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.FDR_QValue], out string qValue);
 
                     searchResult.FragMethod = fragMethod;
                     searchResult.PrecursorMZ = precursorMz;
@@ -2221,18 +2163,18 @@ namespace PeptideHitResultsProcessor
 
                     if (targetDecoyFDRValid)
                     {
-                        GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.PepFDR_PepQValue], out string pepQValue);
+                        GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.PepFDR_PepQValue], out string pepQValue);
                         searchResult.PepQValue = pepQValue;
                     }
                     else
                     {
-                        GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.EFDR], out string efdr);
+                        GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.EFDR], out string efdr);
                         searchResult.QValue = efdr;
                     }
 
-                    if (columnMapping[(int)eMSFGDBSynFileColumns.IsotopeError] >= 0)
+                    if (columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.IsotopeError] >= 0)
                     {
-                        GetColumnValue(splitLine, columnMapping[(int)eMSFGDBSynFileColumns.IsotopeError], out string isotopeError);
+                        GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.IsotopeError], out string isotopeError);
                         searchResult.IsotopeError = isotopeError;
                         searchResult.MSGFPlusResults = true;
                     }
@@ -2264,7 +2206,7 @@ namespace PeptideHitResultsProcessor
                     }
                     else
                     {
-                        errorLog += "Error parsing MSGFDB Results in ParseMSGFDBSynFileEntry" + "\n";
+                        errorLog += "Error parsing MSGFDB Results in ParseMSGFPlusSynFileEntry" + "\n";
                     }
                 }
                 validSearchResult = false;
@@ -2356,8 +2298,8 @@ namespace PeptideHitResultsProcessor
                     var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
                     // Load the MSGF+ Parameter File so that we can determine the modification names and masses
-                    // If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in msgfDbModInfo
-                    var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var msgfdbModInfo);
+                    // If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in msgfPlusModInfo
+                    var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var msgfPlusModInfo);
                     if (!modInfoExtracted)
                     {
                         return false;
@@ -2368,7 +2310,7 @@ namespace PeptideHitResultsProcessor
                         return false;
                     }
 
-                    var query = from item in msgfdbModInfo where item.ModType == clsMSGFPlusParamFileModExtractor.eMSGFDBModType.CustomAA select item;
+                    var query = from item in msgfPlusModInfo where item.ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.CustomAA select item;
                     if (query.Any())
                     {
                         // Custom amino acids are defined; read their values and update the mass calculator
@@ -2416,7 +2358,7 @@ namespace PeptideHitResultsProcessor
                         var scanGroupFilePath = string.Empty;
 
                         success = CreateFHTorSYNResultsFile(
-                            inputFilePath, fhtOutputFilePath, scanGroupFilePath, msgfdbModInfo,
+                            inputFilePath, fhtOutputFilePath, scanGroupFilePath, msgfPlusModInfo,
                             out _, specIdToIndex, eFilteredOutputFileTypeConstants.FHTFile);
                     }
                     else
@@ -2435,7 +2377,7 @@ namespace PeptideHitResultsProcessor
                         var scanGroupFilePath = Path.Combine(outputDirectoryPath, baseName + "_ScanGroupInfo.txt");
 
                         success = CreateFHTorSYNResultsFile(
-                            inputFilePath, synOutputFilePath, scanGroupFilePath, msgfdbModInfo,
+                            inputFilePath, synOutputFilePath, scanGroupFilePath, msgfPlusModInfo,
                             out var isMsgfPlus, specIdToIndex, eFilteredOutputFileTypeConstants.SynFile);
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
@@ -2444,13 +2386,13 @@ namespace PeptideHitResultsProcessor
 
                         ResetProgress("Loading the PepToProtein map file: " + Path.GetFileName(pepToProteinMapFilePath), true);
 
-                        LoadPeptideToProteinMapInfoMSGFDB(pepToProteinMapFilePath, outputDirectoryPath, msgfdbModInfo, isMsgfPlus, pepToProteinMapping, out var mtsPepToProteinMapFilePath);
+                        LoadPeptideToProteinMapInfoMSGFDB(pepToProteinMapFilePath, outputDirectoryPath, msgfPlusModInfo, isMsgfPlus, pepToProteinMapping, out var mtsPepToProteinMapFilePath);
 
                         // Create the other PHRP-specific files
                         ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
 
                         // Now parse the _syn.txt file that we just created to create the other PHRP files
-                        success = ParseMSGFDBSynopsisFile(synOutputFilePath, outputDirectoryPath, pepToProteinMapping, false);
+                        success = ParseMSGFPlusSynopsisFile(synOutputFilePath, outputDirectoryPath, pepToProteinMapping, false);
 
                         // Remove all items from pepToProteinMapping to reduce memory overhead
                         pepToProteinMapping.Clear();
@@ -2576,14 +2518,14 @@ namespace PeptideHitResultsProcessor
         /// Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
         /// </summary>
         /// <param name="peptide"></param>
-        /// <param name="msgfDbModInfo">This function assumes that each entry in msgfDbModInfo has both .ModName and .ModSymbol defined</param>
+        /// <param name="msgfPlusModInfo">This function assumes that each entry in msgfPlusModInfo has both .ModName and .ModSymbol defined</param>
         /// <param name="isMsgfPlus">Should be set to True if processing MSGF+ results</param>
         /// <param name="totalModMass">Output parameter: total mass of all modifications</param>
         /// <returns></returns>
         /// <remarks></remarks>
         public string ReplaceMSGFModTextWithSymbol(
             string peptide,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfDbModInfo,
+            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             bool isMsgfPlus,
             out double totalModMass)
         {
@@ -2620,7 +2562,7 @@ namespace PeptideHitResultsProcessor
                 // Convert the mod mass (or masses) to one or more mod symbols
 
                 if (ConvertMSGFModMassesToSymbols("-", reMatch.Groups[1].Value,
-                    out var modSymbols, out var dynModSymbols, msgfDbModInfo,
+                    out var modSymbols, out var dynModSymbols, msgfPlusModInfo,
                     true, false,
                     out var modMassFound, out containsStaticMod))
                 {
@@ -2717,7 +2659,7 @@ namespace PeptideHitResultsProcessor
                     // Convert the mod mass (or masses) to one or more mod symbols
 
                     if (ConvertMSGFModMassesToSymbols(currentResidue, reMatch.Groups[1].Value,
-                        out var modSymbols, out var dynModSymbols, msgfDbModInfo,
+                        out var modSymbols, out var dynModSymbols, msgfPlusModInfo,
                         false, possibleCTerminalMod, out var modMassFound, out containsStaticMod))
                     {
                         peptide = ReplaceMSGFModTextWithMatchedSymbol(peptide, reMatch.Groups[1], modSymbols, dynModSymbols, isMsgfPlus, containsStaticMod);
@@ -2871,19 +2813,21 @@ namespace PeptideHitResultsProcessor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            List<udtMSGFDBSearchResultType> filteredSearchResults,
+            IEnumerable<udtMSGFPlusSearchResultType> filteredSearchResults,
             ref string errorLog,
             bool includeFDRandPepFDR,
             bool includeEFDR,
             bool includeIMSFields,
             bool isMsgfPlus)
         {
-            // Sort udtFilteredSearchResults by ascending SpecEValue, ascending scan, ascending charge, ascending peptide, and ascending protein
-            filteredSearchResults.Sort(new MSGFDBSearchResultsComparerSpecEValueScanChargePeptide());
+            // Sort filteredSearchResults by ascending SpecEValue, ascending scan, ascending charge, ascending peptide, and ascending protein
+            var query = from item in filteredSearchResults orderby item.SpecEValueNum, item.ScanNum, item.ChargeNum, item.Peptide, item.Protein select item;
 
-            for (var index = 0; index <= filteredSearchResults.Count - 1; index++)
+            var index = 1;
+            foreach (var result in query)
             {
-                WriteSearchResultToFile(index + 1, writer, filteredSearchResults[index], ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+                WriteSearchResultToFile(index, writer, result, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+                index += 1;
             }
         }
 
@@ -2933,10 +2877,10 @@ namespace PeptideHitResultsProcessor
         /// <param name="filteredSearchResults">Filtered search results</param>
         /// <remarks></remarks>
         private void StoreTopFHTMatch(
-            IList<udtMSGFDBSearchResultType> searchResults,
+            IList<udtMSGFPlusSearchResultType> searchResults,
             int startIndex,
             int endIndex,
-            List<udtMSGFDBSearchResultType> filteredSearchResults)
+            List<udtMSGFPlusSearchResultType> filteredSearchResults)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
 
@@ -2994,10 +2938,10 @@ namespace PeptideHitResultsProcessor
         /// <param name="filteredSearchResults">Filtered search results</param>
         /// <remarks></remarks>
         private void StoreSynMatches(
-            IList<udtMSGFDBSearchResultType> searchResults,
+            IList<udtMSGFPlusSearchResultType> searchResults,
             int startIndex,
             int endIndex,
-            List<udtMSGFDBSearchResultType> filteredSearchResults)
+            List<udtMSGFPlusSearchResultType> filteredSearchResults)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
 
@@ -3040,6 +2984,15 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        /// <summary>
+        /// Write out the header line for synopsis / first hits files
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="includeFDRandPepFDR"></param>
+        /// <param name="includeEFDR"></param>
+        /// <param name="includeIMSFields"></param>
+        /// <param name="isMsgfPlus"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ref string errorLog,
@@ -3048,9 +3001,12 @@ namespace PeptideHitResultsProcessor
             bool includeIMSFields,
             bool isMsgfPlus)
         {
-            // Write out the header line for synopsis / first hits files
             try
             {
+                // Get the synopsis file headers
+                // Keys are header name and values are enum IDs
+                var knownHeaderColumns = clsPHRPParserMSGFDB.GetColumnHeaderNamesAndIDs();
+
                 var data = new List<string>
                 {
                     clsPHRPParserMSGFDB.DATA_COLUMN_ResultID,
@@ -3113,6 +3069,14 @@ namespace PeptideHitResultsProcessor
                     data.Add(clsPHRPParserMSGFDB.DATA_COLUMN_IMS_Drift_Time);
                 }
 
+                foreach (var headerName in data)
+                {
+                    if (!knownHeaderColumns.ContainsKey(headerName))
+                    {
+                        errorLog += "Unrecognized header name for the synopsis / first hits file: " + headerName + "\n";
+                    }
+                }
+
                 writer.WriteLine(CollapseList(data));
             }
             catch (Exception)
@@ -3139,7 +3103,7 @@ namespace PeptideHitResultsProcessor
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            udtMSGFDBSearchResultType udtSearchResult,
+            udtMSGFPlusSearchResultType udtSearchResult,
             ref string errorLog,
             bool includeFDRandPepFDR,
             bool includeEFDR,
@@ -3212,9 +3176,9 @@ namespace PeptideHitResultsProcessor
 
         #region "IComparer Classes"
 
-        private class MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide : IComparer<udtMSGFDBSearchResultType>
+        private class MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide : IComparer<udtMSGFPlusSearchResultType>
         {
-            public int Compare(udtMSGFDBSearchResultType x, udtMSGFDBSearchResultType y)
+            public int Compare(udtMSGFPlusSearchResultType x, udtMSGFPlusSearchResultType y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {
@@ -3259,9 +3223,9 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private class MSGFDBSearchResultsComparerSpecEValueScanChargePeptide : IComparer<udtMSGFDBSearchResultType>
+        private class MSGFDBSearchResultsComparerSpecEValueScanChargePeptide : IComparer<udtMSGFPlusSearchResultType>
         {
-            public int Compare(udtMSGFDBSearchResultType x, udtMSGFDBSearchResultType y)
+            public int Compare(udtMSGFPlusSearchResultType x, udtMSGFPlusSearchResultType y)
             {
                 if (x.SpecEValueNum > y.SpecEValueNum)
                 {

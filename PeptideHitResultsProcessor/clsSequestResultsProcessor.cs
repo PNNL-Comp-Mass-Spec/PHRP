@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsSequestResultsProcessor()
         {
-            mFileDate = "October 24, 2018";
+            mFileDate = "March 28, 2019";
             InitializeLocalVariables();
         }
 
@@ -42,39 +42,6 @@ namespace PeptideHitResultsProcessor
 
         private const int SEQUEST_SYN_FILE_MIN_COL_COUNT = 5;
         private const int MAX_ERROR_LOG_LENGTH = 4096;
-
-        // These columns correspond to the tab-delimited file created directly by SEQUEST
-        protected const int SequestSynopsisFileColCount = 27;
-        public enum eSequestSynopsisFileColumns
-        {
-            RowIndex = 0,
-            Scan = 1,
-            NumScans = 2,
-            Charge = 3,
-            PeptideMH = 4,
-            XCorr = 5,
-            DeltaCn = 6,
-            Sp = 7,
-            ProteinName = 8,                 // Aka Reference
-            MultipleProteinCount = 9,        // Aka MO = MultipleORFCount; this is 0 if the peptide is in just one protein; 1 if in 2 proteins, etc.
-            PeptideSequence = 10,            // This is the sequence with prefix and suffix residues and also with modification symbols
-            DeltaCn2 = 11,
-            RankSP = 12,
-            RankXC = 13,
-            DelM = 14,
-            XcRatio = 15,
-            PassFilt = 16,                   // Legacy/unused
-            MScore = 17,                     // Legacy/unused
-            NTT = 18,                        // Number of tryptic terminii
-            IonsObserved = 19,               // Added in August 2011
-            IonsExpected = 20,               // Added in August 2011
-            DelMPPM = 21,                    // Added in August 2011
-            Cleavage_State = 22,             // This column and the ones after it are computed by this program and appended to the input file or saved in a new file
-            Terminus_State = 23,
-            Mod_Count = 24,
-            Mod_Description = 25,
-            Monoisotopic_Mass = 26
-        }
 
         #endregion
 
@@ -228,7 +195,7 @@ namespace PeptideHitResultsProcessor
 
             var resultsProcessed = 0;
 
-            int[] columnMapping = null;
+            var columnMapping = new Dictionary<clsPHRPParserSequest.SequestSynopsisFileColumns, int>();
 
             try
             {
@@ -278,7 +245,7 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseSequestSynFileHeaderLine(lineIn, out columnMapping);
+                                success = ParseSequestSynFileHeaderLine(lineIn, columnMapping);
                                 if (success)
                                 {
                                     dataLine = false;
@@ -412,7 +379,7 @@ namespace PeptideHitResultsProcessor
 
         private bool ParseSequestResultsFileEntry(
             string lineIn,
-            IReadOnlyList<int> columnMapping,
+            IDictionary<clsPHRPParserSequest.SequestSynopsisFileColumns, int> columnMapping,
             clsSearchResultsSequest searchResult,
             ref string errorLog)
         {
@@ -434,22 +401,22 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.RowIndex], out int resultId))
+                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.RowIndex], out int resultId))
                 {
                     ReportError("RowIndex column is missing or invalid", true);
                 }
 
                 searchResult.ResultID = resultId;
 
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.NumScans], out string numScans);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.Charge], out string charge);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.PeptideMH], out string peptideMh);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.XCorr], out string peptideXCorr);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.DeltaCn], out string peptideDeltaCn);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.Sp], out string peptideSp);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.ProteinName], out string proteinName);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.MultipleProteinCount], out string multipleProteinCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.NumScans], out string numScans);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.PeptideMH], out string peptideMh);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.XCorr], out string peptideXCorr);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.DeltaCn], out string peptideDeltaCn);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.Sp], out string peptideSp);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.ProteinName], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.MultipleProteinCount], out string multipleProteinCount);
 
                 searchResult.Scan = scan;
                 searchResult.NumScans = numScans;
@@ -461,7 +428,7 @@ namespace PeptideHitResultsProcessor
                 searchResult.ProteinName = proteinName;
                 searchResult.MultipleProteinCount = multipleProteinCount;
 
-                if (!GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.PeptideSequence], out string peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.PeptideSequence], out string peptideSequenceWithMods))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
@@ -478,18 +445,18 @@ namespace PeptideHitResultsProcessor
                 // will all be based on the first protein since Sequest only outputs the prefix and suffix letters for the first protein
                 searchResult.ComputePeptideCleavageStateInProtein();
 
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.DeltaCn2], out string peptideDeltaCn2);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.RankSP], out string peptideRankSp);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.RankXC], out string peptideRankXc);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.DelM], out string peptideDeltaMass);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.XcRatio], out string peptideXcRatio);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.PassFilt], out string peptidePassFilt);           // Legacy/Unused
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.MScore], out string peptideMScore);               // Legacy/Unused
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.NTT], out string peptideNtt);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.DeltaCn2], out string peptideDeltaCn2);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.RankSP], out string peptideRankSp);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.RankXC], out string peptideRankXc);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.DelM], out string peptideDeltaMass);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.XcRatio], out string peptideXcRatio);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.PassFilt], out string peptidePassFilt);           // Legacy/Unused
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.MScore], out string peptideMScore);               // Legacy/Unused
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.NTT], out string peptideNtt);
 
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.IonsObserved], out string ionsObserved);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.IonsExpected], out string ionsExpected);
-                GetColumnValue(splitLine, columnMapping[(int)eSequestSynopsisFileColumns.DelMPPM], out string delMppm);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.IonsObserved], out string ionsObserved);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.IonsExpected], out string ionsExpected);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserSequest.SequestSynopsisFileColumns.DelMPPM], out string delMppm);
 
                 searchResult.PeptideDeltaCn2 = peptideDeltaCn2;
                 searchResult.PeptideRankSP = peptideRankSp;
@@ -666,51 +633,20 @@ namespace PeptideHitResultsProcessor
 
         private bool ParseSequestSynFileHeaderLine(
             string lineIn,
-            out int[] columnMapping)
+            IDictionary<clsPHRPParserSequest.SequestSynopsisFileColumns, int> columnMapping)
         {
             // Parse the header line
 
+            var columnNames = clsPHRPParserSequest.GetColumnHeaderNamesAndIDs();
 
-
-            var columnNames = new SortedDictionary<string, eSequestSynopsisFileColumns>(StringComparer.InvariantCultureIgnoreCase)
-            {
-                {"HitNum", eSequestSynopsisFileColumns.RowIndex},
-                {"ScanNum", eSequestSynopsisFileColumns.Scan},
-                {"ScanCount", eSequestSynopsisFileColumns.NumScans},
-                {"ChargeState", eSequestSynopsisFileColumns.Charge},
-                {"MH", eSequestSynopsisFileColumns.PeptideMH},
-                {"XCorr", eSequestSynopsisFileColumns.XCorr},
-                {"DelCn", eSequestSynopsisFileColumns.DeltaCn},
-                {"Sp", eSequestSynopsisFileColumns.Sp},
-                {"Reference", eSequestSynopsisFileColumns.ProteinName},
-                {"MultiProtein", eSequestSynopsisFileColumns.MultipleProteinCount},     // Multiple protein count: 0 if the peptide is in 1 protein, 1 if the peptide is in 2 proteins, etc.
-                {"Peptide", eSequestSynopsisFileColumns.PeptideSequence},
-                {"DelCn2", eSequestSynopsisFileColumns.DeltaCn2},
-                {"RankSP", eSequestSynopsisFileColumns.RankSP},
-                {"RankXC", eSequestSynopsisFileColumns.RankXC},
-                {"DelM", eSequestSynopsisFileColumns.DelM},
-                {"XcRatio", eSequestSynopsisFileColumns.XcRatio},
-                {"PassFilt", eSequestSynopsisFileColumns.PassFilt},                     // Legacy/unused
-                {"MScore", eSequestSynopsisFileColumns.MScore},                         // Legacy/unused
-                {"NumTrypticEnds", eSequestSynopsisFileColumns.NTT},
-                {"Ions_Observed", eSequestSynopsisFileColumns.IonsObserved},
-                {"Ions_Expected", eSequestSynopsisFileColumns.IonsExpected},
-                {"DelM_PPM", eSequestSynopsisFileColumns.DelMPPM},
-                {"Cleavage_State", eSequestSynopsisFileColumns.Cleavage_State},         // Computed by this program and appended to the input file or saved in a new file
-                {"Terminus_State", eSequestSynopsisFileColumns.Terminus_State},         // Computed by this program
-                {"Mod_Count", eSequestSynopsisFileColumns.Mod_Count},                   // Computed by this program
-                {"Mod_Description", eSequestSynopsisFileColumns.Mod_Description},       // Computed by this program
-                {"Monoisotopic_Mass", eSequestSynopsisFileColumns.Monoisotopic_Mass}    // Computed by this program
-            };
-
-            columnMapping = new int[SequestSynopsisFileColCount];
+            columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                for (var index = 0; index <= columnMapping.Length - 1; index++)
+                foreach (clsPHRPParserSequest.SequestSynopsisFileColumns resultColumn in Enum.GetValues(typeof(clsPHRPParserSequest.SequestSynopsisFileColumns)))
                 {
-                    columnMapping[index] = -1;
+                    columnMapping.Add(resultColumn, -1);
                 }
 
                 var splitLine = lineIn.Split('\t');
@@ -719,7 +655,7 @@ namespace PeptideHitResultsProcessor
                     if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[(int)eResultFileColumn] = index;
+                        columnMapping[eResultFileColumn] = index;
                     }
                 }
             }

@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using PHRPReader;
 
@@ -31,7 +32,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsInSpecTResultsProcessor()
         {
-            mFileDate = "October 24, 2018";
+            mFileDate = "March 28, 2019";
             InitializeLocalVariables();
         }
 
@@ -65,7 +66,9 @@ namespace PeptideHitResultsProcessor
         private const string PHOS_MOD_MASS = "79.9663";
         private const string PHOS_MOD_RESIDUES = "STY";
 
-        // These columns correspond to the tab-delimited file created directly by Inspect
+        /// <summary>
+        /// These columns correspond to the tab-delimited file created directly by Inspect
+        /// </summary>
         public enum eInspectResultsFileColumns
         {
             SpectrumFile = 0,
@@ -90,39 +93,6 @@ namespace PeptideHitResultsProcessor
             SpecFilePos = 19,
             PrecursorMZ = 20,
             PrecursorError = 21
-        }
-
-        // These columns correspond to the Synopsis and First-Hits files created by this class
-        protected const int InspectSynopsisFileColCount = 27;
-        public enum eInspectSynFileColumns
-        {
-            ResultID = 0,
-            Scan = 1,
-            Peptide = 2,
-            Protein = 3,
-            Charge = 4,
-            MQScore = 5,
-            Length = 6,
-            TotalPRMScore = 7,
-            MedianPRMScore = 8,
-            FractionY = 9,
-            FractionB = 10,
-            Intensity = 11,
-            NTT = 12,
-            PValue = 13,
-            FScore = 14,
-            DeltaScore = 15,
-            DeltaScoreOther = 16,
-            DeltaNormMQScore = 17,                   // Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, then also storing 0.   This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
-            DeltaNormTotalPRMScore = 18,             // Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, then also storing 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
-            RankTotalPRMScore = 19,                  // Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
-            RankFScore = 20,                         // Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
-            MH = 21,                                 // Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
-            RecordNumber = 22,
-            DBFilePos = 23,
-            SpecFilePos = 24,
-            PrecursorMZ = 25,
-            PrecursorError = 26
         }
 
         protected enum eInspectModType
@@ -499,9 +469,8 @@ namespace PeptideHitResultsProcessor
                             var currentScanResultsCount = 0;
                             var udtSearchResultsCurrentScan = new udtInspectSearchResultType[10];
 
-                            // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                            var filteredSearchResultCount = 0;
-                            var udtFilteredSearchResults = new udtInspectSearchResultType[1000];
+                            // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                            var filteredSearchResults = new List<udtInspectSearchResultType>();
 
                             // Parse the input file
                             while (!reader.EndOfStream & !AbortProcessing)
@@ -525,11 +494,11 @@ namespace PeptideHitResultsProcessor
                                         // New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
                                         if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
                                         {
-                                            StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, ref filteredSearchResultCount, ref udtFilteredSearchResults, ref errorLog, ref sortComparer);
+                                            StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults, ref errorLog, ref sortComparer);
                                         }
                                         else
                                         {
-                                            StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, ref filteredSearchResultCount, ref udtFilteredSearchResults, ref errorLog, ref sortComparer);
+                                            StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults, ref errorLog, ref sortComparer);
                                         }
                                         currentScanResultsCount = 0;
                                     }
@@ -550,11 +519,11 @@ namespace PeptideHitResultsProcessor
                             {
                                 if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
                                 {
-                                    StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, ref filteredSearchResultCount, ref udtFilteredSearchResults, ref errorLog, ref sortComparer);
+                                    StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults, ref errorLog, ref sortComparer);
                                 }
                                 else
                                 {
-                                    StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, ref filteredSearchResultCount, ref udtFilteredSearchResults, ref errorLog, ref sortComparer);
+                                    StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults, ref errorLog, ref sortComparer);
                                 }
                                 currentScanResultsCount = 0;
                             }
@@ -562,7 +531,7 @@ namespace PeptideHitResultsProcessor
                             if (SortFHTAndSynFiles)
                             {
                                 // Sort the data in udtFilteredSearchResults then write out to disk
-                                SortAndWriteFilteredSearchResults(writer, filteredSearchResultCount, ref udtFilteredSearchResults, ref errorLog);
+                                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                             }
                         }
                     }
@@ -689,11 +658,11 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Read the contents of the inspect parameter file
-                using (var srInFile = new StreamReader(new FileStream(inspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var reader = new StreamReader(new FileStream(inspectParameterFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    while (!srInFile.EndOfStream)
+                    while (!reader.EndOfStream)
                     {
-                        var lineIn = srInFile.ReadLine();
+                        var lineIn = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(lineIn))
                             continue;
 
@@ -920,49 +889,20 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        private bool ParseInspectSynFileHeaderLine(string lineIn, out int[] columnMapping)
+        private bool ParseInspectSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserInspect.InspectSynFileColumns, int> columnMapping)
         {
             // Parse the header line
 
-            var columnNames = new SortedDictionary<string, eInspectSynFileColumns>(StringComparer.InvariantCultureIgnoreCase)
-            {
-                {"ResultID", eInspectSynFileColumns.ResultID},
-                {"Scan", eInspectSynFileColumns.Scan},
-                {"Peptide", eInspectSynFileColumns.Peptide},
-                {"Protein", eInspectSynFileColumns.Protein},
-                {"Charge", eInspectSynFileColumns.Charge},
-                {"MQScore", eInspectSynFileColumns.MQScore},
-                {"Length", eInspectSynFileColumns.Length},
-                {"TotalPRMScore", eInspectSynFileColumns.TotalPRMScore},
-                {"MedianPRMScore", eInspectSynFileColumns.MedianPRMScore},
-                {"FractionY", eInspectSynFileColumns.FractionY},
-                {"FractionB", eInspectSynFileColumns.FractionB},
-                {"Intensity", eInspectSynFileColumns.Intensity},
-                {"NTT", eInspectSynFileColumns.NTT},
-                {"PValue", eInspectSynFileColumns.PValue},
-                {"FScore", eInspectSynFileColumns.FScore},
-                {"DeltaScore", eInspectSynFileColumns.DeltaScore},
-                {"DeltaScoreOther", eInspectSynFileColumns.DeltaScoreOther},
-                {"DeltaNormMQScore", eInspectSynFileColumns.DeltaNormMQScore},
-                {"DeltaNormTotalPRMScore", eInspectSynFileColumns.DeltaNormTotalPRMScore},
-                {"RankTotalPRMScore", eInspectSynFileColumns.RankTotalPRMScore},
-                {"RankFScore", eInspectSynFileColumns.RankFScore},
-                {"MH", eInspectSynFileColumns.MH},
-                {"RecordNumber", eInspectSynFileColumns.RecordNumber},
-                {"DBFilePos", eInspectSynFileColumns.DBFilePos},
-                {"SpecFilePos", eInspectSynFileColumns.SpecFilePos},
-                {"PrecursorMZ", eInspectSynFileColumns.PrecursorMZ},
-                {"PrecursorError", eInspectSynFileColumns.PrecursorError}
-            };
+            var columnNames = clsPHRPParserInspect.GetColumnHeaderNamesAndIDs();
 
-            columnMapping = new int[InspectSynopsisFileColCount];
+            columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                for (var index = 0; index <= columnMapping.Length - 1; index++)
+                foreach (clsPHRPParserInspect.InspectSynFileColumns resultColumn in Enum.GetValues(typeof(clsPHRPParserInspect.InspectSynFileColumns)))
                 {
-                    columnMapping[index] = -1;
+                    columnMapping.Add(resultColumn, -1);
                 }
 
                 var splitLine = lineIn.Split('\t');
@@ -971,7 +911,7 @@ namespace PeptideHitResultsProcessor
                     if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[(int)eResultFileColumn] = index;
+                        columnMapping[eResultFileColumn] = index;
                     }
                 }
             }
@@ -994,7 +934,7 @@ namespace PeptideHitResultsProcessor
 
             var currentPeptideWithMods = string.Empty;
 
-            int[] columnMapping = null;
+            var columnMapping = new Dictionary<clsPHRPParserInspect.InspectSynFileColumns, int>();
 
             try
             {
@@ -1051,7 +991,7 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseInspectSynFileHeaderLine(lineIn, out columnMapping);
+                                success = ParseInspectSynFileHeaderLine(lineIn, columnMapping);
                                 if (success)
                                 {
                                     dataLine = false;
@@ -1338,7 +1278,7 @@ namespace PeptideHitResultsProcessor
 
         private bool ParseInspectSynFileEntry(
             string lineIn,
-            IReadOnlyList<int> columnMapping,
+            IDictionary<clsPHRPParserInspect.InspectSynFileColumns, int> columnMapping,
             clsSearchResultsInSpecT searchResult,
             ref string errorLog,
             out string peptideSequenceWithMods)
@@ -1365,15 +1305,15 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.ResultID], out int resultId))
+                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.ResultID], out int resultId))
                 {
                     ReportError("ResultID column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.Charge], out string charge);
 
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.Protein], out string proteinName);
 
                 searchResult.ResultID = resultId;
                 searchResult.Scan = scan;
@@ -1382,7 +1322,7 @@ namespace PeptideHitResultsProcessor
 
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.Peptide], out peptideSequenceWithMods);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.Peptide], out peptideSequenceWithMods);
 
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
@@ -1396,7 +1336,7 @@ namespace PeptideHitResultsProcessor
                 // will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
                 searchResult.ComputePeptideCleavageStateInProtein();
 
-                if (GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.PrecursorError], out string peptideDeltaMass))
+                if (GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.PrecursorError], out string peptideDeltaMass))
                 {
                     searchResult.PeptideDeltaMass = peptideDeltaMass;
                     // Note: .peptideDeltaMass is stored in the Inspect results file as "Observed_Mass - Theoretical_Mass"
@@ -1416,30 +1356,30 @@ namespace PeptideHitResultsProcessor
                     searchResult.PeptideDeltaMass = "0";
                 }
 
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.MQScore], out string mqScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.MQScore], out string mqScore);
 
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.Length], out string length);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.TotalPRMScore], out string totalPrmScore);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.MedianPRMScore], out string medianPrmScore);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.FractionY], out string fractionY);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.FractionB], out string fractionB);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.Intensity], out string intensity);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.NTT], out string ntt);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.PValue], out string pValue);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.FScore], out string fScore);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.DeltaScore], out string deltaScore);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.DeltaScoreOther], out string deltaScoreOther);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.DeltaNormMQScore], out string deltaNormMqScore);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.DeltaNormTotalPRMScore], out string deltaNormTotalPrmScore);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.RankTotalPRMScore], out string rankTotalPrmScore);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.RankFScore], out string rankFScore);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.MH], out string peptideMh);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.RecordNumber], out string recordNumber);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.DBFilePos], out string dbFilePos);
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.SpecFilePos], out string specFilePos);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.Length], out string length);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.TotalPRMScore], out string totalPrmScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.MedianPRMScore], out string medianPrmScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.FractionY], out string fractionY);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.FractionB], out string fractionB);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.Intensity], out string intensity);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.NTT], out string ntt);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.PValue], out string pValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.FScore], out string fScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.DeltaScore], out string deltaScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.DeltaScoreOther], out string deltaScoreOther);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.DeltaNormMQScore], out string deltaNormMqScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.DeltaNormTotalPRMScore], out string deltaNormTotalPrmScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.RankTotalPRMScore], out string rankTotalPrmScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.RankFScore], out string rankFScore);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.MH], out string peptideMh);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.RecordNumber], out string recordNumber);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.DBFilePos], out string dbFilePos);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.SpecFilePos], out string specFilePos);
 
                 // Note: .PrecursorError was processed earlier in this function
-                GetColumnValue(splitLine, columnMapping[(int)eInspectSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserInspect.InspectSynFileColumns.PrecursorMZ], out string precursorMz);
 
                 searchResult.MQScore = mqScore;
                 searchResult.Length = length;
@@ -1866,19 +1806,12 @@ namespace PeptideHitResultsProcessor
             StreamWriter writer,
             ref int resultID,
             udtInspectSearchResultType udtSearchResult,
-            ref int filteredSearchResultCount,
-            ref udtInspectSearchResultType[] udtFilteredSearchResults,
+            List<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog)
         {
             if (SortFHTAndSynFiles)
             {
-                if (filteredSearchResultCount == udtFilteredSearchResults.Length)
-                {
-                    Array.Resize(ref udtFilteredSearchResults, udtFilteredSearchResults.Length * 2);
-                }
-
-                udtFilteredSearchResults[filteredSearchResultCount] = udtSearchResult;
-                filteredSearchResultCount += 1;
+                filteredSearchResults.Add(udtSearchResult);
             }
             else
             {
@@ -1889,16 +1822,17 @@ namespace PeptideHitResultsProcessor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            int filteredSearchResultCount,
-            ref udtInspectSearchResultType[] udtFilteredSearchResults,
+            IEnumerable<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog)
         {
             // Sort udtFilteredSearchResults by descending TotalPRMScore, ascending scan, ascending charge, ascending peptide, and ascending protein
-            Array.Sort(udtFilteredSearchResults, 0, filteredSearchResultCount, new InspectSearchResultsComparerTotalPRMDescScanChargePeptide());
+            var query = from item in filteredSearchResults orderby item.TotalPRMScoreNum descending, item.ScanNum, item.ChargeNum, item.PeptideAnnotation, item.Protein select item;
 
-            for (var index = 0; index <= filteredSearchResultCount - 1; index++)
+            var index = 1;
+            foreach (var result in query)
             {
-                WriteSearchResultToFile(index + 1, writer, udtFilteredSearchResults[index], ref errorLog);
+                WriteSearchResultToFile(index, writer, result, ref errorLog);
+                index += 1;
             }
         }
 
@@ -1907,8 +1841,7 @@ namespace PeptideHitResultsProcessor
             ref int resultID,
             int currentScanResultsCount,
             udtInspectSearchResultType[] udtSearchResultsCurrentScan,
-            ref int filteredSearchResultCount,
-            ref udtInspectSearchResultType[] udtFilteredSearchResults,
+            List<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog,
             ref IComparer<udtInspectSearchResultType> sortComparer)
         {
@@ -1925,7 +1858,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (index == 0 || currentCharge != udtSearchResultsCurrentScan[index].ChargeNum)
                 {
-                    StoreOrWriteSearchResult(writer, ref resultID, udtSearchResultsCurrentScan[index], ref filteredSearchResultCount, ref udtFilteredSearchResults, ref errorLog);
+                    StoreOrWriteSearchResult(writer, ref resultID, udtSearchResultsCurrentScan[index], filteredSearchResults, ref errorLog);
                     currentCharge = udtSearchResultsCurrentScan[index].ChargeNum;
                 }
             }
@@ -1936,8 +1869,7 @@ namespace PeptideHitResultsProcessor
             ref int resultID,
             int currentScanResultsCount,
             udtInspectSearchResultType[] udtSearchResultsCurrentScan,
-            ref int filteredSearchResultCount,
-            ref udtInspectSearchResultType[] udtFilteredSearchResults,
+            List<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog,
             ref IComparer<udtInspectSearchResultType> sortComparer)
         {
@@ -1954,51 +1886,29 @@ namespace PeptideHitResultsProcessor
                     udtSearchResultsCurrentScan[index].TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD ||
                     udtSearchResultsCurrentScan[index].FScoreNum >= FSCORE_THRESHOLD)
                 {
-                    StoreOrWriteSearchResult(writer, ref resultID, udtSearchResultsCurrentScan[index], ref filteredSearchResultCount, ref udtFilteredSearchResults, ref errorLog);
+                    StoreOrWriteSearchResult(writer, ref resultID, udtSearchResultsCurrentScan[index], filteredSearchResults, ref errorLog);
                 }
             }
         }
 
+        /// <summary>
+        /// Write out the header line for synopsis / first hits files
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="errorLog"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
             ref string errorLog)
         {
-            // Write out the header line for synopsis / first hits files
             try
             {
-                var data = new List<string>
-                {
-                    COLUMN_NAME_RESULTID,
-                    "Scan",
-                    COLUMN_NAME_PEPTIDE,
-                    "Protein",
-                    "Charge",
-                    "MQScore",
-                    "Length",
-                    "TotalPRMScore",
-                    "MedianPRMScore",
-                    "FractionY",
-                    "FractionB",
-                    "Intensity",
-                    "NTT",
-                    "PValue",
-                    "FScore",
-                    "DeltaScore",
-                    "DeltaScoreOther",
-                    "DeltaNormMQScore",
-                    "DeltaNormTotalPRMScore",
-                    "RankTotalPRMScore",
-                    "RankFScore",
-                    "MH",
-                    "RecordNumber",
-                    "DBFilePos",
-                    "SpecFilePos",
-                    "PrecursorMZ",
-                    "PrecursorError",
-                    "DelM_PPM"
-                };
+                // Get the synopsis file headers
+                // Keys are header name and values are enum IDs
+                var headerColumns = clsPHRPParserInspect.GetColumnHeaderNamesAndIDs();
 
-                writer.WriteLine(CollapseList(data));
+                var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
+
+                writer.WriteLine(CollapseList(headerNames));
             }
             catch (Exception)
             {
@@ -2018,34 +1928,39 @@ namespace PeptideHitResultsProcessor
             // Writes an entry to a synopsis or first hits file
             try
             {
-                writer.WriteLine(resultID + "\t" +
-                                       udtSearchResult.Scan + "\t" +
-                                       udtSearchResult.PeptideAnnotation + "\t" +
-                                       udtSearchResult.Protein + "\t" +
-                                       udtSearchResult.Charge + "\t" +
-                                       udtSearchResult.MQScore + "\t" +
-                                       udtSearchResult.Length + "\t" +
-                                       udtSearchResult.TotalPRMScore + "\t" +
-                                       udtSearchResult.MedianPRMScore + "\t" +
-                                       udtSearchResult.FractionY + "\t" +
-                                       udtSearchResult.FractionB + "\t" +
-                                       udtSearchResult.Intensity + "\t" +
-                                       udtSearchResult.NTT + "\t" +
-                                       udtSearchResult.pValue + "\t" +
-                                       udtSearchResult.FScore + "\t" +
-                                       udtSearchResult.DeltaScore + "\t" +
-                                       udtSearchResult.DeltaScoreOther + "\t" +
-                                       PRISM.StringUtilities.DblToString(udtSearchResult.DeltaNormMQScore, 5) + "\t" +
-                                       PRISM.StringUtilities.DblToString(udtSearchResult.DeltaNormTotalPRMScore, 5) + "\t" +
-                                       udtSearchResult.RankTotalPRMScore + "\t" +
-                                       udtSearchResult.RankFScore + "\t" +
-                                       PRISM.StringUtilities.DblToString(udtSearchResult.MH, 6) + "\t" +
-                                       udtSearchResult.RecordNumber + "\t" +
-                                       udtSearchResult.DBFilePos + "\t" +
-                                       udtSearchResult.SpecFilePos + "\t" +
-                                       udtSearchResult.PrecursorMZ + "\t" +
-                                       udtSearchResult.PrecursorError + "\t" +
-                                       udtSearchResult.DelMPPM);
+                var data = new List<string>
+                {
+                    resultID.ToString(),
+                    udtSearchResult.Scan,
+                    udtSearchResult.PeptideAnnotation,
+                    udtSearchResult.Protein,
+                    udtSearchResult.Charge,
+                    udtSearchResult.MQScore,
+                    udtSearchResult.Length.ToString(),
+                    udtSearchResult.TotalPRMScore,
+                    udtSearchResult.MedianPRMScore,
+                    udtSearchResult.FractionY,
+                    udtSearchResult.FractionB,
+                    udtSearchResult.Intensity,
+                    udtSearchResult.NTT.ToString(),
+                    udtSearchResult.pValue,
+                    udtSearchResult.FScore,
+                    udtSearchResult.DeltaScore,
+                    udtSearchResult.DeltaScoreOther,
+                    PRISM.StringUtilities.DblToString(udtSearchResult.DeltaNormMQScore, 5),
+                    PRISM.StringUtilities.DblToString(udtSearchResult.DeltaNormTotalPRMScore, 5),
+                    udtSearchResult.RankTotalPRMScore.ToString(),
+                    udtSearchResult.RankFScore.ToString(),
+                    PRISM.StringUtilities.DblToString(udtSearchResult.MH, 6),
+                    udtSearchResult.RecordNumber,
+                    udtSearchResult.DBFilePos,
+                    udtSearchResult.SpecFilePos,
+                    udtSearchResult.PrecursorMZ,
+                    udtSearchResult.PrecursorError,
+                    udtSearchResult.DelMPPM
+                };
+
+                writer.WriteLine(CollapseList(data));
             }
             catch (Exception)
             {
@@ -2057,53 +1972,6 @@ namespace PeptideHitResultsProcessor
         }
 
         #region "IComparer Classes"
-
-        protected class InspectSearchResultsComparerTotalPRMDescScanChargePeptide : IComparer<udtInspectSearchResultType>
-        {
-            public int Compare(udtInspectSearchResultType x, udtInspectSearchResultType y)
-            {
-                if (x.TotalPRMScoreNum > y.TotalPRMScoreNum)
-                {
-                    return -1;
-                }
-
-                if (x.TotalPRMScoreNum < y.TotalPRMScoreNum)
-                {
-                    return 1;
-                }
-
-                // TotalPRMScore is the same; check scan number
-                if (x.ScanNum > y.ScanNum)
-                {
-                    return 1;
-                }
-
-                if (x.ScanNum < y.ScanNum)
-                {
-                    return -1;
-                }
-
-                // Scan is the same, check charge
-                if (x.ChargeNum > y.ChargeNum)
-                {
-                    return 1;
-                }
-
-                if (x.ChargeNum < y.ChargeNum)
-                {
-                    return -1;
-                }
-
-                // Charge is the same; check peptide
-                var result = string.Compare(x.PeptideAnnotation, y.PeptideAnnotation, StringComparison.Ordinal);
-                if (result == 0)
-                {
-                    // Peptide is the same, check Protein
-                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
-                }
-                return result;
-            }
-        }
 
         protected class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc : IComparer<udtInspectSearchResultType>
         {
