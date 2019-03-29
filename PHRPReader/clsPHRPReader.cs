@@ -1197,53 +1197,52 @@ namespace PHRPReader
 
             foreach (var kvFileToFind in filesToFind)
             {
-                if (!string.IsNullOrEmpty(kvFileToFind.Key))
+                if (string.IsNullOrEmpty(kvFileToFind.Key))
+                    continue;
+
+                var synOrFHTFile = new FileInfo(Path.Combine(inputDirectory.FullName, kvFileToFind.Key));
+
+                if (!synOrFHTFile.Exists || synOrFHTFile.Directory == null)
+                    continue;
+
+                // Match found
+                // Look for PHRP-related auxiliary files
+                var auxFileCount = 0;
+                var baseName = Path.Combine(synOrFHTFile.Directory.FullName, Path.GetFileNameWithoutExtension(synOrFHTFile.Name));
+
+                foreach (var suffix in auxiliaryFileSuffixes)
                 {
-                    var synOrFHTFile = new FileInfo(Path.Combine(inputDirectory.FullName, kvFileToFind.Key));
-
-                    if (synOrFHTFile.Exists && synOrFHTFile.Directory != null)
+                    if (File.Exists(baseName + suffix))
                     {
-                        // Match found
-                        // Look for PHRP-related auxiliary files
-
-                        var auxFileCount = 0;
-                        var baseName = Path.Combine(synOrFHTFile.Directory.FullName, Path.GetFileNameWithoutExtension(synOrFHTFile.Name));
-
-                        foreach (var suffix in auxiliaryFileSuffixes)
-                        {
-                            if (File.Exists(baseName + suffix))
-                            {
-                                auxFileCount += 1;
-                            }
-                        }
-
-                        if (string.IsNullOrEmpty(kvBestSynOrFHTFile.Key) || auxFileCount > kvBestSynOrFHTFile.Value)
-                        {
-                            kvBestSynOrFHTFile = new KeyValuePair<string, int>(synOrFHTFile.FullName, auxFileCount);
-                            eMatchedResultType = kvFileToFind.Value;
-                        }
+                        auxFileCount += 1;
                     }
+                }
+
+                if (string.IsNullOrEmpty(kvBestSynOrFHTFile.Key) || auxFileCount > kvBestSynOrFHTFile.Value)
+                {
+                    kvBestSynOrFHTFile = new KeyValuePair<string, int>(synOrFHTFile.FullName, auxFileCount);
+                    eMatchedResultType = kvFileToFind.Value;
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(kvBestSynOrFHTFile.Key))
-            {
-                if (datasetNames.Count == 1)
-                {
-                    Console.WriteLine("Could not find a Synopsis or First Hits file for dataset " + datasetNames.First());
-                }
-                else
-                {
-                    Console.WriteLine("Could not find a Synopsis or First Hits file for any of the candidate datasets");
-                }
+            if (!string.IsNullOrWhiteSpace(kvBestSynOrFHTFile.Key))
+                return kvBestSynOrFHTFile.Key;
 
-                Console.WriteLine("Looked for the following files:");
-                foreach (var fileName in filesToFind)
+            if (datasetNames.Count == 1)
+            {
+                Console.WriteLine("Could not find a Synopsis or First Hits file for dataset " + datasetNames.First());
+            }
+            else
+            {
+                Console.WriteLine("Could not find a Synopsis or First Hits file for any of the candidate datasets");
+            }
+
+            Console.WriteLine("Looked for the following files:");
+            foreach (var fileName in filesToFind)
+            {
+                if (!string.IsNullOrWhiteSpace(fileName.Key))
                 {
-                    if (!string.IsNullOrWhiteSpace(fileName.Key))
-                    {
-                        Console.WriteLine("  " + fileName.Key);
-                    }
+                    Console.WriteLine("  " + fileName.Key);
                 }
             }
 
@@ -1343,12 +1342,12 @@ namespace PHRPReader
                     }
 
                     break;
+
                 case ePeptideHitResultType.XTandem:
                     if (inputFileName.EndsWith("_xt", StringComparison.OrdinalIgnoreCase))
                     {
                         datasetName = inputFileName.Substring(0, inputFileName.Length - 3);
                     }
-
                     break;
             }
 
@@ -1406,82 +1405,51 @@ namespace PHRPReader
                 }
             }
 
+            if (eResultType != ePeptideHitResultType.Unknown)
             {
-                eResultType = ePeptideHitResultType.XTandem;
+                return eResultType;
             }
-            else
-            {
-                if (filePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN) || filePathLCase.EndsWith(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT))
-                {
-                    eResultType = ePeptideHitResultType.MSGFPlus;
-                }
-                else if (filePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_SYN) || filePathLCase.EndsWith(LEGACY_MSGFPLUS_SUFFIX_FHT))
-                {
-                    eResultType = ePeptideHitResultType.MSGFPlus;
-                }
-                else if (filePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN) || filePathLCase.EndsWith(clsPHRPParserMSAlign.FILENAME_SUFFIX_FHT))
-                {
-                    eResultType = ePeptideHitResultType.MSAlign;
-                }
-                else if (filePathLCase.EndsWith(clsPHRPParserMODa.FILENAME_SUFFIX_SYN) || filePathLCase.EndsWith(clsPHRPParserMODa.FILENAME_SUFFIX_FHT))
-                {
-                    eResultType = ePeptideHitResultType.MODa;
-                }
-                else if (filePathLCase.EndsWith(clsPHRPParserMODPlus.FILENAME_SUFFIX_SYN) || filePathLCase.EndsWith(clsPHRPParserMODPlus.FILENAME_SUFFIX_FHT))
-                {
-                    eResultType = ePeptideHitResultType.MODPlus;
-                }
-                else if (filePathLCase.EndsWith(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_SYN) || filePathLCase.EndsWith(clsPHRPParserMSPathFinder.FILENAME_SUFFIX_FHT))
-                {
-                    eResultType = ePeptideHitResultType.MSPathFinder;
-                }
-                else if (filePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_SYN) || filePathLCase.EndsWith(clsPHRPParserInspect.FILENAME_SUFFIX_FHT))
-                {
-                    eResultType = ePeptideHitResultType.Inspect;
-                }
-                else
-                {
-                    // Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
 
-                    if (!File.Exists(filePath))
+            // Open the file and read the header line to determine if this is a Sequest file, Inspect file, MSGFDB, or something else
+            if (!File.Exists(filePath))
+            {
+                // File doesn't exist; assume MSGFPlus
+                return ePeptideHitResultType.MSGFPlus;
+            }
+
+            using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            {
+                if (!reader.EndOfStream)
+                {
+                    var headerLine = reader.ReadLine();
+
+                    if (LineContainsValues(headerLine, clsPHRPParserInspect.DATA_COLUMN_MQScore,
+                                           clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore))
                     {
-                        // File doesn't exist; assume Sequest
+                        eResultType = ePeptideHitResultType.Inspect;
+                    }
+                    else if (LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore,
+                                                clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb) ||
+                             LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore,
+                                                clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue) ||
+                             LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore,
+                                                clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore))
+                    {
+                        eResultType = ePeptideHitResultType.MSGFPlus;
+                    }
+                    else if (LineContainsValues(headerLine, clsPHRPParserSequest.DATA_COLUMN_XCorr, clsPHRPParserSequest.DATA_COLUMN_DelCn))
+                    {
                         eResultType = ePeptideHitResultType.Sequest;
                     }
-                    else
-                    {
-                        using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                        {
-                            if (!reader.EndOfStream)
-                            {
-                                var headerLine = reader.ReadLine();
-
-                                if (LineContainsValues(headerLine, clsPHRPParserInspect.DATA_COLUMN_MQScore, clsPHRPParserInspect.DATA_COLUMN_TotalPRMScore))
-                                {
-                                    eResultType = ePeptideHitResultType.Inspect;
-                                }
-                                else if (LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb) ||
-                                         LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue) ||
-                                         LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore, clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore))
-                                {
-                                    eResultType = ePeptideHitResultType.MSGFPlus;
-                                }
-                                else if (LineContainsValues(headerLine, clsPHRPParserSequest.DATA_COLUMN_XCorr, clsPHRPParserSequest.DATA_COLUMN_DelCn))
-                                {
-                                    eResultType = ePeptideHitResultType.Sequest;
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
-            if (eResultType == ePeptideHitResultType.Unknown)
+            if (eResultType != ePeptideHitResultType.Unknown)
+                return eResultType;
+
+            if (AutoTrimExtraSuffix(filePath, out var filePathTrimmed))
             {
-                if (AutoTrimExtraSuffix(filePath, out var filePathTrimmed))
-                {
-                    eResultType = AutoDetermineResultType(filePathTrimmed);
-                }
+                eResultType = AutoDetermineResultType(filePathTrimmed);
             }
 
             return eResultType;
