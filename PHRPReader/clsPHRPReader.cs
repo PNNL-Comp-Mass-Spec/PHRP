@@ -77,7 +77,8 @@ namespace PHRPReader
             MSAlign = 5,
             MODa = 6,
             MODPlus = 7,
-            MSPathFinder = 8
+            MSPathFinder = 8,
+            TopPIC = 9
         }
 
         /// <summary>
@@ -95,6 +96,7 @@ namespace PHRPReader
         }
 
 #pragma warning restore 1591
+
         #endregion
 
         #region "Module variables"
