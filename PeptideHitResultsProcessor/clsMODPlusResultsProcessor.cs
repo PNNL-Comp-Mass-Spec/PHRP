@@ -1023,7 +1023,7 @@ namespace PeptideHitResultsProcessor
                     }
                     else if (!string.IsNullOrEmpty(udtSearchResult.Probability) & !double.TryParse(udtSearchResult.Probability, out _))
                     {
-                        udtSearchResult.Probability = "";
+                        udtSearchResult.Probability = string.Empty;
                     }
 
                     validSearchResult = true;

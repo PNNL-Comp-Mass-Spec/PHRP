@@ -1683,7 +1683,7 @@ namespace PHRPReader
                 return "SID";
             }
 
-            return "";
+            return string.Empty;
         }
 
         private static string GetLegacyMSGFPlusName(string msgfPlusName)

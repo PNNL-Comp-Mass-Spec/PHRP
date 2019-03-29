@@ -348,7 +348,7 @@ namespace PHRPReader
             if (string.IsNullOrWhiteSpace(primarySequence))
                 return numMissedCleavages;
 
-            var previousLetter = "";
+            var previousLetter = string.Empty;
             for (var index = 0; index <= primarySequence.Length - 1; index++)
             {
                 var chCurrent = primarySequence[index];

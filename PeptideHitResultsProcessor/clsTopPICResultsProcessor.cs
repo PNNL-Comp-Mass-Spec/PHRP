@@ -1049,7 +1049,7 @@ namespace PeptideHitResultsProcessor
                     }
                     else if (!string.IsNullOrEmpty(udtSearchResult.Qvalue) & !double.TryParse(udtSearchResult.Qvalue, out _))
                     {
-                        udtSearchResult.Qvalue = "";
+                        udtSearchResult.Qvalue = string.Empty;
                     }
 
                     GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_FDR], out udtSearchResult.Proteoform_FDR);

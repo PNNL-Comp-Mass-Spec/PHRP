@@ -976,7 +976,7 @@ namespace PeptideHitResultsProcessor
                 string outputDirectoryPath;
 
                 if (string.IsNullOrWhiteSpace(mtsPepToProteinMapFile.DirectoryName))
-                    outputDirectoryPath = "";
+                    outputDirectoryPath = string.Empty;
                 else
                     outputDirectoryPath = mtsPepToProteinMapFile.DirectoryName;
 
@@ -1835,7 +1835,7 @@ namespace PeptideHitResultsProcessor
             List<udtPepToProteinMappingType> pepToProteinMapping,
             out string headerLine)
         {
-            headerLine = "";
+            headerLine = string.Empty;
 
             bool success;
 

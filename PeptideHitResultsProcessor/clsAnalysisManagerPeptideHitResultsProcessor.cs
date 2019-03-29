@@ -448,7 +448,7 @@ namespace PeptideHitResultsProcessor
             // Verifies that the specified directory exists
             if (Directory.Exists(TestDir))
             {
-                m_ErrMsg = "";
+                m_ErrMsg = string.Empty;
                 return true;
             }
 
@@ -461,7 +461,7 @@ namespace PeptideHitResultsProcessor
             // Verifies specified file exists
             if (File.Exists(TestFile))
             {
-                m_ErrMsg = "";
+                m_ErrMsg = string.Empty;
                 return true;
             }
 

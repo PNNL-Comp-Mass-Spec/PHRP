@@ -388,7 +388,7 @@ namespace PHRPReader
 
                         if (string.IsNullOrEmpty(modSpec))
                         {
-                            var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", "");
+                            var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", string.Empty);
                             if (lineInNoSpaces.Contains(",opt,") || lineInNoSpaces.Contains(",fix,") || lineInNoSpaces.Contains(",custom,"))
                             {
                                 modSpec = lineInNoSpaces;

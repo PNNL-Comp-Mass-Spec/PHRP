@@ -1466,7 +1466,7 @@ namespace PeptideHitResultsProcessor
                     switch (xmlReader.Name.ToLower())
                     {
                         case XTANDEM_XML_ELEMENT_NAME_AMINO_ACID:
-                            var value = XMLTextReaderGetAttributeValue(xmlReader, "type", "").Trim();
+                            var value = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty).Trim();
                             char targetResidue;
                             if (string.IsNullOrWhiteSpace(value))
                             {

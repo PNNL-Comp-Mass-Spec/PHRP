@@ -1038,7 +1038,7 @@ namespace PeptideHitResultsProcessor
                     }
                     else if (!string.IsNullOrEmpty(udtSearchResult.FDR) & !double.TryParse(udtSearchResult.FDR, out _))
                     {
-                        udtSearchResult.FDR = "";
+                        udtSearchResult.FDR = string.Empty;
                     }
 
                     GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);

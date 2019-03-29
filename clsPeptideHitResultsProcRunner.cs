@@ -140,7 +140,7 @@ namespace PeptideHitResultsProcRunner
                 switch (mLocalErrorCode)
                 {
                     case eResultsProcessorErrorCodes.NoError:
-                        errorMessage = "";
+                        errorMessage = string.Empty;
                         break;
                     case eResultsProcessorErrorCodes.UnspecifiedError:
                         errorMessage = "Unspecified localized error";

@@ -85,7 +85,7 @@ namespace PeptideHitResultsProcessor
         protected readonly clsPeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
         protected readonly clsPeptideMassCalculator mPeptideSeqMassCalculator;
 
-        protected string mErrorMessage = "";
+        protected string mErrorMessage = string.Empty;
         #endregion
 
         #region "Properties"
