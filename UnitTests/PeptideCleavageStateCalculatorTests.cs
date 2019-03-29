@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using PHRPReader;
 
+// ReSharper disable StringLiteralTypo
 namespace PHRP_UnitTests
 {
     [TestFixture]
@@ -40,15 +41,11 @@ namespace PHRP_UnitTests
         [TestCase("..TGMLTQKFARSLGMLAVDNQARV.R", "TGMLTQKFARSLGMLAVDNQARV", "", "R")]
         public void TestSplitPrefixAndSuffix(string sequence, string expectedPrimarySeq, string expectedPrefix, string expectedSuffix)
         {
-            string strPrimarySequence = string.Empty;
-            string strPrefix = string.Empty;
-            string strSuffix = string.Empty;
+            clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out var primarySequence, out var prefix, out var suffix);
 
-            clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out strPrimarySequence, out strPrefix, out strSuffix);
-
-            Assert.AreEqual(expectedPrimarySeq, strPrimarySequence);
-            Assert.AreEqual(expectedPrefix, strPrefix);
-            Assert.AreEqual(expectedSuffix, strSuffix);
+            Assert.AreEqual(expectedPrimarySeq, primarySequence);
+            Assert.AreEqual(expectedPrefix, prefix);
+            Assert.AreEqual(expectedSuffix, suffix);
         }
 
         [Test]

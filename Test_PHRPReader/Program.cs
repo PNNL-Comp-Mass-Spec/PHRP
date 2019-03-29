@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -12,93 +13,94 @@ namespace Test_PHRPReader
     {
         public static void Main()
         {
-            //const string strSequestSynFilePath = @"Seq201304121552_Auto934225\Firestone_Soil_07_18_05APR13_Frodo_12-12-04_syn.txt";
-            //const string strMSGFPlusSynFilePath = @"MSG201304261714_Auto938181\FSFA-299b_25Apr13_Methow_13-02-13_msgfdb_syn.txt";
+            //const string synFileSequest = @"Seq201304121552_Auto934225\Firestone_Soil_07_18_05APR13_Frodo_12-12-04_syn.txt";
+            //const string synFileMSGFPlus = @"MSG201304261714_Auto938181\FSFA-299b_25Apr13_Methow_13-02-13_msgfdb_syn.txt";
 
-            const string strSequestFolder = @"\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225";
-            // const string strMSGFPlusFolder = "MSG201304261714_Auto938181"
+            const string resultsPathSequest = @"\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225";
+            // const string resultsPathMSGFPlus = "MSG201304261714_Auto938181"
 
-            // const string strMSGFPlusFolder = "\\proto-7\VOrbiETD03\2015_1\proteogeomics_32_crude_heavy_peptides_200f_25Feb15_Tiger_15-01-26\MSG201503091410_Auto1169297"
-            const string strMSGFPlusFolder = @"C:\DMS_WorkDir";
+            // const string resultsPathMSGFPlus = "\\proto-7\VOrbiETD03\2015_1\proteogeomics_32_crude_heavy_peptides_200f_25Feb15_Tiger_15-01-26\MSG201503091410_Auto1169297"
+            const string resultsPathMSGFPlus = @"C:\DMS_WorkDir";
 
-            //const string strXTandemFolder = @"\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
+            //const string resultsXTandem = @"\\proto-7\VOrbiETD01\2013_3\QC_Shew_13_04_pt1_1_2_27Jun13_Leopard_13-05-20\XTM201307011524_Auto958319"
 
-            //const string strMSAlignFolder = @"\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
+            //const string resultsMSAlign = @"\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
 
-            string strSynOrFHTFile;
-            clsPHRPReader.ePeptideHitResultType eMatchedResultType;
+            string synOrFhtFile;
+            var matchedResultType = clsPHRPReader.ePeptideHitResultType.Unknown;
 
             if (false) {
                 Console.WriteLine();
-                strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, out eMatchedResultType);
-                if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
-                    TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: true);
+                synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathSequest, out matchedResultType);
+                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                    TestPHRPReader(synOrFhtFile, blnSkipDuplicates: true);
                 }
             }
 
-            var diMSGFPlusFolder = new DirectoryInfo(strMSGFPlusFolder);
-            if (!diMSGFPlusFolder.Exists) {
-                Console.WriteLine("Warning, Folder not found: " + strMSGFPlusFolder);
+            var msgfPlusDirectory = new DirectoryInfo(resultsPathMSGFPlus);
+            if (!msgfPlusDirectory.Exists) {
+                Console.WriteLine("Warning, Folder not found: " + resultsPathMSGFPlus);
             }
 
-            if (true & diMSGFPlusFolder.Exists) {
+            if (true & msgfPlusDirectory.Exists) {
                 Console.WriteLine();
-                strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, out eMatchedResultType);
-                if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
-                    TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: false);
+                synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathMSGFPlus, out matchedResultType);
+                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                    TestPHRPReader(synOrFhtFile, blnSkipDuplicates: false);
                 }
             }
 
-            if (true & diMSGFPlusFolder.Exists) {
+            if (true & msgfPlusDirectory.Exists) {
                 Console.WriteLine();
-                strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strMSGFPlusFolder, out eMatchedResultType);
-                if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
-                    TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: true);
+                synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathMSGFPlus, out matchedResultType);
+                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                    TestPHRPReader(synOrFhtFile, blnSkipDuplicates: true);
                 }
             }
 
-            if (true & diMSGFPlusFolder.Exists) {
+            if (true & msgfPlusDirectory.Exists) {
                 // Look for an MSGF+ parameter file to parse
-                var lstFiles = diMSGFPlusFolder.GetFiles("MSGFDB*.txt");
+                var lstFiles = msgfPlusDirectory.GetFiles("MSGFDB*.txt");
                 if (lstFiles.Length > 0) {
                     TestMSGFPlusParamFileParsing(lstFiles.First().FullName);
                 }
             }
 
-            var diSequestFolder = new DirectoryInfo(strSequestFolder);
-            if (!diSequestFolder.Exists) {
-                Console.WriteLine("Warning, Folder not found: " + strSequestFolder);
+            var sequestDirectory = new DirectoryInfo(resultsPathSequest);
+            if (!sequestDirectory.Exists) {
+                Console.WriteLine("Warning, Folder not found: " + resultsPathSequest);
             }
 
-            if (true || !diSequestFolder.Exists)
+            if (!sequestDirectory.Exists)
                 return;
 
-            var dtStartTimeNoSkipDup = default(DateTime);
-            var dtEndTimeNoSkipDup = default(DateTime);
+            var startTimeNoSkipDup = default(DateTime);
+            var endTimeNoSkipDup = default(DateTime);
 
-            var dtStartTimeSkipDup = default(DateTime);
-            var dtEndTimeSkipDup = default(DateTime);
+            var startTimeSkipDup = default(DateTime);
+            var endTimeSkipDup = default(DateTime);
 
             Console.WriteLine();
-            strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder);
-            if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
-                dtStartTimeNoSkipDup = DateTime.UtcNow;
-                TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: false);
-                dtEndTimeNoSkipDup = DateTime.UtcNow;
+            synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathSequest);
+            if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                startTimeNoSkipDup = DateTime.UtcNow;
+                TestPHRPReader(synOrFhtFile, blnSkipDuplicates: false);
+                endTimeNoSkipDup = DateTime.UtcNow;
             }
 
             Console.WriteLine();
-            strSynOrFHTFile = clsPHRPReader.AutoDetermineBestInputFile(strSequestFolder, out eMatchedResultType);
-            if (!string.IsNullOrEmpty(strSynOrFHTFile) && eMatchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
-                dtStartTimeSkipDup = DateTime.UtcNow;
-                TestPHRPReader(strSynOrFHTFile, blnSkipDuplicates: true);
-                dtEndTimeSkipDup = DateTime.UtcNow;
+            synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathSequest, out matchedResultType);
+            if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                startTimeSkipDup = DateTime.UtcNow;
+                TestPHRPReader(synOrFhtFile, blnSkipDuplicates: true);
+                endTimeSkipDup = DateTime.UtcNow;
             }
 
             Console.WriteLine();
 
-            Console.WriteLine("Elapsed time (Keep Duplicates): " + dtEndTimeNoSkipDup.Subtract(dtStartTimeNoSkipDup).TotalSeconds.ToString("0.0") + " seconds");
-            Console.WriteLine("Elapsed time (Skip Duplicates): " + dtEndTimeSkipDup.Subtract(dtStartTimeSkipDup).TotalSeconds.ToString("0.0") + " seconds");
+            Console.WriteLine("Elapsed time (Keep Duplicates): " + endTimeNoSkipDup.Subtract(startTimeNoSkipDup).TotalSeconds.ToString("0.0") + " seconds");
+            Console.WriteLine("Elapsed time (Skip Duplicates): " + endTimeSkipDup.Subtract(startTimeSkipDup).TotalSeconds.ToString("0.0") + " seconds");
+            Console.WriteLine();
         }
 
         private static void TestMSGFPlusParamFileParsing(string msgfPlusParamFilePath)
@@ -133,9 +135,9 @@ namespace Test_PHRPReader
             Debug.Assert(Math.Abs(monoMassModified - 879.325926865) < 1E-07);
         }
 
-        private static void TestPHRPReader(string strSynOrFHTFile, bool blnSkipDuplicates)
+        private static void TestPHRPReader(string synOrFhtFile, bool blnSkipDuplicates)
         {
-            var fiInputFile = new FileInfo(strSynOrFHTFile);
+            var fiInputFile = new FileInfo(synOrFhtFile);
 
             Console.WriteLine("Instantiating reader");
             var oStartupOptions = new clsPHRPStartupOptions
@@ -196,19 +198,19 @@ namespace Test_PHRPReader
 
                 var strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, out _);
 
-                lstValues.Add(phrpReader.DatasetName + "_dta.txt");                                             // #SpecFile
-                lstValues.Add("index=" + intPSMsRead);                                                           // SpecID
-                lstValues.Add(oPsm.ScanNumber.ToString());                                                       // ScanNum
-                lstValues.Add(oPsm.CollisionMode);                                                               // FragMethod
-                lstValues.Add(oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString());      // Precursor m/z
+                lstValues.Add(phrpReader.DatasetName + "_dta.txt");                                         // #SpecFile
+                lstValues.Add("index=" + intPSMsRead);                                                      // SpecID
+                lstValues.Add(oPsm.ScanNumber.ToString());                                                      // ScanNum
+                lstValues.Add(oPsm.CollisionMode);                                                              // FragMethod
+                lstValues.Add(oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString(CultureInfo.InvariantCulture));      // Precursor m/z
 
-                lstValues.Add(strMassErrorPPM);                                                                  // PrecursorError(ppm)
-                lstValues.Add(oPsm.Charge.ToString());                                                           // Charge
-                lstValues.Add(oPsm.NumTrypticTerminii.ToString());                                               // Tryptic state (0, 1, or 2)
-                lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods));                                      // Peptide
+                lstValues.Add(strMassErrorPPM);                                                                 // PrecursorError(ppm)
+                lstValues.Add(oPsm.Charge.ToString());                                                          // Charge
+                lstValues.Add(oPsm.NumTrypticTerminii.ToString());                                              // Tryptic state (0, 1, or 2)
+                lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods));                                     // Peptide
 
                 if (oPsm.SeqID <= 0) {
-                    lstValues.Add("**" + oPsm.SeqID + "**");                                                     // SeqID is undefined
+                    lstValues.Add("**" + oPsm.SeqID + "**");                                                // SeqID is undefined
                 } else {
                     lstValues.Add(oPsm.SeqID.ToString());                                                        // SeqID
                 }
