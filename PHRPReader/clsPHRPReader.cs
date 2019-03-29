@@ -938,6 +938,51 @@ namespace PHRPReader
         }
 
         /// <summary>
+        /// Add a PHRP file to find when auto-determining the input file type
+        /// </summary>
+        /// <param name="filesToFind"></param>
+        /// <param name="resultType"></param>
+        /// <param name="getPhrpFilenameMethod"></param>
+        /// <param name="datasetName"></param>
+        private static void AddFileToFind(
+            ICollection<KeyValuePair<string, ePeptideHitResultType>> filesToFind,
+            ePeptideHitResultType resultType,
+            Func<string, string> getPhrpFilenameMethod,
+            string datasetName)
+        {
+            var phrpFilename = getPhrpFilenameMethod(datasetName);
+            filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(phrpFilename, resultType));
+        }
+
+        /// <summary>
+        /// Add a PHRP file to find when auto-determining the input file type
+        /// </summary>
+        /// <param name="filesToFind"></param>
+        /// <param name="resultType"></param>
+        /// <param name="phrpFilename"></param>
+        private static void AddFileToFind(
+            ICollection<KeyValuePair<string, ePeptideHitResultType>> filesToFind,
+            ePeptideHitResultType resultType,
+            string phrpFilename)
+        {
+            filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(phrpFilename, resultType));
+        }
+
+        /// <summary>
+        /// Add a filename suffix to check when auto-determining the input file type
+        /// </summary>
+        /// <param name="suffixesToCheck"></param>
+        /// <param name="resultType"></param>
+        /// <param name="suffix"></param>
+        private static void AddSuffixToCheck(
+            ICollection<KeyValuePair<string, ePeptideHitResultType>> suffixesToCheck,
+            ePeptideHitResultType resultType,
+            string suffix)
+        {
+            suffixesToCheck.Add(new KeyValuePair<string, ePeptideHitResultType>(suffix, resultType));
+        }
+
+        /// <summary>
         /// Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified directory
         /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
@@ -1123,40 +1168,31 @@ namespace PHRPReader
             foreach (var dataset in datasetNames)
             {
                 // MSGF+
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.MSGFPlus));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.MSGFPlus));
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFDB.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName, dataset);
 
                 // MSGF+ prior to November 2016
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(dataset)), ePeptideHitResultType.MSGFPlus));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(dataset)), ePeptideHitResultType.MSGFPlus));
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(dataset)));
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(dataset)));
 
-                // X!Tandem
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserXTandem.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.XTandem));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserXTandem.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.XTandem));
-
-                // MSAlign
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSAlign.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.MSAlign));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSAlign.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.MSAlign));
-
-                // MODa
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMODa.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.MODa));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMODa.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.MODa));
-
-                // MODPlus
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMODPlus.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.MODPlus));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMODPlus.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.MODPlus));
-
-                // MSPathFinder
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSPathFinder.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.MSPathFinder));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserMSPathFinder.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.MSPathFinder));
-
-                // Inspect
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserInspect.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.Inspect));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserInspect.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.Inspect));
+                AddFileToFind(filesToFind, ePeptideHitResultType.XTandem, clsPHRPParserXTandem.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.XTandem, clsPHRPParserXTandem.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSAlign, clsPHRPParserMSAlign.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSAlign, clsPHRPParserMSAlign.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MODa, clsPHRPParserMODa.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MODa, clsPHRPParserMODa.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MODPlus, clsPHRPParserMODPlus.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MODPlus, clsPHRPParserMODPlus.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSPathFinder, clsPHRPParserMSPathFinder.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSPathFinder, clsPHRPParserMSPathFinder.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.TopPIC, clsPHRPParserTopPIC.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.TopPIC, clsPHRPParserTopPIC.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.Inspect, clsPHRPParserInspect.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.Inspect, clsPHRPParserInspect.GetPHRPFirstHitsFileName, dataset);
 
                 // Sequest (needs to be added last since files simply end in _syn.txt or _fht.txt)
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserSequest.GetPHRPSynopsisFileName(dataset), ePeptideHitResultType.Sequest));
-                filesToFind.Add(new KeyValuePair<string, ePeptideHitResultType>(clsPHRPParserSequest.GetPHRPFirstHitsFileName(dataset), ePeptideHitResultType.Sequest));
+                AddFileToFind(filesToFind, ePeptideHitResultType.Sequest, clsPHRPParserSequest.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.Sequest, clsPHRPParserSequest.GetPHRPFirstHitsFileName, dataset);
             }
 
             foreach (var kvFileToFind in filesToFind)
@@ -1342,7 +1378,34 @@ namespace PHRPReader
 
             var filePathLCase = filePath.ToLower();
 
-            if (filePathLCase.EndsWith(clsPHRPParserXTandem.FILENAME_SUFFIX_SYN))
+            var suffixesToCheck = new List<KeyValuePair<string, ePeptideHitResultType>>();
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.XTandem, clsPHRPParserXTandem.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSAlign, clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSAlign, clsPHRPParserMSAlign.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MODa, clsPHRPParserMODa.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MODa, clsPHRPParserMODa.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MODPlus, clsPHRPParserMODPlus.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MODPlus, clsPHRPParserMODPlus.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSPathFinder, clsPHRPParserMSPathFinder.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSPathFinder, clsPHRPParserMSPathFinder.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.TopPIC, clsPHRPParserTopPIC.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.TopPIC, clsPHRPParserTopPIC.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.Inspect, clsPHRPParserInspect.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.Inspect, clsPHRPParserInspect.FILENAME_SUFFIX_FHT);
+
+            foreach (var item in suffixesToCheck)
+            {
+                if (filePathLCase.EndsWith(item.Key, StringComparison.OrdinalIgnoreCase))
+                {
+                    eResultType = item.Value;
+                    break;
+                }
+            }
+
             {
                 eResultType = ePeptideHitResultType.XTandem;
             }
