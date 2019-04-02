@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsTopPICResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 1, 2019";
             InitializeLocalVariables();
         }
 
@@ -890,177 +890,186 @@ namespace PeptideHitResultsProcessor
 
             double precursorMZ = 0;
 
-            bool validSearchResult;
-
             try
             {
-                // Set this to False for now
-                validSearchResult = false;
 
                 udtSearchResult.Clear();
                 splitLine = lineIn.TrimEnd().Split('\t');
 
-                if (splitLine.Length >= 13)
+                // The file should have over 20 columns, but we'll only require 15
+                if (splitLine.Length < 15)
                 {
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
-                    if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
-                    {
-                        ReportError("Prsm_ID column is missing or invalid", true);
-                    }
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+                    return false;
+                }
 
-                    if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Scans], out udtSearchResult.Scans))
-                    {
-                        ReportError("Scan(s) column is missing or invalid", true);
-                    }
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
+                if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
+                {
+                    ReportError("Prsm_ID column is missing or invalid", true);
+                }
 
-                    if (!int.TryParse(udtSearchResult.Scans, out udtSearchResult.ScanNum))
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+
+                if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Scans], out udtSearchResult.Scans))
+                {
+                    ReportError("Scan(s) column is missing or invalid", true);
+                }
+
+                if (!int.TryParse(udtSearchResult.Scans, out udtSearchResult.ScanNum))
+                {
+                    // .Scans may have a list of scan numbers; extract the first scan number from .scans
+                    var scanNumberDigits = string.Empty;
+                    foreach (var chChar in udtSearchResult.Scans)
                     {
-                        // .Scans may have a list of scan numbers; extract the first scan number from .scans
-                        var scanNumberDigits = string.Empty;
-                        foreach (var chChar in udtSearchResult.Scans)
+                        if (char.IsDigit(chChar))
                         {
-                            if (char.IsDigit(chChar))
-                            {
-                                scanNumberDigits += chChar;
-                            }
-                        }
-                        if (!int.TryParse(scanNumberDigits, out udtSearchResult.ScanNum))
-                        {
-                            ReportWarning("Error parsing out the scan number from the scan list; could not find an integer: " + udtSearchResult.Scans);
-                            udtSearchResult.ScanNum = 0;
+                            scanNumberDigits += chChar;
                         }
                     }
 
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Peaks], out udtSearchResult.Peaks);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Charge], out udtSearchResult.Charge);
-                    udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
-
-                    // Monoisotopic mass value of the observed precursor_mz
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
-
-                    // precursorMonoMass is Observed m/z, converted to monoisotopic mass
-                    if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
+                    if (!int.TryParse(scanNumberDigits, out udtSearchResult.ScanNum))
                     {
-                        if (udtSearchResult.ChargeNum > 0)
-                        {
-                            precursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, udtSearchResult.ChargeNum);
-                            udtSearchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(precursorMZ, 6);
-                        }
+                        ReportWarning("Error parsing out the scan number from the scan list; could not find an integer: " +
+                                      udtSearchResult.Scans);
+                        udtSearchResult.ScanNum = 0;
                     }
+                }
 
-                    // peptideMonoMassTopPIC is Theoretical peptide monoisotopic mass, including mods, as computed by TopPIC
-                    double peptideMonoMassTopPIC;
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Peaks], out udtSearchResult.Peaks);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Charge], out udtSearchResult.Charge);
+                udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
-                    if (columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass] >= 0)
+                // Monoisotopic mass value of the observed precursor_mz
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
+
+                // precursorMonoMass is Observed m/z, converted to monoisotopic mass
+                if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
+                {
+                    if (udtSearchResult.ChargeNum > 0)
                     {
-                        // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC
-                        GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
+                        precursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, udtSearchResult.ChargeNum);
+                        udtSearchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(precursorMZ, 6);
+                    }
+                }
 
-                        double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassTopPIC);
+                // peptideMonoMassTopPIC is Theoretical peptide monoisotopic mass, including mods, as computed by TopPIC
+                double peptideMonoMassTopPIC;
+
+                if (columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass] >= 0)
+                {
+                    // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC
+                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass],
+                                   out udtSearchResult.Adjusted_precursor_mass);
+
+                    double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassTopPIC);
+                }
+                else
+                {
+                    peptideMonoMassTopPIC = 0;
+                }
+
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Protein_name], out udtSearchResult.Protein);
+                udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
+
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.First_residue], out udtSearchResult.ResidueStart);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Last_residue], out udtSearchResult.ResidueEnd);
+
+                if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform], out udtSearchResult.Proteoform))
+                {
+                    ReportError("Peptide column is missing or invalid", true);
+                }
+
+                // Add the standard terminus symbols to the peptide sequence
+                udtSearchResult.Proteoform = ReplaceTerminus(udtSearchResult.Proteoform);
+
+                // Parse the sequence to determine the total mod mass
+                // Note that we do not remove any of the mod symbols since TopPIC identifies mods by mass alone, and since mods can ambiguously apply to residues
+                var totalModMass = ComputeTotalModMass(udtSearchResult.Proteoform);
+
+                // Compute theoretical peptide monoisotopic mass, including mods, as computed by PHRP
+                var peptideMonoMassPHRP = ComputePeptideMass(udtSearchResult.Proteoform, totalModMass);
+
+                if (Math.Abs(peptideMonoMassTopPIC) < double.Epsilon)
+                {
+                    peptideMonoMassTopPIC = peptideMonoMassPHRP;
+                }
+
+                var massDiffThreshold = peptideMonoMassTopPIC / 50000;
+                if (massDiffThreshold < 0.1)
+                    massDiffThreshold = 0.1;
+
+                if (Math.Abs(peptideMonoMassPHRP - peptideMonoMassTopPIC) > massDiffThreshold)
+                {
+                    // Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
+                    string first30Residues;
+                    if (udtSearchResult.Proteoform.Length < 27)
+                    {
+                        first30Residues = udtSearchResult.Proteoform;
                     }
                     else
                     {
-                        peptideMonoMassTopPIC = 0;
+                        first30Residues = udtSearchResult.Proteoform.Substring(0, 27) + "...";
                     }
 
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Protein_name], out udtSearchResult.Protein);
-                    udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
-
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.First_residue], out udtSearchResult.ResidueStart);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Last_residue], out udtSearchResult.ResidueEnd);
-
-                    if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform], out udtSearchResult.Proteoform))
-                    {
-                        ReportError("Peptide column is missing or invalid", true);
-                    }
-
-                    // Add the standard terminus symbols to the peptide sequence
-                    udtSearchResult.Proteoform = ReplaceTerminus(udtSearchResult.Proteoform);
-
-                    // Parse the sequence to determine the total mod mass
-                    // Note that we do not remove any of the mod symbols since TopPIC identifies mods by mass alone, and since mods can ambiguously apply to residues
-                    var totalModMass = ComputeTotalModMass(udtSearchResult.Proteoform);
-
-                    // Compute theoretical peptide monoisotopic mass, including mods, as computed by PHRP
-                    var peptideMonoMassPHRP = ComputePeptideMass(udtSearchResult.Proteoform, totalModMass);
-
-                    if (Math.Abs(peptideMonoMassTopPIC) < double.Epsilon)
-                    {
-                        peptideMonoMassTopPIC = peptideMonoMassPHRP;
-                    }
-
-                    var massDiffThreshold = peptideMonoMassTopPIC / 50000;
-                    if (massDiffThreshold < 0.1)
-                        massDiffThreshold = 0.1;
-
-                    if (Math.Abs(peptideMonoMassPHRP - peptideMonoMassTopPIC) > massDiffThreshold)
-                    {
-                        // Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
-                        string first30Residues;
-                        if (udtSearchResult.Proteoform.Length < 27)
-                        {
-                            first30Residues = udtSearchResult.Proteoform;
-                        }
-                        else
-                        {
-                            first30Residues = udtSearchResult.Proteoform.Substring(0, 27) + "...";
-                        }
-                        ReportWarning("The monoisotopic mass computed by PHRP is more than " + massDiffThreshold.ToString("0.00") + " Da away from the mass computed by TopPIC: " + peptideMonoMassPHRP.ToString("0.0000") + " vs. " + peptideMonoMassTopPIC.ToString("0.0000") + "; peptide " + first30Residues);
-                    }
-
-                    if (peptideMonoMassTopPIC > 0)
-                    {
-                        // Compute DelM and DelM_PPM
-                        var delM = precursorMonoMass - peptideMonoMassTopPIC;
-                        udtSearchResult.DelM = MassErrorToString(delM);
-
-                        if (precursorMZ > 0)
-                        {
-                            udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(delM, precursorMZ), 5, 0.00005);
-                        }
-                        else
-                        {
-                            udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(delM, 1000), 5, 0.00005);
-                        }
-                    }
-
-                    // Store the monoisotopic MH value in .MH; note that this is (M+H)+
-                    udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
-
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_Mod_Count);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
-                    if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
-                        udtSearchResult.PValueNum = 0;
-
-                    // Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
-                    udtSearchResult.Unexpected_Mod_Count = AssureInteger(udtSearchResult.Unexpected_Mod_Count, 0);      // Unexpected_Mod_Count
-                    udtSearchResult.Peaks = AssureInteger(udtSearchResult.Peaks, 0);                                    // Peak_count
-                    udtSearchResult.Matched_peaks = AssureInteger(udtSearchResult.Matched_peaks, 0);                    // Matched_Peak_Count
-                    udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0);    // Matched_Fragment_Ion_Count
-
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
-
-                    if (udtSearchResult.Qvalue.ToLower() == "infinity")
-                    {
-                        udtSearchResult.Qvalue = "10";
-                    }
-                    else if (!string.IsNullOrEmpty(udtSearchResult.Qvalue) & !double.TryParse(udtSearchResult.Qvalue, out _))
-                    {
-                        udtSearchResult.Qvalue = string.Empty;
-                    }
-
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_FDR], out udtSearchResult.Proteoform_FDR);
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
-
-                    validSearchResult = true;
+                    ReportWarning("The monoisotopic mass computed by PHRP is more than " + massDiffThreshold.ToString("0.00") +
+                                  " Da away from the mass computed by TopPIC: " + peptideMonoMassPHRP.ToString("0.0000") + " vs. " +
+                                  peptideMonoMassTopPIC.ToString("0.0000") + "; peptide " + first30Residues);
                 }
+
+                if (peptideMonoMassTopPIC > 0)
+                {
+                    // Compute DelM and DelM_PPM
+                    var delM = precursorMonoMass - peptideMonoMassTopPIC;
+                    udtSearchResult.DelM = MassErrorToString(delM);
+
+                    if (precursorMZ > 0)
+                    {
+                        udtSearchResult.DelM_PPM =
+                            PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(delM, precursorMZ), 5, 0.00005);
+                    }
+                    else
+                    {
+                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(delM, 1000), 5, 0.00005);
+                    }
+                }
+
+                // Store the monoisotopic MH value in .MH; note that this is (M+H)+
+                udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
+
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Unexpected_modifications],
+                               out udtSearchResult.Unexpected_Mod_Count);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_fragment_ions],
+                               out udtSearchResult.Matched_fragment_ions);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
+                if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
+                    udtSearchResult.PValueNum = 0;
+
+                // Assure that the following are truly integers (Matched_peaks and Matched_fragment_ions are often of the form 8.0)
+                udtSearchResult.Unexpected_Mod_Count = AssureInteger(udtSearchResult.Unexpected_Mod_Count, 0);      // Unexpected_Mod_Count
+                udtSearchResult.Peaks = AssureInteger(udtSearchResult.Peaks, 0);                                    // Peak_count
+                udtSearchResult.Matched_peaks = AssureInteger(udtSearchResult.Matched_peaks, 0);                    // Matched_Peak_Count
+                udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0);    // Matched_Fragment_Ion_Count
+
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
+
+                if (udtSearchResult.Qvalue.ToLower() == "infinity")
+                {
+                    udtSearchResult.Qvalue = "10";
+                }
+                else if (!string.IsNullOrEmpty(udtSearchResult.Qvalue) & !double.TryParse(udtSearchResult.Qvalue, out _))
+                {
+                    udtSearchResult.Qvalue = string.Empty;
+                }
+
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_FDR], out udtSearchResult.Proteoform_FDR);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
+
+                return true;
             }
             catch (Exception)
             {
@@ -1077,10 +1086,9 @@ namespace PeptideHitResultsProcessor
                         errorLog += "Error parsing TopPIC Results in ParseTopPICResultsFileEntry" + "\n";
                     }
                 }
-                validSearchResult = false;
+                return false;
             }
 
-            return validSearchResult;
         }
 
         /// <summary>

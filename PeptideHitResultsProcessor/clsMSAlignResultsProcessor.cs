@@ -1531,27 +1531,29 @@ namespace PeptideHitResultsProcessor
             return peptide;
         }
 
-        protected void ResolveMSAlignModsWithModDefinitions(ref List<clsModificationDefinition> mSAlignModInfo)
+        /// <summary>
+        /// Call .LookupModificationDefinitionByMass for each entry in msAlignModInfo
+        /// </summary>
+        /// <param name="msAlignModInfo"></param>
+        protected void ResolveMSAlignModsWithModDefinitions(ref List<clsModificationDefinition> msAlignModInfo)
         {
-            if (mSAlignModInfo != null)
+            if (msAlignModInfo == null) return;
+
+            foreach (var modInfo in msAlignModInfo)
             {
-                // Call .LookupModificationDefinitionByMass for each entry in mSAlignModInfo
-                foreach (var modInfo in mSAlignModInfo)
+                if (string.IsNullOrEmpty(modInfo.TargetResidues))
                 {
-                    if (string.IsNullOrEmpty(modInfo.TargetResidues))
+                    mPeptideMods.LookupModificationDefinitionByMassAndModType(
+                        modInfo.ModificationMass, modInfo.ModificationType, default(char),
+                        clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
+                }
+                else
+                {
+                    foreach (var chTargetResidue in modInfo.TargetResidues)
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                            modInfo.ModificationMass, modInfo.ModificationType, default(char),
+                            modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
                             clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
-                    }
-                    else
-                    {
-                        foreach (var chTargetResidue in modInfo.TargetResidues)
-                        {
-                            mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                                modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
-                                clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
-                        }
                     }
                 }
             }
