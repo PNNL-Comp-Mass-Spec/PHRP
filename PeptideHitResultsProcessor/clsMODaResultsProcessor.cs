@@ -478,24 +478,6 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private string AssureInteger(string integerText, int defaultValue)
-        {
-            if (integerText.EndsWith(".0"))
-                integerText = integerText.Substring(0, integerText.Length - 2);
-
-            if (int.TryParse(integerText, out var intValue))
-            {
-                return intValue.ToString();
-            }
-
-            if (double.TryParse(integerText, out var dblValue))
-            {
-                return dblValue.ToString("0");
-            }
-
-            return defaultValue.ToString();
-        }
-
         private double ComputePeptideMass(string peptide, double totalModMass)
         {
             var cleanSequence = GetCleanSequence(peptide);
@@ -2030,53 +2012,6 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Probability is the same; check peptide
-                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
-                if (result == 0)
-                {
-                    // Peptide is the same, check Protein
-                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
-                }
-                return result;
-            }
-        }
-
-        private class MODaSearchResultsComparerProbabilityScanChargePeptide : IComparer<udtMODaSearchResultType>
-        {
-            public int Compare(udtMODaSearchResultType x, udtMODaSearchResultType y)
-            {
-                if (x.ProbabilityNum < y.ProbabilityNum)
-                {
-                    return 1;
-                }
-
-                if (x.ProbabilityNum > y.ProbabilityNum)
-                {
-                    return -1;
-                }
-
-                // PValue is the same; check scan number
-                if (x.ScanNum > y.ScanNum)
-                {
-                    return 1;
-                }
-
-                if (x.ScanNum < y.ScanNum)
-                {
-                    return -1;
-                }
-
-                // Scan is the same, check charge
-                if (x.ChargeNum > y.ChargeNum)
-                {
-                    return 1;
-                }
-
-                if (x.ChargeNum < y.ChargeNum)
-                {
-                    return -1;
-                }
-
-                // Charge is the same; check peptide
                 var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
                 if (result == 0)
                 {

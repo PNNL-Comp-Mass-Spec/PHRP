@@ -3234,54 +3234,6 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private class MSGFDBSearchResultsComparerSpecEValueScanChargePeptide : IComparer<udtMSGFPlusSearchResultType>
-        {
-            public int Compare(udtMSGFPlusSearchResultType x, udtMSGFPlusSearchResultType y)
-            {
-                if (x.SpecEValueNum > y.SpecEValueNum)
-                {
-                    return 1;
-                }
-
-                if (x.SpecEValueNum < y.SpecEValueNum)
-                {
-                    return -1;
-                }
-
-                // SpecEValueNum is the same; check scan number
-                if (x.ScanNum > y.ScanNum)
-                {
-                    return 1;
-                }
-
-                if (x.ScanNum < y.ScanNum)
-                {
-                    return -1;
-                }
-
-                // Scan is the same, check charge
-                if (x.ChargeNum > y.ChargeNum)
-                {
-                    return 1;
-                }
-
-                if (x.ChargeNum < y.ChargeNum)
-                {
-                    return -1;
-                }
-
-                // Charge is the same; check peptide
-                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
-                if (result == 0)
-                {
-                    // Peptide is the same, check Protein
-                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
-                }
-
-                return result;
-            }
-        }
-
         #endregion
     }
 }
