@@ -205,10 +205,10 @@ namespace PHRPReader
         /// Default first hits file for the given dataset
         /// </summary>
         /// <param name="datasetName"></param>
-        /// <returns>Filename</returns>
+        /// <returns>Empty string, since MSPathFinder does not have a first-hits file; just the _syn.txt file</returns>
+        /// <remarks></remarks>
         public static string GetPHRPFirstHitsFileName(string datasetName)
         {
-            // MSPathFinder does not have a first-hits file; just the _syn.txt file
             return string.Empty;
         }
 

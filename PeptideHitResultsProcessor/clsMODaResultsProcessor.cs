@@ -935,14 +935,21 @@ namespace PeptideHitResultsProcessor
             return 0;
         }
 
+        /// <summary>
+        /// Parse a MODa synopsis file
+        /// </summary>
+        /// <param name="inputFilePath"></param>
+        /// <param name="outputDirectoryPath"></param>
+        /// <param name="pepToProteinMapping"></param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <returns></returns>
+        /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
         private bool ParseMODaSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
             List<udtPepToProteinMappingType> pepToProteinMapping,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
-
             // Note that MODa synopsis files are normally sorted on Probability value, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
@@ -1148,14 +1155,20 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
+        /// <summary>
+        /// Parses an entry from the MODa results file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="udtSearchResult"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMODaResultsFileEntry(
             string lineIn,
             ref udtMODaSearchResultType udtSearchResult,
             ref string errorLog,
             IDictionary<eMODaResultsFileColumns, int> columnMapping)
         {
-            // Parses an entry from the MODa results file
-
             var rowIndex = "?";
 
             bool validSearchResult;
@@ -1307,7 +1320,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        ///
+        /// Parse the header line from a MODa results file
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
@@ -1315,8 +1328,6 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private bool ParseMODaResultsFileHeaderLine(string lineIn, IDictionary<eMODaResultsFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             // The expected column order from MODa:
             //   SpectrumFile	Index	ObservedMonoMass	Charge	CalculatedMonoMass	DeltaMass	Score	Probability	Peptide	Protein	PeptidePosition
 
@@ -1395,10 +1406,14 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parse the header line from a MODa _syn.txt file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMODaSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMODa.MODaSynFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             var columnNames = clsPHRPParserMODa.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();
@@ -1430,6 +1445,16 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parses an entry from a MODa Synopsis file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="searchResult"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="resultsProcessed"></param>
+        /// <param name="columnMapping"></param>
+        /// <param name="peptideSequenceWithMods"></param>
+        /// <returns></returns>
         private bool ParseMODaSynFileEntry(
             string lineIn,
             clsSearchResultsMODa searchResult,
@@ -1438,8 +1463,6 @@ namespace PeptideHitResultsProcessor
             IDictionary<clsPHRPParserMODa.MODaSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
-            // Parses an entry from the MODa Synopsis file
-
             string[] splitLine = null;
 
             // Reset searchResult

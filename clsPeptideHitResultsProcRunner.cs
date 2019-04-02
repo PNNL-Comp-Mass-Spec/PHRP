@@ -36,7 +36,9 @@ namespace PeptideHitResultsProcRunner
 
         #region "Constants and Enums"
 
-        // Error codes specialized for this class
+        /// <summary>
+        /// Error codes specialized for this class
+        /// </summary>
         public enum eResultsProcessorErrorCodes
         {
             NoError = 0,

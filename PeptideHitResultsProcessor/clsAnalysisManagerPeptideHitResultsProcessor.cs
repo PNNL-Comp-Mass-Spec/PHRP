@@ -73,9 +73,12 @@ namespace PeptideHitResultsProcessor
             return m_Status;
         }
 
+        /// <summary>
+        /// Copies all input data required for plugin operation to appropriate memory variables
+        /// </summary>
+        /// <param name="options"></param>
         public override void Setup(InitializationParams options)
         {
-            // Copies all input data required for plugin operation to appropriate memory variables
             SourceDirectoryPath = options.SourceDirectoryPath;
             OutputDirectoryPath = options.OutputDirectoryPath;
 
@@ -239,10 +242,12 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        /// <summary>
+        /// Initializes module variables and verifies that mandatory parameters have been properly specified
+        /// </summary>
+        /// <returns></returns>
         protected virtual bool InitSetup()
         {
-            // Initializes module variables and verifies that mandatory parameters have been properly specified
-
             // Output directory name
             if (string.IsNullOrEmpty(OutputDirectoryPath))
             {
@@ -451,29 +456,39 @@ namespace PeptideHitResultsProcessor
             OnErrorEvent(source + ": " + m_ErrMsg);
         }
 
-        protected virtual bool VerifyDirExists(string TestDir)
+        /// <summary>
+        /// Verifies that the specified directory exists
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        /// <returns>True if the directory exists, otherwise false</returns>
+        /// <remarks>Updates m_ErrMsg if the directory is not found</remarks>
+        protected virtual bool VerifyDirExists(string directoryPath)
         {
-            // Verifies that the specified directory exists
-            if (Directory.Exists(TestDir))
+            if (Directory.Exists(directoryPath))
             {
                 m_ErrMsg = string.Empty;
                 return true;
             }
 
-            m_ErrMsg = "Directory " + TestDir + " not found";
+            m_ErrMsg = "Directory " + directoryPath + " not found";
             return false;
         }
 
-        protected virtual bool VerifyFileExists(string TestFile)
+        /// <summary>
+        ///  Verifies that the specified file exists
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns>True if the file exists, otherwise false</returns>
+        /// <remarks>Updates m_ErrMsg if the file is not found</remarks>
+        protected virtual bool VerifyFileExists(string filePath)
         {
-            // Verifies specified file exists
-            if (File.Exists(TestFile))
+            if (File.Exists(filePath))
             {
                 m_ErrMsg = string.Empty;
                 return true;
             }
 
-            m_ErrMsg = "File " + TestFile + " not found";
+            m_ErrMsg = "File " + filePath + " not found";
             return false;
         }
 

@@ -589,9 +589,15 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        /// <summary>
+        /// Compute the theoretical peptide MH using the precursor m/z value and the precursor error values
+        /// </summary>
+        /// <param name="precursorMZText"></param>
+        /// <param name="precursorErrorText"></param>
+        /// <param name="chargeText"></param>
+        /// <returns></returns>
         private double ComputePeptideMHFromPrecursorInfo(string precursorMZText, string precursorErrorText, string chargeText)
         {
-            // Compute the theoretical peptide MH using the precursor m/z value and the precursor error values
 
             double peptideMH = 0;
 
@@ -924,10 +930,17 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parse and Inspect synopsis file
+        /// </summary>
+        /// <param name="inputFilePath"></param>
+        /// <param name="outputDirectoryPath"></param>
+        /// <param name="pepToProteinMapping"></param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <returns></returns>
+        /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
         protected bool ParseInspectSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
-
             // Note that Inspect synopsis files are normally sorted on TotalPRMScore descending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique TotalPRMScore encountered
@@ -1138,6 +1151,15 @@ namespace PeptideHitResultsProcessor
 
         }
 
+        /// <summary>
+        /// Parse the header line of an Inspect results file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="udtInspectModInfo"></param>
+        /// <param name="udtSearchResult"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="resultsProcessed"></param>
+        /// <returns></returns>
         private bool ParseInspectResultsFileEntry(
             ref string lineIn,
             ref udtModInfoType[] udtInspectModInfo,
@@ -1276,6 +1298,15 @@ namespace PeptideHitResultsProcessor
             return validSearchResult;
         }
 
+        /// <summary>
+        /// Parse the header line of an Inspect _syn.txt file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <param name="searchResult"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="peptideSequenceWithMods"></param>
+        /// <returns></returns>
         private bool ParseInspectSynFileEntry(
             string lineIn,
             IDictionary<clsPHRPParserInspect.InspectSynFileColumns, int> columnMapping,
@@ -1283,8 +1314,6 @@ namespace PeptideHitResultsProcessor
             ref string errorLog,
             out string peptideSequenceWithMods)
         {
-            // Parses an entry from the Inspect Synopsis file
-
             string[] splitLine = null;
 
             bool validSearchResult;
@@ -1589,7 +1618,11 @@ namespace PeptideHitResultsProcessor
         private static readonly Regex RegexNumPlusZeroes = new Regex(@"(\.\d*[1-9])0+$", RegexOptions.Compiled);
         private static readonly Regex RegexAllZeroes = new Regex(@"\.0+$", RegexOptions.Compiled);
 
-        // If value ends in .0000, then remove the .0000 portion
+        /// <summary>
+        /// If value ends in .0000, then remove the .0000 portion
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         private string RemoveExtraneousDigits(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -1740,7 +1773,6 @@ namespace PeptideHitResultsProcessor
 
         protected void ResolveInspectModsWithModDefinitions(ref udtModInfoType[] udtInspectModInfo)
         {
-
             if (udtInspectModInfo == null)
                 return;
 
@@ -1919,13 +1951,19 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        /// <summary>
+        /// Writes an entry to a synopsis or first hits file
+        /// </summary>
+        /// <param name="resultID"></param>
+        /// <param name="writer"></param>
+        /// <param name="udtSearchResult"></param>
+        /// <param name="errorLog"></param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
             udtInspectSearchResultType udtSearchResult,
             ref string errorLog)
         {
-            // Writes an entry to a synopsis or first hits file
             try
             {
                 var data = new List<string>

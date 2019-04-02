@@ -1528,10 +1528,12 @@ namespace PeptideHitResultsProcessor
             return false;
         }
 
+        /// <summary>
+        /// Get the error message, or an empty string if no error
+        /// </summary>
+        /// <returns></returns>
         protected string GetErrorMessage()
         {
-            // Returns String.Empty if no error
-
             string message;
 
             switch (ErrorCode)
@@ -1646,11 +1648,13 @@ namespace PeptideHitResultsProcessor
             PeptideCTerminusMassChange = clsPeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE;
         }
 
+        /// <summary>
+        /// Initializes the StreamWriter objects using baseOutputFilePath as a base name and replacing the suffix with the default suffix names
+        /// </summary>
+        /// <param name="baseOutputFilePath"></param>
+        /// <returns>True if success; does not catch errors; they will be thrown to the calling function if they occur</returns>
         protected bool InitializeSequenceOutputFiles(string baseOutputFilePath)
         {
-            // Initializes the StreamWriter objects using baseOutputFilePath as a base name and replacing the suffix with the default suffix names
-            // Returns True if success; does not catch errors; they will be thrown to the calling function if they occur
-
             var outputFileInfo = new FileInfo(baseOutputFilePath);
 
             // Initialize the file paths based on baseOutputFilePath

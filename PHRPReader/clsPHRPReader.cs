@@ -2997,7 +2997,11 @@ namespace PHRPReader
         }
 
         #region "IDisposable Support"
-        private bool disposedValue; // To detect redundant calls
+
+        /// <summary>
+        /// Used to detect redundant calls
+        /// </summary>
+        private bool disposedValue;
 
         /// <summary>
         /// Dispose of this class
@@ -3024,6 +3028,7 @@ namespace PHRPReader
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }

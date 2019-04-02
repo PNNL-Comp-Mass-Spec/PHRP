@@ -266,10 +266,9 @@ namespace PHRPReader
         /// Default first hits file for the given dataset
         /// </summary>
         /// <param name="datasetName"></param>
-        /// <returns>Filename</returns>
+        /// <returns>Empty string, since X!Tandem does not have a first-hits file; just the _xt.txt file</returns>
         public static string GetPHRPFirstHitsFileName(string datasetName)
         {
-            // X!Tandem does not have a first-hits file; just the _xt.txt file
             return string.Empty;
         }
 

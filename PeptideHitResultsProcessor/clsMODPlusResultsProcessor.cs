@@ -1050,7 +1050,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        ///
+        /// Parse the header line of a MOD+ results file
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
@@ -1058,8 +1058,6 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private bool ParseMODPlusResultsFileHeaderLine(string lineIn, IDictionary<eMODPlusResultsFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             // The expected column order from MODPlus:
             //   SpectrumFile   Index   ScanNo   ObservedMW   Charge   CalculatedMW   DeltaMass   Score   Probability   Peptide   NTT    Protein   ModificationAnnotation
 
@@ -1141,10 +1139,14 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parse the header line of a MOD+ _syn.txt file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMODPlusSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMODPlus.MODPlusSynFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             var columnNames = clsPHRPParserMODPlus.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();

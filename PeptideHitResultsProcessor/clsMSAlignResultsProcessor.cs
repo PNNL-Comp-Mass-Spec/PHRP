@@ -1067,10 +1067,14 @@ namespace PeptideHitResultsProcessor
             return validSearchResult;
         }
 
+        /// <summary>
+        /// Parse the header line of a MSAlign results file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMSAlignResultsFileHeaderLine(string lineIn, IDictionary<eMSAlignResultsFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             // The expected header from MSAlign v0.5 is:
             //                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                                           Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
 
@@ -1142,10 +1146,14 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parse the header line of a MSAlign _syn.txt file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMSAlignSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             var columnNames = clsPHRPParserMSAlign.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();
@@ -1434,6 +1442,14 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
+        /// <summary>
+        /// Create the MTSPepToProteinMap file
+        /// </summary>
+        /// <param name="baseName"></param>
+        /// <param name="inputFile"></param>
+        /// <param name="synOutputFilePath"></param>
+        /// <param name="outputDirectoryPath"></param>
+        /// <returns></returns>
         private bool CreateProteinModsFileWork(string baseName, FileInfo inputFile, string synOutputFilePath, string outputDirectoryPath)
         {
             bool success;

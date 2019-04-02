@@ -75,10 +75,12 @@ namespace PeptideHitResultsProcRunner
         private static int mLastProgressReportValue;
         private static DateTime mLastProgressReportValueTime;
 
+        /// <summary>
+        /// Program entry point
+        /// </summary>
+        /// <returns>0 if no error, error code if an error</returns>
         public static int Main()
         {
-            // Returns 0 if no error, error code if an error
-
             int returnCode;
             var parseCommandLine = new clsParseCommandLine();
 

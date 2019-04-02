@@ -184,10 +184,16 @@ namespace PeptideHitResultsProcessor
             // Reserved for future use
         }
 
+        /// <summary>
+        /// Parse a synopsis or first hits file
+        /// </summary>
+        /// <param name="inputFilePath"></param>
+        /// <param name="outputDirectoryPath"></param>
+        /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
+        /// <returns></returns>
+        /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
         protected bool ParseSynopsisOrFirstHitsFile(string inputFilePath, string outputDirectoryPath, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
-            // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
-
             // Note that synopsis files are normally sorted on XCorr descending, with lines
             //  duplicated when peptide search results are mapped to multiple proteins
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file,

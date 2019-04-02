@@ -1930,9 +1930,14 @@ namespace PeptideHitResultsProcessor
 
         }
 
+        /// <summary>
+        /// Parse the MSGF+ results file header line
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMSGFPlusResultsFileHeaderLine(string lineIn, IDictionary<eMSGFPlusResultsFileColumns, int> columnMapping)
         {
-            // Parse the header line
 
             // The expected header from MSGFDB is:
             // #SpecFile    SpecIndex    Scan#     FragMethod    Precursor                    PMError(Da)           Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecProb      P-value   FDR       PepFDR
@@ -2010,10 +2015,14 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parse the header line of a MSGF+ _syn.txt file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMSGFPlusSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSGFDB.MSGFPlusSynFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             var columnNames = clsPHRPParserMSGFDB.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();
@@ -2045,6 +2054,16 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parse an entry from a MSGF+ Synopsis file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="searchResult"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="resultsProcessed"></param>
+        /// <param name="columnMapping"></param>
+        /// <param name="peptideSequenceWithMods"></param>
+        /// <returns></returns>
         private bool ParseMSGFPlusSynFileEntry(
             string lineIn,
             clsSearchResultsMSGFDB searchResult,
@@ -2053,7 +2072,6 @@ namespace PeptideHitResultsProcessor
             IDictionary<clsPHRPParserMSGFDB.MSGFPlusSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
-            // Parses an entry from the MSGFDB Synopsis file
 
             string[] splitLine = null;
 

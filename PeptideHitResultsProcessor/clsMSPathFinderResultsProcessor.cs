@@ -915,8 +915,6 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private bool ParseMSPathFinderResultsFileHeaderLine(string lineIn, IDictionary<eMSPathFinderResultsFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             // The expected column order from MassMSPathFinder:
             //   Scan	Pre	Sequence	Post	Modifications	Composition	ProteinName	ProteinDesc	ProteinLength	Start	End	Charge	MostAbundantIsotopeMz	Mass	#MatchedFragments	Probability SpecEValue    EValue    QValue    PepQValue
 
@@ -1006,10 +1004,14 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parse the header line of a MSPathFinder _syn.txt file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseMSPathFinderSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             var columnNames = clsPHRPParserMSPathFinder.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();
@@ -1041,6 +1043,16 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parses an entry from a MSPathFinder Synopsis file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="searchResult"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="resultsProcessed"></param>
+        /// <param name="columnMapping"></param>
+        /// <param name="peptideSequence"></param>
+        /// <returns></returns>
         private bool ParseMSPathFinderSynFileEntry(
             string lineIn,
             clsSearchResultsMSPathFinder searchResult,
@@ -1049,8 +1061,6 @@ namespace PeptideHitResultsProcessor
             IDictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int> columnMapping,
             out string peptideSequence)
         {
-            // Parses an entry from the MSPathFinder Synopsis file
-
             string[] splitLine = null;
 
             // Reset searchResult

@@ -874,13 +874,20 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
+        /// <summary>
+        /// Parses an entry from the TopPIC results file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="udtSearchResult"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseTopPICResultsFileEntry(
             string lineIn,
             ref udtTopPICSearchResultType udtSearchResult,
             ref string errorLog,
             IDictionary<eTopPICResultsFileColumns, int> columnMapping)
         {
-            // Parses an entry from the TopPIC results file
 
             string[] splitLine = null;
 
@@ -1079,10 +1086,14 @@ namespace PeptideHitResultsProcessor
             return validSearchResult;
         }
 
+        /// <summary>
+        /// Parse the header line of a TopPIC results file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseTopPICResultsFileHeaderLine(string lineIn, IDictionary<eTopPICResultsFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             // The expected header:
             // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein name    First residue    Last residue    Proteoform    #unexpected modifications    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR    #Variable PTMs
 
@@ -1148,10 +1159,14 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parse the header line of a TopPIC _syn.txt file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="columnMapping"></param>
+        /// <returns></returns>
         private bool ParseTopPICSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int> columnMapping)
         {
-            // Parse the header line
-
             var columnNames = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();
@@ -1183,6 +1198,16 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        /// <summary>
+        /// Parses an entry from the TopPIC Synopsis file
+        /// </summary>
+        /// <param name="lineIn"></param>
+        /// <param name="searchResult"></param>
+        /// <param name="errorLog"></param>
+        /// <param name="resultsProcessed"></param>
+        /// <param name="columnMapping"></param>
+        /// <param name="peptideSequenceWithMods"></param>
+        /// <returns></returns>
         private bool ParseTopPICSynFileEntry(
             string lineIn,
             clsSearchResultsTopPIC searchResult,
@@ -1191,7 +1216,6 @@ namespace PeptideHitResultsProcessor
             IDictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
-            // Parses an entry from the TopPIC Synopsis file
 
             string[] splitLine = null;
 
