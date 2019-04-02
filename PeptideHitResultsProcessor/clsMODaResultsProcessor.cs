@@ -585,16 +585,12 @@ namespace PeptideHitResultsProcessor
 
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
-            var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath != null &&
-                  (pepToProteinMapFilePath.EndsWith("_MODa_syn", StringComparison.OrdinalIgnoreCase) ||
-                   pepToProteinMapFilePath.EndsWith("_MODa_fht", StringComparison.OrdinalIgnoreCase)))
-            {
-                // Remove _syn or _fht
-                pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
-            }
+            var suffixesToFind = new List<string> {
+                "_MODa_syn",
+                "_MODa_fht"
+            };
 
-            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputDirectoryPath, mts);
+            return ConstructPepToProteinMapFilePath(inputFilePath, outputDirectoryPath, mts, suffixesToFind, 4);
         }
 
         /// <summary>

@@ -447,17 +447,14 @@ namespace PeptideHitResultsProcessor
             return totalModMass;
         }
 
-        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool MTS)
+        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
-            var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath.EndsWith("_MODPlus_syn", StringComparison.OrdinalIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_MODPlus_fht", StringComparison.OrdinalIgnoreCase))
-            {
-                // Remove _syn or _fht
-                pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
-            }
+            var suffixesToFind = new List<string> {
+                "_MODPlus_syn",
+                "_MODPlus_fht"
+            };
 
-            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputDirectoryPath, MTS);
+            return ConstructPepToProteinMapFilePath(inputFilePath, outputDirectoryPath, mts, suffixesToFind, 4);
         }
 
         /// <summary>
@@ -1423,7 +1420,7 @@ namespace PeptideHitResultsProcessor
 
             // Create the MTSPepToProteinMap file
 
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, MTS: true);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, mts: true);
 
             var sourcePHRPDataFiles = new List<string>();
 

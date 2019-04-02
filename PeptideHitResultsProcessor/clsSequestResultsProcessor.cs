@@ -166,17 +166,14 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool MTS)
+        protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
-            var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath.EndsWith("_syn", StringComparison.OrdinalIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_fht", StringComparison.OrdinalIgnoreCase))
-            {
-                // Remove _syn or _fht
-                pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
-            }
+            var suffixesToFind = new List<string> {
+                "_syn",
+                "_fht"
+            };
 
-            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputDirectoryPath, MTS);
+            return ConstructPepToProteinMapFilePath(inputFilePath, outputDirectoryPath, mts, suffixesToFind, 4);
         }
 
         private void InitializeLocalVariables()
@@ -603,7 +600,7 @@ namespace PeptideHitResultsProcessor
                 }
             }
 
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputDirectoryPath, MTS: true);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(inputFile.FullName, outputDirectoryPath, mts: true);
 
             if (File.Exists(mtsPepToProteinMapFilePath) && UseExistingMTSPepToProteinMapFile)
             {

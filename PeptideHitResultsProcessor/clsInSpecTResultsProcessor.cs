@@ -634,15 +634,12 @@ namespace PeptideHitResultsProcessor
 
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
-            var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
-            if (pepToProteinMapFilePath.EndsWith("_inspect_syn", StringComparison.OrdinalIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_inspect_fht", StringComparison.OrdinalIgnoreCase))
-            {
-                // Remove _syn or _fht
-                pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
-            }
+            var suffixesToFind = new List<string> {
+                "_inspect_syn",
+                "_inspect_fht"
+            };
 
-            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputDirectoryPath, mts);
+            return ConstructPepToProteinMapFilePath(inputFilePath, outputDirectoryPath, mts, suffixesToFind, 4);
         }
 
         private bool ExtractModInfoFromInspectParamFile(string inspectParameterFilePath, ref udtModInfoType[] udtModList)

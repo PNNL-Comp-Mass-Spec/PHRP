@@ -590,21 +590,14 @@ namespace PeptideHitResultsProcessor
 
         protected override string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
-            var pepToProteinMapFilePath = Path.GetFileNameWithoutExtension(inputFilePath);
+            var suffixesToFind = new List<string> {
+                "_msgfplus_syn",
+                "_msgfplus_fht",
+                "_msgfdb_syn",
+                "_msgfdb_fht"
+            };
 
-            if (string.IsNullOrEmpty(pepToProteinMapFilePath))
-                return string.Empty;
-
-            if (pepToProteinMapFilePath.EndsWith("_msgfplus_syn", StringComparison.OrdinalIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_msgfplus_fht", StringComparison.OrdinalIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_msgfdb_syn", StringComparison.OrdinalIgnoreCase) ||
-                pepToProteinMapFilePath.EndsWith("_msgfdb_fht", StringComparison.OrdinalIgnoreCase))
-            {
-                // Remove _syn or _fht
-                pepToProteinMapFilePath = pepToProteinMapFilePath.Substring(0, pepToProteinMapFilePath.Length - 4);
-            }
-
-            return base.ConstructPepToProteinMapFilePath(pepToProteinMapFilePath, outputDirectoryPath, mts);
+            return ConstructPepToProteinMapFilePath(inputFilePath, outputDirectoryPath, mts, suffixesToFind, 4);
         }
 
         /// <summary>

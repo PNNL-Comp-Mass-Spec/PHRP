@@ -941,6 +941,24 @@ namespace PeptideHitResultsProcessor
             return pepToProteinMapFilePath;
         }
 
+        protected string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts, List<string> suffixesToFind, int charsToRemove)
+        {
+            var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
+            if (string.IsNullOrEmpty(baseName))
+                return string.Empty;
+
+            foreach (var item in suffixesToFind)
+            {
+                if (!baseName.EndsWith(item, StringComparison.OrdinalIgnoreCase)) continue;
+
+                // baseName matches something like Dataset_
+                var baseNameTrimmed = baseName.Substring(0, baseName.Length - charsToRemove);
+                return ConstructPepToProteinMapFilePath(baseNameTrimmed, outputDirectoryPath, mts);
+            }
+
+            return ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, mts);
+        }
+
         /// <summary>
         /// Use the PeptideToProteinMapEngine to create the Peptide to Protein map file for the file or files in sourcePHRPDataFiles
         /// </summary>
