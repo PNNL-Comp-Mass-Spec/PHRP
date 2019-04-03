@@ -196,8 +196,6 @@ namespace PeptideHitResultsProcessor
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file,
             //  we will keep track of the scan, charge, and peptide information parsed for each unique XCorr encountered
 
-            var resultsProcessed = 0;
-
             var columnMapping = new Dictionary<clsPHRPParserSequest.SequestSynopsisFileColumns, int>();
 
             try
@@ -228,7 +226,6 @@ namespace PeptideHitResultsProcessor
                     // Initialize the stream reader
                     using (var reader = new StreamReader(inputFilePath))
                     {
-                        resultsProcessed = 0;
                         var headerParsed = false;
 
                         // Create the output files
@@ -331,8 +328,6 @@ namespace PeptideHitResultsProcessor
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
                             UpdateProgress(percentComplete);
-
-                            resultsProcessed += 1;
                         }
                     }
 

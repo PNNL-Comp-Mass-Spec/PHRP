@@ -980,7 +980,6 @@ namespace PeptideHitResultsProcessor
                     // Initialize the stream reader
                     using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
-                        var resultsProcessed = 0;
                         var headerParsed = false;
 
                         // Create the output files
@@ -990,7 +989,6 @@ namespace PeptideHitResultsProcessor
                             return false;
 
                         // Parse the input file
-
                         while (!reader.EndOfStream & !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
@@ -1107,8 +1105,6 @@ namespace PeptideHitResultsProcessor
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
                             UpdateProgress(percentComplete);
-
-                            resultsProcessed += 1;
                         }
                     }
 

@@ -422,7 +422,6 @@ namespace PeptideHitResultsProcessor
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile
 
-            var resultsProcessed = 0;
             try
             {
                 // Possibly reset the mass correction tags and Mod Definitions
@@ -514,7 +513,6 @@ namespace PeptideHitResultsProcessor
                                                             eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults;
 
                                                             ParseXTandemResultsFileEntry(xmlReader, writer, ref searchResultCount, ref searchResults, ref errorLog, groupElementReaderDepth);
-                                                            resultsProcessed += 1;
 
                                                             // Update the progress
                                                             var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
