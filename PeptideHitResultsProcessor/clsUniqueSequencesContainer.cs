@@ -24,15 +24,15 @@ namespace PeptideHitResultsProcessor
     public class clsUniqueSequencesContainer
     {
         #region "Constants and Enums"
-        protected const int DEFAULT_INITIAL_SEQ_ID = 1;
-        protected const char SEQUENCE_MOD_DESC_SEP = '_';
+        private const int DEFAULT_INITIAL_SEQ_ID = 1;
+        private const char SEQUENCE_MOD_DESC_SEP = '_';
         #endregion
 
         #region "Classwide Variables"
 
-        protected Dictionary<string, int> mMasterSequences;
+        private Dictionary<string, int> mMasterSequences;
 
-        protected int mNextUniqueSeqID;
+        private int mNextUniqueSeqID;
 
         #endregion
 

@@ -95,7 +95,7 @@ namespace PeptideHitResultsProcessor
             PrecursorError = 21
         }
 
-        protected enum eInspectModType
+        private enum eInspectModType
         {
             Unknown = 0,
             DynamicMod = 1,
@@ -104,7 +104,7 @@ namespace PeptideHitResultsProcessor
             DynCTermPeptide = 4
         }
 
-        protected enum eFilteredOutputFileTypeConstants
+        private enum eFilteredOutputFileTypeConstants
         {
             SynFile = 0,
             FHTbyFScore = 1,
@@ -113,7 +113,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Structures"
-        protected struct udtInspectSearchResultType
+        private struct udtInspectSearchResultType
         {
             public string SpectrumFileName;
             public string Scan;
@@ -189,7 +189,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected struct udtModInfoType
+        private struct udtModInfoType
         {
             public string ModName;              // Mod names must be lower case, and 4 characters in length (or shorter)
             public string ModMass;              // Storing as a string since reading from a text file and writing to a text file
@@ -410,7 +410,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected bool CreateFHTorSYNResultsFile(
+        private bool CreateFHTorSYNResultsFile(
             string inputFilePath,
             string outputFilePath,
             ref udtModInfoType[] udtInspectModInfo,
@@ -561,7 +561,7 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        protected double ComputeDelMCorrectedPPM(
+        private double ComputeDelMCorrectedPPM(
             double precursorErrorDa,
             double precursorMonoMass,
             double peptideMonoisotopicMass,
@@ -818,7 +818,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected bool LoadPeptideToProteinMapInfoInspect(
+        private bool LoadPeptideToProteinMapInfoInspect(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
             ref udtModInfoType[] udtInspectModInfo,
@@ -936,7 +936,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
         /// <returns></returns>
         /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
-        protected bool ParseInspectSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
+        private bool ParseInspectSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Note that Inspect synopsis files are normally sorted on TotalPRMScore descending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
@@ -1658,7 +1658,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="udtInspectModInfo">This function assumes that each entry in udtInspectModInfo() has both .ModName and .ModSymbol defined</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected string ReplaceInspectModTextWithSymbol(string peptide, ref udtModInfoType[] udtInspectModInfo)
+        private string ReplaceInspectModTextWithSymbol(string peptide, IReadOnlyList<udtModInfoType> inspectModInfo)
         {
             var prefix = string.Empty;
             var suffix = string.Empty;
@@ -1753,7 +1753,7 @@ namespace PeptideHitResultsProcessor
             return prefix + peptide + suffix;
         }
 
-        protected string ReplaceTerminus(string peptide)
+        private string ReplaceTerminus(string peptide)
         {
             if (peptide.StartsWith(N_TERMINUS_SYMBOL_INSPECT))
             {
@@ -1768,7 +1768,7 @@ namespace PeptideHitResultsProcessor
             return peptide;
         }
 
-        protected void ResolveInspectModsWithModDefinitions(ref udtModInfoType[] udtInspectModInfo)
+        private void ResolveInspectModsWithModDefinitions(IList<udtModInfoType> inspectModInfo)
         {
             if (udtInspectModInfo == null)
                 return;
@@ -1831,8 +1831,8 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected void StoreOrWriteSearchResult(
-            StreamWriter writer,
+        private void StoreOrWriteSearchResult(
+            TextWriter writer,
             ref int resultID,
             udtInspectSearchResultType udtSearchResult,
             List<udtInspectSearchResultType> filteredSearchResults,
@@ -2008,7 +2008,7 @@ namespace PeptideHitResultsProcessor
 
         #region "IComparer Classes"
 
-        protected class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc : IComparer<udtInspectSearchResultType>
+        private class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc : IComparer<udtInspectSearchResultType>
         {
             public int Compare(udtInspectSearchResultType x, udtInspectSearchResultType y)
             {
@@ -2058,7 +2058,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc : IComparer<udtInspectSearchResultType>
+        private class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc : IComparer<udtInspectSearchResultType>
         {
             public int Compare(udtInspectSearchResultType x, udtInspectSearchResultType y)
             {
@@ -2108,7 +2108,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc : IComparer<udtInspectSearchResultType>
+        private class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc : IComparer<udtInspectSearchResultType>
         {
             public int Compare(udtInspectSearchResultType x, udtInspectSearchResultType y)
             {

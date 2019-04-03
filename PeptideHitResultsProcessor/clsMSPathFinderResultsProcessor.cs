@@ -86,7 +86,7 @@ namespace PeptideHitResultsProcessor
 
         #region "Structures"
         // This data structure holds rows read from the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
-        protected struct udtMSPathFinderSearchResultType
+        private struct udtMSPathFinderSearchResultType
         {
             public string Scan;
             public int ScanNum;
@@ -280,7 +280,7 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        protected double ComputePeptideMass(string cleanSequence, double totalModMass)
+        private double ComputePeptideMass(string cleanSequence, double totalModMass)
         {
             var mass = mPeptideSeqMassCalculator.ComputeSequenceMass(cleanSequence);
             mass += totalModMass;
@@ -296,7 +296,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected double ComputeTotalModMass(
+        private double ComputeTotalModMass(
             string cleanSequence,
             string modificationList,
             List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
@@ -423,7 +423,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected bool CreateSynResultsFile(
+        private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath,
             List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
@@ -579,7 +579,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected bool ParseMSPathfinderSynopsisFile(
+        private bool ParseMSPathfinderSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions,
@@ -1436,7 +1436,7 @@ namespace PeptideHitResultsProcessor
 
         #region "IComparer Classes"
 
-        protected class MSPathFinderSearchResultsComparerScanChargeScorePeptide : IComparer<udtMSPathFinderSearchResultType>
+        private class MSPathFinderSearchResultsComparerScanChargeScorePeptide : IComparer<udtMSPathFinderSearchResultType>
         {
             public int Compare(udtMSPathFinderSearchResultType x, udtMSPathFinderSearchResultType y)
             {

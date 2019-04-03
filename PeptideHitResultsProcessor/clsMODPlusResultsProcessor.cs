@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor
 
         #region "Structures"
         // This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created by MODPlus's tda_plus.jar file
-        protected struct udtMODPlusSearchResultType
+        private struct udtMODPlusSearchResultType
         {
             public string SpectrumFileName;
             public string SpectrumIndex;
@@ -132,7 +132,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Classwide Variables"
-        protected Regex mProteinNamePositionSplit;
+        private Regex mProteinNamePositionSplit;
         #endregion
 
         /// <summary>
@@ -342,7 +342,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected string AssureInteger(string integerText, int defaultValue)
+        private string AssureInteger(string integerText, int defaultValue)
         {
             if (integerText.EndsWith(".0"))
                 integerText = integerText.Substring(0, integerText.Length - 2);
@@ -360,7 +360,7 @@ namespace PeptideHitResultsProcessor
             return defaultValue.ToString();
         }
 
-        protected double ComputePeptideMass(string peptide, double totalModMass)
+        private double ComputePeptideMass(string peptide, double totalModMass)
         {
             var cleanSequence = GetCleanSequence(peptide);
 
@@ -382,7 +382,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="peptide">Peptide sequence, with mod masses in the form +53.8 or -23</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected double ComputeTotalModMass(string peptide)
+        private double ComputeTotalModMass(string peptide)
         {
             double totalModMass = 0;
 
@@ -466,7 +466,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="outputFilePath"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected bool CreateSynResultsFile(
+        private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath)
         {
@@ -677,7 +677,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected bool ParseMODPlusSynopsisFile(
+        private bool ParseMODPlusSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions)
@@ -1480,7 +1480,7 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        protected void ResolveMODPlusModsWithModDefinitions(ref List<clsModificationDefinition> mODPlusModInfo)
+        private void ResolveMODPlusModsWithModDefinitions(List<clsModificationDefinition> modPlusModInfo)
         {
             if (mODPlusModInfo != null)
             {
@@ -1757,7 +1757,7 @@ namespace PeptideHitResultsProcessor
 
         #region "IComparer Classes"
 
-        protected class MODPlusSearchResultsComparerScanChargeScorePeptide : IComparer<udtMODPlusSearchResultType>
+        private class MODPlusSearchResultsComparerScanChargeScorePeptide : IComparer<udtMODPlusSearchResultType>
         {
             public int Compare(udtMODPlusSearchResultType x, udtMODPlusSearchResultType y)
             {
@@ -1804,7 +1804,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected class MODPlusSearchResultsComparerScoreScanChargePeptide : IComparer<udtMODPlusSearchResultType>
+        private class MODPlusSearchResultsComparerScoreScanChargePeptide : IComparer<udtMODPlusSearchResultType>
         {
             public int Compare(udtMODPlusSearchResultType x, udtMODPlusSearchResultType y)
             {

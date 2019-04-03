@@ -189,7 +189,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
         /// <returns></returns>
         /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
-        protected bool ParseSynopsisOrFirstHitsFile(string inputFilePath, string outputDirectoryPath, bool resetMassCorrectionTagsAndModificationDefinitions)
+        private bool ParseSynopsisOrFirstHitsFile(string inputFilePath, string outputDirectoryPath, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Note that synopsis files are normally sorted on XCorr descending, with lines
             //  duplicated when peptide search results are mapped to multiple proteins

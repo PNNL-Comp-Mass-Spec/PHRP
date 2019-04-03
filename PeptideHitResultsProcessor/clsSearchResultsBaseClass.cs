@@ -44,48 +44,44 @@ namespace PeptideHitResultsProcessor
         /// Residue or residues before the start of the peptide sequence
         /// </summary>
         /// <remarks></remarks>
-        protected string mPeptidePreResidues;
+        private string mPeptidePreResidues;
 
         /// <summary>
         /// Residue or residues after the end of the peptide sequence
         /// </summary>
         /// <remarks></remarks>
-        protected string mPeptidePostResidues;
+        private string mPeptidePostResidues;
 
         /// <summary>
         /// Peptide sequence without any modification symbols
         /// </summary>
         /// <remarks></remarks>
-        protected string mPeptideCleanSequence;
+        private string mPeptideCleanSequence;
 
-        /// <summary>
-        /// Cleavage state of the peptide
-        /// </summary>
-        /// <remarks></remarks>
-        protected clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants mPeptideCleavageState;
+        private clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants mPeptideCleavageState;
 
         /// <summary>
         /// Terminus state of the peptide
         /// </summary>
         /// <remarks></remarks>
-        protected clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants mPeptideTerminusState;
+        private clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants mPeptideTerminusState;
 
         /// <summary>
         /// List of modifications present in the current peptide
         /// </summary>
         /// <remarks></remarks>
-        protected readonly List<clsAminoAcidModInfo> mSearchResultModifications;
+        private readonly List<clsAminoAcidModInfo> mSearchResultModifications;
 
         /// <summary>
         /// Possible modifications that the peptide could have
         /// </summary>
         /// <remarks></remarks>
-        protected readonly clsPeptideModificationContainer mPeptideMods;
+        private readonly clsPeptideModificationContainer mPeptideMods;
 
-        protected readonly clsPeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
-        protected readonly clsPeptideMassCalculator mPeptideSeqMassCalculator;
+        private readonly clsPeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
+        private readonly clsPeptideMassCalculator mPeptideSeqMassCalculator;
 
-        protected string mErrorMessage = string.Empty;
+        private string mErrorMessage = string.Empty;
         #endregion
 
         #region "Properties"
@@ -1191,7 +1187,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected class IGenericResidueModificationInfoComparer
+        private class IGenericResidueModificationInfoComparer
             : IComparer<clsAminoAcidModInfo>
         {
             /// <summary>

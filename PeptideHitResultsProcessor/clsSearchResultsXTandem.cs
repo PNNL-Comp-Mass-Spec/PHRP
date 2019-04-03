@@ -26,7 +26,7 @@ namespace PeptideHitResultsProcessor
         #region "Classwide Variables"
         // Note: ProteinExpectationValue and ProteinIntensity are defined in clsSearchResultsBaseClass
         // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
-        protected string mPeptideNextScore;
+        private string mPeptideNextScore;
 
         #endregion
 
@@ -132,7 +132,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected void ComputePeptideDeltaCn2()
+        private void ComputePeptideDeltaCn2()
         {
             try
             {

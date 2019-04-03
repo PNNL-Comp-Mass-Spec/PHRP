@@ -84,7 +84,7 @@ namespace PeptideHitResultsProcessor
         #region "Structures"
 
         // This data structure holds rows read from the tab-delimited file created directly by TopPIC
-        protected struct udtTopPICSearchResultType
+        private struct udtTopPICSearchResultType
         {
             public string SpectrumFileName;
             public string Prsm_ID;
@@ -379,7 +379,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected string AssureInteger(string integer, int defaultValue)
+        private string AssureInteger(string integer, int defaultValue)
         {
             if (integer.EndsWith(".0"))
                 integer = integer.Substring(0, integer.Length - 2);
@@ -397,7 +397,7 @@ namespace PeptideHitResultsProcessor
             return defaultValue.ToString();
         }
 
-        protected double ComputePeptideMass(string peptide, double totalModMass)
+        private double ComputePeptideMass(string peptide, double totalModMass)
         {
             var cleanSequence = GetCleanSequence(peptide);
 
@@ -419,7 +419,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="peptide">Peptide sequence, with mod masses in the form [23.5432]</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected double ComputeTotalModMass(string peptide)
+        private double ComputeTotalModMass(string peptide)
         {
             double totalModMass = 0;
 
@@ -453,7 +453,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="outputFilePath"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        protected bool CreateSynResultsFile(
+        private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath)
         {
@@ -662,7 +662,7 @@ namespace PeptideHitResultsProcessor
             // Nothing to do at present
         }
 
-        protected bool ParseTopPICSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
+        private bool ParseTopPICSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -1539,7 +1539,7 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        protected string ReplaceTerminus(string peptide)
+        private string ReplaceTerminus(string peptide)
         {
             if (peptide.StartsWith(N_TERMINUS_SYMBOL_TopPIC))
             {
@@ -1709,7 +1709,7 @@ namespace PeptideHitResultsProcessor
 
         #region "IComparer Classes"
 
-        protected class TopPICSearchResultsComparerScanChargePValuePeptide : IComparer<udtTopPICSearchResultType>
+        private class TopPICSearchResultsComparerScanChargePValuePeptide : IComparer<udtTopPICSearchResultType>
         {
             public int Compare(udtTopPICSearchResultType x, udtTopPICSearchResultType y)
             {

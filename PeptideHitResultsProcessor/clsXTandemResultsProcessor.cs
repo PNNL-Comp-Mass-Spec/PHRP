@@ -95,8 +95,8 @@ namespace PeptideHitResultsProcessor
 
         #region "Classwide Variables"
 
-        protected int mNextResultID;
-        protected bool mLookForReverseSequenceTag;
+        private int mNextResultID;
+        private bool mLookForReverseSequenceTag;
 
         private Regex mScanNumberRegExA;
         private Regex mScanNumberRegExB;
@@ -418,7 +418,7 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        protected bool ParseXTandemResultsFile(string inputFilePath, string outputFilePath, bool resetMassCorrectionTagsAndModificationDefinitions = true)
+        private bool ParseXTandemResultsFile(string inputFilePath, string outputFilePath, bool resetMassCorrectionTagsAndModificationDefinitions = true)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile
 

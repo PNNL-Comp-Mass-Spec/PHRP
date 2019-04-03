@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcessor
     {
         #region "Classwide Variables"
 
-        protected string mPeptideXCorrNext;             // Not stored in the synopsis or first hits file; it can be computed from XCorr and DeltaCn2
+        private string mPeptideXCorrNext;             // Not stored in the synopsis or first hits file; it can be computed from XCorr and DeltaCn2
         #endregion
 
         #region "Properties"
@@ -77,7 +77,7 @@ namespace PeptideHitResultsProcessor
             mPeptideXCorrNext = string.Empty;
         }
 
-        protected void ComputePeptideXCorrNext()
+        private void ComputePeptideXCorrNext()
         {
             float xCorr = 0;
             float delCN2 = 0;

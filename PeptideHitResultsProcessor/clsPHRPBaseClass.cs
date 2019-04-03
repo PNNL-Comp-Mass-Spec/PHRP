@@ -2658,7 +2658,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected class PepToProteinMappingPeptideSearchComparer : IComparer<udtPepToProteinMappingType>
+        private class PepToProteinMappingPeptideSearchComparer : IComparer<udtPepToProteinMappingType>
         {
             public int Compare(udtPepToProteinMappingType x, udtPepToProteinMappingType y)
             {
