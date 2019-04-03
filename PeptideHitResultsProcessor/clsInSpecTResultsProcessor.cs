@@ -428,7 +428,7 @@ namespace PeptideHitResultsProcessor
             try
             {
                 // Initialize variables
-                var previousScan = Int32.MinValue;
+                var previousScan = int.MinValue;
                 IComparer<udtInspectSearchResultType> sortComparer;
 
                 if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
@@ -489,7 +489,7 @@ namespace PeptideHitResultsProcessor
 
                                 if (validSearchResult)
                                 {
-                                    if (previousScan != Int32.MinValue && previousScan != udtSearchResult.ScanNum)
+                                    if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
                                     {
                                         // New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
                                         if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)

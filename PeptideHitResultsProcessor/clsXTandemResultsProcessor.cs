@@ -1464,7 +1464,7 @@ namespace PeptideHitResultsProcessor
                             char targetResidue;
                             if (string.IsNullOrWhiteSpace(value))
                             {
-                                targetResidue = default(char);
+                                targetResidue = default;
                             }
                             else
                             {

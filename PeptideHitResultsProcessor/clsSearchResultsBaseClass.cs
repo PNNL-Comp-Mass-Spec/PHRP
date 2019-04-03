@@ -1018,8 +1018,8 @@ namespace PeptideHitResultsProcessor
         public string SequenceWithPrefixAndSuffix(bool returnSequenceWithMods)
         {
             string work;
-            var chPrefix = default(char);
-            var chSuffix = default(char);
+            char chPrefix = default;
+            char chSuffix = default;
 
             try
             {

@@ -210,7 +210,7 @@ namespace PHRPReader
                     {
                         if (!String.IsNullOrEmpty(peptideMassUnits))
                         {
-                            Int32.TryParse(peptideMassUnits, out units);
+                            int.TryParse(peptideMassUnits, out units);
                         }
                     }
 
@@ -491,7 +491,7 @@ namespace PHRPReader
 
                                     break;
                                 case "max_num_internal_cleavage_sites":
-                                    if (Int32.TryParse(settingValue, out value))
+                                    if (int.TryParse(settingValue, out value))
                                     {
                                         searchEngineParams.MaxNumberInternalCleavages = value;
                                     }
@@ -518,7 +518,7 @@ namespace PHRPReader
                                         var reMatch = reEnzymeSpecificity.Match(settingValue);
                                         if (reMatch.Success)
                                         {
-                                            if (Int32.TryParse(reMatch.Groups[1].Value, out value))
+                                            if (int.TryParse(reMatch.Groups[1].Value, out value))
                                             {
                                                 searchEngineParams.MinNumberTermini = value;
                                             }
@@ -528,7 +528,7 @@ namespace PHRPReader
                                     break;
                                 case "enzyme_number":
                                     // Used in old-style sequest parameter files
-                                    if (Int32.TryParse(settingValue, out value))
+                                    if (int.TryParse(settingValue, out value))
                                     {
                                         if (value == 0)
                                         {

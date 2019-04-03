@@ -542,12 +542,12 @@ namespace PHRPReader
                             {
                                 // This is a terminal mod, and MSGFDB lists the target residue as * for terminal mods
                                 // This program requires that chTargetResidue be Nothing
-                                chTargetResidue = default(char);
+                                chTargetResidue = default;
                             }
                         }
                         else
                         {
-                            chTargetResidue = default(char);
+                            chTargetResidue = default;
                         }
 
                         var eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;

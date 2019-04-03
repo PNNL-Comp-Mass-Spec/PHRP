@@ -1549,7 +1549,7 @@ namespace PeptideHitResultsProcessor
                 if (string.IsNullOrEmpty(modInfo.TargetResidues))
                 {
                     mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                        modInfo.ModificationMass, modInfo.ModificationType, default(char),
+                        modInfo.ModificationMass, modInfo.ModificationType, default,
                         clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
                 }
                 else
