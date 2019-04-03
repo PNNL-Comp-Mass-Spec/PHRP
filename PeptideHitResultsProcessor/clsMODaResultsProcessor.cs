@@ -552,27 +552,19 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Load the static mods defined in the MODa parameter file
         /// </summary>
-        /// <param name="mODaParamFilePath"></param>
+        /// <param name="modaParamFilePath"></param>
         /// <param name="modInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        private bool ExtractModInfoFromMODaParamFile(string mODaParamFilePath, ref List<clsModificationDefinition> modInfo)
+        private bool ExtractModInfoFromMODaParamFile(string modaParamFilePath, out List<clsModificationDefinition> modInfo)
         {
             var success = false;
 
+            modInfo = new List<clsModificationDefinition>();
+
             try
             {
-                // Initialize the modification list
-                if (modInfo == null)
-                {
-                    modInfo = new List<clsModificationDefinition>();
-                }
-                else
-                {
-                    modInfo.Clear();
-                }
-
-                if (string.IsNullOrEmpty(mODaParamFilePath))
+                if (string.IsNullOrEmpty(modaParamFilePath))
                 {
                     SetErrorMessage("MODa Parameter File name not defined; unable to extract mod info");
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
@@ -1457,11 +1449,14 @@ namespace PeptideHitResultsProcessor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
-                    var mODaModInfo = new List<clsModificationDefinition>();
                     var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
                     // Load the MODa Parameter File to look for any static mods
-                    ExtractModInfoFromMODaParamFile(SearchToolParameterFilePath, ref mODaModInfo);
+                    var modInfoExtracted = ExtractModInfoFromMODaParamFile(SearchToolParameterFilePath, out var modaModInfo);
+                    if (!modInfoExtracted)
+                    {
+                        return false;
+                    }
 
                     // Resolve the mods in modaModInfo with the ModDefs mods
                     ResolveMODaModsWithModDefinitions(modaModInfo);

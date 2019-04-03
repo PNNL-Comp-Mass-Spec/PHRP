@@ -584,24 +584,19 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Load the static mods defined in the MODPlus parameter file
         /// </summary>
-        /// <param name="mODPlusParamFilePath"></param>
+        /// <param name="modPlusParamFilePath"></param>
         /// <param name="modInfo"></param>
         /// <returns></returns>
-        /// <remarks>We don't care about the dynamic mods because there are so many possible mods.  We'll add each dynamic mod as we encounter it in the results</remarks>
-        protected bool ExtractModInfoFromMODPlusParamFile(string mODPlusParamFilePath, ref List<clsModificationDefinition> modInfo)
+        /// <remarks>
+        /// We don't care about the dynamic mods because there are so many possible mods.
+        /// We'll add each dynamic mod as we encounter it in the results
+        /// </remarks>
+        private bool ExtractModInfoFromMODPlusParamFile(string modPlusParamFilePath, out List<clsModificationDefinition> modInfo)
         {
+            modInfo = new List<clsModificationDefinition>();
+
             try
             {
-                // Initialize the modification list
-                if (modInfo == null)
-                {
-                    modInfo = new List<clsModificationDefinition>();
-                }
-                else
-                {
-                    modInfo.Clear();
-                }
-
                 if (string.IsNullOrEmpty(modPlusParamFilePath))
                 {
                     SetErrorMessage("MODPlus Parameter File name not defined; unable to extract mod info");
@@ -752,11 +747,9 @@ namespace PeptideHitResultsProcessor
                                 continue;
                             }
 
-                            var currentPeptideWithMods = string.Empty;
-
                             var validSearchResult = ParseMODPlusSynFileEntry(lineIn, searchResult, ref errorLog,
                                                                                 resultsProcessed, columnMapping,
-                                                                                out currentPeptideWithMods);
+                                                                                out var currentPeptideWithMods);
 
                             if (!validSearchResult)
                             {
@@ -1346,13 +1339,15 @@ namespace PeptideHitResultsProcessor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
-                    var mODPlusModInfo = new List<clsModificationDefinition>();
-
                     // Load the MODPlus Parameter File to look for any static mods
-                    ExtractModInfoFromMODPlusParamFile(SearchToolParameterFilePath, ref mODPlusModInfo);
+                    var modInfoExtracted = ExtractModInfoFromMODPlusParamFile(SearchToolParameterFilePath, out var modPlusModInfo);
+                    if (!modInfoExtracted)
+                    {
+                        return false;
+                    }
 
-                    // Resolve the mods in mODPlusModInfo with the ModDefs mods
-                    ResolveMODPlusModsWithModDefinitions(ref mODPlusModInfo);
+                    // Resolve the mods in modPlusModInfo with the ModDefs mods
+                    ResolveMODPlusModsWithModDefinitions(modPlusModInfo);
 
                     // Define the base output filename using inputFilePath
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);

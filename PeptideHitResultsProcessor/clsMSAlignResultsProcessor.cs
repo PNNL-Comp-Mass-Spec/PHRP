@@ -73,6 +73,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Structures"
+
         // This data structure holds rows read from the tab-delimited file created directly by MSAlign
         private struct udtMSAlignSearchResultType
         {
@@ -561,19 +562,11 @@ namespace PeptideHitResultsProcessor
         {
             var success = false;
 
+            modInfo = new List<clsModificationDefinition>();
+
             try
             {
-                // Initialize the modification list
-                if (modInfo == null)
-                {
-                    modInfo = new List<clsModificationDefinition>();
-                }
-                else
-                {
-                    modInfo.Clear();
-                }
-
-                if (string.IsNullOrEmpty(mSAlignParamFilePath))
+                if (string.IsNullOrEmpty(msAlignParamFilePath))
                 {
                     SetErrorMessage("MSAlign Parameter File name not defined; unable to extract mod info");
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
@@ -1380,14 +1373,17 @@ namespace PeptideHitResultsProcessor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
-                    var mSAlignModInfo = new List<clsModificationDefinition>();
                     var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
                     // Load the MSAlign Parameter File so that we can determine whether Cysteine residues are statically modified
-                    ExtractModInfoFromMSAlignParamFile(SearchToolParameterFilePath, ref mSAlignModInfo);
+                    var modInfoExtracted = ExtractModInfoFromMSAlignParamFile(SearchToolParameterFilePath, out var msAlignModInfo);
+                    if (!modInfoExtracted)
+                    {
+                        return false;
+                    }
 
-                    // Resolve the mods in mSAlignModInfo with the ModDefs mods
-                    ResolveMSAlignModsWithModDefinitions(ref mSAlignModInfo);
+                    // Resolve the mods in msAlignModInfo with the ModDefs mods
+                    ResolveMSAlignModsWithModDefinitions(msAlignModInfo);
 
                     // Define the base output filename using inputFilePath
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
