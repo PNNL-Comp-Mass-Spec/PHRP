@@ -564,97 +564,37 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected bool ExtractModInfoFromTopPICParamFile(string topPICParamFilePath, ref List<clsModificationDefinition> modInfo)
+        /// <summary>
+        /// Read mod info from the TopPIC parameter file
+        /// </summary>
+        /// <param name="topPICParamFilePath"></param>
+        /// <param name="modInfo"></param>
+        /// <returns>True on success, false if an error</returns>
+        /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MSGF+</remarks>
+        private bool ExtractModInfoFromParamFile(
+            string topPICParamFilePath,
+            out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
-            var success = false;
+            var modFileProcessor = new clsMSGFPlusParamFileModExtractor("TopPIC");
 
-            try
+            RegisterEvents(modFileProcessor);
+            modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
+
+            var success = modFileProcessor.ExtractModInfoFromParamFile(topPICParamFilePath, out modInfo);
+
+            if (!success || mErrorCode != ePHRPErrorCodes.NoError)
             {
-                // Initialize the modification list
-                if (modInfo == null)
+                if (mErrorCode == ePHRPErrorCodes.NoError)
                 {
-                    modInfo = new List<clsModificationDefinition>();
-                }
-                else
-                {
-                    modInfo.Clear();
-                }
-
-                if (string.IsNullOrEmpty(topPICParamFilePath))
-                {
-                    SetErrorMessage("TopPIC Parameter File name not defined; unable to extract mod info");
+                    SetErrorMessage("Unknown error extracting the modification definitions from the TopPIC parameter file");
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
-                    return false;
                 }
-
-                if (!File.Exists(topPICParamFilePath))
-                {
-                    SetErrorMessage("TopPIC param file not found: " + topPICParamFilePath);
-                }
-                else
-                {
-                    // Read the contents of the parameter (or mods) file
-                    using (var reader = new StreamReader(new FileStream(topPICParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-                    {
-                        while (!reader.EndOfStream)
-                        {
-                            var lineIn = reader.ReadLine();
-                            if (string.IsNullOrWhiteSpace(lineIn))
-                                continue;
-
-                            var dataLine = lineIn.Trim();
-                            if (dataLine.Length <= 0)
-                                continue;
-
-                            if (dataLine.StartsWith("#"))
-                            {
-                                // Comment line; skip it
-                            }
-                            else
-                            {
-                                // Split the line on the equals sign
-                                var kvSetting = clsPHRPParser.ParseKeyValueSetting(dataLine, '=', "#");
-
-                                if (string.Equals(kvSetting.Key, "cysteineProtection", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    clsModificationDefinition modDef;
-                                    switch (kvSetting.Value.ToUpper())
-                                    {
-                                        case "C57":
-                                            modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
-                                                                                   57.0215, "C",
-                                                                                   clsModificationDefinition.eModificationTypeConstants.StaticMod,
-                                                                                   "IodoAcet");
-                                            modInfo.Add(modDef);
-                                            break;
-
-                                        case "C58":
-                                            modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
-                                                                                   58.0055, "C",
-                                                                                   clsModificationDefinition.eModificationTypeConstants.StaticMod,
-                                                                                   "IodoAcid");
-                                            modInfo.Add(modDef);
-                                            break;
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Console.WriteLine();
-
-                    success = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                SetErrorMessage("Error reading the TopPIC parameter file (" + Path.GetFileName(topPICParamFilePath) + "): " + ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
-                success = false;
+                return false;
             }
 
-            return success;
+            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modInfo, mPeptideMods);
+
+            return true;
         }
 
         private void InitializeLocalVariables()
@@ -673,8 +613,6 @@ namespace PeptideHitResultsProcessor
             //  But, we'll keep the check in place just in case
 
             var columnMapping = new Dictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int>();
-
-            bool success;
 
             try
             {
@@ -1406,14 +1344,14 @@ namespace PeptideHitResultsProcessor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
-                    var msAlignModInfo = new List<clsModificationDefinition>();
                     var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
                     // Load the TopPIC Parameter File so that we can determine whether Cysteine residues are statically modified
-                    ExtractModInfoFromTopPICParamFile(SearchToolParameterFilePath, ref msAlignModInfo);
-
-                    // Resolve the mods in mSAlignModInfo with the ModDefs mods
-                    ResolveTopPICModsWithModDefinitions(ref msAlignModInfo);
+                    var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var topPicModInfo);
+                    if (!modInfoExtracted)
+                    {
+                        return false;
+                    }
 
                     // Define the base output filename using inputFilePath
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
@@ -1554,32 +1492,6 @@ namespace PeptideHitResultsProcessor
             return peptide;
         }
 
-        protected void ResolveTopPICModsWithModDefinitions(ref List<clsModificationDefinition> mSAlignModInfo)
-        {
-            if (mSAlignModInfo != null)
-            {
-                // Call .LookupModificationDefinitionByMass for each entry in mSAlignModInfo
-                foreach (var modInfo in mSAlignModInfo)
-                {
-                    if (string.IsNullOrEmpty(modInfo.TargetResidues))
-                    {
-                        mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                            modInfo.ModificationMass, modInfo.ModificationType, default(char),
-                            clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
-                    }
-                    else
-                    {
-                        foreach (var chTargetResidue in modInfo.TargetResidues)
-                        {
-                            mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                                modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
-                                clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
-                        }
-                    }
-                }
-            }
-        }
-
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
             IEnumerable<udtTopPICSearchResultType> filteredSearchResults,
@@ -1706,6 +1618,15 @@ namespace PeptideHitResultsProcessor
                 }
             }
         }
+
+        #region "Event Handlers"
+
+        private void ModExtractorErrorHandler(string message, Exception ex)
+        {
+            SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+        }
+
+        #endregion
 
         #region "IComparer Classes"
 
