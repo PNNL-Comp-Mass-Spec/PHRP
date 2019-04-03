@@ -55,7 +55,7 @@ namespace PHRPReader
                 throw new FileNotFoundException("ModSummary file not found: " + modSummaryFilePath);
             }
 
-            Success = ReadModSummaryFile(modSummaryFilePath, ref mModificationDefs);
+            Success = ReadModSummaryFile(modSummaryFilePath);
         }
 
         /// <summary>
@@ -74,17 +74,10 @@ namespace PHRPReader
             return string.Empty;
         }
 
-        private bool ReadModSummaryFile(string modSummaryFilePath, ref List<clsModificationDefinition> modInfo)
+        private bool ReadModSummaryFile(string modSummaryFilePath)
         {
 
-            if (modInfo == null)
-            {
-                modInfo = new List<clsModificationDefinition>();
-            }
-            else
-            {
-                modInfo.Clear();
-            }
+            mModificationDefs.Clear();
 
             if (string.IsNullOrEmpty(modSummaryFilePath))
             {
@@ -176,7 +169,7 @@ namespace PHRPReader
                             ModificationMassAsText = modMassText
                         };
 
-                    modInfo.Add(modDef);
+                    mModificationDefs.Add(modDef);
 
                     if (!mModDefMassesAsText.ContainsKey(massCorrectionTag))
                     {
