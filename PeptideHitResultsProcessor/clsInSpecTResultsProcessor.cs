@@ -1866,11 +1866,11 @@ namespace PeptideHitResultsProcessor
         }
 
         private void StoreTopFHTMatch(
-            StreamWriter writer,
+            TextWriter writer,
             ref int resultID,
             int currentScanResultsCount,
             udtInspectSearchResultType[] udtSearchResultsCurrentScan,
-            List<udtInspectSearchResultType> filteredSearchResults,
+            ICollection<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog,
             ref IComparer<udtInspectSearchResultType> sortComparer)
         {
@@ -1894,11 +1894,11 @@ namespace PeptideHitResultsProcessor
         }
 
         private void StoreSynMatches(
-            StreamWriter writer,
+            TextWriter writer,
             ref int resultID,
             int currentScanResultsCount,
             udtInspectSearchResultType[] udtSearchResultsCurrentScan,
-            List<udtInspectSearchResultType> filteredSearchResults,
+            ICollection<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog,
             ref IComparer<udtInspectSearchResultType> sortComparer)
         {

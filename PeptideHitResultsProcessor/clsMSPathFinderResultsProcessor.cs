@@ -299,7 +299,7 @@ namespace PeptideHitResultsProcessor
         private double ComputeTotalModMass(
             string cleanSequence,
             string modificationList,
-            List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             if (string.IsNullOrWhiteSpace(modificationList))
             {
@@ -426,7 +426,7 @@ namespace PeptideHitResultsProcessor
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath,
-            List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             try
             {
@@ -583,7 +583,7 @@ namespace PeptideHitResultsProcessor
             string inputFilePath,
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions,
-            List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -813,7 +813,7 @@ namespace PeptideHitResultsProcessor
             ref udtMSPathFinderSearchResultType udtSearchResult,
             ref string errorLog,
             IDictionary<eMSPathFinderResultsFileColumns, int> columnMapping,
-            List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo,
+            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo,
             int rowNumber)
         {
             // Parses an entry from the MSPathFinder results file
