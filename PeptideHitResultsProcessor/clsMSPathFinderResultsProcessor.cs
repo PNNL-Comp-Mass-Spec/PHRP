@@ -436,94 +436,95 @@ namespace PeptideHitResultsProcessor
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
                 using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-                    using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    var headerParsed = false;
+                    var rowNumber = 0;
+
+                    // Initialize the list that will hold all of the records in the MSPathFinder result file
+                    var searchResultsUnfiltered = new List<udtMSPathFinderSearchResultType>();
+
+                    // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                    var filteredSearchResults = new List<udtMSPathFinderSearchResultType>();
+
+                    // Parse the input file
+                    while (!reader.EndOfStream & !AbortProcessing)
                     {
-                        var headerParsed = false;
-                        var rowNumber = 0;
+                        var lineIn = reader.ReadLine();
+                        rowNumber += 1;
 
-                        // Initialize the list that will hold all of the records in the MSPathFinder result file
-                        var searchResultsUnfiltered = new List<udtMSPathFinderSearchResultType>();
-
-                        // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                        var filteredSearchResults = new List<udtMSPathFinderSearchResultType>();
-
-                        // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
-                            rowNumber += 1;
+                            continue;
+                        }
 
-                            if (string.IsNullOrWhiteSpace(lineIn))
+                        if (!headerParsed)
+                        {
+                            // Parse the header line
+
+                            var success = ParseMSPathFinderResultsFileHeaderLine(lineIn, columnMapping);
+                            if (!success)
                             {
-                                continue;
-                            }
-
-                            if (!headerParsed)
-                            {
-                                // Parse the header line
-
-                                var success = ParseMSPathFinderResultsFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                if (string.IsNullOrEmpty(mErrorMessage))
                                 {
-                                    if (string.IsNullOrEmpty(mErrorMessage))
-                                    {
-                                        SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
-                                    }
-                                    return false;
+                                    SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
                                 }
 
-                                // Write the header line to the output file
-                                WriteSynFHTFileHeader(writer, ref errorLog);
-
-                                headerParsed = true;
-                                continue;
+                                return false;
                             }
 
-                            var udtSearchResult = new udtMSPathFinderSearchResultType();
+                            // Write the header line to the output file
+                            WriteSynFHTFileHeader(writer, ref errorLog);
 
-                            var validSearchResult = ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modInfo, rowNumber);
-
-                            if (validSearchResult)
-                            {
-                                searchResultsUnfiltered.Add(udtSearchResult);
-                            }
-
-                            // Update the progress
-                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
-                            if (CreateProteinModsFile)
-                            {
-                                percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
-                            }
-                            UpdateProgress(percentComplete);
+                            headerParsed = true;
+                            continue;
                         }
 
-                        // Sort the SearchResults by scan, charge, and ascending SpecEValue
-                        searchResultsUnfiltered.Sort(new MSPathFinderSearchResultsComparerScanChargeScorePeptide());
+                        var udtSearchResult = new udtMSPathFinderSearchResultType();
 
-                        // Now filter the data
+                        var validSearchResult =
+                            ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modInfo, rowNumber);
 
-                        // Initialize variables
-                        var startIndex = 0;
-
-                        while (startIndex < searchResultsUnfiltered.Count)
+                        if (validSearchResult)
                         {
-                            var endIndex = startIndex;
-                            while (endIndex + 1 < searchResultsUnfiltered.Count &&
-                                   searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
-                            {
-                                endIndex += 1;
-                            }
-
-                            // Store the results for this scan
-                            StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
-
-                            startIndex = endIndex + 1;
+                            searchResultsUnfiltered.Add(udtSearchResult);
                         }
 
-                        // Sort the data in udtFilteredSearchResults then write out to disk
-                        SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                        // Update the progress
+                        var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
+                        if (CreateProteinModsFile)
+                        {
+                            percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
+                        }
+
+                        UpdateProgress(percentComplete);
                     }
+
+                    // Sort the SearchResults by scan, charge, and ascending SpecEValue
+                    searchResultsUnfiltered.Sort(new MSPathFinderSearchResultsComparerScanChargeScorePeptide());
+
+                    // Now filter the data
+
+                    // Initialize variables
+                    var startIndex = 0;
+
+                    while (startIndex < searchResultsUnfiltered.Count)
+                    {
+                        var endIndex = startIndex;
+                        while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                               searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                        {
+                            endIndex += 1;
+                        }
+
+                        // Store the results for this scan
+                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+
+                        startIndex = endIndex + 1;
+                    }
+
+                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                 }
 
                 // Inform the user if any errors occurred

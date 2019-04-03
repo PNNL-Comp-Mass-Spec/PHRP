@@ -471,72 +471,71 @@ namespace PeptideHitResultsProcessor
                     // Initialize the stream reader and the XML Text Reader
                     eCurrentXMLDataFileSectionConstants eCurrentXMLDataFileSection;
                     using (var reader = new StreamReader(inputFilePath))
+                    using (var xmlReader = new XmlTextReader(reader))
+                    using (var writer = new StreamWriter(outputFilePath, false))
                     {
-                        using (var xmlReader = new XmlTextReader(reader))
+                        // Write the header line
+                        WriteSynFHTFileHeader(writer, ref errorLog);
+
+                        // Create the additional output files
+                        var filesInitialized = InitializeSequenceOutputFiles(outputFilePath);
+                        if (!filesInitialized)
+                            return false;
+
+                        // Parse the input file
+                        eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
+
+                        while (xmlReader.Read() & !AbortProcessing)
                         {
-                            // Create the output file
-                            using (var writer = new StreamWriter(outputFilePath, false))
+                            XMLTextReaderSkipWhitespace(xmlReader);
+                            if (xmlReader.ReadState != ReadState.Interactive)
+                                break;
+
+                            if (xmlReader.Depth >= 2)
+                                continue;
+
+                            if (xmlReader.NodeType != XmlNodeType.Element)
+                                continue;
+
+                            switch (xmlReader.Name.ToLower())
                             {
-                                // Write the header line
-                                WriteSynFHTFileHeader(writer, ref errorLog);
-
-                                // Create the additional output files
-                                var filesInitialized = InitializeSequenceOutputFiles(outputFilePath);
-                                if (!filesInitialized)
-                                    return false;
-
-                                // Parse the input file
-                                eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
-
-                                while (xmlReader.Read() & !AbortProcessing)
-                                {
-                                    XMLTextReaderSkipWhitespace(xmlReader);
-                                    if (xmlReader.ReadState != ReadState.Interactive)
-                                        break;
-
-                                    if (xmlReader.Depth < 2)
+                                case XTANDEM_XML_ELEMENT_NAME_GROUP:
+                                    if (xmlReader.HasAttributes)
                                     {
-                                        if (xmlReader.NodeType == XmlNodeType.Element)
+                                        // Cache the XML reader depth before reading any of the element's attributes
+                                        var groupElementReaderDepth = xmlReader.Depth;
+
+                                        // See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
+                                        var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
+                                        if (currentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL)
                                         {
-                                            switch (xmlReader.Name.ToLower())
+                                            eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults;
+
+                                            ParseXTandemResultsFileEntry(xmlReader, writer, ref searchResultCount, ref searchResults,
+                                                                         ref errorLog, groupElementReaderDepth);
+
+                                            // Update the progress
+                                            var percentComplete =
+                                                Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
+                                            if (CreateProteinModsFile)
                                             {
-                                                case XTANDEM_XML_ELEMENT_NAME_GROUP:
-                                                    if (xmlReader.HasAttributes)
-                                                    {
-                                                        // Cache the XML reader depth before reading any of the element's attributes
-                                                        var groupElementReaderDepth = xmlReader.Depth;
-
-                                                        // See if the group has a "type" attribute containing the text XTANDEM_XML_GROUP_TYPE_MODEL
-                                                        var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
-                                                        if (currentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL)
-                                                        {
-                                                            eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults;
-
-                                                            ParseXTandemResultsFileEntry(xmlReader, writer, ref searchResultCount, ref searchResults, ref errorLog, groupElementReaderDepth);
-
-                                                            // Update the progress
-                                                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
-                                                            if (CreateProteinModsFile)
-                                                            {
-                                                                percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
-                                                            }
-                                                            UpdateProgress(percentComplete);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        // Group doesn't have any attributes; ignore it
-                                                        xmlReader.Skip();
-                                                    }
-
-                                                    break;
-                                                case XTANDEM_XML_ROOT_ELEMENT:
-                                                    eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.Start;
-                                                    break;
+                                                percentComplete =
+                                                    percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                                             }
+
+                                            UpdateProgress(percentComplete);
                                         }
                                     }
-                                }
+                                    else
+                                    {
+                                        // Group doesn't have any attributes; ignore it
+                                        xmlReader.Skip();
+                                    }
+
+                                    break;
+                                case XTANDEM_XML_ROOT_ELEMENT:
+                                    eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.Start;
+                                    break;
                             }
                         }
                     }

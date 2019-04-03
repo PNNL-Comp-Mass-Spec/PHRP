@@ -826,209 +826,214 @@ namespace PeptideHitResultsProcessor
                     string errorLog;
 
                     using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                     {
-                        using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                        errorLog = string.Empty;
+                        var headerParsed = false;
+                        var includeFDRandPepFDR = false;
+                        var includeEFDR = false;
+                        var includeIMSFields = false;
+
+                        var nextScanGroupID = 1;
+                        scanGroupDetails.Clear();
+                        scanGroupCombo.Clear();
+
+                        // Initialize the array that will hold all of the records that will ultimately be written out to disk
+                        var filteredSearchResults = new List<udtMSGFPlusSearchResultType>();
+
+                        // Initialize a dictionary that tracks the peptide sequence for each combo of scan and charge
+                        // Keys are Scan_Charge, values track the clean sequence, the associated protein name, and the protein number for that name
+                        // Note that we can only track protein numbers if the FASTA file path was provided at the command line
+                        var scanChargeFirstHit = new Dictionary<string, clsFirstHitInfo>();
+
+                        var columnMapping = new Dictionary<eMSGFPlusResultsFileColumns, int>();
+
+                        // Parse the input file
+                        while (!reader.EndOfStream & !AbortProcessing)
                         {
-                            errorLog = string.Empty;
-                            var headerParsed = false;
-                            var includeFDRandPepFDR = false;
-                            var includeEFDR = false;
-                            var includeIMSFields = false;
-
-                            var nextScanGroupID = 1;
-                            scanGroupDetails.Clear();
-                            scanGroupCombo.Clear();
-
-                            // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                            var filteredSearchResults = new List<udtMSGFPlusSearchResultType>();
-
-                            // Initialize a dictionary that tracks the peptide sequence for each combo of scan and charge
-                            // Keys are Scan_Charge, values track the clean sequence, the associated protein name, and the protein number for that name
-                            // Note that we can only track protein numbers if the FASTA file path was provided at the command line
-                            var scanChargeFirstHit = new Dictionary<string, clsFirstHitInfo>();
-
-                            var columnMapping = new Dictionary<eMSGFPlusResultsFileColumns, int>();
-
-                            // Parse the input file
-                            while (!reader.EndOfStream & !AbortProcessing)
+                            var lineIn = reader.ReadLine();
+                            if (string.IsNullOrWhiteSpace(lineIn))
                             {
-                                var lineIn = reader.ReadLine();
-                                if (string.IsNullOrWhiteSpace(lineIn))
-                                {
-                                    continue;
-                                }
-
-                                if (!headerParsed)
-                                {
-                                    var validHeader = ParseMSGFPlusResultsFileHeaderLine(lineIn, columnMapping);
-                                    if (!validHeader)
-                                    {
-                                        // Error parsing header
-                                        SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                                        return false;
-                                    }
-                                    headerParsed = true;
-
-                                    if (columnMapping[eMSGFPlusResultsFileColumns.FDR_QValue] >= 0 || columnMapping[eMSGFPlusResultsFileColumns.PepFDR_PepQValue] >= 0)
-                                    {
-                                        includeFDRandPepFDR = true;
-                                    }
-                                    else if (columnMapping[eMSGFPlusResultsFileColumns.EFDR] >= 0)
-                                    {
-                                        includeEFDR = true;
-                                    }
-
-                                    if (columnMapping[eMSGFPlusResultsFileColumns.IMSDriftTime] >= 0)
-                                    {
-                                        includeIMSFields = true;
-                                    }
-
-                                    if (columnMapping[eMSGFPlusResultsFileColumns.IsotopeError] >= 0)
-                                    {
-                                        isMsgfPlus = true;
-                                    }
-
-                                    // Write the header line
-                                    WriteSynFHTFileHeader(writer, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
-
-                                    continue;
-                                }
-
-                                var validSearchResult = ParseMSGFPlusResultsFileEntry(lineIn, isMsgfPlus, msgfPlusModInfo,
-                                                                                      searchResultsCurrentScan, ref errorLog,
-                                                                                      columnMapping, ref nextScanGroupID, scanGroupDetails, scanGroupCombo, specIdToIndex);
-
-                                if (validSearchResult && searchResultsCurrentScan.Count > 0)
-                                {
-                                    if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
-                                    {
-                                        // Synopsis file
-                                        validSearchResult = MSGFPlusResultPassesSynFilter(searchResultsCurrentScan[0]);
-                                    }
-                                    else
-                                    {
-                                        // First Hits file
-                                        var scanChargeKey = searchResultsCurrentScan[0].Scan + "_" + searchResultsCurrentScan[0].Charge;
-
-                                        if (scanChargeFirstHit.TryGetValue(scanChargeKey, out var firstHitPeptide))
-                                        {
-                                            // A result has already been stored for this scan/charge combo
-                                            validSearchResult = false;
-
-                                            // Possibly update the associated protein name
-                                            if (firstHitPeptide.CleanSequence.Equals(GetCleanSequence(searchResultsCurrentScan[0].Peptide, out var newPrefix, out var newSuffix)))
-                                            {
-                                                var bestProtein = GetBestProteinName(firstHitPeptide.ProteinName, firstHitPeptide.ProteinNumber, searchResultsCurrentScan[0].Protein);
-                                                if (bestProtein.Value < firstHitPeptide.ProteinNumber)
-                                                {
-                                                    firstHitPeptide.ProteinName = bestProtein.Key;
-                                                    firstHitPeptide.ProteinNumber = bestProtein.Value;
-                                                    firstHitPeptide.UpdatePrefixAndSuffix(newPrefix, newSuffix);
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            firstHitPeptide = new clsFirstHitInfo(searchResultsCurrentScan[0].Peptide, GetCleanSequence(searchResultsCurrentScan[0].Peptide))
-                                            {
-                                                ProteinName = searchResultsCurrentScan[0].Protein,
-                                                ProteinNumber = int.MaxValue
-                                            };
-
-                                            if (mProteinNameOrder.TryGetValue(searchResultsCurrentScan[0].Protein, out var proteinNumber))
-                                            {
-                                                firstHitPeptide.ProteinNumber = proteinNumber;
-                                            }
-
-                                            scanChargeFirstHit.Add(scanChargeKey, firstHitPeptide);
-                                        }
-                                    }
-
-                                    if (validSearchResult)
-                                    {
-                                        ExpandListIfRequired(searchResultsPrefiltered, searchResultsCurrentScan.Count);
-                                        searchResultsPrefiltered.AddRange(searchResultsCurrentScan);
-                                    }
-                                }
-
-                                // Update the progress
-                                var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
-                                if (CreateProteinModsFile)
-                                {
-                                    percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
-                                }
-                                UpdateProgress(percentComplete);
+                                continue;
                             }
 
-                            searchResultsPrefiltered.TrimExcess();
-
-                            // Sort the SearchResults by scan, charge, and ascending SpecEValue
-                            searchResultsPrefiltered.Sort(new MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide());
-
-                            if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.FHTFile)
+                            if (!headerParsed)
                             {
-                                // Update the protein names in searchResultsPrefiltered using scanChargeFirstHit
-                                // This step is typically not necessary, but is often required for SplitFasta results
-
-                                for (var index = 0; index <= searchResultsPrefiltered.Count - 1; index++)
+                                var validHeader = ParseMSGFPlusResultsFileHeaderLine(lineIn, columnMapping);
+                                if (!validHeader)
                                 {
-                                    var scanChargeKey = searchResultsPrefiltered[index].Scan + "_" + searchResultsPrefiltered[index].Charge;
-
-                                    if (!scanChargeFirstHit.TryGetValue(scanChargeKey, out var firstHitPeptide))
-                                        continue;
-
-                                    if (searchResultsPrefiltered[index].Protein.Equals(firstHitPeptide.ProteinName))
-                                        continue;
-
-                                    // Protein name doesn't match the expected name
-                                    if (firstHitPeptide.CleanSequence.Equals(GetCleanSequence(searchResultsPrefiltered[index].Peptide)))
-                                    {
-                                        // Update the protein name
-                                        var updatedSearchResult = searchResultsPrefiltered[index];
-                                        updatedSearchResult.Peptide = firstHitPeptide.SequenceWithModsAndContext;
-                                        updatedSearchResult.Protein = string.Copy(firstHitPeptide.ProteinName);
-                                        searchResultsPrefiltered[index] = updatedSearchResult;
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Possible programming bug; " +
-                                                          "mix of peptides tracked for a given scan/charge combo when caching data for First Hits files; " +
-                                                          $"see scan_charge {scanChargeKey}");
-                                    }
+                                    // Error parsing header
+                                    SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                                    return false;
                                 }
+
+                                headerParsed = true;
+
+                                if (columnMapping[eMSGFPlusResultsFileColumns.FDR_QValue] >= 0 ||
+                                    columnMapping[eMSGFPlusResultsFileColumns.PepFDR_PepQValue] >= 0)
+                                {
+                                    includeFDRandPepFDR = true;
+                                }
+                                else if (columnMapping[eMSGFPlusResultsFileColumns.EFDR] >= 0)
+                                {
+                                    includeEFDR = true;
+                                }
+
+                                if (columnMapping[eMSGFPlusResultsFileColumns.IMSDriftTime] >= 0)
+                                {
+                                    includeIMSFields = true;
+                                }
+
+                                if (columnMapping[eMSGFPlusResultsFileColumns.IsotopeError] >= 0)
+                                {
+                                    isMsgfPlus = true;
+                                }
+
+                                // Write the header line
+                                WriteSynFHTFileHeader(writer, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+
+                                continue;
                             }
 
-                            // Now filter the data and store in filteredSearchResults
-                            // Due to code updates in October 2016, searchResultsPrefiltered already has filtered data
-                            var startIndex = 0;
+                            var validSearchResult = ParseMSGFPlusResultsFileEntry(lineIn, isMsgfPlus, msgfPlusModInfo,
+                                                                                  searchResultsCurrentScan, ref errorLog,
+                                                                                  columnMapping, ref nextScanGroupID, scanGroupDetails,
+                                                                                  scanGroupCombo, specIdToIndex);
 
-                            while (startIndex < searchResultsPrefiltered.Count)
+                            if (validSearchResult && searchResultsCurrentScan.Count > 0)
                             {
-                                var endIndex = startIndex;
-                                // Find all of the peptides with the same scan number
-                                while (endIndex + 1 < searchResultsPrefiltered.Count &&
-                                       searchResultsPrefiltered[endIndex + 1].ScanNum == searchResultsPrefiltered[startIndex].ScanNum)
-                                {
-                                    endIndex += 1;
-                                }
-
-                                // Store the results for this scan
                                 if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
                                 {
-                                    StoreSynMatches(searchResultsPrefiltered, startIndex, endIndex, filteredSearchResults);
+                                    // Synopsis file
+                                    validSearchResult = MSGFPlusResultPassesSynFilter(searchResultsCurrentScan[0]);
                                 }
                                 else
                                 {
-                                    StoreTopFHTMatch(searchResultsPrefiltered, startIndex, endIndex, filteredSearchResults);
+                                    // First Hits file
+                                    var scanChargeKey = searchResultsCurrentScan[0].Scan + "_" + searchResultsCurrentScan[0].Charge;
+
+                                    if (scanChargeFirstHit.TryGetValue(scanChargeKey, out var firstHitPeptide))
+                                    {
+                                        // A result has already been stored for this scan/charge combo
+                                        validSearchResult = false;
+
+                                        // Possibly update the associated protein name
+                                        if (firstHitPeptide.CleanSequence.Equals(
+                                            GetCleanSequence(searchResultsCurrentScan[0].Peptide, out var newPrefix, out var newSuffix)))
+                                        {
+                                            var bestProtein = GetBestProteinName(firstHitPeptide.ProteinName, firstHitPeptide.ProteinNumber,
+                                                                                 searchResultsCurrentScan[0].Protein);
+                                            if (bestProtein.Value < firstHitPeptide.ProteinNumber)
+                                            {
+                                                firstHitPeptide.ProteinName = bestProtein.Key;
+                                                firstHitPeptide.ProteinNumber = bestProtein.Value;
+                                                firstHitPeptide.UpdatePrefixAndSuffix(newPrefix, newSuffix);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        firstHitPeptide = new clsFirstHitInfo(searchResultsCurrentScan[0].Peptide,
+                                                                              GetCleanSequence(searchResultsCurrentScan[0].Peptide))
+                                        {
+                                            ProteinName = searchResultsCurrentScan[0].Protein,
+                                            ProteinNumber = int.MaxValue
+                                        };
+
+                                        if (mProteinNameOrder.TryGetValue(searchResultsCurrentScan[0].Protein, out var proteinNumber))
+                                        {
+                                            firstHitPeptide.ProteinNumber = proteinNumber;
+                                        }
+
+                                        scanChargeFirstHit.Add(scanChargeKey, firstHitPeptide);
+                                    }
                                 }
 
-                                startIndex = endIndex + 1;
+                                if (validSearchResult)
+                                {
+                                    ExpandListIfRequired(searchResultsPrefiltered, searchResultsCurrentScan.Count);
+                                    searchResultsPrefiltered.AddRange(searchResultsCurrentScan);
+                                }
                             }
 
-                            // Sort the data in udtFilteredSearchResults then write out to disk
-                            SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog,
-                                                              includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+                            // Update the progress
+                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
+                            if (CreateProteinModsFile)
+                            {
+                                percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
+                            }
+
+                            UpdateProgress(percentComplete);
                         }
+
+                        searchResultsPrefiltered.TrimExcess();
+
+                        // Sort the SearchResults by scan, charge, and ascending SpecEValue
+                        searchResultsPrefiltered.Sort(new MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide());
+
+                        if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.FHTFile)
+                        {
+                            // Update the protein names in searchResultsPrefiltered using scanChargeFirstHit
+                            // This step is typically not necessary, but is often required for SplitFasta results
+
+                            for (var index = 0; index <= searchResultsPrefiltered.Count - 1; index++)
+                            {
+                                var scanChargeKey = searchResultsPrefiltered[index].Scan + "_" + searchResultsPrefiltered[index].Charge;
+
+                                if (!scanChargeFirstHit.TryGetValue(scanChargeKey, out var firstHitPeptide))
+                                    continue;
+
+                                if (searchResultsPrefiltered[index].Protein.Equals(firstHitPeptide.ProteinName))
+                                    continue;
+
+                                // Protein name doesn't match the expected name
+                                if (firstHitPeptide.CleanSequence.Equals(GetCleanSequence(searchResultsPrefiltered[index].Peptide)))
+                                {
+                                    // Update the protein name
+                                    var updatedSearchResult = searchResultsPrefiltered[index];
+                                    updatedSearchResult.Peptide = firstHitPeptide.SequenceWithModsAndContext;
+                                    updatedSearchResult.Protein = string.Copy(firstHitPeptide.ProteinName);
+                                    searchResultsPrefiltered[index] = updatedSearchResult;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Possible programming bug; " +
+                                                      "mix of peptides tracked for a given scan/charge combo when caching data for First Hits files; " +
+                                                      $"see scan_charge {scanChargeKey}");
+                                }
+                            }
+                        }
+
+                        // Now filter the data and store in filteredSearchResults
+                        // Due to code updates in October 2016, searchResultsPrefiltered already has filtered data
+                        var startIndex = 0;
+
+                        while (startIndex < searchResultsPrefiltered.Count)
+                        {
+                            var endIndex = startIndex;
+                            // Find all of the peptides with the same scan number
+                            while (endIndex + 1 < searchResultsPrefiltered.Count &&
+                                   searchResultsPrefiltered[endIndex + 1].ScanNum == searchResultsPrefiltered[startIndex].ScanNum)
+                            {
+                                endIndex += 1;
+                            }
+
+                            // Store the results for this scan
+                            if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
+                            {
+                                StoreSynMatches(searchResultsPrefiltered, startIndex, endIndex, filteredSearchResults);
+                            }
+                            else
+                            {
+                                StoreTopFHTMatch(searchResultsPrefiltered, startIndex, endIndex, filteredSearchResults);
+                            }
+
+                            startIndex = endIndex + 1;
+                        }
+
+                        // Sort the data in udtFilteredSearchResults then write out to disk
+                        SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog,
+                                                          includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
                     }
 
                     // Write out the scan group info

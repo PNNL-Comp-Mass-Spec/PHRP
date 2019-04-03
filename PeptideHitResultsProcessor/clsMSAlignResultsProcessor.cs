@@ -192,17 +192,17 @@ namespace PeptideHitResultsProcessor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.eModificationTypeConstants.StaticMod)
-                        {
-                            var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                            continue;
 
-                            if (modificationDefinition.TargetResiduesContain(chChar))
-                            {
-                                // Match found; add this modification
-                                searchResult.SearchResultAddModification(
-                                    modificationDefinition, chChar, residueLocInPeptide,
-                                    searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
-                            }
+                        var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+
+                        if (modificationDefinition.TargetResiduesContain(chChar))
+                        {
+                            // Match found; add this modification
+                            searchResult.SearchResultAddModification(
+                                modificationDefinition, chChar, residueLocInPeptide,
+                                searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
                         }
                     }
                 }
@@ -226,47 +226,47 @@ namespace PeptideHitResultsProcessor
                 {
                     // Mod Mass End
 
-                    if (parsingModMass)
+                    if (!parsingModMass)
+                        continue;
+
+                    char residueForMod;
+                    int residueLocForMod;
+
+                    if (chAmbiguousResidue == NO_RESIDUE)
                     {
-                        char residueForMod;
-                        int residueLocForMod;
-
-                        if (chAmbiguousResidue == NO_RESIDUE)
-                        {
-                            residueForMod = chMostRecentResidue;
-                            residueLocForMod = residueLocInPeptide;
-                        }
-                        else
-                        {
-                            // Ambiguous mod
-                            // We'll associate it with the first residue of the mod group
-                            residueForMod = chAmbiguousResidue;
-                            residueLocForMod = ambiguousResidueLocInPeptide;
-                        }
-
-                        if (double.TryParse(modMassDigits, out var modMass))
-                        {
-                            if (residueLocForMod == 0)
-                            {
-                                // Modification is at the peptide N-terminus
-                                residueLocForMod = 1;
-                            }
-
-                            var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts);
-
-                            if (!success)
-                            {
-                                var errorMessage = searchResult.ErrorMessage;
-                                if (string.IsNullOrEmpty(errorMessage))
-                                {
-                                    errorMessage = "SearchResultAddDynamicModification returned false for mod mass " + modMassDigits;
-                                }
-                                SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
-                            }
-                        }
-
-                        parsingModMass = false;
+                        residueForMod = chMostRecentResidue;
+                        residueLocForMod = residueLocInPeptide;
                     }
+                    else
+                    {
+                        // Ambiguous mod
+                        // We'll associate it with the first residue of the mod group
+                        residueForMod = chAmbiguousResidue;
+                        residueLocForMod = ambiguousResidueLocInPeptide;
+                    }
+
+                    if (double.TryParse(modMassDigits, out var modMass))
+                    {
+                        if (residueLocForMod == 0)
+                        {
+                            // Modification is at the peptide N-terminus
+                            residueLocForMod = 1;
+                        }
+
+                        var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts);
+
+                        if (!success)
+                        {
+                            var errorMessage = searchResult.ErrorMessage;
+                            if (string.IsNullOrEmpty(errorMessage))
+                            {
+                                errorMessage = "SearchResultAddDynamicModification returned false for mod mass " + modMassDigits;
+                            }
+                            SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
+                        }
+                    }
+
+                    parsingModMass = false;
                 }
                 else if (parsingModMass)
                 {
@@ -455,85 +455,86 @@ namespace PeptideHitResultsProcessor
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
                 using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-                    using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    var headerParsed = false;
+
+                    // Initialize array that will hold all of the records in the MSAlign result file
+                    var searchResultsUnfiltered = new List<udtMSAlignSearchResultType>();
+
+                    // Initialize the array that will hold all of the records that will ultimately be written out to disk
+                    var filteredSearchResults = new List<udtMSAlignSearchResultType>();
+
+                    // Parse the input file
+                    while (!reader.EndOfStream & !AbortProcessing)
                     {
-                        var headerParsed = false;
-
-                        // Initialize array that will hold all of the records in the MSAlign result file
-                        var searchResultsUnfiltered = new List<udtMSAlignSearchResultType>();
-
-                        // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                        var filteredSearchResults = new List<udtMSAlignSearchResultType>();
-
-                        // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        var lineIn = reader.ReadLine();
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
-                            if (string.IsNullOrWhiteSpace(lineIn))
-                            {
-                                continue;
-                            }
-
-                            if (!headerParsed)
-                            {
-                                var validHeader = ParseMSAlignResultsFileHeaderLine(lineIn, columnMapping);
-                                if (!validHeader)
-                                {
-                                    // Error parsing header
-                                    SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                                    return false;
-                                }
-                                headerParsed = true;
-
-                                // Write the header line
-                                WriteSynFHTFileHeader(writer, ref errorLog);
-
-                                continue;
-                            }
-
-                            var udtSearchResult = new udtMSAlignSearchResultType();
-                            var validSearchResult = ParseMSAlignResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
-
-                            if (validSearchResult)
-                            {
-                                searchResultsUnfiltered.Add(udtSearchResult);
-                            }
-
-                            // Update the progress
-                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
-                            if (CreateProteinModsFile)
-                            {
-                                percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
-                            }
-                            UpdateProgress(percentComplete);
+                            continue;
                         }
 
-                        // Sort the SearchResults by scan, charge, and ascending PValue
-                        searchResultsUnfiltered.Sort(new MSAlignSearchResultsComparerScanChargePValuePeptide());
-
-                        // Now filter the data
-
-                        // Initialize variables
-                        var startIndex = 0;
-
-                        while (startIndex < searchResultsUnfiltered.Count)
+                        if (!headerParsed)
                         {
-                            var endIndex = startIndex;
-                            while (endIndex + 1 < searchResultsUnfiltered.Count && searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                            var validHeader = ParseMSAlignResultsFileHeaderLine(lineIn, columnMapping);
+                            if (!validHeader)
                             {
-                                endIndex += 1;
+                                // Error parsing header
+                                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                                return false;
                             }
 
-                            // Store the results for this scan
-                            StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+                            headerParsed = true;
 
-                            startIndex = endIndex + 1;
+                            // Write the header line
+                            WriteSynFHTFileHeader(writer, ref errorLog);
+
+                            continue;
                         }
 
-                        // Sort the data in udtFilteredSearchResults then write out to disk
-                        SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                        var udtSearchResult = new udtMSAlignSearchResultType();
+                        var validSearchResult = ParseMSAlignResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
+
+                        if (validSearchResult)
+                        {
+                            searchResultsUnfiltered.Add(udtSearchResult);
+                        }
+
+                        // Update the progress
+                        var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
+                        if (CreateProteinModsFile)
+                        {
+                            percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
+                        }
+
+                        UpdateProgress(percentComplete);
                     }
+
+                    // Sort the SearchResults by scan, charge, and ascending PValue
+                    searchResultsUnfiltered.Sort(new MSAlignSearchResultsComparerScanChargePValuePeptide());
+
+                    // Now filter the data
+
+                    // Initialize variables
+                    var startIndex = 0;
+
+                    while (startIndex < searchResultsUnfiltered.Count)
+                    {
+                        var endIndex = startIndex;
+                        while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                               searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                        {
+                            endIndex += 1;
+                        }
+
+                        // Store the results for this scan
+                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+
+                        startIndex = endIndex + 1;
+                    }
+
+                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                 }
 
                 // Inform the user if any errors occurred

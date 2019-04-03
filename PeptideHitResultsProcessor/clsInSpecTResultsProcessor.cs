@@ -244,17 +244,17 @@ namespace PeptideHitResultsProcessor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.eModificationTypeConstants.StaticMod)
-                        {
-                           var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                            continue;
 
-                            if (modificationDefinition.TargetResiduesContain(chChar))
-                            {
-                                // Match found; add this modification
-                                searchResult.SearchResultAddModification(
-                                    modificationDefinition, chChar, residueLocInPeptide,
-                                    searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
-                            }
+                        var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+
+                        if (modificationDefinition.TargetResiduesContain(chChar))
+                        {
+                            // Match found; add this modification
+                            searchResult.SearchResultAddModification(
+                                modificationDefinition, chChar, residueLocInPeptide,
+                                searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
                         }
                     }
                 }
@@ -456,83 +456,88 @@ namespace PeptideHitResultsProcessor
                     // Open the input file and parse it
                     // Initialize the stream reader and the stream Text writer
                     using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                     {
-                        using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                        // Write the header line
+                        WriteSynFHTFileHeader(writer, ref errorLog);
+
+                        errorLog = string.Empty;
+                        var resultsProcessed = 0;
+
+                        // Initialize array that will hold all of the records for a given scan
+                        var currentScanResultsCount = 0;
+                        var udtSearchResultsCurrentScan = new udtInspectSearchResultType[10];
+
+                        // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                        var filteredSearchResults = new List<udtInspectSearchResultType>();
+
+                        // Parse the input file
+                        while (!reader.EndOfStream & !AbortProcessing)
                         {
-                            // Write the header line
-                            WriteSynFHTFileHeader(writer, ref errorLog);
+                            var lineIn = reader.ReadLine();
 
-                            errorLog = string.Empty;
-                            var resultsProcessed = 0;
-
-                            // Initialize array that will hold all of the records for a given scan
-                            var currentScanResultsCount = 0;
-                            var udtSearchResultsCurrentScan = new udtInspectSearchResultType[10];
-
-                            // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                            var filteredSearchResults = new List<udtInspectSearchResultType>();
-
-                            // Parse the input file
-                            while (!reader.EndOfStream & !AbortProcessing)
+                            if (string.IsNullOrWhiteSpace(lineIn))
                             {
-                                var lineIn = reader.ReadLine();
+                                continue;
+                            }
 
-                                if (string.IsNullOrWhiteSpace(lineIn))
+                            // Initialize udtSearchResult
+                            udtSearchResult.Clear();
+
+                            var validSearchResult =
+                                ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, ref errorLog, resultsProcessed);
+
+                            if (validSearchResult)
+                            {
+                                if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
                                 {
-                                    continue;
-                                }
-
-                                // Initialize udtSearchResult
-                                udtSearchResult.Clear();
-
-                                var validSearchResult = ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, ref errorLog, resultsProcessed);
-
-                                if (validSearchResult)
-                                {
-                                    if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
+                                    // New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
+                                    if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
                                     {
-                                        // New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
-                                        if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
-                                        {
-                                            StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults, ref errorLog, ref sortComparer);
-                                        }
-                                        else
-                                        {
-                                            StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults, ref errorLog, ref sortComparer);
-                                        }
-                                        currentScanResultsCount = 0;
+                                        StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan,
+                                                        filteredSearchResults, ref errorLog, ref sortComparer);
+                                    }
+                                    else
+                                    {
+                                        StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan,
+                                                         filteredSearchResults, ref errorLog, ref sortComparer);
                                     }
 
-                                    AddCurrentRecordToSearchResults(ref currentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult);
-
-                                    previousScan = udtSearchResult.ScanNum;
+                                    currentScanResultsCount = 0;
                                 }
 
-                                // Update the progress
-                                UpdateProgress(Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100));
+                                AddCurrentRecordToSearchResults(ref currentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult);
 
-                                resultsProcessed += 1;
+                                previousScan = udtSearchResult.ScanNum;
                             }
 
-                            // Store the last record
-                            if (currentScanResultsCount > 0)
+                            // Update the progress
+                            UpdateProgress(Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100));
+
+                            resultsProcessed += 1;
+                        }
+
+                        // Store the last record
+                        if (currentScanResultsCount > 0)
+                        {
+                            if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
                             {
-                                if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
-                                {
-                                    StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults, ref errorLog, ref sortComparer);
-                                }
-                                else
-                                {
-                                    StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults, ref errorLog, ref sortComparer);
-                                }
-                                currentScanResultsCount = 0;
+                                StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults,
+                                                ref errorLog, ref sortComparer);
+                            }
+                            else
+                            {
+                                StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults,
+                                                 ref errorLog, ref sortComparer);
                             }
 
-                            if (SortFHTAndSynFiles)
-                            {
-                                // Sort the data in udtFilteredSearchResults then write out to disk
-                                SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
-                            }
+                            currentScanResultsCount = 0;
+                        }
+
+                        if (SortFHTAndSynFiles)
+                        {
+                            // Sort the data in udtFilteredSearchResults then write out to disk
+                            SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                         }
                     }
 

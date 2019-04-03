@@ -467,85 +467,86 @@ namespace PeptideHitResultsProcessor
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
                 using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-                    using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    var headerParsed = false;
+
+                    // Initialize array that will hold all of the records in the TopPIC result file
+                    var searchResultsUnfiltered = new List<udtTopPICSearchResultType>();
+
+                    // Initialize the array that will hold all of the records that will ultimately be written out to disk
+                    var filteredSearchResults = new List<udtTopPICSearchResultType>();
+
+                    // Parse the input file
+                    while (!reader.EndOfStream & !AbortProcessing)
                     {
-                        var headerParsed = false;
-
-                        // Initialize array that will hold all of the records in the TopPIC result file
-                        var searchResultsUnfiltered = new List<udtTopPICSearchResultType>();
-
-                        // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                        var filteredSearchResults = new List<udtTopPICSearchResultType>();
-
-                        // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        var lineIn = reader.ReadLine();
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
-                            if (string.IsNullOrWhiteSpace(lineIn))
-                            {
-                                continue;
-                            }
-
-                            if (!headerParsed)
-                            {
-                                var validHeader = ParseTopPICResultsFileHeaderLine(lineIn, columnMapping);
-                                if (!validHeader)
-                                {
-                                    // Error parsing header
-                                    SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                                    return false;
-                                }
-                                headerParsed = true;
-
-                                // Write the header line
-                                WriteSynFHTFileHeader(writer, ref errorLog);
-
-                                continue;
-                            }
-
-                            var udtSearchResult = new udtTopPICSearchResultType();
-                            var validSearchResult = ParseTopPICResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
-
-                            if (validSearchResult)
-                            {
-                                searchResultsUnfiltered.Add(udtSearchResult);
-                            }
-
-                            // Update the progress
-                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
-                            if (CreateProteinModsFile)
-                            {
-                                percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
-                            }
-                            UpdateProgress(percentComplete);
+                            continue;
                         }
 
-                        // Sort the SearchResults by scan, charge, and ascending PValue
-                        searchResultsUnfiltered.Sort(new TopPICSearchResultsComparerScanChargePValuePeptide());
-
-                        // Now filter the data
-
-                        // Initialize variables
-                        var startIndex = 0;
-
-                        while (startIndex < searchResultsUnfiltered.Count)
+                        if (!headerParsed)
                         {
-                            var endIndex = startIndex;
-                            while (endIndex + 1 < searchResultsUnfiltered.Count && searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                            var validHeader = ParseTopPICResultsFileHeaderLine(lineIn, columnMapping);
+                            if (!validHeader)
                             {
-                                endIndex += 1;
+                                // Error parsing header
+                                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                                return false;
                             }
 
-                            // Store the results for this scan
-                            StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+                            headerParsed = true;
 
-                            startIndex = endIndex + 1;
+                            // Write the header line
+                            WriteSynFHTFileHeader(writer, ref errorLog);
+
+                            continue;
                         }
 
-                        // Sort the data in udtFilteredSearchResults then write out to disk
-                        SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                        var udtSearchResult = new udtTopPICSearchResultType();
+                        var validSearchResult = ParseTopPICResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
+
+                        if (validSearchResult)
+                        {
+                            searchResultsUnfiltered.Add(udtSearchResult);
+                        }
+
+                        // Update the progress
+                        var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
+                        if (CreateProteinModsFile)
+                        {
+                            percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
+                        }
+
+                        UpdateProgress(percentComplete);
                     }
+
+                    // Sort the SearchResults by scan, charge, and ascending PValue
+                    searchResultsUnfiltered.Sort(new TopPICSearchResultsComparerScanChargePValuePeptide());
+
+                    // Now filter the data
+
+                    // Initialize variables
+                    var startIndex = 0;
+
+                    while (startIndex < searchResultsUnfiltered.Count)
+                    {
+                        var endIndex = startIndex;
+                        while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                               searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                        {
+                            endIndex += 1;
+                        }
+
+                        // Store the results for this scan
+                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+
+                        startIndex = endIndex + 1;
+                    }
+
+                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                 }
 
                 // Inform the user if any errors occurred

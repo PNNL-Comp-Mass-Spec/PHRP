@@ -174,17 +174,17 @@ namespace PeptideHitResultsProcessor
                     // Look for static mods to associate with this residue
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.eModificationTypeConstants.StaticMod)
-                        {
-                            var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                            continue;
 
-                            if (modificationDefinition.TargetResiduesContain(chChar))
-                            {
-                                // Match found; add this modification
-                                searchResult.SearchResultAddModification(
-                                    modificationDefinition, chChar, residueLocInPeptide,
-                                    searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
-                            }
+                        var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+
+                        if (modificationDefinition.TargetResiduesContain(chChar))
+                        {
+                            // Match found; add this modification
+                            searchResult.SearchResultAddModification(
+                                modificationDefinition, chChar, residueLocInPeptide,
+                                searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
                         }
                     }
                 }
@@ -415,31 +415,31 @@ namespace PeptideHitResultsProcessor
             {
                 var chChar = primarySequence[index];
 
-                if (IsLetterAtoZ(chChar))
+                if (!IsLetterAtoZ(chChar))
+                    continue;
+
+                // Look for static mods to associate with this residue
+                for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                 {
-                    // Look for static mods to associate with this residue
-                    for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
+                    if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                        continue;
+
+                    var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
+                    var matchFound = modificationDefinition.TargetResiduesContain(chChar);
+
+                    if (!matchFound && index == 0)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.eModificationTypeConstants.StaticMod)
-                        {
-                            var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
-                            var matchFound = modificationDefinition.TargetResiduesContain(chChar);
+                        matchFound = modificationDefinition.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS);
+                    }
 
-                            if (!matchFound && index == 0)
-                            {
-                                matchFound = modificationDefinition.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS);
-                            }
+                    if (!matchFound && index == indexLastChar)
+                    {
+                        matchFound = modificationDefinition.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS);
+                    }
 
-                            if (!matchFound && index == indexLastChar)
-                            {
-                                matchFound = modificationDefinition.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS);
-                            }
-
-                            if (matchFound)
-                            {
-                                totalModMass += modificationDefinition.ModificationMass;
-                            }
-                        }
+                    if (matchFound)
+                    {
+                        totalModMass += modificationDefinition.ModificationMass;
                     }
                 }
             }
@@ -478,91 +478,92 @@ namespace PeptideHitResultsProcessor
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
                 using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-                    using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    var headerParsed = false;
+
+                    // Initialize the list that will hold all of the records in the MODPlus result file
+                    var searchResultsUnfiltered = new List<udtMODPlusSearchResultType>();
+
+                    // Initialize the list that will hold all of the records that will ultimately be written out to disk
+                    var filteredSearchResults = new List<udtMODPlusSearchResultType>();
+
+                    // Parse the input file
+                    while (!reader.EndOfStream & !AbortProcessing)
                     {
-                        var headerParsed = false;
+                        var lineIn = reader.ReadLine();
 
-                        // Initialize the list that will hold all of the records in the MODPlus result file
-                        var searchResultsUnfiltered = new List<udtMODPlusSearchResultType>();
-
-                        // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                        var filteredSearchResults = new List<udtMODPlusSearchResultType>();
-
-                        // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        if (string.IsNullOrWhiteSpace(lineIn))
                         {
-                            var lineIn = reader.ReadLine();
+                            continue;
+                        }
 
-                            if (string.IsNullOrWhiteSpace(lineIn))
+                        if (!headerParsed)
+                        {
+                            // Parse the header line
+
+                            var success = ParseMODPlusResultsFileHeaderLine(lineIn, columnMapping);
+                            if (!success)
                             {
-                                continue;
-                            }
-
-                            if (!headerParsed)
-                            {
-                                // Parse the header line
-
-                                var success = ParseMODPlusResultsFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                if (string.IsNullOrEmpty(mErrorMessage))
                                 {
-                                    if (string.IsNullOrEmpty(mErrorMessage))
-                                    {
-                                        SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
-                                    }
-                                    return false;
+                                    SetErrorMessage("Invalid header line in " + Path.GetFileName(inputFilePath));
                                 }
 
-                                // Write the header line to the output file
-                                WriteSynFHTFileHeader(writer, ref errorLog);
-
-                                headerParsed = true;
-                                continue;
+                                return false;
                             }
 
-                            var udtSearchResult = new udtMODPlusSearchResultType();
+                            // Write the header line to the output file
+                            WriteSynFHTFileHeader(writer, ref errorLog);
 
-                            var validSearchResult = ParseMODPlusResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
-
-                            if (validSearchResult)
-                            {
-                                searchResultsUnfiltered.Add(udtSearchResult);
-                            }
-
-                            // Update the progress
-                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
-                            if (CreateProteinModsFile)
-                            {
-                                percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
-                            }
-                            UpdateProgress(percentComplete);
+                            headerParsed = true;
+                            continue;
                         }
 
-                        // Sort the SearchResults by scan, charge, and descending score
-                        searchResultsUnfiltered.Sort(new MODPlusSearchResultsComparerScanChargeScorePeptide());
+                        var udtSearchResult = new udtMODPlusSearchResultType();
 
-                        // Now filter the data
+                        var validSearchResult = ParseMODPlusResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
 
-                        // Initialize variables
-                        var startIndex = 0;
-
-                        while (startIndex < searchResultsUnfiltered.Count)
+                        if (validSearchResult)
                         {
-                            var endIndex = startIndex;
-                            while (endIndex + 1 < searchResultsUnfiltered.Count && searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
-                            {
-                                endIndex += 1;
-                            }
-
-                            // Store the results for this scan
-                            StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
-
-                            startIndex = endIndex + 1;
+                            searchResultsUnfiltered.Add(udtSearchResult);
                         }
 
-                        // Sort the data in udtFilteredSearchResults then write out to disk
-                        SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                        // Update the progress
+                        var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
+                        if (CreateProteinModsFile)
+                        {
+                            percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
+                        }
+
+                        UpdateProgress(percentComplete);
                     }
+
+                    // Sort the SearchResults by scan, charge, and descending score
+                    searchResultsUnfiltered.Sort(new MODPlusSearchResultsComparerScanChargeScorePeptide());
+
+                    // Now filter the data
+
+                    // Initialize variables
+                    var startIndex = 0;
+
+                    while (startIndex < searchResultsUnfiltered.Count)
+                    {
+                        var endIndex = startIndex;
+                        while (endIndex + 1 < searchResultsUnfiltered.Count &&
+                               searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
+                        {
+                            endIndex += 1;
+                        }
+
+                        // Store the results for this scan
+                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+
+                        startIndex = endIndex + 1;
+                    }
+
+                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                 }
 
                 // Inform the user if any errors occurred
@@ -1476,25 +1477,27 @@ namespace PeptideHitResultsProcessor
 
         private void ResolveMODPlusModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> modPlusModInfo)
         {
-            if (mODPlusModInfo != null)
+            if (modPlusModInfo == null)
             {
-                // Call .LookupModificationDefinitionByMass for each entry in mODPlusModInfo
-                foreach (var modInfo in mODPlusModInfo)
+                return;
+            }
+
+            // Call .LookupModificationDefinitionByMass for each entry in modPlusModInfo
+            foreach (var modInfo in modPlusModInfo)
+            {
+                if (string.IsNullOrEmpty(modInfo.TargetResidues))
                 {
-                    if (string.IsNullOrEmpty(modInfo.TargetResidues))
+                    mPeptideMods.LookupModificationDefinitionByMassAndModType(
+                        modInfo.ModificationMass, modInfo.ModificationType, default,
+                        clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
+                }
+                else
+                {
+                    foreach (var chTargetResidue in modInfo.TargetResidues)
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                            modInfo.ModificationMass, modInfo.ModificationType, default(char),
+                            modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
                             clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
-                    }
-                    else
-                    {
-                        foreach (var chTargetResidue in modInfo.TargetResidues)
-                        {
-                            mPeptideMods.LookupModificationDefinitionByMassAndModType(
-                                modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
-                                clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
-                        }
                     }
                 }
             }
