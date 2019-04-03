@@ -70,53 +70,6 @@ namespace PHRPReader
         /// <summary>
         /// MSGF+ modification type
         /// </summary>
-        [Obsolete("Use eMSGFPlusModType")]
-        public enum eMSGFDBModType
-        {
-            /// <summary>
-            /// Unknown
-            /// </summary>
-            Unknown = 0,
-
-            /// <summary>
-            /// Dynamic
-            /// </summary>
-            DynamicMod = 1,
-
-            /// <summary>
-            /// Static
-            /// </summary>
-            StaticMod = 2,
-
-            /// <summary>
-            /// N-terminal peptide dynamic
-            /// </summary>
-            DynNTermPeptide = 3,
-
-            /// <summary>
-            /// C-terminal peptide dynamic
-            /// </summary>
-            DynCTermPeptide = 4,
-
-            /// <summary>
-            /// N-terminal protein dynamic
-            /// </summary>
-            DynNTermProtein = 5,
-
-            /// <summary>
-            /// C-terminal protein dynamic
-            /// </summary>
-            DynCTermProtein = 6,
-
-            /// <summary>
-            /// Custom amino acid definition
-            /// </summary>
-            CustomAA = 7
-        }
-
-        /// <summary>
-        /// MSGF+ modification type
-        /// </summary>
         public enum eMSGFPlusModType
         {
             /// <summary>

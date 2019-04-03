@@ -76,23 +76,6 @@ namespace PHRPReader
 
         private bool ReadModSummaryFile(string modSummaryFilePath, ref List<clsModificationDefinition> modInfo)
         {
-            //string lineIn = null;
-            //string[] splitLine = null;
-
-            //var columnHeaders = default(SortedDictionary<string, int>);
-
-            //string modSymbol = null;
-            //string modMass = null;
-            //string targetResidues = null;
-            //string modType = null;
-            //string massCorrectionTag = null;
-
-            //var modSymbol = default(char);
-            //double modificationMass = 0;
-            //var eModificationType = default(clsModificationDefinition.eModificationTypeConstants);
-
-            //var skipLine = false;
-            //var headerLineParsed = false;
 
             if (modInfo == null)
             {
