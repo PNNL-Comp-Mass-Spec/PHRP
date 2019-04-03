@@ -291,13 +291,11 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Computes the total of all modifications defined for the sequence
         /// </summary>
-        /// <param name="cleanSequence"></param>
         /// <param name="modificationList">Comma separated list of modifications, e.g. Dehydro 52,Dehydro 63</param>
         /// <param name="modInfo"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         private double ComputeTotalModMass(
-            string cleanSequence,
             string modificationList,
             IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
@@ -873,7 +871,7 @@ namespace PeptideHitResultsProcessor
                     GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ResidueStart], out udtSearchResult.ResidueStart);
 
                     // Parse the list of modified residues to determine the total mod mass
-                    var totalModMass = ComputeTotalModMass(udtSearchResult.Sequence, udtSearchResult.Modifications, modInfo);
+                    var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modInfo);
 
                     // Compute monoisotopic mass of the peptide
                     udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
