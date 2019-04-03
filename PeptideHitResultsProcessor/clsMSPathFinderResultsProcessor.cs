@@ -542,17 +542,21 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        /// <summary>
+        /// Read mod info from the MSPathFinder parameter file
+        /// </summary>
+        /// <param name="msPathFinderParamFilePath"></param>
+        /// <param name="modInfo"></param>
+        /// <returns>True on success, false if an error</returns>
+        /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MSGF+</remarks>
         private bool ExtractModInfoFromParamFile(string msPathFinderParamFilePath,
             out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
-            // The DMS-based parameter file for MSPathFinder uses the same formatting as MSGF+
-
             var modFileProcessor = new clsMSGFPlusParamFileModExtractor("MSPathFinder");
             RegisterEvents(modFileProcessor);
 
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
-            // Note that this call will initialize modInfo
             var success = modFileProcessor.ExtractModInfoFromParamFile(msPathFinderParamFilePath, out modInfo);
 
             if (!success || mErrorCode != ePHRPErrorCodes.NoError)
@@ -592,7 +596,6 @@ namespace PeptideHitResultsProcessor
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
 
             var columnMapping = new Dictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int>();
-            bool success;
 
             try
             {
@@ -1234,7 +1237,6 @@ namespace PeptideHitResultsProcessor
                     var inputFile = new FileInfo(inputFilePath);
 
                     // Load the MSPathFinder Parameter File so that we can determine the modification names and masses
-                    // Note that this call will initialize modInfo
                     var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var modInfo);
                     if (!modInfoExtracted)
                     {
@@ -1427,6 +1429,7 @@ namespace PeptideHitResultsProcessor
         }
 
         #region "Event Handlers"
+
         private void ModExtractorErrorHandler(string message, Exception ex)
         {
             SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);

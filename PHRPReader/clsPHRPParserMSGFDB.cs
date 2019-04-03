@@ -826,7 +826,6 @@ namespace PHRPReader
 
             errorMessage = string.Empty;
 
-            // Note that this call will initialize modInfo
             var success = modFileProcessor.ExtractModInfoFromParamFile(searchEngineParamFileName, out var modInfo);
             if (!success)
             {

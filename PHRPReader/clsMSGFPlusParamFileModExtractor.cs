@@ -265,7 +265,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Extracts mod info from either a MSGF+ or MSPathFinder param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
+        /// Extracts mod info from either a MSGF+, MSPathFinder, or TopPIC param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
         /// <param name="paramFilePath"></param>
         /// <param name="modInfo"></param>
@@ -505,7 +505,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Resolve MSGF+ mods with mod definitions
+        /// Resolve MSGF+, MSPathFinder, or TopPIC mods with mod definitions
         /// </summary>
         /// <param name="modInfo"></param>
         /// <param name="oPeptideMods"></param>

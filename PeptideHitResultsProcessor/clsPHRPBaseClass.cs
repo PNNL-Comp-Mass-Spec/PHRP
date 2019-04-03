@@ -1970,12 +1970,16 @@ namespace PeptideHitResultsProcessor
 
         public abstract bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath);
 
+        /// <summary>
+        /// Appends newSuffix to the base name of the original file, then returns a full path to the file using the directory associated with originalFilePath
+        /// Note that newSuffix may contain a file extension though it does not have to
+        /// If newSuffix does not contain an extension, then the path returned will end in the same extension as originalFilePath
+        /// </summary>
+        /// <param name="originalFile"></param>
+        /// <param name="newSuffix"></param>
+        /// <returns></returns>
         protected string ReplaceFilenameSuffix(FileInfo originalFile, string newSuffix)
         {
-            // Appends newSuffix to the base name of the original file, then returns a full path to the file using the directory associated with originalFilePath
-            // Note that newSuffix may contain a file extension though it does not have to
-            //  If newSuffix does not contain an extension, then the path returned will end in the same extension as originalFilePath
-
             // Keep track of the original extension on originalFilePath
             var originalExtension = originalFile.Extension;
 

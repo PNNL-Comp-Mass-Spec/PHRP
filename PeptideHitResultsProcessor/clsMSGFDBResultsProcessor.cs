@@ -895,8 +895,8 @@ namespace PeptideHitResultsProcessor
                                 }
 
                                 var validSearchResult = ParseMSGFPlusResultsFileEntry(lineIn, isMsgfPlus, msgfPlusModInfo,
-                                                                                   searchResultsCurrentScan, ref errorLog,
-                                                                                   columnMapping, ref nextScanGroupID, scanGroupDetails, scanGroupCombo, specIdToIndex);
+                                                                                      searchResultsCurrentScan, ref errorLog,
+                                                                                      columnMapping, ref nextScanGroupID, scanGroupDetails, scanGroupCombo, specIdToIndex);
 
                                 if (validSearchResult && searchResultsCurrentScan.Count > 0)
                                 {
@@ -1077,7 +1077,6 @@ namespace PeptideHitResultsProcessor
             RegisterEvents(modFileProcessor);
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
-            // Note that this call will initialize modInfo
             var success = modFileProcessor.ExtractModInfoFromParamFile(msgfDbParamFilePath, out modInfo);
 
             if (!success || mErrorCode != ePHRPErrorCodes.NoError)
