@@ -699,7 +699,7 @@ namespace PeptideHitResultsProcessor
                             Array.Resize(ref udtModList, udtModList.Length * 2);
                         }
 
-                        var udtMod = new udtModInfoType
+                        var modDef = new udtModInfoType()
                         {
                             ModMass = splitLine[1],
                             Residues = splitLine[2],
@@ -711,50 +711,50 @@ namespace PeptideHitResultsProcessor
                             switch (splitLine[3].ToLower())
                             {
                                 case "opt":
-                                    udtMod.ModType = eInspectModType.DynamicMod;
+                                    modDef.ModType = eInspectModType.DynamicMod;
                                     break;
                                 case "fix":
-                                    udtMod.ModType = eInspectModType.StaticMod;
+                                    modDef.ModType = eInspectModType.StaticMod;
                                     break;
                                 case "nterminal":
-                                    udtMod.ModType = eInspectModType.DynNTermPeptide;
+                                    modDef.ModType = eInspectModType.DynNTermPeptide;
                                     break;
                                 case "cterminal":
-                                    udtMod.ModType = eInspectModType.DynCTermPeptide;
+                                    modDef.ModType = eInspectModType.DynCTermPeptide;
                                     break;
                                 default:
                                     ReportWarning("Unrecognized Mod Type in the Inspect parameter file");
-                                    udtMod.ModType = eInspectModType.DynamicMod;
+                                    modDef.ModType = eInspectModType.DynamicMod;
                                     break;
                             }
                         }
                         else
                         {
                             // Assume dynamic if not specified
-                            udtMod.ModType = eInspectModType.DynamicMod;
+                            modDef.ModType = eInspectModType.DynamicMod;
                         }
 
                         if (splitLine.Length >= 5)
                         {
-                            udtMod.ModName = splitLine[4].ToLower();
-                            if (udtMod.ModName.Length > 4)
+                            modDef.ModName = splitLine[4].ToLower();
+                            if (modDef.ModName.Length > 4)
                             {
                                 // Only keep the first 4 characters of the modification name
-                                udtMod.ModName = udtMod.ModName.Substring(0, 4);
+                                modDef.ModName = modDef.ModName.Substring(0, 4);
                             }
                         }
                         else
                         {
                             unnamedModID += 1;
-                            udtMod.ModName = "UnnamedMod" + unnamedModID.ToString();
+                            modDef.ModName = "UnnamedMod" + unnamedModID.ToString();
                         }
 
                         // Check for phosphorylation
                         // Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
                         //  However, we want to use the more precise mass of 79.9663
-                        if (udtMod.ModName == PHOS_MOD_NAME.ToLower() & udtMod.ModMass == "80")
+                        if (modDef.ModName == PHOS_MOD_NAME.ToLower() & modDef.ModMass == "80")
                         {
-                            udtMod.ModMass = PHOS_MOD_MASS;
+                            modDef.ModMass = PHOS_MOD_MASS;
                         }
                         udtModList[modCount] = udtMod;
 
@@ -985,7 +985,9 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        var success = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        if (!filesInitialized)
+                            return false;
 
                         // Parse the input file
 
@@ -1001,8 +1003,8 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseInspectSynFileHeaderLine(lineIn, columnMapping);
-                                if (success)
+                                var validHeader = ParseInspectSynFileHeaderLine(lineIn, columnMapping);
+                                if (validHeader)
                                 {
                                     dataLine = false;
                                 }
@@ -1058,8 +1060,8 @@ namespace PeptideHitResultsProcessor
                                     firstMatchForGroup = true;
                                 }
 
-                                success = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                                if (!success)
+                                var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                                if (!modsAdded)
                                 {
                                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                     {

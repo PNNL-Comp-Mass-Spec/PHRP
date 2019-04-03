@@ -579,14 +579,14 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (!File.Exists(mODaParamFilePath))
+                if (!File.Exists(modaParamFilePath))
                 {
-                    SetErrorMessage("MODa param file not found: " + mODaParamFilePath);
+                    SetErrorMessage("MODa param file not found: " + modaParamFilePath);
                 }
                 else
                 {
                     // Read the contents of the parameter (or mods) file
-                    using (var reader = new StreamReader(new FileStream(mODaParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var reader = new StreamReader(new FileStream(modaParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
                         while (!reader.EndOfStream)
                         {
@@ -654,7 +654,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the MODa parameter file (" + Path.GetFileName(mODaParamFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the MODa parameter file (" + Path.GetFileName(modaParamFilePath) + "): " + ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 success = false;
             }
@@ -787,7 +787,7 @@ namespace PeptideHitResultsProcessor
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
 
             var columnMapping = new Dictionary<clsPHRPParserMODa.MODaSynFileColumns, int>();
-            bool success;
+
             try
             {
                 // Possibly reset the mass correction tags and Mod Definitions
@@ -827,7 +827,9 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        success = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        if (!filesInitialized)
+                            return false;
 
                         // Parse the input file
                         while (!reader.EndOfStream & !AbortProcessing)
@@ -840,12 +842,12 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseMODaSynFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                var validHeader = ParseMODaSynFileHeaderLine(lineIn, columnMapping);
+                                if (!validHeader)
                                 {
                                     // Error parsing header
                                     SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                                    return success;
+                                    return false;
                                 }
                                 headerParsed = true;
                                 continue;
@@ -895,8 +897,8 @@ namespace PeptideHitResultsProcessor
                                 firstMatchForGroup = true;
                             }
 
-                            success = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                            if (!success)
+                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                            if (!modsAdded)
                             {
                                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                 {
@@ -964,13 +966,13 @@ namespace PeptideHitResultsProcessor
                         SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
                     }
 
-                    success = true;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
-                    success = false;
+                    return false;
                 }
                 finally
                 {
@@ -981,10 +983,9 @@ namespace PeptideHitResultsProcessor
             {
                 SetErrorMessage(ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                success = false;
+                return false;
             }
 
-            return success;
         }
 
         /// <summary>
@@ -1462,8 +1463,8 @@ namespace PeptideHitResultsProcessor
                     // Load the MODa Parameter File to look for any static mods
                     ExtractModInfoFromMODaParamFile(SearchToolParameterFilePath, ref mODaModInfo);
 
-                    // Resolve the mods in mODaModInfo with the ModDefs mods
-                    ResolveMODaModsWithModDefinitions(mODaModInfo);
+                    // Resolve the mods in modaModInfo with the ModDefs mods
+                    ResolveMODaModsWithModDefinitions(modaModInfo);
 
                     // Define the base output filename using inputFilePath
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
@@ -1602,23 +1603,25 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private void ResolveMODaModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> mODaModInfo)
+        private void ResolveMODaModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> modaModInfo)
         {
-            if (mODaModInfo != null)
+            if (modaModInfo == null)
             {
-                // Call .LookupModificationDefinitionByMass for each entry in mODaModInfo
-                foreach (var modInfo in mODaModInfo)
+                return;
+            }
+
+            // Call .LookupModificationDefinitionByMass for each entry in modaModInfo
+            foreach (var modInfo in modaModInfo)
+            {
+                if (string.IsNullOrEmpty(modInfo.TargetResidues))
                 {
-                    if (string.IsNullOrEmpty(modInfo.TargetResidues))
+                    mPeptideMods.LookupModificationDefinitionByMassAndModType(modInfo.ModificationMass, modInfo.ModificationType, default, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true, MODA_MASS_DIGITS_OF_PRECISION);
+                }
+                else
+                {
+                    foreach (var targetResidue in modInfo.TargetResidues)
                     {
-                        mPeptideMods.LookupModificationDefinitionByMassAndModType(modInfo.ModificationMass, modInfo.ModificationType, default(char), clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true, MODA_MASS_DIGITS_OF_PRECISION);
-                    }
-                    else
-                    {
-                        foreach (var targetResidue in modInfo.TargetResidues)
-                        {
-                            mPeptideMods.LookupModificationDefinitionByMassAndModType(modInfo.ModificationMass, modInfo.ModificationType, targetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true, MODA_MASS_DIGITS_OF_PRECISION);
-                        }
+                        mPeptideMods.LookupModificationDefinitionByMassAndModType(modInfo.ModificationMass, modInfo.ModificationType, targetResidue, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true, MODA_MASS_DIGITS_OF_PRECISION);
                     }
                 }
             }

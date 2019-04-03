@@ -411,7 +411,7 @@ namespace PeptideHitResultsProcessor
             return mass;
         }
 
-        private static readonly Regex RegexModMassRegEx = new Regex(TopPIC_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ModMassMatcher = new Regex(TopPIC_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Computes the total of all modification masses defined for the peptide
@@ -423,7 +423,7 @@ namespace PeptideHitResultsProcessor
         {
             double totalModMass = 0;
 
-            foreach (Match reMatch in RegexModMassRegEx.Matches(peptide))
+            foreach (Match reMatch in ModMassMatcher.Matches(peptide))
             {
                 if (double.TryParse(reMatch.Groups[1].Value, out var modMassFound))
                 {
@@ -489,8 +489,8 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                var success = ParseTopPICResultsFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                var validHeader = ParseTopPICResultsFileHeaderLine(lineIn, columnMapping);
+                                if (!validHeader)
                                 {
                                     // Error parsing header
                                     SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
@@ -715,10 +715,11 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        success = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        if (!filesInitialized)
+                            return false;
 
                         // Parse the input file
-
                         while (!reader.EndOfStream & !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
@@ -729,12 +730,12 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseTopPICSynFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                var validHeader = ParseTopPICSynFileHeaderLine(lineIn, columnMapping);
+                                if (!validHeader)
                                 {
                                     // Error parsing header
                                     SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                                    return success;
+                                    return false;
                                 }
                                 headerParsed = true;
                                 continue;
@@ -778,8 +779,8 @@ namespace PeptideHitResultsProcessor
                                     firstMatchForGroup = true;
                                 }
 
-                                success = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                                if (!success)
+                                var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                                if (!modsAdded)
                                 {
                                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                     {
@@ -848,13 +849,13 @@ namespace PeptideHitResultsProcessor
                         SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
                     }
 
-                    success = true;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
-                    success = false;
+                    return false;
                 }
                 finally
                 {
@@ -865,10 +866,9 @@ namespace PeptideHitResultsProcessor
             {
                 SetErrorMessage(ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                success = false;
+                return false;
             }
 
-            return success;
         }
 
         /// <summary>

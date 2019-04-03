@@ -374,7 +374,7 @@ namespace PeptideHitResultsProcessor
             return mass;
         }
 
-        private static readonly Regex RegexModMassRegEx = new Regex(MODPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ModMassMatcher = new Regex(MODPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Computes the total of all modification masses defined for the peptide
@@ -389,7 +389,7 @@ namespace PeptideHitResultsProcessor
             clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptide, out var primarySequence, out var _, out var _);
 
             // Parse the dynamic mods reported by MODPlus
-            foreach (Match reMatch in RegexModMassRegEx.Matches(primarySequence))
+            foreach (Match reMatch in ModMassMatcher.Matches(primarySequence))
             {
                 // We use .TrimEnd() because the matched mod mass will end in a period if this mod applies to the final residue in a peptide
                 if (double.TryParse(reMatch.Groups[1].Value.TrimEnd('.'), out var modMassFound))
@@ -602,17 +602,17 @@ namespace PeptideHitResultsProcessor
                     modInfo.Clear();
                 }
 
-                if (string.IsNullOrEmpty(mODPlusParamFilePath))
+                if (string.IsNullOrEmpty(modPlusParamFilePath))
                 {
                     SetErrorMessage("MODPlus Parameter File name not defined; unable to extract mod info");
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                     return false;
                 }
 
-                var paramFile = new FileInfo(mODPlusParamFilePath);
+                var paramFile = new FileInfo(modPlusParamFilePath);
                 if (!paramFile.Exists)
                 {
-                    SetErrorMessage("MODPlus param file not found: " + mODPlusParamFilePath);
+                    SetErrorMessage("MODPlus param file not found: " + modPlusParamFilePath);
                     return false;
                 }
 
@@ -663,7 +663,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the MODPlus parameter file (" + Path.GetFileName(mODPlusParamFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the MODPlus parameter file (" + Path.GetFileName(modPlusParamFilePath) + "): " + ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
@@ -725,10 +725,11 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        success = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        if (!filesInitialized)
+                            return false;
 
                         // Parse the input file
-
                         while (!reader.EndOfStream & !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
@@ -740,12 +741,12 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseMODPlusSynFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                var validHeader = ParseMODPlusSynFileHeaderLine(lineIn, columnMapping);
+                                if (!validHeader)
                                 {
                                     // Error parsing header
                                     SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                                    return success;
+                                    return false;
                                 }
                                 headerParsed = true;
                                 continue;
@@ -794,8 +795,8 @@ namespace PeptideHitResultsProcessor
                                 firstMatchForGroup = true;
                             }
 
-                            success = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                            if (!success)
+                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                            if (!modsAdded)
                             {
                                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                 {
@@ -834,13 +835,13 @@ namespace PeptideHitResultsProcessor
                         SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
                     }
 
-                    success = true;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
-                    success = false;
+                    return false;
                 }
                 finally
                 {
@@ -851,10 +852,9 @@ namespace PeptideHitResultsProcessor
             {
                 SetErrorMessage(ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                success = false;
+                return false;
             }
 
-            return success;
         }
 
         /// <summary>

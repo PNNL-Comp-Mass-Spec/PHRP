@@ -509,7 +509,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modInfo"></param>
         /// <param name="oPeptideMods"></param>
-        public void ResolveMSGFDBModsWithModDefinitions(List<udtModInfoType> modInfo, clsPeptideModificationContainer oPeptideMods)
+        public void ResolveMSGFPlusModsWithModDefinitions(List<udtModInfoType> modInfo, clsPeptideModificationContainer oPeptideMods)
         {
             if (modInfo != null)
             {

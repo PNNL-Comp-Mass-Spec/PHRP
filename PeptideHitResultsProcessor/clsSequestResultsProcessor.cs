@@ -233,7 +233,9 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        var success = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        if (!filesInitialized)
+                            return false;
 
                         // Parse the input file
                         while (!reader.EndOfStream & !AbortProcessing)
@@ -248,8 +250,8 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseSequestSynFileHeaderLine(lineIn, columnMapping);
-                                if (success)
+                                var validHeader = ParseSequestSynFileHeaderLine(lineIn, columnMapping);
+                                if (validHeader)
                                 {
                                     dataLine = false;
                                 }
@@ -305,8 +307,8 @@ namespace PeptideHitResultsProcessor
                                     firstMatchForGroup = true;
                                 }
 
-                                success = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                                if (!success)
+                                var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                                if (!modsAdded)
                                 {
                                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                     {

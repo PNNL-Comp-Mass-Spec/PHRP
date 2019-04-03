@@ -423,9 +423,6 @@ namespace PeptideHitResultsProcessor
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile
 
             var resultsProcessed = 0;
-
-            bool success;
-
             try
             {
                 // Possibly reset the mass correction tags and Mod Definitions
@@ -456,7 +453,7 @@ namespace PeptideHitResultsProcessor
                 try
                 {
                     // Read the input parameters from the end of the X!Tandem results file (inputFilePath)
-                    success = ParseXTandemResultsFileInputParameters(inputFilePath);
+                    var success = ParseXTandemResultsFileInputParameters(inputFilePath);
                     if (!success)
                     {
                         SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile, true);
@@ -478,8 +475,6 @@ namespace PeptideHitResultsProcessor
                     {
                         using (var xmlReader = new XmlTextReader(reader))
                         {
-                            resultsProcessed = 0;
-
                             // Create the output file
                             using (var writer = new StreamWriter(outputFilePath, false))
                             {
@@ -487,7 +482,9 @@ namespace PeptideHitResultsProcessor
                                 WriteSynFHTFileHeader(writer, ref errorLog);
 
                                 // Create the additional output files
-                                success = InitializeSequenceOutputFiles(outputFilePath);
+                                var filesInitialized = InitializeSequenceOutputFiles(outputFilePath);
+                                if (!filesInitialized)
+                                    return false;
 
                                 // Parse the input file
                                 eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
@@ -584,13 +581,13 @@ namespace PeptideHitResultsProcessor
                         }
                     }
 
-                    success = true;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
-                    success = false;
+                    return false;
                 }
                 finally
                 {
@@ -601,10 +598,9 @@ namespace PeptideHitResultsProcessor
             {
                 SetErrorMessage(ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                success = false;
+                return false;
             }
 
-            return success;
         }
 
         private bool ParseXTandemResultsFileEntry(XmlReader xmlReader, StreamWriter writer, ref int searchResultCount, ref clsSearchResultsXTandem[] searchResults, ref string errorLog, int groupElementReaderDepth)
@@ -1004,8 +1000,8 @@ namespace PeptideHitResultsProcessor
                                         }
                                     }
 
-                                    success = AddModificationsAndComputeMass(searchResults[searchResultIndex], updateModOccurrenceCounts);
-                                    if (!success)
+                                    var modsAdded = AddModificationsAndComputeMass(searchResults[searchResultIndex], updateModOccurrenceCounts);
+                                    if (!modsAdded)
                                     {
                                         if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                         {

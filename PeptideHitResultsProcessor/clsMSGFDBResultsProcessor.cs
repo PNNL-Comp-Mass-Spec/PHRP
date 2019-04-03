@@ -860,8 +860,8 @@ namespace PeptideHitResultsProcessor
 
                                 if (!headerParsed)
                                 {
-                                    var success = ParseMSGFPlusResultsFileHeaderLine(lineIn, columnMapping);
-                                    if (!success)
+                                    var validHeader = ParseMSGFPlusResultsFileHeaderLine(lineIn, columnMapping);
+                                    if (!validHeader)
                                     {
                                         // Error parsing header
                                         SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
@@ -1090,7 +1090,7 @@ namespace PeptideHitResultsProcessor
                 return false;
             }
 
-            modFileProcessor.ResolveMSGFDBModsWithModDefinitions(modInfo, mPeptideMods);
+            modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modInfo, mPeptideMods);
 
             return true;
         }
@@ -1424,7 +1424,9 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        InitializeSequenceOutputFiles(baseOutputFilePath);
+                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        if (!filesInitialized)
+                            return false;
 
                         var columnMapping = new Dictionary<clsPHRPParserMSGFDB.MSGFPlusSynFileColumns, int>();
 
@@ -1439,12 +1441,12 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                var success = ParseMSGFPlusSynFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                var validHeader = ParseMSGFPlusSynFileHeaderLine(lineIn, columnMapping);
+                                if (!validHeader)
                                 {
                                     // Error parsing header
                                     SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                                    return success;
+                                    return false;
                                 }
                                 headerParsed = true;
                                 continue;
@@ -1488,8 +1490,8 @@ namespace PeptideHitResultsProcessor
                                     firstMatchForGroup = true;
                                 }
 
-                                var success = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                                if (!success)
+                                var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                                if (!modsAdded)
                                 {
                                     successOverall = false;
                                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
@@ -2522,8 +2524,8 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private static readonly Regex RegexNTerminalModMassRegEx = new Regex(MSGFDB_N_TERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
-        private static readonly Regex RegexModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex NTerminalModMassMatcher = new Regex(MSGFDB_N_TERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ModMassMatcher = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
@@ -2566,7 +2568,7 @@ namespace PeptideHitResultsProcessor
 
             // First look for dynamic N-terminal mods (NTermPeptide or NTermProtein)
             // This RegEx will match one or more mods, all at the N-terminus
-            var reMatch = RegexNTerminalModMassRegEx.Match(peptide);
+            var reMatch = NTerminalModMassMatcher.Match(peptide);
 
             if (reMatch.Success)
             {
@@ -2663,7 +2665,7 @@ namespace PeptideHitResultsProcessor
                 else
                 {
                     // Found a mod; find the extent of the mod digits
-                    reMatch = RegexModMassRegEx.Match(peptide, index);
+                    reMatch = ModMassMatcher.Match(peptide, index);
 
                     // Note that possibleCTerminalMod will be set to True once we hit the last residue
 
@@ -2779,7 +2781,7 @@ namespace PeptideHitResultsProcessor
             return peptide;
         }
 
-        private static readonly Regex RegexProteinInfo = new Regex(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ProteinInfoMatcher = new Regex(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Examines proteinList to look for a semi-colon separated list of proteins and terminus symbols, for example
@@ -2793,7 +2795,7 @@ namespace PeptideHitResultsProcessor
         {
             proteinInfo.Clear();
 
-            var reMatches = RegexProteinInfo.Matches(proteinList);
+            var reMatches = ProteinInfoMatcher.Matches(proteinList);
 
             if (reMatches.Count == 0)
             {

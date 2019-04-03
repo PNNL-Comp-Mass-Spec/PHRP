@@ -476,8 +476,8 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                var success = ParseMSAlignResultsFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                var validHeader = ParseMSAlignResultsFileHeaderLine(lineIn, columnMapping);
+                                if (!validHeader)
                                 {
                                     // Error parsing header
                                     SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
@@ -580,14 +580,14 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (!File.Exists(mSAlignParamFilePath))
+                if (!File.Exists(msAlignParamFilePath))
                 {
-                    SetErrorMessage("MSAlign param file not found: " + mSAlignParamFilePath);
+                    SetErrorMessage("MSAlign param file not found: " + msAlignParamFilePath);
                 }
                 else
                 {
                     // Read the contents of the parameter (or mods) file
-                    using (var reader = new StreamReader(new FileStream(mSAlignParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    using (var reader = new StreamReader(new FileStream(msAlignParamFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                     {
                         while (!reader.EndOfStream)
                         {
@@ -642,7 +642,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error reading the MSAlign parameter file (" + Path.GetFileName(mSAlignParamFilePath) + "): " + ex.Message);
+                SetErrorMessage("Error reading the MSAlign parameter file (" + Path.GetFileName(msAlignParamFilePath) + "): " + ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 success = false;
             }
@@ -666,8 +666,6 @@ namespace PeptideHitResultsProcessor
             //  But, we'll keep the check in place just in case
 
             var columnMapping = new Dictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int>();
-
-            bool success;
 
             try
             {
@@ -708,10 +706,11 @@ namespace PeptideHitResultsProcessor
 
                         // Create the output files
                         var baseOutputFilePath = Path.Combine(outputDirectoryPath, Path.GetFileName(inputFilePath));
-                        success = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        var filesInitialized = InitializeSequenceOutputFiles(baseOutputFilePath);
+                        if (!filesInitialized)
+                            return false;
 
                         // Parse the input file
-
                         while (!reader.EndOfStream & !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
@@ -722,12 +721,12 @@ namespace PeptideHitResultsProcessor
 
                             if (!headerParsed)
                             {
-                                success = ParseMSAlignSynFileHeaderLine(lineIn, columnMapping);
-                                if (!success)
+                                var validHeader = ParseMSAlignSynFileHeaderLine(lineIn, columnMapping);
+                                if (!validHeader)
                                 {
                                     // Error parsing header
                                     SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                                    return success;
+                                    return false;
                                 }
                                 headerParsed = true;
                                 continue;
@@ -771,8 +770,8 @@ namespace PeptideHitResultsProcessor
                                     firstMatchForGroup = true;
                                 }
 
-                                success = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                                if (!success)
+                                var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                                if (!modsAdded)
                                 {
                                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                     {
@@ -841,13 +840,13 @@ namespace PeptideHitResultsProcessor
                         SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
                     }
 
-                    success = true;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
-                    success = false;
+                    return false;
                 }
                 finally
                 {
@@ -858,10 +857,9 @@ namespace PeptideHitResultsProcessor
             {
                 SetErrorMessage(ex.Message);
                 SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
-                success = false;
+                return false;
             }
 
-            return success;
         }
 
         private bool ParseMSAlignResultsFileEntry(
@@ -1270,7 +1268,7 @@ namespace PeptideHitResultsProcessor
                     // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                     searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
-                    var searchResultBase = (clsSearchResultsBaseClass) searchResult;
+                    var searchResultBase = (clsSearchResultsBaseClass)searchResult;
 
                     ComputePseudoPeptideLocInProtein(searchResultBase);
 
@@ -1543,7 +1541,8 @@ namespace PeptideHitResultsProcessor
         /// <param name="msAlignModInfo"></param>
         private void ResolveMSAlignModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> msAlignModInfo)
         {
-            if (msAlignModInfo == null) return;
+            if (msAlignModInfo == null)
+                return;
 
             foreach (var modInfo in msAlignModInfo)
             {
