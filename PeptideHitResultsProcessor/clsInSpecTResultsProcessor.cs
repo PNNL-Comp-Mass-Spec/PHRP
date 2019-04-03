@@ -1159,13 +1159,8 @@ namespace PeptideHitResultsProcessor
 
             string[] splitLine = null;
 
-            bool validSearchResult;
-
             try
             {
-                // Set this to False for now
-                validSearchResult = false;
-
                 // Reset udtSearchResult
                 udtSearchResult.Clear();
 
@@ -1182,7 +1177,6 @@ namespace PeptideHitResultsProcessor
                               clsPHRPParser.IsNumber(splitLine[2])))
                         {
                             // This is a header line; ignore it
-                            validSearchResult = false;
                             return false;
                         }
                     }
@@ -1261,8 +1255,10 @@ namespace PeptideHitResultsProcessor
                         udtSearchResult.DelMPPM = "0";
                     }
 
-                    validSearchResult = true;
+                    return true;
                 }
+
+                return false;
             }
             catch (Exception)
             {
@@ -1278,10 +1274,9 @@ namespace PeptideHitResultsProcessor
                         errorLog += "Error parsing InSpecT Results in ParseInspectResultsFileEntry" + "\n";
                     }
                 }
-                validSearchResult = false;
+                return false;
             }
 
-            return validSearchResult;
         }
 
         /// <summary>
@@ -1302,15 +1297,10 @@ namespace PeptideHitResultsProcessor
         {
             string[] splitLine = null;
 
-            bool validSearchResult;
-
             peptideSequenceWithMods = string.Empty;
 
             try
             {
-                // Set this to False for now
-                validSearchResult = false;
-
                 // Reset searchResult
                 searchResult.Clear();
 
@@ -1418,7 +1408,7 @@ namespace PeptideHitResultsProcessor
                 searchResult.SpecFilePos = specFilePos;
                 searchResult.PrecursorMz = precursorMz;
 
-                validSearchResult = true;
+                return true;
             }
             catch (Exception)
             {
@@ -1434,10 +1424,9 @@ namespace PeptideHitResultsProcessor
                         errorLog += "Error parsing InSpecT Results in ParseInspectSynFileEntry" + "\n";
                     }
                 }
-                validSearchResult = false;
+                return false;
             }
 
-            return validSearchResult;
         }
 
         /// <summary>

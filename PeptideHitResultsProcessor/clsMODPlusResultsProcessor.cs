@@ -684,7 +684,6 @@ namespace PeptideHitResultsProcessor
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
 
             var columnMapping = new Dictionary<clsPHRPParserMODPlus.MODPlusSynFileColumns, int>();
-            bool success;
 
             try
             {

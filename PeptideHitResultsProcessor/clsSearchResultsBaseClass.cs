@@ -926,7 +926,7 @@ namespace PeptideHitResultsProcessor
                         // If it does, do not re-add the modification
                         for (var indexCompare = 0; indexCompare <= mSearchResultModifications.Count - 1; indexCompare++)
                         {
-                            if (object.ReferenceEquals(modificationDefinition, mSearchResultModifications[indexCompare].ModDefinition))
+                            if (ReferenceEquals(modificationDefinition, mSearchResultModifications[indexCompare].ModDefinition))
                             {
                                 addModification = false;
                                 break;
