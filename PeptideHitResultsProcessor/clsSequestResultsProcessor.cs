@@ -32,11 +32,14 @@ namespace PeptideHitResultsProcessor
     {
         public clsSequestResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
             InitializeLocalVariables();
         }
 
         #region "Constants and Enums"
+
+        public const string TOOL_NAME = "SEQUEST";
+
         public const string FILENAME_SUFFIX_FIRST_HITS_FILE = "_fht";
         public const string FILENAME_SUFFIX_SYNOPSIS_FILE = "_syn";
 

@@ -22,10 +22,12 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODPlusResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
         }
 
         #region "Constants and Enums"
+
+        public const string TOOL_NAME = "ModPlus";
 
         public const string FILENAME_SUFFIX_MODPlus_FILE = "_modp.id";
 

@@ -20,11 +20,13 @@ namespace PeptideHitResultsProcessor
     {
         public clsMSAlignResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
             InitializeLocalVariables();
         }
 
         #region "Constants and Enums"
+
+        public const string TOOL_NAME = "MSAlign";
 
         public const string FILENAME_SUFFIX_MSALIGN_FILE = "_MSAlign_ResultTable";
 

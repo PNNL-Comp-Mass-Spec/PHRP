@@ -37,6 +37,11 @@ namespace PeptideHitResultsProcessor
 
         #region "Constants and Enums"
 
+        // Note: TOOL_NAME is used by clsAnalysisManagerPeptideHitResultsProcessor.InitSetup
+        //       Do not add an exclamation mark
+
+        public const string TOOL_NAME = "XTandem";
+
         // Note: These names must all be lowercase
         private const string XTANDEM_XML_ROOT_ELEMENT = "bioml";
         private const string XTANDEM_XML_ELEMENT_NAME_GROUP = "group";
@@ -116,7 +121,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public clsXTandemResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
 
             mSeqsWithMods = new Dictionary<string, int>();
             mSeqsWithoutMods = new SortedSet<string>();

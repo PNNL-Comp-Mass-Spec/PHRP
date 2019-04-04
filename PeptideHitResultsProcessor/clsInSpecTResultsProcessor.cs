@@ -32,11 +32,13 @@ namespace PeptideHitResultsProcessor
     {
         public clsInSpecTResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
             InitializeLocalVariables();
         }
 
         #region "Constants and Enums"
+
+        public const string TOOL_NAME = "InSpecT";
 
         public const string FILENAME_SUFFIX_INSPECT_FILE = "_inspect";
 

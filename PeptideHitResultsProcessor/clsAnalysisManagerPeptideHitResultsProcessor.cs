@@ -311,15 +311,15 @@ namespace PeptideHitResultsProcessor
             m_SettingsFilePath = Path.Combine(SourceDirectoryPath, SettingsFileName);
 
             // Define the peptide hit results format based on the analysis tool name
-            if (AnalysisToolName.IndexOf("xtandem", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (AnalysisToolName.IndexOf(clsXTandemResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile;
             }
-            else if (AnalysisToolName.IndexOf("sequest", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(clsSequestResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile;
             }
-            else if (AnalysisToolName.IndexOf("inspect", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(clsInSpecTResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InspectTXTFile;
             }
@@ -327,27 +327,27 @@ namespace PeptideHitResultsProcessor
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("msgfplus", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(clsMSGFDBResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("msalign", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(clsMSAlignResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("moda", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(clsMODaResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("ModPlus", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(clsMODPlusResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile;
             }
-            else if (AnalysisToolName.IndexOf("MSPathFinder", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(clsMSPathFinderResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
             }
-            else if (AnalysisToolName.IndexOf("TopPIC", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(clsTopPICResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.TopPICTXTFile;
             }

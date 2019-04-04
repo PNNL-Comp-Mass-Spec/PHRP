@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSGFDBResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
             mModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
@@ -39,6 +39,8 @@ namespace PeptideHitResultsProcessor
         }
 
         #region "Constants and Enums"
+
+        public const string TOOL_NAME = "MSGFPlus";
 
         public const string FILENAME_SUFFIX_MSGFDB_FILE = "_msgfdb";
         public const string FILENAME_SUFFIX_MSGFPLUS_FILE = "_msgfplus";

@@ -21,11 +21,13 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODaResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
             InitializeLocalVariables();
         }
 
         #region "Constants and Enums"
+
+        public const string TOOL_NAME = "MODa";
 
         public const string FILENAME_SUFFIX_MODA_FILE = "_moda.id";
 

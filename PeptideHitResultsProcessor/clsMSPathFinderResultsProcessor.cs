@@ -32,12 +32,14 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSPathFinderResultsProcessor()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
 
             mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }
 
         #region "Constants and Enums"
+
+        public const string TOOL_NAME = "MSPathFinder";
 
         public const string FILENAME_SUFFIX_MSPathFinder_FILE = "_IcTda";
 
@@ -551,7 +553,7 @@ namespace PeptideHitResultsProcessor
         private bool ExtractModInfoFromParamFile(string msPathFinderParamFilePath,
             out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
-            var modFileProcessor = new clsMSGFPlusParamFileModExtractor("MSPathFinder");
+            var modFileProcessor = new clsMSGFPlusParamFileModExtractor(TOOL_NAME);
             RegisterEvents(modFileProcessor);
 
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;

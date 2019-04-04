@@ -29,11 +29,13 @@ namespace PeptideHitResultsProcessor
     {
         public clsTopPICResultsProcessor()
         {
-            mFileDate = "April 1, 2019";
+            mFileDate = "April 3, 2019";
             InitializeLocalVariables();
         }
 
         #region "Constants and Enums"
+
+        public const string TOOL_NAME = "TopPIC";
 
         public const string FILENAME_SUFFIX_TopPIC_PROTEOFORMS_FILE = "_TopPIC_Proteoforms";
 
@@ -576,7 +578,7 @@ namespace PeptideHitResultsProcessor
             string topPICParamFilePath,
             out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
-            var modFileProcessor = new clsMSGFPlusParamFileModExtractor("TopPIC");
+            var modFileProcessor = new clsMSGFPlusParamFileModExtractor(TOOL_NAME);
 
             RegisterEvents(modFileProcessor);
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
