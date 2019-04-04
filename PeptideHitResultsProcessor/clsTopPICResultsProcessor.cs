@@ -941,27 +941,8 @@ namespace PeptideHitResultsProcessor
                     peptideMonoMassTopPIC = peptideMonoMassPHRP;
                 }
 
-                var massDiffThreshold = peptideMonoMassTopPIC / 50000;
-                if (massDiffThreshold < 0.1)
-                    massDiffThreshold = 0.1;
-
-                if (Math.Abs(peptideMonoMassPHRP - peptideMonoMassTopPIC) > massDiffThreshold)
-                {
-                    // Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
-                    string first30Residues;
-                    if (udtSearchResult.Proteoform.Length < 27)
-                    {
-                        first30Residues = udtSearchResult.Proteoform;
-                    }
-                    else
-                    {
-                        first30Residues = udtSearchResult.Proteoform.Substring(0, 27) + "...";
-                    }
-
-                    ReportWarning("The monoisotopic mass computed by PHRP is more than " + massDiffThreshold.ToString("0.00") +
-                                  " Da away from the mass computed by TopPIC: " + peptideMonoMassPHRP.ToString("0.0000") + " vs. " +
-                                  peptideMonoMassTopPIC.ToString("0.0000") + "; peptide " + first30Residues);
-                }
+                // Warn the user if the monoisotopic mass values differ by more than 0.1 Da
+                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Proteoform, peptideMonoMassPHRP, peptideMonoMassTopPIC);
 
                 if (peptideMonoMassTopPIC > 0)
                 {

@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "March 28, 2019";
+            mFileDate = "April 3, 2019";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -2362,6 +2362,42 @@ namespace PeptideHitResultsProcessor
 
         }
 
+        /// <summary>
+        /// Compare the two mass values; warn the user if more than 0.1 Da apart (slightly larger threshold if over 5000 Da)
+        /// </summary>
+        /// <param name="toolName"></param>
+        /// <param name="peptide"></param>
+        /// <param name="peptideMonoMassFromPHRP"></param>
+        /// <param name="peptideMonoMassFromTool"></param>
+        protected void ValidateMatchingMonoisotopicMass(string toolName, string peptide, double peptideMonoMassFromPHRP, double peptideMonoMassFromTool)
+        {
+            var massDiffThreshold = peptideMonoMassFromTool / 5000 / 10;
+            if (massDiffThreshold < 0.1)
+                massDiffThreshold = 0.1;
+
+            if (Math.Abs(peptideMonoMassFromPHRP - peptideMonoMassFromTool) <= massDiffThreshold)
+                return;
+
+            // Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da
+            // (or by a slightly larger value if over 5000 Da)
+
+            // This is unexpected
+
+            string first30Residues;
+            if (peptide.Length < 27)
+            {
+                first30Residues = peptide;
+            }
+            else
+            {
+                first30Residues = peptide.Substring(0, 27) + "...";
+            }
+            ReportWarning(string.Format(
+                              "The monoisotopic mass computed by PHRP is more than {0:F2} Da away from " +
+                              "the mass computed by {1}: {2:F4} vs. {3:F4}; peptide {4}",
+                              massDiffThreshold, toolName, peptideMonoMassFromPHRP, peptideMonoMassFromTool, first30Residues));
+
+        }
         private bool ValidatePeptideToProteinMapResults(string peptideToProteinMapFilePath, bool ignorePeptideToProteinMapperErrors)
         {
             bool success;
@@ -2671,5 +2707,6 @@ namespace PeptideHitResultsProcessor
         }
 
         #endregion
+
     }
 }
