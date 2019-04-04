@@ -826,7 +826,11 @@ namespace PHRPReader
 
             errorMessage = string.Empty;
 
-            var success = modFileProcessor.ExtractModInfoFromParamFile(searchEngineParamFileName, out var modInfo);
+            var success = modFileProcessor.ExtractModInfoFromParamFile(
+                searchEngineParamFilePath,
+                clsMSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
+                out var modInfo);
+
             if (!success)
             {
                 errorMessage = modFileProcessor.ErrorMessage;
