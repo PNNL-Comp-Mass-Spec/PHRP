@@ -754,7 +754,7 @@ namespace PeptideHitResultsProcessor
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
                             UpdateProgress(percentComplete);
-                            
+
                         }
                     }
 
