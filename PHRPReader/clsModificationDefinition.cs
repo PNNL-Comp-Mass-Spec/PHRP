@@ -664,5 +664,13 @@ namespace PHRPReader
             return false;
         }
 
+        /// <summary>
+        /// Description of this modification definition
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return string.Format("{0} {1}, {2:F4}; {3}", ModificationType, MassCorrectionTag, ModificationMass, TargetResidues);
+        }
     }
 }
