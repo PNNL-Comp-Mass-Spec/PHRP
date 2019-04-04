@@ -1073,12 +1073,12 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Extracts mod info from either a MSGF+ param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
-        /// <param name="msgfDbParamFilePath"></param>
+        /// <param name="msgfPlusParamFilePath"></param>
         /// <param name="modInfo"></param>
         /// <returns>True if success; false if a problem</returns>
         /// <remarks></remarks>
         private bool ExtractModInfoFromParamFile(
-            string msgfDbParamFilePath,
+            string msgfPlusParamFilePath,
             out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             var modFileProcessor = new clsMSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME);

@@ -448,28 +448,28 @@ namespace PHRPReader
         /// <summary>
         /// Parses the specified MSGFDB (aka MS-GF+) parameter file
         /// </summary>
-        /// <param name="searchEngineParamFileName"></param>
+        /// <param name="searchEngineParamFilePath"></param>
         /// <param name="searchEngineParams"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
+        public override bool LoadSearchEngineParameters(string searchEngineParamFilePath, out clsSearchEngineParameters searchEngineParams)
         {
             searchEngineParams = new clsSearchEngineParameters(MSGFPLUS_SEARCH_ENGINE_NAME, mModInfo);
 
-            var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
+            var success = ReadSearchEngineParamFile(searchEngineParamFilePath, searchEngineParams);
 
             ReadSearchEngineVersion(mPeptideHitResultType, searchEngineParams);
 
             return success;
         }
 
-        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, clsSearchEngineParameters searchEngineParams)
+        private bool ReadSearchEngineParamFile(string searchEngineParamFilePath, clsSearchEngineParameters searchEngineParams)
         {
             try
             {
                 mPeptideMassCalculator.ResetAminoAcidMasses();
 
-                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSGFPlus, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus, searchEngineParams);
 
                 if (!success)
                 {
@@ -588,7 +588,7 @@ namespace PHRPReader
 
                 // Store the Custom Amino Acid info
                 // Need to use a different parsing function to extract it
-                success = UpdateMassCalculatorMasses(searchEngineParamFileName);
+                success = UpdateMassCalculatorMasses(searchEngineParamFilePath);
 
                 // Look for a custom charge carrier mass
                 if (GetCustomChargeCarrierMass(searchEngineParams, out var customChargeCarrierMass))
@@ -788,12 +788,12 @@ namespace PHRPReader
 
         }
 
-        private bool UpdateMassCalculatorMasses(string searchEngineParamFileName)
+        private bool UpdateMassCalculatorMasses(string searchEngineParamFilePath)
         {
             var modFileProcessor = new clsMSGFPlusParamFileModExtractor("MSGF+");
             RegisterEvents(modFileProcessor);
 
-            var success = UpdateMassCalculatorMasses(searchEngineParamFileName, modFileProcessor, mPeptideMassCalculator, out var localErrorMsg);
+            var success = UpdateMassCalculatorMasses(searchEngineParamFilePath, modFileProcessor, mPeptideMassCalculator, out var localErrorMsg);
 
             if (!string.IsNullOrWhiteSpace(localErrorMsg) && string.IsNullOrWhiteSpace(mErrorMessage))
             {
@@ -807,14 +807,14 @@ namespace PHRPReader
         /// Look for custom amino acid definitions in the MSGF+ parameter file
         /// If any are found, update the amino acid mass values in the PeptideMassCalculator instance
         /// </summary>
-        /// <param name="searchEngineParamFileName"></param>
+        /// <param name="searchEngineParamFilePath"></param>
         /// <param name="modFileProcessor"></param>
         /// <param name="peptideMassCalculator"></param>
         /// <param name="errorMessage"></param>
         /// <returns></returns>
         /// <remarks></remarks>
         public static bool UpdateMassCalculatorMasses(
-            string searchEngineParamFileName,
+            string searchEngineParamFilePath,
             clsMSGFPlusParamFileModExtractor modFileProcessor,
             clsPeptideMassCalculator peptideMassCalculator,
             out string errorMessage)
