@@ -1380,9 +1380,9 @@ namespace PeptideHitResultsProcessor
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "_MSAlign_ResultTable" with "_msalign"
-                    if (baseName.EndsWith("_MSAlign_ResultTable", StringComparison.OrdinalIgnoreCase))
+                    if (baseName.EndsWith(FILENAME_SUFFIX_MSALIGN_FILE, StringComparison.OrdinalIgnoreCase))
                     {
-                        baseName = baseName.Substring(0, baseName.Length - "_MSAlign_ResultTable".Length) + "_msalign";
+                        baseName = baseName.Substring(0, baseName.Length - FILENAME_SUFFIX_MSALIGN_FILE.Length) + "_msalign";
                     }
 
                     // Do not create a first-hits file for MSAlign results

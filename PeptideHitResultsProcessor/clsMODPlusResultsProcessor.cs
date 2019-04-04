@@ -1337,9 +1337,9 @@ namespace PeptideHitResultsProcessor
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "modp.id" with "_modp"
-                    if (baseName.EndsWith("_modp.id", StringComparison.OrdinalIgnoreCase))
+                    if (baseName.EndsWith(FILENAME_SUFFIX_MODPlus_FILE, StringComparison.OrdinalIgnoreCase))
                     {
-                        baseName = baseName.Substring(0, baseName.Length - "_modp.id".Length) + "_modp";
+                        baseName = baseName.Substring(0, baseName.Length - FILENAME_SUFFIX_MODPlus_FILE.Length) + "_modp";
                     }
 
                     // Do not create a first-hits file for MODPlus results

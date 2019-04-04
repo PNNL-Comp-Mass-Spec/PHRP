@@ -1251,10 +1251,10 @@ namespace PeptideHitResultsProcessor
                     // Define the base output filename using inputFilePath
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
-                    // Auto-replace "_IcTda.tsv" with "_mspath"
-                    if (baseName.EndsWith("_IcTda", StringComparison.OrdinalIgnoreCase))
+                    // Auto-replace "_IcTda" with "_mspath"
+                    if (baseName.EndsWith(FILENAME_SUFFIX_MSPathFinder_FILE, StringComparison.OrdinalIgnoreCase))
                     {
-                        baseName = baseName.Substring(0, baseName.Length - "_IcTda".Length) + "_mspath";
+                        baseName = baseName.Substring(0, baseName.Length - FILENAME_SUFFIX_MSPathFinder_FILE.Length) + "_mspath";
                     }
 
                     // Do not create a first-hits file for MSPathFinder results

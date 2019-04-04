@@ -1344,10 +1344,12 @@ namespace PeptideHitResultsProcessor
                     // Define the base output filename using inputFilePath
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
-                    // Auto-replace "_TopPIC_ResultTable" with "_msalign"
-                    if (baseName.EndsWith("_TopPIC_ResultTable", StringComparison.OrdinalIgnoreCase))
+                    // Auto-replace "_TopPIC_PrSMs" or "_TopPIC_Proteoforms" with "_toppic"
+                    foreach (var suffix in new List<string> { FILENAME_SUFFIX_TopPIC_PRSMs_FILE, FILENAME_SUFFIX_TopPIC_PROTEOFORMS_FILE })
                     {
-                        baseName = baseName.Substring(0, baseName.Length - "_TopPIC_ResultTable".Length) + "_msalign";
+                        if (!baseName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) continue;
+                        baseName = baseName.Substring(0, baseName.Length - suffix.Length) + "_toppic";
+                        break;
                     }
 
                     // Do not create a first-hits file for TopPIC results

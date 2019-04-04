@@ -1447,9 +1447,9 @@ namespace PeptideHitResultsProcessor
                     var baseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
                     // Auto-replace "_moda.id" with "_moda"
-                    if (baseName.EndsWith("_moda.id", StringComparison.OrdinalIgnoreCase))
+                    if (baseName.EndsWith(FILENAME_SUFFIX_MODA_FILE, StringComparison.OrdinalIgnoreCase))
                     {
-                        baseName = baseName.Substring(0, baseName.Length - "_moda.id".Length) + "_moda";
+                        baseName = baseName.Substring(0, baseName.Length - FILENAME_SUFFIX_MODA_FILE.Length) + "_moda";
                     }
 
                     // Load the MSG IndexToScanMap file (if it exists)
