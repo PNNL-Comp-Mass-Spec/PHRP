@@ -556,7 +556,10 @@ namespace PeptideHitResultsProcessor
 
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
-            var success = modFileProcessor.ExtractModInfoFromParamFile(msPathFinderParamFilePath, out modInfo);
+            var success = modFileProcessor.ExtractModInfoFromParamFile(
+                msPathFinderParamFilePath,
+                clsMSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
+                out modInfo);
 
             if (!success || mErrorCode != ePHRPErrorCodes.NoError)
             {

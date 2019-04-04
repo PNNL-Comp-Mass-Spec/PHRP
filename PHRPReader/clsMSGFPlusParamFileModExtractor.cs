@@ -113,6 +113,22 @@ namespace PHRPReader
             CustomAA = 7
         }
 
+        /// <summary>
+        /// Modification specification formats
+        /// </summary>
+        public enum ModSpecFormats
+        {
+            /// <summary>
+            /// MSGF+ or MSPathFinder
+            /// </summary>
+            MSGFPlusAndMSPathFinder = 0,
+
+            /// <summary>
+            /// TopPIC
+            /// </summary>
+            TopPIC = 1
+        }
+
         #endregion
 
         #region "Structures"
@@ -168,7 +184,7 @@ namespace PHRPReader
             /// <returns></returns>
             public override string ToString()
             {
-                return ModType + " " + ModName + ", " + ModMass + "; " + Residues;
+                return string.Format("{0} {1}, {2}; {3}", ModType, ModName, ModMass, Residues);
             }
         }
         #endregion
@@ -265,13 +281,14 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Extracts mod info from either a MSGF+, MSPathFinder, or TopPIC param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
+        /// Extracts mod info from a MSGF+ or MSPathFinder param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
         /// <param name="paramFilePath"></param>
+        /// <param name="modSpecFormat"></param>
         /// <param name="modInfo"></param>
         /// <returns>True if success; false if a problem</returns>
         /// <remarks></remarks>
-        public bool ExtractModInfoFromParamFile(string paramFilePath, out List<udtModInfoType> modInfo)
+        public bool ExtractModInfoFromParamFile(string paramFilePath, ModSpecFormats modSpecFormat, out List<udtModInfoType> modInfo)
         {
             var tagNamesToFind = new List<string> {
                 PARAM_TAG_MOD_STATIC,
@@ -320,8 +337,11 @@ namespace PHRPReader
                             continue;
                         }
 
+                        var modType = eMSGFPlusModType.Unknown;
+
                         foreach (var tagName in tagNamesToFind)
                         {
+                            // Check whether the line starts with StaticMod, DynamicMod, or CustomAA
                             modSpec = ValidateIsValidModSpec(trimmedLine, tagName);
                             if (!string.IsNullOrEmpty(modSpec))
                             {
@@ -335,15 +355,41 @@ namespace PHRPReader
                                 //   C2H3NO, *,  opt, N-term,   Carbamidomethylation
                                 //   C5H7N1O2S0,J,custom,P,Hydroxylation     # Hydroxyproline
 
+                                switch (tagName)
+                                {
+                                    case PARAM_TAG_MOD_STATIC:
+                                        modType = eMSGFPlusModType.StaticMod;
+                                        break;
+                                    case PARAM_TAG_MOD_DYNAMIC:
+                                        modType = eMSGFPlusModType.DynamicMod;
+                                        break;
+                                    case PARAM_TAG_CUSTOM_AA:
+                                        modType = eMSGFPlusModType.CustomAA;
+                                        break;
+                                }
+
                                 break;
                             }
                         }
 
                         if (string.IsNullOrEmpty(modSpec))
                         {
+                            // The line does not start with StaticMod, DynamicMod, or CustomAA
+                            // This method also supports MSGFPlus_Mods.txt files, which specify mods with ,opt, or ,fix,
                             var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", string.Empty);
-                            if (lineInNoSpaces.Contains(",opt,") || lineInNoSpaces.Contains(",fix,") || lineInNoSpaces.Contains(",custom,"))
+                            if (lineInNoSpaces.Contains(",opt,"))
                             {
+                                modType = eMSGFPlusModType.DynamicMod;
+                                modSpec = lineInNoSpaces;
+                            }
+                            else if (lineInNoSpaces.Contains(",fix,"))
+                            {
+                                modType = eMSGFPlusModType.StaticMod;
+                                modSpec = lineInNoSpaces;
+                            }
+                            else if (lineInNoSpaces.Contains(",custom,"))
+                            {
+                                modType = eMSGFPlusModType.CustomAA;
                                 modSpec = lineInNoSpaces;
                             }
                         }
@@ -356,129 +402,58 @@ namespace PHRPReader
                         if (modSpec.Contains("="))
                         {
                             // Unrecognized tag name
-                            ReportError("Mod spec '" + modSpec + "' contains an unknown keyword before the equals sign; see parameter file " + Path.GetFileName(paramFilePath));
+                            ReportError(string.Format(
+                                            "Mod spec '{0}' contains an unknown keyword before the equals sign; see parameter file {1}",
+                                            modSpec, Path.GetFileName(paramFilePath)));
                             return false;
                         }
-                        // Modification definition line found
 
+                        // Modification definition line found
                         // Split the line on commas
                         var splitLine = modSpec.Split(',');
 
-                        if (splitLine.Length < 5)
+                        // Define the minimum number of parts in the mod spec
+                        int minimumModDefParts;
+
+                        switch (modSpecFormat)
+                        {
+                            case ModSpecFormats.MSGFPlusAndMSPathFinder:
+                                minimumModDefParts = 5;
+                                break;
+
+                            case ModSpecFormats.TopPIC:
+                                minimumModDefParts = 5;
+                                break;
+
+                            default:
+                                // Unrecognized format
+                                ReportError(string.Format("Mod spec format {0} not recognized; unable to extract mods from {1}",
+                                                          modSpecFormat.ToString(), Path.GetFileName(paramFilePath)));
+                                return false;
+                        }
+
+                        if (splitLine.Length < minimumModDefParts)
                         {
                             continue;
                         }
 
-
-                        // Notes when tracking information for custom amino acids
-                        //   ModName:    Name associated with the custom amino acid
-                        //   ModMass:    Composition string, for example C5H7N1O2S0 for Hydroxyproline
-                        //   ModMassVal: Computed mass of the composition string
-                        //   Residues:   Single letter abbreviation for the custom amino acid, for example J or X
-                        //   ModType:    eMSGFPlusModType.CustomAA
-                        //   ModSymbol:  ?   (a question mark; not used)
-
-                        var udtModInfo = new udtModInfoType {
-                            ModMass = splitLine[0].Trim()
-                        };
-
-                        // .ModMass could be a number, or could be an empirical formula
-                        // First try to parse out a number
-                        if (!double.TryParse(udtModInfo.ModMass, out udtModInfo.ModMassVal))
+                        switch (modSpecFormat)
                         {
-                            // Not a number
-                            // Mod (or custom AA) is specified as an empirical formula
-                            // Compute the mass
-                            udtModInfo.ModMassVal = ComputeMass(udtModInfo.ModMass);
-                        }
+                            case ModSpecFormats.MSGFPlusAndMSPathFinder:
+                                if (ParseModSpecMSGFPlus(paramFilePath, splitLine, ref unnamedModID, out var udtMSGFPlusModInfo))
+                                {
+                                    modInfo.Add(udtMSGFPlusModInfo);
+                                }
+                                break;
 
-                        udtModInfo.Residues = splitLine[1].Trim();
-                        udtModInfo.ModSymbol = UNKNOWN_MSGFPlus_MOD_SYMBOL;
-
-                        switch (splitLine[2].Trim().ToLower())
-                        {
-                            case "opt":
-                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
-                                break;
-                            case "fix":
-                                udtModInfo.ModType = eMSGFPlusModType.StaticMod;
-                                break;
-                            case "custom":
-                                udtModInfo.ModType = eMSGFPlusModType.CustomAA;
-                                break;
-                            default:
-                                ReportWarning("Unrecognized Mod Type in the " + mToolName + " parameter file; should be 'opt' or 'fix'");
-                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                            case ModSpecFormats.TopPIC:
+                                if (ParseModSpecTopPIC(paramFilePath, splitLine, modType, ref unnamedModID, out var udtTopPICModInfo))
+                                {
+                                    modInfo.Add(udtTopPICModInfo);
+                                }
                                 break;
                         }
 
-                        if (udtModInfo.ModType != eMSGFPlusModType.CustomAA)
-                        {
-                            switch (splitLine[3].Trim().ToLower().Replace("-", string.Empty))
-                            {
-                                case "any":
-                                    break;
-                                // Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
-                                case "nterm":
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
-                                    {
-                                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                        udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
-                                    }
-                                    udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                                    if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                                        udtModInfo.ModType = eMSGFPlusModType.DynNTermPeptide;
-
-                                    break;
-                                case "cterm":
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
-                                    {
-                                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                        udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
-                                    }
-                                    udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                                    if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                                        udtModInfo.ModType = eMSGFPlusModType.DynCTermPeptide;
-
-                                    break;
-                                case "protnterm":
-                                    // Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
-                                    {
-                                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                        udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
-                                    }
-                                    udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
-                                    if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                                        udtModInfo.ModType = eMSGFPlusModType.DynNTermProtein;
-
-                                    break;
-                                case "protcterm":
-                                    // Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
-                                    {
-                                        // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                        udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
-                                    }
-                                    udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
-                                    if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                                        udtModInfo.ModType = eMSGFPlusModType.DynCTermProtein;
-
-                                    break;
-                                default:
-                                    ReportWarning("Unrecognized Mod Type in the " + mToolName + " parameter file; should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'");
-                                    break;
-                            }
-                        }
-
-                        udtModInfo.ModName = splitLine[4].Trim();
-                        if (string.IsNullOrEmpty(udtModInfo.ModName))
-                        {
-                            unnamedModID += 1;
-                            udtModInfo.ModName = "UnnamedMod" + unnamedModID.ToString();
-                        }
-
-                        modInfo.Add(udtModInfo);
                     }
                 }
 
@@ -486,11 +461,272 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                ReportError("Error reading mod info the " + mToolName + " parameter file (" + Path.GetFileName(paramFilePath) + "): " + ex.Message);
+                ReportError(string.Format(
+                                "Error reading mod info from the {0} parameter file ({1}): {2}",
+                                mToolName, Path.GetFileName(paramFilePath), ex.Message));
                 return false;
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Parse the mod spec definition from a MSGF+ or MSPathFinder parameter file
+        /// </summary>
+        /// <param name="paramFilePath"></param>
+        /// <param name="splitLine"></param>
+        /// <param name="unnamedModID"></param>
+        /// <param name="udtModInfo"></param>
+        /// <returns>True if success, false if an error</returns>
+        private bool ParseModSpecMSGFPlus(
+            string paramFilePath,
+            IReadOnlyList<string> splitLine,
+            ref int unnamedModID,
+            out udtModInfoType udtModInfo)
+        {
+
+            // Modification definition format:
+            //   Mass or EmpiricalFormula:   Mod mass, or empirical formula (like C2H3N1O1 or H-2O-1)
+            //   Residues:  affected residues or N/C-terminus or *
+            //   ModType:   fix or opt
+            //   Position:  any, N-term, Prot-N-term, etc.; see eMSGFPlusModType.CustomAA
+            //   ModName:   UniMod name or custom name
+
+            // Custom amino acids using a different format:
+            //   EmpiricalFormula
+            //   Symbol:     Single letter abbreviation for the custom amino acid: B, J, O, U, X, Z
+            //   Type:       always "custom"
+            //   Unused:     unused field, but a letter must be present
+            //   Name:       Name associated with the custom amino acid
+
+            udtModInfo = new udtModInfoType();
+
+            try
+            {
+
+                udtModInfo.ModMass = splitLine[0].Trim();
+
+                // udtModInfo.ModMass could be a number, or could be an empirical formula
+                // First try to parse out a number
+                if (!double.TryParse(udtModInfo.ModMass, out udtModInfo.ModMassVal))
+                {
+                    // Not a number
+                    // Mod (or custom AA) is specified as an empirical formula
+                    // Compute the mass
+                    udtModInfo.ModMassVal = ComputeMass(udtModInfo.ModMass);
+                }
+
+                udtModInfo.Residues = splitLine[1].Trim();
+                udtModInfo.ModSymbol = UNKNOWN_MSGFPlus_MOD_SYMBOL;
+
+                switch (splitLine[2].Trim().ToLower())
+                {
+                    case "opt":
+                        udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                        break;
+                    case "fix":
+                        udtModInfo.ModType = eMSGFPlusModType.StaticMod;
+                        break;
+                    case "custom":
+                        udtModInfo.ModType = eMSGFPlusModType.CustomAA;
+                        break;
+                    default:
+                        ReportWarning(string.Format(
+                                          "Unrecognized Mod Type {0} in the {1} parameter file; should be 'opt', 'fix', or 'custom'; will assume 'opt'",
+                                          splitLine[2], mToolName));
+
+                        udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                        break;
+                }
+
+                if (udtModInfo.ModType != eMSGFPlusModType.CustomAA)
+                {
+                    switch (splitLine[3].Trim().ToLower().Replace("-", string.Empty))
+                    {
+                        case "any":
+                            // Leave .ModType unchanged; this is a static or dynamic mod (fix or opt)
+                            break;
+
+                        case "nterm":
+                            if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                            {
+                                // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                            }
+                            udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                            if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
+                                udtModInfo.ModType = eMSGFPlusModType.DynNTermPeptide;
+
+                            break;
+
+                        case "cterm":
+                            if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                            {
+                                // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                            }
+                            udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                            if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
+                                udtModInfo.ModType = eMSGFPlusModType.DynCTermPeptide;
+
+                            break;
+
+                        case "protnterm":
+                            // Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
+                            if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                            {
+                                // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                            }
+                            udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                            if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
+                                udtModInfo.ModType = eMSGFPlusModType.DynNTermProtein;
+
+                            break;
+
+                        case "protcterm":
+                            // Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
+                            if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                            {
+                                // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                            }
+                            udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                            if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
+                                udtModInfo.ModType = eMSGFPlusModType.DynCTermProtein;
+
+                            break;
+
+                        default:
+                            ReportWarning(string.Format(
+                                              "Unrecognized Mod Position {0} in the {1} parameter file; " +
+                                              "should be 'any', 'N-term', 'C-term', 'Prot-N-term', or 'Prot-C-term'",
+                                              splitLine[3], mToolName));
+                            break;
+                    }
+                }
+
+                udtModInfo.ModName = ParseModSpecGetName(splitLine[4], ref unnamedModID);
+
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                ReportError(string.Format(
+                                "Error reading mod info from the {0} parameter file ({1}): {2}",
+                                mToolName, Path.GetFileName(paramFilePath), ex.Message));
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Parse the mod spec definition from a TopPIC parameter file
+        /// </summary>
+        /// <param name="paramFilePath"></param>
+        /// <param name="splitLine"></param>
+        /// <param name="modType">eMSGFPlusModType.DynamicMod or eMSGFPlusModType.StaticMod</param>
+        /// <param name="unnamedModID"></param>
+        /// <param name="udtModInfo"></param>
+        /// <returns>True if success, false if an error</returns>
+        private bool ParseModSpecTopPIC(
+            string paramFilePath,
+            IReadOnlyList<string> splitLine,
+            eMSGFPlusModType modType,
+            ref int unnamedModID,
+            out udtModInfoType udtModInfo)
+        {
+
+            // Modification definition format:
+            //   ModName:   UniMod name or custom name
+            //   Mass:      Mod mass
+            //   Residues:  affected residues *
+            //   Position:  any, N-term, or C-term
+            //   UniModID:  UniMod ID, or -1 if not in UniMod
+
+            udtModInfo = new udtModInfoType();
+
+            try
+            {
+
+                udtModInfo.ModMass = splitLine[1].Trim();
+
+                // udtModInfo.ModMass should be a number
+                if (!double.TryParse(udtModInfo.ModMass, out udtModInfo.ModMassVal))
+                {
+                    ReportWarning("Non-numeric mod mass in the " + mToolName + " parameter file: " + string.Join(",", splitLine));
+                    return false;
+                }
+
+                udtModInfo.Residues = splitLine[2].Trim();
+                udtModInfo.ModSymbol = UNKNOWN_MSGFPlus_MOD_SYMBOL;
+
+                udtModInfo.ModType = modType;
+
+                switch (splitLine[3].Trim().ToLower().Replace("-", string.Empty))
+                {
+                    case "any":
+                        // Leave .ModType unchanged; this is a static or dynamic mod
+                        break;
+
+                    case "nterm":
+                        if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                        {
+                            // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                            udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                        }
+                        udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                        if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
+                            udtModInfo.ModType = eMSGFPlusModType.DynNTermPeptide;
+
+                        break;
+
+                    case "cterm":
+                        if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                        {
+                            // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
+                            udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                        }
+                        udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                        if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
+                            udtModInfo.ModType = eMSGFPlusModType.DynCTermPeptide;
+
+                        break;
+
+                    default:
+                        ReportWarning(string.Format(
+                                          "Unrecognized Mod Position {0} in the {1} parameter file; " +
+                                          "should be 'any', 'N-term', or 'C-term'",
+                                          splitLine[3], mToolName));
+                        break;
+                }
+
+                udtModInfo.ModName = ParseModSpecGetName(splitLine[0], ref unnamedModID);
+
+                // splitLine[4] has UniModID
+
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                ReportError(string.Format(
+                                "Error reading mod info from the {0} parameter file ({1}): {2}",
+                                mToolName, Path.GetFileName(paramFilePath), ex.Message));
+
+                return false;
+            }
+        }
+
+        private string ParseModSpecGetName(string modName, ref int unnamedModID)
+        {
+            if (string.IsNullOrWhiteSpace(modName))
+            {
+                unnamedModID += 1;
+                return "UnnamedMod" + unnamedModID;
+            }
+
+            return modName.Trim();
         }
 
         private void ReportError(string message)

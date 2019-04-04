@@ -1082,7 +1082,10 @@ namespace PeptideHitResultsProcessor
             RegisterEvents(modFileProcessor);
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
-            var success = modFileProcessor.ExtractModInfoFromParamFile(msgfDbParamFilePath, out modInfo);
+            var success = modFileProcessor.ExtractModInfoFromParamFile(
+                msgfPlusParamFilePath,
+                clsMSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
+                out modInfo);
 
             if (!success || mErrorCode != ePHRPErrorCodes.NoError)
             {

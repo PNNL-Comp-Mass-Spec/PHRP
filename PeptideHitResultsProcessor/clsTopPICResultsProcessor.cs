@@ -581,7 +581,10 @@ namespace PeptideHitResultsProcessor
             RegisterEvents(modFileProcessor);
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
-            var success = modFileProcessor.ExtractModInfoFromParamFile(topPICParamFilePath, out modInfo);
+            var success = modFileProcessor.ExtractModInfoFromParamFile(
+                topPICParamFilePath,
+                clsMSGFPlusParamFileModExtractor.ModSpecFormats.TopPIC,
+                out modInfo);
 
             if (!success || mErrorCode != ePHRPErrorCodes.NoError)
             {
