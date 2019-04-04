@@ -102,11 +102,6 @@ namespace PHRPReader
         private double mModificationMass;
 
         /// <summary>
-        /// Modification mass, stored as text
-        /// </summary>
-        private string mModificationMassAsText;
-
-        /// <summary>
         /// Target residues, tracked as a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to
         /// Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols (&lt; and &gt; for the peptide terminii; [ and ] for the protein terminii)
         /// </summary>
@@ -114,11 +109,6 @@ namespace PHRPReader
         /// If this is empty, the given modification can apply to any residue or terminus
         /// </remarks>
         private string mTargetResidues;
-
-        /// <summary>
-        /// Modification type
-        /// </summary>
-        private eModificationTypeConstants mModificationType;
 
         /// <summary>
         /// Name associated with the given ModificationMass; maximum length is 8 characters
@@ -131,16 +121,6 @@ namespace PHRPReader
         /// For Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
         /// </summary>
         private char mAffectedAtom;
-
-        /// <summary>
-        /// Number of times this modification was observed in the given XML file
-        /// </summary>
-        private int mOccurrenceCount;
-
-        /// <summary>
-        /// True if this was an unknown mass that was auto defined
-        /// </summary>
-        private bool mUnknownModAutoDefined;
 
         #endregion
 
@@ -183,7 +163,7 @@ namespace PHRPReader
             set
             {
                 mModificationMass = value;
-                mModificationMassAsText = mModificationMass.ToString(CultureInfo.InvariantCulture);
+                ModificationMassAsText = mModificationMass.ToString(CultureInfo.InvariantCulture);
             }
         }
 
@@ -193,11 +173,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>Represents the original string value read from the data file</remarks>
-        public string ModificationMassAsText
-        {
-            get => mModificationMassAsText;
-            set => mModificationMassAsText = value;
-        }
+        public string ModificationMassAsText { get; set; }
 
         /// <summary>
         /// Residues that this modification can apply to
@@ -232,11 +208,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public eModificationTypeConstants ModificationType
-        {
-            get => mModificationType;
-            set => mModificationType = value;
-        }
+        public eModificationTypeConstants ModificationType { get; set; }
 
         /// <summary>
         /// Modification name, for example Phosph, IodoAcet, Plus1Oxy, or Methyl
@@ -291,11 +263,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public int OccurrenceCount
-        {
-            get => mOccurrenceCount;
-            set => mOccurrenceCount = value;
-        }
+        public int OccurrenceCount { get; set; }
 
         /// <summary>
         /// True if this was an unknown mass that was auto defined
@@ -303,11 +271,8 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool UnknownModAutoDefined
-        {
-            get => mUnknownModAutoDefined;
-            set => mUnknownModAutoDefined = value;
-        }
+        public bool UnknownModAutoDefined { get; set; }
+
         #endregion
 
         /// <summary>
@@ -396,13 +361,13 @@ namespace PHRPReader
         {
             mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL;
             mModificationMass = 0;
-            mModificationMassAsText = "0";
+            ModificationMassAsText = "0";
             mTargetResidues = string.Empty;
-            mModificationType = eModificationTypeConstants.UnknownType;
+            ModificationType = eModificationTypeConstants.UnknownType;
             mMassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME;
             mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
-            mOccurrenceCount = 0;
-            mUnknownModAutoDefined = false;
+            OccurrenceCount = 0;
+            UnknownModAutoDefined = false;
         }
 
         /// <summary>
@@ -560,7 +525,7 @@ namespace PHRPReader
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (mModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || mModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
+            if (ModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || ModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
             {
                 return true;
             }
@@ -584,7 +549,7 @@ namespace PHRPReader
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (mModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || mModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
+            if (ModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || ModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
             {
                 return false;
             }
@@ -698,5 +663,6 @@ namespace PHRPReader
 
             return false;
         }
+
     }
 }
