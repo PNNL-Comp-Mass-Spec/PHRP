@@ -747,108 +747,106 @@ namespace PHRPReader
         /// <param name="oPeptideMods"></param>
         public void ResolveMSGFPlusModsWithModDefinitions(List<udtModInfoType> modInfo, clsPeptideModificationContainer oPeptideMods)
         {
-            if (modInfo != null)
+            if (modInfo == null)
+                return;
+
+            for (var index = 0; index <= modInfo.Count - 1; index++)
             {
-                // Call .LookupModificationDefinitionByMass for each entry in msgfdbModInfo
+                var udtModInfo = modInfo[index];
+                int resIndexStart;
+                int resIndexEnd;
 
-                for (var index = 0; index <= modInfo.Count - 1; index++)
+                if (udtModInfo.Residues.Length > 0)
                 {
-                    var udtModInfo = modInfo[index];
-                    int resIndexStart;
-                    int resIndexEnd;
+                    resIndexStart = 0;
+                    resIndexEnd = udtModInfo.Residues.Length - 1;
+                }
+                else
+                {
+                    resIndexStart = -1;
+                    resIndexEnd = -1;
+                }
 
-                    if (udtModInfo.Residues.Length > 0)
+                for (var residueIndex = resIndexStart; residueIndex <= resIndexEnd; residueIndex++)
+                {
+                    char chTargetResidue;
+                    if (residueIndex >= 0)
                     {
-                        resIndexStart = 0;
-                        resIndexEnd = udtModInfo.Residues.Length - 1;
+                        chTargetResidue = udtModInfo.Residues[residueIndex];
+                        if (chTargetResidue == '*')
+                        {
+                            // This is a terminal mod, and MSGFDB lists the target residue as * for terminal mods
+                            // This program requires that chTargetResidue be Nothing
+                            chTargetResidue = default;
+                        }
                     }
                     else
                     {
-                        resIndexStart = -1;
-                        resIndexEnd = -1;
+                        chTargetResidue = default;
                     }
 
-                    for (var residueIndex = resIndexStart; residueIndex <= resIndexEnd; residueIndex++)
+                    var eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
+                    clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState;
+
+                    if (udtModInfo.ModType == eMSGFPlusModType.DynNTermPeptide)
                     {
-                        char chTargetResidue;
-                        if (residueIndex >= 0)
+                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
+                    }
+                    else if (udtModInfo.ModType == eMSGFPlusModType.DynCTermPeptide)
+                    {
+                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
+                    }
+                    else if (udtModInfo.ModType == eMSGFPlusModType.DynNTermProtein)
+                    {
+                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
+                    }
+                    else if (udtModInfo.ModType == eMSGFPlusModType.DynCTermProtein)
+                    {
+                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
+                    }
+                    else
+                    {
+                        switch (chTargetResidue)
                         {
-                            chTargetResidue = udtModInfo.Residues[residueIndex];
-                            if (chTargetResidue == '*')
-                            {
-                                // This is a terminal mod, and MSGFDB lists the target residue as * for terminal mods
-                                // This program requires that chTargetResidue be Nothing
-                                chTargetResidue = default;
-                            }
-                        }
-                        else
-                        {
-                            chTargetResidue = default;
-                        }
-
-                        var eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
-                        clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState;
-
-                        if (udtModInfo.ModType == eMSGFPlusModType.DynNTermPeptide)
-                        {
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
-                        }
-                        else if (udtModInfo.ModType == eMSGFPlusModType.DynCTermPeptide)
-                        {
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
-                        }
-                        else if (udtModInfo.ModType == eMSGFPlusModType.DynNTermProtein)
-                        {
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
-                        }
-                        else if (udtModInfo.ModType == eMSGFPlusModType.DynCTermProtein)
-                        {
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
-                        }
-                        else
-                        {
-                            switch (chTargetResidue)
-                            {
-                                case clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS:
-                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                        eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
-                                    break;
-                                case clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS:
-                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                        eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
-                                    break;
-                                case clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS:
-                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                        eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
-                                    break;
-                                case clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS:
-                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                        eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
-                                    break;
-                                default:
-                                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None;
-                                    if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                        eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod;
-                                    break;
-                            }
-                        }
-
-                        var modificationDefinition = oPeptideMods.LookupModificationDefinitionByMassAndModType(
-                            udtModInfo.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, out _, true);
-
-                        if (residueIndex == resIndexStart)
-                        {
-                            // Update the Mod Symbol
-                            udtModInfo.ModSymbol = modificationDefinition.ModificationSymbol;
+                            case clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS:
+                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
+                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
+                                break;
+                            case clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS:
+                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
+                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
+                                break;
+                            case clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS:
+                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
+                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
+                                break;
+                            case clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS:
+                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
+                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
+                                break;
+                            default:
+                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None;
+                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod;
+                                break;
                         }
                     }
 
-                    modInfo[index] = udtModInfo;
+                    var modificationDefinition = oPeptideMods.LookupModificationDefinitionByMassAndModType(
+                        udtModInfo.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, out _, true);
+
+                    if (residueIndex == resIndexStart)
+                    {
+                        // Update the Mod Symbol
+                        udtModInfo.ModSymbol = modificationDefinition.ModificationSymbol;
+                    }
                 }
+
+                modInfo[index] = udtModInfo;
             }
         }
 

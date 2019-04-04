@@ -486,37 +486,37 @@ namespace PeptideHitResultsProcessor
                             // Initialize udtSearchResult
                             udtSearchResult.Clear();
 
-                            var validSearchResult =
-                                ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, ref errorLog, resultsProcessed);
+                            var validSearchResult = ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, ref errorLog, resultsProcessed);
 
-                            if (validSearchResult)
+                            resultsProcessed += 1;
+                            if (!validSearchResult)
                             {
-                                if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
-                                {
-                                    // New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
-                                    if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
-                                    {
-                                        StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan,
-                                                        filteredSearchResults, ref errorLog, ref sortComparer);
-                                    }
-                                    else
-                                    {
-                                        StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan,
-                                                         filteredSearchResults, ref errorLog, ref sortComparer);
-                                    }
+                                continue;
+                            }
 
-                                    currentScanResultsCount = 0;
+                            if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
+                            {
+                                // New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
+                                if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
+                                {
+                                    StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan,
+                                                    filteredSearchResults, ref errorLog, ref sortComparer);
+                                }
+                                else
+                                {
+                                    StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan,
+                                                     filteredSearchResults, ref errorLog, ref sortComparer);
                                 }
 
-                                AddCurrentRecordToSearchResults(ref currentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult);
-
-                                previousScan = udtSearchResult.ScanNum;
+                                currentScanResultsCount = 0;
                             }
+
+                            AddCurrentRecordToSearchResults(ref currentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult);
+
+                            previousScan = udtSearchResult.ScanNum;
 
                             // Update the progress
                             UpdateProgress(Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100));
-
-                            resultsProcessed += 1;
                         }
 
                         // Store the last record
@@ -1022,77 +1022,81 @@ namespace PeptideHitResultsProcessor
                                 validSearchResult = false;
                             }
 
-                            if (validSearchResult)
+                            if (!validSearchResult)
                             {
-                                var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
-                                bool firstMatchForGroup;
+                                continue;
+                            }
 
-                                if (searchResult.TotalPRMScore == previousTotalPRMScore)
+                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
+                            bool firstMatchForGroup;
+
+                            if (searchResult.TotalPRMScore == previousTotalPRMScore)
+                            {
+                                // New result has the same TotalPRMScore as the previous result
+                                // See if htPeptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
+
+                                if (peptidesFoundForTotalPRMScoreLevel.Contains(key))
                                 {
-                                    // New result has the same TotalPRMScore as the previous result
-                                    // See if htPeptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
-
-                                    if (peptidesFoundForTotalPRMScoreLevel.Contains(key))
-                                    {
-                                        firstMatchForGroup = false;
-                                    }
-                                    else
-                                    {
-                                        peptidesFoundForTotalPRMScoreLevel.Add(key);
-                                        firstMatchForGroup = true;
-                                    }
+                                    firstMatchForGroup = false;
                                 }
                                 else
                                 {
-                                    // New TotalPRMScore
-                                    // Reset htPeptidesFoundForTotalPRMScoreLevel
-                                    peptidesFoundForTotalPRMScoreLevel.Clear();
-
-                                    // Update previousTotalPRMScore
-                                    previousTotalPRMScore = searchResult.TotalPRMScore;
-
-                                    // Append a new entry to htPeptidesFoundForTotalPRMScoreLevel
                                     peptidesFoundForTotalPRMScoreLevel.Add(key);
                                     firstMatchForGroup = true;
                                 }
+                            }
+                            else
+                            {
+                                // New TotalPRMScore
+                                // Reset htPeptidesFoundForTotalPRMScoreLevel
+                                peptidesFoundForTotalPRMScoreLevel.Clear();
 
-                                var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                                if (!modsAdded)
+                                // Update previousTotalPRMScore
+                                previousTotalPRMScore = searchResult.TotalPRMScore;
+
+                                // Append a new entry to htPeptidesFoundForTotalPRMScoreLevel
+                                peptidesFoundForTotalPRMScoreLevel.Add(key);
+                                firstMatchForGroup = true;
+                            }
+
+                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                            if (!modsAdded)
+                            {
+                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                 {
-                                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                    {
-                                        errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'" + "\n";
-                                    }
+                                    errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'" + "\n";
                                 }
-                                SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+                            }
 
-                                if (pepToProteinMapping.Count > 0)
+                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+
+                            if (pepToProteinMapping.Count > 0)
+                            {
+                                // Add the additional proteins for this peptide
+
+                                // Use binary search to find this peptide in pepToProteinMapping
+                                var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, currentPeptideWithMods);
+
+                                if (pepToProteinMapIndex >= 0)
                                 {
-                                    // Add the additional proteins for this peptide
-
-                                    // Use binary search to find this peptide in pepToProteinMapping
-                                    var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, currentPeptideWithMods);
-
-                                    if (pepToProteinMapIndex >= 0)
+                                    // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
+                                    var currentProtein = string.Copy(searchResult.ProteinName);
+                                    do
                                     {
-                                        // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
-                                        var currentProtein = string.Copy(searchResult.ProteinName);
-                                        do
+                                        if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
                                         {
-                                            if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
-                                            {
-                                                searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
-                                                SaveResultsFileEntrySeqInfo(searchResult, false);
-                                            }
+                                            searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                            SaveResultsFileEntrySeqInfo(searchResult, false);
+                                        }
 
-                                            pepToProteinMapIndex += 1;
-                                        } while (pepToProteinMapIndex < pepToProteinMapping.Count && currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
-                                    }
-                                    else
-                                    {
-                                        // Match not found; this is unexpected
-                                        ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
-                                    }
+                                        pepToProteinMapIndex += 1;
+                                    } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
+                                             currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
+                                }
+                                else
+                                {
+                                    // Match not found; this is unexpected
+                                    ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
                                 }
                             }
 

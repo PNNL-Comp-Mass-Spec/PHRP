@@ -273,56 +273,62 @@ namespace PeptideHitResultsProcessor
                                 validSearchResult = false;
                             }
 
-                            if (validSearchResult)
+                            if (!validSearchResult)
                             {
-                                var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.NumScans + "_" + searchResult.Charge + "_" + searchResult.PeptideMH;
-                                bool firstMatchForGroup;
+                                continue;
+                            }
 
-                                if (searchResult.PeptideXCorr == previousXCorr)
+                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.NumScans + "_" +
+                                      searchResult.Charge + "_" + searchResult.PeptideMH;
+
+                            bool firstMatchForGroup;
+
+                            if (searchResult.PeptideXCorr == previousXCorr)
+                            {
+                                // New result has the same XCorr as the previous results
+                                // See if htPeptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
+
+                                if (peptidesFoundForXCorrLevel.Contains(key))
                                 {
-                                    // New result has the same XCorr as the previous results
-                                    // See if htPeptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
-
-                                    if (peptidesFoundForXCorrLevel.Contains(key))
-                                    {
-                                        firstMatchForGroup = false;
-                                    }
-                                    else
-                                    {
-                                        peptidesFoundForXCorrLevel.Add(key);
-                                        firstMatchForGroup = true;
-                                    }
+                                    firstMatchForGroup = false;
                                 }
                                 else
                                 {
-                                    // New XCorr
-                                    // Reset htPeptidesFoundForXCorrLevel
-                                    peptidesFoundForXCorrLevel.Clear();
-
-                                    // Update previousXCorr
-                                    previousXCorr = searchResult.PeptideXCorr;
-
-                                    // Append a new entry to htPeptidesFoundForXCorrLevel
                                     peptidesFoundForXCorrLevel.Add(key);
                                     firstMatchForGroup = true;
                                 }
-
-                                var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                                if (!modsAdded)
-                                {
-                                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                    {
-                                        errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'";
-                                        if (!string.IsNullOrEmpty(mErrorMessage))
-                                        {
-                                            errorLog += ": " + mErrorMessage;
-                                            mErrorMessage = string.Empty;
-                                        }
-                                        errorLog += "\n";
-                                    }
-                                }
-                                SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
                             }
+                            else
+                            {
+                                // New XCorr
+                                // Reset htPeptidesFoundForXCorrLevel
+                                peptidesFoundForXCorrLevel.Clear();
+
+                                // Update previousXCorr
+                                previousXCorr = searchResult.PeptideXCorr;
+
+                                // Append a new entry to htPeptidesFoundForXCorrLevel
+                                peptidesFoundForXCorrLevel.Add(key);
+                                firstMatchForGroup = true;
+                            }
+
+                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                            if (!modsAdded)
+                            {
+                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                                {
+                                    errorLog += "Error adding modifications to sequence at RowIndex '" + searchResult.ResultID + "'";
+                                    if (!string.IsNullOrEmpty(mErrorMessage))
+                                    {
+                                        errorLog += ": " + mErrorMessage;
+                                        mErrorMessage = string.Empty;
+                                    }
+
+                                    errorLog += "\n";
+                                }
+                            }
+
+                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
 
                             // Update the progress
                             var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
@@ -388,12 +394,8 @@ namespace PeptideHitResultsProcessor
         {
             string[] splitLine = null;
 
-            bool validSearchResult;
-
             try
             {
-                // Set this to False for now
-                validSearchResult = false;
 
                 // Reset searchResult
                 searchResult.Clear();
@@ -473,7 +475,7 @@ namespace PeptideHitResultsProcessor
                 searchResult.IonsExpected = ionsExpected;
                 searchResult.DelMPPM = delMppm;
 
-                validSearchResult = true;
+                return true;
             }
             catch (Exception)
             {
@@ -489,10 +491,9 @@ namespace PeptideHitResultsProcessor
                         errorLog += "Error parsing Sequest Results in ParseSequestResultsFileEntry" + "\n";
                     }
                 }
-                validSearchResult = false;
+                return false;
             }
 
-            return validSearchResult;
         }
 
         /// <summary>

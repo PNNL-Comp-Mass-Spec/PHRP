@@ -670,6 +670,7 @@ namespace PeptideHitResultsProcessor
                                                                                      resultsProcessed, columnMapping,
                                                                                      out _);
 
+                            resultsProcessed += 1;
                             if (!validSearchResult)
                             {
                                 continue;
@@ -753,8 +754,7 @@ namespace PeptideHitResultsProcessor
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
                             UpdateProgress(percentComplete);
-
-                            resultsProcessed += 1;
+                            
                         }
                     }
 
@@ -829,75 +829,77 @@ namespace PeptideHitResultsProcessor
             // ReSharper disable once NotAccessedVariable
             double sequenceMonoMassMSPathFinder = 0;
 
-            bool validSearchResult;
-
             try
             {
-                // Set this to False for now
-                validSearchResult = false;
-
                 udtSearchResult.Clear();
                 var splitLine = lineIn.TrimEnd().Split('\t');
 
-                if (splitLine.Length >= 11)
+                if (splitLine.Length < 11)
                 {
-                    if (!GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Scan], out udtSearchResult.Scan))
-                    {
-                        ReportError("Scan column is missing or invalid in row " + rowNumber, true);
-                    }
-
-                    if (!int.TryParse(udtSearchResult.Scan, out udtSearchResult.ScanNum))
-                    {
-                        ReportError("Scan column is not numeric in row " + rowNumber, true);
-                    }
-
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Charge], out udtSearchResult.Charge);
-                    udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
-
-                    // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MSPathFinder
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
-                    double.TryParse(udtSearchResult.CalculatedMonoMass, out sequenceMonoMassMSPathFinder);
-
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.PrefixResidue], out udtSearchResult.PrefixResidue);
-
-                    if (!GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Sequence], out udtSearchResult.Sequence))
-                    {
-                        ReportError("Sequence column is missing or invalid in row " + rowNumber, true);
-                    }
-
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.SuffixResidue], out udtSearchResult.SuffixResidue);
-
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Modifications], out udtSearchResult.Modifications);
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Composition], out udtSearchResult.Composition);
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Protein], out udtSearchResult.Protein);
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ProteinDesc], out udtSearchResult.ProteinDesc);
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ProteinLength], out udtSearchResult.ProteinLength);
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ResidueEnd], out udtSearchResult.ResidueEnd);
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ResidueStart], out udtSearchResult.ResidueStart);
-
-                    // Parse the list of modified residues to determine the total mod mass
-                    var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modInfo);
-
-                    // Compute monoisotopic mass of the peptide
-                    udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
-
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz], out udtSearchResult.MostAbundantIsotopeMz);
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.NumMatchedFragments], out udtSearchResult.NumMatchedFragments);
-
-                    if (GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.SpecEValue], out udtSearchResult.SpecEValue))
-                    {
-                        double.TryParse(udtSearchResult.SpecEValue, out udtSearchResult.SpecEValueNum);
-                    }
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.EValue], out udtSearchResult.EValue);
-
-                    if (GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.QValue], out udtSearchResult.QValue))
-                    {
-                        double.TryParse(udtSearchResult.QValue, out udtSearchResult.QValueNum);
-                    }
-                    GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.PepQValue], out udtSearchResult.PepQValue);
-
-                    validSearchResult = true;
+                    return false;
                 }
+
+                if (!GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Scan], out udtSearchResult.Scan))
+                {
+                    ReportError("Scan column is missing or invalid in row " + rowNumber, true);
+                }
+
+                if (!int.TryParse(udtSearchResult.Scan, out udtSearchResult.ScanNum))
+                {
+                    ReportError("Scan column is not numeric in row " + rowNumber, true);
+                }
+
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Charge], out udtSearchResult.Charge);
+                udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
+
+                // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MSPathFinder
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.CalculatedMonoMass],
+                               out udtSearchResult.CalculatedMonoMass);
+                double.TryParse(udtSearchResult.CalculatedMonoMass, out sequenceMonoMassMSPathFinder);
+
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.PrefixResidue], out udtSearchResult.PrefixResidue);
+
+                if (!GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Sequence], out udtSearchResult.Sequence))
+                {
+                    ReportError("Sequence column is missing or invalid in row " + rowNumber, true);
+                }
+
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.SuffixResidue], out udtSearchResult.SuffixResidue);
+
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Modifications], out udtSearchResult.Modifications);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Composition], out udtSearchResult.Composition);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.Protein], out udtSearchResult.Protein);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ProteinDesc], out udtSearchResult.ProteinDesc);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ProteinLength], out udtSearchResult.ProteinLength);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ResidueEnd], out udtSearchResult.ResidueEnd);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.ResidueStart], out udtSearchResult.ResidueStart);
+
+                // Parse the list of modified residues to determine the total mod mass
+                var totalModMass = ComputeTotalModMass(udtSearchResult.Modifications, modInfo);
+
+                // Compute monoisotopic mass of the peptide
+                udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
+
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz],
+                               out udtSearchResult.MostAbundantIsotopeMz);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.NumMatchedFragments],
+                               out udtSearchResult.NumMatchedFragments);
+
+                if (GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.SpecEValue], out udtSearchResult.SpecEValue))
+                {
+                    double.TryParse(udtSearchResult.SpecEValue, out udtSearchResult.SpecEValueNum);
+                }
+
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.EValue], out udtSearchResult.EValue);
+
+                if (GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.QValue], out udtSearchResult.QValue))
+                {
+                    double.TryParse(udtSearchResult.QValue, out udtSearchResult.QValueNum);
+                }
+
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.PepQValue], out udtSearchResult.PepQValue);
+
+                return true;
             }
             catch (Exception)
             {
@@ -907,10 +909,9 @@ namespace PeptideHitResultsProcessor
                     errorLog += "Error parsing MassMSPathFinder Results in ParseMSPathFinderResultsFileEntry for Row " + rowNumber + "\n";
                 }
 
-                validSearchResult = false;
+                return false;
             }
 
-            return validSearchResult;
         }
 
         /// <summary>

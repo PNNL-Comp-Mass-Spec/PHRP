@@ -854,6 +854,7 @@ namespace PeptideHitResultsProcessor
                                                                           columnMapping,
                                                                           out var currentPeptideWithMods);
 
+                            resultsProcessed += 1;
                             if (!validSearchResult)
                             {
                                 continue;
@@ -938,9 +939,7 @@ namespace PeptideHitResultsProcessor
                             {
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
-                            UpdateProgress(percentComplete);
-
-                            resultsProcessed += 1;
+                            UpdateProgress(percentComplete);                            
                         }
                     }
 
@@ -998,133 +997,115 @@ namespace PeptideHitResultsProcessor
         {
             var rowIndex = "?";
 
-            bool validSearchResult;
-
             try
             {
-                // Set this to False for now
-                validSearchResult = false;
-
                 udtSearchResult.Clear();
                 var splitLine = lineIn.TrimEnd().Split('\t');
 
-                if (splitLine.Length >= 11)
+                if (splitLine.Length < 11)
                 {
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
-
-                    if (!GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.SpectrumIndex], out udtSearchResult.SpectrumIndex))
-                    {
-                        ReportError("Index column is missing or invalid", true);
-                    }
-                    else
-                    {
-                        rowIndex = udtSearchResult.SpectrumIndex;
-                    }
-
-                    if (!int.TryParse(udtSearchResult.SpectrumIndex, out var spectrumIndex))
-                    {
-                        ReportError("Index column is not numeric", true);
-                    }
-                    udtSearchResult.ScanNum = LookupScanBySpectrumIndex(spectrumIndex);
-                    if (udtSearchResult.ScanNum == 0)
-                    {
-                        ReportWarning("Error, could not resolve spectrumIndex to Scan Number: " + spectrumIndex);
-                    }
-
-                    // Monoisotopic mass value of the observed precursor_mz
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.ObservedMonoMass], out udtSearchResult.Precursor_mass);
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Charge], out udtSearchResult.Charge);
-                    udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
-
-                    // Observed m/z, converted to monoisotopic mass
-                    if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
-                    {
-                        if (udtSearchResult.ChargeNum > 0)
-                        {
-                            var precursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, udtSearchResult.ChargeNum);
-                            udtSearchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(precursorMZ, 6);
-                        }
-                    }
-
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
-
-                    // Theoretical peptide monoisotopic mass, including mods, as computed by MODa
-                    double.TryParse(udtSearchResult.CalculatedMonoMass, out var peptideMonoMassMODa);
-
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.DeltaMass], out udtSearchResult.DeltaMass);
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Score], out udtSearchResult.Score);
-
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Probability], out udtSearchResult.Probability);
-                    if (!double.TryParse(udtSearchResult.Probability, out udtSearchResult.ProbabilityNum))
-                        udtSearchResult.ProbabilityNum = 0;
-
-                    if (!GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Peptide], out udtSearchResult.Peptide))
-                    {
-                        ReportError("Peptide column is missing or invalid", true);
-                    }
-
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Protein], out udtSearchResult.Protein);
-                    udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
-                    GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.PeptidePosition], out udtSearchResult.PeptidePosition);
-
-                    // Parse the sequence to determine the total mod mass
-                    // Note that we do not remove any of the mod symbols since MODa identifies mods by mass alone
-                    // Note that static mods are implied (thus are not explicitly displayed by MODa)
-                    var totalModMass = ComputeTotalModMass(udtSearchResult.Peptide);
-
-                    // Compute monoisotopic mass of the peptide
-                    // Theoretical peptide monoisotopic mass, including mods, as computed by PHRP
-                    var peptideMonoMassPHRP = ComputePeptideMass(udtSearchResult.Peptide, totalModMass);
-
-                    if (Math.Abs(peptideMonoMassMODa) < double.Epsilon)
-                    {
-                        peptideMonoMassMODa = peptideMonoMassPHRP;
-                    }
-
-                    var massDiffThreshold = peptideMonoMassMODa / 50000;
-                    if (massDiffThreshold < 0.1)
-                        massDiffThreshold = 0.1;
-
-                    if (Math.Abs(peptideMonoMassPHRP - peptideMonoMassMODa) > massDiffThreshold)
-                    {
-                        // Computed monoisotopic mass values differ by more than 0.1 Da if less than 5000 Da or by a slightly larger value if over 5000 Da; this is unexpected
-                        string first30Residues;
-                        if (udtSearchResult.Peptide.Length < 27)
-                        {
-                            first30Residues = udtSearchResult.Peptide;
-                        }
-                        else
-                        {
-                            first30Residues = udtSearchResult.Peptide.Substring(0, 27) + "...";
-                        }
-                        ReportWarning("The monoisotopic mass computed by PHRP is more than " + massDiffThreshold.ToString("0.00") + " Da away from the mass computed by MODa: " + peptideMonoMassPHRP.ToString("0.0000") + " vs. " + peptideMonoMassMODa.ToString("0.0000") + "; peptide " + first30Residues);
-                    }
-
-                    if (peptideMonoMassMODa > 0)
-                    {
-                        // Compute DelM and DelM_PPM
-                        var delM = precursorMonoMass - peptideMonoMassMODa;
-                        udtSearchResult.DelM = MassErrorToString(delM);
-
-                        var peptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, true, peptideMonoMassMODa);
-
-                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
-                    }
-
-                    // Store the monoisotopic MH value in .MH; note that this is (M+H)+
-                    udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
-
-                    if (udtSearchResult.Probability.ToLower() == "infinity")
-                    {
-                        udtSearchResult.Probability = "0";
-                    }
-                    else if (!string.IsNullOrEmpty(udtSearchResult.Probability) & !double.TryParse(udtSearchResult.Probability, out _))
-                    {
-                        udtSearchResult.Probability = string.Empty;
-                    }
-
-                    validSearchResult = true;
+                    return false;
                 }
+
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
+
+                if (!GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.SpectrumIndex], out udtSearchResult.SpectrumIndex))
+                {
+                    ReportError("Index column is missing or invalid", true);
+                }
+                else
+                {
+                    rowIndex = udtSearchResult.SpectrumIndex;
+                }
+
+                if (!int.TryParse(udtSearchResult.SpectrumIndex, out var spectrumIndex))
+                {
+                    ReportError("Index column is not numeric", true);
+                }
+
+                udtSearchResult.ScanNum = LookupScanBySpectrumIndex(spectrumIndex);
+                if (udtSearchResult.ScanNum == 0)
+                {
+                    ReportWarning("Error, could not resolve spectrumIndex to Scan Number: " + spectrumIndex);
+                }
+
+                // Monoisotopic mass value of the observed precursor_mz
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.ObservedMonoMass], out udtSearchResult.Precursor_mass);
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Charge], out udtSearchResult.Charge);
+                udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
+
+                // Observed m/z, converted to monoisotopic mass
+                if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
+                {
+                    if (udtSearchResult.ChargeNum > 0)
+                    {
+                        var precursorMZ = mPeptideSeqMassCalculator.ConvoluteMass(precursorMonoMass, 0, udtSearchResult.ChargeNum);
+                        udtSearchResult.PrecursorMZ = PRISM.StringUtilities.DblToString(precursorMZ, 6);
+                    }
+                }
+
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
+
+                // Theoretical peptide monoisotopic mass, including mods, as computed by MODa
+                double.TryParse(udtSearchResult.CalculatedMonoMass, out var peptideMonoMassMODa);
+
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.DeltaMass], out udtSearchResult.DeltaMass);
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Score], out udtSearchResult.Score);
+
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Probability], out udtSearchResult.Probability);
+                if (!double.TryParse(udtSearchResult.Probability, out udtSearchResult.ProbabilityNum))
+                    udtSearchResult.ProbabilityNum = 0;
+
+                if (!GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Peptide], out udtSearchResult.Peptide))
+                {
+                    ReportError("Peptide column is missing or invalid", true);
+                }
+
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.Protein], out udtSearchResult.Protein);
+                udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
+                GetColumnValue(splitLine, columnMapping[eMODaResultsFileColumns.PeptidePosition], out udtSearchResult.PeptidePosition);
+
+                // Parse the sequence to determine the total mod mass
+                // Note that we do not remove any of the mod symbols since MODa identifies mods by mass alone
+                // Note that static mods are implied (thus are not explicitly displayed by MODa)
+                var totalModMass = ComputeTotalModMass(udtSearchResult.Peptide);
+
+                // Compute monoisotopic mass of the peptide
+                // Theoretical peptide monoisotopic mass, including mods, as computed by PHRP
+                var peptideMonoMassPHRP = ComputePeptideMass(udtSearchResult.Peptide, totalModMass);
+
+                if (Math.Abs(peptideMonoMassMODa) < double.Epsilon)
+                {
+                    peptideMonoMassMODa = peptideMonoMassPHRP;
+                }
+
+                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Peptide, peptideMonoMassPHRP, peptideMonoMassMODa);
+
+                if (peptideMonoMassMODa > 0)
+                {
+                    // Compute DelM and DelM_PPM
+                    var delM = precursorMonoMass - peptideMonoMassMODa;
+                    udtSearchResult.DelM = MassErrorToString(delM);
+
+                    var peptideDeltaMassCorrectedPpm =
+                        clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, true, peptideMonoMassMODa);
+
+                    udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
+                }
+
+                // Store the monoisotopic MH value in .MH; note that this is (M+H)+
+                udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
+
+                if (udtSearchResult.Probability.ToLower() == "infinity")
+                {
+                    udtSearchResult.Probability = "0";
+                }
+                else if (!string.IsNullOrEmpty(udtSearchResult.Probability) & !double.TryParse(udtSearchResult.Probability, out _))
+                {
+                    udtSearchResult.Probability = string.Empty;
+                }
+
+                return true;
             }
             catch (Exception)
             {
@@ -1140,10 +1121,9 @@ namespace PeptideHitResultsProcessor
                         errorLog += "Error parsing MODa Results in ParseMODaResultsFileEntry" + "\n";
                     }
                 }
-                validSearchResult = false;
+                return false;
             }
 
-            return validSearchResult;
         }
 
         /// <summary>

@@ -689,79 +689,81 @@ namespace PeptideHitResultsProcessor
                                                                             resultsProcessed, columnMapping,
                                                                             out var currentPeptideWithMods);
 
-                            if (validSearchResult)
+                            resultsProcessed += 1;
+                            if (!validSearchResult)
+                                continue;
+
+                            var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
+
+                            bool firstMatchForGroup;
+                            if (searchResult.PValue == previousPValue)
                             {
-                                var key = searchResult.PeptideSequenceWithMods + "_" + searchResult.Scan + "_" + searchResult.Charge;
+                                // New result has the same PValue as the previous result
+                                // See if htPeptidesFoundForPValueLevel contains the peptide, scan and charge
 
-                                bool firstMatchForGroup;
-                                if (searchResult.PValue == previousPValue)
+                                if (peptidesFoundForPValueLevel.Contains(key))
                                 {
-                                    // New result has the same PValue as the previous result
-                                    // See if htPeptidesFoundForPValueLevel contains the peptide, scan and charge
-
-                                    if (peptidesFoundForPValueLevel.Contains(key))
-                                    {
-                                        firstMatchForGroup = false;
-                                    }
-                                    else
-                                    {
-                                        peptidesFoundForPValueLevel.Add(key);
-                                        firstMatchForGroup = true;
-                                    }
+                                    firstMatchForGroup = false;
                                 }
                                 else
                                 {
-                                    // New PValue
-                                    // Reset htPeptidesFoundForPValueLevel
-                                    peptidesFoundForPValueLevel.Clear();
-
-                                    // Update previousPValue
-                                    previousPValue = searchResult.PValue;
-
-                                    // Append a new entry to htPeptidesFoundForPValueLevel
                                     peptidesFoundForPValueLevel.Add(key);
                                     firstMatchForGroup = true;
                                 }
+                            }
+                            else
+                            {
+                                // New PValue
+                                // Reset htPeptidesFoundForPValueLevel
+                                peptidesFoundForPValueLevel.Clear();
 
-                                var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
-                                if (!modsAdded)
+                                // Update previousPValue
+                                previousPValue = searchResult.PValue;
+
+                                // Append a new entry to htPeptidesFoundForPValueLevel
+                                peptidesFoundForPValueLevel.Add(key);
+                                firstMatchForGroup = true;
+                            }
+
+                            var modsAdded = AddModificationsAndComputeMass(searchResult, firstMatchForGroup);
+                            if (!modsAdded)
+                            {
+                                if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                 {
-                                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                                    {
-                                        errorLog += "Error adding modifications to sequence at RowIndex '" +
-                                                    searchResult.ResultID + "'" + "\n";
-                                    }
+                                    errorLog += "Error adding modifications to sequence at RowIndex '" +
+                                                searchResult.ResultID + "'" + "\n";
                                 }
+                            }
 
-                                SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
+                            SaveResultsFileEntrySeqInfo(searchResult, firstMatchForGroup);
 
-                                if (pepToProteinMapping.Count > 0)
+                            if (pepToProteinMapping.Count > 0)
+                            {
+                                // Add the additional proteins for this peptide
+
+                                // Use binary search to find this peptide in pepToProteinMapping
+                                var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, currentPeptideWithMods);
+
+                                if (pepToProteinMapIndex >= 0)
                                 {
-                                    // Add the additional proteins for this peptide
-
-                                    // Use binary search to find this peptide in pepToProteinMapping
-                                    var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, currentPeptideWithMods);
-
-                                    if (pepToProteinMapIndex >= 0)
+                                    // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
+                                    var currentProtein = string.Copy(searchResult.ProteinName);
+                                    do
                                     {
-                                        // Call MyBase.SaveResultsFileEntrySeqInfo for each entry in pepToProteinMapping() for peptide , skipping searchResult.ProteinName
-                                        var currentProtein = string.Copy(searchResult.ProteinName);
-                                        do
+                                        if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
                                         {
-                                            if (pepToProteinMapping[pepToProteinMapIndex].Protein != currentProtein)
-                                            {
-                                                searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
-                                                SaveResultsFileEntrySeqInfo(searchResult, false);
-                                            }
+                                            searchResult.ProteinName = string.Copy(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                            SaveResultsFileEntrySeqInfo(searchResult, false);
+                                        }
 
-                                            pepToProteinMapIndex += 1;
-                                        } while (pepToProteinMapIndex < pepToProteinMapping.Count && currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
-                                    }
-                                    else
-                                    {
-                                        // Match not found; this is unexpected
-                                        ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
-                                    }
+                                        pepToProteinMapIndex += 1;
+                                    } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
+                                             currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
+                                }
+                                else
+                                {
+                                    // Match not found; this is unexpected
+                                    ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
                                 }
                             }
 
@@ -771,9 +773,7 @@ namespace PeptideHitResultsProcessor
                             {
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
-                            UpdateProgress(percentComplete);
-
-                            resultsProcessed += 1;
+                            UpdateProgress(percentComplete);                            
                         }
                     }
 
@@ -1149,123 +1149,125 @@ namespace PeptideHitResultsProcessor
 
             string[] splitLine = null;
 
-            bool validSearchResult;
-
             // Reset searchResult
             searchResult.Clear();
             peptideSequenceWithMods = string.Empty;
 
             try
             {
-                // Set this to False for now
-                validSearchResult = false;
-
                 splitLine = lineIn.TrimEnd().Split('\t');
 
-                if (splitLine.Length >= 15)
+                if (splitLine.Length < 15)
                 {
-                    if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.ResultID], out string value))
-                    {
-                        if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                        {
-                            errorLog += "Error reading ResultID value from TopPIC Results line " +
-                                        (resultsProcessed + 1) + "\n";
-                        }
-                        return false;
-                    }
-
-                    searchResult.ResultID = int.Parse(value);
-
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Scan], out string scan);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Charge], out string charge);
-
-                    searchResult.Scan = scan;
-                    searchResult.Charge = charge;
-
-                    if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Peptide], out peptideSequenceWithMods))
-                    {
-                        if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
-                        {
-                            errorLog += "Error reading Peptide sequence value from TopPIC Results line " +
-                                        (resultsProcessed + 1) + "\n";
-                        }
-                        return false;
-                    }
-
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Protein], out string proteinName);
-                    searchResult.MultipleProteinCount = "0";
-
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.DelM], out string msAlignComputedDelM);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
-
-                    searchResult.ProteinName = proteinName;
-                    searchResult.TopPICComputedDelM = msAlignComputedDelM;
-                    searchResult.TopPICComputedDelMPPM = msAlignComputedDelMppm;
-
-                    searchResult.PeptideDeltaMass = searchResult.TopPICComputedDelM;
-
-                    // Note: .PeptideDeltaMass is stored in the TopPIC results file as "Observed_Mass - Theoretical_Mass"
-                    // However, in MTS .PeptideDeltaMass is "Theoretical - Observed"
-                    // Therefore, we will negate .PeptideDeltaMass
-                    try
-                    {
-                        searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString(CultureInfo.InvariantCulture);
-                    }
-                    catch (Exception)
-                    {
-                        // Error; Leave .PeptideDeltaMass unchanged
-                    }
-
-                    // Calling this function will set .ProteoformPreResidues, .ProteoformPostResidues, .PeptideSequenceWithMods, and .ProteoformCleanSequence
-                    searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
-
-                    var searchResultBase = (clsSearchResultsBaseClass)searchResult;
-
-                    ComputePseudoPeptideLocInProtein(searchResultBase);
-
-                    // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
-                    // If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
-                    // will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
-                    searchResult.ComputePeptideCleavageStateInProtein();
-
-                    // Read the remaining data values
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Prsm_ID], out string prsmId);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Spectrum_ID], out string spectrumId);
-
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.PrecursorMZ], out string precursorMz);
-
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.MH], out string parentIonMH);
-
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Peak_Count], out string peakCount);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.PValue], out string pValue);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Rank_PValue], out string rankPValue);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.EValue], out string eValue);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.QValue], out string qValue);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.FragMethod], out string fragMethod);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Proteoform_FDR], out string proteoformFDR);
-                    GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.VariablePTMs], out string variablePTMs);
-
-                    searchResult.Prsm_ID = prsmId;
-                    searchResult.Spectrum_ID = spectrumId;
-                    searchResult.Precursor_mz = precursorMz;
-                    searchResult.ParentIonMH = parentIonMH;
-                    searchResult.Unexpected_Mod_Count = unexpectedModCount;
-                    searchResult.Peak_Count = peakCount;
-                    searchResult.Matched_Peak_Count = matchedPeakCount;
-                    searchResult.Matched_Fragment_Ion_Count = matchedFragmentIonCount;
-                    searchResult.PValue = pValue;
-                    searchResult.Rank_PValue = rankPValue;
-                    searchResult.EValue = eValue;
-                    searchResult.QValue = qValue;
-                    searchResult.FragMethod = fragMethod;
-                    searchResult.ProteoformFDR = proteoformFDR;
-                    searchResult.VariablePTMs = variablePTMs;
-
-                    validSearchResult = true;
+                    return false;
                 }
+
+                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.ResultID], out string value))
+                {
+                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    {
+                        errorLog += "Error reading ResultID value from TopPIC Results line " +
+                                    (resultsProcessed + 1) + "\n";
+                    }
+
+                    return false;
+                }
+
+                searchResult.ResultID = int.Parse(value);
+
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Charge], out string charge);
+
+                searchResult.Scan = scan;
+                searchResult.Charge = charge;
+
+                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Peptide], out peptideSequenceWithMods))
+                {
+                    if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
+                    {
+                        errorLog += "Error reading Peptide sequence value from TopPIC Results line " +
+                                    (resultsProcessed + 1) + "\n";
+                    }
+
+                    return false;
+                }
+
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Protein], out string proteinName);
+                searchResult.MultipleProteinCount = "0";
+
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.DelM], out string msAlignComputedDelM);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
+
+                searchResult.ProteinName = proteinName;
+                searchResult.TopPICComputedDelM = msAlignComputedDelM;
+                searchResult.TopPICComputedDelMPPM = msAlignComputedDelMppm;
+
+                searchResult.PeptideDeltaMass = searchResult.TopPICComputedDelM;
+
+                // Note: .PeptideDeltaMass is stored in the TopPIC results file as "Observed_Mass - Theoretical_Mass"
+                // However, in MTS .PeptideDeltaMass is "Theoretical - Observed"
+                // Therefore, we will negate .PeptideDeltaMass
+                try
+                {
+                    searchResult.PeptideDeltaMass = (-double.Parse(searchResult.PeptideDeltaMass)).ToString(CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    // Error; Leave .PeptideDeltaMass unchanged
+                }
+
+                // Calling this function will set .ProteoformPreResidues, .ProteoformPostResidues, .PeptideSequenceWithMods, and .ProteoformCleanSequence
+                searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
+
+                var searchResultBase = (clsSearchResultsBaseClass)searchResult;
+
+                ComputePseudoPeptideLocInProtein(searchResultBase);
+
+                // Now that the peptide location in the protein has been determined, re-compute the peptide's cleavage and terminus states
+                // If a peptide belongs to several proteins, the cleavage and terminus states shown for the same peptide
+                // will all be based on the first protein since Inspect only outputs the prefix and suffix letters for the first protein
+                searchResult.ComputePeptideCleavageStateInProtein();
+
+                // Read the remaining data values
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Prsm_ID], out string prsmId);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Spectrum_ID], out string spectrumId);
+
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.PrecursorMZ], out string precursorMz);
+
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.MH], out string parentIonMH);
+
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Unexpected_Mod_Count],
+                               out string unexpectedModCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Peak_Count], out string peakCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Peak_Count],
+                               out string matchedPeakCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Fragment_Ion_Count],
+                               out string matchedFragmentIonCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.PValue], out string pValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Rank_PValue], out string rankPValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.EValue], out string eValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.QValue], out string qValue);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.FragMethod], out string fragMethod);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Proteoform_FDR], out string proteoformFDR);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.VariablePTMs], out string variablePTMs);
+
+                searchResult.Prsm_ID = prsmId;
+                searchResult.Spectrum_ID = spectrumId;
+                searchResult.Precursor_mz = precursorMz;
+                searchResult.ParentIonMH = parentIonMH;
+                searchResult.Unexpected_Mod_Count = unexpectedModCount;
+                searchResult.Peak_Count = peakCount;
+                searchResult.Matched_Peak_Count = matchedPeakCount;
+                searchResult.Matched_Fragment_Ion_Count = matchedFragmentIonCount;
+                searchResult.PValue = pValue;
+                searchResult.Rank_PValue = rankPValue;
+                searchResult.EValue = eValue;
+                searchResult.QValue = qValue;
+                searchResult.FragMethod = fragMethod;
+                searchResult.ProteoformFDR = proteoformFDR;
+                searchResult.VariablePTMs = variablePTMs;
+
+                return true;
             }
             catch (Exception)
             {
@@ -1281,10 +1283,9 @@ namespace PeptideHitResultsProcessor
                         errorLog += "Error parsing TopPIC Results in ParseTopPICSynFileEntry" + "\n";
                     }
                 }
-                validSearchResult = false;
+                return false;
             }
 
-            return validSearchResult;
         }
 
         /// <summary>
