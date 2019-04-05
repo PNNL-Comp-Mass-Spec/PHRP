@@ -654,6 +654,10 @@ namespace PeptideHitResultsProcessor
                 if (!inputFile.Exists)
                 {
                     SetErrorMessage("Input file not found: " + inputFilePath);
+                    if (inputFilePath.Contains(".."))
+                    {
+                        ReportWarning("Absolute path: " + inputFile.DirectoryName);
+                    }
                     SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath);
                     return false;
                 }

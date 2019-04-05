@@ -752,6 +752,10 @@ namespace PHRPReader
                 if (!inputFile.Exists)
                 {
                     ReportError("Input file not found: " + inputFilePath);
+                    if (inputFilePath.Contains(".."))
+                    {
+                        ReportWarning("Absolute path: " + inputFile.DirectoryName);
+                    }
                     SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
                     if (!mInitialized)
                         throw new FileNotFoundException(mErrorMessage);
@@ -2913,6 +2917,11 @@ namespace PHRPReader
             {
                 SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
                 ReportError("Input file not found: " + inputFilePath);
+                if (inputFilePath.Contains(".."))
+                {
+                    ReportWarning("Absolute path: " + inputFile.DirectoryName);
+                }
+
                 return false;
             }
 
