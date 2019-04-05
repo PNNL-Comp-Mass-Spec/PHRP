@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -910,6 +910,11 @@ namespace PeptideHitResultsProcessor
 
         protected virtual string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts)
         {
+            return ConstructPepToProteinMapFilePathWork(inputFilePath, outputDirectoryPath, mts);
+        }
+
+        private string ConstructPepToProteinMapFilePathWork(string inputFilePath, string outputDirectoryPath, bool mts)
+        {
             var pepToProteinMapBaseName = Path.GetFileNameWithoutExtension(inputFilePath);
 
             string pepToProteinMapFileName;
@@ -954,12 +959,12 @@ namespace PeptideHitResultsProcessor
             {
                 if (!baseName.EndsWith(item, StringComparison.OrdinalIgnoreCase)) continue;
 
-                // baseName matches something like Dataset_
+                // baseName matches something like Dataset_msgfplus_syn
                 var baseNameTrimmed = baseName.Substring(0, baseName.Length - charsToRemove);
-                return ConstructPepToProteinMapFilePath(baseNameTrimmed, outputDirectoryPath, mts);
+                return ConstructPepToProteinMapFilePathWork(baseNameTrimmed, outputDirectoryPath, mts);
             }
 
-            return ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, mts);
+            return ConstructPepToProteinMapFilePathWork(baseName, outputDirectoryPath, mts);
         }
 
         /// <summary>
