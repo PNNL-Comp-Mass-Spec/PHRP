@@ -453,6 +453,7 @@ namespace PeptideHitResultsProcessor
             try
             {
                 var errorLog = string.Empty;
+                var includeSpeciesAndFragMethod = false;
 
                 // Open the input file and parse it
                 // Initialize the stream reader and the stream Text writer
@@ -489,7 +490,7 @@ namespace PeptideHitResultsProcessor
                             headerParsed = true;
 
                             // Write the header line
-                            WriteSynFHTFileHeader(writer, ref errorLog);
+                            WriteSynFHTFileHeader(writer, columnMapping, out includeSpeciesAndFragMethod, ref errorLog);
 
                             continue;
                         }
@@ -536,7 +537,7 @@ namespace PeptideHitResultsProcessor
                     }
 
                     // Sort the data in udtFilteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, includeSpeciesAndFragMethod, ref errorLog);
                 }
 
                 // Inform the user if any errors occurred
@@ -1548,6 +1549,7 @@ namespace PeptideHitResultsProcessor
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
             IEnumerable<udtMSAlignSearchResultType> filteredSearchResults,
+            bool includeSpeciesAndFragMethod,
             ref string errorLog)
         {
             // Sort filteredSearchResults by ascending PValue, ascending scan, ascending charge, ascending peptide, and ascending protein
@@ -1556,7 +1558,7 @@ namespace PeptideHitResultsProcessor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, ref errorLog);
+                WriteSearchResultToFile(index, writer, result, includeSpeciesAndFragMethod, ref errorLog);
                 index += 1;
             }
         }
@@ -1585,18 +1587,42 @@ namespace PeptideHitResultsProcessor
         /// Write out the header line for synopsis / first hits files
         /// </summary>
         /// <param name="writer"></param>
+        /// <param name="columnMapping"></param>
+        /// <param name="includeSpeciesAndFragMethod"></param>
         /// <param name="errorLog"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
+            IDictionary<eMSAlignResultsFileColumns, int> columnMapping,
+            out bool includeSpeciesAndFragMethod,
             ref string errorLog)
         {
+            includeSpeciesAndFragMethod = false;
+
             try
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
                 var headerColumns = clsPHRPParserMSAlign.GetColumnHeaderNamesAndIDs();
 
-                var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
+                List<string> headerNames;
+
+                // Only include Species_ID and FragMethod if defined in the column mapping
+                columnMapping.TryGetValue(eMSAlignResultsFileColumns.Species_ID, out var colIndexSpeciesId);
+                columnMapping.TryGetValue(eMSAlignResultsFileColumns.FragMethod, out var colIndexFragMethod);
+
+                if (colIndexSpeciesId >= 0 || colIndexFragMethod >= 0)
+                {
+                    includeSpeciesAndFragMethod = true;
+                    headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
+                }
+                else
+                {
+                    headerNames = (from item in headerColumns
+                                   where item.Key != clsPHRPParserMSAlign.DATA_COLUMN_Species_ID &&
+                                         item.Key != clsPHRPParserMSAlign.DATA_COLUMN_FragMethod
+                                   orderby item.Value
+                                   select item.Key).ToList();
+                }
 
                 writer.WriteLine(CollapseList(headerNames));
             }
@@ -1615,12 +1641,14 @@ namespace PeptideHitResultsProcessor
         /// <param name="resultID"></param>
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
+        /// <param name="includeSpeciesAndFragMethod"></param>
         /// <param name="errorLog"></param>
         /// <remarks></remarks>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
             udtMSAlignSearchResultType udtSearchResult,
+            bool includeSpeciesAndFragMethod,
             ref string errorLog)
         {
             try
@@ -1651,10 +1679,14 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Pvalue,
                     udtSearchResult.RankPValue.ToString(),
                     udtSearchResult.Evalue,
-                    udtSearchResult.FDR,
-                    udtSearchResult.Species_ID,
-                    udtSearchResult.FragMethod
+                    udtSearchResult.FDR
                 };
+
+                if (includeSpeciesAndFragMethod)
+                {
+                    data.Add(udtSearchResult.Species_ID);
+                    data.Add(udtSearchResult.FragMethod);
+                }
 
                 writer.WriteLine(CollapseList(data));
             }
