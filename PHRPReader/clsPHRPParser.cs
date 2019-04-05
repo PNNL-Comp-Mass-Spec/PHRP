@@ -319,7 +319,7 @@ namespace PHRPReader
 
             MaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM;
 
-            var isSynopsisFile = false;
+            bool isSynopsisFile;
 
             if (string.IsNullOrEmpty(inputFilePath))
             {
@@ -329,6 +329,7 @@ namespace PHRPReader
                 mInputDirectoryPath = string.Empty;
 
                 startupOptions.LoadModsAndSeqInfo = false;
+                isSynopsisFile = false;
             }
             else
             {
@@ -339,13 +340,10 @@ namespace PHRPReader
                     mInputDirectoryPath = inputFile.Directory.FullName;
                 }
 
-                var expectedSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
-                expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(expectedSynopsisName, inputFile.Name);
+                var phrpSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
+                var expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
 
-                if (string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase))
-                {
-                    isSynopsisFile = true;
-                }
+                isSynopsisFile = string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase);
             }
 
             mErrorMessage = string.Empty;
