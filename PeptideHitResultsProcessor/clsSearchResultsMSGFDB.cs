@@ -21,10 +21,6 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsSearchResultsMSGFDB : clsSearchResultsBaseClass
     {
-        #region "Classwide Variables"
-        // Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
-        #endregion
-
         #region "Properties"
 
         public string FragMethod { get; set; }
@@ -32,24 +28,55 @@ namespace PeptideHitResultsProcessor
 
         public string DeNovoScore { get; set; }
         public string MSGFScore { get; set; }
-        public string SpecEValue { get; set; }      // SpecProb in MSGFDB; SpecEValue in MSGF+
-        public string RankSpecEValue { get; set; }
-        public string EValue { get; set; }          // PValue in MSGFDB; EValue in MSGF+
 
-        // ReSharper disable once CommentTypo
-        public string QValue { get; set; }          // Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
-        public string PepQValue { get; set; }       // Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+
+        /// <summary>
+        /// SpecProb in MSGFDB; SpecEValue in MSGF+
+        /// </summary>
+        public string SpecEValue { get; set; }
+        public string RankSpecEValue { get; set; }
+
+        /// <summary>
+        /// PValue in MSGFDB; EValue in MSGF+
+        /// </summary>
+        public string EValue { get; set; }
+
+        /// <summary>
+        /// QValue
+        /// </summary>
+        /// <remarks>
+        /// Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
+        /// </remarks>
+        public string QValue { get; set; }
+
+        /// <summary>
+        /// Pep QValue
+        /// </summary>
+        /// <remarks>Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+</remarks>
+        public string PepQValue { get; set; }
 
         public string PrecursorMZ { get; set; }
         public string MSGFPlusComputedDelM { get; set; }
         public string MSGFPlusComputedDelMPPM { get; set; }
 
-        public string IsotopeError { get; set; }    // Only reported by MSGF+
+        /// <summary>
+        /// Isotope error
+        /// </summary>
+        /// <remarks>Only reported by MSGF+</remarks>
+        public string IsotopeError { get; set; }
 
         public bool MSGFPlusResults { get; set; }
+
         #endregion
 
-        // Note that the following call will call both the base class's Clear method and this class's Clear method
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="peptideMods"></param>
+        /// <param name="peptideSeqMassCalculator"></param>
+        /// <remarks>
+        /// The base class constructor calls InitializeLocalVariables,
+        /// which calls both the base class's Clear method and this class's Clear method
+        /// </remarks>
         public clsSearchResultsMSGFDB(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {

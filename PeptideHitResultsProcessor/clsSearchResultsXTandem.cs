@@ -67,7 +67,15 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        // Note that the following call will call both the base class's Clear method and this class's Clear method
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="peptideMods"></param>
+        /// <param name="peptideSeqMassCalculator"></param>
+        /// <remarks>
+        /// The base class constructor calls InitializeLocalVariables,
+        /// which calls both the base class's Clear method and this class's Clear method
+        /// </remarks>
         public clsSearchResultsXTandem(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {

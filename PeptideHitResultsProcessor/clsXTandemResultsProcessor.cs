@@ -112,16 +112,13 @@ namespace PeptideHitResultsProcessor
         private readonly SortedSet<string> mSeqsWithoutMods;
 
         #endregion
-
-        #region "Properties"
-        #endregion
-
+        
         /// <summary>
         /// Constructor
         /// </summary>
         public clsXTandemResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
 
             mSeqsWithMods = new Dictionary<string, int>();
             mSeqsWithoutMods = new SortedSet<string>();

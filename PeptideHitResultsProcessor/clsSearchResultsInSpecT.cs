@@ -32,7 +32,6 @@ namespace PeptideHitResultsProcessor
 
         #region "Properties"
 
-        // Auto-Properties
         public string SpectrumFile { get; set; }
         public string MQScore { get; set; }
         public string Length { get; set; }
@@ -58,7 +57,15 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        // Note that the following call will call both the base class's Clear method and this class's Clear method
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="peptideMods"></param>
+        /// <param name="peptideSeqMassCalculator"></param>
+        /// <remarks>
+        /// The base class constructor calls InitializeLocalVariables,
+        /// which calls both the base class's Clear method and this class's Clear method
+        /// </remarks>
         public clsSearchResultsInSpecT(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {

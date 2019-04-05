@@ -21,13 +21,8 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsSearchResultsMSAlign : clsSearchResultsBaseClass
     {
-        #region "Classwide Variables"
-        // Note that "Automatic properties" are being used; thus, we don't need to explicitly define class variables
-        #endregion
-
         #region "Properties"
-
-        // Auto-Properties
+        
         public string Prsm_ID { get; set; }
         public string Spectrum_ID { get; set; }
 
@@ -47,13 +42,24 @@ namespace PeptideHitResultsProcessor
         public string Species_ID { get; set; }
         public string FragMethod { get; set; }
 
-        public string Precursor_mz { get; set; }            // Observed precursor_mz
+        /// <summary>
+        /// Observed precursor_mz
+        /// </summary>
+        public string Precursor_mz { get; set; }
         public string MSAlignComputedDelM { get; set; }
         public string MSAlignComputedDelMPPM { get; set; }
 
         #endregion
 
-        // Note that the following call will call both the base class's Clear method and this class's Clear method
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="peptideMods"></param>
+        /// <param name="peptideSeqMassCalculator"></param>
+        /// <remarks>
+        /// The base class constructor calls InitializeLocalVariables,
+        /// which calls both the base class's Clear method and this class's Clear method
+        /// </remarks>
         public clsSearchResultsMSAlign(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {

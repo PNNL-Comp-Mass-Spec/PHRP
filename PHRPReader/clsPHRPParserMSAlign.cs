@@ -40,8 +40,8 @@ namespace PHRPReader
         public const string DATA_COLUMN_Rank_PValue = "Rank_PValue";
         public const string DATA_COLUMN_EValue = "EValue";
         public const string DATA_COLUMN_FDR = "FDR";
-        public const string DATA_COLUMN_Species_ID = "Species_ID";
-        public const string DATA_COLUMN_FragMethod = "FragMethod";
+        public const string DATA_COLUMN_Species_ID = "Species_ID";      // Only in MSAlign_Histone results
+        public const string DATA_COLUMN_FragMethod = "FragMethod";      // Only in MSAlign_Histone results
 
         public const string FILENAME_SUFFIX_SYN = "_msalign_syn.txt";
         public const string FILENAME_SUFFIX_FHT = "_msalign_fht.txt";
@@ -229,8 +229,8 @@ namespace PHRPReader
                 {DATA_COLUMN_Rank_PValue, MSAlignSynFileColumns.Rank_PValue},
                 {DATA_COLUMN_EValue, MSAlignSynFileColumns.EValue},
                 {DATA_COLUMN_FDR, MSAlignSynFileColumns.FDR},
-                {DATA_COLUMN_Species_ID, MSAlignSynFileColumns.Species_ID},
-                {DATA_COLUMN_FragMethod, MSAlignSynFileColumns.FragMethod}
+                {DATA_COLUMN_Species_ID, MSAlignSynFileColumns.Species_ID},         // Only in MSAlign_Histone results
+                {DATA_COLUMN_FragMethod, MSAlignSynFileColumns.FragMethod}          // Only in MSAlign_Histone results
             };
 
             return headerColumns;
