@@ -1263,7 +1263,7 @@ namespace PeptideHitResultsProcessor
 
                     // Update the Mass Calculator to use the one tracked by this class
                     // (since this class's calculator knows about custom amino acids and custom charge carriers)
-                    var oStartupOptions = new clsPHRPStartupOptions
+                    var startupOptions = new clsPHRPStartupOptions
                     {
                         LoadModsAndSeqInfo = true,
                         LoadMSGFResults = loadMSGFResults,
@@ -1271,7 +1271,7 @@ namespace PeptideHitResultsProcessor
                         PeptideMassCalculator = mPeptideSeqMassCalculator
                     };
 
-                    using (var reader = new clsPHRPReader(phrpDataFilePath, ePHRPResultType, oStartupOptions))
+                    using (var reader = new clsPHRPReader(phrpDataFilePath, ePHRPResultType, startupOptions))
                     {
                         reader.EchoMessagesToConsole = false;
                         reader.SkipDuplicatePSMs = true;
@@ -1922,15 +1922,17 @@ namespace PeptideHitResultsProcessor
                             }
                             else
                             {
-                                var udtPepToProteinMappingEntry = default(udtPepToProteinMappingType);
-                                udtPepToProteinMappingEntry.Peptide = string.Copy(splitLine[0]);
-                                udtPepToProteinMappingEntry.Protein = string.Copy(splitLine[1]);
-                                int.TryParse(splitLine[2], out udtPepToProteinMappingEntry.ResidueStart);
-                                int.TryParse(splitLine[3], out udtPepToProteinMappingEntry.ResidueEnd);
+                                var pepToProteinMappingEntry = new udtPepToProteinMappingType
+                                {
+                                    Peptide = string.Copy(splitLine[0]),
+                                    Protein = string.Copy(splitLine[1])
+                                };
+                                int.TryParse(splitLine[2], out pepToProteinMappingEntry.ResidueStart);
+                                int.TryParse(splitLine[3], out pepToProteinMappingEntry.ResidueEnd);
 
                                 ExpandListIfRequired(pepToProteinMapping, 1);
 
-                                pepToProteinMapping.Add(udtPepToProteinMappingEntry);
+                                pepToProteinMapping.Add(pepToProteinMappingEntry);
                             }
                         }
                     }
@@ -2103,9 +2105,11 @@ namespace PeptideHitResultsProcessor
 
                 for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
                 {
-                    var oModInfo = mPeptideMods.GetModificationByIndex(index);
-                    var searchResult = oModInfo;
-                    if (searchResult.OccurrenceCount > 0 || !searchResult.UnknownModAutoDefined)
+                    var modInfo = mPeptideMods.GetModificationByIndex(index);
+                    var searchResult = modInfo;
+                    if (searchResult.OccurrenceCount <= 0 && searchResult.UnknownModAutoDefined)
+                        continue;
+
                     {
                         writer.WriteLine(searchResult.ModificationSymbol + SEP_CHAR +
                                          searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture) + SEP_CHAR +

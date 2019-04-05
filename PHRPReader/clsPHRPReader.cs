@@ -489,10 +489,10 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="oStartupOptions">Startup options</param>
+        /// <param name="startupOptions">Startup options</param>
         /// <remarks></remarks>
-        public clsPHRPReader(string inputFilePath, clsPHRPStartupOptions oStartupOptions)
-            : this(inputFilePath, ePeptideHitResultType.Unknown, oStartupOptions)
+        public clsPHRPReader(string inputFilePath, clsPHRPStartupOptions startupOptions)
+            : this(inputFilePath, ePeptideHitResultType.Unknown, startupOptions)
         {
         }
 

@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSGFDBResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
             mModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
@@ -443,15 +443,15 @@ namespace PeptideHitResultsProcessor
                 return;
             }
 
-            // Duplicate a portion of udtSearchResults so that we can sort by ascending Spectral Probability
+            // Duplicate a portion of searchResults so that we can sort by ascending Spectral Probability
 
-            var dctResultsSubset = new Dictionary<int, udtMSGFPlusSearchResultType>();
+            var resultsSubset = new Dictionary<int, udtMSGFPlusSearchResultType>();
             for (var index = startIndex; index <= endIndex; index++)
             {
-                dctResultsSubset.Add(index, searchResults[index]);
+                resultsSubset.Add(index, searchResults[index]);
             }
 
-            var resultsBySpecProb = (from item in dctResultsSubset orderby item.Value.SpecEValueNum select item).ToList();
+            var resultsBySpecProb = (from item in resultsSubset orderby item.Value.SpecEValueNum select item).ToList();
 
             double lastValue = 0;
             var currentRank = -1;
@@ -1554,7 +1554,7 @@ namespace PeptideHitResultsProcessor
                             {
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
-                            UpdateProgress(percentComplete);                            
+                            UpdateProgress(percentComplete);
                         }
                     }
 
@@ -1634,8 +1634,7 @@ namespace PeptideHitResultsProcessor
 
                 rowIndex = splitLine[0];
 
-                if (!GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.SpectrumFile],
-                                    out udtSearchResult.SpectrumFileName))
+                if (!GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.SpectrumFile], out udtSearchResult.SpectrumFileName))
                 {
                     ReportError("SpectrumFile column is missing or invalid", true);
                 }
@@ -1858,15 +1857,13 @@ namespace PeptideHitResultsProcessor
                 if (!double.TryParse(udtSearchResult.EValue, out udtSearchResult.EValueNum))
                     udtSearchResult.EValueNum = 0;
 
-                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.FDR_QValue],
-                                                            out udtSearchResult.QValue);
+                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.FDR_QValue], out udtSearchResult.QValue);
                 if (!double.TryParse(udtSearchResult.QValue, out udtSearchResult.QValueNum))
                     udtSearchResult.QValueNum = 0;
 
                 if (targetDecoyFDRValid)
                 {
-                    GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.PepFDR_PepQValue],
-                                   out udtSearchResult.PepQValue);
+                    GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.PepFDR_PepQValue], out udtSearchResult.PepQValue);
                 }
                 else
                 {
@@ -1880,7 +1877,7 @@ namespace PeptideHitResultsProcessor
 
                 udtSearchResult.NTT = ComputeCleavageState(udtSearchResult.Peptide).ToString();
 
-                var udtScanGroupInfo = default(udtScanGroupInfoType);
+                var udtScanGroupInfo = new udtScanGroupInfoType();
                 var currentScanGroupID = -1;
 
                 udtScanGroupInfo.Charge = udtSearchResult.ChargeNum;
@@ -2174,8 +2171,7 @@ namespace PeptideHitResultsProcessor
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.RankSpecProb], out string rankSpecEValue);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.PValue_EValue], out string eValue);
 
-                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.FDR_QValue],
-                                                         out string qValue);
+                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[clsPHRPParserMSGFDB.MSGFPlusSynFileColumns.FDR_QValue], out string qValue);
 
                 searchResult.FragMethod = fragMethod;
                 searchResult.PrecursorMZ = precursorMz;
@@ -2818,11 +2814,7 @@ namespace PeptideHitResultsProcessor
 
             foreach (Match reMatch in reMatches)
             {
-                var udtTerminusChars = default(udtTerminusCharsType);
-
                 var proteinName = TruncateProteinName(reMatch.Groups[1].Value);
-                udtTerminusChars.NTerm = reMatch.Groups[2].Value[0];
-                udtTerminusChars.CTerm = reMatch.Groups[3].Value[0];
 
                 if (proteinInfo.ContainsKey(proteinName))
                 {
@@ -2830,7 +2822,13 @@ namespace PeptideHitResultsProcessor
                 }
                 else
                 {
-                    proteinInfo.Add(proteinName, udtTerminusChars);
+                    var terminusChars = new udtTerminusCharsType
+                    {
+                        NTerm = reMatch.Groups[2].Value[0],
+                        CTerm = reMatch.Groups[3].Value[0]
+                    };
+
+                    proteinInfo.Add(proteinName, terminusChars);
                 }
             }
 

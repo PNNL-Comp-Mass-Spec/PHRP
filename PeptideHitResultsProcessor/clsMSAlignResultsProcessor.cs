@@ -335,37 +335,37 @@ namespace PeptideHitResultsProcessor
 
             // Duplicate a portion of searchResults so that we can sort by PValue
 
-            var dctResultsSubset = new Dictionary<int, udtMSAlignSearchResultType>();
+            var resultsSubset = new Dictionary<int, udtMSAlignSearchResultType>();
             for (var index = startIndex; index <= endIndex; index++)
             {
-                dctResultsSubset.Add(index, searchResults[index]);
+                resultsSubset.Add(index, searchResults[index]);
             }
 
-            var resultsByProbability = (from item in dctResultsSubset orderby item.Value.PValueNum select item).ToList();
+            var resultsByProbability = (from item in resultsSubset orderby item.Value.PValueNum select item).ToList();
 
             double lastValue = 0;
             var currentRank = -1;
 
             foreach (var entry in resultsByProbability)
             {
-                var oResult = searchResults[entry.Key];
+                var result = searchResults[entry.Key];
 
                 if (currentRank < 0)
                 {
-                    lastValue = oResult.PValueNum;
+                    lastValue = result.PValueNum;
                     currentRank = 1;
                 }
                 else
                 {
-                    if (Math.Abs(oResult.PValueNum - lastValue) > double.Epsilon)
+                    if (Math.Abs(result.PValueNum - lastValue) > double.Epsilon)
                     {
-                        lastValue = oResult.PValueNum;
+                        lastValue = result.PValueNum;
                         currentRank += 1;
                     }
                 }
 
-                oResult.RankPValue = currentRank;
-                searchResults[entry.Key] = oResult;
+                result.RankPValue = currentRank;
+                searchResults[entry.Key] = result;
             }
         }
 
@@ -677,7 +677,7 @@ namespace PeptideHitResultsProcessor
                 // Initialize searchResult
                 var searchResult = new clsSearchResultsMSAlign(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize htPeptidesFoundForPValueLevel
+                // Initialize peptidesFoundForPValueLevel
                 var peptidesFoundForPValueLevel = new SortedSet<string>();
                 var previousPValue = string.Empty;
 
@@ -742,7 +742,7 @@ namespace PeptideHitResultsProcessor
                             if (searchResult.PValue == previousPValue)
                             {
                                 // New result has the same PValue as the previous result
-                                // See if htPeptidesFoundForPValueLevel contains the peptide, scan and charge
+                                // See if peptidesFoundForPValueLevel contains the peptide, scan and charge
 
                                 if (peptidesFoundForPValueLevel.Contains(key))
                                 {
@@ -757,13 +757,13 @@ namespace PeptideHitResultsProcessor
                             else
                             {
                                 // New PValue
-                                // Reset htPeptidesFoundForPValueLevel
+                                // Reset peptidesFoundForPValueLevel
                                 peptidesFoundForPValueLevel.Clear();
 
                                 // Update previousPValue
                                 previousPValue = searchResult.PValue;
 
-                                // Append a new entry to htPeptidesFoundForPValueLevel
+                                // Append a new entry to peptidesFoundForPValueLevel
                                 peptidesFoundForPValueLevel.Add(key);
                                 firstMatchForGroup = true;
                             }
@@ -936,8 +936,7 @@ namespace PeptideHitResultsProcessor
                 if (columnMapping[eMSAlignResultsFileColumns.Adjusted_precursor_mass] >= 0)
                 {
                     // Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
-                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Adjusted_precursor_mass],
-                                   out udtSearchResult.Adjusted_precursor_mass);
+                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
 
                     double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassMSAlign);
                 }
@@ -999,11 +998,9 @@ namespace PeptideHitResultsProcessor
                 // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                 udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Unexpected_modifications],
-                               out udtSearchResult.Unexpected_modifications);
+                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_modifications);
                 GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Matched_fragment_ions],
-                               out udtSearchResult.Matched_fragment_ions);
+                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
                 GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
                 if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
                     udtSearchResult.PValueNum = 0;
@@ -1269,13 +1266,10 @@ namespace PeptideHitResultsProcessor
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.MH], out string parentIonMH);
 
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Protein_Mass], out string proteinMass);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Unexpected_Mod_Count],
-                               out string unexpectedModCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Peak_Count], out string peakCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Matched_Peak_Count],
-                               out string matchedPeakCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Matched_Fragment_Ion_Count],
-                               out string matchedFragmentIonCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.PValue], out string pValue);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Rank_PValue], out string rankPValue);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.EValue], out string eValue);

@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsInSpecTResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
             InitializeLocalVariables();
         }
 
@@ -202,10 +202,6 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        #region "Classwide Variables"
-
-        #endregion
-
         #region "Properties"
 
         public bool SortFHTAndSynFiles { get; set; }
@@ -213,15 +209,15 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         private void AddCurrentRecordToSearchResults(ref int currentScanResultsCount,
-            udtInspectSearchResultType[] udtSearchResultsCurrentScan,
+            udtInspectSearchResultType[] searchResultsCurrentScan,
             udtInspectSearchResultType udtSearchResult)
         {
-            if (currentScanResultsCount >= udtSearchResultsCurrentScan.Length)
+            if (currentScanResultsCount >= searchResultsCurrentScan.Length)
             {
-                Array.Resize(ref udtSearchResultsCurrentScan, udtSearchResultsCurrentScan.Length * 2);
+                Array.Resize(ref searchResultsCurrentScan, searchResultsCurrentScan.Length * 2);
             }
 
-            udtSearchResultsCurrentScan[currentScanResultsCount] = udtSearchResult;
+            searchResultsCurrentScan[currentScanResultsCount] = udtSearchResult;
             currentScanResultsCount += 1;
         }
 
@@ -279,10 +275,10 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Sorts the data by descending TotalPRMScore, than ranks each entry; in addition, computes normalized delta score (DeltaNorm) values
         /// </summary>
-        /// <param name="udtSearchResultsCurrentScan"></param>
+        /// <param name="searchResultsCurrentScan"></param>
         /// <param name="currentScanResultsCount"></param>
         /// <remarks></remarks>
-        private void AssignRankAndDeltaNormValues(ref udtInspectSearchResultType[] udtSearchResultsCurrentScan, int currentScanResultsCount)
+        private void AssignRankAndDeltaNormValues(ref udtInspectSearchResultType[] searchResultsCurrentScan, int currentScanResultsCount)
         {
             const float DeltaNormMQScore_If_Undefined = 0;
             const float DeltaNormTotalPRMScore_If_Undefined = 0;
@@ -293,75 +289,75 @@ namespace PeptideHitResultsProcessor
             var currentRank = 0;
 
             // Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending RankFScore
-            // All of the data in udtSearchResultsCurrentScan should have the same scan number
-            Array.Sort(udtSearchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeFScore);
+            // All of the data in searchResultsCurrentScan should have the same scan number
+            Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeFScore);
 
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
             {
-                if (index == 0 || udtSearchResultsCurrentScan[index].ChargeNum != lastCharge)
+                if (index == 0 || searchResultsCurrentScan[index].ChargeNum != lastCharge)
                 {
-                    lastCharge = udtSearchResultsCurrentScan[index].ChargeNum;
-                    lastValue = udtSearchResultsCurrentScan[index].FScoreNum;
+                    lastCharge = searchResultsCurrentScan[index].ChargeNum;
+                    lastValue = searchResultsCurrentScan[index].FScoreNum;
                     currentRank = 1;
                 }
                 else
                 {
-                    if (Math.Abs(udtSearchResultsCurrentScan[index].FScoreNum - lastValue) > float.Epsilon)
+                    if (Math.Abs(searchResultsCurrentScan[index].FScoreNum - lastValue) > float.Epsilon)
                     {
-                        lastValue = udtSearchResultsCurrentScan[index].FScoreNum;
+                        lastValue = searchResultsCurrentScan[index].FScoreNum;
                         currentRank += 1;
                     }
                 }
 
-                udtSearchResultsCurrentScan[index].RankFScore = currentRank;
+                searchResultsCurrentScan[index].RankFScore = currentRank;
             }
 
             // Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending MQScore (note that MQScore can be negative)
-            // All of the data in udtSearchResultsCurrentScan should have the same scan number
-            Array.Sort(udtSearchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeMQScore);
+            // All of the data in searchResultsCurrentScan should have the same scan number
+            Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeMQScore);
 
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
             {
-                if (index < currentScanResultsCount - 1 && udtSearchResultsCurrentScan[index].ChargeNum == udtSearchResultsCurrentScan[index + 1].ChargeNum)
+                if (index < currentScanResultsCount - 1 && searchResultsCurrentScan[index].ChargeNum == searchResultsCurrentScan[index + 1].ChargeNum)
                 {
-                    udtSearchResultsCurrentScan[index].DeltaNormMQScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan[index].MQScoreNum, udtSearchResultsCurrentScan[index + 1].MQScoreNum, DeltaNormMQScore_If_Undefined);
+                    searchResultsCurrentScan[index].DeltaNormMQScore = ComputeDeltaNormScore(searchResultsCurrentScan[index].MQScoreNum, searchResultsCurrentScan[index + 1].MQScoreNum, DeltaNormMQScore_If_Undefined);
                 }
                 else
                 {
-                    udtSearchResultsCurrentScan[index].DeltaNormMQScore = 0;
+                    searchResultsCurrentScan[index].DeltaNormMQScore = 0;
                 }
             }
 
             // Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending PValue
-            // All of the data in udtSearchResultsCurrentScan should have the same scan number
-            Array.Sort(udtSearchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeTotalPRMDesc);
+            // All of the data in searchResultsCurrentScan should have the same scan number
+            Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeTotalPRMDesc);
 
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
             {
-                if (index == 0 || udtSearchResultsCurrentScan[index].ChargeNum != lastCharge)
+                if (index == 0 || searchResultsCurrentScan[index].ChargeNum != lastCharge)
                 {
-                    lastCharge = udtSearchResultsCurrentScan[index].ChargeNum;
-                    lastValue = udtSearchResultsCurrentScan[index].TotalPRMScoreNum;
+                    lastCharge = searchResultsCurrentScan[index].ChargeNum;
+                    lastValue = searchResultsCurrentScan[index].TotalPRMScoreNum;
                     currentRank = 1;
                 }
                 else
                 {
-                    if (Math.Abs(udtSearchResultsCurrentScan[index].TotalPRMScoreNum - lastValue) > float.Epsilon)
+                    if (Math.Abs(searchResultsCurrentScan[index].TotalPRMScoreNum - lastValue) > float.Epsilon)
                     {
-                        lastValue = udtSearchResultsCurrentScan[index].TotalPRMScoreNum;
+                        lastValue = searchResultsCurrentScan[index].TotalPRMScoreNum;
                         currentRank += 1;
                     }
                 }
 
-                udtSearchResultsCurrentScan[index].RankTotalPRMScore = currentRank;
+                searchResultsCurrentScan[index].RankTotalPRMScore = currentRank;
 
-                if (index < currentScanResultsCount - 1 && udtSearchResultsCurrentScan[index].ChargeNum == udtSearchResultsCurrentScan[index + 1].ChargeNum)
+                if (index < currentScanResultsCount - 1 && searchResultsCurrentScan[index].ChargeNum == searchResultsCurrentScan[index + 1].ChargeNum)
                 {
-                    udtSearchResultsCurrentScan[index].DeltaNormTotalPRMScore = ComputeDeltaNormScore(udtSearchResultsCurrentScan[index].TotalPRMScoreNum, udtSearchResultsCurrentScan[index + 1].TotalPRMScoreNum, DeltaNormTotalPRMScore_If_Undefined);
+                    searchResultsCurrentScan[index].DeltaNormTotalPRMScore = ComputeDeltaNormScore(searchResultsCurrentScan[index].TotalPRMScoreNum, searchResultsCurrentScan[index + 1].TotalPRMScoreNum, DeltaNormTotalPRMScore_If_Undefined);
                 }
                 else
                 {
-                    udtSearchResultsCurrentScan[index].DeltaNormTotalPRMScore = 0;
+                    searchResultsCurrentScan[index].DeltaNormTotalPRMScore = 0;
                 }
             }
         }
@@ -468,7 +464,7 @@ namespace PeptideHitResultsProcessor
 
                         // Initialize array that will hold all of the records for a given scan
                         var currentScanResultsCount = 0;
-                        var udtSearchResultsCurrentScan = new udtInspectSearchResultType[10];
+                        var searchResultsCurrentScan = new udtInspectSearchResultType[10];
 
                         // Initialize the list that will hold all of the records that will ultimately be written out to disk
                         var filteredSearchResults = new List<udtInspectSearchResultType>();
@@ -496,22 +492,22 @@ namespace PeptideHitResultsProcessor
 
                             if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
                             {
-                                // New scan encountered; sort and filter the data in udtSearchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
+                                // New scan encountered; sort and filter the data in searchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
                                 if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
                                 {
-                                    StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan,
+                                    StoreSynMatches(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan,
                                                     filteredSearchResults, ref errorLog, ref sortComparer);
                                 }
                                 else
                                 {
-                                    StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan,
+                                    StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan,
                                                      filteredSearchResults, ref errorLog, ref sortComparer);
                                 }
 
                                 currentScanResultsCount = 0;
                             }
 
-                            AddCurrentRecordToSearchResults(ref currentScanResultsCount, udtSearchResultsCurrentScan, udtSearchResult);
+                            AddCurrentRecordToSearchResults(ref currentScanResultsCount, searchResultsCurrentScan, udtSearchResult);
 
                             previousScan = udtSearchResult.ScanNum;
 
@@ -524,12 +520,12 @@ namespace PeptideHitResultsProcessor
                         {
                             if (eFilteredOutputFileType == eFilteredOutputFileTypeConstants.SynFile)
                             {
-                                StoreSynMatches(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults,
+                                StoreSynMatches(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan, filteredSearchResults,
                                                 ref errorLog, ref sortComparer);
                             }
                             else
                             {
-                                StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, udtSearchResultsCurrentScan, filteredSearchResults,
+                                StoreTopFHTMatch(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan, filteredSearchResults,
                                                  ref errorLog, ref sortComparer);
                             }
 
@@ -958,7 +954,7 @@ namespace PeptideHitResultsProcessor
                 // Initialize searchResult
                 var searchResult = new clsSearchResultsInSpecT(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize htPeptidesFoundForTotalPRMScoreLevel
+                // Initialize peptidesFoundForTotalPRMScoreLevel
                 var peptidesFoundForTotalPRMScoreLevel = new SortedSet<string>();
                 var previousTotalPRMScore = string.Empty;
 
@@ -1033,7 +1029,7 @@ namespace PeptideHitResultsProcessor
                             if (searchResult.TotalPRMScore == previousTotalPRMScore)
                             {
                                 // New result has the same TotalPRMScore as the previous result
-                                // See if htPeptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
+                                // See if peptidesFoundForTotalPRMScoreLevel contains the peptide, scan and charge
 
                                 if (peptidesFoundForTotalPRMScoreLevel.Contains(key))
                                 {
@@ -1048,13 +1044,13 @@ namespace PeptideHitResultsProcessor
                             else
                             {
                                 // New TotalPRMScore
-                                // Reset htPeptidesFoundForTotalPRMScoreLevel
+                                // Reset peptidesFoundForTotalPRMScoreLevel
                                 peptidesFoundForTotalPRMScoreLevel.Clear();
 
                                 // Update previousTotalPRMScore
                                 previousTotalPRMScore = searchResult.TotalPRMScore;
 
-                                // Append a new entry to htPeptidesFoundForTotalPRMScoreLevel
+                                // Append a new entry to peptidesFoundForTotalPRMScoreLevel
                                 peptidesFoundForTotalPRMScoreLevel.Add(key);
                                 firstMatchForGroup = true;
                             }
@@ -1869,26 +1865,26 @@ namespace PeptideHitResultsProcessor
             TextWriter writer,
             ref int resultID,
             int currentScanResultsCount,
-            udtInspectSearchResultType[] udtSearchResultsCurrentScan,
+            udtInspectSearchResultType[] searchResultsCurrentScan,
             ICollection<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog,
             ref IComparer<udtInspectSearchResultType> sortComparer)
         {
             var currentCharge = short.MinValue;
 
-            AssignRankAndDeltaNormValues(ref udtSearchResultsCurrentScan, currentScanResultsCount);
+            AssignRankAndDeltaNormValues(ref searchResultsCurrentScan, currentScanResultsCount);
 
             // Sort udtFilteredSearchResults by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on sortComparer)
-            // All of the data in udtSearchResultsCurrentScan should have the same scan number
-            Array.Sort(udtSearchResultsCurrentScan, 0, currentScanResultsCount, sortComparer);
+            // All of the data in searchResultsCurrentScan should have the same scan number
+            Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortComparer);
 
             // Now store or write out the first match for each charge for this scan
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
             {
-                if (index == 0 || currentCharge != udtSearchResultsCurrentScan[index].ChargeNum)
+                if (index == 0 || currentCharge != searchResultsCurrentScan[index].ChargeNum)
                 {
-                    StoreOrWriteSearchResult(writer, ref resultID, udtSearchResultsCurrentScan[index], filteredSearchResults, ref errorLog);
-                    currentCharge = udtSearchResultsCurrentScan[index].ChargeNum;
+                    StoreOrWriteSearchResult(writer, ref resultID, searchResultsCurrentScan[index], filteredSearchResults, ref errorLog);
+                    currentCharge = searchResultsCurrentScan[index].ChargeNum;
                 }
             }
         }
@@ -1897,25 +1893,25 @@ namespace PeptideHitResultsProcessor
             TextWriter writer,
             ref int resultID,
             int currentScanResultsCount,
-            udtInspectSearchResultType[] udtSearchResultsCurrentScan,
+            udtInspectSearchResultType[] searchResultsCurrentScan,
             ICollection<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog,
             ref IComparer<udtInspectSearchResultType> sortComparer)
         {
-            AssignRankAndDeltaNormValues(ref udtSearchResultsCurrentScan, currentScanResultsCount);
+            AssignRankAndDeltaNormValues(ref searchResultsCurrentScan, currentScanResultsCount);
 
             // Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
-            // All of the data in udtSearchResultsCurrentScan should have the same scan number
-            Array.Sort(udtSearchResultsCurrentScan, 0, currentScanResultsCount, sortComparer);
+            // All of the data in searchResultsCurrentScan should have the same scan number
+            Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortComparer);
 
             // Now store or write out the matches that pass the filters
             for (var index = 0; index <= currentScanResultsCount - 1; index++)
             {
-                if (udtSearchResultsCurrentScan[index].PValueNum <= InspectSynopsisFilePValueThreshold ||
-                    udtSearchResultsCurrentScan[index].TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD ||
-                    udtSearchResultsCurrentScan[index].FScoreNum >= FSCORE_THRESHOLD)
+                if (searchResultsCurrentScan[index].PValueNum <= InspectSynopsisFilePValueThreshold ||
+                    searchResultsCurrentScan[index].TotalPRMScoreNum >= TOTALPRMSCORE_THRESHOLD ||
+                    searchResultsCurrentScan[index].FScoreNum >= FSCORE_THRESHOLD)
                 {
-                    StoreOrWriteSearchResult(writer, ref resultID, udtSearchResultsCurrentScan[index], filteredSearchResults, ref errorLog);
+                    StoreOrWriteSearchResult(writer, ref resultID, searchResultsCurrentScan[index], filteredSearchResults, ref errorLog);
                 }
             }
         }

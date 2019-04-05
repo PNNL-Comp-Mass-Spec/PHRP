@@ -22,7 +22,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODPlusResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
         }
 
         #region "Constants and Enums"
@@ -310,37 +310,37 @@ namespace PeptideHitResultsProcessor
 
             // Duplicate a portion of searchResults so that we can sort by descending Probability
 
-            var dctResultsSubset = new Dictionary<int, udtMODPlusSearchResultType>();
+            var resultsSubset = new Dictionary<int, udtMODPlusSearchResultType>();
             for (var index = startIndex; index <= endIndex; index++)
             {
-                dctResultsSubset.Add(index, searchResults[index]);
+                resultsSubset.Add(index, searchResults[index]);
             }
 
-            var resultsByScore = (from item in dctResultsSubset orderby item.Value.ScoreNum descending select item).ToList();
+            var resultsByScore = (from item in resultsSubset orderby item.Value.ScoreNum descending select item).ToList();
 
             double lastValue = 0;
             var currentRank = -1;
 
             foreach (var entry in resultsByScore)
             {
-                var oResult = searchResults[entry.Key];
+                var result = searchResults[entry.Key];
 
                 if (currentRank < 0)
                 {
-                    lastValue = oResult.ScoreNum;
+                    lastValue = result.ScoreNum;
                     currentRank = 1;
                 }
                 else
                 {
-                    if (Math.Abs(oResult.ScoreNum - lastValue) > double.Epsilon)
+                    if (Math.Abs(result.ScoreNum - lastValue) > double.Epsilon)
                     {
-                        lastValue = oResult.ScoreNum;
+                        lastValue = result.ScoreNum;
                         currentRank += 1;
                     }
                 }
 
-                oResult.RankScore = currentRank;
-                searchResults[entry.Key] = oResult;
+                result.RankScore = currentRank;
+                searchResults[entry.Key] = result;
             }
         }
 
@@ -937,8 +937,7 @@ namespace PeptideHitResultsProcessor
 
                 if (splitLine.Length > (int)eMODPlusResultsFileColumns.ProteinAndPeptidePositionList)
                 {
-                    GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.ProteinAndPeptidePositionList],
-                                   out udtSearchResult.ProteinList);
+                    GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.ProteinAndPeptidePositionList], out udtSearchResult.ProteinList);
 
                     // The protein column will have both the protein name and the peptide position
                     // For example, ref|YP_001038741.1[R.67~78.L(2)]
@@ -955,8 +954,7 @@ namespace PeptideHitResultsProcessor
                     {
                         if (splitLine.Length > (int)eMODPlusResultsFileColumns.ModificationAnnotation)
                         {
-                            GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.ModificationAnnotation],
-                                           out udtSearchResult.ModificationAnnotation);
+                            GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.ModificationAnnotation], out udtSearchResult.ModificationAnnotation);
                         }
                     }
                 }

@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSPathFinderResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
 
             mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }
@@ -853,8 +853,7 @@ namespace PeptideHitResultsProcessor
                 udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
                 // Theoretical monoisotopic mass of the peptide (uncharged, including mods), as computed by MSPathFinder
-                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.CalculatedMonoMass],
-                               out udtSearchResult.CalculatedMonoMass);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
                 double.TryParse(udtSearchResult.CalculatedMonoMass, out sequenceMonoMassMSPathFinder);
 
                 GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.PrefixResidue], out udtSearchResult.PrefixResidue);
@@ -880,10 +879,8 @@ namespace PeptideHitResultsProcessor
                 // Compute monoisotopic mass of the peptide
                 udtSearchResult.CalculatedMonoMassPHRP = ComputePeptideMass(udtSearchResult.Sequence, totalModMass);
 
-                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz],
-                               out udtSearchResult.MostAbundantIsotopeMz);
-                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.NumMatchedFragments],
-                               out udtSearchResult.NumMatchedFragments);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.MostAbundantIsotopeMz], out udtSearchResult.MostAbundantIsotopeMz);
+                GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.NumMatchedFragments], out udtSearchResult.NumMatchedFragments);
 
                 if (GetColumnValue(splitLine, columnMapping[eMSPathFinderResultsFileColumns.SpecEValue], out udtSearchResult.SpecEValue))
                 {

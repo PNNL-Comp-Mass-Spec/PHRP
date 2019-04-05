@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsTopPICResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
             InitializeLocalVariables();
         }
 
@@ -342,42 +342,39 @@ namespace PeptideHitResultsProcessor
             int startIndex,
             int endIndex)
         {
-            // Prior to September 2014 ranks were assign per charge state per scan;
-            // Ranks are now assigned per scan (across all charge states)
-
             // Duplicate a portion of searchResults so that we can sort by PValue
 
-            var dctResultsSubset = new Dictionary<int, udtTopPICSearchResultType>();
+            var resultsSubset = new Dictionary<int, udtTopPICSearchResultType>();
             for (var index = startIndex; index <= endIndex; index++)
             {
-                dctResultsSubset.Add(index, searchResults[index]);
+                resultsSubset.Add(index, searchResults[index]);
             }
 
-            var resultsByProbability = (from item in dctResultsSubset orderby item.Value.PValueNum select item).ToList();
+            var resultsByProbability = (from item in resultsSubset orderby item.Value.PValueNum select item).ToList();
 
             double lastValue = 0;
             var currentRank = -1;
 
             foreach (var entry in resultsByProbability)
             {
-                var oResult = searchResults[entry.Key];
+                var result = searchResults[entry.Key];
 
                 if (currentRank < 0)
                 {
-                    lastValue = oResult.PValueNum;
+                    lastValue = result.PValueNum;
                     currentRank = 1;
                 }
                 else
                 {
-                    if (Math.Abs(oResult.PValueNum - lastValue) > double.Epsilon)
+                    if (Math.Abs(result.PValueNum - lastValue) > double.Epsilon)
                     {
-                        lastValue = oResult.PValueNum;
+                        lastValue = result.PValueNum;
                         currentRank += 1;
                     }
                 }
 
-                oResult.RankPValue = currentRank;
-                searchResults[entry.Key] = oResult;
+                result.RankPValue = currentRank;
+                searchResults[entry.Key] = result;
             }
         }
 
@@ -634,7 +631,7 @@ namespace PeptideHitResultsProcessor
                 // Initialize searchResult
                 var searchResult = new clsSearchResultsTopPIC(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize htPeptidesFoundForPValueLevel
+                // Initialize peptidesFoundForPValueLevel
                 var peptidesFoundForPValueLevel = new SortedSet<string>();
                 var previousPValue = string.Empty;
 
@@ -699,7 +696,7 @@ namespace PeptideHitResultsProcessor
                             if (searchResult.PValue == previousPValue)
                             {
                                 // New result has the same PValue as the previous result
-                                // See if htPeptidesFoundForPValueLevel contains the peptide, scan and charge
+                                // See if peptidesFoundForPValueLevel contains the peptide, scan and charge
 
                                 if (peptidesFoundForPValueLevel.Contains(key))
                                 {
@@ -714,13 +711,13 @@ namespace PeptideHitResultsProcessor
                             else
                             {
                                 // New PValue
-                                // Reset htPeptidesFoundForPValueLevel
+                                // Reset peptidesFoundForPValueLevel
                                 peptidesFoundForPValueLevel.Clear();
 
                                 // Update previousPValue
                                 previousPValue = searchResult.PValue;
 
-                                // Append a new entry to htPeptidesFoundForPValueLevel
+                                // Append a new entry to peptidesFoundForPValueLevel
                                 peptidesFoundForPValueLevel.Add(key);
                                 firstMatchForGroup = true;
                             }
@@ -773,7 +770,7 @@ namespace PeptideHitResultsProcessor
                             {
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
-                            UpdateProgress(percentComplete);                            
+                            UpdateProgress(percentComplete);
                         }
                     }
 
@@ -903,8 +900,7 @@ namespace PeptideHitResultsProcessor
                 if (columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass] >= 0)
                 {
                     // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass],
-                                   out udtSearchResult.Adjusted_precursor_mass);
+                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
 
                     double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassTopPIC);
                 }
@@ -964,11 +960,9 @@ namespace PeptideHitResultsProcessor
                 // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                 udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Unexpected_modifications],
-                               out udtSearchResult.Unexpected_Mod_Count);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_Mod_Count);
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_fragment_ions],
-                               out udtSearchResult.Matched_fragment_ions);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
                 if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
                     udtSearchResult.PValueNum = 0;
@@ -1236,13 +1230,10 @@ namespace PeptideHitResultsProcessor
 
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.MH], out string parentIonMH);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Unexpected_Mod_Count],
-                               out string unexpectedModCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Peak_Count], out string peakCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Peak_Count],
-                               out string matchedPeakCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Fragment_Ion_Count],
-                               out string matchedFragmentIonCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.PValue], out string pValue);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Rank_PValue], out string rankPValue);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.EValue], out string eValue);
@@ -1594,8 +1585,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Evalue,
                     udtSearchResult.Qvalue,
                     udtSearchResult.Proteoform_FDR,
-                    udtSearchResult.FragMethod,
-                    udtSearchResult.VariablePTMs,
+                    udtSearchResult.VariablePTMs
                 };
 
                 writer.WriteLine(CollapseList(data));

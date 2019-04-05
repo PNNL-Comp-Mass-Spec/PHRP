@@ -21,7 +21,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODaResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
             InitializeLocalVariables();
         }
 
@@ -300,37 +300,37 @@ namespace PeptideHitResultsProcessor
 
             // Duplicate a portion of searchResults so that we can sort by descending Probability
 
-            var dctResultsSubset = new Dictionary<int, udtMODaSearchResultType>();
+            var resultsSubset = new Dictionary<int, udtMODaSearchResultType>();
             for (var index = startIndex; index <= endIndex; index++)
             {
-                dctResultsSubset.Add(index, searchResults[index]);
+                resultsSubset.Add(index, searchResults[index]);
             }
 
-            var resultsByProbability = (from item in dctResultsSubset orderby item.Value.ProbabilityNum descending select item).ToList();
+            var resultsByProbability = (from item in resultsSubset orderby item.Value.ProbabilityNum descending select item).ToList();
 
             double lastValue = 0;
             var currentRank = -1;
 
             foreach (var entry in resultsByProbability)
             {
-                var oResult = searchResults[entry.Key];
+                var result = searchResults[entry.Key];
 
                 if (currentRank < 0)
                 {
-                    lastValue = oResult.ProbabilityNum;
+                    lastValue = result.ProbabilityNum;
                     currentRank = 1;
                 }
                 else
                 {
-                    if (Math.Abs(oResult.ProbabilityNum - lastValue) > double.Epsilon)
+                    if (Math.Abs(result.ProbabilityNum - lastValue) > double.Epsilon)
                     {
-                        lastValue = oResult.ProbabilityNum;
+                        lastValue = result.ProbabilityNum;
                         currentRank += 1;
                     }
                 }
 
-                oResult.RankProbability = currentRank;
-                searchResults[entry.Key] = oResult;
+                result.RankProbability = currentRank;
+                searchResults[entry.Key] = result;
             }
         }
 

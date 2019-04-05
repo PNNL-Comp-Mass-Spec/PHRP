@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsSequestResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
             InitializeLocalVariables();
         }
 
@@ -53,9 +53,6 @@ namespace PeptideHitResultsProcessor
 
         #region "Classwide Variables"
 
-        #endregion
-
-        #region "Properties"
         #endregion
 
         private bool AddDynamicAndStaticResidueMods(
@@ -215,7 +212,7 @@ namespace PeptideHitResultsProcessor
                 // Initialize searchResult
                 var searchResult = new clsSearchResultsSequest(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Initialize htPeptidesFoundForXCorrLevel
+                // Initialize peptidesFoundForXCorrLevel
                 var peptidesFoundForXCorrLevel = new SortedSet<string>();
                 var previousXCorr = string.Empty;
 
@@ -286,7 +283,7 @@ namespace PeptideHitResultsProcessor
                             if (searchResult.PeptideXCorr == previousXCorr)
                             {
                                 // New result has the same XCorr as the previous results
-                                // See if htPeptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
+                                // See if peptidesFoundForXCorrLevel contains the peptide, scan, charge, and MH
 
                                 if (peptidesFoundForXCorrLevel.Contains(key))
                                 {
@@ -301,13 +298,13 @@ namespace PeptideHitResultsProcessor
                             else
                             {
                                 // New XCorr
-                                // Reset htPeptidesFoundForXCorrLevel
+                                // Reset peptidesFoundForXCorrLevel
                                 peptidesFoundForXCorrLevel.Clear();
 
                                 // Update previousXCorr
                                 previousXCorr = searchResult.PeptideXCorr;
 
-                                // Append a new entry to htPeptidesFoundForXCorrLevel
+                                // Append a new entry to peptidesFoundForXCorrLevel
                                 peptidesFoundForXCorrLevel.Add(key);
                                 firstMatchForGroup = true;
                             }

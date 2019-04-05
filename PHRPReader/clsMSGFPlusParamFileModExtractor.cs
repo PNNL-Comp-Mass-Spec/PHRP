@@ -744,8 +744,8 @@ namespace PHRPReader
         /// Resolve MSGF+, MSPathFinder, or TopPIC mods with mod definitions
         /// </summary>
         /// <param name="modInfo"></param>
-        /// <param name="oPeptideMods"></param>
-        public void ResolveMSGFPlusModsWithModDefinitions(List<udtModInfoType> modInfo, clsPeptideModificationContainer oPeptideMods)
+        /// <param name="peptideMods"></param>
+        public void ResolveMSGFPlusModsWithModDefinitions(List<udtModInfoType> modInfo, clsPeptideModificationContainer peptideMods)
         {
             if (modInfo == null)
                 return;
@@ -836,7 +836,7 @@ namespace PHRPReader
                         }
                     }
 
-                    var modificationDefinition = oPeptideMods.LookupModificationDefinitionByMassAndModType(
+                    var modificationDefinition = peptideMods.LookupModificationDefinitionByMassAndModType(
                         udtModInfo.ModMassVal, eModType, chTargetResidue, eResidueTerminusState, out _, true);
 
                     if (residueIndex == resIndexStart)
