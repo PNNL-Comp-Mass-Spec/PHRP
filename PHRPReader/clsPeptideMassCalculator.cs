@@ -94,6 +94,15 @@ namespace PHRPReader
             /// For Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
             /// </remarks>
             public char AffectedAtom;
+
+            /// <summary>
+            /// Modification mass and residue number
+            /// </summary>
+            /// <returns></returns>
+            public override string ToString()
+            {
+                return string.Format("{0:F4} Da on residue {1}", ModificationMass, ResidueLocInPeptide);
+            }
         }
 
         #endregion
