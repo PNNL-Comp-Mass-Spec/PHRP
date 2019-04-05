@@ -20,7 +20,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMSAlignResultsProcessor()
         {
-            mFileDate = "April 3, 2019";
+            mFileDate = "April 4, 2019";
             InitializeLocalVariables();
         }
 
@@ -157,6 +157,7 @@ namespace PeptideHitResultsProcessor
         private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
+            const int MOD_MASS_DIGITS_OF_PRECISION = 3;
 
             var parsingModMass = false;
             var modMassDigits = string.Empty;
@@ -169,6 +170,17 @@ namespace PeptideHitResultsProcessor
 
             var clearAmbiguousResidue = false;
             var storeAmbiguousResidue = false;
+
+            // ReSharper disable CommentTypo
+
+            // Examine sequence, which will look something like:
+            // (ST)[-1.02]YSLSSTLTLSKADYEKHKVYACEVTHQGLSSPVTKSFNRGEC
+            // (VHTFPAVLQSSGLYSLSSV)[-.99]VTVPSSSLGTQTYICNVNHKPSNTKVDKKVEPKSCDKTH
+
+            // ReSharper restore CommentTypo
+
+            // When a modification mass follows a series of residues in parentheses, that means an ambiguous mod,
+            // i.e. we don't know which residue to associate the mod with
 
             var sequence = searchResult.PeptideSequenceWithMods;
             for (var index = 0; index <= sequence.Length - 1; index++)
@@ -194,6 +206,7 @@ namespace PeptideHitResultsProcessor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
+                        // Only add this modification if it is a static mod; dynamic mods are handled later in this method when a ']' is found
                         if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.eModificationTypeConstants.StaticMod)
                             continue;
 
@@ -255,7 +268,7 @@ namespace PeptideHitResultsProcessor
                             residueLocForMod = 1;
                         }
 
-                        var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts);
+                        var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts, MOD_MASS_DIGITS_OF_PRECISION);
 
                         if (!success)
                         {
