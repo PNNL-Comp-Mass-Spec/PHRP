@@ -58,7 +58,6 @@ namespace PeptideHitResultsProcessor
 
         #region "Constants and Enums"
 
-        protected const string SEP_CHAR = "\t";
         private const string UNIQUE_SEQ_TO_PROTEIN_MAP_SEP = "_";
 
         private const string COLUMN_NAME_UNIQUE_SEQ_ID = "Unique_Seq_ID";
@@ -1691,31 +1690,53 @@ namespace PeptideHitResultsProcessor
             // Clear the sequence to protein map
             mSeqToProteinMap.Clear();
 
+            var resultToSeqMapHeaders = new List<string>
+            {
+                "Result_ID",
+                COLUMN_NAME_UNIQUE_SEQ_ID
+            };
+
+            var seqInfoHeaders = new List<string>
+            {
+                COLUMN_NAME_UNIQUE_SEQ_ID,
+                "Mod_Count",
+                "Mod_Description",
+                "Monoisotopic_Mass"
+            };
+
+            var modDetailsHeaders = new List<string>
+            {
+                COLUMN_NAME_UNIQUE_SEQ_ID,
+                "Mass_Correction_Tag",
+                "Position"
+            };
+
+            var seqToProteinMapHeaders = new List<string>
+            {
+                COLUMN_NAME_UNIQUE_SEQ_ID,
+                "Cleavage_State",
+                "Terminus_State",
+                COLUMN_NAME_PROTEIN_NAME,
+                "Protein_Expectation_Value_Log(e)",
+                "Protein_Intensity_Log(I)"
+            };
+
+
             // Initialize the ResultToSeqMap file
             mResultToSeqMapFile = new StreamWriter(resultToSeqMapFilePath);
-            mResultToSeqMapFile.WriteLine("Result_ID" + SEP_CHAR + COLUMN_NAME_UNIQUE_SEQ_ID);
+            mResultToSeqMapFile.WriteLine(CollapseList(resultToSeqMapHeaders));
 
             // Initialize the SeqInfo file
             mSeqInfoFile = new StreamWriter(seqInfoFilePath, false);
-            mSeqInfoFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID + SEP_CHAR +
-                                   "Mod_Count" + SEP_CHAR +
-                                   "Mod_Description" + SEP_CHAR +
-                                   "Monoisotopic_Mass");
+            mSeqInfoFile.WriteLine(CollapseList(seqInfoHeaders));
 
             // Initialize the ModDetails file
             mModDetailsFile = new StreamWriter(modDetailsFilePath);
-            mModDetailsFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID + SEP_CHAR +
-                                      "Mass_Correction_Tag" + SEP_CHAR +
-                                      "Position");
+            mModDetailsFile.WriteLine(CollapseList(modDetailsHeaders));
 
             // Initialize the SeqToProtein map file
             mSeqToProteinMapFile = new StreamWriter(seqToProteinMapFilePath, false);
-            mSeqToProteinMapFile.WriteLine(COLUMN_NAME_UNIQUE_SEQ_ID + SEP_CHAR +
-                                           "Cleavage_State" + SEP_CHAR +
-                                           "Terminus_State" + SEP_CHAR +
-                                           COLUMN_NAME_PROTEIN_NAME + SEP_CHAR +
-                                           "Protein_Expectation_Value_Log(e)" + SEP_CHAR +
-                                           "Protein_Intensity_Log(I)");
+            mSeqToProteinMapFile.WriteLine(CollapseList(seqToProteinMapHeaders));
 
             return true;
         }
@@ -2100,12 +2121,17 @@ namespace PeptideHitResultsProcessor
             using (var writer = new StreamWriter(modificationSummaryFilePath, false))
             {
                 // Write the header line
-                writer.WriteLine(clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol + SEP_CHAR +
-                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass + SEP_CHAR +
-                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues + SEP_CHAR +
-                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type + SEP_CHAR +
-                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag + SEP_CHAR +
-                                 clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count);
+                var headerNames = new List<string>
+                {
+                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol,
+                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass,
+                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues,
+                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type,
+                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag,
+                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count
+                };
+
+                writer.WriteLine(CollapseList(headerNames));
 
                 for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
                 {
@@ -2114,14 +2140,16 @@ namespace PeptideHitResultsProcessor
                     if (searchResult.OccurrenceCount <= 0 && searchResult.UnknownModAutoDefined)
                         continue;
 
+                    var data = new List<string>
                     {
-                        writer.WriteLine(searchResult.ModificationSymbol + SEP_CHAR +
-                                         searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture) + SEP_CHAR +
-                                         searchResult.TargetResidues + SEP_CHAR +
-                                         clsModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType) + SEP_CHAR +
-                                         searchResult.MassCorrectionTag + SEP_CHAR +
-                                         searchResult.OccurrenceCount);
-                    }
+                        searchResult.ModificationSymbol.ToString(),
+                        searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture),
+                        searchResult.TargetResidues,
+                        clsModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType).ToString(),
+                        searchResult.MassCorrectionTag,
+                        searchResult.OccurrenceCount.ToString()
+                    };
+                    writer.WriteLine(CollapseList(data));
                 }
             }
         }
@@ -2140,17 +2168,26 @@ namespace PeptideHitResultsProcessor
             if (updateResultToSeqMapFile)
             {
                 // Write a new entry to the ResultToSeqMap file
-                mResultToSeqMapFile.WriteLine(searchResult.ResultID + SEP_CHAR + uniqueSeqID);
+                var seqMapData = new List<string>
+                {
+                    searchResult.ResultID.ToString(),
+                    uniqueSeqID.ToString()
+                };
+                mResultToSeqMapFile.WriteLine(CollapseList(seqMapData));
 
                 // Only write this entry to the SeqInfo and ModDetails files if existingSequenceFound is False
 
                 if (!existingSequenceFound)
                 {
                     // Write a new entry to the SeqInfo file
-                    mSeqInfoFile.WriteLine(uniqueSeqID + SEP_CHAR +
-                                           searchResult.SearchResultModificationCount + SEP_CHAR +
-                                           searchResult.PeptideModDescription + SEP_CHAR +
-                                           PRISM.StringUtilities.DblToString(searchResult.PeptideMonoisotopicMass, 5, 0.000001));
+                    var seqInfoData = new List<string>
+                    {
+                        uniqueSeqID.ToString(),
+                        searchResult.SearchResultModificationCount.ToString(),
+                        searchResult.PeptideModDescription,
+                        PRISM.StringUtilities.DblToString(searchResult.PeptideMonoisotopicMass, 5, 0.000001)
+                    };
+                    mSeqInfoFile.WriteLine(CollapseList(seqInfoData));
 
                     if (searchResult.SearchResultModificationCount > 0)
                     {
@@ -2180,9 +2217,15 @@ namespace PeptideHitResultsProcessor
                         for (var index = 0; index <= searchResult.SearchResultModificationCount - 1; index++)
                         {
                             var resultModDetails = searchResult.GetSearchResultModDetailsByIndex(pointerArray[index]);
-                            mModDetailsFile.WriteLine(uniqueSeqID + SEP_CHAR +
-                                                      resultModDetails.ModDefinition.MassCorrectionTag + SEP_CHAR +
-                                                      resultModDetails.ResidueLocInPeptide);
+
+                            var modDetailsData = new List<string>
+                            {
+                                uniqueSeqID.ToString(),
+                                resultModDetails.ModDefinition.MassCorrectionTag,
+                                resultModDetails.ResidueLocInPeptide.ToString()
+                            };
+
+                            mModDetailsFile.WriteLine(CollapseList(modDetailsData));
                         }
                     }
                 }
@@ -2191,12 +2234,17 @@ namespace PeptideHitResultsProcessor
             // Write a new entry to the SeqToProteinMap file if not yet defined
             if (!CheckSeqToProteinMapDefined(uniqueSeqID, searchResult.ProteinName))
             {
-                mSeqToProteinMapFile.WriteLine(uniqueSeqID + SEP_CHAR +
-                                               Convert.ToInt32(searchResult.PeptideCleavageState) + SEP_CHAR +
-                                               Convert.ToInt32(searchResult.PeptideTerminusState) + SEP_CHAR +
-                                               searchResult.ProteinName + SEP_CHAR +
-                                               searchResult.ProteinExpectationValue + SEP_CHAR +
-                                               searchResult.ProteinIntensity);
+                var seqToProteinData = new List<string>
+                {
+                    uniqueSeqID.ToString(),
+                    Convert.ToInt32(searchResult.PeptideCleavageState).ToString(),
+                    Convert.ToInt32(searchResult.PeptideTerminusState).ToString(),
+                    searchResult.ProteinName,
+                    searchResult.ProteinExpectationValue,
+                    searchResult.ProteinIntensity
+                };
+
+                mSeqToProteinMapFile.WriteLine(CollapseList(seqToProteinData));
             }
         }
 
