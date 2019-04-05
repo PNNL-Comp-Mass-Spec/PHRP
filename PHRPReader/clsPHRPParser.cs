@@ -1425,79 +1425,77 @@ namespace PHRPReader
         /// <remarks></remarks>
         protected bool UpdatePSMUsingSeqInfo(clsPSM currentPSM)
         {
-            var success = false;
+            if (mResultToSeqMap == null || mResultToSeqMap.Count == 0)
+            {
+                return false;
+            }
 
             // First determine the modified residues present in this peptide
-            if (mResultToSeqMap != null && mResultToSeqMap.Count > 0)
+            if (!mResultToSeqMap.TryGetValue(currentPSM.ResultID, out var seqID))
             {
-                if (mResultToSeqMap.TryGetValue(currentPSM.ResultID, out var seqID))
+                return false;
+            }
+
+            currentPSM.SeqID = seqID;
+
+            if (mSeqInfo.TryGetValue(seqID, out var seqInfo))
+            {
+                StoreModInfo(currentPSM, seqInfo);
+            }
+
+            // Lookup the protein details using mSeqToProteinMap
+            if (mSeqToProteinMap.TryGetValue(seqID, out var proteinDetails))
+            {
+                foreach (var protein in proteinDetails)
                 {
-                    currentPSM.SeqID = seqID;
+                    currentPSM.AddProteinDetail(protein);
+                }
+            }
 
-                    if (mSeqInfo.TryGetValue(seqID, out var seqInfo))
-                    {
-                        StoreModInfo(currentPSM, seqInfo);
-                        success = true;
-                    }
+            // Make sure all of the proteins in currentPSM.Proteins are defined in currentPSM.ProteinDetails
+            var additionalProteins1 = currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.OrdinalIgnoreCase).ToList();
 
-                    // Lookup the protein details using mSeqToProteinMap
-                    if (mSeqToProteinMap.TryGetValue(seqID, out var proteinDetails))
+            foreach (var proteinName in additionalProteins1)
+            {
+                if (MaxProteinsPerPSM > 0 && currentPSM.ProteinDetails.Count > MaxProteinsPerPSM)
+                {
+                    // Maximum number of proteins reached (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
+                    break;
+                }
+
+                var proteinInfo = new clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific,
+                                                     clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None);
+                currentPSM.AddProtein(proteinInfo);
+            }
+
+            if (mPepToProteinMap.Count > 0)
+            {
+                // Make sure the residue start/end locations are up-to-date in currentPSM.ProteinDetails
+
+                if (mPepToProteinMap.TryGetValue(currentPSM.PeptideCleanSequence, out var pepToProteinMapInfo))
+                {
+                    foreach (var protein in currentPSM.ProteinDetails)
                     {
-                        foreach (var protein in proteinDetails)
+                        // Find the matching protein in pepToProteinMapInfo
+                        if (pepToProteinMapInfo.ProteinMapInfo.TryGetValue(protein.Key, out var locations))
                         {
-                            currentPSM.AddProteinDetail(protein);
-                        }
-                    }
-
-                    // Make sure all of the proteins in currentPSM.Proteins are defined in currentPSM.ProteinDetails
-                    var additionalProteins1 = currentPSM.Proteins.Except(currentPSM.ProteinDetails.Keys, StringComparer.OrdinalIgnoreCase).ToList();
-
-                    foreach (var proteinName in additionalProteins1)
-                    {
-                        if (MaxProteinsPerPSM > 0 && currentPSM.ProteinDetails.Count > MaxProteinsPerPSM)
-                        {
-                            // Maximum number of proteins reached (note that we allow for tracking one more than the maximum because we are merging data from two different data sources)
-                            break;
-                        }
-
-                        var proteinInfo = new clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific, clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None);
-                        currentPSM.AddProtein(proteinInfo);
-                    }
-
-                    if (mPepToProteinMap.Count > 0)
-                    {
-                        // Make sure the residue start/end locations are up-to-date in currentPSM.ProteinDetails
-
-                        if (mPepToProteinMap.TryGetValue(currentPSM.PeptideCleanSequence, out var pepToProteinMapInfo))
-                        {
-                            foreach (var protein in currentPSM.ProteinDetails)
-                            {
-                                // Find the matching protein in oPepToProteinMapInfo
-
-                                if (pepToProteinMapInfo.ProteinMapInfo.TryGetValue(protein.Key, out var locations))
-                                {
-                                    var udtFirstLocation = locations.First();
-                                    protein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd);
-                                }
-                            }
+                            var udtFirstLocation = locations.First();
+                            protein.Value.UpdateLocationInProtein(udtFirstLocation.ResidueStart, udtFirstLocation.ResidueEnd);
                         }
                     }
                 }
             }
 
-            if (success)
+            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(currentPSM.Peptide, out _, out var prefix, out var suffix))
             {
-                if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(currentPSM.Peptide, out _, out var prefix, out var suffix))
-                {
-                    currentPSM.PeptideWithNumericMods = prefix + "." + ConvertModsToNumericMods(currentPSM.PeptideCleanSequence, currentPSM.ModifiedResidues) + "." + suffix;
-                }
-                else
-                {
-                    currentPSM.PeptideWithNumericMods = ConvertModsToNumericMods(currentPSM.PeptideCleanSequence, currentPSM.ModifiedResidues);
-                }
+                currentPSM.PeptideWithNumericMods = prefix + "." + ConvertModsToNumericMods(currentPSM.PeptideCleanSequence, currentPSM.ModifiedResidues) + "." + suffix;
+            }
+            else
+            {
+                currentPSM.PeptideWithNumericMods = ConvertModsToNumericMods(currentPSM.PeptideCleanSequence, currentPSM.ModifiedResidues);
             }
 
-            return success;
+            return true;
         }
 
         private bool UpdatePSMFindMatchingModInfo(

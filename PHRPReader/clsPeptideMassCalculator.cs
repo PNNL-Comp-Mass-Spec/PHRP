@@ -354,46 +354,48 @@ namespace PHRPReader
             // Note that this call to ComputeSequenceMass will reset mErrorMessage
             var mass = ComputeSequenceMass(sequence);
 
-            if (mass >= 0 && modifiedResidues != null && modifiedResidues.Count > 0)
+            if (mass < 0 || modifiedResidues == null || modifiedResidues.Count == 0)
             {
-                var empiricalFormula = new clsEmpiricalFormula();
+                return mass;
+            }
 
-                foreach (var modifiedResidue in modifiedResidues)
+            var empiricalFormula = new clsEmpiricalFormula();
+
+            foreach (var modifiedResidue in modifiedResidues)
+            {
+                // Note: do not use String.IsNullOrWhiteSpace(modifiedResidue.AffectedAtom) since that does not work on a char
+
+                if (modifiedResidue.AffectedAtom == default(char) || modifiedResidue.AffectedAtom == NO_AFFECTED_ATOM_SYMBOL)
                 {
-                    // Note: do not use String.IsNullOrWhiteSpace(modifiedResidue.AffectedAtom) since that does not work on a char
+                    // Positional modification (static or dynamic mod)
+                    // Simply add the modification mass to mass
+                    mass += modifiedResidue.ModificationMass;
+                    continue;
+                }
 
-                    if (modifiedResidue.AffectedAtom == default(char) || modifiedResidue.AffectedAtom == NO_AFFECTED_ATOM_SYMBOL)
-                    {
-                        // Positional modification (static or dynamic mod)
-                        // Simply add the modification mass to mass
-                        mass += modifiedResidue.ModificationMass;
-                        continue;
-                    }
+                // Isotopic modification
+                if (empiricalFormula.ElementCounts.Count == 0)
+                {
+                    // Initialize empiricalFormula using the amino acid sequence
+                    var empiricalFormulaToAdd = ConvertAminoAcidSequenceToEmpiricalFormula(sequence);
+                    empiricalFormula.AddElements(empiricalFormulaToAdd);
+                }
 
-                    // Isotopic modification
-                    if (empiricalFormula.ElementCounts.Count == 0)
-                    {
-                        // Initialize empiricalFormula using the amino acid sequence
-                        var empiricalFormulaToAdd = ConvertAminoAcidSequenceToEmpiricalFormula(sequence);
-                        empiricalFormula.AddElements(empiricalFormulaToAdd);
-                    }
+                if (!mElementMonoMasses.ContainsKey(modifiedResidue.AffectedAtom.ToString()))
+                {
+                    mErrorMessage = "Unknown Affected Atom '" + modifiedResidue.AffectedAtom + "'";
+                    mass = -1;
+                    break;
+                }
 
-                    if (!mElementMonoMasses.ContainsKey(modifiedResidue.AffectedAtom.ToString()))
-                    {
-                        mErrorMessage = "Unknown Affected Atom '" + modifiedResidue.AffectedAtom + "'";
-                        mass = -1;
-                        break;
-                    }
-
-                    var elementCount = empiricalFormula.GetElementCount(modifiedResidue.AffectedAtom);
-                    if (elementCount == 0)
-                    {
-                        Console.WriteLine("Warning: no amino acids in {0} contain element {1}", sequence, modifiedResidue.AffectedAtom);
-                    }
-                    else
-                    {
-                        mass += elementCount * modifiedResidue.ModificationMass;
-                    }
+                var elementCount = empiricalFormula.GetElementCount(modifiedResidue.AffectedAtom);
+                if (elementCount == 0)
+                {
+                    Console.WriteLine("Warning: no amino acids in {0} contain element {1}", sequence, modifiedResidue.AffectedAtom);
+                }
+                else
+                {
+                    mass += elementCount * modifiedResidue.ModificationMass;
                 }
             }
 
