@@ -733,7 +733,8 @@ namespace PHRPReader
             }
 
             // Still no match; return a default modification with a mass of 0
-            var modificationDefinition = new clsModificationDefinition(modificationSymbol, 0) {
+            var modificationDefinition = new clsModificationDefinition(modificationSymbol, 0)
+            {
                 MassCorrectionTag = LookupMassCorrectionTagByMass(0)
             };
 
