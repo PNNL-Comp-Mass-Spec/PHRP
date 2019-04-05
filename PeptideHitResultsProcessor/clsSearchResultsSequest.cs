@@ -23,13 +23,8 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsSearchResultsSequest : clsSearchResultsBaseClass
     {
-        #region "Classwide Variables"
-
-        private string mPeptideXCorrNext;             // Not stored in the synopsis or first hits file; it can be computed from XCorr and DeltaCn2
-        #endregion
-
         #region "Properties"
-        // Auto-properties (only work with Visual Studio 2010)
+
         public string NumScans { get; set; }
         public string PeptideDeltaCn { get; set; }
         public string PeptideDeltaCn2 { get; set; }
@@ -45,7 +40,10 @@ namespace PeptideHitResultsProcessor
         public string IonsExpected { get; set; }
         public string DelMPPM { get; set; }
 
-        public string PeptideXCorrNext => mPeptideXCorrNext;
+        /// <summary>
+        /// Not stored in the synopsis or first hits file; it can be computed from XCorr and DeltaCn2
+        /// </summary>
+        public string PeptideXCorrNext { get; private set; }
 
         #endregion
 
@@ -82,7 +80,7 @@ namespace PeptideHitResultsProcessor
             IonsExpected = string.Empty;
             DelMPPM = string.Empty;
 
-            mPeptideXCorrNext = string.Empty;
+            PeptideXCorrNext = string.Empty;
         }
 
         private void ComputePeptideXCorrNext()
@@ -95,16 +93,16 @@ namespace PeptideHitResultsProcessor
                 if (float.TryParse(PeptideXCorr, out xCorr) &&
                     float.TryParse(PeptideDeltaCn2, out delCN2))
                 {
-                    mPeptideXCorrNext = (xCorr - delCN2 * xCorr).ToString();
+                    PeptideXCorrNext = (xCorr - delCN2 * xCorr).ToString();
                 }
                 else
                 {
-                    mPeptideXCorrNext = "0";
+                    PeptideXCorrNext = "0";
                 }
             }
             catch (Exception)
             {
-                mPeptideXCorrNext = "0";
+                PeptideXCorrNext = "0";
             }
         }
     }
