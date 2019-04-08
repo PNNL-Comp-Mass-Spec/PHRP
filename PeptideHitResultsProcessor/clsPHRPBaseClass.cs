@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "April 8, 2019";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -1473,9 +1473,6 @@ namespace PeptideHitResultsProcessor
 
         protected string GetCleanSequence(string sequenceWithMods, out string prefix, out string suffix)
         {
-            prefix = string.Empty;
-            suffix = string.Empty;
-
             if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out prefix, out suffix))
             {
                 // Remove any non-letter characters
