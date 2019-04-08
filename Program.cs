@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "April 4, 2019";
+        public const string PROGRAM_DATE = "April 8, 2019";
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional
@@ -159,6 +159,14 @@ namespace PeptideHitResultsProcRunner
                         MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
                     };
 
+                    var commandLineArgs = GetCommandLineArgs();
+                    if (mLogMessagesToFile && !string.IsNullOrEmpty(commandLineArgs))
+                    {
+                        mPeptideHitResultsProcRunner.SkipConsoleWriteIfNoStatusListener = true;
+                        mPeptideHitResultsProcRunner.LogAdditionalMessage(commandLineArgs);
+                        mPeptideHitResultsProcRunner.SkipConsoleWriteIfNoStatusListener = false;
+                    }
+
                     mPeptideHitResultsProcRunner.ErrorEvent += PeptideHitResultsProcRunner_ErrorEvent;
                     mPeptideHitResultsProcRunner.StatusEvent += PeptideHitResultsProcRunner_MessageEvent;
                     mPeptideHitResultsProcRunner.ProgressUpdate += PeptideHitResultsProcRunner_ProgressChanged;
@@ -230,6 +238,19 @@ namespace PeptideHitResultsProcRunner
         private static string GetAppVersion()
         {
             return PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppVersion(PROGRAM_DATE);
+        }
+
+        /// <summary>
+        /// Obtain the command line arguments, excluding the Exe
+        /// </summary>
+        /// <returns></returns>
+        private static string GetCommandLineArgs()
+        {
+            var commandLineArgs = Environment.GetCommandLineArgs();
+            if (commandLineArgs.Length <= 1)
+                return string.Empty;
+
+            return string.Join(" ", commandLineArgs.Skip(1));
         }
 
         /// <summary>

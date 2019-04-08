@@ -320,6 +320,15 @@ namespace PeptideHitResultsProcRunner
         }
 
         /// <summary>
+        /// Log an additional message to the log file
+        /// </summary>
+        /// <param name="message"></param>
+        public void LogAdditionalMessage(string message)
+        {
+            LogMessage(message);
+        }
+
+        /// <summary>
         /// Main processing function
         /// </summary>
         /// <param name="inputFilePath"></param>
