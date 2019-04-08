@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsTopPICResultsProcessor()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "April 8, 2019";
             InitializeLocalVariables();
         }
 
@@ -47,7 +47,14 @@ namespace PeptideHitResultsProcessor
 
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
-        private const string TopPIC_MOD_MASS_REGEX = @"\[([+-]*[0-9\.]+)\]";
+        /// <summary>
+        /// Regex to match mods in square brackets, examples:
+        /// [11.94403]
+        /// [15.98154]
+        /// [-109.08458]
+        /// [Acetyl]
+        /// </summary>
+        private const string TopPIC_MOD_MASS_OR_NAME_REGEX = @"\[(?<ModMass>[+-]*[0-9\.]+)\]|\[(?<NamedMod>[^\]]+)\]";
 
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
@@ -158,6 +165,12 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
+        #region "Classwide Variables"
+
+        private readonly SortedSet<string> mUnknownNamedMods = new SortedSet<string>();
+
+        #endregion
+
         /// <summary>
         /// Step through .PeptideSequenceWithMods
         /// For each residue, check if a static mod is defined that affects that residue
@@ -170,8 +183,8 @@ namespace PeptideHitResultsProcessor
         {
             const char NO_RESIDUE = '-';
 
-            var parsingModMass = false;
-            var modMassDigits = string.Empty;
+            var parsingModInfo = false;
+            var modMassOrName = string.Empty;
 
             var chMostRecentResidue = NO_RESIDUE;
             var residueLocInPeptide = 0;
@@ -187,7 +200,7 @@ namespace PeptideHitResultsProcessor
             {
                 var chChar = sequence[index];
 
-                if (IsLetterAtoZ(chChar))
+                if (!parsingModInfo && IsLetterAtoZ(chChar))
                 {
                     chMostRecentResidue = chChar;
                     residueLocInPeptide += 1;
@@ -232,59 +245,88 @@ namespace PeptideHitResultsProcessor
                 }
                 else if (chChar == '[')
                 {
-                    // Mod Mass Start
-                    modMassDigits = string.Empty;
-                    parsingModMass = true;
+                    // Mod Info Start
+                    modMassOrName = string.Empty;
+                    parsingModInfo = true;
                 }
                 else if (chChar == ']')
                 {
-                    // Mod Mass End
+                    // Mod Info End
 
-                    if (parsingModMass)
+                    if (!parsingModInfo) continue;
+
+                    char residueForMod;
+                    int residueLocForMod;
+
+                    if (chAmbiguousResidue == NO_RESIDUE)
                     {
-                        char residueForMod;
-                        int residueLocForMod;
+                        residueForMod = chMostRecentResidue;
+                        residueLocForMod = residueLocInPeptide;
+                    }
+                    else
+                    {
+                        // Ambiguous mod
+                        // We'll associate it with the first residue of the mod group
+                        residueForMod = chAmbiguousResidue;
+                        residueLocForMod = ambiguousResidueLocInPeptide;
+                    }
 
-                        if (chAmbiguousResidue == NO_RESIDUE)
-                        {
-                            residueForMod = chMostRecentResidue;
-                            residueLocForMod = residueLocInPeptide;
-                        }
-                        else
-                        {
-                            // Ambiguous mod
-                            // We'll associate it with the first residue of the mod group
-                            residueForMod = chAmbiguousResidue;
-                            residueLocForMod = ambiguousResidueLocInPeptide;
-                        }
+                    if (residueLocForMod == 0)
+                    {
+                        // Modification is at the peptide N-terminus
+                        residueLocForMod = 1;
+                    }
 
-                        if (double.TryParse(modMassDigits, out var modMass))
+                    if (double.TryParse(modMassOrName, out var modMass))
+                    {
+                        var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts);
+                        if (!success)
                         {
-                            if (residueLocForMod == 0)
+                            var errorMessage = searchResult.ErrorMessage;
+                            if (string.IsNullOrEmpty(errorMessage))
                             {
-                                // Modification is at the peptide N-terminus
-                                residueLocForMod = 1;
+                                errorMessage = "SearchResultAddDynamicModification returned false for mod mass " + modMassOrName;
                             }
-
-                            var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts);
-
+                            SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
+                        }
+                    }
+                    else
+                    {
+                        // Named mod
+                        if (LookupModificationMassByName(modMassOrName, out var modMassFromUniMod))
+                        {
+                            var success = searchResult.SearchResultAddModification(modMassFromUniMod, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts);
                             if (!success)
                             {
                                 var errorMessage = searchResult.ErrorMessage;
                                 if (string.IsNullOrEmpty(errorMessage))
                                 {
-                                    errorMessage = "SearchResultAddDynamicModification returned false for mod mass " + modMassDigits;
+                                    errorMessage = string.Format("SearchResultAddDynamicModification returned false for mod named {0} with mass {1} ",
+                                                                 modMassOrName, modMassFromUniMod);
                                 }
                                 SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
                             }
                         }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(mErrorMessage))
+                            {
+                                var errorMessage = "Unknown mod name: " + modMassOrName;
+                                SetErrorMessage(errorMessage + "; ResultID = " + searchResult.ResultID);
+                            }
+                            else
+                            {
+                                OnDebugEvent(ErrorMessage);
+                            }
+                        }
 
-                        parsingModMass = false;
                     }
+
+                    parsingModInfo = false;
                 }
-                else if (parsingModMass)
+                else if (parsingModInfo)
                 {
-                    modMassDigits += chChar;
+                    modMassOrName += chChar;
                 }
                 else
                 {
@@ -396,6 +438,12 @@ namespace PeptideHitResultsProcessor
             return defaultValue.ToString();
         }
 
+        /// <summary>
+        /// Compute the peptide mass
+        /// </summary>
+        /// <param name="peptide">Sequence with mods, which can be either numeric or named ([15.98154] or [Acetyl])</param>
+        /// <param name="totalModMass"></param>
+        /// <returns></returns>
         private double ComputePeptideMass(string peptide, double totalModMass)
         {
             var cleanSequence = GetCleanSequence(peptide);
@@ -410,23 +458,28 @@ namespace PeptideHitResultsProcessor
             return mass;
         }
 
-        private static readonly Regex ModMassMatcher = new Regex(TopPIC_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ModMatcher = new Regex(TopPIC_MOD_MASS_OR_NAME_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Computes the total of all modification masses defined for the peptide
         /// </summary>
-        /// <param name="peptide">Peptide sequence, with mod masses in the form [23.5432]</param>
+        /// <param name="peptide">Peptide sequence, with mod masses in the form [23.5432] or [Acetyl]</param>
         /// <returns></returns>
         /// <remarks></remarks>
         private double ComputeTotalModMass(string peptide)
         {
             double totalModMass = 0;
 
-            foreach (Match reMatch in ModMassMatcher.Matches(peptide))
+            foreach (Match reMatch in ModMatcher.Matches(peptide))
             {
-                if (double.TryParse(reMatch.Groups[1].Value, out var modMassFound))
+                if (double.TryParse(reMatch.Groups["ModMass"].Value, out var modMassFound))
                 {
                     totalModMass += modMassFound;
+                }
+                else
+                {
+                    if (LookupModificationMassByName(reMatch.Groups["NamedMod"].Value, out var modMass))
+                        totalModMass += modMass;
                 }
             }
 
@@ -600,9 +653,49 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
+        private new string GetCleanSequence(string sequenceWithMods)
+        {
+            var primarySequence = GetCleanSequence(sequenceWithMods, out _, out _, out _);
+            return primarySequence;
+        }
+
+        private string GetCleanSequence(string sequenceWithMods, out string prefix, out string suffix, out string primarySequenceWithMods)
+        {
+            string primarySequence;
+
+            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out primarySequenceWithMods, out prefix, out suffix))
+            {
+                // Remove all mods
+                primarySequence = ModMatcher.Replace(primarySequenceWithMods, string.Empty);
+            }
+            else
+            {
+                // Sequence does not have prefix or suffix letters; use sequenceWithMods
+                primarySequenceWithMods = string.Copy(sequenceWithMods);
+                primarySequence = ModMatcher.Replace(sequenceWithMods, string.Empty);
+            }
+
+            // The primary sequence may still contain parentheses; remove them
+            return base.GetCleanSequence(primarySequence);
+        }
+
         private void InitializeLocalVariables()
         {
             // Nothing to do at present
+        }
+
+        private bool LookupModificationMassByName(string modName, out double modMass)
+        {
+            if (mPeptideMods.LookupModificationMassByName(modName, out modMass))
+                return true;
+
+            if (!mUnknownNamedMods.Contains(modName))
+            {
+                mUnknownNamedMods.Add(modName);
+                OnErrorEvent("Unrecognized named mod: " + modName);
+            }
+
+            return false;
         }
 
         private bool ParseTopPICSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
@@ -926,7 +1019,7 @@ namespace PeptideHitResultsProcessor
                 udtSearchResult.Proteoform = ReplaceTerminus(udtSearchResult.Proteoform);
 
                 // Parse the sequence to determine the total mod mass
-                // Note that we do not remove any of the mod symbols since TopPIC identifies mods by mass alone, and since mods can ambiguously apply to residues
+                // Note that we do not remove any of the mod symbols since TopPIC since mods can ambiguously apply to residues
                 var totalModMass = ComputeTotalModMass(udtSearchResult.Proteoform);
 
                 // Compute theoretical peptide monoisotopic mass, including mods, as computed by PHRP
@@ -1210,8 +1303,16 @@ namespace PeptideHitResultsProcessor
                     // Error; Leave .PeptideDeltaMass unchanged
                 }
 
-                // Calling this function will set .ProteoformPreResidues, .ProteoformPostResidues, .PeptideSequenceWithMods, and .ProteoformCleanSequence
-                searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
+                // Since peptideSequenceWithMods may contain named mods in square brackets,
+                // do not call searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods)
+                // and instead emulate what SetPeptideSequenceWithMods does
+
+                var primarySequenceWithoutMods = GetCleanSequence(peptideSequenceWithMods, out var prefix, out var suffix, out var primarySequenceWithMods);
+
+                searchResult.PeptidePreResidues = prefix;
+                searchResult.PeptidePostResidues = suffix;
+                searchResult.PeptideCleanSequence = primarySequenceWithoutMods;
+                searchResult.PeptideSequenceWithMods = primarySequenceWithMods;
 
                 var searchResultBase = (clsSearchResultsBaseClass)searchResult;
 

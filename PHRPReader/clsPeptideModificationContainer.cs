@@ -911,6 +911,48 @@ namespace PHRPReader
         }
 
         /// <summary>
+        /// Resolve a modification name to a modification mass
+        /// Checks both selected UniMod names and the names in mMassCorrectionTags
+        /// </summary>
+        /// <param name="modName">Modification name</param>
+        /// <param name="modMass">Monoisotopic mass</param>
+        /// <returns>True if found, otherwise false</returns>
+        public bool LookupModificationMassByName(string modName, out double modMass)
+        {
+            foreach (var item in mMassCorrectionTags)
+            {
+                if (string.Equals(item.Key, modName, StringComparison.OrdinalIgnoreCase))
+                {
+                    modMass = item.Value;
+                    return true;
+                }
+            }
+
+            switch (modName.ToLower())
+            {
+                case "deamidated":
+                    modMass = 0.984016;
+                    return true;
+                case "methyl":
+                    modMass = 14.01565;
+                    return true;
+                case "oxidation":
+                    modMass = 15.994915;
+                    return true;
+                case "acetyl":
+                    modMass = 42.010567;
+                    return true;
+                case "phospho":
+                    modMass = 79.966331;
+                    return true;
+                default:
+                    modMass = 0;
+                    return false;
+            }
+
+        }
+
+        /// <summary>
         /// Looks for an existing modification with the given modification mass, modification type, and target residues
         /// </summary>
         /// <param name="modificationMass"></param>
