@@ -1540,7 +1540,7 @@ namespace PeptideHitResultsProcessor
 
                         success = CreateFHTorSYNResultsFile(inputFilePath, synOutputFilePath, inspectModInfo, eFilteredOutputFileTypeConstants.SynFile);
 
-                        // Load the PeptideToProteinMap information; if the file doesn't exist, then a warning will be displayed, but processing will continue
+                        // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
                         // LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
                         var pepToProteinMapFilePath = Path.Combine(inputFile.Directory.FullName, Path.GetFileNameWithoutExtension(inputFile.Name) + FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING + ".txt");
 
@@ -1600,7 +1600,7 @@ namespace PeptideHitResultsProcessor
         private static readonly Regex RegexAllZeroes = new Regex(@"\.0+$", RegexOptions.Compiled);
 
         /// <summary>
-        /// If value ends in .0000, then remove the .0000 portion
+        /// If value ends in .0000, remove the .0000 portion
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -1706,7 +1706,7 @@ namespace PeptideHitResultsProcessor
                         var modMass = Convert.ToInt32(reMatch.Groups[1].Value);
 
                         // Compare the mod mass in the specification to this Mod's mod mass
-                        // If they are less than 0.5 Da apart, then assume we have a match; yes, this assumption is a bit flaky
+                        // If they are less than 0.5 Da apart, assume we have a match; yes, this assumption is a bit flaky
                         if (Math.Abs(modMass - Convert.ToDouble(inspectModInfo[index].ModMass)) <= 0.5)
                         {
                             // Match found

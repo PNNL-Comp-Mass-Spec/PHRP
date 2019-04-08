@@ -277,7 +277,7 @@ namespace PeptideHitResultsProcessor
 
         /// <summary>
         /// In XTandem this is the theoretical monoisotopic MH
-        /// In Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, then this is a monoisotopic mass
+        /// In Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, this is a monoisotopic mass
         /// In Inspect, MSGF+, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
         /// </summary>
         /// <value></value>
@@ -656,7 +656,7 @@ namespace PeptideHitResultsProcessor
 
         /// <summary>
         /// Associates the given modification symbol with the given residue
-        /// If the modification symbol is unknown, then will return False
+        /// Returns false if the modification symbol is unknown
         /// </summary>
         /// <param name="modificationSymbol"></param>
         /// <param name="chTargetResidue"></param>
@@ -706,7 +706,7 @@ namespace PeptideHitResultsProcessor
 
         /// <summary>
         /// Associates the given modification mass with the given residue
-        /// If the modification mass is unknown, then will auto-add it to the list of known modifications
+        /// If the modification mass is unknown, will auto-add it to the list of known modifications
         /// </summary>
         /// <param name="modificationMass"></param>
         /// <param name="chTargetResidue"></param>
@@ -727,7 +727,7 @@ namespace PeptideHitResultsProcessor
 
         /// <summary>
         /// Associates the given modification mass with the given residue
-        /// If the modification mass is unknown, then will auto-add it to the list of known modifications
+        /// If the modification mass is unknown, will auto-add it to the list of known modifications
         /// </summary>
         /// <param name="modificationMass"></param>
         /// <param name="chTargetResidue"></param>
@@ -754,7 +754,7 @@ namespace PeptideHitResultsProcessor
             else
             {
                 // Lookup the modification definition given the modification information
-                // If the modification mass is unknown, then will auto-add it to the list of known modifications
+                // If the modification mass is unknown, will auto-add it to the list of known modifications
                 var modificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(
                     modificationMass,
                     chTargetResidue,
@@ -1009,7 +1009,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Obtain the peptide sequence
         /// </summary>
-        /// <param name="returnSequenceWithMods">When true, then include the mod symbols in the sequence</param>
+        /// <param name="returnSequenceWithMods">When true, include the mod symbols in the sequence</param>
         /// <returns></returns>
         /// <remarks>
         /// If you want to guarantee that mod symbols are included in the peptide sequence,

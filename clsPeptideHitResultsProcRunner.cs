@@ -78,7 +78,7 @@ namespace PeptideHitResultsProcRunner
         /// <remarks>
         /// Setting this to true assumes the input file is a valid PHRP data file
         /// Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
-        /// When this is True, then mCreateProteinModsFile is assumed to be true
+        /// When this is True, mCreateProteinModsFile is assumed to be true
         /// </remarks>
         public bool CreateProteinModsUsingPHRPDataFile { get; set; }
 
@@ -108,7 +108,7 @@ namespace PeptideHitResultsProcRunner
         ///
         /// </summary>
         /// <returns></returns>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath</remarks>
+        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the the Fasta file specified by mFastaFilePath</remarks>
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
         public bool WarnMissingParameterFileSection { get; set; }
@@ -402,7 +402,7 @@ namespace PeptideHitResultsProcRunner
 
         /// <summary>
         /// Looks for file fileNameOrPath in the current working directory
-        /// If not found, then looks in sourceDirectoryPath
+        /// If not found, looks in sourceDirectoryPath
         /// </summary>
         /// <param name="sourceDirectoryPath">Path to the directory containing the input file</param>
         /// <param name="fileNameOrPath">File to find (either filename or full file path)</param>
@@ -638,7 +638,7 @@ namespace PeptideHitResultsProcRunner
 
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
                         mPeptideHitResultsProcessor = new clsMSGFDBResultsProcessor();
-                        LogMessage("Detected MSGFDB (or MSGF+) results file");
+                        LogMessage("Detected MSGF+ results file");
                         break;
 
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
@@ -730,5 +730,6 @@ namespace PeptideHitResultsProcRunner
         {
             LogMessage(warningMessage, MessageTypeConstants.Warning);
         }
+
     }
 }

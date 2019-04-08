@@ -146,7 +146,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        /// <param name="loadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
+        /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
         public clsPHRPParserMSAlign(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
             : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSAlign, loadModsAndSeqInfo)
@@ -402,7 +402,7 @@ namespace PHRPReader
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
-        /// <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
+        /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if success, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)

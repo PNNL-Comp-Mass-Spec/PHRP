@@ -76,8 +76,8 @@ namespace PHRPReader
             FScore = 14,
             DeltaScore = 15,
             DeltaScoreOther = 16,
-            DeltaNormMQScore = 17,                   // Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, then also storing 0.   This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
-            DeltaNormTotalPRMScore = 18,             // Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, then also storing 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
+            DeltaNormMQScore = 17,                   // Computed as Abs((MQScore(n) - MQScore(n+1)) / MQScore(n)); storing 0 for the lowest scoring result in each set. If MQScore(n) is 0, stores 0.  This value is not usable when MQScore(n) is <= 0, and should generally not be used when MQScore(n) is < 0.5
+            DeltaNormTotalPRMScore = 18,             // Computed as Abs((TotalPRMScore(n) - TotalPRMScore(n+1)) / TotalPRMScore(n)); storing 0 for the lowest scoring result in each set.  If TotalPRMScore(n) is 0, stores 0.  This value is not usable when TotalPRMScore(n) is <= 0, and should generally not be used when TotalPRMScore(n) is < 0.5
             RankTotalPRMScore = 19,                  // Rank 1 means highest TotalPRMScore, 2 means next lower score, etc. (ties get the same rank)
             RankFScore = 20,                         // Rank 1 means highest FScore, 2 means next lower, etc. (ties get the same rank)
             MH = 21,                                 // Theoretical monoisotopic peptide mass (computed by PHRP); note that this is (M+H)+
@@ -159,7 +159,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        /// <param name="loadModsAndSeqInfo">If True, then load the ModSummary file and SeqInfo files</param>
+        /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
         public clsPHRPParserInspect(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
             : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.Inspect, loadModsAndSeqInfo)
@@ -424,7 +424,7 @@ namespace PHRPReader
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
-        /// <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
+        /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if success, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)

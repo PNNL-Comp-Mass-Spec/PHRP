@@ -387,7 +387,7 @@ namespace PeptideHitResultsProcessor
                 OnDebugEvent("Setup params: PeptideHitResultsFilePath = " + m_PeptideHitResultsFilePath);
             }
 
-            // Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine then try to determine the correct format
+            // Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine, try to determine the correct format
             if (m_PeptideHitResultsFileFormat == clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine)
             {
                 m_PeptideHitResultsFileFormat = clsPHRPBaseClass.DetermineResultsFileFormat(m_PeptideHitResultsFilePath);

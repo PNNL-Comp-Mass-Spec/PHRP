@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor
     /// a tab-delimited text file with the data.  It will insert modification symbols
     /// into the peptide sequences for modified peptides.  The user can optionally provide
     /// a modification definition file which specifies the symbol to use for each
-    /// modification mass.  If the user does not provide this file, then the modification
+    /// modification mass.  If the user does not provide this file, the modification
     /// definition information is determined from the X!Tandem Input Parameters section at
     /// the end of the X!Tandem results file.
     /// </summary>
@@ -112,7 +112,7 @@ namespace PeptideHitResultsProcessor
         private readonly SortedSet<string> mSeqsWithoutMods;
 
         #endregion
-        
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -238,7 +238,7 @@ namespace PeptideHitResultsProcessor
         {
             // Parse out the mod information defined in paramValue
             // Add each entry to udtModInfo
-            // If parsingMotifDef = True, then do not try to determine .TargetResidues
+            // If parsingMotifDef = True, do not try to determine .TargetResidues
 
             const char MOD_LIST_SEP_CHAR = ',';
 
@@ -261,7 +261,7 @@ namespace PeptideHitResultsProcessor
                         // However, a neutral loss can be specified using "79.9663:-97.98@STY"
                         //   Thus, mod mass is number up to first non-numeric character (typically a colon or @ sign)
                         // Target residues are the residues after the @
-                        // If the Target residues contain an X, then the modification can apply to any residue
+                        // If the Target residues contain an X, the modification can apply to any residue
 
                         var modificationMass = 0.0;
 
@@ -362,7 +362,7 @@ namespace PeptideHitResultsProcessor
         {
             // Parse out the mass defined in paramValue
             // Add the entry to udtModInfo if non-zero
-            // if nTerminus = True then mod applies to the protein's N-Terminus; otherwise, applies to the protein's C-Terminus
+            // if nTerminus = True, the mod applies to the protein's N-Terminus; otherwise, applies to the protein's C-Terminus
 
             bool success;
 
@@ -721,7 +721,7 @@ namespace PeptideHitResultsProcessor
                                 // Update the protein name for this protein entry
 
                                 // Note: we truncate .ProteinName at the first space
-                                // However, if mLookForReverseSequenceTag = True then we need to look for ":reversed" at the end of the description
+                                // However, if mLookForReverseSequenceTag = True, we need to look for ":reversed" at the end of the description
                                 result.ProteinName = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
                                 result.ProteinName = TruncateProteinName(result.ProteinName);
 
@@ -748,7 +748,7 @@ namespace PeptideHitResultsProcessor
                                 }
                                 break;
                             case XTANDEM_XML_ELEMENT_NAME_DOMAIN:
-                                // If the given peptide is present in the protein more than once, then domain will appear twice
+                                // If the given peptide is present in the protein more than once, domain will appear twice
                                 //   Only keep the data for the first domain
                                 // Additionally, if X!Tandem decides a given modification could occur on either of two residues, it repeats the domain information
                                 //   Again, in this situation, we'll only keep the first domain
@@ -802,7 +802,7 @@ namespace PeptideHitResultsProcessor
                                     searchResult.PeptideBIons = XMLTextReaderGetAttributeValue(xmlReader, "b_ions", string.Empty);
 
                                     // Now read all of the mods for this domain
-                                    // If this is the first search result, then update the mod occurrence counts; otherwise, do not
+                                    // If this is the first search result, update the mod occurrence counts; otherwise, do not
                                     if (searchResultCount == 1)
                                     {
                                         ParseXTandemResultsFileReadDomainMods(xmlReader, searchResults[searchResultCount - 1], domainElementReaderDepth, true);
@@ -838,7 +838,7 @@ namespace PeptideHitResultsProcessor
                                     if (value == PROTEIN_DESCRIPTION_LABEL)
                                     {
                                         // Check whether this note ends in ":reversed"
-                                        // If it does, then make sure searchResults[searchResultCount - 1].ProteinName ends in :reversed
+                                        // If it does, make sure searchResults[searchResultCount - 1].ProteinName ends in :reversed
 
                                         // Advance the reader before grabbing the inner text
                                         if (xmlReader.Read())
@@ -1390,8 +1390,8 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Before continuing, look for Static residue mods in udtModInfo
-                // If any are found, and if an identical dynamic residue mod is already present, then delete the static residue mod
-                // Additionally, if 	<note type="input" label="refine, modification mass">none</note> was present in the XTandem results file then
+                // If any are found, and if an identical dynamic residue mod is already present, delete the static residue mod
+                // Additionally, if <note type="input" label="refine, modification mass">none</note> was present in the XTandem results file,
                 //  auto update all static mods to dynamic mods since they are reset during refinement
                 for (var index = 0; index < modInfoCount;)
                 {

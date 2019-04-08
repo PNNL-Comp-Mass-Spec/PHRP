@@ -1471,10 +1471,9 @@ namespace PeptideHitResultsProcessor
                     // Now parse the _syn.txt file that we just created to next create the other PHRP files
                     success = ParseMODaSynopsisFile(synOutputFilePath, outputDirectoryPath, pepToProteinMapping, false);
 
-                    // This step is not necessary
-                    //If success Then
-                    //	success = AppendDelMPPMRefinedToSynFile(synOutputFilePath)
-                    //End If
+                    // This step is not necessary:
+                    // if (success)
+                    //	success = AppendDelMPPMRefinedToSynFile(synOutputFilePath);
 
                     // Remove all items from pepToProteinMapping to reduce memory overhead
                     pepToProteinMapping.Clear();

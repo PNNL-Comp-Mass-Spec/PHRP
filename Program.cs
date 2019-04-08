@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcRunner
         private static string mModificationDefinitionsFilePath;          // Optional
         private static string mSearchToolParameterFilePath;              // Optional
 
-        // Note: If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath
+        // Note: If this is true and the _PepToProtMap.txt file isn't found, it will be created using the the Fasta file specified by mFastaFilePath
         private static bool mCreateProteinModsFile;
         private static string mFastaFilePath;
         private static bool mIgnorePeptideToProteinMapperErrors;
@@ -302,10 +302,6 @@ namespace PeptideHitResultsProcRunner
 
                 if (parseCommandLine.RetrieveValueForParameter("O", out value))
                     mOutputDirectoryPath = string.Copy(value);
-
-                // Future
-                // If .RetrieveValueForParameter("DatasetDir", value) Then mDatasetDirectoryPath = String.Copy(value)
-                //
 
                 if (parseCommandLine.RetrieveValueForParameter("P", out value))
                     mParameterFilePath = string.Copy(value);

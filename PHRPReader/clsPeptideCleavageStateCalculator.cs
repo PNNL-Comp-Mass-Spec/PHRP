@@ -392,7 +392,7 @@ namespace PHRPReader
         /// <param name="prefix"></param>
         /// <param name="suffix"></param>
         /// <returns></returns>
-        /// <remarks>For example, if the peptide is -.PEPTIDE.G then pass prefix="-" and suffix="G"</remarks>
+        /// <remarks>For example, if the peptide is -.PEPTIDE.G, pass prefix="-" and suffix="G"</remarks>
         public ePeptideTerminusStateConstants ComputeTerminusState(char prefix, char suffix)
         {
             ePeptideTerminusStateConstants ePeptideTerminusState;
@@ -672,9 +672,9 @@ namespace PHRPReader
         /// <param name="prefix">Prefix residue (output)</param>
         /// <param name="suffix">Suffix residue (output)</param>
         /// <returns> Returns True if success, False if prefix and suffix residues were not found</returns>
-        /// <remarks>If more than one character is present before the first period or after the last period, then all characters are returned
-        /// If the peptide starts with ".." then it is auto-changed to start with "."
-        /// If the peptide ends with ".." then it is auto-changed to end with "."
+        /// <remarks>If more than one character is present before the first period or after the last period, all characters are returned
+        /// If the peptide starts with ".." it is auto-changed to start with "."
+        /// If the peptide ends with ".." it is auto-changed to end with "."
         /// </remarks>
         public static bool SplitPrefixAndSuffixFromSequence(string sequenceIn,
             out string primarySequence,

@@ -257,7 +257,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-        /// <remarks>If inputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
+        /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
         protected clsPHRPParser(string datasetName, string inputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
             bool loadModsAndSeqInfo)
         {
@@ -282,7 +282,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="ePeptideHitResultType"></param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        /// <remarks>If inputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
+        /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
         protected clsPHRPParser(string datasetName, string inputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, clsPHRPStartupOptions startupOptions)
         {
             mErrorMessages = new List<string>();
@@ -304,7 +304,8 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="ePeptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="startupOptions">Startup options</param>
-        /// <remarks>If inputFilePath is an empty string, then the functions that solely depend on dataset name will be callable, but data related functions will not be callable
+        /// <remarks>
+        /// If inputFilePath is an empty string,  the functions that solely depend on dataset name will be callable, but data related functions will not be callable
         /// startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
         /// Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
         /// </remarks>
@@ -547,7 +548,7 @@ namespace PHRPReader
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
-        /// <param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
+        /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if success, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
         public abstract bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode);
@@ -991,7 +992,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="text"></param>
         /// <param name="chDelimiter"></param>
-        /// <param name="commentChar">If defined, then looks for this character in the value portion of the setting and removes that character plus any text after it</param>
+        /// <param name="commentChar">If defined, looks for this character in the value portion of the setting and removes that character plus any text after it</param>
         /// <returns>KeyValuePair with key and value from text; key and value will be empty if chDelimiter was not found</returns>
         /// <remarks>Automatically trims whitespace</remarks>
         public static KeyValuePair<string, string> ParseKeyValueSetting(string text, char chDelimiter, string commentChar)
@@ -1326,7 +1327,7 @@ namespace PHRPReader
 
                 // Find the modification definition in mModInfo
                 // Note that a given mass correction tag might be present multiple times in mModInfo, since it could be used as both a static peptide mod and a static peptide terminal mod
-                // Thus, if residueLoc = 1 or residueLoc = currentPSM.PeptideCleanSequence.Length then we'll first look for a peptide or protein terminal static mod
+                // Thus, if residueLoc = 1 or residueLoc = currentPSM.PeptideCleanSequence.Length, we'll first look for a peptide or protein terminal static mod
 
                 bool favorTerminalMods;
                 clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState;

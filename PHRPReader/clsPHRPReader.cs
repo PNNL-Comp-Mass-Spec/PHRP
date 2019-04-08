@@ -223,7 +223,7 @@ namespace PHRPReader
         public string DatasetName => mDatasetName;
 
         /// <summary>
-        /// If True, then will display messages at the console
+        /// If True, will display messages at the console
         /// </summary>
         /// <value></value>
         /// <returns></returns>
@@ -270,7 +270,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// If True, then looks for and loads the modification definitions from the _ModSummary.txt file associated with the input file
+        /// If True, looks for and loads the modification definitions from the _ModSummary.txt file associated with the input file
         /// Also reads the SeqInfo and related files
         /// </summary>
         /// <value></value>
@@ -279,7 +279,7 @@ namespace PHRPReader
         public bool LoadModsAndSeqInfo => mStartupOptions.LoadModsAndSeqInfo;
 
         /// <summary>
-        /// If true, then loads the MSGF SpecProb values from the _MSGF.txt file associated with the input file
+        /// If true, loads the MSGF SpecProb values from the _MSGF.txt file associated with the input file
         /// </summary>
         /// <value></value>
         /// <returns></returns>
@@ -287,7 +287,7 @@ namespace PHRPReader
         public bool LoadMSGFResults => mStartupOptions.LoadMSGFResults;
 
         /// <summary>
-        /// If True, then loads the MASIC _ScanStats.txt file
+        /// If True, loads the MASIC _ScanStats.txt file
         /// </summary>
         /// <value></value>
         /// <returns></returns>
@@ -418,7 +418,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// When True, then skips near-duplicate lines in the PHRP data file (lines with the same peptide in the same scan, but different protein names)
+        /// When True, skips near-duplicate lines in the PHRP data file (lines with the same peptide in the same scan, but different protein names)
         /// </summary>
         /// <value></value>
         /// <returns></returns>
@@ -464,8 +464,8 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, ePeptideHitResultType.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
@@ -476,9 +476,9 @@ namespace PHRPReader
         /// Constructor that auto-determines the PeptideHit result type based on the filename
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        /// <param name="loadScanStats">If True, then looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
             : this(inputFilePath, ePeptideHitResultType.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
@@ -501,8 +501,8 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// ''' <param name="eResultType">Source file PeptideHit result type</param>
-        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, ePeptideHitResultType eResultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, eResultType, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
@@ -514,9 +514,9 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="eResultType">Source file PeptideHit result type</param>
-        /// <param name="loadModsAndSeqInfo">If True, then looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
-        /// <param name="loadMSGFResults">If True, then looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        /// <param name="loadScanStats">If True, then looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
+        /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
+        /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
+        /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, ePeptideHitResultType eResultType, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
         {
@@ -992,7 +992,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified directory
-        /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+        /// If both the _syn.txt and _fht.txt files are present, chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
@@ -1004,7 +1004,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Looks for a valid _syn.txt or _fht.txt file for any dataset in the specified directory
-        /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+        /// If both the _syn.txt and _fht.txt files are present, chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="eMatchedResultType">Output parameter: the result type of the best result file found</param>
@@ -1106,7 +1106,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Looks for a valid _syn.txt or _fht.txt file for the specified dataset in the specified directory
-        /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+        /// If both the _syn.txt and _fht.txt files are present, chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="datasetName">Dataset name</param>
@@ -1119,7 +1119,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Looks for a valid _syn.txt or _fht.txt file for the specified dataset in the specified directory
-        /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+        /// If both the _syn.txt and _fht.txt files are present, chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="datasetName">Dataset name</param>
@@ -1138,7 +1138,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Looks for a valid _syn.txt or _fht.txt file for the given list of datasets in the specified directory
-        /// If both the _syn.txt and _fht.txt files are present, then chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
+        /// If both the _syn.txt and _fht.txt files are present, chooses the file with _ResultToSeqMap.txt and _SeqInfo.txt files
         /// </summary>
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="datasetNames">List of dataset names to search for</param>
@@ -1497,7 +1497,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
-        /// Note that if the _SeqInfo.txt file is available, then this function will not be used
+        /// Note that if the _SeqInfo.txt file is available, this function will not be used
         /// </summary>
         /// <param name="peptide"></param>
         /// <param name="peptideWithNumericMods">Peptide with numeric mods (output)</param>
@@ -2320,7 +2320,7 @@ namespace PHRPReader
             var matchFound = true;
 
             // The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
-            // If it wasn't loaded, then this class can update .PeptideWithNumericMods and .PeptideMods
+            // If it wasn't loaded, this class can update .PeptideWithNumericMods and .PeptideMods
             // by inferring the mods using mDynamicMods and mStaticMods (which were populated using the PHRP ModSummary file)
             if (!mFastReadMode && mStartupOptions.LoadModsAndSeqInfo && string.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods))
             {
@@ -2398,7 +2398,7 @@ namespace PHRPReader
                     mPHRPParser.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out var newPSM, mFastReadMode);
 
                     // Check for duplicate lines
-                    // If this line is a duplicate of the previous line, then skip it
+                    // If this line is a duplicate of the previous line, skip it
                     // This happens in Sequest _syn.txt files where the line is repeated for all protein matches
                     // It can also happen in MSGF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
 
@@ -2537,8 +2537,8 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// When FastReadMode is True, you first call MoveNext to read the peptide scores, then if the peptide
-        /// is a peptide of interest, you call this function to finalize any processing steps that were skipped
+        /// When FastReadMode is True, first call MoveNext to read the peptide scores.
+        /// Then, if the peptide is a peptide of interest, call this function to finalize any processing steps that were skipped.
         /// </summary>
         /// <remarks></remarks>
         public void FinalizeCurrentPSM()

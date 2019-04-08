@@ -668,7 +668,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="peptideSequence">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
         /// <param name="updateCleanSequence"></param>
-        /// <remarks>Does not update the cleavage state info.  If updateCleanSequence is false, then call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
+        /// <remarks>Does not update the cleavage state info.  If updateCleanSequence is false, call UpdateCleanSequence at a later time to populate mPeptideCleanSequence</remarks>
         public void SetPeptide(string peptideSequence, bool updateCleanSequence = true)
         {
             if (string.IsNullOrEmpty(peptideSequence))

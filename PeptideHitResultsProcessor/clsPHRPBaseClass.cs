@@ -280,7 +280,7 @@ namespace PeptideHitResultsProcessor
         ///
         /// </summary>
         /// <returns></returns>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found then it will be created using the the Fasta file specified by mFastaFilePath</remarks>
+        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the the Fasta file specified by mFastaFilePath</remarks>
         public bool CreateProteinModsFile { get; set; }
 
         public clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType EnzymeMatchSpec { get; set; }
@@ -1478,13 +1478,12 @@ namespace PeptideHitResultsProcessor
 
             if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out prefix, out suffix))
             {
-                // Remove any non-letter characters when calling .ComputeCleavageState()
-
+                // Remove any non-letter characters
                 primarySequence = mReplaceSymbols.Replace(primarySequence, string.Empty);
             }
             else
             {
-                // Unable to determine cleavage-state
+                // Sequence does not have prefix or suffix letters; use sequenceWithMods
                 primarySequence = mReplaceSymbols.Replace(sequenceWithMods, string.Empty);
             }
 
@@ -1492,7 +1491,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// If columnIndex is >= 0 then updates value with the value at splitLine[columnIndex]
+        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
         /// Otherwise, updates value to String.Empty
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
@@ -1503,7 +1502,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// If columnIndex is >= 0 then updates value with the value at splitLine[columnIndex]
+        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
         /// Otherwise, updates value to 0
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
@@ -1514,7 +1513,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// If columnIndex is >= 0 then updates value with the value at splitLine[columnIndex]
+        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
         /// Otherwise, updates value to valueIfMissing
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
@@ -1532,7 +1531,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// If columnIndex is >= 0 then updates value with the value at splitLine[columnIndex]
+        /// If columnIndex is >= 0, updates value with the value at splitLine[columnIndex]
         /// Otherwise, updates value to valueIfMissing
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
@@ -2005,7 +2004,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Appends newSuffix to the base name of the original file, then returns a full path to the file using the directory associated with originalFilePath
         /// Note that newSuffix may contain a file extension though it does not have to
-        /// If newSuffix does not contain an extension, then the path returned will end in the same extension as originalFilePath
+        /// If newSuffix does not contain an extension, the path returned will end in the same extension as originalFilePath
         /// </summary>
         /// <param name="originalFile"></param>
         /// <param name="newSuffix"></param>
@@ -2070,7 +2069,7 @@ namespace PeptideHitResultsProcessor
         {
             var fileNotFound = false;
 
-            // Note: If mMassCorrectionTagsFilePath is blank then the mass correction tags will be reset to the defaults and success will be True
+            // Note: If mMassCorrectionTagsFilePath is blank, the mass correction tags will be reset to the defaults and success will be True
             var success = mPeptideMods.ReadMassCorrectionTagsFile(MassCorrectionTagsFilePath, ref fileNotFound);
             if (!success)
             {
@@ -2084,7 +2083,7 @@ namespace PeptideHitResultsProcessor
                 }
             }
 
-            // Note: If mModificationDefinitionsFilePath is blank, then the modifications will be cleared and success will be True
+            // Note: If mModificationDefinitionsFilePath is blank, the modifications will be cleared and success will be True
             success = mPeptideMods.ReadModificationDefinitionsFile(ModificationDefinitionsFilePath, ref fileNotFound);
             if (!success)
             {

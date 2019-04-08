@@ -58,13 +58,13 @@ namespace PHRPReader
             UnknownType = 0,
 
             /// <summary>
-            /// Dynamic mod on a residue or peptide terminus; supported by Sequest and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, then the mod symbol is associated with the first or last residue in the peptide
+            /// Dynamic mod on a residue or peptide terminus; supported by Sequest and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
             /// </summary>
             /// <remarks></remarks>
             DynamicMod = 1,
 
             /// <summary>
-            /// Static mod on a residue or peptide terminus; supported by Sequest but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, then the mod symbol is associated with the first or last residue in the peptide
+            /// Static mod on a residue or peptide terminus; supported by Sequest but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
             /// </summary>
             /// <remarks></remarks>
             StaticMod = 2,
@@ -181,7 +181,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>
-        /// If an empty string, then the modification can apply to any residue or terminus;
+        /// If an empty string, the modification can apply to any residue or terminus;
         /// Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to.
         /// Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols
         /// (less than and greater than signs for the peptide terminii; [ and ] for the protein terminii)

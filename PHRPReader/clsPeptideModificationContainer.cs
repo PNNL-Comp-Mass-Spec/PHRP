@@ -70,14 +70,21 @@ namespace PHRPReader
 
         #region "Classwide Variables"
 
-        // List of available modification symbols
+        /// <summary>
+        /// List of available modification symbols
+        /// </summary>
         private Queue mDefaultModificationSymbols;
 
-        // List of known mass correction tags
+        /// <summary>
+        /// List of known mass correction tags
+        /// </summary>
+        /// <remarks>Keys are mod names, values are mod masses</remarks>
         private readonly Dictionary<string, double> mMassCorrectionTags;
 
-        // This array holds modifications that Sequest or XTandem will often use but for
-        // which the auto-addition method sometimes incorrectly notes
+        /// <summary>
+        /// This array holds modifications that Sequest or XTandem will often use but for
+        /// which the auto-addition method sometimes incorrectly notes
+        /// </summary>
         private List<clsModificationDefinition> mStandardRefinementModifications;
 
         private Dictionary<int, string> mIntegerMassCorrectionTagLookup;
@@ -122,7 +129,7 @@ namespace PHRPReader
         /// <summary>
         /// Add modificationDefinition to mModifications
         /// However, do not add if a duplicate modification
-        /// Furthermore, if everything matches except for .TargetResidues, then add the new target residues to the existing, matching mod
+        /// Furthermore, if everything matches except for .TargetResidues, add the new target residues to the existing, matching mod
         /// </summary>
         /// <param name="modificationDefinition"></param>
         /// <param name="useNextAvailableModificationSymbol"></param>
@@ -697,7 +704,7 @@ namespace PHRPReader
 
             // No match was found
             // First compare against modifications, only considering those with empty .TargetResidues
-            // If still no match, then we'll try again but ignore .TargetResidues
+            // If still no match, we'll try again but ignore .TargetResidues
             var considerTargetResidues = true;
 
             while (true)
@@ -745,14 +752,18 @@ namespace PHRPReader
         /// Looks for an existing modification with the given modification mass and target residues
         /// </summary>
         /// <param name="modificationMass"></param>
-        /// <param name="chTargetResidue">If defined, then returns the first modification with the given mass and containing the residue in .TargetResidues; if no match, then looks for the first modification with the given mass and no defined .TargetResidues</param>
+        /// <param name="chTargetResidue">
+        /// If defined, returns the first modification with the given mass and containing the residue in .TargetResidues;
+        /// if no match, looks for the first modification with the given mass and no defined .TargetResidues
+        /// </param>
         /// <param name="eResidueTerminusState"></param>
         /// <param name="existingModFound"></param>
         /// <param name="addToModificationListIfUnknown"></param>
         /// <param name="massDigitsOfPrecision"></param>
-        /// <returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown is True</returns>
-        /// <remarks>If chTargetResidue is nothing, then follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
-        public clsModificationDefinition LookupModificationDefinitionByMass(double modificationMass,
+        /// <returns>The best matched modification; if no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown is True</returns>
+        /// <remarks>If chTargetResidue is nothing, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+        public clsModificationDefinition LookupModificationDefinitionByMass(
+            double modificationMass,
             char chTargetResidue,
             clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
             out bool existingModFound,
@@ -904,13 +915,15 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modificationMass"></param>
         /// <param name="eModType"></param>
-        /// <param name="chTargetResidue">If defined, then returns the first modification with the given mass and containing the residue in .TargetResidues; if no match, then looks for the first modification with the given mass and no defined .TargetResidues</param>
+        /// <param name="chTargetResidue">
+        /// If defined, returns the first modification with the given mass and containing the residue in .TargetResidues;
+        /// if no match, looks for the first modification with the given mass and no defined .TargetResidues</param>
         /// <param name="eResidueTerminusState"></param>
         /// <param name="existingModFound"></param>
         /// <param name="addToModificationListIfUnknown"></param>
         /// <param name="massDigitsOfPrecision"></param>
-        /// <returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True</returns>
-        /// <remarks>If chTargetResidue is nothing, then follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+        /// <returns>The best matched modification; if no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True</returns>
+        /// <remarks>If chTargetResidue is nothing, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         public clsModificationDefinition LookupModificationDefinitionByMassAndModType(
             double modificationMass,
             clsModificationDefinition.eModificationTypeConstants eModType,
@@ -920,11 +933,11 @@ namespace PHRPReader
             bool addToModificationListIfUnknown,
             byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
         {
-            // If chTargetResidue is defined, then returns the first modification with the given mass and containing the residue in .TargetResidues
-            //  If no match is found, then looks for the first modification with the given mass and no defined .TargetResidues
-            //  If no match is found, then looks for the first dynamic modification with the given mass, regardless of .TargetResidues
-            //  If no match is found, then returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True
-            // If chTargetResidue is nothing, then follows similar logic, but skips defined modifications with defined .TargetResidues
+            // If chTargetResidue is defined, returns the first modification with the given mass and containing the residue in .TargetResidues
+            // If no match is found, looks for the first modification with the given mass and no defined .TargetResidues
+            // If no match is found, looks for the first dynamic modification with the given mass, regardless of .TargetResidues
+            // If no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True
+            // If chTargetResidue is nothing, follows similar logic, but skips defined modifications with defined .TargetResidues
 
             clsModificationDefinition modificationDefinition;
 
@@ -1186,7 +1199,7 @@ namespace PHRPReader
                 // It should have 2 or more columns, separated by tabs
                 // Column 1 is the modification symbol
                 // Column 2 is the modification mass
-                // Column 3, which is optional, is the residues and/or terminii that can be modified; if omitted, then the modification can apply to any residues or terminii
+                // Column 3, which is optional, is the residues and/or terminii that can be modified; if omitted, the modification can apply to any residues or terminii
                 //   For column 3, use 1 letter amino acid abbreviations; the residues can be a continuous string, or can be separated by commas and/or spaces
                 //   For column 3, use the *_SYMBOL_DMS constants for the terminii (< and > for the peptide terminii; [ and ] for the protein terminii)
                 // Column 4, which is optional, specifies the type of modification: D, S, T, I, or P (corresponding to clsModificationDefinition.eModificationTypeConstants)
@@ -1262,7 +1275,7 @@ namespace PHRPReader
                                         modificationDefinition.ModificationType = clsModificationDefinition.ModificationSymbolToModificationType(splitLine[3].ToUpper().Trim()[0]);
                                     }
 
-                                    // If the .ModificationType is unknown, then change it to Dynamic
+                                    // If the .ModificationType is unknown, change it to Dynamic
                                     if (modificationDefinition.ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType)
                                     {
                                         modificationDefinition.ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
