@@ -19,6 +19,7 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using PeptideHitResultsProcessor;
 using PRISM;
 
 namespace PeptideHitResultsProcRunner
@@ -365,7 +366,7 @@ namespace PeptideHitResultsProcRunner
 
                 if (parseCommandLine.RetrieveValueForParameter("InsSyn", out value))
                 {
-                    if (ParseBoolean(value, out var blnValue ))
+                    if (ParseBoolean(value, out var blnValue))
                     {
                         mCreateInspectOrMSGFPlusSynopsisFile = blnValue;
                     }
@@ -487,22 +488,41 @@ namespace PeptideHitResultsProcRunner
                 Console.WriteLine(" [/SynProb:0.05]");
                 Console.WriteLine(" [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]] [/LogDir:LogDirectoryPath]");
                 Console.WriteLine();
-                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "The input file should be an XTandem Results file (_xt.xml), " +
-                                      "a Sequest Synopsis File (_syn.txt), a Sequest First Hits file (_fht.txt), " +
-                                      "an Inspect results file (_inspect.txt), an MSGF-DB results file (_msgfdb.txt), " +
-                                      "an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), " +
-                                      "or an MSAlign results file (_MSAlign_ResultTable.txt)"));
+                Console.WriteLine(ConsoleMsgUtils.WrapParagraph(string.Format(
+                                      "The input file should be one of the following:\n" +
+                                      "  MSGF+ results file ({0}.tsv or {1}.tsv)\n" +
+                                      "  MSGF-DB results file ({1}.txt)\n" +
+                                      "  MSAlign results file ({2}.txt)\n" +
+                                      "  MODa results file ({3}.txt)\n" +
+                                      "  MODPlus results file ({4}.txt)\n" +
+                                      "  MSPathFinder results file ({5}.txt)\n" +
+                                      "  Inspect results file ({6}.txt)\n" +
+                                      "  SEQUEST Synopsis File ({7}.txt)\n" +
+                                      "  SEQUEST First Hits file ({8}.txt)\n" +
+                                      "  TopPIC results file ({9}.txt)\n" +
+                                      "  X!Tandem Results file (_xt.xml)",
+                                      clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE,
+                                      clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE,
+                                      clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE,
+                                      clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE,
+                                      clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE,
+                                      clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE,
+                                      clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE,
+                                      clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE,
+                                      clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE,
+                                      clsTopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE
+                                      )));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "The output directory switch is optional. If omitted, the output file will be created " +
+                                      "The output directory switch is optional. " +
+                                      "If omitted, the output file will be created " +
                                       "in the same directory as the input file."));
                 Console.WriteLine();
                 // Future:
                 // Console.WriteLine("As an alternative to specifying an input file, you can specify an input directory. " +
                 //                   "In this case the program will look for the best file to process from that directory, and will auto-determine /T and /N")
                 //
-                Console.WriteLine();
+
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "The parameter file path is optional. If included, it should point to a valid XML parameter file."));
                 Console.WriteLine();

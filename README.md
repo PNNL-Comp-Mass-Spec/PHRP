@@ -1,13 +1,15 @@
 # Peptide Hit Results Processor
 
-The Peptide Hit Results Processor (PHRP) can be used to convert an X!Tandem results 
-file (XML format), MSGF+ .tsv search result file, Sequest Synopsis/First Hits file, 
-or Inspect search result into a series of tab-delimited text files 
-summarizing the results. It will insert modification symbols into the 
-peptide sequences for modified peptides.  Parallel files are created containing 
-sequence information, modification details, and protein information.  The 
-user can optionally provide a modification definition file that specifies 
-the symbol to use for each modification mass.
+The Peptide Hit Results Processor (PHRP) can be used to convert a MSGF+ .tsv 
+search result file or an X!Tandem results file (XML format) into a series 
+of tab-delimited text files summarizing the results. It also supports 
+results files from MSAlign, TopPIC, MODa, MODPlus, MSPathFinder, 
+along with SEQUEST Synopsis/First Hits files.
+
+PHRP will insert modification symbols into the peptide sequences for modified peptides.
+Parallel files are created containing sequence information, modification details,
+and protein information.  The user can optionally provide a modification definition 
+file that specifies the symbol to use for each modification mass.
 
 ## Example Data
 
@@ -38,10 +40,18 @@ PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputDirectoryPath]
  [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]]
 ```
 
-The input file should be an XTandem Results file (_xt.xml), a Sequest Synopsis File 
-(_syn.txt), a Sequest First Hits file (_fht.txt), an Inspect results file (_inspect.txt), an 
-MSGF-DB results file (_msgfdb.txt), an MSGF+ results file (_msgfdb.tsv or _msgfplus.tsv), or 
-an MSAlign results files (_MSAlign_ResultTable.txt)
+The input file should be one of the following:
+* MSGF+ results file (_msgfplus.tsv or _msgfdb.tsv)
+* MSGF-DB results file (_msgfdb.txt)
+* MSAlign results file (_MSAlign_ResultTable.txt)
+* MODa results file (_moda.id.txt)
+* MODPlus results file (_modp.id.txt)
+* MSPathFinder results file (_IcTda.txt)
+* Inspect results file (_inspect.txt)
+* SEQUEST Synopsis File (_syn.txt)
+* SEQUEST First Hits file (_fht.txt)
+* TopPIC results file (_TopPIC_PrSMs.txt)
+* X!Tandem Results file (_xt.xml)
 
 The output directory switch is optional.  If omitted, the output file will be created in the same 
 directory as the input file.

@@ -1,5 +1,12 @@
 Peptide Hit Results Proc Runner Revision History
 
+Version 1.5.7037; April 8, 2019
+	- Add support for TopPIC results
+
+Version 1.5.6871; October 24, 2018
+	- Replace HashTables with a SortedSet or Dictionary
+	- Code cleanup
+
 Version 1.5.6583; January 9, 2018
 	- Use FileProcessor.ProcessFilesBase in PRISM.dll
 
