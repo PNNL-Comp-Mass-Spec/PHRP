@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSGFDBResultsProcessor()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "April 17, 2019";
             mModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
@@ -88,23 +88,24 @@ namespace PeptideHitResultsProcessor
             SpectrumFile = 0,
             SpecIndex = 1,               // SpecID in MSGF+
             Scan = 2,
-            FragMethod = 3,
-            PrecursorMZ = 4,
-            PMErrorDa = 5,               // Corresponds to PrecursorError(Da)
-            PMErrorPPM = 6,              // Corresponds to PrecursorError(ppm)
-            Charge = 7,
-            Peptide = 8,
-            Protein = 9,
-            DeNovoScore = 10,
-            MSGFScore = 11,
-            SpecProb_EValue = 12,
-            PValue_EValue = 13,
-            FDR_QValue = 14,             // Only present if searched using -tda 1
-            PepFDR_PepQValue = 15,       // Only present if searched using -tda 1
-            EFDR = 16,                   // Only present if did not search using -tda 1
-            IMSScan = 17,                // Only present for MSGFDB_IMS results
-            IMSDriftTime = 18,           // Only present for MSGFDB_IMS results
-            IsotopeError = 19            // Only reported by MSGF+
+            ScanTimeMinutes = 3,         // Added to MzidToTsvConverter in April 2019
+            FragMethod = 4,
+            PrecursorMZ = 5,
+            PMErrorDa = 6,               // Corresponds to PrecursorError(Da)
+            PMErrorPPM = 7,              // Corresponds to PrecursorError(ppm)
+            Charge = 8,
+            Peptide = 9,
+            Protein = 10,
+            DeNovoScore = 11,
+            MSGFScore = 12,
+            SpecProb_EValue = 13,
+            PValue_EValue = 14,
+            FDR_QValue = 15,             // Only present if searched using -tda 1
+            PepFDR_PepQValue = 16,       // Only present if searched using -tda 1
+            EFDR = 17,                   // Only present if did not search using -tda 1
+            IMSScan = 18,                // Only present for MSGFDB_IMS results
+            IMSDriftTime = 19,           // Only present for MSGFDB_IMS results
+            IsotopeError = 20            // Only reported by MSGF+
         }
 
         private enum eFilteredOutputFileTypeConstants
@@ -1950,9 +1951,9 @@ namespace PeptideHitResultsProcessor
             // #SpecFile    SpecIndex    Scan#     FragMethod    Precursor                    PMError(ppm)          Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecProb      P-value   FDR       PepFDR
 
             // The expected header from MSGF+ is:
-            // #SpecFile    SpecID       ScanNum   FragMethod    Precursor    IsotopeError    PrecursorError(Da)    Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecEValue    EValue    QValue    PepQValue
+            // #SpecFile    SpecID       ScanNum   ScanTime(Min)    FragMethod    Precursor    IsotopeError    PrecursorError(Da)    Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecEValue    EValue    QValue    PepQValue
             // or
-            // #SpecFile    SpecID       ScanNum   FragMethod    Precursor    IsotopeError    PrecursorError(ppm)   Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecEValue    EValue    QValue    PepQValue
+            // #SpecFile    SpecID       ScanNum   ScanTime(Min)    FragMethod    Precursor    IsotopeError    PrecursorError(ppm)   Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecEValue    EValue    QValue    PepQValue
 
             var columnNames = new SortedDictionary<string, eMSGFPlusResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1961,6 +1962,7 @@ namespace PeptideHitResultsProcessor
                 {"SpecID", eMSGFPlusResultsFileColumns.SpecIndex},
                 {"Scan#", eMSGFPlusResultsFileColumns.Scan},
                 {"ScanNum", eMSGFPlusResultsFileColumns.Scan},
+                {"ScanTime(Min)", eMSGFPlusResultsFileColumns.ScanTimeMinutes},
                 {"FragMethod", eMSGFPlusResultsFileColumns.FragMethod},
                 {"Precursor", eMSGFPlusResultsFileColumns.PrecursorMZ},
                 {"IsotopeError", eMSGFPlusResultsFileColumns.IsotopeError},
