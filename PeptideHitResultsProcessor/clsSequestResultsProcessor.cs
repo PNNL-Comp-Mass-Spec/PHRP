@@ -48,13 +48,6 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        #region "Structures"
-        #endregion
-
-        #region "Classwide Variables"
-
-        #endregion
-
         private bool AddDynamicAndStaticResidueMods(
             clsSearchResultsBaseClass searchResult,
             bool updateModOccurrenceCounts)

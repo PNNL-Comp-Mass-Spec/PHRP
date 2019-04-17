@@ -95,9 +95,6 @@ namespace PeptideHitResultsProcessor
         }
         #endregion
 
-        #region "Structures"
-        #endregion
-
         #region "Classwide Variables"
 
         private int mNextResultID;
