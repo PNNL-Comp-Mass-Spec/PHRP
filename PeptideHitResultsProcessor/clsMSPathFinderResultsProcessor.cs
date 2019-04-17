@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSPathFinderResultsProcessor()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "April 17, 2019";
 
             mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }
@@ -54,7 +54,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
         /// </summary>
-        public enum eMSPathFinderResultsFileColumns
+        private enum eMSPathFinderResultsFileColumns
         {
             Scan = 0,
             PrefixResidue = 1,

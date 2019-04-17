@@ -21,7 +21,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODaResultsProcessor()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "April 17, 2019";
             InitializeLocalVariables();
         }
 
@@ -52,7 +52,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
         /// </summary>
-        public enum eMODaResultsFileColumns
+        private enum eMODaResultsFileColumns
         {
             SpectrumFileName = 0,
             SpectrumIndex = 1,
@@ -939,7 +939,7 @@ namespace PeptideHitResultsProcessor
                             {
                                 percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
                             }
-                            UpdateProgress(percentComplete);                            
+                            UpdateProgress(percentComplete);
                         }
                     }
 

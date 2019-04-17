@@ -81,9 +81,9 @@ namespace PeptideHitResultsProcessor
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
         /// <summary>
-        /// These columns correspond to the tab-delimited file created directly by MSGF+
+        /// These columns correspond to TSV file created by MzidToTsvConverter.exe from the MSGF+ .mzid file
         /// </summary>
-        public enum eMSGFPlusResultsFileColumns
+        private enum eMSGFPlusResultsFileColumns
         {
             SpectrumFile = 0,
             SpecIndex = 1,               // SpecID in MSGF+

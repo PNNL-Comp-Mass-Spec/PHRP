@@ -22,7 +22,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODPlusResultsProcessor()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "April 17, 2019";
         }
 
         #region "Constants and Enums"
@@ -51,7 +51,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file (_MODPlus.id.txt) created by MODPlus's tda_plus.jar file
         /// </summary>
-        public enum eMODPlusResultsFileColumns
+        private enum eMODPlusResultsFileColumns
         {
             SpectrumFileName = 0,
             SpectrumIndex = 1,

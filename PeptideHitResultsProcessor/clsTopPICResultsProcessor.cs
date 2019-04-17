@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsTopPICResultsProcessor()
         {
-            mFileDate = "April 8, 2019";
+            mFileDate = "April 17, 2019";
             InitializeLocalVariables();
         }
 
@@ -61,7 +61,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file created directly by TopPIC
         /// </summary>
-        public enum eTopPICResultsFileColumns
+        private enum eTopPICResultsFileColumns
         {
             SpectrumFileName = 0,
             Prsm_ID = 1,

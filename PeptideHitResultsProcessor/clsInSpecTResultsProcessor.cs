@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsInSpecTResultsProcessor()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "April 17, 2019";
             InitializeLocalVariables();
         }
 
@@ -71,7 +71,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file created directly by Inspect
         /// </summary>
-        public enum eInspectResultsFileColumns
+        private enum eInspectResultsFileColumns
         {
             SpectrumFile = 0,
             Scan = 1,

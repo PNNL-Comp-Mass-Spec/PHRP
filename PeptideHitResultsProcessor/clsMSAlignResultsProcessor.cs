@@ -20,7 +20,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMSAlignResultsProcessor()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "April 17, 2019";
             InitializeLocalVariables();
         }
 
@@ -45,7 +45,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file created directly by MSAlign
         /// </summary>
-        public enum eMSAlignResultsFileColumns
+        private enum eMSAlignResultsFileColumns
         {
             SpectrumFileName = 0,
             Prsm_ID = 1,
