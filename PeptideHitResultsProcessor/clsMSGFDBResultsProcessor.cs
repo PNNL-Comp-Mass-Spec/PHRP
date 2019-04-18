@@ -2849,11 +2849,11 @@ namespace PeptideHitResultsProcessor
             // Sort filteredSearchResults by ascending SpecEValue, ascending scan, ascending charge, ascending peptide, and ascending protein
             var query = from item in filteredSearchResults orderby item.SpecEValueNum, item.ScanNum, item.ChargeNum, item.Peptide, item.Protein select item;
 
-            var index = 1;
+            var resultID = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
-                index += 1;
+                WriteSearchResultToFile(resultID, writer, result, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
+                resultID += 1;
             }
         }
 
@@ -3169,12 +3169,12 @@ namespace PeptideHitResultsProcessor
 
                 if (includeFDRandPepFDR)
                 {
-                    data.Add(udtSearchResult.QValue);
-                    data.Add(udtSearchResult.PepQValue);
+                    data.Add(TrimZeroIfNotFirstID(resultID, udtSearchResult.QValue));
+                    data.Add(TrimZeroIfNotFirstID(resultID, udtSearchResult.PepQValue));
                 }
                 else if (includeEFDR)
                 {
-                    data.Add(udtSearchResult.QValue);
+                    data.Add(TrimZeroIfNotFirstID(resultID, udtSearchResult.QValue));
                     data.Add("1");
                 }
 

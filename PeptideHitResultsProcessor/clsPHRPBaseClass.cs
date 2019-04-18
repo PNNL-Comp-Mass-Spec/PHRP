@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "April 8, 2019";
+            mFileDate = "April 18, 2019";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -2276,6 +2276,29 @@ namespace PeptideHitResultsProcessor
             {
                 OnErrorEvent(message, ex);
             }
+        }
+
+        /// <summary>
+        /// If valueText is 0.0, returns 0
+        /// If otherwise returns valueText
+        /// </summary>
+        /// <param name="resultID"></param>
+        /// <param name="valueText"></param>
+        /// <returns></returns>
+        protected string TrimZeroIfNotFirstID(int resultID, string valueText)
+        {
+            return resultID > 1 ? TrimZero(valueText) : valueText;
+        }
+
+        /// <summary>
+        /// If valueText is 0.0, returns 0
+        /// If otherwise returns valueText
+        /// </summary>
+        /// <param name="valueText"></param>
+        /// <returns></returns>
+        private string TrimZero(string valueText)
+        {
+            return valueText.Equals("0.0") ? "0" : valueText;
         }
 
         /// <summary>
