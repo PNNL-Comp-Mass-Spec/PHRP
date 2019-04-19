@@ -26,7 +26,7 @@ namespace PeptideHitResultsProcRunner
 {
     static class Program
     {
-        public const string PROGRAM_DATE = "April 17, 2019";
+        public const string PROGRAM_DATE = "April 18, 2019";
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional

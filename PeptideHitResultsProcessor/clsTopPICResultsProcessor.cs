@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsTopPICResultsProcessor()
         {
-            mFileDate = "April 17, 2019";
+            mFileDate = "April 18, 2019";
             InitializeLocalVariables();
         }
 
@@ -52,9 +52,10 @@ namespace PeptideHitResultsProcessor
         /// [11.94403]
         /// [15.98154]
         /// [-109.08458]
+        /// [4.52e-003]
         /// [Acetyl]
         /// </summary>
-        private const string TopPIC_MOD_MASS_OR_NAME_REGEX = @"\[(?<ModMass>[+-]*[0-9\.]+)\]|\[(?<NamedMod>[^\]]+)\]";
+        private const string TopPIC_MOD_MASS_OR_NAME_REGEX = @"\[(?<ModMass>[+-]*[0-9\.e-]+)\]|\[(?<NamedMod>[^\]]+)\]";
 
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
@@ -68,24 +69,27 @@ namespace PeptideHitResultsProcessor
             Spectrum_ID = 2,
             FragMethod = 3,
             Scans = 4,
-            Peaks = 5,
-            Charge = 6,
-            Precursor_mass = 7,              // Monoisotopic mass value of the observed precursor_mz
-            Adjusted_precursor_mass = 8,     // Theoretical monoisotopic mass of the peptide (including mods)
-            Proteoform_ID = 9,
-            Feature_intensity = 10,
-            Protein_name = 11,               // Protein name and description
-            First_residue = 12,
-            Last_residue = 13,
-            Proteoform = 14,
-            Unexpected_modifications = 15,
-            Matched_peaks = 16,
-            Matched_fragment_ions = 17,
-            Pvalue = 18,
-            Evalue = 19,
-            Qvalue = 20,                     //  Spectral FDR, or PepFDR
-            Proteoform_FDR = 21,
-            Variable_PTMs = 22
+            RetentionTime = 5,
+            Peaks = 6,
+            Charge = 7,
+            Precursor_mass = 8,              // Monoisotopic mass value of the observed precursor_mz
+            Adjusted_precursor_mass = 9,     // Theoretical monoisotopic mass of the peptide (including mods)
+            Proteoform_ID = 10,
+            Feature_intensity = 11,
+            Protein_accession = 12,
+            Protein_description = 13,
+            First_residue = 14,
+            Last_residue = 15,
+            Proteoform = 16,
+            Unexpected_modifications = 17,
+            MIScore = 18,
+            Variable_PTMs = 19,
+            Matched_peaks = 20,
+            Matched_fragment_ions = 21,
+            Pvalue = 22,
+            Evalue = 23,
+            Qvalue = 24,                     //  Spectral FDR, or PepFDR
+            Proteoform_FDR = 25
         }
 
         #endregion
@@ -113,10 +117,13 @@ namespace PeptideHitResultsProcessor
             public string Proteoform_ID;
             public string Feature_Intensity;
             public string Protein;
+            public string ProteinDescription;
             public string ResidueStart;                 // First_residue
             public string ResidueEnd;                   // Last_residue
             public string Proteoform;
             public string Unexpected_Mod_Count;         // unexpected modifications
+            public string MIScore;
+            public string VariablePTMs;
             public string Matched_peaks;
             public string Matched_fragment_ions;
             public string Pvalue;
@@ -125,7 +132,6 @@ namespace PeptideHitResultsProcessor
             public string Evalue;
             public string Qvalue;
             public string Proteoform_FDR;
-            public string VariablePTMs;
 
             public void Clear()
             {
@@ -147,10 +153,13 @@ namespace PeptideHitResultsProcessor
                 Proteoform_ID = string.Empty;
                 Feature_Intensity = string.Empty;
                 Protein = string.Empty;
+                ProteinDescription = string.Empty;
                 ResidueStart = string.Empty;
                 ResidueEnd = string.Empty;
                 Proteoform = string.Empty;
                 Unexpected_Mod_Count = string.Empty;
+                MIScore = string.Empty;
+                VariablePTMs = string.Empty;
                 Matched_peaks = string.Empty;
                 Matched_fragment_ions = string.Empty;
                 Pvalue = string.Empty;
@@ -159,7 +168,6 @@ namespace PeptideHitResultsProcessor
                 Evalue = string.Empty;
                 Qvalue = string.Empty;
                 Proteoform_FDR = string.Empty;
-                VariablePTMs = string.Empty;
             }
         }
 
@@ -1004,8 +1012,10 @@ namespace PeptideHitResultsProcessor
 
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Protein_name], out udtSearchResult.Protein);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Protein_accession], out udtSearchResult.Protein);
                 udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
+
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Protein_description], out udtSearchResult.ProteinDescription);
 
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.First_residue], out udtSearchResult.ResidueStart);
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Last_residue], out udtSearchResult.ResidueEnd);
@@ -1054,6 +1064,9 @@ namespace PeptideHitResultsProcessor
                 udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_Mod_Count);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.MIScore], out udtSearchResult.MIScore);
+                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
+
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
@@ -1079,7 +1092,6 @@ namespace PeptideHitResultsProcessor
                 }
 
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_FDR], out udtSearchResult.Proteoform_FDR);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
 
                 return true;
             }
@@ -1111,8 +1123,11 @@ namespace PeptideHitResultsProcessor
         /// <returns></returns>
         private bool ParseTopPICResultsFileHeaderLine(string lineIn, IDictionary<eTopPICResultsFileColumns, int> columnMapping)
         {
-            // The expected header:
+            // Header prior to November 2018:
             // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein name    First residue    Last residue    Proteoform    #unexpected modifications    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR    #Variable PTMs
+
+            // Header for TopPIC 1.2 and newer
+            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein accession    Protein description    First residue    Last residue    Proteoform    #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR
 
             var columnNames = new SortedDictionary<string, eTopPICResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1121,24 +1136,28 @@ namespace PeptideHitResultsProcessor
                 {"Spectrum ID", eTopPICResultsFileColumns.Spectrum_ID},
                 {"Fragmentation", eTopPICResultsFileColumns.FragMethod},
                 {"Scan(s)", eTopPICResultsFileColumns.Scans},
+                {"Retention time", eTopPICResultsFileColumns.RetentionTime},
                 {"#peaks", eTopPICResultsFileColumns.Peaks},
                 {"Charge", eTopPICResultsFileColumns.Charge},
                 {"Precursor mass", eTopPICResultsFileColumns.Precursor_mass},
                 {"Adjusted precursor mass", eTopPICResultsFileColumns.Adjusted_precursor_mass},
                 {"Proteoform ID", eTopPICResultsFileColumns.Proteoform_ID},
                 {"Feature intensity", eTopPICResultsFileColumns.Feature_intensity},
-                {"Protein name", eTopPICResultsFileColumns.Protein_name},
+                {"Protein name", eTopPICResultsFileColumns.Protein_accession},
+                {"Protein accession", eTopPICResultsFileColumns.Protein_accession},
+                {"Protein description", eTopPICResultsFileColumns.Protein_description},
                 {"First residue", eTopPICResultsFileColumns.First_residue},
                 {"Last residue", eTopPICResultsFileColumns.Last_residue},
                 {"Proteoform", eTopPICResultsFileColumns.Proteoform},
                 {"#unexpected modifications", eTopPICResultsFileColumns.Unexpected_modifications},
+                {"MIScore", eTopPICResultsFileColumns.MIScore},
+                {"#variable PTMs", eTopPICResultsFileColumns.Variable_PTMs},
                 {"#matched peaks", eTopPICResultsFileColumns.Matched_peaks},
                 {"#matched fragment ions", eTopPICResultsFileColumns.Matched_fragment_ions},
                 {"P-value", eTopPICResultsFileColumns.Pvalue},
                 {"E-value", eTopPICResultsFileColumns.Evalue},
                 {"Q-value (spectral FDR)", eTopPICResultsFileColumns.Qvalue},
-                {"Proteoform FDR", eTopPICResultsFileColumns.Proteoform_FDR},
-                {"#Variable PTMs", eTopPICResultsFileColumns.Variable_PTMs}
+                {"Proteoform FDR", eTopPICResultsFileColumns.Proteoform_FDR}
             };
 
             columnMapping.Clear();
@@ -1675,6 +1694,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Proteoform_ID,
                     udtSearchResult.Feature_Intensity,
                     udtSearchResult.Protein,
+                    udtSearchResult.ProteinDescription,
                     udtSearchResult.ResidueStart,
                     udtSearchResult.ResidueEnd,
                     udtSearchResult.Unexpected_Mod_Count,       // Unexpected_Mod_Count
