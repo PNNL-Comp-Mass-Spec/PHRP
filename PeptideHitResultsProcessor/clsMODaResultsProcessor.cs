@@ -1579,7 +1579,7 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private void ResolveMODaModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> modaModInfo)
+        private void ResolveMODaModsWithModDefinitions(ICollection<clsModificationDefinition> modaModInfo)
         {
             if (modaModInfo == null)
             {

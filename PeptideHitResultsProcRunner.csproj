@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PeptideHitResultsProcRunner</RootNamespace>
     <AssemblyName>PeptideHitResultsProcRunner</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
@@ -41,11 +41,17 @@
     <StartupObject>PeptideHitResultsProcRunner.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PeptideToProteinMapEngine">
-      <HintPath>PeptideHitResultsProcessor\Lib\PeptideToProteinMapEngine.dll</HintPath>
+    <Reference Include="PeptideToProteinMapEngine, Version=1.1.7048.31316, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>PeptideHitResultsProcessor\Lib\NET_4\PeptideToProteinMapEngine.dll</HintPath>
     </Reference>
-    <Reference Include="ProteinCoverageSummarizer">
-      <HintPath>PeptideHitResultsProcessor\Lib\ProteinCoverageSummarizer.dll</HintPath>
+    <Reference Include="PRISM, Version=2.5.17.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>PeptideHitResultsProcessor\Lib\NET_4\PRISM.dll</HintPath>
+    </Reference>
+    <Reference Include="ProteinCoverageSummarizer, Version=1.1.7048.31316, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>PeptideHitResultsProcessor\Lib\NET_4\ProteinCoverageSummarizer.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -63,9 +69,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="PRISM-Library">
-      <Version>2.5.17</Version>
-    </PackageReference>
     <PackageReference Include="ProteinFileReader">
       <Version>1.3.1</Version>
     </PackageReference>

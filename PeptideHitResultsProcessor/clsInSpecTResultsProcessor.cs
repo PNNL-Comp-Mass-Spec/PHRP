@@ -411,7 +411,7 @@ namespace PeptideHitResultsProcessor
         private bool CreateFHTorSYNResultsFile(
             string inputFilePath,
             string outputFilePath,
-            IReadOnlyList<udtModInfoType> inspectModInfo,
+            IList<udtModInfoType> inspectModInfo,
             eFilteredOutputFileTypeConstants eFilteredOutputFileType)
         {
 
@@ -815,7 +815,7 @@ namespace PeptideHitResultsProcessor
         private bool LoadPeptideToProteinMapInfoInspect(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
-            IReadOnlyList<udtModInfoType> inspectModInfo,
+            IList<udtModInfoType> inspectModInfo,
             ref List<udtPepToProteinMappingType> pepToProteinMapping,
             ref string mtsPepToProteinMapFilePath)
         {
@@ -1155,7 +1155,7 @@ namespace PeptideHitResultsProcessor
         /// <returns></returns>
         private bool ParseInspectResultsFileEntry(
             string lineIn,
-            IReadOnlyList<udtModInfoType> inspectModInfo,
+            IList<udtModInfoType> inspectModInfo,
             ref udtInspectSearchResultType udtSearchResult,
             ref string errorLog,
             int resultsProcessed)
@@ -1642,7 +1642,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inspectModInfo">This function assumes that each entry in inspectModInfo has both .ModName and .ModSymbol defined</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        private string ReplaceInspectModTextWithSymbol(string peptide, IReadOnlyList<udtModInfoType> inspectModInfo)
+        private string ReplaceInspectModTextWithSymbol(string peptide, IList<udtModInfoType> inspectModInfo)
         {
             var prefix = string.Empty;
             var suffix = string.Empty;

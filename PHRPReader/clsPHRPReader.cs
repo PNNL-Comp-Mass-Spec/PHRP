@@ -1633,7 +1633,7 @@ namespace PHRPReader
         }
 
         private void AddDynamicModIfPresent(
-            IReadOnlyDictionary<char, clsModificationDefinition> mods,
+            IDictionary<char, clsModificationDefinition> mods,
             char residue,
             char modSymbol,
             int ResidueLocInPeptide,
@@ -1650,7 +1650,7 @@ namespace PHRPReader
         }
 
         private void AddStaticModIfPresent(
-            IReadOnlyDictionary<string, List<clsModificationDefinition>> mods,
+            IDictionary<string, List<clsModificationDefinition>> mods,
             char residue,
             int ResidueLocInPeptide,
             clsAminoAcidModInfo.eResidueTerminusStateConstants ResidueTerminusState,

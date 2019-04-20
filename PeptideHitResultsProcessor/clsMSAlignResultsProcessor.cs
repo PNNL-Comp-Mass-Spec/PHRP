@@ -1534,7 +1534,7 @@ namespace PeptideHitResultsProcessor
         /// Call .LookupModificationDefinitionByMass for each entry in msAlignModInfo
         /// </summary>
         /// <param name="msAlignModInfo"></param>
-        private void ResolveMSAlignModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> msAlignModInfo)
+        private void ResolveMSAlignModsWithModDefinitions(ICollection<clsModificationDefinition> msAlignModInfo)
         {
             if (msAlignModInfo == null)
                 return;

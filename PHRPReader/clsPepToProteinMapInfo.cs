@@ -37,7 +37,7 @@ namespace PHRPReader
         /// <summary>
         /// Dictionary of protein names and residue start/end positions for a given peptide
         /// </summary>
-        public IReadOnlyDictionary<string, List<udtProteinLocationInfo>> ProteinMapInfo => mProteinMapInfo;
+        public IDictionary<string, List<udtProteinLocationInfo>> ProteinMapInfo => mProteinMapInfo;
 
         /// <summary>
         /// Constructor

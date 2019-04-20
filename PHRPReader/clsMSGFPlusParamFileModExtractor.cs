@@ -480,7 +480,7 @@ namespace PHRPReader
         /// <returns>True if success, false if an error</returns>
         private bool ParseModSpecMSGFPlus(
             string paramFilePath,
-            IReadOnlyList<string> splitLine,
+            IList<string> splitLine,
             ref int unnamedModID,
             out udtModInfoType udtModInfo)
         {
@@ -631,7 +631,7 @@ namespace PHRPReader
         /// <returns>True if success, false if an error</returns>
         private bool ParseModSpecTopPIC(
             string paramFilePath,
-            IReadOnlyList<string> splitLine,
+            IList<string> splitLine,
             eMSGFPlusModType modType,
             ref int unnamedModID,
             out udtModInfoType udtModInfo)

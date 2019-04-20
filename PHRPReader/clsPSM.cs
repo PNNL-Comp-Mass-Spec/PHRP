@@ -59,7 +59,7 @@ namespace PHRPReader
         /// <returns></returns>
         /// <remarks>Update scores using SetScore</remarks>
         // ReSharper disable once UnusedMember.Global
-        public IReadOnlyDictionary<string, string> AdditionalScores => mAdditionalScores;
+        public IDictionary<string, string> AdditionalScores => mAdditionalScores;
 
         /// <summary>
         /// Assumed charge of the spectrum in which this peptide was identified
@@ -271,12 +271,12 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public IReadOnlyList<string> Proteins => mProteins;
+        public IList<string> Proteins => mProteins;
 
         /// <summary>
         /// Dictionary with info on each protein, including name, description, cleavage state, terminus state, residue start, and residue end
         /// </summary>
-        public IReadOnlyDictionary<string, clsProteinInfo> ProteinDetails => mProteinDetails;
+        public IDictionary<string, clsProteinInfo> ProteinDetails => mProteinDetails;
 
         /// <summary>
         /// ResultID of this peptide (typically assigned by the search engine)

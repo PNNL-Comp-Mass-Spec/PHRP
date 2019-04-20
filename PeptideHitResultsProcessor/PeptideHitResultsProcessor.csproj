@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PeptideHitResultsProcessor</RootNamespace>
     <AssemblyName>PeptideHitResultsProcessor</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -34,10 +34,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PeptideToProteinMapEngine">
-      <HintPath>Lib\PeptideToProteinMapEngine.dll</HintPath>
+      <HintPath>Lib\NET_4\PeptideToProteinMapEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="PRISM, Version=2.5.17.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\NET_4\PRISM.dll</HintPath>
     </Reference>
     <Reference Include="ProteinCoverageSummarizer">
-      <HintPath>Lib\ProteinCoverageSummarizer.dll</HintPath>
+      <HintPath>Lib\NET_4\ProteinCoverageSummarizer.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -81,9 +85,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="PRISM-Library">
-      <Version>2.5.17</Version>
-    </PackageReference>
     <PackageReference Include="ProteinFileReader">
       <Version>1.3.1</Version>
     </PackageReference>

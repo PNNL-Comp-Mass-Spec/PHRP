@@ -622,7 +622,7 @@ namespace PeptideHitResultsProcessor
             string modDigits,
             out string modSymbols,
             out string dynModSymbols,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             bool nTerminalMod,
             bool possibleCTerminalMod,
             out double modMassFound,
@@ -780,7 +780,7 @@ namespace PeptideHitResultsProcessor
             string inputFilePath,
             string outputFilePath,
             string scanGroupFilePath,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             out bool isMsgfPlus,
             IDictionary<string, int> specIdToIndex,
             eFilteredOutputFileTypeConstants eFilteredOutputFileType)
@@ -1223,7 +1223,7 @@ namespace PeptideHitResultsProcessor
         private bool LoadPeptideToProteinMapInfoMSGFDB(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             bool isMsgfPlus,
             List<udtPepToProteinMappingType> pepToProteinMapping,
             out string mtsPepToProteinMapFilePath)
@@ -1600,7 +1600,7 @@ namespace PeptideHitResultsProcessor
         private bool ParseMSGFPlusResultsFileEntry(
             string lineIn,
             bool isMsgfPlus,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             ICollection<udtMSGFPlusSearchResultType> searchResultsCurrentScan,
             ref string errorLog,
             IDictionary<eMSGFPlusResultsFileColumns, int> columnMapping,
@@ -2549,7 +2549,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public string ReplaceMSGFModTextWithSymbol(
             string peptide,
-            IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             bool isMsgfPlus,
             out double totalModMass)
         {
@@ -2857,7 +2857,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private void StoreScanGroupInfo(string scanGroupFilePath, IReadOnlyCollection<udtScanGroupInfoType> scanGroupDetails)
+        private void StoreScanGroupInfo(string scanGroupFilePath, ICollection<udtScanGroupInfoType> scanGroupDetails)
         {
             try
             {

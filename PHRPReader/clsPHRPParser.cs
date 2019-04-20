@@ -616,7 +616,7 @@ namespace PHRPReader
 
         private readonly StringBuilder mNewPeptide = new StringBuilder();
 
-        private string ConvertModsToNumericMods(string cleanSequence, IReadOnlyCollection<clsAminoAcidModInfo> modifiedResidues)
+        private string ConvertModsToNumericMods(string cleanSequence, ICollection<clsAminoAcidModInfo> modifiedResidues)
         {
             mNewPeptide.Length = 0;
 

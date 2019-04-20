@@ -1457,7 +1457,7 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private void ResolveMODPlusModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> modPlusModInfo)
+        private void ResolveMODPlusModsWithModDefinitions(ICollection<clsModificationDefinition> modPlusModInfo)
         {
             if (modPlusModInfo == null)
             {
