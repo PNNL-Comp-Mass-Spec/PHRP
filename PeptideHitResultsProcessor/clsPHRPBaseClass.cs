@@ -1781,7 +1781,7 @@ namespace PeptideHitResultsProcessor
             }
             if (proteinName.StartsWith("xxx_", StringComparison.OrdinalIgnoreCase))
             {
-                // Used by MSGF+
+                // Used by MSGF+ and MSFragger
                 return true;
             }
 
