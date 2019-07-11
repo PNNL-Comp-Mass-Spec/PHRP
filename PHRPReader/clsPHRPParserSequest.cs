@@ -410,7 +410,7 @@ namespace PHRPReader
 
             try
             {
-                var paramFilePath = Path.Combine(mInputDirectoryPath, searchEngineParamFileName);
+                var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
 
                 if (!File.Exists(paramFilePath))
                 {
