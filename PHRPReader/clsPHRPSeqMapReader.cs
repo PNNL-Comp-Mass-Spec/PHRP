@@ -209,11 +209,12 @@ namespace PHRPReader
         /// <returns>True if success, false if an error</returns>
         /// <remarks></remarks>
         public bool GetProteinMapping(
-            out SortedList<int, int> resultToSeqMap,
-            out SortedList<int, List<clsProteinInfo>> seqToProteinMap,
-            out SortedList<int, clsSeqInfo> seqInfo)
+            SortedList<int, int> resultToSeqMap,
+            SortedList<int, List<clsProteinInfo>> seqToProteinMap,
+            SortedList<int, clsSeqInfo> seqInfo)
         {
-            return GetProteinMapping(out resultToSeqMap, out seqToProteinMap, out seqInfo, out _);
+            var pepToProteinMap = new Dictionary<string, clsPepToProteinMapInfo>();
+            return GetProteinMapping(resultToSeqMap, seqToProteinMap, seqInfo, pepToProteinMap);
         }
 
         /// <summary>
@@ -226,21 +227,21 @@ namespace PHRPReader
         /// <returns>True if success, false if an error</returns>
         /// <remarks></remarks>
         public bool GetProteinMapping(
-            out SortedList<int, int> resultToSeqMap,
-            out SortedList<int, List<clsProteinInfo>> seqToProteinMap,
-            out SortedList<int, clsSeqInfo> seqInfo,
-            out Dictionary<string, clsPepToProteinMapInfo> pepToProteinMap)
+            SortedList<int, int> resultToSeqMap,
+            SortedList<int, List<clsProteinInfo>> seqToProteinMap,
+            SortedList<int, clsSeqInfo> seqInfo,
+            Dictionary<string, clsPepToProteinMapInfo> pepToProteinMap)
         {
             bool success;
             string filePath;
 
+            resultToSeqMap.Clear();
+            seqToProteinMap.Clear();
+            seqInfo.Clear();
+            pepToProteinMap.Clear();
+
             // Note: do not put a Try/Catch handler in this function
             //       Instead, allow LoadResultToSeqMapping or LoadSeqToProteinMapping to raise exceptions
-
-            resultToSeqMap = new SortedList<int, int>();
-            seqToProteinMap = new SortedList<int, List<clsProteinInfo>>();
-            seqInfo = new SortedList<int, clsSeqInfo>();
-            pepToProteinMap = new Dictionary<string, clsPepToProteinMapInfo>();
 
             if (string.IsNullOrEmpty(ResultToSeqMapFilename))
             {
