@@ -2639,10 +2639,10 @@ namespace PeptideHitResultsProcessor
                         // Look for static mods that should be applied to this residue (only applies to MSGFDB, not MSGF+)
                         for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                         {
-                            var eModificationType = mPeptideMods.GetModificationTypeByIndex(modIndex);
+                            var modificationType = mPeptideMods.GetModificationTypeByIndex(modIndex);
 
                             clsModificationDefinition modificationDefinition;
-                            if (eModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                            if (modificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod)
                             {
                                 modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
@@ -2654,13 +2654,13 @@ namespace PeptideHitResultsProcessor
                             }
                             else if (index == indexFirstResidue)
                             {
-                                if (eModificationType == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod && prefix == "_")
+                                if (modificationType == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod && prefix == "_")
                                 {
                                     // N-terminal protein static mod
                                     modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
                                     totalModMass += modificationDefinition.ModificationMass;
                                 }
-                                else if (eModificationType == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod)
+                                else if (modificationType == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod)
                                 {
                                     // N-terminal peptide static mod
                                     modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);

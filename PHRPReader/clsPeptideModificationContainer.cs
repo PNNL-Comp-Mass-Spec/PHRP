@@ -1699,13 +1699,13 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
-        /// <param name="eModificationType"></param>
+        /// <param name="modificationType"></param>
         /// <param name="massDigitsOfPrecision"></param>
         /// <returns>True if the modification was matched or was added; false if an error</returns>
         public bool VerifyModificationPresent(
             double modificationMass,
             string targetResidues,
-            clsModificationDefinition.eModificationTypeConstants eModificationType,
+            clsModificationDefinition.eModificationTypeConstants modificationType,
             int massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
         {
             // Returns True if the modification was matched or was added
@@ -1724,7 +1724,7 @@ namespace PHRPReader
             {
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (Modifications[index].ModificationType != eModificationType)
+                    if (Modifications[index].ModificationType != modificationType)
                         continue;
 
                     // Matching modification type
@@ -1742,7 +1742,7 @@ namespace PHRPReader
 
                 if (!matchFound)
                 {
-                    var modificationDefinition = new clsModificationDefinition(modificationMass, targetResidues, eModificationType)
+                    var modificationDefinition = new clsModificationDefinition(modificationMass, targetResidues, modificationType)
                     {
                         MassCorrectionTag = LookupMassCorrectionTagByMass(modificationMass)
                     };
