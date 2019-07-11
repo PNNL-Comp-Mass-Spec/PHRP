@@ -61,7 +61,7 @@ namespace PHRPReader
         /// <summary>
         /// Column headers in the synopsis file and first hits file
         /// </summary>
-        protected SortedDictionary<string, int> mColumnHeaders;
+        protected readonly SortedDictionary<string, int> mColumnHeaders;
 
         /// <summary>
         /// Error message
@@ -87,11 +87,6 @@ namespace PHRPReader
         /// Modification info
         /// </summary>
         protected List<clsModificationDefinition> mModInfo;
-
-        private SortedList<int, int> mResultToSeqMap;
-        private SortedList<int, clsSeqInfo> mSeqInfo;
-        private SortedList<int, List<clsProteinInfo>> mSeqToProteinMap;
-        private Dictionary<string, clsPepToProteinMapInfo> mPepToProteinMap;
 
         /// <summary>
         /// Protein Names for each ResultID
@@ -257,6 +252,17 @@ namespace PHRPReader
 
             mPeptideMassCalculator = new clsPeptideMassCalculator();
 
+            // Initialize the column mapping object
+            // Using a case-insensitive comparer
+            mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            // Initialize the tracking lists
+            // These will get populated via the call to reader.GetProteinMapping
+            ResultToSeqMap = new SortedList<int, int>();
+            SeqInfo = new SortedList<int, clsSeqInfo>();
+            SeqToProteinMap = new SortedList<int, List<clsProteinInfo>>();
+            PepToProteinMap = new Dictionary<string, clsPepToProteinMapInfo>();
+
             var startupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = loadModsAndSeqInfo };
 
             InitializeParser(datasetName, inputFilePath, ePeptideHitResultType, startupOptions);
@@ -280,6 +286,17 @@ namespace PHRPReader
             mCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
 
             mPeptideMassCalculator = startupOptions.PeptideMassCalculator ?? new clsPeptideMassCalculator();
+
+            // Initialize the column mapping object
+            // Using a case-insensitive comparer
+            mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            // Initialize the tracking lists
+            // These will get populated via the call to reader.GetProteinMapping
+            ResultToSeqMap = new SortedList<int, int>();
+            SeqInfo = new SortedList<int, clsSeqInfo>();
+            SeqToProteinMap = new SortedList<int, List<clsProteinInfo>>();
+            PepToProteinMap = new Dictionary<string, clsPepToProteinMapInfo>();
 
             InitializeParser(datasetName, inputFilePath, ePeptideHitResultType, startupOptions);
         }
@@ -338,14 +355,14 @@ namespace PHRPReader
 
             // Initialize the column mapping object
             // Using a case-insensitive comparer
-            mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            mColumnHeaders.Clear();
 
             // Initialize the tracking lists
             // These will get updated via the call to reader.GetProteinMapping
-            mResultToSeqMap = new SortedList<int, int>();
-            mSeqInfo = new SortedList<int, clsSeqInfo>();
-            mSeqToProteinMap = new SortedList<int, List<clsProteinInfo>>();
-            mPepToProteinMap = new Dictionary<string, clsPepToProteinMapInfo>();
+            ResultToSeqMap.Clear();
+            SeqInfo.Clear();
+            SeqToProteinMap.Clear();
+            PepToProteinMap.Clear();
 
             if (startupOptions.LoadModsAndSeqInfo)
             {
@@ -852,7 +869,7 @@ namespace PHRPReader
 
 
                 // Read the files
-                success = reader.GetProteinMappingUseExisting(ResultToSeqMap, SeqToProteinMap, SeqInfo, PepToProteinMap);
+                success = reader.GetProteinMapping(ResultToSeqMap, SeqToProteinMap, SeqInfo, PepToProteinMap);
 
                 if (!success)
                 {
@@ -1411,26 +1428,26 @@ namespace PHRPReader
         /// <remarks></remarks>
         protected bool UpdatePSMUsingSeqInfo(clsPSM currentPSM)
         {
-            if (mResultToSeqMap == null || mResultToSeqMap.Count == 0)
+            if (ResultToSeqMap == null || ResultToSeqMap.Count == 0)
             {
                 return false;
             }
 
             // First determine the modified residues present in this peptide
-            if (!mResultToSeqMap.TryGetValue(currentPSM.ResultID, out var seqID))
+            if (!ResultToSeqMap.TryGetValue(currentPSM.ResultID, out var seqID))
             {
                 return false;
             }
 
             currentPSM.SeqID = seqID;
 
-            if (mSeqInfo.TryGetValue(seqID, out var seqInfo))
+            if (SeqInfo.TryGetValue(seqID, out var seqInfo))
             {
                 StoreModInfo(currentPSM, seqInfo);
             }
 
             // Lookup the protein details using mSeqToProteinMap
-            if (mSeqToProteinMap.TryGetValue(seqID, out var proteinDetails))
+            if (SeqToProteinMap.TryGetValue(seqID, out var proteinDetails))
             {
                 foreach (var protein in proteinDetails)
                 {
@@ -1454,11 +1471,11 @@ namespace PHRPReader
                 currentPSM.AddProtein(proteinInfo);
             }
 
-            if (mPepToProteinMap.Count > 0)
+            if (PepToProteinMap.Count > 0)
             {
                 // Make sure the residue start/end locations are up-to-date in currentPSM.ProteinDetails
 
-                if (mPepToProteinMap.TryGetValue(currentPSM.PeptideCleanSequence, out var pepToProteinMapInfo))
+                if (PepToProteinMap.TryGetValue(currentPSM.PeptideCleanSequence, out var pepToProteinMapInfo))
                 {
                     foreach (var protein in currentPSM.ProteinDetails)
                     {
