@@ -54,16 +54,6 @@ namespace PHRPReader
         protected string mDatasetName;
 
         /// <summary>
-        /// Input file path
-        /// </summary>
-        private string mInputFilePath;
-
-        /// <summary>
-        /// Input directory path
-        /// </summary>
-        protected string mInputDirectoryPath;
-
-        /// <summary>
         /// True if initialized
         /// </summary>
         private bool mInitialized;
@@ -108,9 +98,6 @@ namespace PHRPReader
         /// </summary>
         protected readonly SortedList<int, List<string>> mResultIDToProteins;
 
-        private readonly List<string> mErrorMessages;
-        private readonly List<string> mWarningMessages;
-
         #endregion
 
         #region "Properties"
@@ -121,7 +108,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> ErrorMessages => mErrorMessages;
+        public List<string> ErrorMessages { get; }
 
         /// <summary>
         /// Input file path
@@ -129,7 +116,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string InputFilePath => mInputFilePath;
+        public string InputFilePath { get; private set; } = string.Empty;
 
         /// <summary>
         /// Input directory path
@@ -137,13 +124,13 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string InputDirectoryPath => mInputDirectoryPath;
+        public string InputDirectoryPath { get; private set; } = string.Empty;
 
         /// <summary>
         /// Input directory path
         /// </summary>
         [Obsolete("Use InputDirectoryPath")]
-        public string InputFolderPath => mInputDirectoryPath;
+        public string InputFolderPath => InputDirectoryPath;
 
         /// <summary>
         /// Maximum number of proteins to associate with each PSM
@@ -165,7 +152,7 @@ namespace PHRPReader
         /// Peptide to protein map file name
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, clsPepToProteinMapInfo> PepToProteinMap => mPepToProteinMap;
+        public Dictionary<string, clsPepToProteinMapInfo> PepToProteinMap { get; }
 
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
@@ -173,7 +160,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public SortedList<int, int> ResultToSeqMap => mResultToSeqMap;
+        public SortedList<int, int> ResultToSeqMap { get; }
 
         /// <summary>
         /// Returns the cached sequence info, where key is SeqID
@@ -181,7 +168,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public SortedList<int, clsSeqInfo> SeqInfo => mSeqInfo;
+        public SortedList<int, clsSeqInfo> SeqInfo { get; }
 
         /// <summary>
         /// Returns the cached sequence to protein map information
@@ -189,7 +176,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public SortedList<int, List<clsProteinInfo>> SeqToProteinMap => mSeqToProteinMap;
+        public SortedList<int, List<clsProteinInfo>> SeqToProteinMap { get; }
 
         /// <summary>
         /// Cached warning messages
@@ -197,7 +184,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> WarningMessages => mWarningMessages;
+        public List<string> WarningMessages { get; }
 
         #endregion
 
@@ -261,8 +248,8 @@ namespace PHRPReader
         protected clsPHRPParser(string datasetName, string inputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
             bool loadModsAndSeqInfo)
         {
-            mErrorMessages = new List<string>();
-            mWarningMessages = new List<string>();
+            ErrorMessages = new List<string>();
+            WarningMessages = new List<string>();
 
             mResultIDToProteins = new SortedList<int, List<string>>();
 
@@ -285,8 +272,8 @@ namespace PHRPReader
         /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
         protected clsPHRPParser(string datasetName, string inputFilePath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, clsPHRPStartupOptions startupOptions)
         {
-            mErrorMessages = new List<string>();
-            mWarningMessages = new List<string>();
+            ErrorMessages = new List<string>();
+            WarningMessages = new List<string>();
 
             mResultIDToProteins = new SortedList<int, List<string>>();
 
@@ -326,8 +313,8 @@ namespace PHRPReader
             {
                 // User instantiated the class without a filename
                 // Functions that solely require a dataset name will be callable, but cannot call functions that read a data line
-                mInputFilePath = string.Empty;
-                mInputDirectoryPath = string.Empty;
+                InputFilePath = string.Empty;
+                InputDirectoryPath = string.Empty;
 
                 startupOptions.LoadModsAndSeqInfo = false;
                 isSynopsisFile = false;
@@ -335,10 +322,10 @@ namespace PHRPReader
             else
             {
                 var inputFile = new FileInfo(inputFilePath);
-                mInputFilePath = inputFile.FullName;
+                InputFilePath = inputFile.FullName;
                 if (inputFile.Directory != null)
                 {
-                    mInputDirectoryPath = inputFile.Directory.FullName;
+                    InputDirectoryPath = inputFile.Directory.FullName;
                 }
 
                 var phrpSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
@@ -602,7 +589,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public void ClearErrors()
         {
-            mErrorMessages.Clear();
+            ErrorMessages.Clear();
         }
 
         /// <summary>
@@ -611,7 +598,7 @@ namespace PHRPReader
         /// <remarks></remarks>
         public void ClearWarnings()
         {
-            mWarningMessages.Clear();
+            WarningMessages.Clear();
         }
 
         private readonly StringBuilder mNewPeptide = new StringBuilder();
@@ -858,14 +845,14 @@ namespace PHRPReader
 
                 // Instantiate the reader
                 var reader =
-                    new clsPHRPSeqMapReader(mDatasetName, mInputDirectoryPath, mPeptideHitResultType, mInputFilePath)
+                    new clsPHRPSeqMapReader(mDatasetName, InputDirectoryPath, mPeptideHitResultType, InputFilePath)
                     {
                         MaxProteinsPerSeqID = MaxProteinsPerPSM
                     };
 
 
                 // Read the files
-                success = reader.GetProteinMapping(out mResultToSeqMap, out mSeqToProteinMap, out mSeqInfo, out mPepToProteinMap);
+                success = reader.GetProteinMappingUseExisting(ResultToSeqMap, SeqToProteinMap, SeqInfo, PepToProteinMap);
 
                 if (!success)
                 {
@@ -878,11 +865,11 @@ namespace PHRPReader
                 {
                     // Populate mResultIDToProteins
 
-                    foreach (var mapItem in mResultToSeqMap)
+                    foreach (var mapItem in ResultToSeqMap)
                     {
                         List<string> proteinsForResultID;
 
-                        if (mSeqToProteinMap.TryGetValue(mapItem.Value, out var proteinsForSeqID))
+                        if (SeqToProteinMap.TryGetValue(mapItem.Value, out var proteinsForSeqID))
                         {
                             proteinsForResultID = (from protein in proteinsForSeqID select protein.ProteinName).ToList();
                             // proteinsForResultID = new List<string>(proteinsForSeqID.Count);
@@ -913,7 +900,7 @@ namespace PHRPReader
                         entriesParsed += 1;
                         if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds >= 5)
                         {
-                            var pctComplete = entriesParsed / Convert.ToDouble(mResultToSeqMap.Count) * 100;
+                            var pctComplete = entriesParsed / Convert.ToDouble(ResultToSeqMap.Count) * 100;
                             Console.WriteLine(" ... associating proteins with sequences: " + pctComplete.ToString("0.0") + "% complete");
                             lastProgress = DateTime.UtcNow;
                             notifyComplete = true;
@@ -1034,7 +1021,7 @@ namespace PHRPReader
         /// Read a Search Engine parameter file where settings are stored as key/value pairs
         /// </summary>
         /// <param name="searchEngineName">Search engine name (e.g. MSGF+)</param>
-        /// <param name="searchEngineParamFileName">Search engine parameter file name (must exist in mInputDirectoryPath)</param>
+        /// <param name="searchEngineParamFileName">Search engine parameter file name (must exist in InputDirectoryPath)</param>
         /// <param name="ePeptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
         /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
         /// <returns>True if success, false if an error</returns>
@@ -1044,7 +1031,7 @@ namespace PHRPReader
             clsPHRPReader.ePeptideHitResultType ePeptideHitResultType,
             clsSearchEngineParameters searchEngineParams)
         {
-            var paramFilePath = Path.Combine(mInputDirectoryPath, searchEngineParamFileName);
+            var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
 
             var success = ReadKeyValuePairSearchEngineParamFile(searchEngineName, paramFilePath, ePeptideHitResultType, searchEngineParams,
                 out var errorMessage, out var warningMessage);
@@ -1167,12 +1154,12 @@ namespace PHRPReader
             try
             {
                 // Read the Tool_Version_Info file to determine the analysis time and the tool version
-                var toolVersionInfoFilePath = Path.Combine(mInputDirectoryPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType));
+                var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, clsPHRPReader.GetToolVersionInfoFilename(ePeptideHitResultType));
 
                 if (!File.Exists(toolVersionInfoFilePath) && ePeptideHitResultType == clsPHRPReader.ePeptideHitResultType.MSGFPlus)
                 {
                     // This could be an older MSGF+ job; check for a _MSGFDB.txt tool version file
-                    var alternativeVersionInfoFilePath = Path.Combine(mInputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");
+                    var alternativeVersionInfoFilePath = Path.Combine(InputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");
                     if (File.Exists(alternativeVersionInfoFilePath))
                     {
                         toolVersionInfoFilePath = alternativeVersionInfoFilePath;
@@ -1264,7 +1251,7 @@ namespace PHRPReader
         protected void ReportError(string message)
         {
             mErrorMessage = message;
-            mErrorMessages.Add(message);
+            ErrorMessages.Add(message);
             OnErrorEvent(message);
         }
 
@@ -1274,7 +1261,7 @@ namespace PHRPReader
         /// <param name="message"></param>
         protected void ReportWarning(string message)
         {
-            mWarningMessages.Add(message);
+            WarningMessages.Add(message);
             OnWarningEvent(message);
         }
 

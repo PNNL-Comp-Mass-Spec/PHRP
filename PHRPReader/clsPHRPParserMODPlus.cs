@@ -315,7 +315,7 @@ namespace PHRPReader
                 // But MODPlus does not have a _ModDefs.txt file because it performs a blind search
                 // The user can define static mods on any of the residues, plus the peptide terminii; check for these now
 
-                var paramFilePath = Path.Combine(mInputDirectoryPath, searchEngineParamFileName);
+                var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
 
                 // Read the contents of the parameter file
                 var doc = new XmlDocument();

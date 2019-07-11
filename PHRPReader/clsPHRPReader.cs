@@ -100,19 +100,14 @@ namespace PHRPReader
         #endregion
 
         #region "Module variables"
-        private string mDatasetName;
-        private string mInputFilePath;
-        private string mInputDirectoryPath;
 
-        private bool mSkipDuplicatePSMs;
+        private string mInputFilePath;
+
+        private string mInputDirectoryPath;
 
         private readonly clsPHRPStartupOptions mStartupOptions;
 
-        private bool mEchoMessagesToConsole;
-
-        private bool mCanRead;
         private bool mInitialized;
-        private bool mModSummaryFileLoaded;
 
         /// <summary>
         /// When set to true, calls to MoveNext will read the next data line, but will skip several additional processing steps for performance reasons
@@ -121,10 +116,11 @@ namespace PHRPReader
         private bool mFastReadMode;
 
         private StreamReader mSourceFile;
+
         private int mSourceFileLineCount;
+
         private int mSourceFileLinesRead;
 
-        private clsPHRPParser mPHRPParser;
         private readonly clsPeptideMassCalculator mPeptideMassCalculator;
 
         // This dictionary contains mod symbols as the key and modification definition as the values
@@ -156,10 +152,6 @@ namespace PHRPReader
         private string mCachedLine;
         private clsPSM mCachedPSM;
 
-        private readonly List<string> mErrorMessages;
-        private readonly List<string> mWarningMessages;
-
-        private string mErrorMessage = string.Empty;
         private ePHRPReaderErrorCodes mLocalErrorCode;
 
         /// <summary>
@@ -184,7 +176,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns>True if the file is readable</returns>
         /// <remarks></remarks>
-        public bool CanRead => mCanRead;
+        public bool CanRead { get; private set; }
 
         /// <summary>
         /// Returns the most recently loaded PSM
@@ -204,12 +196,12 @@ namespace PHRPReader
         {
             get
             {
-                if (mPSMCurrent == null || mPHRPParser.SeqInfo == null)
+                if (mPSMCurrent == null || PHRPParser.SeqInfo == null)
                 {
                     return null;
                 }
 
-                mPHRPParser.SeqInfo.TryGetValue(mPSMCurrent.SeqID, out var seqInfo);
+                PHRPParser.SeqInfo.TryGetValue(mPSMCurrent.SeqID, out var seqInfo);
                 return seqInfo;
             }
         }
@@ -220,7 +212,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string DatasetName => mDatasetName;
+        public string DatasetName { get; private set; }
 
         /// <summary>
         /// If True, will display messages at the console
@@ -228,11 +220,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool EchoMessagesToConsole
-        {
-            get => mEchoMessagesToConsole;
-            set => mEchoMessagesToConsole = value;
-        }
+        public bool EchoMessagesToConsole { get; set; }
 
         /// <summary>
         /// Cached error messages
@@ -240,7 +228,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> ErrorMessages => mErrorMessages;
+        public List<string> ErrorMessages { get; }
 
         /// <summary>
         /// Current error message
@@ -248,7 +236,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public string ErrorMessage => mErrorMessage;
+        public string ErrorMessage { get; private set; } = string.Empty;
 
         /// <summary>
         /// Used to enable fast read mode when calling MoveNext
@@ -312,7 +300,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool ModSummaryFileLoaded => mModSummaryFileLoaded;
+        public bool ModSummaryFileLoaded { get; private set; }
 
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB (aka MSGF+)
@@ -324,12 +312,12 @@ namespace PHRPReader
         {
             get
             {
-                if (mPHRPParser == null)
+                if (PHRPParser == null)
                 {
                     return ePeptideHitResultType.Unknown;
                 }
 
-                return mPHRPParser.PeptideHitResultType;
+                return PHRPParser.PeptideHitResultType;
             }
         }
 
@@ -358,7 +346,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public clsPHRPParser PHRPParser => mPHRPParser;
+        public clsPHRPParser PHRPParser { get; private set; }
 
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
@@ -370,12 +358,12 @@ namespace PHRPReader
         {
             get
             {
-                if (mPHRPParser == null)
+                if (PHRPParser == null)
                 {
                     return new SortedList<int, int>();
                 }
 
-                return mPHRPParser.ResultToSeqMap;
+                return PHRPParser.ResultToSeqMap;
             }
         }
 
@@ -389,12 +377,12 @@ namespace PHRPReader
         {
             get
             {
-                if (mPHRPParser == null)
+                if (PHRPParser == null)
                 {
                     return new SortedList<int, clsSeqInfo>();
                 }
 
-                return mPHRPParser.SeqInfo;
+                return PHRPParser.SeqInfo;
             }
         }
 
@@ -408,12 +396,12 @@ namespace PHRPReader
         {
             get
             {
-                if (mPHRPParser == null)
+                if (PHRPParser == null)
                 {
                     return new SortedList<int, List<clsProteinInfo>>();
                 }
 
-                return mPHRPParser.SeqToProteinMap;
+                return PHRPParser.SeqToProteinMap;
             }
         }
 
@@ -423,11 +411,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public bool SkipDuplicatePSMs
-        {
-            get => mSkipDuplicatePSMs;
-            set => mSkipDuplicatePSMs = value;
-        }
+        public bool SkipDuplicatePSMs { get; set; }
 
         /// <summary>
         /// Cached warning messages
@@ -435,7 +419,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public List<string> WarningMessages => mWarningMessages;
+        public List<string> WarningMessages { get; }
 
         #endregion
 
@@ -536,8 +520,8 @@ namespace PHRPReader
 
             mPeptideMassCalculator = new clsPeptideMassCalculator();
 
-            mErrorMessages = new List<string>();
-            mWarningMessages = new List<string>();
+            ErrorMessages = new List<string>();
+            WarningMessages = new List<string>();
 
             InitializeClass(inputFilePath, eResultType);
         }
@@ -560,8 +544,8 @@ namespace PHRPReader
 
             mPeptideMassCalculator = startupOptions.PeptideMassCalculator ?? new clsPeptideMassCalculator();
 
-            mErrorMessages = new List<string>();
-            mWarningMessages = new List<string>();
+            ErrorMessages = new List<string>();
+            WarningMessages = new List<string>();
 
             InitializeClass(inputFilePath, eResultType);
         }
@@ -644,8 +628,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public void ClearErrors()
         {
-            mErrorMessages.Clear();
-            mPHRPParser?.ClearErrors();
+            ErrorMessages.Clear();
+            PHRPParser?.ClearErrors();
         }
 
         private int CountLines(string textFilePath)
@@ -678,8 +662,8 @@ namespace PHRPReader
         /// <remarks></remarks>
         public void ClearWarnings()
         {
-            mWarningMessages.Clear();
-            mPHRPParser?.ClearWarnings();
+            WarningMessages.Clear();
+            PHRPParser?.ClearWarnings();
         }
 
         /// <summary>
@@ -701,18 +685,18 @@ namespace PHRPReader
 
         private void InitializeMemberVariables()
         {
-            mDatasetName = string.Empty;
+            DatasetName = string.Empty;
             mInputFilePath = string.Empty;
             mInputDirectoryPath = string.Empty;
 
-            mCanRead = false;
-            mModSummaryFileLoaded = false;
+            CanRead = false;
+            ModSummaryFileLoaded = false;
 
-            mSkipDuplicatePSMs = true;
+            SkipDuplicatePSMs = true;
 
-            mEchoMessagesToConsole = false;
+            EchoMessagesToConsole = false;
 
-            mErrorMessage = string.Empty;
+            ErrorMessage = string.Empty;
             mLocalErrorCode = ePHRPReaderErrorCodes.NoError;
 
             mSourceFileLineCount = 0;
@@ -729,7 +713,7 @@ namespace PHRPReader
                     ReportError("Input file name is empty");
                     SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
                     if (!mInitialized)
-                        throw new FileNotFoundException(mErrorMessage);
+                        throw new FileNotFoundException(ErrorMessage);
                     return;
                 }
 
@@ -742,7 +726,7 @@ namespace PHRPReader
                     ReportError("Unable to determine the parent directory of " + inputFile.FullName);
                     SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
                     if (!mInitialized)
-                        throw new FileNotFoundException(mErrorMessage);
+                        throw new FileNotFoundException(ErrorMessage);
                     return;
                 }
 
@@ -758,7 +742,7 @@ namespace PHRPReader
                     }
                     SetLocalErrorCode(ePHRPReaderErrorCodes.InvalidInputFilePath);
                     if (!mInitialized)
-                        throw new FileNotFoundException(mErrorMessage);
+                        throw new FileNotFoundException(ErrorMessage);
                     return;
                 }
 
@@ -768,7 +752,7 @@ namespace PHRPReader
                 {
                     SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound, true);
                     if (!mInitialized)
-                        throw new FileNotFoundException(mErrorMessage);
+                        throw new FileNotFoundException(ErrorMessage);
                     return;
                 }
 
@@ -783,12 +767,12 @@ namespace PHRPReader
                     success = ReadModSummaryFile(modSummaryFilePath, mDynamicMods, mStaticMods);
                     if (!success)
                     {
-                        mModSummaryFileLoaded = false;
+                        ModSummaryFileLoaded = false;
                         success = true;
                     }
                     else
                     {
-                        mModSummaryFileLoaded = true;
+                        ModSummaryFileLoaded = true;
                     }
                 }
 
@@ -809,14 +793,14 @@ namespace PHRPReader
             {
                 HandleException("Error in InitializeReader", ex);
                 if (!mInitialized)
-                    throw new Exception(mErrorMessage, ex);
+                    throw new Exception(ErrorMessage, ex);
             }
         }
 
         private bool InitializeParser(ePeptideHitResultType eResultType)
         {
             var success = true;
-            var datasetName = string.Copy(mDatasetName);
+            var datasetName = string.Copy(DatasetName);
 
             try
             {
@@ -858,41 +842,41 @@ namespace PHRPReader
                 switch (eResultType)
                 {
                     case ePeptideHitResultType.Sequest:
-                        mPHRPParser = new clsPHRPParserSequest(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserSequest(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.XTandem:
                         // Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
-                        mPHRPParser = new clsPHRPParserXTandem(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserXTandem(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.Inspect:
-                        mPHRPParser = new clsPHRPParserInspect(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserInspect(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.MSGFPlus:
                         // MSGF+
-                        mPHRPParser = new clsPHRPParserMSGFDB(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserMSGFDB(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.MSAlign:
-                        mPHRPParser = new clsPHRPParserMSAlign(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserMSAlign(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.MODa:
-                        mPHRPParser = new clsPHRPParserMODa(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserMODa(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.MODPlus:
-                        mPHRPParser = new clsPHRPParserMODPlus(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserMODPlus(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.MSPathFinder:
-                        mPHRPParser = new clsPHRPParserMSPathFinder(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserMSPathFinder(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.TopPIC:
-                        mPHRPParser = new clsPHRPParserTopPIC(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserTopPIC(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     default:
@@ -908,29 +892,29 @@ namespace PHRPReader
                 }
 
                 // Attach the event handlers
-                RegisterEvents(mPHRPParser);
+                RegisterEvents(PHRPParser);
 
                 // Report any errors cached during instantiation of mPHRPParser
-                foreach (var message in mPHRPParser.ErrorMessages)
+                foreach (var message in PHRPParser.ErrorMessages)
                 {
                     ReportError(message);
                 }
 
                 // Report any warnings cached during instantiation of mPHRPParser
-                foreach (var message in mPHRPParser.WarningMessages)
+                foreach (var message in PHRPParser.WarningMessages)
                 {
                     ReportWarning(message);
                 }
 
-                mPHRPParser.ClearErrors();
-                mPHRPParser.ClearWarnings();
+                PHRPParser.ClearErrors();
+                PHRPParser.ClearWarnings();
 
                 // Open the data file and count the number of lines so that we can compute progress
                 mSourceFileLineCount = CountLines(mInputFilePath);
 
                 // Open the data file for reading
                 mSourceFile = new StreamReader(new FileStream(mInputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                mCanRead = true;
+                CanRead = true;
 
                 return true;
             }
@@ -938,7 +922,7 @@ namespace PHRPReader
             {
                 HandleException("Error in InitializeParser", ex);
                 if (!mInitialized)
-                    throw new Exception(mErrorMessage, ex);
+                    throw new Exception(ErrorMessage, ex);
 
                 return false;
             }
@@ -1483,7 +1467,7 @@ namespace PHRPReader
             {
                 if (filePath.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
                 {
-                    filePathTrimmed = filePath.Substring(0, filePath.Length - suffix.Length) + ".txt";
+                    filePathTrimmed = filePath.Substring(0, filePath.Length - suffix.Length) + Path.GetExtension(filePath);
                     return true;
                 }
             }
@@ -2276,7 +2260,7 @@ namespace PHRPReader
             }
             else
             {
-                mCanRead = false;
+                CanRead = false;
             }
 
             if (!success || string.IsNullOrEmpty(lineIn))
@@ -2290,7 +2274,7 @@ namespace PHRPReader
                 if (!IsNumber(splitLine[0]))
                 {
                     // Parse the header line to confirm the column ordering
-                    mPHRPParser.ParseColumnHeaders(splitLine);
+                    PHRPParser.ParseColumnHeaders(splitLine);
 
                     mHeaderLineParsed = true;
                     return MoveNext();
@@ -2303,7 +2287,7 @@ namespace PHRPReader
             {
                 mPSMCurrent = null;
 
-                success = mPHRPParser.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out mPSMCurrent, mFastReadMode);
+                success = PHRPParser.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out mPSMCurrent, mFastReadMode);
 
                 if (mPSMCurrent == null)
                     mPSMCurrent = new clsPSM();
@@ -2361,7 +2345,7 @@ namespace PHRPReader
 
             if (!mFastReadMode)
             {
-                if (mPHRPParser.PeptideHitResultType == ePeptideHitResultType.Sequest || mPHRPParser.PeptideHitResultType == ePeptideHitResultType.XTandem)
+                if (PHRPParser.PeptideHitResultType == ePeptideHitResultType.Sequest || PHRPParser.PeptideHitResultType == ePeptideHitResultType.XTandem)
                 {
                     ComputePrecursorNeutralMass();
                 }
@@ -2383,7 +2367,7 @@ namespace PHRPReader
                 }
             }
 
-            if (mSkipDuplicatePSMs)
+            if (SkipDuplicatePSMs)
             {
                 // Read the next line and check whether it's the same hit, but a different protein
                 var readNext = true;
@@ -2395,7 +2379,7 @@ namespace PHRPReader
                     if (string.IsNullOrEmpty(lineIn))
                         continue;
 
-                    mPHRPParser.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out var newPSM, mFastReadMode);
+                    PHRPParser.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out var newPSM, mFastReadMode);
 
                     // Check for duplicate lines
                     // If this line is a duplicate of the previous line, skip it
@@ -2547,7 +2531,7 @@ namespace PHRPReader
                 return;
 
             // Determine the clean sequence and cleavage state, and update the Seq_ID fields
-            mPHRPParser.FinalizePSM(mPSMCurrent);
+            PHRPParser.FinalizePSM(mPSMCurrent);
 
             MarkupPeptideWithMods();
 
@@ -2758,7 +2742,7 @@ namespace PHRPReader
         {
             try
             {
-                var scanStatsFilePath = GetScanStatsFilename(mDatasetName);
+                var scanStatsFilePath = GetScanStatsFilename(DatasetName);
                 scanStatsFilePath = Path.Combine(mInputDirectoryPath, scanStatsFilePath);
 
                 ReadScanStatsData(scanStatsFilePath);
@@ -2800,7 +2784,7 @@ namespace PHRPReader
         {
             try
             {
-                var extendedScanStatsFilePath = GetExtendedScanStatsFilename(mDatasetName);
+                var extendedScanStatsFilePath = GetExtendedScanStatsFilename(DatasetName);
                 extendedScanStatsFilePath = Path.Combine(mInputDirectoryPath, extendedScanStatsFilePath);
 
                 ReadExtendedScanStatsData(extendedScanStatsFilePath);
@@ -2829,7 +2813,7 @@ namespace PHRPReader
                 else
                 {
                     // Note: we do not need to raise a warning for MSGFDB results since the extended scan stats file isn't needed
-                    if (mPHRPParser.PeptideHitResultType != ePeptideHitResultType.MSGFPlus)
+                    if (PHRPParser.PeptideHitResultType != ePeptideHitResultType.MSGFPlus)
                     {
                         ReportWarning("Extended ScanStats file not found: " + extendedScanStatsFilePath);
                     }
@@ -2844,19 +2828,19 @@ namespace PHRPReader
 
         private void ReportError(string message)
         {
-            mErrorMessage = message;
-            if (mEchoMessagesToConsole)
+            ErrorMessage = message;
+            if (EchoMessagesToConsole)
                 Console.WriteLine(message);
-            mErrorMessages.Add(message);
+            ErrorMessages.Add(message);
 
             OnErrorEvent(message);
         }
 
         private void ReportWarning(string message)
         {
-            if (mEchoMessagesToConsole)
+            if (EchoMessagesToConsole)
                 Console.WriteLine(message);
-            mWarningMessages.Add(message);
+            WarningMessages.Add(message);
 
             OnWarningEvent(message);
         }
@@ -2875,7 +2859,7 @@ namespace PHRPReader
 
         private void ShowMessage(string message)
         {
-            if (mEchoMessagesToConsole)
+            if (EchoMessagesToConsole)
                 Console.WriteLine(message);
 
             OnStatusEvent(message);
@@ -2939,8 +2923,8 @@ namespace PHRPReader
             }
 
             // Extract the dataset name from the input file path
-            mDatasetName = AutoDetermineDatasetName(inputFilePath, eResultType);
-            if (string.IsNullOrEmpty(mDatasetName))
+            DatasetName = AutoDetermineDatasetName(inputFilePath, eResultType);
+            if (string.IsNullOrEmpty(DatasetName))
             {
                 if (mStartupOptions.LoadModsAndSeqInfo || mStartupOptions.LoadMSGFResults || mStartupOptions.LoadScanStatsData)
                 {

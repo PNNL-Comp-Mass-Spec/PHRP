@@ -527,7 +527,7 @@ namespace PHRPReader
 
             try
             {
-                var paramFilePath = Path.Combine(mInputDirectoryPath, paramFileName);
+                var paramFilePath = Path.Combine(InputDirectoryPath, paramFileName);
 
                 if (!File.Exists(paramFilePath))
                 {
@@ -537,7 +537,7 @@ namespace PHRPReader
                 {
                     try
                     {
-                        success = ParseXTandemParamFileWork(mInputDirectoryPath, paramFileName, searchEngineParams, determineFastaFileNameUsingTaxonomyFile, lookForDefaultParamsFileName, ref errorMessage);
+                        success = ParseXTandemParamFileWork(InputDirectoryPath, paramFileName, searchEngineParams, determineFastaFileNameUsingTaxonomyFile, lookForDefaultParamsFileName, ref errorMessage);
                     }
                     catch (Exception ex)
                     {
