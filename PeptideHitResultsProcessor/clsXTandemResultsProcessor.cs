@@ -115,7 +115,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public clsXTandemResultsProcessor()
         {
-            mFileDate = "April 4, 2019";
+            mFileDate = "July 10, 2019";
 
             mSeqsWithMods = new Dictionary<string, int>();
             mSeqsWithoutMods = new SortedSet<string>();
@@ -226,7 +226,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private bool ParseXTandemInputParameterModInfo(
-            clsModificationDefinition.eModificationTypeConstants eModificationType,
+            clsModificationDefinition.eModificationTypeConstants modificationType,
             int sortOrder,
             bool parsingMotifDef,
             string paramValue,
@@ -332,7 +332,7 @@ namespace PeptideHitResultsProcessor
                                 modInfo.SortOrder = sortOrder;
                                 modInfo.ModificationMass = modificationMass;
                                 modInfo.TargetResidues = targetResidues;
-                                modInfo.ModificationType = eModificationType;
+                                modInfo.ModificationType = modificationType;
                                 udtModInfo[modInfoCount] = modInfo;
                                 modInfoCount += 1;
                             }

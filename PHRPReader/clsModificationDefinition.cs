@@ -301,14 +301,14 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
-        /// <param name="eModificationType"></param>
-        public clsModificationDefinition(double modificationMass, string targetResidues, eModificationTypeConstants eModificationType)
+        /// <param name="modificationType"></param>
+        public clsModificationDefinition(double modificationMass, string targetResidues, eModificationTypeConstants modificationType)
         {
             Clear();
 
             ModificationMass = modificationMass;
             TargetResidues = targetResidues;
-            ModificationType = eModificationType;
+            ModificationType = modificationType;
         }
 
         /// <summary>
@@ -317,16 +317,16 @@ namespace PHRPReader
         /// <param name="modificationSymbol"></param>
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
-        /// <param name="eModificationType"></param>
+        /// <param name="modificationType"></param>
         /// <param name="massCorrectionTag"></param>
-        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, eModificationTypeConstants eModificationType, string massCorrectionTag)
+        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, eModificationTypeConstants modificationType, string massCorrectionTag)
         {
             Clear();
 
             ModificationSymbol = modificationSymbol;
             ModificationMass = modificationMass;
             TargetResidues = targetResidues;
-            ModificationType = eModificationType;
+            ModificationType = modificationType;
             MassCorrectionTag = massCorrectionTag;
         }
 
@@ -336,18 +336,18 @@ namespace PHRPReader
         /// <param name="modificationSymbol"></param>
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
-        /// <param name="eModificationType"></param>
+        /// <param name="modificationType"></param>
         /// <param name="massCorrectionTag"></param>
         /// <param name="chAffectedAtom"></param>
         /// <param name="unknownModAutoDefined"></param>
-        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, eModificationTypeConstants eModificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
+        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, eModificationTypeConstants modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
         {
             Clear();
 
             ModificationSymbol = modificationSymbol;
             ModificationMass = modificationMass;
             TargetResidues = targetResidues;
-            ModificationType = eModificationType;
+            ModificationType = modificationType;
             MassCorrectionTag = massCorrectionTag;
             AffectedAtom = chAffectedAtom;
             UnknownModAutoDefined = unknownModAutoDefined;
