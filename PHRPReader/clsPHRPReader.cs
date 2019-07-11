@@ -557,7 +557,7 @@ namespace PHRPReader
         /// <param name="basePHRPFileName"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static string AutoSwitchToFHTIfRequired(string filePath, string basePHRPFileName)
+        private static string AutoSwitchToFHTIfRequired(string filePath, string basePHRPFileName)
         {
             if (string.IsNullOrEmpty(basePHRPFileName))
             {
@@ -1651,6 +1651,134 @@ namespace PHRPReader
                     peptideMods.Add(new clsAminoAcidModInfo(residue, ResidueLocInPeptide, ResidueTerminusState, modDef));
                 }
             }
+        }
+
+        /// <summary>
+        /// Find the ModSummary file for the given input file
+        /// </summary>
+        /// <param name="peptideHitResultType">PHRP Result Type of the input file</param>
+        /// <param name="datasetName">Dataset name</param>
+        /// <param name="inputDirectoryPath">Input directory (can be an empty string if inputFileName is a full path)</param>
+        /// <param name="inputFileName">Name or path of the input file, e.g. Dataset_msgfplus_syn.txt or Dataset_syn.txt</param>
+        /// <param name="modSummaryFileNamePreferred">Output: preferred mod summary filename (based on whether a _syn.txt or _fht.txt file is present)</param>
+        /// <returns></returns>
+        public static string FindModSummaryFile(
+            ePeptideHitResultType peptideHitResultType,
+            string datasetName,
+            string inputDirectoryPath,
+            string inputFileName,
+            out string modSummaryFileNamePreferred)
+        {
+            var modSummaryFileName = GetPHRPModSummaryFileName(peptideHitResultType, datasetName);
+            if (string.IsNullOrEmpty(modSummaryFileName))
+            {
+                modSummaryFileNamePreferred = string.Empty;
+                return string.Empty;
+            }
+
+            return FindModSummaryFile(inputDirectoryPath, inputFileName, modSummaryFileName, out modSummaryFileNamePreferred);
+        }
+
+        /// <summary>
+        /// Find the ModSummary file for the given input file
+        /// </summary>
+        /// <param name="inputDirectoryPath">Input directory (can be an empty string if inputFileName is a full path)</param>
+        /// <param name="inputFileName">Name or path of the input file, e.g. Dataset_msgfplus_syn.txt or Dataset_syn.txt</param>
+        /// <param name="modSummaryFileName">Expected mod summary filename</param>
+        /// <param name="modSummaryFileNamePreferred">Output: preferred mod summary filename (based on whether a _syn.txt or _fht.txt file is present)</param>
+        /// <returns>Mod summary file path if found; otherwise, an empty string</returns>
+        public static string FindModSummaryFile(
+            string inputDirectoryPath,
+            string inputFileName,
+            string modSummaryFileName,
+            out string modSummaryFileNamePreferred)
+        {
+            return FindPHRPFile(inputDirectoryPath, inputFileName, modSummaryFileName, out modSummaryFileNamePreferred);
+        }
+
+        /// <summary>
+        /// Find the ResultToSeqMap file for the given input file
+        /// </summary>
+        /// <param name="inputDirectoryPath">Input directory (can be an empty string if inputFileName is a full path)</param>
+        /// <param name="inputFileName">Name or path of the input file, e.g. Dataset_msgfplus_syn.txt or Dataset_syn.txt</param>
+        /// <param name="resultToSeqMapFileName">Expected ResultToSeqMap filename</param>
+        /// <param name="resultToSeqMapFileNamePreferred">Output: preferred ResultToSeqMap filename (based on whether a _syn.txt or _fht.txt file is present)</param>
+        /// <returns>Mod summary file path if found; otherwise, an empty string</returns>
+        public static string FindResultToSeqMapFile(
+            string inputDirectoryPath,
+            string inputFileName,
+            string resultToSeqMapFileName,
+            out string resultToSeqMapFileNamePreferred)
+        {
+            return FindPHRPFile(inputDirectoryPath, inputFileName, resultToSeqMapFileName, out resultToSeqMapFileNamePreferred);
+        }
+
+        /// <summary>
+        /// Find the given PHRP result file for the given input file
+        /// </summary>
+        /// <param name="inputDirectoryPath">Input directory (can be an empty string if inputFileName is a full path)</param>
+        /// <param name="inputFileName">Name or path of the input file, e.g. Dataset_msgfplus_syn.txt or Dataset_syn.txt</param>
+        /// <param name="fileNameToFind">Expected PHRP result filename</param>
+        /// <param name="preferredName">Output: preferred PHRP result filename (based on whether a _syn.txt or _fht.txt file is present)</param>
+        /// <returns>Mod summary file path if found; otherwise, an empty string</returns>
+        public static string FindPHRPFile(
+            string inputDirectoryPath,
+            string inputFileName,
+            string fileNameToFind,
+            out string preferredName)
+        {
+            preferredName = string.Empty;
+
+            try
+            {
+                if (string.IsNullOrEmpty(fileNameToFind))
+                {
+                    return string.Empty;
+                }
+
+                if (string.IsNullOrWhiteSpace(inputDirectoryPath))
+                {
+                    var inputFile = new FileInfo(inputFileName);
+                    inputDirectoryPath = inputFile.DirectoryName;
+                }
+
+                var namesToFind = new List<string>();
+
+                fileNameToFind = AutoSwitchToLegacyMSGFDBIfRequired(fileNameToFind, inputFileName);
+                preferredName = AutoSwitchToFHTIfRequired(fileNameToFind, inputFileName);
+
+                namesToFind.Add(preferredName);
+                namesToFind.Add(fileNameToFind);
+
+                if (preferredName.Contains("_msgfplus_"))
+                    namesToFind.Add(preferredName.Replace("_msgfplus_", "_"));
+
+                if (fileNameToFind.Contains("_msgfplus_"))
+                    namesToFind.Add(fileNameToFind.Replace("_msgfplus_", "_"));
+
+                foreach (var nameToFind in namesToFind)
+                {
+                    if (string.IsNullOrWhiteSpace(inputDirectoryPath))
+                    {
+                        if (File.Exists(nameToFind))
+                            return nameToFind;
+
+                        continue;
+                    }
+
+                    var fileToFind = new FileInfo(Path.Combine(inputDirectoryPath, nameToFind));
+                    if (fileToFind.Exists)
+                    {
+                        return fileToFind.FullName;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                PRISM.ConsoleMsgUtils.ShowWarning("Exception in FindModSummaryFile: {0}", ex.Message);
+            }
+
+            return string.Empty;
         }
 
         /// <summary>
@@ -2938,19 +3066,22 @@ namespace PHRPReader
 
             if (mStartupOptions.LoadModsAndSeqInfo)
             {
-                modSummaryFilePath = GetPHRPModSummaryFileName(eResultType, mDatasetName);
-
-                if (inputFile.Directory != null)
+                var modSummaryFileName = GetPHRPModSummaryFileName(eResultType, DatasetName);
+                if (string.IsNullOrEmpty(modSummaryFileName))
                 {
-                    modSummaryFilePath = Path.Combine(inputFile.Directory.FullName, modSummaryFilePath);
+                    ReportError(string.Format("Could not determine the ModSummaryFile name for dataset {0} " +
+                                              "given the PHRP result type {1}",
+                                              DatasetName, eResultType.ToString()));
+                    SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound);
+                    return false;
                 }
 
-                modSummaryFilePath = AutoSwitchToLegacyMSGFDBIfRequired(modSummaryFilePath, inputFile.Name);
-                var modSummaryFilePathPreferred = AutoSwitchToFHTIfRequired(modSummaryFilePath, inputFile.Name);
-                if (modSummaryFilePath != modSummaryFilePathPreferred && File.Exists(modSummaryFilePathPreferred))
-                {
-                    modSummaryFilePath = modSummaryFilePathPreferred;
-                }
+                modSummaryFilePath = FindModSummaryFile(inputFile.DirectoryName,
+                                                        inputFile.Name,
+                                                        modSummaryFileName,
+                                                        out _);
+
+
 
                 if (!ValidateRequiredFileExists("ModSummary file", modSummaryFilePath) && inputFile.Name.ToLower().Contains("_fht"))
                 {
@@ -3023,5 +3154,6 @@ namespace PHRPReader
         }
 
         #endregion
+
     }
 }
