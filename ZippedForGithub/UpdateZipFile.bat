@@ -1,0 +1,3 @@
+"C:\Program Files\7-Zip\7z.exe" a PeptideHitResultsProcessor.zip ..\bin\Release\PeptideHitResultsProcessor.dll ..\bin\Release\PeptideHitResultsProcessor.xml ..\bin\Release\PeptideHitResultsProcRunner.exe ..\bin\Release\PeptideHitResultsProcRunner.exe.config ..\bin\Release\PeptideToProteinMapEngine.dll ..\bin\Release\PHRPReader.dll ..\bin\Release\PHRPReader.xml ..\bin\Release\PRISM.dll ..\bin\Release\ProteinCoverageSummarizer.dll ..\bin\Release\ProteinFileReader.dll ..\bin\Release\System.Data.SQLite.dll ..\README.md ..\RevisionHistory.txt
+
+pause
