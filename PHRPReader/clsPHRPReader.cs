@@ -1919,6 +1919,7 @@ namespace PHRPReader
                 "_SeqToProteinMap.txt",
                 "_SeqInfo.txt",
                 "_MSGF.txt",
+                "_peptides.txt",
                 "_ProteinMods.txt",
                 "_ModDetails.txt",
                 "_ModSummary.txt"
