@@ -260,57 +260,57 @@ namespace PHRPReader
                 }
             }
 
-            if (success)
-            {
-                if (!string.IsNullOrEmpty(mSeqInfoFilename))
-                {
-                    filePath = Path.Combine(mInputDirectoryPath, mSeqInfoFilename);
-                    if (File.Exists(filePath))
-                    {
-                        LoadSeqInfo(filePath, seqInfo);
-                    }
-                }
+            if (!success)
+                return false;
 
-                if (!string.IsNullOrEmpty(mSeqToProteinMapFilename))
+            if (!string.IsNullOrEmpty(mSeqInfoFilename))
+            {
+                filePath = Path.Combine(InputDirectoryPath, mSeqInfoFilename);
+                if (File.Exists(filePath))
                 {
-                    filePath = Path.Combine(mInputDirectoryPath, mSeqToProteinMapFilename);
-                    if (!File.Exists(filePath))
-                    {
-                        mErrorMessage = "SeqInfo file not found: " + filePath;
-                        success = false;
-                    }
-                    else
-                    {
-                        success = LoadSeqToProteinMapping(filePath, seqToProteinMap);
-                    }
+                    LoadSeqInfo(filePath, seqInfo);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(SeqToProteinMapFilename))
+            {
+                filePath = Path.Combine(InputDirectoryPath, SeqToProteinMapFilename);
+                if (!File.Exists(filePath))
+                {
+                    ErrorMessage = "SeqInfo file not found: " + filePath;
+                    success = false;
                 }
                 else
                 {
-                    success = false;
+                    success = LoadSeqToProteinMapping(filePath, seqToProteinMap);
                 }
+            }
+            else
+            {
+                success = false;
+            }
 
-                if (success && !string.IsNullOrEmpty(mPepToProteinMapFilename))
+            if (!success || string.IsNullOrEmpty(PepToProteinMapFilename))
+                return success;
+
+            filePath = Path.Combine(InputDirectoryPath, PepToProteinMapFilename);
+            if (!File.Exists(filePath))
+            {
+                var filePathAlternate = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(filePath, "Dataset_msgfdb.txt");
+                if (File.Exists(filePathAlternate))
                 {
-                    filePath = Path.Combine(mInputDirectoryPath, mPepToProteinMapFilename);
-                    if (!File.Exists(filePath))
-                    {
-                        var filePathAlternate = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(filePath, "Dataset_msgfdb.txt");
-                        if (File.Exists(filePathAlternate))
-                        {
-                            filePath = filePathAlternate;
-                        }
-                    }
-
-                    if (!File.Exists(filePath))
-                    {
-                        Console.WriteLine("Warning: PepToProtMap file not found; protein residue start/end values will be zero");
-                        Console.WriteLine("         " + filePath);
-                    }
-                    else
-                    {
-                        success = LoadPepToProtMapData(filePath, pepToProteinMap);
-                    }
+                    filePath = filePathAlternate;
                 }
+            }
+
+            if (!File.Exists(filePath))
+            {
+                Console.WriteLine("Warning: PepToProtMap file not found; protein residue start/end values will be zero");
+                Console.WriteLine("         " + filePath);
+            }
+            else
+            {
+                success = LoadPepToProtMapData(filePath, pepToProteinMap);
             }
 
             return success;
