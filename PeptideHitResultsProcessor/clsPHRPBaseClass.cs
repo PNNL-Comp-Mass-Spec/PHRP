@@ -1327,53 +1327,11 @@ namespace PeptideHitResultsProcessor
 
                                     if (!skipProtein)
                                     {
-                                        foreach (var mod in reader.CurrentPSM.ModifiedResidues)
-                                        {
-                                            var residueLocInProtein = pepToProteinMapping[pepToProteinMapIndex].ResidueStart + mod.ResidueLocInPeptide - 1;
-                                            string residue;
-
-                                            if (IsLetterAtoZ(mod.Residue))
-                                            {
-                                                residue = mod.Residue.ToString();
-                                            }
-                                            else
-                                            {
-                                                var cleanSequence = reader.CurrentPSM.PeptideCleanSequence;
-
-                                                if (mod.ResidueLocInPeptide < 1)
-                                                {
-                                                    // This shouldn't be the case, but we'll check for it anyway
-                                                    residue = cleanSequence.Substring(0, 1);
-                                                }
-                                                else if (mod.ResidueLocInPeptide > cleanSequence.Length)
-                                                {
-                                                    // This shouldn't be the case, but we'll check for it anyway
-                                                    residue = cleanSequence.Substring(cleanSequence.Length - 1, 1);
-                                                }
-                                                else
-                                                {
-                                                    residue = cleanSequence.Substring(mod.ResidueLocInPeptide - 1, 1);
-                                                }
-                                            }
-
-                                            if (pepToProteinMapping[pepToProteinMapIndex].Protein == PROTEIN_NAME_NO_MATCH && IsReversedProtein(reader.CurrentPSM.ProteinFirst))
-                                            {
-                                                // Skip this result
-                                                psmCountSkippedSinceReversedOrScrambledProtein += 1;
-                                            }
-                                            else
-                                            {
-                                                writer.WriteLine(reader.CurrentPSM.ResultID + "\t" +
-                                                                 reader.CurrentPSM.Peptide + "\t" +
-                                                                 reader.CurrentPSM.SeqID + "\t" +
-                                                                 pepToProteinMapping[pepToProteinMapIndex].Protein + "\t" +
-                                                                 residue + "\t" +
-                                                                 residueLocInProtein + "\t" +
-                                                                 mod.ModDefinition.MassCorrectionTag + "\t" +
-                                                                 mod.ResidueLocInPeptide + "\t" +
-                                                                 reader.CurrentPSM.MSGFSpecEValue);
-                                            }
-                                        }
+                                        WriteModDetailsEntry(reader,
+                                                             writer,
+                                                             pepToProteinMapping,
+                                                             pepToProteinMapIndex,
+                                                             ref psmCountSkippedSinceReversedOrScrambledProtein);
                                     }
 
                                     pepToProteinMapIndex += 1;
@@ -2721,6 +2679,63 @@ namespace PeptideHitResultsProcessor
             }
 
             return true;
+        }
+
+        private void WriteModDetailsEntry(
+            clsPHRPReader reader,
+            TextWriter writer,
+            IReadOnlyList<udtPepToProteinMappingType> pepToProteinMapping,
+            int pepToProteinMapIndex,
+            ref int psmCountSkippedSinceReversedOrScrambledProtein)
+        {
+            foreach (var mod in reader.CurrentPSM.ModifiedResidues)
+            {
+                var residueLocInProtein = pepToProteinMapping[pepToProteinMapIndex].ResidueStart + mod.ResidueLocInPeptide - 1;
+                string residue;
+
+                if (IsLetterAtoZ(mod.Residue))
+                {
+                    residue = mod.Residue.ToString();
+                }
+                else
+                {
+                    var cleanSequence = reader.CurrentPSM.PeptideCleanSequence;
+
+                    if (mod.ResidueLocInPeptide < 1)
+                    {
+                        // This shouldn't be the case, but we'll check for it anyway
+                        residue = cleanSequence.Substring(0, 1);
+                    }
+                    else if (mod.ResidueLocInPeptide > cleanSequence.Length)
+                    {
+                        // This shouldn't be the case, but we'll check for it anyway
+                        residue = cleanSequence.Substring(cleanSequence.Length - 1, 1);
+                    }
+                    else
+                    {
+                        residue = cleanSequence.Substring(mod.ResidueLocInPeptide - 1, 1);
+                    }
+                }
+
+                if (pepToProteinMapping[pepToProteinMapIndex].Protein == PROTEIN_NAME_NO_MATCH && IsReversedProtein(reader.CurrentPSM.ProteinFirst))
+                {
+                    // Skip this result
+                    psmCountSkippedSinceReversedOrScrambledProtein += 1;
+                }
+                else
+                {
+                    writer.WriteLine(reader.CurrentPSM.ResultID + "\t" +
+                                     reader.CurrentPSM.Peptide + "\t" +
+                                     reader.CurrentPSM.SeqID + "\t" +
+                                     pepToProteinMapping[pepToProteinMapIndex].Protein + "\t" +
+                                     residue + "\t" +
+                                     residueLocInProtein + "\t" +
+                                     mod.ModDefinition.MassCorrectionTag + "\t" +
+                                     mod.ResidueLocInPeptide + "\t" +
+                                     reader.CurrentPSM.MSGFSpecEValue);
+                }
+            }
+
         }
 
         #region "PeptideToProteinMapper Event Handlers"
