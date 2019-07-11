@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "April 18, 2019";
+            mFileDate = "July 10, 2019";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -552,7 +552,7 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                ReportMessage("Cached " + mProteinNameOrder.Count + " proteins");
+                ReportMessage(string.Format("Cached {0:N0} proteins", mProteinNameOrder.Count));
 
                 return true;
             }
