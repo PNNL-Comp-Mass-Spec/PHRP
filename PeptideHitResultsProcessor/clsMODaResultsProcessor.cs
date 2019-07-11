@@ -21,7 +21,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODaResultsProcessor()
         {
-            mFileDate = "April 17, 2019";
+            mFileDate = "July 10, 2019";
             InitializeLocalVariables();
         }
 
@@ -124,7 +124,11 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Classwide Variables"
+
+        private int mDeltaMassWarningCount;
+
         private Dictionary<int, int> mSpectrumIndexToScanMap;
+
         #endregion
 
         /// <summary>
@@ -455,6 +459,7 @@ namespace PeptideHitResultsProcessor
                 using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     var resultsProcessed = 0;
+                    mDeltaMassWarningCount = 0;
 
                     // Initialize the list that will hold all of the records in the MODa result file
                     var searchResultsUnfiltered = new List<udtMODaSearchResultType>();
@@ -1079,7 +1084,7 @@ namespace PeptideHitResultsProcessor
                     peptideMonoMassMODa = peptideMonoMassPHRP;
                 }
 
-                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Peptide, peptideMonoMassPHRP, peptideMonoMassMODa);
+                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Peptide, peptideMonoMassPHRP, peptideMonoMassMODa, ref mDeltaMassWarningCount);
 
                 if (peptideMonoMassMODa > 0)
                 {

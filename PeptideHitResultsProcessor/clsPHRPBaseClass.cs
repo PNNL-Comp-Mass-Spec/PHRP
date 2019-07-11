@@ -1303,6 +1303,7 @@ namespace PeptideHitResultsProcessor
                         reader.ClearErrors();
                         reader.ClearWarnings();
 
+                        var peptidesNotFoundInPepToProtMapping = 0;
                         while (reader.MoveNext())
                         {
                             // Use binary search to find this peptide in pepToProteinMapping
@@ -1381,7 +1382,9 @@ namespace PeptideHitResultsProcessor
                             }
                             else
                             {
-                                ReportWarning("Peptide not found in pepToProteinMapping: " + reader.CurrentPSM.Peptide);
+                                peptidesNotFoundInPepToProtMapping++;
+                                ShowPeriodicWarning(peptidesNotFoundInPepToProtMapping, 10,
+                                                    "Peptide not found in pepToProteinMapping: " + reader.CurrentPSM.Peptide);
                             }
 
                             UpdateProgress(progressAtStart + reader.PercentComplete * (100 - progressAtStart) / 100);
@@ -1401,6 +1404,11 @@ namespace PeptideHitResultsProcessor
                                                   "while creating the _ProteinMods.txt file",
                                                   psmCountSkippedSinceReversedOrScrambledProtein, psmCount);
                             }
+                        }
+
+                        if (peptidesNotFoundInPepToProtMapping > 10)
+                        {
+                            Console.WriteLine("Note: {0:N0} peptides were not found in pepToProteinMapping", peptidesNotFoundInPepToProtMapping);
                         }
                     }
                 }
@@ -2278,6 +2286,18 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        protected void ShowPeriodicWarning(int warningCount, int thresholdCountAlwaysShow, string warningMessage)
+        {
+            if (warningCount <= thresholdCountAlwaysShow ||
+                warningCount < 1000 && warningCount % 100 == 0 ||
+                warningCount < 10000 && warningCount % 1000 == 0 ||
+                warningCount < 100000 && warningCount % 10000 == 0 ||
+                warningCount < 1000000 && warningCount % 100000 == 0)
+            {
+                ReportWarning(warningMessage);
+            }
+        }
+
         /// <summary>
         /// If valueText is 0.0, returns 0
         /// If otherwise returns valueText
@@ -2445,11 +2465,17 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Compare the two mass values; warn the user if more than 0.1 Da apart (slightly larger threshold if over 5000 Da)
         /// </summary>
-        /// <param name="toolName"></param>
-        /// <param name="peptide"></param>
-        /// <param name="peptideMonoMassFromPHRP"></param>
-        /// <param name="peptideMonoMassFromTool"></param>
-        protected void ValidateMatchingMonoisotopicMass(string toolName, string peptide, double peptideMonoMassFromPHRP, double peptideMonoMassFromTool)
+        /// <param name="toolName">Tool name</param>
+        /// <param name="peptide">Peptide sequence</param>
+        /// <param name="peptideMonoMassFromPHRP">Peptide monoisotopic mass, as computed by PHRP</param>
+        /// <param name="peptideMonoMassFromTool">Peptide monoisotopic mass, as computed by the search engine</param>
+        /// <param name="deltaMassWarningCount">Keeps track of the number of times the monoisotopic mass values differ more than the threshold</param>
+        protected void ValidateMatchingMonoisotopicMass(
+            string toolName,
+            string peptide,
+            double peptideMonoMassFromPHRP,
+            double peptideMonoMassFromTool,
+            ref int deltaMassWarningCount)
         {
             var massDiffThreshold = peptideMonoMassFromTool / 5000 / 10;
             if (massDiffThreshold < 0.1)
@@ -2472,10 +2498,14 @@ namespace PeptideHitResultsProcessor
             {
                 first30Residues = peptide.Substring(0, 27) + "...";
             }
-            ReportWarning(string.Format(
-                              "The monoisotopic mass computed by PHRP is more than {0:F2} Da away from " +
-                              "the mass computed by {1}: {2:F4} vs. {3:F4}; peptide {4}",
-                              massDiffThreshold, toolName, peptideMonoMassFromPHRP, peptideMonoMassFromTool, first30Residues));
+
+            deltaMassWarningCount++;
+            ShowPeriodicWarning(deltaMassWarningCount,
+                                10,
+                                string.Format(
+                                    "The monoisotopic mass computed by PHRP is more than {0:F2} Da away from " +
+                                    "the mass computed by {1}: {2:F4} vs. {3:F4}; peptide {4}",
+                                    massDiffThreshold, toolName, peptideMonoMassFromPHRP, peptideMonoMassFromTool, first30Residues));
 
         }
         private bool ValidatePeptideToProteinMapResults(string peptideToProteinMapFilePath, bool ignorePeptideToProteinMapperErrors)
