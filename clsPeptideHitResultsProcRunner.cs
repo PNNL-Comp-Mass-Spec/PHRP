@@ -302,7 +302,7 @@ namespace PeptideHitResultsProcRunner
                     var value = settingsFile.GetParam(OPTIONS_SECTION, "PeptideHitResultsFileFormat", Convert.ToInt32(mPeptideHitResultsFileFormat));
                     try
                     {
-                        mPeptideHitResultsFileFormat = (clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants) value;
+                        mPeptideHitResultsFileFormat = (clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants)value;
                     }
                     catch (Exception)
                     {
@@ -608,18 +608,27 @@ namespace PeptideHitResultsProcRunner
                 {
                     // If ePeptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
 
-                    var message = "Error: Could not determine the format of the input file.  It must end in " +
-                                        clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE + ".txt, " +
-                                        clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE + ".txt, .xml (for X!Tandem), " +
-                                        clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE + ".txt, " +
-                                        clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE + ".tsv, " +
-                                        clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE + ".txt, " +
-                                        clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE + ".txt, " +
-                                        clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE + ".txt, or" +
-                                        clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE + ".tsv" +
-                                        clsTopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE + ".txt";
+                    ShowErrorMessage("Could not determine the format of the input file.");
 
-                    ShowErrorMessage(message);
+                    Console.WriteLine();
+                    ShowMessage(
+                        "The filename must end in:\n" +
+                        "  " + clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE + ".tsv or " +
+                        clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE + ".tsv (for MS-GF+),\n" +
+                        "  " + clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE + ".txt (for MSAlign),\n" +
+                        "  " + clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE + ".txt (for MODA),\n" +
+                        "  " + clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE + ".txt (for MODPlus),\n" +
+                        "  " + clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE + ".tsv (for MSPathFinder),\n" +
+                        "  " + clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE + ".txt or " +
+                        clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE + ".txt (for SEQUEST),\n" +
+                        "  " + clsTopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE + ".txt (for TopPIC), or\n" +
+                        "  .xml (for X!Tandem).");
+
+                    Console.WriteLine();
+                    ShowMessage(ConsoleMsgUtils.WrapParagraph(
+                                    "If the file ends in .tsv but does not match the other known .tsv suffixes shown above, " +
+                                    "this program will assume the results come from MS-GF+"));
+
                     return false;
                 }
 
