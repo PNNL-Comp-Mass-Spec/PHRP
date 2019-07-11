@@ -597,7 +597,9 @@ namespace PeptideHitResultsProcessor
                 "_msgfplus_syn",
                 "_msgfplus_fht",
                 "_msgfdb_syn",
-                "_msgfdb_fht"
+                "_msgfdb_fht",
+                "_syn",
+                "_fht"
             };
 
             return ConstructPepToProteinMapFilePath(inputFilePath, outputDirectoryPath, mts, suffixesToFind, 4);

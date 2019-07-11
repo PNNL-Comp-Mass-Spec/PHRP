@@ -348,7 +348,8 @@ namespace PHRPReader
                 var phrpSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
                 var expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
 
-                isSynopsisFile = string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase);
+                isSynopsisFile = string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase) ||
+                                 inputFile.Name.ToLower().EndsWith("_syn.txt");
             }
 
             mErrorMessage = string.Empty;
@@ -373,41 +374,38 @@ namespace PHRPReader
             if (startupOptions.LoadModsAndSeqInfo)
             {
                 // Read the ResultToSeqMapInfo (if the files exist)
-                if (isSynopsisFile)
+
+                var resultToSeqMapFilename = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName);
+                var resultToSeqMapFilePathPreferred = string.Empty;
+                var resultToSeqMapFilePath = string.Empty;
+
+                if (!string.IsNullOrEmpty(resultToSeqMapFilename))
                 {
-                    // Assume the files exist
+                    resultToSeqMapFilePath = clsPHRPReader.FindResultToSeqMapFile(InputDirectoryPath,
+                                                                                  InputFilePath,
+                                                                                  resultToSeqMapFilename,
+                                                                                  out resultToSeqMapFilePathPreferred);
+                }
+
+                if (isSynopsisFile && !string.IsNullOrWhiteSpace(resultToSeqMapFilePath))
+                {
                     LoadSeqInfo();
                 }
-                else
+                else if (!isSynopsisFile && !string.IsNullOrWhiteSpace(resultToSeqMapFilePath))
                 {
-                    // Only continue if the fht versions exists
+                    // Processing an FHT file, and the corresponding ResultToSeqMap file does exist
 
-                    var resultToSeqMapFilePath = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName);
-                    var seqInfoLoaded = false;
-
-                    if (!string.IsNullOrEmpty(resultToSeqMapFilePath))
-                    {
-                        if (!string.IsNullOrWhiteSpace(mInputDirectoryPath))
-                            resultToSeqMapFilePath = Path.Combine(mInputDirectoryPath, resultToSeqMapFilePath);
-
-                        resultToSeqMapFilePath = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(resultToSeqMapFilePath, mInputFilePath);
-                        resultToSeqMapFilePath = clsPHRPReader.AutoSwitchToFHTIfRequired(resultToSeqMapFilePath, mInputFilePath);
-
-                        if (File.Exists(resultToSeqMapFilePath))
-                        {
-                            seqInfoLoaded = LoadSeqInfo();
-                        }
-                    }
+                    var seqInfoLoaded = LoadSeqInfo();
 
                     if (!seqInfoLoaded)
                     {
-                        if (string.IsNullOrEmpty(resultToSeqMapFilePath))
+                        if (string.IsNullOrEmpty(resultToSeqMapFilePathPreferred))
                         {
                             ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file and unable to determine the ResultToSeqMapFilename using clsPHRPReader.GetPHRPResultToSeqMapFileName()");
                         }
                         else
                         {
-                            ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file but the ResultToSeqMap file does not exist: " + resultToSeqMapFilePath);
+                            ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file but the ResultToSeqMap file does not exist: " + resultToSeqMapFilePathPreferred);
                         }
                     }
                 }
@@ -809,25 +807,22 @@ namespace PHRPReader
         {
             try
             {
-                var modSummaryFilePath = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
-                if (string.IsNullOrEmpty(modSummaryFilePath))
+                var modSummaryFileName = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
+                if (string.IsNullOrEmpty(modSummaryFileName))
                 {
-                    ReportWarning("ModSummaryFile path is empty; unable to continue");
+                    ReportWarning("ModSummaryFile name is empty; unable to continue");
                     return;
                 }
 
-                modSummaryFilePath = Path.Combine(mInputDirectoryPath, modSummaryFilePath);
+                var modSummaryFilePath = clsPHRPReader.FindModSummaryFile(InputDirectoryPath,
+                                                                          InputFilePath,
+                                                                          modSummaryFileName,
+                                                                          out var modSummaryFileNamePreferred);
 
-                modSummaryFilePath = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(modSummaryFilePath, mInputFilePath);
-                var modSummaryFilePathPreferred = clsPHRPReader.AutoSwitchToFHTIfRequired(modSummaryFilePath, mInputFilePath);
-                if (modSummaryFilePath != modSummaryFilePathPreferred && File.Exists(modSummaryFilePathPreferred))
+                if (string.IsNullOrWhiteSpace(modSummaryFilePath) || !File.Exists(modSummaryFilePath))
                 {
-                    modSummaryFilePath = modSummaryFilePathPreferred;
-                }
-
-                if (!File.Exists(modSummaryFilePath))
-                {
-                    ReportWarning("ModSummary file not found: " + modSummaryFilePath);
+                    // ModSummary file not found, expected name: Dataset_msgfplus_syn_ModSummary.txt
+                    ReportWarning("ModSummary file not found: " + modSummaryFileNamePreferred);
                     return;
                 }
 
