@@ -1,4 +1,7 @@
-Peptide Hit Results Proc Runner Revision History
+Peptide Hit Results Processor Runner Revision History
+
+Version 1.5.7130; July 10, 2019
+	- Allow the MS-GF+ input file to be named Dataset.tsv instead of Dataset_msgfplus.tsv
 
 Version 1.5.7037; April 8, 2019
 	- Add support for TopPIC results
