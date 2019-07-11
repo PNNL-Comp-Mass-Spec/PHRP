@@ -1,0 +1,35 @@
+Parsing QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus.tsv
+Processing: 0% Detected MSGF+ results file
+
+
+Caching protein names from the FASTA file
+Cached 4,316 proteins
+
+
+Creating the FHT file
+Creating the FHT file
+Processing: 0% ..
+Processing: 25% 
+
+Creating the SYN file
+Creating the SYN file
+..
+Processing: 50% 
+
+Loading the PepToProtein map file: QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus_PepToProtMap.txt
+
+
+Creating the PHRP files for QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus_syn.txt
+Creating the PHRP files for QC_Shew_13_05b_HCD_500ng_24Mar14_Tiger_14-03-04_msgfplus_syn.txt
+..
+Processing: 75% 
+Creating the Protein Mod Details file (95.0% complete)
+Reading the PHRP ModSummary file
+Reading the PHRP SeqInfo file
+Reading the PHRP ModSummary file
+..
+Processing: 100% 
+Note: skipped 561 / 14,673 PSMs that map to reversed or scrambled proteins while creating the _ProteinMods.txt file
+Processing Complete
+
+Processing: 100% 

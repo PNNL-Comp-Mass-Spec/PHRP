@@ -1,0 +1,69 @@
+Parsing QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt.xml
+Processing: 0% Detected X!Tandem XML file
+Processing: 0% .
+
+Creating Peptide to Protein Map file (90.0% complete)
+
+Processing: 25% 
+  Checking for write permission by creating file F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\TempFileToTestFileIOPermissions.tmp
+
+  Deleting F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\TempFileToTestFileIOPermissions.tmp
+
+   SQLite DB Path defined: F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3
+Processing QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt.txt
+Preprocessing input file
+
+Pre-processing PHRP data file: QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt.txt
+Creating QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_peptides.txt
+Running protein coverage summarizer (5.0% complete)
+Initializing
+
+  DeleteSQLiteDBFile: File doesn't exist; nothing to do (F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3); calling method: clsProteinCoverageSummarizer.ProcessFile_Start
+Reading protein input file: Shewanella_oneidensis_MR1_2010-04-22_Tryp_Pig_Bov.fasta (5.9% complete)
+
+  Connecting to SQLite DB: Data Source=F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3;
+
+  Disabling Journaling and setting Synchronous mode to 0 (improves update speed)
+
+  ParseProteinFile: Creating table with CREATE TABLE udtProteinInfoType( Name TEXT, Description TEXT, sequence TEXT, UniquesequenceID INTEGER PRIMARY KEY, PercentCoverage REAL);
+Reading protein input file (6.9% complete)
+
+Processing: 50% Done: Processed 4,316 proteins (29,998 lines)
+Complete reading protein input file: Shewanella_oneidensis_MR1_2010-04-22_Tryp_Pig_Bov.fasta (45.5% complete)
+
+Parsing QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_peptides.txt
+Reading peptides from QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_peptides.txt and finding leader sequences (45.5% complete)
+Determining the shortest peptide in the input file (45.5% complete)
+
+Processing: 75% Reading peptides from QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_peptides.txt and finding leader sequences (leader seq length = 5) (50.0% complete)
+Creating the protein to peptide mapping file: QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_ProteinToPeptideMapping.txt (50.0% complete)
+Reading peptide input file (50.3% complete)
+Comparing proteins to peptide leader sequences
+Comparing proteins to peptide leader sequences (54.5% complete)
+
+  Connecting to SQLite DB: Data Source=F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3;
+
+  GetCachedProteinFromSQLiteDB: running query  SELECT UniqueSequenceID, Name, Description, Sequence, PercentCoverage FROM udtProteinInfoType WHERE UniqueSequenceID BETWEEN 0 AND 49999
+Processing complete; deleting the temporary SQLite database (93.2% complete)
+
+  Closing persistent SQLite connection; calling method: clsProteinCoverageSummarizer.ProcessFile_Complete
+
+  DeleteSQLiteDBFile: Deleting F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Bin\Debug\tmpProteinInfoCache.db3; calling method: clsProteinCoverageSummarizer.ProcessFile_Complete
+Done (93.2% complete)
+Postprocessing (95.0% complete)
+
+Post-processing the results files
+Reading QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_ProteinToPeptideMapping.txt
+.Creating QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_PepToProtMap.txt
+Deleting QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_peptides.txt
+Deleting QC_Shew_12_02_pt5_2c_20Dec12_Leopard_12-11-10_xt_ProteinToPeptideMapping.txt
+Processing successful
+
+Creating the Protein Mod Details file (95.0% complete)
+.Reading the PHRP ModSummary file
+Reading the PHRP SeqInfo file
+Reading the PHRP ModSummary file
+
+Processing: 100% Processing Complete
+
+Processing: 100% 
