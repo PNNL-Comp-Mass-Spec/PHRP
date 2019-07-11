@@ -20,7 +20,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMSAlignResultsProcessor()
         {
-            mFileDate = "April 17, 2019";
+            mFileDate = "July 10, 2019";
             InitializeLocalVariables();
         }
 
@@ -143,6 +143,12 @@ namespace PeptideHitResultsProcessor
                 RankPValue = 0;
             }
         }
+
+        #endregion
+
+        #region "Classwide Variables"
+
+        private int mDeltaMassWarningCount;
 
         #endregion
 
@@ -474,6 +480,8 @@ namespace PeptideHitResultsProcessor
                 using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     var headerParsed = false;
+
+                    mDeltaMassWarningCount = 0;
 
                     // Initialize array that will hold all of the records in the MSAlign result file
                     var searchResultsUnfiltered = new List<udtMSAlignSearchResultType>();
@@ -990,7 +998,7 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Warn the user if the monoisotopic mass values differ by more than 0.1 Da
-                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Peptide, peptideMonoMassPHRP, peptideMonoMassMSAlign);
+                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Peptide, peptideMonoMassPHRP, peptideMonoMassMSAlign, ref mDeltaMassWarningCount);
 
                 if (peptideMonoMassMSAlign > 0)
                 {

@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsTopPICResultsProcessor()
         {
-            mFileDate = "April 18, 2019";
+            mFileDate = "July 10, 2019";
             InitializeLocalVariables();
         }
 
@@ -174,6 +174,8 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Classwide Variables"
+
+        private int mDeltaMassWarningCount;
 
         private readonly SortedSet<string> mUnknownNamedMods = new SortedSet<string>();
 
@@ -530,6 +532,8 @@ namespace PeptideHitResultsProcessor
                 using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     var headerParsed = false;
+
+                    mDeltaMassWarningCount = 0;
 
                     // Initialize array that will hold all of the records in the TopPIC result file
                     var searchResultsUnfiltered = new List<udtTopPICSearchResultType>();
@@ -1041,7 +1045,7 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Warn the user if the monoisotopic mass values differ by more than 0.1 Da
-                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Proteoform, peptideMonoMassPHRP, peptideMonoMassTopPIC);
+                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Proteoform, peptideMonoMassPHRP, peptideMonoMassTopPIC, ref mDeltaMassWarningCount);
 
                 if (peptideMonoMassTopPIC > 0)
                 {

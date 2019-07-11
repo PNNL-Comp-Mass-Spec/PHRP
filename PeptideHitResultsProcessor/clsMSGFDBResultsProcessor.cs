@@ -29,7 +29,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSGFDBResultsProcessor()
         {
-            mFileDate = "April 17, 2019";
+            mFileDate = "July 10, 2019";
             mModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
@@ -1444,6 +1444,8 @@ namespace PeptideHitResultsProcessor
 
                         var columnMapping = new Dictionary<clsPHRPParserMSGFDB.MSGFPlusSynFileColumns, int>();
 
+                        var peptidesNotFoundInPepToProtMapping = 0;
+
                         // Parse the input file
                         while (!reader.EndOfStream & !AbortProcessing)
                         {
@@ -1547,7 +1549,10 @@ namespace PeptideHitResultsProcessor
                                 else
                                 {
                                     // Match not found; this is unexpected
-                                    ReportWarning("no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
+                                    peptidesNotFoundInPepToProtMapping++;
+                                    ShowPeriodicWarning(peptidesNotFoundInPepToProtMapping,
+                                                        10,
+                                                        "no match for '" + currentPeptideWithMods + "' in pepToProteinMapping");
                                 }
                             }
 
@@ -1799,18 +1804,13 @@ namespace PeptideHitResultsProcessor
                                  pMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5))
                             {
                                 // PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
-
                                 mPrecursorMassErrorWarningCount += 1;
-                                if (mPrecursorMassErrorWarningCount <= 10)
-                                {
-                                    ReportWarning("Precursor mass error computed by MSGF+ is 1.5-fold larger than search tolerance: " +
-                                                  udtSearchResult.PMErrorPPM + " vs. " + mParentMassToleranceInfo.ToleranceLeft.ToString("0") +
-                                                  "ppm," + mParentMassToleranceInfo.ToleranceRight.ToString("0") + "ppm");
-                                    if (mPrecursorMassErrorWarningCount == 10)
-                                    {
-                                        ReportWarning("Additional mass errors will not be reported");
-                                    }
-                                }
+                                ShowPeriodicWarning(mPrecursorMassErrorWarningCount,
+                                                    10,
+                                                    string.Format("Precursor mass error computed by MSGF+ is 1.5-fold larger than the search tolerance: {0} vs. {1:F0}ppm,{2:F0}ppm",
+                                                    udtSearchResult.PMErrorPPM,
+                                                    mParentMassToleranceInfo.ToleranceLeft,
+                                                    mParentMassToleranceInfo.ToleranceRight));
 
                                 var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, udtSearchResult.ChargeNum, 0);
 

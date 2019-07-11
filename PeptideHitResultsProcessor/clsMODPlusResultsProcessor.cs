@@ -22,7 +22,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODPlusResultsProcessor()
         {
-            mFileDate = "April 17, 2019";
+            mFileDate = "July 10, 2019";
         }
 
         #region "Constants and Enums"
@@ -134,7 +134,11 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Classwide Variables"
+
+        private int mDeltaMassWarningCount;
+
         private Regex mProteinNamePositionSplit;
+
         #endregion
 
         /// <summary>
@@ -483,6 +487,7 @@ namespace PeptideHitResultsProcessor
                 using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     var headerParsed = false;
+                    mDeltaMassWarningCount = 0;
 
                     // Initialize the list that will hold all of the records in the MODPlus result file
                     var searchResultsUnfiltered = new List<udtMODPlusSearchResultType>();
@@ -974,7 +979,7 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Warn the user if the monoisotopic mass values differ by more than 0.1 Da
-                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Peptide, peptideMonoMassPHRP, peptideMonoMassMODPlus);
+                ValidateMatchingMonoisotopicMass(TOOL_NAME, udtSearchResult.Peptide, peptideMonoMassPHRP, peptideMonoMassMODPlus, ref mDeltaMassWarningCount);
 
                 if (peptideMonoMassMODPlus > 0)
                 {
