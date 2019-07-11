@@ -41,7 +41,7 @@ PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputDirectoryPath]
 ```
 
 The input file should be one of the following:
-* MSGF+ results file (_msgfplus.tsv or _msgfdb.tsv)
+* MSGF+ results file (_msgfplus.tsv or _msgfdb.tsv or .tsv)
 * MSGF-DB results file (_msgfdb.txt)
 * MSAlign results file (_MSAlign_ResultTable.txt)
 * MODa results file (_moda.id.txt)
