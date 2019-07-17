@@ -14,7 +14,7 @@ namespace Test_PHRPReader
         public static void Main()
         {
             //const string synFileSequest = @"Seq201304121552_Auto934225\Firestone_Soil_07_18_05APR13_Frodo_12-12-04_syn.txt";
-            //const string synFileMSGFPlus = @"MSG201304261714_Auto938181\FSFA-299b_25Apr13_Methow_13-02-13_msgfdb_syn.txt";
+            //const string synFileMSGFPlus = @"MSG201304261714_Auto938181\FSFA-299b_25Apr13_Methow_13-02-13_msgfplus_syn.txt";
 
             const string resultsPathSequest = @"\\proto-7\VOrbi05\2013_2\Firestone_Soil_07_18_05APR13_Frodo_12-12-04\Seq201304121552_Auto934225";
             // const string resultsPathMSGFPlus = "MSG201304261714_Auto938181"

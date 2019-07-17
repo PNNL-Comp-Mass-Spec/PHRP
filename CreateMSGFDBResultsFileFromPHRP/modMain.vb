@@ -103,7 +103,7 @@ Module modMain
                 ' Auto-define the output file
 
                 mOutputFilePath = Path.GetFileNameWithoutExtension(fiInputFile.Name)
-                If mOutputFilePath.ToLower.EndsWith("_msgfdb_fht") OrElse mOutputFilePath.EndsWith("_msgfdb_syn") Then
+                If mOutputFilePath.ToLower.EndsWith("_msgfplus_fht") OrElse mOutputFilePath.EndsWith("_msgfplus_syn") Then
                     mOutputFilePath = mOutputFilePath.Substring(0, mOutputFilePath.Length - 11)
                 End If
                 mOutputFilePath = Path.Combine(fiInputFile.Directory.FullName, mOutputFilePath & "_msgfplus.tsv")
@@ -296,7 +296,7 @@ Module modMain
 
         Try
 
-            Console.WriteLine("This program reads a PHRP-compatible _msgfdb_fht.txt file and creates the equivalent tab-delimited _msgfplus.tsv file that would have been created by MSGFPlus when converting the .mzIdentML file to a .tsv file")
+            Console.WriteLine("This program reads a PHRP-compatible _msgfplus_fht.txt file and creates the equivalent tab-delimited _msgfplus.tsv file that would have been created by MSGFPlus when converting the .mzIdentML file to a .tsv file")
             Console.WriteLine()
             Console.WriteLine("Program syntax:" & ControlChars.NewLine & Path.GetFileName(Assembly.GetExecutingAssembly().Location) & _
              " InputFilePath [/O:OutputFilePath]")
