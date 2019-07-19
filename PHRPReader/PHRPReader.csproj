@@ -61,6 +61,7 @@
     <Compile Include="clsPHRPParserMODa.cs" />
     <Compile Include="clsPHRPParserMODPlus.cs" />
     <Compile Include="clsPHRPParserMSAlign.cs" />
+    <Compile Include="clsPHRPParserMSGFDB.cs" />
     <Compile Include="clsPHRPParserMSGFPlus.cs" />
     <Compile Include="clsPHRPParserMSPathFinder.cs" />
     <Compile Include="clsPHRPParserSequest.cs" />
