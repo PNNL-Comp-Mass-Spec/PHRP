@@ -69,7 +69,6 @@ namespace PHRPReader
 
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
-
         /// <summary>
         /// These columns correspond to the Synopsis file created by clsMSGFDBResultsProcessor
         /// </summary>
@@ -355,6 +354,19 @@ namespace PHRPReader
             };
 
             return headerColumns;
+        }
+
+        /// <summary>
+        /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
+        /// Populates a dictionary mapping enum MSGFPlusSynFileColumns to the 0-based index in columnNames
+        /// </summary>
+        /// <param name="headerNames"></param>
+        /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
+        // ReSharper disable once UnusedMember.Global
+        public static Dictionary<MSGFPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        {
+            var headerColumns = GetColumnHeaderNamesAndIDs();
+            return GetColumnMapFromHeaderLine(headerNames, headerColumns);
         }
 
         /// <summary>
