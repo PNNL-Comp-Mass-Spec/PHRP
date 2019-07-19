@@ -373,7 +373,7 @@ namespace PHRPReader
                 searchEngineParams.MinNumberTermini = 0;
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                searchEngineParams.PrecursorMassToleranceDa = clsPHRPParserMSGFDB.DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, resultType);
+                searchEngineParams.PrecursorMassToleranceDa = clsPHRPParserMSGFPlus.DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, resultType);
                 searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
 
                 return true;
