@@ -303,7 +303,7 @@ namespace PHRPReader
         public bool ModSummaryFileLoaded { get; private set; }
 
         /// <summary>
-        /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB (aka MSGF+)
+        /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFPlus (aka MSGF+)
         /// </summary>
         /// <value></value>
         /// <returns></returns>
