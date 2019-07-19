@@ -223,7 +223,7 @@ namespace PHRPReader
                     }
                     else if (units == 1)
                     {
-                        // Tolerance is in milli mass units
+                        // Tolerance is in mmu (milli mass units)
                         toleranceDa = value / 1000.0;
 
                         // Convert from dalton to PPM (assuming a mass of 2000 m/z)
