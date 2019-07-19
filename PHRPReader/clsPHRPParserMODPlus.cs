@@ -201,6 +201,19 @@ namespace PHRPReader
         }
 
         /// <summary>
+        /// Compares the names in headerNames to the standard header names tracked by the dictionary returned by GetColumnHeaderNamesAndIDs
+        /// Populates a dictionary mapping enum MODPlusSynFileColumns to the 0-based index in columnNames
+        /// </summary>
+        /// <param name="headerNames"></param>
+        /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
+        // ReSharper disable once UnusedMember.Global
+        public static Dictionary<MODPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        {
+            var headerColumns = GetColumnHeaderNamesAndIDs();
+            return GetColumnMapFromHeaderLine(headerNames, headerColumns);
+        }
+
+        /// <summary>
         /// Default first hits file for the given dataset
         /// </summary>
         /// <param name="datasetName"></param>

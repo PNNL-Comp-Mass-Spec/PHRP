@@ -726,6 +726,40 @@ namespace PHRPReader
             UpdatePSMUsingSeqInfo(psm);
         }
 
+        /// <summary>
+        /// Compares the names in headerNames to the standard header names tracked by headerColumnInfo
+        /// Populates a dictionary mapping a PHRPReader enum to the 0-based index in columnNames
+        /// </summary>
+        /// <param name="headerNames">List of column names from the header line of a data file</param>
+        /// <param name="headerColumnInfo">Dictionary mapping standard header column names to a PHRPReader enum (e.g. MSGFPlusSynFileColumns)</param>
+        /// <returns>Dictionary mapping the PHRPReader enum value to the column index in headerNames (0-based column index)</returns>
+        protected static Dictionary<T, int> GetColumnMapFromHeaderLine<T>(List<string> headerNames, SortedDictionary<string, T> headerColumnInfo)
+        {
+            var columnNameToIndexMap = new Dictionary<T, int>();
+
+            for (var index = 0; index < headerNames.Count; index++)
+            {
+                var headerName = headerNames[index];
+
+                foreach (var headerColumn in headerColumnInfo)
+                {
+                    if (!headerName.Equals(headerColumn.Key, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (columnNameToIndexMap.ContainsKey(headerColumn.Value))
+                    {
+                        // Header name is present more than once; ignore the duplicate entry
+                        break;
+                    }
+
+                    columnNameToIndexMap.Add(headerColumn.Value, index);
+                    break;
+                }
+            }
+
+            return columnNameToIndexMap;
+        }
+
         private static KeyValuePair<string, string> GetMODaStaticModSetting(KeyValuePair<string, string> kvSetting, out string warningMessage)
         {
             var key = kvSetting.Key;
