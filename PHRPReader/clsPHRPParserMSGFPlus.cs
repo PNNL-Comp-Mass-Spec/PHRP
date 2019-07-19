@@ -17,7 +17,7 @@ namespace PHRPReader
     /// <summary>
     /// PHRP parser for MSGF+
     /// </summary>
-    public class clsPHRPParserMSGFDB : clsPHRPParser
+    public class clsPHRPParserMSGFPlus : clsPHRPParser
     {
         #region "Constants"
 
@@ -162,7 +162,7 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <remarks></remarks>
-        public clsPHRPParserMSGFDB(string datasetName, string inputFilePath)
+        public clsPHRPParserMSGFPlus(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
         }
@@ -174,7 +174,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
-        public clsPHRPParserMSGFDB(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
+        public clsPHRPParserMSGFPlus(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
             : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus, loadModsAndSeqInfo)
         {
         }
@@ -186,7 +186,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
-        public clsPHRPParserMSGFDB(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
+        public clsPHRPParserMSGFPlus(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
             : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus, startupOptions)
         {
         }

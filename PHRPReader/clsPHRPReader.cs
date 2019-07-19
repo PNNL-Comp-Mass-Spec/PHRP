@@ -856,7 +856,7 @@ namespace PHRPReader
 
                     case ePeptideHitResultType.MSGFPlus:
                         // MSGF+
-                        PHRPParser = new clsPHRPParserMSGFDB(datasetName, mInputFilePath, mStartupOptions);
+                        PHRPParser = new clsPHRPParserMSGFPlus(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case ePeptideHitResultType.MSAlign:
@@ -1013,12 +1013,12 @@ namespace PHRPReader
             }
 
             // MSGF+
-            filesToFind.Add(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN);
-            filesToFind.Add(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT);
+            filesToFind.Add(clsPHRPParserMSGFPlus.FILENAME_SUFFIX_SYN);
+            filesToFind.Add(clsPHRPParserMSGFPlus.FILENAME_SUFFIX_FHT);
 
             // MSGF+ prior to November 2016
-            filesToFind.Add(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN));
-            filesToFind.Add(GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT));
+            filesToFind.Add(GetLegacyMSGFPlusName(clsPHRPParserMSGFPlus.FILENAME_SUFFIX_SYN));
+            filesToFind.Add(GetLegacyMSGFPlusName(clsPHRPParserMSGFPlus.FILENAME_SUFFIX_FHT));
 
             // X!Tandem (only has _xt.txt files)
             filesToFind.Add(clsPHRPParserXTandem.FILENAME_SUFFIX_SYN);
@@ -1164,12 +1164,12 @@ namespace PHRPReader
             foreach (var dataset in datasetNames)
             {
                 // MSGF+
-                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFDB.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFPlus.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFPlus.GetPHRPFirstHitsFileName, dataset);
 
                 // MSGF+ prior to November 2016
-                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPSynopsisFileName(dataset)));
-                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, GetLegacyMSGFPlusName(clsPHRPParserMSGFDB.GetPHRPFirstHitsFileName(dataset)));
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, GetLegacyMSGFPlusName(clsPHRPParserMSGFPlus.GetPHRPSynopsisFileName(dataset)));
+                AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, GetLegacyMSGFPlusName(clsPHRPParserMSGFPlus.GetPHRPFirstHitsFileName(dataset)));
 
                 AddFileToFind(filesToFind, ePeptideHitResultType.XTandem, clsPHRPParserXTandem.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, ePeptideHitResultType.XTandem, clsPHRPParserXTandem.GetPHRPFirstHitsFileName, dataset);
@@ -1382,8 +1382,8 @@ namespace PHRPReader
 
             var suffixesToCheck = new List<KeyValuePair<string, ePeptideHitResultType>>();
             AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.XTandem, clsPHRPParserXTandem.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFDB.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFDB.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFPlus.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFPlus.FILENAME_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_SYN);
             AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_FHT);
             AddSuffixToCheck(suffixesToCheck, ePeptideHitResultType.MSAlign, clsPHRPParserMSAlign.FILENAME_SUFFIX_SYN);
@@ -1431,12 +1431,12 @@ namespace PHRPReader
                     {
                         eResultType = ePeptideHitResultType.Inspect;
                     }
-                    else if (LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore,
-                                                clsPHRPParserMSGFDB.DATA_COLUMN_MSGFDB_SpecProb) ||
-                             LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore,
-                                                clsPHRPParserMSGFDB.DATA_COLUMN_MSGFPlus_SpecEValue) ||
-                             LineContainsValues(headerLine, clsPHRPParserMSGFDB.DATA_COLUMN_MSGFScore,
-                                                clsPHRPParserMSGFDB.DATA_COLUMN_DeNovoScore))
+                    else if (LineContainsValues(headerLine, clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFScore,
+                                                clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFDB_SpecProb) ||
+                             LineContainsValues(headerLine, clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFScore,
+                                                clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFPlus_SpecEValue) ||
+                             LineContainsValues(headerLine, clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFScore,
+                                                clsPHRPParserMSGFPlus.DATA_COLUMN_DeNovoScore))
                     {
                         eResultType = ePeptideHitResultType.MSGFPlus;
                     }
@@ -1954,7 +1954,7 @@ namespace PHRPReader
                     break;
 
                 case ePeptideHitResultType.MSGFPlus:
-                    mCachedParser = new clsPHRPParserMSGFDB(datasetName, string.Empty);
+                    mCachedParser = new clsPHRPParserMSGFPlus(datasetName, string.Empty);
                     break;
 
                 case ePeptideHitResultType.MSAlign:

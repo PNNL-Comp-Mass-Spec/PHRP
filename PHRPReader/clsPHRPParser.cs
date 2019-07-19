@@ -489,7 +489,7 @@ namespace PHRPReader
                     return new clsPHRPParserMSAlign(datasetName, inputFilePath, loadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.MSGFPlus:
-                    return new clsPHRPParserMSGFDB(datasetName, inputFilePath, loadModsAndSeqInfo);
+                    return new clsPHRPParserMSGFPlus(datasetName, inputFilePath, loadModsAndSeqInfo);
 
                 case clsPHRPReader.ePeptideHitResultType.Sequest:
                     return new clsPHRPParserSequest(datasetName, inputFilePath, loadModsAndSeqInfo);
