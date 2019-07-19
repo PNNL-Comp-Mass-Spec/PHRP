@@ -2266,6 +2266,25 @@ namespace PHRPReader
             return -1;
         }
 
+        /// <summary>
+        /// Returns the index of the indicated column, as tracked by columnHeaders
+        /// </summary>
+        /// <param name="columnEnum"></param>
+        /// <param name="columnHeaders"></param>
+        /// <returns>Column index, or -1 if not found</returns>
+        /// <remarks></remarks>
+        public static int LookupColumnIndex(Enum columnEnum, SortedDictionary<Enum, int> columnHeaders)
+        {
+            if (columnHeaders.TryGetValue(columnEnum, out var colIndex))
+            {
+                if (colIndex >= 0)
+                {
+                    return colIndex;
+                }
+            }
+
+            return -1;
+        }
 
         /// <summary>
         /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
@@ -2287,6 +2306,31 @@ namespace PHRPReader
             if (dataColumns != null)
             {
                 var colIndex = LookupColumnIndex(columnName, columnHeaders);
+                if (colIndex >= 0 && colIndex < dataColumns.Length)
+                {
+                    if (string.IsNullOrWhiteSpace(dataColumns[colIndex]))
+                    {
+                        return string.Empty;
+                    }
+
+                    return dataColumns[colIndex];
+                }
+            }
+
+            // If we get here, return valueIfMissing
+            return valueIfMissing;
+        }
+
+        /// <summary>
+        /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
+        /// </summary>
+        /// <returns>The text in the specified column; valueIfMissing if the specific column name is not recognized</returns>
+        /// <remarks></remarks>
+        public static string LookupColumnValue(string[] dataColumns, Enum columnEnum, SortedDictionary<Enum, int> columnHeaders, string valueIfMissing)
+        {
+            if (dataColumns != null)
+            {
+                var colIndex = LookupColumnIndex(columnEnum, columnHeaders);
                 if (colIndex >= 0 && colIndex < dataColumns.Length)
                 {
                     if (string.IsNullOrWhiteSpace(dataColumns[colIndex]))
