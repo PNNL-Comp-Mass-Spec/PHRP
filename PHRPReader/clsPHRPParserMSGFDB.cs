@@ -3,7 +3,7 @@
 namespace PHRPReader
 {
     [Obsolete("Use clsPHRPParserMSGFPlus")]
-    class clsPHRPParserMSGFDB : clsPHRPParserMSGFPlus
+    public class clsPHRPParserMSGFDB : clsPHRPParserMSGFPlus
     {
         /// <summary>
         /// Constructor; assumes loadModsAndSeqInfo=True
