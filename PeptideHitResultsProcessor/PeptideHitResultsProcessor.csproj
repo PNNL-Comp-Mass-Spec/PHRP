@@ -58,7 +58,7 @@
     <Compile Include="clsMODaResultsProcessor.cs" />
     <Compile Include="clsMODPlusResultsProcessor.cs" />
     <Compile Include="clsMSAlignResultsProcessor.cs" />
-    <Compile Include="clsMSGFDBResultsProcessor.cs" />
+    <Compile Include="clsMSGFPlusResultsProcessor.cs" />
     <Compile Include="clsMSPathFinderResultsProcessor.cs" />
     <Compile Include="clsPHRPBaseClass.cs" />
     <Compile Include="clsSearchResultsBaseClass.cs" />
@@ -66,7 +66,7 @@
     <Compile Include="clsSearchResultsMODa.cs" />
     <Compile Include="clsSearchResultsMODPlus.cs" />
     <Compile Include="clsSearchResultsMSAlign.cs" />
-    <Compile Include="clsSearchResultsMSGFDB.cs" />
+    <Compile Include="clsSearchResultsMSGFPlus.cs" />
     <Compile Include="clsSearchResultsMSPathFinder.cs" />
     <Compile Include="clsSearchResultsSequest.cs" />
     <Compile Include="clsSearchResultsTopPIC.cs" />
