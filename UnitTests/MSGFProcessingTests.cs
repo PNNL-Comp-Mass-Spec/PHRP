@@ -73,7 +73,7 @@ namespace PHRP_UnitTests
             // ReSharper disable StringLiteralTypo
 
             var peptide = "-187.152+229.163ATK-187.152+229.163QIFDC+57.021K+229.163";
-            var processor = new clsMSGFDBResultsProcessor();
+            var processor = new clsMSGFPlusResultsProcessor();
 
             var replaced = processor.ReplaceMSGFModTextWithSymbol(peptide, modInfo, true, out _);
             Console.WriteLine("Original: {0}", peptide);

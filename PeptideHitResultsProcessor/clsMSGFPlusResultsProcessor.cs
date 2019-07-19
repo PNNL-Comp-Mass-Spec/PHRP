@@ -21,15 +21,15 @@ using PHRPReader;
 
 namespace PeptideHitResultsProcessor
 {
-    public class clsMSGFDBResultsProcessor : clsPHRPBaseClass
+    public class clsMSGFPlusResultsProcessor : clsPHRPBaseClass
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <remarks></remarks>
-        public clsMSGFDBResultsProcessor()
+        public clsMSGFPlusResultsProcessor()
         {
-            mFileDate = "July 10, 2019";
+            mFileDate = "July 19, 2019";
             mModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
@@ -1405,7 +1405,7 @@ namespace PeptideHitResultsProcessor
                 mNumericModErrors = 0;
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsMSGFDB(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new clsSearchResultsMSGFPlus(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Note that MSGF+ synopsis files are normally sorted on SpecEValue value, ascending
                 // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
@@ -2075,7 +2075,7 @@ namespace PeptideHitResultsProcessor
         /// <returns></returns>
         private bool ParseMSGFPlusSynFileEntry(
             string lineIn,
-            clsSearchResultsMSGFDB searchResult,
+            clsSearchResultsMSGFPlus searchResult,
             ref string errorLog,
             int resultsProcessed,
             IDictionary<clsPHRPParserMSGFPlus.MSGFPlusSynFileColumns, int> columnMapping,
@@ -2437,13 +2437,13 @@ namespace PeptideHitResultsProcessor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in clsMSGFDBResultsProcessor.ProcessFile (2):  " + ex.Message);
+                    SetErrorMessage("Error in clsMSGFPlusResultsProcessor.ProcessFile (2):  " + ex.Message);
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in clsMSGFDBResultsProcessor.ProcessFile (1):" + ex.Message);
+                SetErrorMessage("Error in clsMSGFPlusResultsProcessor.ProcessFile (1):" + ex.Message);
                 SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
             }
 
