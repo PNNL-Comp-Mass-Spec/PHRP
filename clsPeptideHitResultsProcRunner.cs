@@ -181,8 +181,8 @@ namespace PeptideHitResultsProcRunner
 
             MODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
-            MsgfPlusEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            MsgfPlusSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
+            MsgfPlusEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
+            MsgfPlusSpecEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
             WarnMissingParameterFileSection = true;
 
@@ -541,7 +541,7 @@ namespace PeptideHitResultsProcRunner
                         break;
 
                     case clsPHRPReader.ePeptideHitResultType.MSGFPlus:
-                        mPeptideHitResultsProcessor = new clsMSGFDBResultsProcessor();
+                        mPeptideHitResultsProcessor = new clsMSGFPlusResultsProcessor();
                         break;
 
                     case clsPHRPReader.ePeptideHitResultType.MSAlign:
@@ -613,8 +613,8 @@ namespace PeptideHitResultsProcRunner
                     Console.WriteLine();
                     ShowMessage(
                         "The filename must end in:\n" +
-                        "  " + clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE + ".tsv or " +
-                        clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE + ".tsv (for MS-GF+),\n" +
+                        "  " + clsMSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE + ".tsv or " +
+                        clsMSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE + ".tsv (for MS-GF+),\n" +
                         "  " + clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE + ".txt (for MSAlign),\n" +
                         "  " + clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE + ".txt (for MODA),\n" +
                         "  " + clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE + ".txt (for MODPlus),\n" +
@@ -655,7 +655,7 @@ namespace PeptideHitResultsProcRunner
                         break;
 
                     case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
-                        mPeptideHitResultsProcessor = new clsMSGFDBResultsProcessor();
+                        mPeptideHitResultsProcessor = new clsMSGFPlusResultsProcessor();
                         LogMessage("Detected MSGF+ results file");
                         break;
 

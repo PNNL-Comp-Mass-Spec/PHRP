@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "July 10, 2019";
+            mFileDate = "July 19, 2019";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -347,7 +347,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
+        /// Used by clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lower E-values are higher confidence results</remarks>
@@ -359,7 +359,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
+        /// clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
@@ -371,14 +371,14 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Used by clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
+        /// Used by clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lower E-values are higher confidence results</remarks>
         public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
 
         /// <summary>
-        /// clsMSGFDBResultsProcessor and clsMSPathFinderResultsProcessor
+        /// clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
@@ -409,7 +409,7 @@ namespace PeptideHitResultsProcessor
         ///
         /// </summary>
         /// <returns></returns>
-        /// <remarks>Used by clsInSpecTResultsProcessor and clsMSGFDBResultsProcessor (aka SearchEngineParamFileName)</remarks>
+        /// <remarks>Used by clsInSpecTResultsProcessor and clsMSGFPlusResultsProcessor (aka SearchEngineParamFileName)</remarks>
         public string SearchToolParameterFilePath { get; set; }
 
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
@@ -755,12 +755,12 @@ namespace PeptideHitResultsProcessor
                 return ePeptideHitResultsFileFormatConstants.InspectTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(clsMSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(clsMSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
@@ -1627,8 +1627,8 @@ namespace PeptideHitResultsProcessor
 
             MSAlignAndTopPICSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
-            MSGFPlusSynopsisFileEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            MSGFPlusSynopsisFileSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
+            MSGFPlusSynopsisFileEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
+            MSGFPlusSynopsisFileSpecEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
             EnzymeMatchSpec = clsPeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
 

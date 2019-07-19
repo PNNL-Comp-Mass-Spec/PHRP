@@ -101,8 +101,8 @@ namespace PeptideHitResultsProcRunner
 
             mCreateProteinModsUsingPHRPDataFile = false;
 
-            mMsgfPlusEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            mMsgfPlusSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
+            mMsgfPlusEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
+            mMsgfPlusSpecEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
             // These should default to True
             mCreateInspectOrMSGFPlusFirstHitsFile = true;
@@ -501,8 +501,8 @@ namespace PeptideHitResultsProcRunner
                                       "  SEQUEST First Hits file ({8}.txt)\n" +
                                       "  TopPIC results file ({9}.txt)\n" +
                                       "  X!Tandem Results file (_xt.xml)",
-                                      clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE,
-                                      clsMSGFDBResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE,
+                                      clsMSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE,
+                                      clsMSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE,
                                       clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE,
                                       clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE,
                                       clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE,
@@ -571,9 +571,9 @@ namespace PeptideHitResultsProcRunner
                                       "to customize the thresholds used to determine which peptides are written to the the synopsis file"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Defaults are /MSGFPlusSpecEValue:" +
-                                      clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +
+                                      clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +
                                       " and /MSGFPlusEValue:" +
-                                      clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD));
+                                      clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "When processing an Inspect results file, use /SynPValue to customize " +

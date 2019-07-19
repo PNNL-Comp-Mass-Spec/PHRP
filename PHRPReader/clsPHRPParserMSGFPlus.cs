@@ -70,7 +70,7 @@ namespace PHRPReader
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
         /// <summary>
-        /// These columns correspond to the Synopsis file created by clsMSGFDBResultsProcessor
+        /// These columns correspond to the Synopsis file created by clsMSGFPlusResultsProcessor
         /// </summary>
         public enum MSGFPlusSynFileColumns
         {

@@ -19,7 +19,7 @@ namespace PeptideHitResultsProcessor
     /// This class is used to track the peptide details for an MSGF+ search result
     /// See clsSearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsMSGFDB : clsSearchResultsBaseClass
+    public class clsSearchResultsMSGFPlus : clsSearchResultsBaseClass
     {
         #region "Properties"
 
@@ -77,7 +77,7 @@ namespace PeptideHitResultsProcessor
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        public clsSearchResultsMSGFDB(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+        public clsSearchResultsMSGFPlus(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
         }
