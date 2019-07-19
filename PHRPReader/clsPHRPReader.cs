@@ -2266,14 +2266,15 @@ namespace PHRPReader
             return -1;
         }
 
+
         /// <summary>
         /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
         /// <remarks></remarks>
-        public static string LookupColumnValue(string[] columns, string columnName, SortedDictionary<string, int> columnHeaders)
+        public static string LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders)
         {
-            return LookupColumnValue(columns, columnName, columnHeaders, string.Empty);
+            return LookupColumnValue(dataColumns, columnName, columnHeaders, string.Empty);
         }
 
         /// <summary>
@@ -2281,19 +2282,19 @@ namespace PHRPReader
         /// </summary>
         /// <returns>The text in the specified column; valueIfMissing if the specific column name is not recognized</returns>
         /// <remarks></remarks>
-        public static string LookupColumnValue(string[] columns, string columnName, SortedDictionary<string, int> columnHeaders, string valueIfMissing)
+        public static string LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders, string valueIfMissing)
         {
-            if (columns != null)
+            if (dataColumns != null)
             {
                 var colIndex = LookupColumnIndex(columnName, columnHeaders);
-                if (colIndex >= 0 && colIndex < columns.Length)
+                if (colIndex >= 0 && colIndex < dataColumns.Length)
                 {
-                    if (string.IsNullOrWhiteSpace(columns[colIndex]))
+                    if (string.IsNullOrWhiteSpace(dataColumns[colIndex]))
                     {
                         return string.Empty;
                     }
 
-                    return columns[colIndex];
+                    return dataColumns[colIndex];
                 }
             }
 
@@ -2306,9 +2307,9 @@ namespace PHRPReader
         /// </summary>
         /// <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
         /// <remarks></remarks>
-        public static int LookupColumnValue(string[] columns, string columnName, SortedDictionary<string, int> columnHeaders, int valueIfMissing)
+        public static int LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders, int valueIfMissing)
         {
-            var valueText = LookupColumnValue(columns, columnName, columnHeaders, valueIfMissing.ToString());
+            var valueText = LookupColumnValue(dataColumns, columnName, columnHeaders, valueIfMissing.ToString());
 
             int.TryParse(valueText, out var value);
 
@@ -2320,9 +2321,9 @@ namespace PHRPReader
         /// </summary>
         /// <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
         /// <remarks></remarks>
-        public static double LookupColumnValue(string[] columns, string columnName, SortedDictionary<string, int> columnHeaders, double valueIfMissing)
+        public static double LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders, double valueIfMissing)
         {
-            var valueText = LookupColumnValue(columns, columnName, columnHeaders, valueIfMissing.ToString(CultureInfo.InvariantCulture));
+            var valueText = LookupColumnValue(dataColumns, columnName, columnHeaders, valueIfMissing.ToString(CultureInfo.InvariantCulture));
 
             double.TryParse(valueText, out var value);
 
@@ -2332,10 +2333,10 @@ namespace PHRPReader
         /// <summary>
         /// Updates the column name to column index mapping in columnHeaders
         /// </summary>
-        /// <param name="columns">Column names read from the input file</param>
+        /// <param name="dataColumns">Column names read from the input file</param>
         /// <param name="columnHeaders">Column mapping dictionary object to update</param>
         /// <remarks>The SortedDictionary object should be instantiated using a case-insensitive comparer, i.e. (StringComparer.OrdinalIgnoreCase)</remarks>
-        public static void ParseColumnHeaders(string[] columns, SortedDictionary<string, int> columnHeaders)
+        public static void ParseColumnHeaders(string[] dataColumns, SortedDictionary<string, int> columnHeaders)
         {
             // Reset the column indices in columnHeaders
             if (columnHeaders.Count > 0)
@@ -2349,12 +2350,12 @@ namespace PHRPReader
                 }
             }
 
-            for (var index = 0; index <= columns.Length - 1; index++)
+            for (var index = 0; index <= dataColumns.Length - 1; index++)
             {
-                if (columnHeaders.ContainsKey(columns[index]))
+                if (columnHeaders.ContainsKey(dataColumns[index]))
                 {
                     // Update the index associated with this column name
-                    columnHeaders[columns[index]] = index;
+                    columnHeaders[dataColumns[index]] = index;
                 }
             }
         }
