@@ -101,15 +101,15 @@ namespace PeptideHitResultsProcRunner
 
             mCreateProteinModsUsingPHRPDataFile = false;
 
-            mMsgfPlusEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            mMsgfPlusSpecEValueThreshold = PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
+            mMsgfPlusEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
+            mMsgfPlusSpecEValueThreshold = clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
             // These should default to True
             mCreateInspectOrMSGFPlusFirstHitsFile = true;
             mCreateInspectOrMSGFPlusSynopsisFile = true;
-            mInspectSynopsisFilePValueThreshold = PeptideHitResultsProcessor.clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
+            mInspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
-            mMODaMODPlusSynopsisFileProbabilityThreshold = PeptideHitResultsProcessor.clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
+            mMODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
             mMaxLevelsToRecurse = 0;
 
@@ -571,16 +571,16 @@ namespace PeptideHitResultsProcRunner
                                       "to customize the thresholds used to determine which peptides are written to the the synopsis file"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Defaults are /MSGFPlusSpecEValue:" +
-                                      PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +
+                                      clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +
                                       " and /MSGFPlusEValue:" +
-                                      PeptideHitResultsProcessor.clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD));
+                                      clsMSGFDBResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "When processing an Inspect results file, use /SynPValue to customize " +
                                       "the PValue threshold used to determine which peptides are written to the synopsis file. " +
                                       "The default is /SynPValue:0.2  Note that peptides with a " +
-                                      "TotalPRMScore >= " + PeptideHitResultsProcessor.clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD +
-                                      " or an FScore >= " + PeptideHitResultsProcessor.clsInSpecTResultsProcessor.FSCORE_THRESHOLD +
+                                      "TotalPRMScore >= " + clsInSpecTResultsProcessor.TOTALPRMSCORE_THRESHOLD +
+                                      " or an FScore >= " + clsInSpecTResultsProcessor.FSCORE_THRESHOLD +
                                       " will also be included in the synopsis file."));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) " +
