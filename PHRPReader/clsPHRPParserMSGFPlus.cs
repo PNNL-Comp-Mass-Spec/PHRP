@@ -67,6 +67,10 @@ namespace PHRPReader
         // Renamed from "MS-GFDB" to "MS-GF+" in November 2016
         private const string MSGFPLUS_SEARCH_ENGINE_NAME = "MS-GF+";
 
+        public const string PRECURSOR_TOLERANCE_PARAM_NAME = "PrecursorMassTolerance";
+
+        public const string PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM = "PMTolerance";
+
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
         /// <summary>
@@ -222,9 +226,9 @@ namespace PHRPReader
             else
             {
                 // MS-GF+ or MSPathFinder
-                if (!searchEngineParams.Parameters.TryGetValue("PrecursorMassTolerance", out tolerance))
+                if (!searchEngineParams.Parameters.TryGetValue(PRECURSOR_TOLERANCE_PARAM_NAME, out tolerance))
                 {
-                    if (!searchEngineParams.Parameters.TryGetValue("PMTolerance", out tolerance))
+                    if (!searchEngineParams.Parameters.TryGetValue(PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, out tolerance))
                     {
                         return toleranceDa;
                     }
