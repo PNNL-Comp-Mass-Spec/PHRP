@@ -111,7 +111,7 @@ namespace Test_PHRPReader
             modFileProcessor.WarningEvent += WarningEventHandler;
 
             var peptideMassCalculator = new clsPeptideMassCalculator();
-            clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(msgfPlusParamFilePath, modFileProcessor, peptideMassCalculator, out _);
+            clsPHRPParserMSGFPlus.UpdateMassCalculatorMasses(msgfPlusParamFilePath, modFileProcessor, peptideMassCalculator, out _);
 
             var udtModInfo = new List<clsPeptideMassCalculator.udtPeptideSequenceModInfoType>();
 
@@ -236,10 +236,10 @@ namespace Test_PHRPReader
                 lstValues.Add(oPsm.MSGFSpecEValue);                                                   // MSGF SpecEValue
                 lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_DelCn2, "0"));          // DelCn2
 
-                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_PValue, "0"));           // PValue
-                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_EValue, "0"));           // EValue
-                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, "0"));           // SpecEValue
-                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFDB.DATA_COLUMN_FDR, "1"));              // FDR
+                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_PValue, "0"));           // PValue
+                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_EValue, "0"));           // EValue
+                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, "0"));           // SpecEValue
+                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_FDR, "1"));              // FDR
 
                 if (oPsm.PeptideCleanSequence == "QQIEESTSDYDKEK") {
                     Console.WriteLine(oPsm.Peptide + " in scan " + oPsm.ScanNumber);
