@@ -1117,23 +1117,21 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private udtParentMassToleranceType ExtractParentMassToleranceFromParamFile(clsSearchEngineParameters searchEngineParams)
         {
-            const string PM_TOLERANCE_TAG = "PrecursorMassTolerance";
-            const string PM_TOLERANCE_TAG_SYNONYM = "PMTolerance";
-
             var parentMassToleranceInfo = new udtParentMassToleranceType();
 
             try
             {
                 parentMassToleranceInfo.Clear();
 
-                if (!searchEngineParams.Parameters.TryGetValue(PM_TOLERANCE_TAG, out var value))
+                if (!searchEngineParams.Parameters.TryGetValue(clsPHRPParserMSGFPlus.PRECURSOR_TOLERANCE_PARAM_NAME, out var value))
                 {
-                    if (!searchEngineParams.Parameters.TryGetValue(PM_TOLERANCE_TAG_SYNONYM, out  value))
+                    if (!searchEngineParams.Parameters.TryGetValue(clsPHRPParserMSGFPlus.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM, out value))
                     {
                         ReportWarning(string.Format(
                                           "Could not find parameter {0} or {1} in parameter file {2}; " +
                                           "cannot determine the precursor mass tolerance",
-                                          PM_TOLERANCE_TAG, PM_TOLERANCE_TAG_SYNONYM,
+                                          clsPHRPParserMSGFPlus.PRECURSOR_TOLERANCE_PARAM_NAME,
+                                          clsPHRPParserMSGFPlus.PRECURSOR_TOLERANCE_PARAM_NAME_SYNONYM,
                                           Path.GetFileName(searchEngineParams.SearchEngineParamFilePath)));
 
                         return parentMassToleranceInfo;
@@ -1364,7 +1362,7 @@ namespace PeptideHitResultsProcessor
                 return false;
             }
 
-            // Parse the PMTolerance setting
+            // Parse the PrecursorMassTolerance setting
             mParentMassToleranceInfo = ExtractParentMassToleranceFromParamFile(searchEngineParams);
 
             // Parse the ChargeCarrierMass setting
