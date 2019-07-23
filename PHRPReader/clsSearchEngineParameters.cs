@@ -172,8 +172,8 @@ namespace PHRPReader
         /// </summary>
         /// <param name="searchEngineName"></param>
         /// <param name="modInfo"></param>
-        /// <param name="Parameters"></param>
-        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> modInfo, Dictionary<string, string> Parameters)
+        /// <param name="parameters"></param>
+        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> modInfo, Dictionary<string, string> parameters)
         {
             InitializeDefaults();
 
@@ -190,7 +190,7 @@ namespace PHRPReader
             }
             else
             {
-                mParameters = Parameters;
+                mParameters = parameters;
             }
         }
 
@@ -215,17 +215,17 @@ namespace PHRPReader
         /// <summary>
         /// Add/update a parameter
         /// </summary>
-        /// <param name="ParamName"></param>
-        /// <param name="ParamValue"></param>
-        public void AddUpdateParameter(string ParamName, string ParamValue)
+        /// <param name="paramName"></param>
+        /// <param name="paramValue"></param>
+        public void AddUpdateParameter(string paramName, string paramValue)
         {
-            if (mParameters.ContainsKey(ParamName))
+            if (mParameters.ContainsKey(paramName))
             {
-                mParameters[ParamName] = ParamValue;
+                mParameters[paramName] = paramValue;
             }
             else
             {
-                mParameters.Add(ParamName, ParamValue);
+                mParameters.Add(paramName, paramValue);
             }
         }
 
