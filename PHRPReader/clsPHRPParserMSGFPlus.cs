@@ -222,10 +222,12 @@ namespace PHRPReader
             else
             {
                 // MS-GF+ or MSPathFinder
-                if (!searchEngineParams.Parameters.TryGetValue("PMTolerance", out tolerance))
+                if (!searchEngineParams.Parameters.TryGetValue("PrecursorMassTolerance", out tolerance))
                 {
-
-                    return toleranceDa;
+                    if (!searchEngineParams.Parameters.TryGetValue("PMTolerance", out tolerance))
+                    {
+                        return toleranceDa;
+                    }
                 }
             }
 
