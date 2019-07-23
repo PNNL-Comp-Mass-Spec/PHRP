@@ -2,7 +2,7 @@
 // a tab-delimited text file with the data.  It will insert modification symbols
 // into the peptide sequences for modified peptides.
 //
-// The modification definition information is determined from the MSGF+ parameter file
+// The modification definition information is determined from the MS-GF+ parameter file
 //
 // -------------------------------------------------------------------------------
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
@@ -61,7 +61,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public const float DEFAULT_SYN_FILE_EVALUE_THRESHOLD = 0.75f;
 
-        private const string SEARCH_ENGINE_NAME = "MSGF+";
+        private const string SEARCH_ENGINE_NAME = "MS-GF+";
 
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
@@ -81,12 +81,12 @@ namespace PeptideHitResultsProcessor
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
         /// <summary>
-        /// These columns correspond to TSV file created by MzidToTsvConverter.exe from the MSGF+ .mzid file
+        /// These columns correspond to TSV file created by MzidToTsvConverter.exe from the MS-GF+ .mzid file
         /// </summary>
         private enum eMSGFPlusResultsFileColumns
         {
             SpectrumFile = 0,
-            SpecIndex = 1,               // SpecID in MSGF+
+            SpecIndex = 1,               // SpecID in MS-GF+
             Scan = 2,
             ScanTimeMinutes = 3,         // Added to MzidToTsvConverter in April 2019
             FragMethod = 4,
@@ -105,7 +105,7 @@ namespace PeptideHitResultsProcessor
             EFDR = 17,                   // Only present if did not search using -tda 1
             IMSScan = 18,                // Only present for MSGFDB_IMS results
             IMSDriftTime = 19,           // Only present for MSGFDB_IMS results
-            IsotopeError = 20            // Only reported by MSGF+
+            IsotopeError = 20            // Only reported by MS-GF+
         }
 
         private enum eFilteredOutputFileTypeConstants
@@ -136,17 +136,17 @@ namespace PeptideHitResultsProcessor
             public string NTT;
             public string DeNovoScore;
             public string MSGFScore;
-            public string SpecEValue;               // Smaller values are better scores (e.g. 1E-9 is better than 1E-6); MSGF+ renamed this from SpecProb to SpecEValue
+            public string SpecEValue;               // Smaller values are better scores (e.g. 1E-9 is better than 1E-6); MS-GF+ renamed this from SpecProb to SpecEValue
             public double SpecEValueNum;
-            public string EValue;                   // Smaller values are better scores (e.g. 1E-7 is better than 1E-3); MSGF+ renamed this from PValue to EValue
+            public string EValue;                   // Smaller values are better scores (e.g. 1E-7 is better than 1E-3); MS-GF+ renamed this from PValue to EValue
             public double EValueNum;
-            public string QValue;                   // Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MSGF+
+            public string QValue;                   // Holds FDR when a target/decoy search was used; holds EFDR when a non-decoy search was used; holds QValue for MS-GF+
             public double QValueNum;                // Numeric equivalent of QValue
-            public string PepQValue;                // Only used when target/decoy search was used; holds PepQValue for MSGF+
+            public string PepQValue;                // Only used when target/decoy search was used; holds PepQValue for MS-GF+
             public int RankSpecProb;
             public int IMSScan;
             public string IMSDriftTime;
-            public int IsotopeError;                // Only used by MSGF+
+            public int IsotopeError;                // Only used by MS-GF+
 
             public void Clear()
             {
@@ -244,7 +244,7 @@ namespace PeptideHitResultsProcessor
         private int mPrecursorMassErrorWarningCount;
 
         /// <summary>
-        /// Looks for numeric mods in MSGF+ results
+        /// Looks for numeric mods in MS-GF+ results
         /// For example, +14.016 in K.LQVPAGK+14.016ANPSPPIGPALGQR.G
         /// </summary>
         /// <remarks></remarks>
@@ -765,7 +765,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// This routine creates a first hits file or synopsis file from the output from MSGF+
+        /// This routine creates a first hits file or synopsis file from the output from MS-GF+
         /// The synopsis file includes every result with a p-value below a set threshold or a SpecEValue below a certain threshold
         /// The first-hits file includes the results with the lowest SpecEValue (for each scan and charge)
         /// </summary>
@@ -773,7 +773,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="outputFilePath"></param>
         /// <param name="scanGroupFilePath"></param>
         /// <param name="msgfPlusModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
-        /// <param name="isMsgfPlus">Output parameter: this function will set this to True if we're processing MSGF+ results</param>
+        /// <param name="isMsgfPlus">Output parameter: this function will set this to True if we're processing MS-GF+ results</param>
         /// <param name="specIdToIndex"></param>
         /// <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
         /// <returns></returns>
@@ -1074,7 +1074,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Extracts mod info from either a MSGF+ param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
+        /// Extracts mod info from either a MS-GF+ param file or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
         /// <param name="msgfPlusParamFilePath"></param>
         /// <param name="modInfo"></param>
@@ -1098,7 +1098,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (mErrorCode == ePHRPErrorCodes.NoError)
                 {
-                    SetErrorMessage("Unknown error extracting the modification definitions from the MSGF+ parameter file");
+                    SetErrorMessage("Unknown error extracting the modification definitions from the MS-GF+ parameter file");
                     SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 }
                 return false;
@@ -1110,7 +1110,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Extracts parent mass tolerance from the parameters loaded from an MSGF+ parameter file
+        /// Extracts parent mass tolerance from the parameters loaded from an MS-GF+ parameter file
         /// </summary>
         /// <param name="searchEngineParams"></param>
         /// <returns>Parent mass tolerance info.  Tolerances will be 0 if an error occurs</returns>
@@ -1167,7 +1167,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage(string.Format("Error parsing the ParentMass tolerance from the MSGF+ parameter file ({0}): {1}",
+                SetErrorMessage(string.Format("Error parsing the ParentMass tolerance from the MS-GF+ parameter file ({0}): {1}",
                     Path.GetFileName(searchEngineParams.SearchEngineParamFilePath), ex.Message), ex);
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
             }
@@ -1217,7 +1217,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="pepToProteinMapFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="msgfPlusModInfo"></param>
-        /// <param name="isMsgfPlus">Should be set to True if processing MSGF+ results</param>
+        /// <param name="isMsgfPlus">Should be set to True if processing MS-GF+ results</param>
         /// <param name="pepToProteinMapping"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <returns></returns>
@@ -1313,7 +1313,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Load the MSGF+ parameter file and updates settings
+        /// Load the MS-GF+ parameter file and updates settings
         /// </summary>
         /// <param name="msgfPlusParamFilePath"></param>
         /// <returns>
@@ -1324,7 +1324,7 @@ namespace PeptideHitResultsProcessor
         {
             if (string.IsNullOrWhiteSpace(msgfPlusParamFilePath))
             {
-                ReportWarning("MSGF+ parameter file is not defined. Unable to extract parent mass tolerance info or custom charge carrier masses");
+                ReportWarning("MS-GF+ parameter file is not defined. Unable to extract parent mass tolerance info or custom charge carrier masses");
                 return true;
             }
 
@@ -1346,7 +1346,7 @@ namespace PeptideHitResultsProcessor
 
             if (searchEngineParams.Parameters.Count == 0)
             {
-                SetErrorMessage("MSGF+ parameter file is empty; unable to extract parent mass tolerance info");
+                SetErrorMessage("MS-GF+ parameter file is empty; unable to extract parent mass tolerance info");
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
@@ -1407,10 +1407,10 @@ namespace PeptideHitResultsProcessor
                 // Initialize searchResult
                 var searchResult = new clsSearchResultsMSGFPlus(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Note that MSGF+ synopsis files are normally sorted on SpecEValue value, ascending
+                // Note that MS-GF+ synopsis files are normally sorted on SpecEValue value, ascending
                 // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
                 //  we will keep track of the scan, charge, and peptide information parsed for each unique SpecEValue encountered
-                // Although this was a possibility with Inspect, it likely never occurs for MSGF+
+                // Although this was a possibility with Inspect, it likely never occurs for MS-GF+
                 //  But, we'll keep the check in place just in case
 
                 var peptidesFoundForSpecEValueLevel = new SortedSet<string>();
@@ -1616,7 +1616,7 @@ namespace PeptideHitResultsProcessor
             IDictionary<string, bool> scanGroupCombo,
             IDictionary<string, int> specIdToIndex)
         {
-            // Parses an entry from the MSGF+ results file
+            // Parses an entry from the MS-GF+ results file
 
             var udtSearchResult = new udtMSGFPlusSearchResultType();
             string rowIndex = null;
@@ -1654,7 +1654,7 @@ namespace PeptideHitResultsProcessor
 
                     if (!int.TryParse(udtSearchResult.SpecIndex, out var specIndex))
                     {
-                        // MSGF+ includes text in the SpecID column, for example: "controllerType=0 controllerNumber=1 scan=6390" or "index=4323"
+                        // MS-GF+ includes text in the SpecID column, for example: "controllerType=0 controllerNumber=1 scan=6390" or "index=4323"
                         // Need to convert these to an integer
 
                         if (udtSearchResult.SpecIndex.StartsWith("index="))
@@ -1745,7 +1745,7 @@ namespace PeptideHitResultsProcessor
 
                 // Precursor mass error could be in PPM or Da
                 //   In MSGFDB, the header line will have PMError(ppm)        or PMError(Da)
-                //   In MSGF+,  the header line will have PrecursorError(ppm) or PrecursorError(Da)
+                //   In MS-GF+,  the header line will have PrecursorError(ppm) or PrecursorError(Da)
                 double precursorErrorDa = 0;
 
                 if (columnMapping[eMSGFPlusResultsFileColumns.PMErrorPPM] >= 0)
@@ -1766,7 +1766,7 @@ namespace PeptideHitResultsProcessor
 
                 GetColumnValue(splitLine, columnMapping[eMSGFPlusResultsFileColumns.Protein], out udtSearchResult.Protein);
 
-                // MSGF+ .tsv files may have a semicolon separated list of protein names; check for this
+                // MS-GF+ .tsv files may have a semicolon separated list of protein names; check for this
                 udtSearchResult.Protein = SplitProteinList(udtSearchResult.Protein, proteinInfo);
 
                 if (proteinInfo.Count > 0)
@@ -1803,11 +1803,11 @@ namespace PeptideHitResultsProcessor
                                 (pMErrorPPM < -mParentMassToleranceInfo.ToleranceLeft * 1.5 ||
                                  pMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5))
                             {
-                                // PPM error computed by MSGF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MSGF+
+                                // PPM error computed by MS-GF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MS-GF+
                                 mPrecursorMassErrorWarningCount += 1;
                                 ShowPeriodicWarning(mPrecursorMassErrorWarningCount,
                                                     10,
-                                                    string.Format("Precursor mass error computed by MSGF+ is 1.5-fold larger than the search tolerance: {0} vs. {1:F0}ppm,{2:F0}ppm",
+                                                    string.Format("Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: {0} vs. {1:F0}ppm,{2:F0}ppm",
                                                     udtSearchResult.PMErrorPPM,
                                                     mParentMassToleranceInfo.ToleranceLeft,
                                                     mParentMassToleranceInfo.ToleranceRight));
@@ -1920,17 +1920,17 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception)
             {
-                // Error parsing this row from the MSGF+ results file
+                // Error parsing this row from the MS-GF+ results file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
                     if (!string.IsNullOrEmpty(rowIndex))
                     {
-                        errorLog += "Error parsing MSGF+ Results in ParseMSGFPlusResultsFileEntry for RowIndex '" + rowIndex + "'" +
+                        errorLog += "Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry for RowIndex '" + rowIndex + "'" +
                                        "\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing MSGF+ Results in ParseMSGFPlusResultsFileEntry" + "\n";
+                        errorLog += "Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry" + "\n";
                     }
                 }
                 return false;
@@ -1939,7 +1939,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse the MSGF+ results file header line
+        /// Parse the MS-GF+ results file header line
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
@@ -1952,7 +1952,7 @@ namespace PeptideHitResultsProcessor
             // or
             // #SpecFile    SpecIndex    Scan#     FragMethod    Precursor                    PMError(ppm)          Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecProb      P-value   FDR       PepFDR
 
-            // The expected header from MSGF+ is:
+            // The expected header from MS-GF+ is:
             // #SpecFile    SpecID       ScanNum   ScanTime(Min)    FragMethod    Precursor    IsotopeError    PrecursorError(Da)    Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecEValue    EValue    QValue    PepQValue
             // or
             // #SpecFile    SpecID       ScanNum   ScanTime(Min)    FragMethod    Precursor    IsotopeError    PrecursorError(ppm)   Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecEValue    EValue    QValue    PepQValue
@@ -2025,7 +2025,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse the header line of a MSGF+ _syn.txt file
+        /// Parse the header line of a MS-GF+ _syn.txt file
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
@@ -2064,7 +2064,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse an entry from a MSGF+ Synopsis file
+        /// Parse an entry from a MS-GF+ Synopsis file
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="searchResult"></param>
@@ -2101,7 +2101,7 @@ namespace PeptideHitResultsProcessor
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
-                        errorLog += "Error reading ResultID value from MSGF+ Results line " +
+                        errorLog += "Error reading ResultID value from MS-GF+ Results line " +
                                     (resultsProcessed + 1) + "\n";
                     }
 
@@ -2120,7 +2120,7 @@ namespace PeptideHitResultsProcessor
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
-                        errorLog += "Error reading Peptide sequence value from MSGF+ Results line " +
+                        errorLog += "Error reading Peptide sequence value from MS-GF+ Results line " +
                                     (resultsProcessed + 1) + "\n";
                     }
 
@@ -2139,7 +2139,7 @@ namespace PeptideHitResultsProcessor
 
                 searchResult.PeptideDeltaMass = searchResult.MSGFPlusComputedDelM;
 
-                // Note: .PeptideDeltaMass is stored in the MSGF+ results file as "Observed_Mass - Theoretical_Mass"
+                // Note: .PeptideDeltaMass is stored in the MS-GF+ results file as "Observed_Mass - Theoretical_Mass"
                 // However, in MTS .peptideDeltaMass is "Theoretical - Observed"
                 // Therefore, we will negate .peptideDeltaMass
                 try
@@ -2323,7 +2323,7 @@ namespace PeptideHitResultsProcessor
 
                     var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
-                    // Load the MSGF+ Parameter File so that we can determine the modification names and masses
+                    // Load the MS-GF+ Parameter File so that we can determine the modification names and masses
                     // If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in msgfPlusModInfo
                     var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var msgfPlusModInfo);
                     if (!modInfoExtracted)
@@ -2545,7 +2545,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="peptide"></param>
         /// <param name="msgfPlusModInfo">This function assumes that each entry in msgfPlusModInfo has both .ModName and .ModSymbol defined</param>
-        /// <param name="isMsgfPlus">Should be set to True if processing MSGF+ results</param>
+        /// <param name="isMsgfPlus">Should be set to True if processing MS-GF+ results</param>
         /// <param name="totalModMass">Output parameter: total mass of all modifications</param>
         /// <returns></returns>
         /// <remarks></remarks>
@@ -2607,7 +2607,7 @@ namespace PeptideHitResultsProcessor
             // We want things to look like this: -.#MDHTPQSQLK.L or -.#*MNDRQLNHR.S
 
             // In MSGFDB, static mods do not have a mod mass listed
-            // In MSGF+,  static mods do have a mod mass listed
+            // In MS-GF+,  static mods do have a mod mass listed
             // Regardless, we do not add mod symbols for static mods, but we do increment totalModMass
 
             // Find the index of the last residue
@@ -2636,7 +2636,7 @@ namespace PeptideHitResultsProcessor
 
                     if (!isMsgfPlus)
                     {
-                        // Look for static mods that should be applied to this residue (only applies to MSGFDB, not MSGF+)
+                        // Look for static mods that should be applied to this residue (only applies to MSGFDB, not MS-GF+)
                         for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                         {
                             var modificationType = mPeptideMods.GetModificationTypeByIndex(modIndex);
@@ -2693,7 +2693,7 @@ namespace PeptideHitResultsProcessor
 
                         if (isMsgfPlus && containsStaticMod)
                         {
-                            // MSGF+ shows mod masses for static mods
+                            // MS-GF+ shows mod masses for static mods
                             // Thus, we have removed the static mod mass and did not add a mod symbol
                             // Therefore, leave index unchanged
                         }
@@ -2758,7 +2758,7 @@ namespace PeptideHitResultsProcessor
 
             if (isMsgfPlus && containsStaticMod)
             {
-                // MSGF+ shows mod masses for static mods
+                // MS-GF+ shows mod masses for static mods
                 // However, for consistency with other PHRP results, we do not add a symbol to the peptide for this static mod
                 // Catch: If we have a peptide/terminus affected by both a static and a dynamic mod, we still want the dynamic mod.
                 if (!string.IsNullOrWhiteSpace(dynModSymbols))
@@ -3145,7 +3145,7 @@ namespace PeptideHitResultsProcessor
                 // MSGFDB
                 // ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecProb    Rank_MSGFDB_SpecProb    PValue  FDR     PepFDR
 
-                // MSGF+
+                // MS-GF+
                 // ResultID  Scan FragMethod  SpecIndex  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  NTT  DeNovoScore  MSGFScore  MSGFDB_SpecEValue  Rank_MSGFDB_SpecEValue  EValue  QValue  PepQValue  IsotopeError
 
                 var data = new List<string>

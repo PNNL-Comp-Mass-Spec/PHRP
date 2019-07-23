@@ -549,7 +549,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="msPathFinderParamFilePath"></param>
         /// <param name="modInfo"></param>
         /// <returns>True on success, false if an error</returns>
-        /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MSGF+</remarks>
+        /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(string msPathFinderParamFilePath,
             out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {

@@ -12,7 +12,7 @@
         public bool LoadModsAndSeqInfo { get; set; }
 
         /// <summary>
-        /// If true, load MSGF results (not MSGF+)
+        /// If true, load MSGF results (not MS-GF+)
         /// </summary>
         public bool LoadMSGFResults { get; set; }
 

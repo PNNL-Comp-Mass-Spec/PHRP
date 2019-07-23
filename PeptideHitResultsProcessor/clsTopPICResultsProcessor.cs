@@ -635,7 +635,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="topPICParamFilePath"></param>
         /// <param name="modInfo"></param>
         /// <returns>True on success, false if an error</returns>
-        /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MSGF+</remarks>
+        /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string topPICParamFilePath,
             out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)

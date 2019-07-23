@@ -365,7 +365,7 @@ namespace PHRPReader
 
                 if (success)
                 {
-                    // For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
+                    // For MS-GF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
                     // But MSAlign does not have a _ModDefs.txt file because it performs a blind search
                     // The user can define static mods on cysteine; check for these now
 

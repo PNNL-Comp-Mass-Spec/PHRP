@@ -278,7 +278,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// In XTandem this is the theoretical monoisotopic MH
         /// In Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, this is a monoisotopic mass
-        /// In Inspect, MSGF+, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
+        /// In Inspect, MS-GF+, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
         /// </summary>
         /// <value></value>
         /// <returns></returns>
@@ -288,7 +288,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation)
         /// In Sequest this is Theoretical Mass - Observed Mass
-        /// In XTandem, Inspect, MSGF+, and MSAlign the DelM value is listed as Observed - Theoretical,
+        /// In XTandem, Inspect, MS-GF+, and MSAlign the DelM value is listed as Observed - Theoretical,
         /// however, PHRP negates that value while reading the synopsis file to match Sequest
         /// </summary>
         /// <value></value>

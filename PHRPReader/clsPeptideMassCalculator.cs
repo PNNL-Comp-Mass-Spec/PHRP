@@ -897,7 +897,7 @@ namespace PHRPReader
         /// <returns>EmpiricalFormula instance tracking the element symbols and counts</returns>
         public static clsEmpiricalFormula GetEmpiricalFormulaComponents(string empiricalFormula)
         {
-            // Originally MSGF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
+            // Originally MS-GF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
             // It now allows for any element
 
             var reMatches = mAtomicFormulaRegEx.Matches(empiricalFormula);
