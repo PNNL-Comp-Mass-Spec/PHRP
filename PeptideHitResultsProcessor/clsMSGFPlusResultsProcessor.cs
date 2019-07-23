@@ -1117,62 +1117,75 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private udtParentMassToleranceType ExtractParentMassToleranceFromParamFile(clsSearchEngineParameters searchEngineParams)
         {
-            const string PM_TOLERANCE_TAG = "PMTolerance";
+            const string PM_TOLERANCE_TAG = "PrecursorMassTolerance";
+            const string PM_TOLERANCE_TAG_SYNONYM = "PMTolerance";
 
-            var udtParentMassToleranceInfo = new udtParentMassToleranceType();
+            var parentMassToleranceInfo = new udtParentMassToleranceType();
 
             try
             {
-                udtParentMassToleranceInfo.Clear();
+                parentMassToleranceInfo.Clear();
 
-                if (searchEngineParams.Parameters.TryGetValue(PM_TOLERANCE_TAG, out var value))
+                if (!searchEngineParams.Parameters.TryGetValue(PM_TOLERANCE_TAG, out var value))
                 {
-                    // Parent ion tolerance line found
-
-                    // Split the line on commas
-                    var splitLine = value.Split(',');
-
-                    double tolerance;
-                    bool isPPM;
-
-                    if (splitLine.Length == 1)
+                    if (!searchEngineParams.Parameters.TryGetValue(PM_TOLERANCE_TAG_SYNONYM, out  value))
                     {
-                        if (ParseParentMassTolerance(splitLine[0], out tolerance, out isPPM))
-                        {
-                            udtParentMassToleranceInfo.ToleranceLeft = tolerance;
-                            udtParentMassToleranceInfo.ToleranceRight = tolerance;
-                            udtParentMassToleranceInfo.IsPPM = isPPM;
-                        }
+                        ReportWarning(string.Format(
+                                          "Could not find parameter {0} or {1} in parameter file {2}; " +
+                                          "cannot determine the precursor mass tolerance",
+                                          PM_TOLERANCE_TAG, PM_TOLERANCE_TAG_SYNONYM,
+                                          Path.GetFileName(searchEngineParams.SearchEngineParamFilePath)));
+
+                        return parentMassToleranceInfo;
                     }
-                    else if (splitLine.Length > 1)
-                    {
-                        if (ParseParentMassTolerance(splitLine[0], out tolerance, out isPPM))
-                        {
-                            udtParentMassToleranceInfo.ToleranceLeft = tolerance;
-                            udtParentMassToleranceInfo.IsPPM = isPPM;
+                }
 
-                            if (ParseParentMassTolerance(splitLine[1], out tolerance, out isPPM))
-                            {
-                                udtParentMassToleranceInfo.ToleranceRight = tolerance;
-                            }
-                            else
-                            {
-                                udtParentMassToleranceInfo.ToleranceRight = udtParentMassToleranceInfo.ToleranceLeft;
-                            }
+                // Parent ion tolerance line found
+
+                // Split the line on commas
+                var splitLine = value.Split(',');
+
+                double tolerance;
+                bool isPPM;
+
+                if (splitLine.Length == 1)
+                {
+                    if (ParseParentMassTolerance(splitLine[0], out tolerance, out isPPM))
+                    {
+                        parentMassToleranceInfo.ToleranceLeft = tolerance;
+                        parentMassToleranceInfo.ToleranceRight = tolerance;
+                        parentMassToleranceInfo.IsPPM = isPPM;
+                    }
+                }
+                else if (splitLine.Length > 1)
+                {
+                    if (ParseParentMassTolerance(splitLine[0], out tolerance, out isPPM))
+                    {
+                        parentMassToleranceInfo.ToleranceLeft = tolerance;
+                        parentMassToleranceInfo.IsPPM = isPPM;
+
+                        if (ParseParentMassTolerance(splitLine[1], out tolerance, out isPPM))
+                        {
+                            parentMassToleranceInfo.ToleranceRight = tolerance;
+                        }
+                        else
+                        {
+                            parentMassToleranceInfo.ToleranceRight = parentMassToleranceInfo.ToleranceLeft;
                         }
                     }
                 }
 
                 Console.WriteLine();
+                return parentMassToleranceInfo;
             }
             catch (Exception ex)
             {
                 SetErrorMessage(string.Format("Error parsing the ParentMass tolerance from the MS-GF+ parameter file ({0}): {1}",
                     Path.GetFileName(searchEngineParams.SearchEngineParamFilePath), ex.Message), ex);
                 SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                return parentMassToleranceInfo;
             }
 
-            return udtParentMassToleranceInfo;
         }
 
         /// <summary>
