@@ -16,7 +16,7 @@ using PHRPReader;
 namespace PeptideHitResultsProcessor
 {
     /// <summary>
-    /// This class is used to track the peptide details for an MSGF+ search result
+    /// This class is used to track the peptide details for an MS-GF+ search result
     /// See clsSearchResultsBaseClass for additional information
     /// </summary>
     public class clsSearchResultsMSGFPlus : clsSearchResultsBaseClass
@@ -30,13 +30,13 @@ namespace PeptideHitResultsProcessor
         public string MSGFScore { get; set; }
 
         /// <summary>
-        /// SpecProb in MSGFDB; SpecEValue in MSGF+
+        /// SpecProb in MSGFDB; SpecEValue in MS-GF+
         /// </summary>
         public string SpecEValue { get; set; }
         public string RankSpecEValue { get; set; }
 
         /// <summary>
-        /// PValue in MSGFDB; EValue in MSGF+
+        /// PValue in MSGFDB; EValue in MS-GF+
         /// </summary>
         public string EValue { get; set; }
 
@@ -44,14 +44,14 @@ namespace PeptideHitResultsProcessor
         /// QValue
         /// </summary>
         /// <remarks>
-        /// Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MSGF+
+        /// Will contain target/decoy FDR when -tda 1 was used; will contain EFDR when -tda 1 was not used; FDR in MSGFDB; QValue in MS-GF+
         /// </remarks>
         public string QValue { get; set; }
 
         /// <summary>
         /// Pep QValue
         /// </summary>
-        /// <remarks>Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MSGF+</remarks>
+        /// <remarks>Only present if searched using -tda 1; PepFDR in MSGFDB; PepQValue in MS-GF+</remarks>
         public string PepQValue { get; set; }
 
         public string PrecursorMZ { get; set; }
@@ -61,7 +61,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Isotope error
         /// </summary>
-        /// <remarks>Only reported by MSGF+</remarks>
+        /// <remarks>Only reported by MS-GF+</remarks>
         public string IsotopeError { get; set; }
 
         public bool MSGFPlusResults { get; set; }

@@ -358,7 +358,7 @@ namespace PHRPReader
                     return false;
                 }
 
-                // For MSGF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
+                // For MS-GF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
                 // But MODa does not have a _ModDefs.txt file because it performs a blind search
                 // The user can define static mods on any of the residues, plus the peptide terminii; check for these now
 

@@ -15,7 +15,7 @@ using System.Text.RegularExpressions;
 namespace PHRPReader
 {
     /// <summary>
-    /// PHRP parser for MSGF+
+    /// PHRP parser for MS-GF+
     /// </summary>
     public class clsPHRPParserMSGFPlus : clsPHRPParser
     {
@@ -40,24 +40,24 @@ namespace PHRPReader
         public const string DATA_COLUMN_MSGFDB_SpecProb = "MSGFDB_SpecProb";           // MSGFDB
         public const string DATA_COLUMN_Rank_MSGFDB_SpecProb = "Rank_MSGFDB_SpecProb"; // MSGFDB
 
-        public const string DATA_COLUMN_MSGFPlus_SpecEValue = "MSGFDB_SpecEValue";           // MSGF+
-        public const string DATA_COLUMN_Rank_MSGFPlus_SpecEValue = "Rank_MSGFDB_SpecEValue"; // MSGF+
+        public const string DATA_COLUMN_MSGFPlus_SpecEValue = "MSGFDB_SpecEValue";           // MS-GF+
+        public const string DATA_COLUMN_Rank_MSGFPlus_SpecEValue = "Rank_MSGFDB_SpecEValue"; // MS-GF+
 
         public const string DATA_COLUMN_PValue = "PValue"; // MSGFDB
-        public const string DATA_COLUMN_EValue = "EValue"; // MSGF+
+        public const string DATA_COLUMN_EValue = "EValue"; // MS-GF+
 
         public const string DATA_COLUMN_FDR = "FDR";        // MSGFDB; Only present if a Target/Decoy (TDA) search was used
         public const string DATA_COLUMN_PepFDR = "PepFDR";  // MSGFDB; Only valid if a Target/Decoy (TDA) search was used; if EFDR is present, will contain 1 for every row
 
-        public const string DATA_COLUMN_QValue = "QValue";       // MSGF+ reports QValue instead of FDR
-        public const string DATA_COLUMN_PepQValue = "PepQValue"; // MSGF+ reports pepQValue instead of PepFDR
+        public const string DATA_COLUMN_QValue = "QValue";       // MS-GF+ reports QValue instead of FDR
+        public const string DATA_COLUMN_PepQValue = "PepQValue"; // MS-GF+ reports pepQValue instead of PepFDR
 
         public const string DATA_COLUMN_EFDR = "EFDR";  // Only present if a Target/Decoy (TDA) search was not used
 
         public const string DATA_COLUMN_IMS_Scan = "IMS_Scan";
         public const string DATA_COLUMN_IMS_Drift_Time = "IMS_Drift_Time";
 
-        public const string DATA_COLUMN_Isotope_Error = "IsotopeError"; // Only reported by MSGF+
+        public const string DATA_COLUMN_Isotope_Error = "IsotopeError"; // Only reported by MS-GF+
 
         // These suffixes were changed from_msgfdb to _msgfplus in November 2016
         public const string FILENAME_SUFFIX_SYN = "_msgfplus_syn.txt";
@@ -191,7 +191,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Determines the precursor mass tolerance for either MSGF+, MSPathFinder, or TopPIC
+        /// Determines the precursor mass tolerance for either MS-GF+, MSPathFinder, or TopPIC
         /// </summary>
         /// <param name="searchEngineParams"></param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
@@ -216,7 +216,6 @@ namespace PHRPReader
                 // TopPIC
                 if (!searchEngineParams.Parameters.TryGetValue("ErrorTolerance", out tolerance))
                 {
-
                     return toleranceDa;
                 }
             }
@@ -283,7 +282,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Look for MSGF+ parameter ChargeCarrierMass
+        /// Look for MS-GF+ parameter ChargeCarrierMass
         /// If defined, update chargeCarrierMass with the associated mass value and return True
         /// Otherwise return false
         /// </summary>
@@ -320,7 +319,7 @@ namespace PHRPReader
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
         /// <returns></returns>
-        /// <remarks>This includes headers for synopsis files from both MSGFDB and MSGF+</remarks>
+        /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
         public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
             var headerColumns = new SortedDictionary<string, MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
@@ -560,7 +559,7 @@ namespace PHRPReader
                 }
                 else
                 {
-                    // MSGF+ uses ntt instead of nnet; thus look for ntt
+                    // MS-GF+ uses ntt instead of nnet; thus look for ntt
 
                     if (searchEngineParams.Parameters.TryGetValue("ntt", out settingValue))
                     {
@@ -802,7 +801,7 @@ namespace PHRPReader
 
         private bool UpdateMassCalculatorMasses(string searchEngineParamFilePath)
         {
-            var modFileProcessor = new clsMSGFPlusParamFileModExtractor("MSGF+");
+            var modFileProcessor = new clsMSGFPlusParamFileModExtractor("MS-GF+");
             RegisterEvents(modFileProcessor);
 
             var success = UpdateMassCalculatorMasses(searchEngineParamFilePath, modFileProcessor, mPeptideMassCalculator, out var localErrorMsg);
@@ -816,7 +815,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Look for custom amino acid definitions in the MSGF+ parameter file
+        /// Look for custom amino acid definitions in the MS-GF+ parameter file
         /// If any are found, update the amino acid mass values in the PeptideMassCalculator instance
         /// </summary>
         /// <param name="searchEngineParamFilePath"></param>

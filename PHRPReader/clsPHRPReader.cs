@@ -73,7 +73,7 @@ namespace PHRPReader
             Inspect = 3,
             [Obsolete("Use MSGFPlus")]
             MSGFDB = 4,
-            MSGFPlus = 4,      // Aka MSGF+
+            MSGFPlus = 4,      // Aka MS-GF+
             MSAlign = 5,
             MODa = 6,
             MODPlus = 7,
@@ -303,7 +303,7 @@ namespace PHRPReader
         public bool ModSummaryFileLoaded { get; private set; }
 
         /// <summary>
-        /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFPlus (aka MSGF+)
+        /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFPlus (aka MS-GF+)
         /// </summary>
         /// <value></value>
         /// <returns></returns>
@@ -855,7 +855,7 @@ namespace PHRPReader
                         break;
 
                     case ePeptideHitResultType.MSGFPlus:
-                        // MSGF+
+                        // MS-GF+
                         PHRPParser = new clsPHRPParserMSGFPlus(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
@@ -1012,11 +1012,11 @@ namespace PHRPReader
                 throw new DirectoryNotFoundException("Input directory not found: " + inputDirectoryPath);
             }
 
-            // MSGF+
+            // MS-GF+
             filesToFind.Add(clsPHRPParserMSGFPlus.FILENAME_SUFFIX_SYN);
             filesToFind.Add(clsPHRPParserMSGFPlus.FILENAME_SUFFIX_FHT);
 
-            // MSGF+ prior to November 2016
+            // MS-GF+ prior to November 2016
             filesToFind.Add(GetLegacyMSGFPlusName(clsPHRPParserMSGFPlus.FILENAME_SUFFIX_SYN));
             filesToFind.Add(GetLegacyMSGFPlusName(clsPHRPParserMSGFPlus.FILENAME_SUFFIX_FHT));
 
@@ -1163,11 +1163,11 @@ namespace PHRPReader
 
             foreach (var dataset in datasetNames)
             {
-                // MSGF+
+                // MS-GF+
                 AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFPlus.GetPHRPSynopsisFileName, dataset);
                 AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, clsPHRPParserMSGFPlus.GetPHRPFirstHitsFileName, dataset);
 
-                // MSGF+ prior to November 2016
+                // MS-GF+ prior to November 2016
                 AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, GetLegacyMSGFPlusName(clsPHRPParserMSGFPlus.GetPHRPSynopsisFileName(dataset)));
                 AddFileToFind(filesToFind, ePeptideHitResultType.MSGFPlus, GetLegacyMSGFPlusName(clsPHRPParserMSGFPlus.GetPHRPFirstHitsFileName(dataset)));
 
@@ -2558,7 +2558,7 @@ namespace PHRPReader
                     // Check for duplicate lines
                     // If this line is a duplicate of the previous line, skip it
                     // This happens in Sequest _syn.txt files where the line is repeated for all protein matches
-                    // It can also happen in MSGF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
+                    // It can also happen in MS-GF+ results, though the prefix and suffix residues could differ for the same peptide, depending on the protein context
 
                     var isDuplicate = false;
 

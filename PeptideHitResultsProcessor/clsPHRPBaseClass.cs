@@ -128,7 +128,7 @@ namespace PeptideHitResultsProcessor
             InspectTXTFile = 4,
 
             /// <summary>
-            /// MSGFDB, MS-GF+, MSGF+
+            /// MSGFDB, MS-GF+ (MSGF+)
             /// </summary>
             MSGFPlusTXTFile = 5,
 
@@ -326,7 +326,7 @@ namespace PeptideHitResultsProcessor
         ///
         /// </summary>
         /// <returns></returns>
-        /// <remarks>Lower p-values are higher confidence results; renamed to EValue in MSGF+</remarks>
+        /// <remarks>Lower p-values are higher confidence results; renamed to EValue in MS-GF+</remarks>
         [Obsolete("Use MSGFDBSynopsisFileEValueThreshold")]
         public float MSGFDBSynopsisFilePValueThreshold
         {
@@ -338,7 +338,7 @@ namespace PeptideHitResultsProcessor
         /// MSGFDB synopsis file specEValue threshold
         /// </summary>
         /// <returns></returns>
-        /// <remarks>Lower SpecProb values are higher confidence results; renamed to SpecEValue in MSGF+</remarks>
+        /// <remarks>Lower SpecProb values are higher confidence results; renamed to SpecEValue in MS-GF+</remarks>
         [Obsolete("Use MSGFDBSynopsisFileSpecEValueThreshold")]
         public float MSGFDBSynopsisFileSpecProbThreshold
         {
@@ -791,7 +791,7 @@ namespace PeptideHitResultsProcessor
 
             if (extensionLCase == ".tsv")
             {
-                // Assume this is an MSGF+ TSV file
+                // Assume this is an MS-GF+ TSV file
                 return ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
 
@@ -1747,7 +1747,7 @@ namespace PeptideHitResultsProcessor
             }
             if (proteinName.StartsWith("xxx_", StringComparison.OrdinalIgnoreCase))
             {
-                // Used by MSGF+ and MSFragger
+                // Used by MS-GF+ and MSFragger
                 return true;
             }
 

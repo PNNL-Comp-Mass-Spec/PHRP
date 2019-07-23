@@ -1066,7 +1066,7 @@ namespace PHRPReader
         /// <summary>
         /// Read a Search Engine parameter file where settings are stored as key/value pairs
         /// </summary>
-        /// <param name="searchEngineName">Search engine name (e.g. MSGF+)</param>
+        /// <param name="searchEngineName">Search engine name (e.g. MS-GF+)</param>
         /// <param name="searchEngineParamFileName">Search engine parameter file name (must exist in InputDirectoryPath)</param>
         /// <param name="ePeptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
         /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
@@ -1204,7 +1204,7 @@ namespace PHRPReader
 
                 if (!File.Exists(toolVersionInfoFilePath) && ePeptideHitResultType == clsPHRPReader.ePeptideHitResultType.MSGFPlus)
                 {
-                    // This could be an older MSGF+ job; check for a _MSGFDB.txt tool version file
+                    // This could be an older MS-GF+ job; check for a _MSGFDB.txt tool version file
                     var alternativeVersionInfoFilePath = Path.Combine(InputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");
                     if (File.Exists(alternativeVersionInfoFilePath))
                     {

@@ -1,4 +1,4 @@
-﻿// This class reads a DMS-based parameter file for MSGF+ or MSPathFinder
+﻿// This class reads a DMS-based parameter file for MS-GF+ or MSPathFinder
 // to extract the dynamic and static modification information
 // Example param file contents:
 //
@@ -11,7 +11,7 @@
 // DynamicMod=C2H2O,   *,   opt, Prot-N-term, Acetyl                    # Acetylation Protein N-term (C2H2O can be replaced with "H(2) C(2) O")
 //
 //
-// Note that DMS uses this information to create a Mods.txt file that is provided to MSGF+ or MSPathFinder
+// Note that DMS uses this information to create a Mods.txt file that is provided to MS-GF+ or MSPathFinder
 // When doing this, the static mods defs have ",fix," while the dynamic mod defs have ',opt'
 // Example contents of an auto-generated Mods.txt file:
 //
@@ -38,7 +38,7 @@ using System.Linq;
 namespace PHRPReader
 {
     /// <summary>
-    /// This class reads a DMS-based parameter file for MSGF+ or MSPathFinder to extract the dynamic and static modification information
+    /// This class reads a DMS-based parameter file for MS-GF+ or MSPathFinder to extract the dynamic and static modification information
     /// </summary>
     /// <remarks>See above for an example parameter file</remarks>
     public class clsMSGFPlusParamFileModExtractor : PRISM.EventNotifier
@@ -46,7 +46,7 @@ namespace PHRPReader
         #region "Constants and Enums"
 
         /// <summary>
-        /// Unknown MSGF+ mod symbols
+        /// Unknown MS-GF+ mod symbols
         /// </summary>
         public const char UNKNOWN_MSGFPlus_MOD_SYMBOL = '?';
 
@@ -68,7 +68,7 @@ namespace PHRPReader
         private const string MSGFPLUS_COMMENT_CHAR = "#";
 
         /// <summary>
-        /// MSGF+ modification type
+        /// MS-GF+ modification type
         /// </summary>
         public enum eMSGFPlusModType
         {
@@ -119,7 +119,7 @@ namespace PHRPReader
         public enum ModSpecFormats
         {
             /// <summary>
-            /// MSGF+ or MSPathFinder
+            /// MS-GF+ or MSPathFinder
             /// </summary>
             MSGFPlusAndMSPathFinder = 0,
 
@@ -149,7 +149,7 @@ namespace PHRPReader
         public struct udtModInfoType
         {
             /// <summary>
-            /// Mod name (read from the parameter file) isn't used by MSGF+, but it is used by MSPathFinder
+            /// Mod name (read from the parameter file) isn't used by MS-GF+, but it is used by MSPathFinder
             /// </summary>
             public string ModName;
 
@@ -207,7 +207,7 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="toolName">
-        /// Search engine name, typically MSGF+
+        /// Search engine name, typically MS-GF+
         /// This name is only used in log messages
         /// </param>
         /// <remarks></remarks>
@@ -242,7 +242,7 @@ namespace PHRPReader
 
             if (string.Equals(empiricalFormula, "HexNAc", StringComparison.OrdinalIgnoreCase))
             {
-                // This is a special-case modification that MSGF+ and MSPathFinder recognize
+                // This is a special-case modification that MS-GF+ and MSPathFinder recognize
                 // It is listed in DMS as Hexosam, which means N-Acetylhexosamine
                 // It is tracked by UniMod as HexNAc
                 return 203.079376;
@@ -281,7 +281,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Extracts mod info from a MSGF+ or MSPathFinder param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
+        /// Extracts mod info from a MS-GF+ or MSPathFinder param file, or from a MSGFPlus_Mods.txt file (previously MSGFDB_Mods.txt)
         /// </summary>
         /// <param name="paramFilePath"></param>
         /// <param name="modSpecFormat"></param>
@@ -471,7 +471,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Parse the mod spec definition from a MSGF+ or MSPathFinder parameter file
+        /// Parse the mod spec definition from a MS-GF+ or MSPathFinder parameter file
         /// </summary>
         /// <param name="paramFilePath"></param>
         /// <param name="splitLine"></param>
@@ -741,7 +741,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Resolve MSGF+, MSPathFinder, or TopPIC mods with mod definitions
+        /// Resolve MS-GF+, MSPathFinder, or TopPIC mods with mod definitions
         /// </summary>
         /// <param name="modInfo"></param>
         /// <param name="peptideMods"></param>
@@ -852,7 +852,7 @@ namespace PHRPReader
 
         private static string TrimComment(string value)
         {
-            // Look for the MSGF+ comment character
+            // Look for the MS-GF+ comment character
             var commentCharIndex = value.IndexOf(MSGFPLUS_COMMENT_CHAR, StringComparison.Ordinal);
 
             if (commentCharIndex > 0)

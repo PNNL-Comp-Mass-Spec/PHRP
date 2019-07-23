@@ -2,6 +2,9 @@
 
 namespace PHRPReader
 {
+    /// <summary>
+    /// Old PHRP parser for MS-GF+
+    /// </summary>
     [Obsolete("Use clsPHRPParserMSGFPlus")]
     public class clsPHRPParserMSGFDB : clsPHRPParserMSGFPlus
     {
