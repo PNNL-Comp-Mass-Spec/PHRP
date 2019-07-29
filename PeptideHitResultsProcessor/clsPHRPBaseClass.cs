@@ -2684,7 +2684,7 @@ namespace PeptideHitResultsProcessor
         private void WriteModDetailsEntry(
             clsPHRPReader reader,
             TextWriter writer,
-            IReadOnlyList<udtPepToProteinMappingType> pepToProteinMapping,
+            IList<udtPepToProteinMappingType> pepToProteinMapping,
             int pepToProteinMapIndex,
             ref int psmCountSkippedSinceReversedOrScrambledProtein)
         {
