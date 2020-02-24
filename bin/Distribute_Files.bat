@@ -10,6 +10,9 @@ pause
 xcopy Release\PeptideHitResultsProcessor.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common" /D /Y
 xcopy Release\PeptideHitResultsProcessor.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin" /D /Y
 
+xcopy Release\PHRPReader.* "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common" /D /Y
+xcopy Release\PHRPReader.* "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Program\bin" /D /Y
+
 rem PeptideHitResultsProcRunner is compiled as AnyCPU
 xcopy Release\*.dll "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
 xcopy Release\PeptideHitResultsProcessor.pdb "F:\Documents\Projects\DataMining\DMS_Managers\Analysis_Manager\AM_Common\PHRP" /D /Y
