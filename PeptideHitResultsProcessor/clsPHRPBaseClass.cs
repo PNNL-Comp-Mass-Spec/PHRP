@@ -1899,15 +1899,17 @@ namespace PeptideHitResultsProcessor
                             continue;
 
                         var dataLine = lineIn.Trim();
-                        if (dataLine.Length <= 0)
+                        if (dataLine.Length == 0)
                             continue;
+
+                        linesRead++;
 
                         // Split the line on tabs
                         var splitLine = dataLine.TrimEnd().Split('\t');
 
                         if (splitLine.Length >= 4)
                         {
-                            if (linesRead == 0 && !int.TryParse(splitLine[2], out _))
+                            if (linesRead == 1 && !int.TryParse(splitLine[2], out _))
                             {
                                 // Header line; cache it
                                 headerLine = string.Copy(dataLine);
@@ -2466,6 +2468,7 @@ namespace PeptideHitResultsProcessor
                                     massDiffThreshold, toolName, peptideMonoMassFromPHRP, peptideMonoMassFromTool, first30Residues));
 
         }
+
         private bool ValidatePeptideToProteinMapResults(string peptideToProteinMapFilePath, bool ignorePeptideToProteinMapperErrors)
         {
             bool success;
