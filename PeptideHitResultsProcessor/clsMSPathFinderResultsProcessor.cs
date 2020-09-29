@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PHRPReader;
+using PRISM.AppSettings;
 
 namespace PeptideHitResultsProcessor
 {
@@ -34,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSPathFinderResultsProcessor()
         {
-            mFileDate = "April 17, 2019";
+            mFileDate = "September 28, 2020";
 
             mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }
@@ -579,6 +580,44 @@ namespace PeptideHitResultsProcessor
             modFileProcessor.ResolveMSGFPlusModsWithModDefinitions(modInfo, mPeptideMods);
 
             return true;
+        }
+
+        private int GetNumMatchesPerSpectrumToReport(string searchToolParameterFilePath)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(searchToolParameterFilePath))
+                {
+                    ReportError("MSPathFinder parameter file name not defined; cannot determine NumMatchesPerSpec");
+                    return 0;
+                }
+
+                var paramFile = new FileInfo(searchToolParameterFilePath);
+                if (!paramFile.Exists)
+                {
+                    ReportError("MSPathFinder parameter file not found: " + searchToolParameterFilePath);
+                    return 0;
+                }
+
+                var paramFileReader = new KeyValueParamFileReader("MSPathFinder", searchToolParameterFilePath);
+                RegisterEvents(paramFileReader);
+
+                var success = paramFileReader.ParseKeyValueParameterFile(out var paramFileEntries);
+                if (!success)
+                {
+                    ReportError("Error reading MSPathFinder parameter file in GetNumMatchesPerSpectrumToReport: " + paramFileReader.ErrorMessage);
+                    return 0;
+                }
+
+                return KeyValueParamFileReader.GetParameterValue(paramFileEntries, "NumMatchesPerSpec", 1);
+            }
+            catch (Exception ex)
+            {
+                ReportError(string.Format(
+                                "Error reading the MSPathFinder parameter file ({0}): {1}",
+                                Path.GetFileName(searchToolParameterFilePath), ex.Message));
+                return 0;
+            }
         }
 
         /// <summary>
@@ -1246,6 +1285,20 @@ namespace PeptideHitResultsProcessor
                     if (!modInfoExtracted)
                     {
                         return false;
+                    }
+
+                    // Re-parse the MSPathFinder parameter file to look for NumMatchesPerSpec
+                    var numMatchesPerSpec = GetNumMatchesPerSpectrumToReport(SearchToolParameterFilePath);
+                    if (numMatchesPerSpec > 1)
+                    {
+                        // Auto-change IgnorePeptideToProteinMapperErrors to True
+                        // since the MSPathFinder parameter file has NumMatchesPerSpec of 2 or higher
+                        // (which results in PSMs associated with decoy proteins)
+                        IgnorePeptideToProteinMapperErrors = true;
+
+                        OnDebugEvent(string.Format(
+                            "Set IgnorePeptideToProteinMapperErrors to true since NumMatchesPerSpec is {0} in the MSPathFinder parameter file",
+                            numMatchesPerSpec));
                     }
 
                     // Define the base output filename using inputFilePath
