@@ -107,7 +107,7 @@ namespace PHRPReader
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
         // The Amino Acid arrays contain 26 entries, corresponding to A through Z
         // Invalid/Undefined letters (J and U) have values of 0 for the mass and atom counts
         // The values can be customized using SetAminoAcidMass and SetAminoAcidAtomCounts

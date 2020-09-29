@@ -43,6 +43,8 @@ namespace PHRPReader
     /// <remarks>See above for an example parameter file</remarks>
     public class clsMSGFPlusParamFileModExtractor : PRISM.EventNotifier
     {
+        // Ignore Spelling: Carbamidomethyl, Dehydro, Acetyl, Acetylation, Prot, UniMod, defs, Hydroxyproline, nterm, cterm
+
         #region "Constants and Enums"
 
         /// <summary>
@@ -189,7 +191,7 @@ namespace PHRPReader
         }
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
         private string mErrorMessage;
         private readonly string mToolName;
         #endregion

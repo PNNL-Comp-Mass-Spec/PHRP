@@ -74,7 +74,7 @@ namespace PHRPReader
             XcRatio = 15,
             PassFilt = 16,                   // Legacy/unused
             MScore = 17,                     // Legacy/unused
-            NTT = 18,                        // Number of tryptic terminii
+            NTT = 18,                        // Number of tryptic termini
             IonsObserved = 19,               // Added in August 2011
             IonsExpected = 20,               // Added in August 2011
             DelMPPM = 21,                    // Added in August 2011

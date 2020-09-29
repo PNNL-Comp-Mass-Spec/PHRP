@@ -95,7 +95,7 @@ namespace PeptideHitResultsProcessor
         }
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         private int mNextResultID;
         private bool mLookForReverseSequenceTag;

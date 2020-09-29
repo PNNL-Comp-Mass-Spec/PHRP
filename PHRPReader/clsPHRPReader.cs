@@ -27,6 +27,8 @@ namespace PHRPReader
     /// </summary>
     public class clsPHRPReader : PRISM.EventNotifier, IDisposable
     {
+        // Ignore Spelling: xt, msx, fht, Ss, Za, msgfdb, MODa, moda, modp, kv, toppic, mspath, msa, modplus, msp, prot, tpc
+
         #region "Constants"
 
         /// <summary>
@@ -2496,7 +2498,7 @@ namespace PHRPReader
 
             if (string.IsNullOrEmpty(mPSMCurrent.CollisionMode) || mPSMCurrent.CollisionMode == clsPSM.UNKNOWN_COLLISION_MODE)
             {
-                // Determine the ScanTypeName using the the ScanStats or ExtendedScanStats info
+                // Determine the ScanTypeName using the ScanStats or ExtendedScanStats info
                 if (scanStatsValid && !string.IsNullOrEmpty(scanStatsInfo.ScanTypeName))
                 {
                     mPSMCurrent.CollisionMode = GetCollisionMode(scanStatsInfo.ScanTypeName);
@@ -2532,7 +2534,7 @@ namespace PHRPReader
                     mPSMCurrent.MSGFSpecEValue = specEValueText;
                     if (specEValueText.Length > 12)
                     {
-                        // Attempt to shorten the SpecEValue value
+                        // Attempt to shorten the SpecEValue
                         if (double.TryParse(specEValueText, out var specEValue))
                         {
                             mPSMCurrent.MSGFSpecEValue = specEValue.ToString("0.00000E-00");

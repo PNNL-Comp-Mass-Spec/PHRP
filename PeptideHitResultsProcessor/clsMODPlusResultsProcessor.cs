@@ -1,4 +1,4 @@
-﻿// This class reads in an MODPlus results file (txt format) and creates
+﻿// This class reads in an MODPlus results file (.txt format) and creates
 // a tab-delimited text file with the data.
 //
 // -------------------------------------------------------------------------------
@@ -20,6 +20,8 @@ namespace PeptideHitResultsProcessor
 {
     public class clsMODPlusResultsProcessor : clsPHRPBaseClass
     {
+        // Ignore Spelling: MODa, tda, methylation, udt, fht, modp
+
         public clsMODPlusResultsProcessor()
         {
             mFileDate = "July 10, 2019";
@@ -92,7 +94,7 @@ namespace PeptideHitResultsProcessor
             public double ProbabilityNum;           // Higher values are better
             public int RankScore;
             public string Peptide;
-            public string NTT;                      // Number of Tryptic Terminii
+            public string NTT;                      // Number of Tryptic Termini
             public string ProteinList;              // One or more protein entries of the form ref|YP_003651515.1[K.196~206.Q(2)] where the text in brackets is the start/stop residues of the peptide; Multiple entries will be separated by semicolons, e.g. ref|YP_003651515.1[K.196~206.Q(2)];ref|YP_003201491.1[K.223~233.Q(2)];ref|YP_003313784.1[K.266~276.Q(2)]
             public string ModificationAnnotation;
             public double FDR;                      // Computed by this class
@@ -133,7 +135,7 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         private int mDeltaMassWarningCount;
 
@@ -1426,7 +1428,7 @@ namespace PeptideHitResultsProcessor
                 else
                 {
                     // Auto-change mIgnorePeptideToProteinMapperErrors to True
-                    // We only do this because some peptides reported by MODPlus may not match the fasta file (due to amino acid substitutions)
+                    // We do this because some peptides reported by MODPlus may not match the fasta file (due to amino acid substitutions)
                     IgnorePeptideToProteinMapperErrors = true;
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)
@@ -1802,7 +1804,7 @@ namespace PeptideHitResultsProcessor
                     return -1;
                 }
 
-                // Pvalue is the same; check scan number
+                // P-value is the same; check scan number
                 if (x.ScanNum > y.ScanNum)
                 {
                     return 1;

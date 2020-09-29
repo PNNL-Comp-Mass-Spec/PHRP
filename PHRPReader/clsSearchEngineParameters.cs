@@ -81,7 +81,7 @@ namespace PHRPReader
         /// 0 means no-enzyme, 1 means partially tryptic, 2 means fully tryptic
         /// </summary>
         /// <returns></returns>
-        /// <remarks>For trypsin, this is NTT or Number of Tryptic Terminii</remarks>
+        /// <remarks>For trypsin, this is NTT or Number of Tryptic Termini</remarks>
         public int MinNumberTermini { get; set; }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace PHRPReader
         public Dictionary<string, string> Parameters => mParameters;
 
         /// <summary>
-        /// Precursor mass tolerance, in Da; 0 if unknown
+        /// Precursor mass tolerance, in Daltons; 0 if unknown
         /// </summary>
         /// <returns></returns>
         public double PrecursorMassToleranceDa { get; set; }

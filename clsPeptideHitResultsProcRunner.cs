@@ -28,6 +28,8 @@ namespace PeptideHitResultsProcRunner
     /// </summary>
     public class clsPeptideHitResultsProcRunner : PRISM.FileProcessor.ProcessFilesBase
     {
+        // Ignore Spelling: parm, proc, MODa
+
         public clsPeptideHitResultsProcRunner()
         {
             mFileDate = Program.PROGRAM_DATE;
@@ -51,7 +53,7 @@ namespace PeptideHitResultsProcRunner
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
         protected clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants mPeptideHitResultsFileFormat;
 
         protected bool mObtainModificationDefinitionsFromDMS;
@@ -72,7 +74,7 @@ namespace PeptideHitResultsProcRunner
         public bool CreateProteinModsFile { get; set; }
 
         /// <summary>
-        ///
+        /// Create Protein Mods Using PHRP Data File
         /// </summary>
         /// <returns></returns>
         /// <remarks>
@@ -105,10 +107,10 @@ namespace PeptideHitResultsProcRunner
         public string SearchToolParameterFilePath { get; set; }
 
         /// <summary>
-        ///
+        /// Use Existing MTS PepToProtein Map File
         /// </summary>
         /// <returns></returns>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the the Fasta file specified by mFastaFilePath</remarks>
+        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
         public bool WarnMissingParameterFileSection { get; set; }
@@ -410,7 +412,7 @@ namespace PeptideHitResultsProcRunner
         }
 
         /// <summary>
-        /// Looks for file fileNameOrPath in the current working directory
+        /// Looks for fileNameOrPath in the current working directory
         /// If not found, looks in sourceDirectoryPath
         /// </summary>
         /// <param name="sourceDirectoryPath">Path to the directory containing the input file</param>

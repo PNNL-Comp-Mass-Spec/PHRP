@@ -220,7 +220,7 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         protected ePHRPErrorCodes mErrorCode = ePHRPErrorCodes.NoError;
         protected string mErrorMessage = string.Empty;
@@ -277,10 +277,10 @@ namespace PeptideHitResultsProcessor
         public bool CreateInspectSynopsisFile { get; set; }
 
         /// <summary>
-        ///
+        /// Create protein mods file
         /// </summary>
         /// <returns></returns>
-        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the the Fasta file specified by mFastaFilePath</remarks>
+        /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
         public bool CreateProteinModsFile { get; set; }
 
         public clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType EnzymeMatchSpec { get; set; }
@@ -298,7 +298,7 @@ namespace PeptideHitResultsProcessor
         public bool IgnorePeptideToProteinMapperErrors { get; set; }
 
         /// <summary>
-        ///
+        /// Inspect synopsis file p-value threshold
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lower p-values are higher confidence results</remarks>
@@ -323,7 +323,7 @@ namespace PeptideHitResultsProcessor
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
-        ///
+        /// MSGFDB synopsis file p-value threshold
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lower p-values are higher confidence results; renamed to EValue in MS-GF+</remarks>
@@ -406,7 +406,7 @@ namespace PeptideHitResultsProcessor
         public float ProgressPercentComplete => Convert.ToSingle(Math.Round(mProgressPercentComplete, 2));
 
         /// <summary>
-        ///
+        /// Search tool parameter file path
         /// </summary>
         /// <returns></returns>
         /// <remarks>Used by clsInSpecTResultsProcessor and clsMSGFPlusResultsProcessor (aka SearchEngineParamFileName)</remarks>

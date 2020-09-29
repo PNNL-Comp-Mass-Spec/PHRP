@@ -26,6 +26,8 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsMSPathFinderResultsProcessor : clsPHRPBaseClass
     {
+        // Ignore Spelling: IcTda, Dehydro, Desc, mspath
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -153,7 +155,7 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         #endregion
         private readonly Regex mGetModName;
@@ -523,7 +525,7 @@ namespace PeptideHitResultsProcessor
                         startIndex = endIndex + 1;
                     }
 
-                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    // Sort the data in filteredSearchResults then write out to disk
                     SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                 }
 
@@ -550,7 +552,8 @@ namespace PeptideHitResultsProcessor
         /// <param name="modInfo"></param>
         /// <returns>True on success, false if an error</returns>
         /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MS-GF+</remarks>
-        private bool ExtractModInfoFromParamFile(string msPathFinderParamFilePath,
+        private bool ExtractModInfoFromParamFile(
+            string msPathFinderParamFilePath,
             out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             var modFileProcessor = new clsMSGFPlusParamFileModExtractor(TOOL_NAME);

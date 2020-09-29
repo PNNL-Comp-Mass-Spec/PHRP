@@ -36,7 +36,7 @@ namespace PeptideHitResultsProcessor
         public const double MASS_C13 = 1.00335483;
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
         // Note: Many of these variables typically hold numbers but we're storing the numbers as strings
         //       to prevent the numeric representation from changing when converting to a number then back to a string
 

@@ -23,6 +23,8 @@ namespace PHRPReader
     /// </summary>
     public class clsModificationDefinition
     {
+        // Ignore Spelling: UnkMod, Phosph, IodoAcet, Plus1Oxy
+
         #region "Constants and Enums"
 
         /// <summary>
@@ -90,7 +92,7 @@ namespace PHRPReader
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
         /// <summary>
         /// One letter symbol for this modification; use NO_SYMBOL_MODIFICATION_SYMBOL if no symbol (necessary for isotopic mods or protein terminus static mods)
         /// </summary>
@@ -103,7 +105,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Target residues, tracked as a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to
-        /// Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols (&lt; and &gt; for the peptide terminii; [ and ] for the protein terminii)
+        /// Use the *_SYMBOL_DMS constants for the peptide and protein termini symbols (&lt; and &gt; for the peptide termini; [ and ] for the protein termini)
         /// </summary>
         /// <remarks>
         /// If this is empty, the given modification can apply to any residue or terminus
@@ -183,8 +185,8 @@ namespace PHRPReader
         /// <remarks>
         /// If an empty string, the modification can apply to any residue or terminus;
         /// Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to.
-        /// Use the *_SYMBOL_DMS constants for the peptide and protein terminii symbols
-        /// (less than and greater than signs for the peptide terminii; [ and ] for the protein terminii)
+        /// Use the *_SYMBOL_DMS constants for the peptide and protein termini symbols
+        /// (less than and greater than signs for the peptide termini; [ and ] for the protein termini)
         /// </remarks>
         public string TargetResidues
         {
@@ -297,7 +299,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Constructor that takes a mod mass, target residues, and modification tye
+        /// Constructor that takes a mod mass, target residues, and modification type
         /// </summary>
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
@@ -517,7 +519,7 @@ namespace PHRPReader
 
         /// <summary>
         /// Returns True if this modification can affect the peptide or protein terminus
-        /// Note that some modifications can affect either peptide terminii or internal residues
+        /// Note that some modifications can affect either peptide termini or internal residues
         /// </summary>
         /// <returns></returns>
         /// <remarks></remarks>

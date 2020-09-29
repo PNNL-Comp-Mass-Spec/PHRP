@@ -19,6 +19,8 @@ namespace PHRPReader
     /// </summary>
     public class clsPHRPParserMODPlus : clsPHRPParser
     {
+        // Ignore Spelling: MODp, modp, prot
+
         #region "Constants"
 
 #pragma warning disable 1591
@@ -56,7 +58,7 @@ namespace PHRPReader
             Spectrum_Index = 2,
             Charge = 3,
             PrecursorMZ = 4,
-            DelM = 5,                            // Precursor error, in Da
+            DelM = 5,                            // Precursor error, in Daltons
             DelM_PPM = 6,                        // Precursor error, in ppm
             MH = 7,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
             Peptide = 8,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. +42
@@ -326,7 +328,7 @@ namespace PHRPReader
             {
                 // For MS-GF+ or Sequest we load mod info from the _ModDefs.txt file for the parameter file
                 // But MODPlus does not have a _ModDefs.txt file because it performs a blind search
-                // The user can define static mods on any of the residues, plus the peptide terminii; check for these now
+                // The user can define static mods on any of the residues, plus the peptide termini; check for these now
 
                 var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
 
@@ -392,7 +394,7 @@ namespace PHRPReader
                             searchEngineParams.PrecursorMassToleranceDa = precursorMassToleranceDa;
                         }
 
-                        // Convert from dalton to PPM (assuming a mass of 2000 m/z)
+                        // Convert from Daltons to PPM (assuming a mass of 2000 m/z)
                         searchEngineParams.PrecursorMassToleranceDa = clsPeptideMassCalculator.MassToPPM(searchEngineParams.PrecursorMassToleranceDa, 2000);
                     }
                 }

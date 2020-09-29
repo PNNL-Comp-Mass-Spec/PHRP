@@ -27,6 +27,7 @@ namespace PeptideHitResultsProcRunner
     static class Program
     {
         public const string PROGRAM_DATE = "June 2, 2020";
+        // Ignore Spelling: Prot, MODa
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional
@@ -36,7 +37,7 @@ namespace PeptideHitResultsProcRunner
         private static string mModificationDefinitionsFilePath;          // Optional
         private static string mSearchToolParameterFilePath;              // Optional
 
-        // Note: If this is true and the _PepToProtMap.txt file isn't found, it will be created using the the Fasta file specified by mFastaFilePath
+        // Note: If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath
         private static bool mCreateProteinModsFile;
         private static string mFastaFilePath;
         private static bool mIgnorePeptideToProteinMapperErrors;
@@ -346,13 +347,16 @@ namespace PeptideHitResultsProcRunner
 
                 if (parseCommandLine.RetrieveValueForParameter("F", out value))
                     mFastaFilePath = string.Copy(value);
+
                 if (parseCommandLine.RetrieveValueForParameter("Fasta", out value))
                     mFastaFilePath = string.Copy(value);
 
                 if (parseCommandLine.IsParameterPresent("IgnorePepToProtMapErrors"))
                     mIgnorePeptideToProteinMapperErrors = true;
+
                 if (parseCommandLine.IsParameterPresent("ProteinModsIncludeReversed"))
                     mProteinModsFileIncludesReversedProteins = true;
+
                 if (parseCommandLine.IsParameterPresent("UseExistingPepToProteinMapFile"))
                     mUseExistingMTSPepToProteinMapFile = true;
 
@@ -568,7 +572,7 @@ namespace PeptideHitResultsProcRunner
 
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "When processing an MSGF+ results file, use /MSGFPlusSpecEValue and /MSGFPlusEValue " +
-                                      "to customize the thresholds used to determine which peptides are written to the the synopsis file"));
+                                      "to customize the thresholds used to determine which peptides are written to the synopsis file"));
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "Defaults are /MSGFPlusSpecEValue:" +
                                       clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD +

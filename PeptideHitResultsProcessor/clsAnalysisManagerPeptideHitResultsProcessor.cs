@@ -14,12 +14,14 @@ namespace PeptideHitResultsProcessor
 {
     public class clsAnalysisManagerPeptideHitResultsProcessor : IPeptideHitResultsProcessor
     {
+        // Ignore Spelling: msgfdb
+
         #region "Constants and enums"
         private const string DEFAULT_MASS_CORRECTION_TAGS_FILENAME = "Mass_Correction_Tags.txt";
         private const string MODIFICATION_DEFINITIONS_FILE_SUFFIX = "_ModDefs.txt";
         #endregion
 
-        #region "Classwide variables"
+        #region "Class wide Variables"
 
         private clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants m_PeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
 

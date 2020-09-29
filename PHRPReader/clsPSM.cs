@@ -75,7 +75,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>
-        /// CleavageState, NumMissedCleavages, and NumTrypticTerminii are typically populated using UpdateCleavageInfo
+        /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
         /// </remarks>
         public clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState { get; set; }
 
@@ -172,18 +172,18 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks>
-        /// CleavageState, NumMissedCleavages, and NumTrypticTerminii are typically populated using UpdateCleavageInfo
+        /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
         /// </remarks>
         public short NumMissedCleavages { get; set; }
 
         /// <summary>
-        /// Number of tryptic terminii (or similar if not using trypsin)
+        /// Number of tryptic termini (or similar if not using trypsin)
         /// </summary>
         /// <value></value>
         /// <returns></returns>
         /// <remarks>
         /// 2 means fully tryptic, 1 means partially tryptic, 0 means non-tryptic
-        /// CleavageState, NumMissedCleavages, and NumTrypticTerminii are typically populated using UpdateCleavageInfo
+        /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
         /// </remarks>
         public short NumTrypticTerminii { get; set; }
 
@@ -384,7 +384,7 @@ namespace PHRPReader
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein termini (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
         /// <param name="residueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
         /// <param name="residueTerminusState">Terminus state of residue</param>
         /// <param name="modDefinition">Modification details</param>
@@ -401,7 +401,7 @@ namespace PHRPReader
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein terminii (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein termini (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
         /// <param name="residueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
         /// <param name="residueTerminusState">Terminus state of residue</param>
         /// <param name="modDefinition">Modification details</param>
@@ -687,7 +687,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Update the peptide sequence (auto-determines the clean sequence); also auto-update the the cleavage state info
+        /// Update the peptide sequence (auto-determines the clean sequence); also auto-update the cleavage state info
         /// </summary>
         /// <param name="peptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
         /// <param name="cleavageStateCalculator">Cleavage state calculator object</param>
@@ -735,7 +735,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic terminii based on the peptide sequence
+        /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic termini based on the peptide sequence
         /// </summary>
         /// <param name="cleavageStateCalculator"></param>
         /// <remarks></remarks>

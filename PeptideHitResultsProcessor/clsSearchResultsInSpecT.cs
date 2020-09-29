@@ -22,7 +22,7 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsSearchResultsInSpecT : clsSearchResultsBaseClass
     {
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         // Scan: tracked by the base class
         // Annotation: aka Peptide, which is tracked by the base class

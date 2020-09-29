@@ -29,6 +29,8 @@ namespace PHRPReader
     /// </remarks>
     public class clsPeptideModificationContainer
     {
+        // Ignore Spelling: UniMod, deamidated, acetyl
+
         #region "Constants and Enums"
 
         /// <summary>
@@ -68,7 +70,7 @@ namespace PHRPReader
         #region "Structures"
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         /// <summary>
         /// List of available modification symbols
@@ -133,7 +135,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modificationDefinition"></param>
         /// <param name="useNextAvailableModificationSymbol"></param>
-        /// <returns>The index of the newly added modification, or the the index of the modification that modificationDefinition matches </returns>
+        /// <returns>The index of the newly added modification, or the index of the modification that modificationDefinition matches </returns>
         /// <remarks></remarks>
         private int AddModification(clsModificationDefinition modificationDefinition, bool useNextAvailableModificationSymbol)
         {
@@ -381,7 +383,7 @@ namespace PHRPReader
 
             while (modMassName.Length < 8)
             {
-                // Append extra zeroes (this code will likely never be reached)
+                // Append extra zeros (this code will likely never be reached)
                 modMassName += "0";
             }
 
@@ -1241,9 +1243,9 @@ namespace PHRPReader
                 // It should have 2 or more columns, separated by tabs
                 // Column 1 is the modification symbol
                 // Column 2 is the modification mass
-                // Column 3, which is optional, is the residues and/or terminii that can be modified; if omitted, the modification can apply to any residues or terminii
+                // Column 3, which is optional, is the residues and/or termini that can be modified; if omitted, the modification can apply to any residues or termini
                 //   For column 3, use 1 letter amino acid abbreviations; the residues can be a continuous string, or can be separated by commas and/or spaces
-                //   For column 3, use the *_SYMBOL_DMS constants for the terminii (< and > for the peptide terminii; [ and ] for the protein terminii)
+                //   For column 3, use the *_SYMBOL_DMS constants for the termini (< and > for the peptide termini; [ and ] for the protein termini)
                 // Column 4, which is optional, specifies the type of modification: D, S, T, I, or P (corresponding to clsModificationDefinition.eModificationTypeConstants)
                 // Column 5, which is optional, specifies the mass correction tag associated with the given modification
 

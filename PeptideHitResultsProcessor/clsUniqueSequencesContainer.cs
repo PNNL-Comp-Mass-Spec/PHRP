@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor
         private const char SEQUENCE_MOD_DESC_SEP = '_';
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         private Dictionary<string, int> mMasterSequences;
 

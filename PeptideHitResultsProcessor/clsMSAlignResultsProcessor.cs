@@ -146,7 +146,7 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
 
         private int mDeltaMassWarningCount;
 
@@ -1482,7 +1482,7 @@ namespace PeptideHitResultsProcessor
                 else
                 {
                     // Auto-change mIgnorePeptideToProteinMapperErrors to True
-                    // We only do this since a small number of peptides reported by MSAlign don't perfectly match the fasta file
+                    // We do this since a small number of peptides reported by MSAlign don't perfectly match the fasta file
                     IgnorePeptideToProteinMapperErrors = true;
                     success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                     if (!success)

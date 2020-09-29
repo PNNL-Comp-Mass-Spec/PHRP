@@ -19,6 +19,7 @@ namespace PHRPReader
     /// </summary>
     public class clsPHRPParserMSGFPlus : clsPHRPParser
     {
+        // Ignore Spelling: Frag, novo, msgfdb, Da, tda, Za, Validator, prot, nnet, ntt
         #region "Constants"
 
 #pragma warning disable 1591
@@ -84,12 +85,12 @@ namespace PHRPReader
             SpecIndex = 3,
             Charge = 4,
             PrecursorMZ = 5,
-            DelM = 6,                            // Precursor error, in Da; if the search used a tolerance less than 0.5 Da or less than 500 ppm, this value is computed from the DelMPPM value
+            DelM = 6,                            // Precursor error, in Daltons; if the search used a tolerance less than 0.5 Da or less than 500 ppm, this value is computed from the DelMPPM value
             DelMPPM = 7,                         // Precursor error, in ppm; corrected for isotope selection errors
             MH = 8,                              // Theoretical monoisotopic peptide mass (computed by PHRP)
             Peptide = 9,                         // This is the sequence with prefix and suffix residues and also with modification symbols
             Protein = 10,                        // Protein Name (remove description)
-            NTT = 11,                            // Number of tryptic terminii
+            NTT = 11,                            // Number of tryptic termini
             DeNovoScore = 12,
             MSGFScore = 13,
             SpecProb_EValue = 14,
@@ -271,7 +272,7 @@ namespace PHRPReader
                 else if (reMatch.Groups.Count > 1 && reMatch.Groups[2].Value.ToLower().Contains("ppm"))
                 {
                     // Ppm
-                    // Convert from PPM to dalton (assuming a mass of 2000 m/z)
+                    // Convert from PPM to Daltons (assuming a mass of 2000 m/z)
                     tolerancePPM = toleranceCurrent;
                     toleranceCurrent = clsPeptideMassCalculator.PPMToMass(toleranceCurrent, 2000);
                 }
@@ -542,7 +543,7 @@ namespace PHRPReader
                 // Determine the cleavage specificity
                 if (searchEngineParams.Parameters.TryGetValue("nnet", out settingValue))
                 {
-                    // NNET means number of non-enzymatic terminii
+                    // NNET means number of non-enzymatic termini
 
                     if (int.TryParse(settingValue, out value))
                     {
@@ -569,7 +570,7 @@ namespace PHRPReader
 
                     if (searchEngineParams.Parameters.TryGetValue("ntt", out settingValue))
                     {
-                        // NTT means number of tolerable terminii
+                        // NTT means number of tolerable termini
 
                         if (int.TryParse(settingValue, out value))
                         {
@@ -706,7 +707,7 @@ namespace PHRPReader
 
                 if (psm.MSGFSpecEValue.Length > 13)
                 {
-                    // Attempt to shorten the SpecEValue value
+                    // Attempt to shorten the SpecEValue
                     if (double.TryParse(psm.MSGFSpecEValue, out var specEValue))
                     {
                         psm.MSGFSpecEValue = specEValue.ToString("0.0000000E-00");

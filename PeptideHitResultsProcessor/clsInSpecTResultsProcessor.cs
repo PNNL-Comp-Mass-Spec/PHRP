@@ -803,7 +803,7 @@ namespace PeptideHitResultsProcessor
 
         /// <summary>
         /// Load the PeptideToProteinMap information
-        /// In addition, creates the _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
+        /// In addition, creates the _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
         /// </summary>
         /// <param name="pepToProteinMapFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
@@ -1541,7 +1541,7 @@ namespace PeptideHitResultsProcessor
                         success = CreateFHTorSYNResultsFile(inputFilePath, synOutputFilePath, inspectModInfo, eFilteredOutputFileTypeConstants.SynFile);
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
-                        // LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
+                        // LoadPeptideToProteinMapInfoInspect also creates _inspect_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
                         var pepToProteinMapFilePath = Path.Combine(inputFile.Directory.FullName, Path.GetFileNameWithoutExtension(inputFile.Name) + FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING + ".txt");
 
                         ResetProgress("Loading the PepToProtein map file: " + Path.GetFileName(pepToProteinMapFilePath), true);

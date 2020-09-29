@@ -177,7 +177,7 @@ namespace PHRPReader
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
         private udtEnzymeMatchSpecType mEnzymeMatchSpec;
         private Regex mLeftRegEx;
         private Regex mRightRegEx;

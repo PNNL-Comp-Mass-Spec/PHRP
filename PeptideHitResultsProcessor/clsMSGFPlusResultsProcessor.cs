@@ -1,4 +1,4 @@
-// This class reads in an MSGF_DB results file (txt format) and creates
+// This class reads in an MS-GF+ results file (.txt format) and creates
 // a tab-delimited text file with the data.  It will insert modification symbols
 // into the peptide sequences for modified peptides.
 //
@@ -23,6 +23,8 @@ namespace PeptideHitResultsProcessor
 {
     public class clsMSGFPlusResultsProcessor : clsPHRPBaseClass
     {
+        // Ignore Spelling: tsv, da, tda, kv, msgfdb, fht, structs, methylation, udt, frag, novo, Prefiltered
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -236,7 +238,7 @@ namespace PeptideHitResultsProcessor
 
         #endregion
 
-        #region "Classwide Variables"
+        #region "Class wide Variables"
         private readonly clsPeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
         private udtParentMassToleranceType mParentMassToleranceInfo;
@@ -1038,7 +1040,7 @@ namespace PeptideHitResultsProcessor
                             startIndex = endIndex + 1;
                         }
 
-                        // Sort the data in udtFilteredSearchResults then write out to disk
+                        // Sort the data in filteredSearchResults then write out to disk
                         SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog,
                                                           includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
                     }
@@ -1223,7 +1225,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Load the PeptideToProteinMap information; in addition, creates the _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
+        /// Load the PeptideToProteinMap information; in addition, creates the _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
         /// </summary>
         /// <param name="pepToProteinMapFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
@@ -1418,7 +1420,7 @@ namespace PeptideHitResultsProcessor
                 // Initialize searchResult
                 var searchResult = new clsSearchResultsMSGFPlus(mPeptideMods, mPeptideSeqMassCalculator);
 
-                // Note that MS-GF+ synopsis files are normally sorted on SpecEValue value, ascending
+                // Note that MS-GF+ synopsis files are normally sorted on SpecEValue, ascending
                 // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
                 //  we will keep track of the scan, charge, and peptide information parsed for each unique SpecEValue encountered
                 // Although this was a possibility with Inspect, it likely never occurs for MS-GF+
@@ -2418,7 +2420,7 @@ namespace PeptideHitResultsProcessor
                             out var isMsgfPlus, specIdToIndex, eFilteredOutputFileTypeConstants.SynFile);
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
-                        // LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected terminii symbols
+                        // LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
                         var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(outputDirectoryPath, baseName) + ".txt", outputDirectoryPath, mts: false);
 
                         ResetProgress("Loading the PepToProtein map file: " + Path.GetFileName(pepToProteinMapFilePath), true);
@@ -2506,8 +2508,8 @@ namespace PeptideHitResultsProcessor
                     }
                     else
                     {
-                        // Auto-change mIgnorePeptideToProteinMapperErrors to True
-                        // We only do this for MSGFDB since it often includes reverse protein peptides in the results even though the FASTA file often does not have reverse proteins
+                        // Auto-change IgnorePeptideToProteinMapperErrors to True
+                        // We do this for MS-GF+ since it often includes reverse protein peptides in the results even though the FASTA file often does not have reverse proteins
                         IgnorePeptideToProteinMapperErrors = true;
                         success = CreatePepToProteinMapFile(sourcePHRPDataFiles, mtsPepToProteinMapFilePath);
                         if (!success)
