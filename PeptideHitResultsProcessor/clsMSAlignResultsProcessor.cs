@@ -1036,7 +1036,7 @@ namespace PeptideHitResultsProcessor
                 GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Evalue], out udtSearchResult.Evalue);
                 GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.FDR], out udtSearchResult.FDR);
 
-                if (udtSearchResult.FDR.ToLower() == "infinity")
+                if (string.Equals(udtSearchResult.FDR, "infinity", StringComparison.OrdinalIgnoreCase))
                 {
                     udtSearchResult.FDR = "10";
                 }

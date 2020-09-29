@@ -638,9 +638,9 @@ namespace PeptideHitResultsProcessor
                         var modMass = node.Attributes["massdiff"].Value;
 
                         // Replace N-Term or C-Term with < or >
-                        if (residue.ToLower() == "n-term")
+                        if (string.Equals(residue, "n-term", StringComparison.OrdinalIgnoreCase))
                             residue = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                        if (residue.ToLower() == "c-term")
+                        if (string.Equals(residue, "c-term", StringComparison.OrdinalIgnoreCase))
                             residue = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
 
                         if (double.TryParse(modMass, out var modMassDa))
@@ -998,7 +998,7 @@ namespace PeptideHitResultsProcessor
                 // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                 udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                if (udtSearchResult.Probability.ToLower() == "infinity")
+                if (string.Equals(udtSearchResult.Probability, "infinity", StringComparison.OrdinalIgnoreCase))
                 {
                     udtSearchResult.Probability = "0";
                 }

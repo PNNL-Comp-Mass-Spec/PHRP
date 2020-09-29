@@ -1086,7 +1086,7 @@ namespace PeptideHitResultsProcessor
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
                 GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
 
-                if (udtSearchResult.Qvalue.ToLower() == "infinity")
+                if (string.Equals(udtSearchResult.Qvalue, "infinity", StringComparison.OrdinalIgnoreCase))
                 {
                     udtSearchResult.Qvalue = "10";
                 }

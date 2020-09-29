@@ -1079,7 +1079,7 @@ namespace PeptideHitResultsProcessor
                         }
                         else
                         {
-                            if (string.IsNullOrWhiteSpace(peptideToProteinMapper.GetErrorMessage()) && peptideToProteinMapper.StatusMessage.ToLower().Contains("error"))
+                            if (string.IsNullOrWhiteSpace(peptideToProteinMapper.GetErrorMessage()) && peptideToProteinMapper.StatusMessage.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0)
                             {
                                 SetErrorMessage("Error running clsPeptideToProteinMapEngine: " + peptideToProteinMapper.StatusMessage);
                             }

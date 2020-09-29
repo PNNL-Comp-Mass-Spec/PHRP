@@ -269,7 +269,7 @@ namespace PHRPReader
                     tolerancePPM = toleranceCurrent;
                     toleranceCurrent = clsPeptideMassCalculator.PPMToMass(toleranceCurrent, 2000);
                 }
-                else if (reMatch.Groups.Count > 1 && reMatch.Groups[2].Value.ToLower().Contains("ppm"))
+                else if (reMatch.Groups.Count > 1 && reMatch.Groups[2].Value.IndexOf("ppm", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     // Ppm
                     // Convert from PPM to Daltons (assuming a mass of 2000 m/z)

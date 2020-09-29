@@ -116,7 +116,7 @@ namespace PHRPReader
 
                     if (!headerLineParsed)
                     {
-                        if (splitLine[0].ToLower() == MOD_SUMMARY_COLUMN_Modification_Symbol.ToLower())
+                        if (string.Equals(splitLine[0], MOD_SUMMARY_COLUMN_Modification_Symbol, StringComparison.OrdinalIgnoreCase))
                         {
                             // Parse the header line to confirm the column ordering
                             // The Occurrence_Count column was misspelled prior to December 2012; need to check for this

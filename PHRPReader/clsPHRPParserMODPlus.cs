@@ -377,7 +377,7 @@ namespace PHRPReader
                     var tolerance = GetAttribute(massTolParamNode[0], "value");
                     var massUnits = GetAttribute(massTolParamNode[0], "unit");
 
-                    if (massUnits.ToLower() == "ppm")
+                    if (string.Equals(massUnits, "ppm", StringComparison.OrdinalIgnoreCase))
                     {
                         // Parent mass tolerance, in ppm
 
@@ -387,7 +387,7 @@ namespace PHRPReader
                             searchEngineParams.PrecursorMassToleranceDa = clsPeptideMassCalculator.PPMToMass(searchEngineParams.PrecursorMassTolerancePpm, 2000);
                         }
                     }
-                    else if (massUnits.ToLower() == "da")
+                    else if (string.Equals(massUnits, "da", StringComparison.OrdinalIgnoreCase))
                     {
                         if (double.TryParse(tolerance, out var precursorMassToleranceDa))
                         {
@@ -415,9 +415,9 @@ namespace PHRPReader
                     var modMass = GetAttribute(node, "massdiff");
 
                     // Replace N-Term or C-Term with < or >
-                    if (residue.ToLower() == "n-term")
+                    if (string.Equals(residue, "n-term", StringComparison.OrdinalIgnoreCase))
                         residue = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                    if (residue.ToLower() == "c-term")
+                    if (string.Equals(residue, "c-term", StringComparison.OrdinalIgnoreCase))
                         residue = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
 
                     if (!double.TryParse(modMass, out var modMassDa))

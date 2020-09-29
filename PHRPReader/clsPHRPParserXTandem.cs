@@ -454,7 +454,7 @@ namespace PHRPReader
 
                             if (xmlReader.NodeType == XmlNodeType.Element)
                             {
-                                if (xmlReader.Name.ToLower() == "file")
+                                if (string.Equals(xmlReader.Name, "file", StringComparison.OrdinalIgnoreCase))
                                 {
                                     var fileFormat = XMLTextReaderGetAttributeValue(xmlReader, "format", string.Empty);
 
@@ -675,7 +675,7 @@ namespace PHRPReader
                 if (xmlReader.NodeType != XmlNodeType.Element)
                     continue;
 
-                if (xmlReader.Name.ToLower() != "note")
+                if (!string.Equals(xmlReader.Name, "note", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 var noteType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);

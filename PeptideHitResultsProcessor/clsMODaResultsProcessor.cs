@@ -1101,7 +1101,7 @@ namespace PeptideHitResultsProcessor
                 // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                 udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                if (udtSearchResult.Probability.ToLower() == "infinity")
+                if (string.Equals(udtSearchResult.Probability, "infinity", StringComparison.OrdinalIgnoreCase))
                 {
                     udtSearchResult.Probability = "0";
                 }

@@ -874,7 +874,7 @@ namespace PHRPReader
             {
                 var kvSetting = clsPHRPParser.ParseKeyValueSetting(lineIn, '=', "#");
 
-                if (string.IsNullOrEmpty(kvSetting.Value) || kvSetting.Value.ToLower() == "none")
+                if (string.IsNullOrEmpty(kvSetting.Value) || string.Equals(kvSetting.Value, "none", StringComparison.OrdinalIgnoreCase))
                 {
                     // Not a valid mod spec
                     modSpec = string.Empty;

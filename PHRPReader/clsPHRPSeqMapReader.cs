@@ -487,7 +487,7 @@ namespace PHRPReader
 
                         if (!headerLineParsed)
                         {
-                            if (splitLine[0].ToLower() == SEQ_INFO_COLUMN_Unique_Seq_ID.ToLower())
+                            if (string.Equals(splitLine[0], SEQ_INFO_COLUMN_Unique_Seq_ID, StringComparison.OrdinalIgnoreCase))
                             {
                                 // Parse the header line to confirm the column ordering
                                 clsPHRPReader.ParseColumnHeaders(splitLine, columnHeaders);
@@ -564,7 +564,7 @@ namespace PHRPReader
 
                         if (!headerLineParsed)
                         {
-                            if (splitLine[0].ToLower() == SEQ_PROT_MAP_COLUMN_Unique_Seq_ID.ToLower())
+                            if (string.Equals(splitLine[0], SEQ_PROT_MAP_COLUMN_Unique_Seq_ID, StringComparison.OrdinalIgnoreCase))
                             {
                                 // Parse the header line to confirm the column ordering
                                 clsPHRPReader.ParseColumnHeaders(splitLine, columnHeaders);
