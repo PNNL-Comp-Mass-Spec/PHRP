@@ -185,7 +185,7 @@ namespace PHRPReader
         /// 2 means fully tryptic, 1 means partially tryptic, 0 means non-tryptic
         /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
         /// </remarks>
-        public short NumTrypticTerminii { get; set; }
+        public short NumTrypticTermini { get; set; }
 
         /// <summary>
         /// Peptide sequence, including any modification symbols that were assigned by the search engine
@@ -490,7 +490,7 @@ namespace PHRPReader
 
             CleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Unknown;
             NumMissedCleavages = 0;
-            NumTrypticTerminii = 0;
+            NumTrypticTermini = 0;
 
             PrecursorNeutralMass = 0;
             MassErrorDa = string.Empty;
@@ -544,7 +544,7 @@ namespace PHRPReader
 
             newPSM.CleavageState = CleavageState;
             newPSM.NumMissedCleavages = NumMissedCleavages;
-            newPSM.NumTrypticTerminii = NumTrypticTerminii;
+            newPSM.NumTrypticTermini = NumTrypticTermini;
 
             newPSM.PrecursorNeutralMass = PrecursorNeutralMass;
             newPSM.MassErrorDa = MassErrorDa;
@@ -747,15 +747,15 @@ namespace PHRPReader
 
             if (CleavageState == clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)
             {
-                NumTrypticTerminii = 2;
+                NumTrypticTermini = 2;
             }
             else if (CleavageState == clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial)
             {
-                NumTrypticTerminii = 1;
+                NumTrypticTermini = 1;
             }
             else
             {
-                NumTrypticTerminii = 0;
+                NumTrypticTermini = 0;
             }
         }
     }
