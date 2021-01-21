@@ -74,6 +74,7 @@
     <Compile Include="clsScanStatsReader.cs" />
     <Compile Include="clsSearchEngineParameters.cs" />
     <Compile Include="clsSeqInfo.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

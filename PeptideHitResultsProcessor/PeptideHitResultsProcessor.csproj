@@ -71,6 +71,7 @@
     <Compile Include="clsTopPICResultsProcessor.cs" />
     <Compile Include="clsUniqueSequencesContainer.cs" />
     <Compile Include="clsXTandemResultsProcessor.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPeptideHitResultsProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
