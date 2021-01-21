@@ -1382,16 +1382,11 @@ namespace PeptideHitResultsProcessor
             SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
         }
 
-        private bool MSGFPlusResultPassesSynFilter(udtMSGFPlusSearchResultType udtMSGFPlusSearchResultType)
+        private bool MSGFPlusResultPassesSynFilter(udtMSGFPlusSearchResultType msgfPlusSearchResultType)
         {
-            if (udtMSGFPlusSearchResultType.EValueNum <= MSGFPlusSynopsisFileEValueThreshold ||
-                udtMSGFPlusSearchResultType.SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold ||
-                udtMSGFPlusSearchResultType.QValueNum > 0 && udtMSGFPlusSearchResultType.QValueNum < 0.01)
-            {
-                return true;
-            }
-
-            return false;
+            return msgfPlusSearchResultType.EValueNum <= MSGFPlusSynopsisFileEValueThreshold ||
+                   msgfPlusSearchResultType.SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold ||
+                   msgfPlusSearchResultType.QValueNum > 0 && msgfPlusSearchResultType.QValueNum < 0.01;
         }
 
         private bool ParseMSGFPlusSynopsisFile(
