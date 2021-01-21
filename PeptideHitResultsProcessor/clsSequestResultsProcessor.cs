@@ -180,7 +180,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
         private bool ParseSynopsisOrFirstHitsFile(string inputFilePath, string outputDirectoryPath, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
@@ -492,7 +492,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath">Sequest Synopsis or First-hits file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;

@@ -75,7 +75,6 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <remarks></remarks>
         public clsExtendedScanStatsReader()
         {
             mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);

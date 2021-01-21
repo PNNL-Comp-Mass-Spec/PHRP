@@ -131,7 +131,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        /// <remarks></remarks>
         public clsPHRPParserMODPlus(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
@@ -143,7 +142,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
-        /// <remarks></remarks>
         public clsPHRPParserMODPlus(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
             : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MODPlus, loadModsAndSeqInfo)
         {
@@ -155,7 +153,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        /// <remarks></remarks>
         public clsPHRPParserMODPlus(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
             : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MODPlus, startupOptions)
         {
@@ -164,7 +161,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of header names</returns>
         protected override List<string> GetColumnHeaderNames()
         {
             var headerNames = new List<string>();
@@ -175,7 +172,7 @@ namespace PHRPReader
         /// <summary>
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, MODPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
             var headerColumns = new SortedDictionary<string, MODPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
@@ -309,8 +306,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
         {
             searchEngineParams = new clsSearchEngineParameters(MODPlus_SEARCH_ENGINE_NAME);
@@ -491,7 +487,7 @@ namespace PHRPReader
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {

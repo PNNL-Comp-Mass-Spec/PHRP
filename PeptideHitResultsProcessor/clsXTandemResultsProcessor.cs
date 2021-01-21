@@ -1506,7 +1506,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath">X!Tandem results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;

@@ -100,25 +100,16 @@ namespace PHRPReader
         /// <summary>
         /// Cached error messages
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public List<string> ErrorMessages { get; }
 
         /// <summary>
         /// Input file path
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string InputFilePath { get; private set; } = string.Empty;
 
         /// <summary>
         /// Input directory path
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string InputDirectoryPath { get; private set; } = string.Empty;
 
         /// <summary>
@@ -130,55 +121,37 @@ namespace PHRPReader
         /// <summary>
         /// Maximum number of proteins to associate with each PSM
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>0 means to load all proteins</remarks>
         public int MaxProteinsPerPSM { get; set; }
 
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public clsPHRPReader.PeptideHitResultTypes PeptideHitResultType => mPeptideHitResultType;
 
         /// <summary>
         /// Peptide to protein map file name
         /// </summary>
-        /// <returns></returns>
         public Dictionary<string, clsPepToProteinMapInfo> PepToProteinMap { get; }
 
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public SortedList<int, int> ResultToSeqMap { get; }
 
         /// <summary>
         /// Returns the cached sequence info, where key is SeqID
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public SortedList<int, clsSeqInfo> SeqInfo { get; }
 
         /// <summary>
         /// Returns the cached sequence to protein map information
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public SortedList<int, List<clsProteinInfo>> SeqToProteinMap { get; }
 
         /// <summary>
         /// Cached warning messages
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public List<string> WarningMessages { get; }
 
         #endregion
@@ -476,7 +449,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-        /// <remarks></remarks>
         public static clsPHRPParser GetParser(string inputFilePath, string datasetName, clsPHRPReader.PeptideHitResultTypes peptideHitResultType,
             bool loadModsAndSeqInfo)
         {
@@ -529,7 +501,6 @@ namespace PHRPReader
         /// <summary>
         /// List of header names for the PHRP synopsis or first hits file for the given tool
         /// </summary>
-        /// <returns></returns>
         protected abstract List<string> GetColumnHeaderNames();
 
         /// <summary>
@@ -538,7 +509,7 @@ namespace PHRPReader
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         public bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm)
         {
             return ParsePHRPDataLine(line, linesRead, out psm, fastReadMode: false);
@@ -551,7 +522,7 @@ namespace PHRPReader
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
         public abstract bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode);
 
@@ -561,8 +532,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="searchEngineParamFileName">Name of the parameter file to parse (must reside in InputDirectoryPath)</param>
         /// <param name="searchEngineParams">Search engine parameters class (output)</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public abstract bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams);
 
         #endregion
@@ -601,7 +571,6 @@ namespace PHRPReader
         /// <summary>
         /// Clear any cached error messages
         /// </summary>
-        /// <remarks></remarks>
         public void ClearErrors()
         {
             ErrorMessages.Clear();
@@ -610,7 +579,6 @@ namespace PHRPReader
         /// <summary>
         /// Clear any cached warning messages
         /// </summary>
-        /// <remarks></remarks>
         public void ClearWarnings()
         {
             WarningMessages.Clear();
@@ -648,8 +616,7 @@ namespace PHRPReader
         /// For example, -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q
         /// </summary>
         /// <param name="sequenceWithMods"></param>
-        /// <returns></returns>
-        /// <remarks>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</remarks>
+        /// <returns>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</returns>
         private SortedList<int, udtAmbiguousModInfo> ExtractAmbiguousMods(string sequenceWithMods)
         {
             if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out _, out _))
@@ -977,8 +944,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="value"></param>
         /// <param name="digitsOfPrecision"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>Formatted number</returns>
         public static string NumToStringPlusMinus(double value, int digitsOfPrecision)
         {
             var formatString = "+0;-0";
@@ -1002,7 +968,6 @@ namespace PHRPReader
         /// Parse the column names in splitLine and update the local column header mapping
         /// </summary>
         /// <param name="splitLine"></param>
-        /// <remarks></remarks>
         public void ParseColumnHeaders(string[] splitLine)
         {
             clsPHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
@@ -1070,7 +1035,7 @@ namespace PHRPReader
         /// <param name="searchEngineParamFileName">Search engine parameter file name (must exist in InputDirectoryPath)</param>
         /// <param name="peptideHitResultType">PeptideHitResultType (only important if reading a ModA parameter file</param>
         /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         protected bool ReadKeyValuePairSearchEngineParamFile(
             string searchEngineName,
             string searchEngineParamFileName,
@@ -1104,7 +1069,7 @@ namespace PHRPReader
         /// <param name="searchEngineParams">SearchEngineParams container class (must be initialized by the calling function)</param>
         /// <param name="errorMessage">Output: error message</param>
         /// <param name="warningMessage">Output: warning message</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         public static bool ReadKeyValuePairSearchEngineParamFile(
             string searchEngineName,
             string paramFilePath,
@@ -1190,7 +1155,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="peptideHitResultType"></param>
         /// <param name="searchEngineParams"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         protected bool ReadSearchEngineVersion(
             clsPHRPReader.PeptideHitResultTypes peptideHitResultType,
             clsSearchEngineParameters searchEngineParams)
@@ -1453,8 +1418,7 @@ namespace PHRPReader
         /// Also updates SeqID
         /// </summary>
         /// <param name="currentPSM"></param>
-        /// <returns>True if success, False if currentPSM.ResultID is not found in mResultToSeqMap</returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, False if currentPSM.ResultID is not found in mResultToSeqMap</returns>
         protected bool UpdatePSMUsingSeqInfo(clsPSM currentPSM)
         {
             if (ResultToSeqMap == null || ResultToSeqMap.Count == 0)

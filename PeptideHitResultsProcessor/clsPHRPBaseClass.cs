@@ -35,7 +35,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
             FileDate = "October 25, 2020";
@@ -280,7 +279,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Create protein mods file
         /// </summary>
-        /// <returns></returns>
         /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
         public bool CreateProteinModsFile { get; set; }
 
@@ -301,7 +299,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Inspect synopsis file p-value threshold
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Lower p-values are higher confidence results</remarks>
         public float InspectSynopsisFilePValueThreshold { get; set; }
 
@@ -312,42 +309,36 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Used by clsMODaResultsProcessor and clsMODPlusResultsProcessor
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Higher probability are higher confidence results</remarks>
         public float MODaMODPlusSynopsisFileProbabilityThreshold { get; set; }
 
         /// <summary>
         /// Used by MSAlign and TopPIC
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Lower p-values are higher confidence results</remarks>
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
         /// Used by clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Lower E-values are higher confidence results</remarks>
         public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
 
         /// <summary>
         /// clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
         public float MSGFPlusSynopsisFileSpecEValueThreshold { get; set; }
 
         /// <summary>
         /// Typical non-zero value is 17.0027387
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Ignored if equal to 0</remarks>
         public double PeptideCTerminusMassChange { get; set; }
 
         /// <summary>
-        ///  typical non-zero value is 1.0078246
+        /// Typical non-zero value is 1.0078246
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Ignored if equal to 0</remarks>
         public double PeptideNTerminusMassChange { get; set; }
 
@@ -361,7 +352,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Search tool parameter file path
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Used by clsInSpecTResultsProcessor and clsMSGFPlusResultsProcessor (aka SearchEngineParamFileName)</remarks>
         public string SearchToolParameterFilePath { get; set; }
 
@@ -594,7 +584,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="inputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         protected bool CleanupFilePaths(ref string inputFilePath, ref string outputDirectoryPath)
         {
 
@@ -667,8 +657,6 @@ namespace PeptideHitResultsProcessor
         /// Collapses a list of strings to a tab-delimited line of text
         /// </summary>
         /// <param name="fields"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         protected string CollapseList(List<string> fields)
         {
             return string.Join("\t", fields);
@@ -678,7 +666,6 @@ namespace PeptideHitResultsProcessor
         /// Examine the extension on filePath to determine the file format
         /// </summary>
         /// <param name="filePath"></param>
-        /// <returns></returns>
         public static PeptideHitResultsFileFormatConstants DetermineResultsFileFormat(string filePath)
         {
 
@@ -925,8 +912,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="sourcePHRPDataFiles"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         protected bool CreatePepToProteinMapFile(List<string> sourcePHRPDataFiles, string mtsPepToProteinMapFilePath)
         {
             var success = false;
@@ -1119,8 +1104,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="phrpDataFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool CreateProteinModDetailsFile(string phrpDataFilePath, string outputDirectoryPath)
         {
             var success = false;
@@ -1415,7 +1398,6 @@ namespace PeptideHitResultsProcessor
         /// Otherwise, updates value to String.Empty
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
-        /// <remarks></remarks>
         protected bool GetColumnValue(string[] splitLine, int columnIndex, out string value)
         {
             return GetColumnValue(splitLine, columnIndex, out value, string.Empty);
@@ -1426,7 +1408,6 @@ namespace PeptideHitResultsProcessor
         /// Otherwise, updates value to 0
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
-        /// <remarks></remarks>
         protected bool GetColumnValue(string[] splitLine, int columnIndex, out int value)
         {
             return GetColumnValue(splitLine, columnIndex, out value, 0);
@@ -1437,7 +1418,6 @@ namespace PeptideHitResultsProcessor
         /// Otherwise, updates value to valueIfMissing
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
-        /// <remarks></remarks>
         protected bool GetColumnValue(string[] splitLine, int columnIndex, out string value, string valueIfMissing)
         {
             if (columnIndex >= 0 && columnIndex < splitLine.Length)
@@ -1455,7 +1435,6 @@ namespace PeptideHitResultsProcessor
         /// Otherwise, updates value to valueIfMissing
         /// </summary>
         /// <returns>True if columnIndex >= 0</returns>
-        /// <remarks></remarks>
         protected bool GetColumnValue(string[] splitLine, int columnIndex, out int value, int valueIfMissing)
         {
             if (GetColumnValue(splitLine, columnIndex, out var valueText, valueIfMissing.ToString()))
@@ -1476,7 +1455,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Get the error message, or an empty string if no error
         /// </summary>
-        /// <returns></returns>
         protected string GetErrorMessage()
         {
             string message;
@@ -1814,8 +1792,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="pepToProteinMapFilePath">File to read</param>
         /// <param name="pepToProteinMapping">Output parameter: peptide to protein mapping (calling function must pre-initialize the list)</param>
         /// <param name="headerLine">Output parameter: Header line text</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         protected bool LoadPeptideToProteinMapInfo(
             string pepToProteinMapFilePath,
             List<udtPepToProteinMappingType> pepToProteinMapping,
@@ -1924,13 +1901,13 @@ namespace PeptideHitResultsProcessor
         public abstract bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath);
 
         /// <summary>
-        /// Appends newSuffix to the base name of the original file, then returns a full path to the file using the directory associated with originalFilePath
+        /// Appends newSuffix to the base name of the original file, then returns the full path
         /// Note that newSuffix may contain a file extension though it does not have to
         /// If newSuffix does not contain an extension, the path returned will end in the same extension as originalFilePath
         /// </summary>
         /// <param name="originalFile"></param>
         /// <param name="newSuffix"></param>
-        /// <returns></returns>
+        /// <returns>Full path to the file using the directory associated with originalFilePath</returns>
         protected string ReplaceFilenameSuffix(FileInfo originalFile, string newSuffix)
         {
             // Keep track of the original extension on originalFilePath
@@ -2216,12 +2193,12 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// If valueText is 0.0, returns 0
-        /// If otherwise returns valueText
+        /// If resultID is 0 or 1, returns valueText
+        /// Otherwise, if valueText is 0.0, returns 0
+        /// Otherwise, returns valueText
         /// </summary>
         /// <param name="resultID"></param>
         /// <param name="valueText"></param>
-        /// <returns></returns>
         protected string TrimZeroIfNotFirstID(int resultID, string valueText)
         {
             return resultID > 1 ? TrimZero(valueText) : valueText;
@@ -2229,10 +2206,9 @@ namespace PeptideHitResultsProcessor
 
         /// <summary>
         /// If valueText is 0.0, returns 0
-        /// If otherwise returns valueText
+        /// Otherwise, returns valueText
         /// </summary>
         /// <param name="valueText"></param>
-        /// <returns></returns>
         private string TrimZero(string valueText)
         {
             return valueText.Equals("0.0") ? "0" : valueText;
@@ -2242,8 +2218,6 @@ namespace PeptideHitResultsProcessor
         /// Return the text up to (but not including) the first space in proteinNameAndDescription
         /// </summary>
         /// <param name="proteinNameAndDescription"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         protected virtual string TruncateProteinName(string proteinNameAndDescription)
         {
             var index = proteinNameAndDescription.IndexOf(' ');
@@ -2295,7 +2269,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="fileDescription">File description, e.g. Synopsis</param>
         /// <param name="errorMessage"></param>
         /// <returns>True if the file has data; otherwise false</returns>
-        /// <remarks></remarks>
         public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage)
         {
             const int numericDataColIndex = 0;
@@ -2310,7 +2283,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="errorMessage"></param>
         /// <param name="numericDataColIndex">Index of the numeric data column; use -1 to simply look for any text in the file</param>
         /// <returns>True if the file has data; otherwise false</returns>
-        /// <remarks></remarks>
         public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage, int numericDataColIndex)
         {
 

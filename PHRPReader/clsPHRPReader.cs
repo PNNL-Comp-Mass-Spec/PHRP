@@ -175,25 +175,17 @@ namespace PHRPReader
         /// <summary>
         /// Returns True if the input file was successfully opened and data remains to be read
         /// </summary>
-        /// <value></value>
         /// <returns>True if the file is readable</returns>
-        /// <remarks></remarks>
         public bool CanRead { get; private set; }
 
         /// <summary>
         /// Returns the most recently loaded PSM
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public clsPSM CurrentPSM => mPSMCurrent;
 
         /// <summary>
         /// Returns the most recently loaded PSM's sequence info (if available)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public clsSeqInfo CurrentPSMSeqInfo
         {
             get
@@ -211,41 +203,27 @@ namespace PHRPReader
         /// <summary>
         /// Dataset name (auto-determined based on the input filename)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string DatasetName { get; private set; }
 
         /// <summary>
         /// If True, will display messages at the console
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool EchoMessagesToConsole { get; set; }
 
         /// <summary>
         /// Cached error messages
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public List<string> ErrorMessages { get; }
 
         /// <summary>
         /// Current error message
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string ErrorMessage { get; private set; } = string.Empty;
 
         /// <summary>
         /// Used to enable fast read mode when calling MoveNext
         /// When FastReadMode is True, you should call FinalizeCurrentPSM after calling MoveNext to populate the remaining fields if the peptide is a peptide of interest
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Once FastReadMode is enabled it cannot be turned off (this is a safety measure due to how data is cached)</remarks>
         public bool FastReadMode
         {
@@ -263,33 +241,21 @@ namespace PHRPReader
         /// If True, looks for and loads the modification definitions from the _ModSummary.txt file associated with the input file
         /// Also reads the SeqInfo and related files
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool LoadModsAndSeqInfo => mStartupOptions.LoadModsAndSeqInfo;
 
         /// <summary>
         /// If true, loads the MSGF SpecProb values from the _MSGF.txt file associated with the input file
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool LoadMSGFResults => mStartupOptions.LoadMSGFResults;
 
         /// <summary>
         /// If True, loads the MASIC _ScanStats.txt file
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool LoadScanStatsData => mStartupOptions.LoadScanStatsData;
 
         /// <summary>
         /// The maximum number of proteins that will be tracked for each PSM
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int MaxProteinsPerPSM
         {
             get => mStartupOptions.MaxProteinsPerPSM;
@@ -299,17 +265,11 @@ namespace PHRPReader
         /// <summary>
         /// Returns True if the ModSummary file was successfully loaded
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool ModSummaryFileLoaded { get; private set; }
 
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFPlus (aka MS-GF+)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public PeptideHitResultTypes PeptideHitResultType
         {
             get
@@ -321,9 +281,6 @@ namespace PHRPReader
         /// <summary>
         /// Returns a number between 0 and 100 indicating the percentage of the source file that has been read
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public float PercentComplete
         {
             get
@@ -335,17 +292,11 @@ namespace PHRPReader
         /// <summary>
         /// Returns the PHRP Parser object
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public clsPHRPParser PHRPParser { get; private set; }
 
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public SortedList<int, int> ResultToSeqMap
         {
             get
@@ -357,9 +308,6 @@ namespace PHRPReader
         /// <summary>
         /// Returns the cached sequence info, where key is SeqID
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public SortedList<int, clsSeqInfo> SeqInfo
         {
             get
@@ -371,9 +319,6 @@ namespace PHRPReader
         /// <summary>
         /// Returns the cached sequence to protein map information
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public SortedList<int, List<clsProteinInfo>> SeqToProteinMap
         {
             get
@@ -385,17 +330,11 @@ namespace PHRPReader
         /// <summary>
         /// When True, skips near-duplicate lines in the PHRP data file (lines with the same peptide in the same scan, but different protein names)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool SkipDuplicatePSMs { get; set; }
 
         /// <summary>
         /// Cached warning messages
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public List<string> WarningMessages { get; }
 
         #endregion
@@ -414,10 +353,10 @@ namespace PHRPReader
         /// Constructor where the PeptideHit result type is explicitly set
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
-        /// <param name="eResultType">Source file PeptideHit result type</param>
+        /// <param name="resultType">Source file PeptideHit result type</param>
         /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
-        public clsPHRPReader(string inputFilePath, PeptideHitResultTypes eResultType)
-            : this(inputFilePath, eResultType, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
+        public clsPHRPReader(string inputFilePath, PeptideHitResultTypes resultType)
+            : this(inputFilePath, resultType, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
         }
 
@@ -427,7 +366,6 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
@@ -440,7 +378,6 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
-        /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
             : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
         {
@@ -451,7 +388,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="startupOptions">Startup options</param>
-        /// <remarks></remarks>
         public clsPHRPReader(string inputFilePath, clsPHRPStartupOptions startupOptions)
             : this(inputFilePath, PeptideHitResultTypes.Unknown, startupOptions)
         {
@@ -532,8 +468,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="basePHRPFileName"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private static string AutoSwitchToFHTIfRequired(string filePath, string basePHRPFileName)
         {
             if (string.IsNullOrEmpty(basePHRPFileName))
@@ -572,8 +506,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="basePHRPFileName"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public static string AutoSwitchToLegacyMSGFDBIfRequired(string filePath, string basePHRPFileName)
         {
             var basePHRPFile = new FileInfo(basePHRPFileName);
@@ -602,7 +534,6 @@ namespace PHRPReader
         /// <summary>
         /// Clear any cached error messages
         /// </summary>
-        /// <remarks></remarks>
         public void ClearErrors()
         {
             ErrorMessages.Clear();
@@ -636,7 +567,6 @@ namespace PHRPReader
         /// <summary>
         /// Clear any cached warning messages
         /// </summary>
-        /// <remarks></remarks>
         public void ClearWarnings()
         {
             WarningMessages.Clear();
@@ -957,7 +887,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
-        /// <remarks></remarks>
         public static string AutoDetermineBestInputFile(string inputDirectoryPath)
         {
             return AutoDetermineBestInputFile(inputDirectoryPath, out _);
@@ -1072,7 +1001,6 @@ namespace PHRPReader
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="datasetName">Dataset name</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
-        /// <remarks></remarks>
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, string datasetName)
         {
             return AutoDetermineBestInputFile(inputDirectoryPath, datasetName, out _);
@@ -1346,8 +1274,6 @@ namespace PHRPReader
         /// Determine the PeptideHit result type given the input file path
         /// </summary>
         /// <param name="filePath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public static PeptideHitResultTypes AutoDetermineResultType(string filePath)
         {
             const string LEGACY_MSGFPLUS_SUFFIX_SYN = "_msgfdb_syn.txt";
@@ -1463,7 +1389,7 @@ namespace PHRPReader
         /// <param name="peptide"></param>
         /// <param name="peptideWithNumericMods">Peptide with numeric mods (output)</param>
         /// <param name="peptideMods">List of modified amino acids (output)</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>peptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
         private bool ConvertModsToNumericMods(string peptide,
             out string peptideWithNumericMods,
@@ -1638,7 +1564,6 @@ namespace PHRPReader
         /// <param name="inputDirectoryPath">Input directory (can be an empty string if inputFileName is a full path)</param>
         /// <param name="inputFileName">Name or path of the input file, e.g. Dataset_msgfplus_syn.txt or Dataset_syn.txt</param>
         /// <param name="modSummaryFileNamePreferred">Output: preferred mod summary filename (based on whether a _syn.txt or _fht.txt file is present)</param>
-        /// <returns></returns>
         public static string FindModSummaryFile(
             PeptideHitResultTypes peptideHitResultType,
             string datasetName,
@@ -1762,8 +1687,6 @@ namespace PHRPReader
         /// Determines the collision mode using the Scan Type name
         /// </summary>
         /// <param name="scanTypeName"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private string GetCollisionMode(string scanTypeName)
         {
             // Typical scan types, along with DMS usage count as of 4/26/2012
@@ -1829,8 +1752,6 @@ namespace PHRPReader
         /// Returns the filename of the MSGF file that corresponds to synopsisOrFirstHitsFileName
         /// </summary>
         /// <param name="synopsisOrFirstHitsFileName">Filename (or full path) to the synopsis or first-hits file</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public static string GetMSGFFileName(string synopsisOrFirstHitsFileName)
         {
             return Path.GetFileNameWithoutExtension(synopsisOrFirstHitsFileName) + MSGF_RESULT_FILENAME_SUFFIX;
@@ -1840,8 +1761,6 @@ namespace PHRPReader
         /// Get the peptide hit result type for the given result type name
         /// </summary>
         /// <param name="ResultTypeName"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public static PeptideHitResultTypes GetPeptideHitResultType(string ResultTypeName)
         {
             switch (ResultTypeName.ToLower())
@@ -1881,8 +1800,6 @@ namespace PHRPReader
         /// <summary>
         /// Get the list of auxiliary file suffixes
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public static List<string> GetPHRPAuxiliaryFileSuffixes()
         {
             var auxSuffixes = new List<string>
@@ -2159,7 +2076,6 @@ namespace PHRPReader
         /// Returns true if the character is a letter between A and Z or a and z
         /// </summary>
         /// <param name="chChar">Character to examine</param>
-        /// <returns></returns>
         /// <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
         public static bool IsLetterAtoZ(char chChar)
         {
@@ -2214,7 +2130,6 @@ namespace PHRPReader
         /// <param name="columnName"></param>
         /// <param name="columnHeaders"></param>
         /// <returns>Column index, or -1 if not found</returns>
-        /// <remarks></remarks>
         public static int LookupColumnIndex(string columnName, SortedDictionary<string, int> columnHeaders)
         {
             if (columnHeaders.TryGetValue(columnName, out var colIndex))
@@ -2234,7 +2149,6 @@ namespace PHRPReader
         /// <param name="columnEnum"></param>
         /// <param name="columnHeaders"></param>
         /// <returns>Column index, or -1 if not found</returns>
-        /// <remarks></remarks>
         public static int LookupColumnIndex(Enum columnEnum, SortedDictionary<Enum, int> columnHeaders)
         {
             if (columnHeaders.TryGetValue(columnEnum, out var colIndex))
@@ -2252,7 +2166,6 @@ namespace PHRPReader
         /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
-        /// <remarks></remarks>
         public static string LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders)
         {
             return LookupColumnValue(dataColumns, columnName, columnHeaders, string.Empty);
@@ -2262,7 +2175,6 @@ namespace PHRPReader
         /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The text in the specified column; valueIfMissing if the specific column name is not recognized</returns>
-        /// <remarks></remarks>
         public static string LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders, string valueIfMissing)
         {
             if (dataColumns != null)
@@ -2282,7 +2194,6 @@ namespace PHRPReader
         /// Returns the string stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The text in the specified column; valueIfMissing if the specific column name is not recognized</returns>
-        /// <remarks></remarks>
         public static string LookupColumnValue(string[] dataColumns, Enum columnEnum, SortedDictionary<Enum, int> columnHeaders, string valueIfMissing)
         {
             if (dataColumns != null)
@@ -2302,7 +2213,6 @@ namespace PHRPReader
         /// Returns the value stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
-        /// <remarks></remarks>
         public static int LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders, int valueIfMissing)
         {
             var valueText = LookupColumnValue(dataColumns, columnName, columnHeaders, valueIfMissing.ToString());
@@ -2316,7 +2226,6 @@ namespace PHRPReader
         /// Returns the value stored in the given named column (using columnHeaders to dereference column name with column index)
         /// </summary>
         /// <returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
-        /// <remarks></remarks>
         public static double LookupColumnValue(string[] dataColumns, string columnName, SortedDictionary<string, int> columnHeaders, double valueIfMissing)
         {
             var valueText = LookupColumnValue(dataColumns, columnName, columnHeaders, valueIfMissing.ToString(CultureInfo.InvariantCulture));
@@ -2650,7 +2559,6 @@ namespace PHRPReader
         /// When FastReadMode is True, first call MoveNext to read the peptide scores.
         /// Then, if the peptide is a peptide of interest, call this function to finalize any processing steps that were skipped.
         /// </summary>
-        /// <remarks></remarks>
         public void FinalizeCurrentPSM()
         {
             if (mPSMCurrentFinalized)

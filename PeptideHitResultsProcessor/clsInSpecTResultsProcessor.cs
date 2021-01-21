@@ -277,7 +277,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="searchResultsCurrentScan"></param>
         /// <param name="currentScanResultsCount"></param>
-        /// <remarks></remarks>
         private void AssignRankAndDeltaNormValues(ref udtInspectSearchResultType[] searchResultsCurrentScan, int currentScanResultsCount)
         {
             const float DeltaNormMQScore_If_Undefined = 0;
@@ -405,9 +404,8 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
         /// <param name="inspectModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
-        /// <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <param name="filteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
+        /// <returns>True if successful, false if an error</returns>
         private bool CreateFHTorSYNResultsFile(
             string inputFilePath,
             string outputFilePath,
@@ -598,7 +596,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="precursorMZText"></param>
         /// <param name="precursorErrorText"></param>
         /// <param name="chargeText"></param>
-        /// <returns></returns>
         private double ComputePeptideMHFromPrecursorInfo(string precursorMZText, string precursorErrorText, string chargeText)
         {
 
@@ -810,8 +807,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inspectModInfo"></param>
         /// <param name="pepToProteinMapping"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool LoadPeptideToProteinMapInfoInspect(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
@@ -928,7 +924,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="outputDirectoryPath"></param>
         /// <param name="pepToProteinMapping"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
         private bool ParseInspectSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
@@ -1152,7 +1148,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
         /// <param name="resultsProcessed"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseInspectResultsFileEntry(
             string lineIn,
             IReadOnlyList<udtModInfoType> inspectModInfo,
@@ -1294,7 +1290,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="searchResult"></param>
         /// <param name="errorLog"></param>
         /// <param name="peptideSequenceWithMods"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseInspectSynFileEntry(
             string lineIn,
             IDictionary<clsPHRPParserInspect.InspectSynFileColumns, int> columnMapping,
@@ -1442,7 +1438,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath">Inspect results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var mtsPepToProteinMapFilePath = string.Empty;
@@ -1603,7 +1599,6 @@ namespace PeptideHitResultsProcessor
         /// If value ends in .0000, remove the .0000 portion
         /// </summary>
         /// <param name="value"></param>
-        /// <returns></returns>
         private string RemoveExtraneousDigits(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -1640,8 +1635,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="peptide"></param>
         /// <param name="inspectModInfo">This function assumes that each entry in inspectModInfo has both .ModName and .ModSymbol defined</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private string ReplaceInspectModTextWithSymbol(string peptide, IReadOnlyList<udtModInfoType> inspectModInfo)
         {
             var prefix = string.Empty;

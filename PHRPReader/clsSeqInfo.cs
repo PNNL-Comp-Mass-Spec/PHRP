@@ -16,39 +16,26 @@ namespace PHRPReader
         /// <summary>
         /// Sequence ID
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int SeqID { get; }
 
         /// <summary>
         /// Number of modifications
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int ModCount { get; }
 
         /// <summary>
         /// Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string ModDescription { get; }
 
         /// <summary>
         /// Theoretical, monoisotopic mass (including the modified residues)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public double MonoisotopicMass { get; private set; }
 
         /// <summary>
         /// Constructor using Sequence ID and mass
         /// </summary>
-        /// <remarks></remarks>
         public clsSeqInfo(int seqID, double monoisotopicMass) : this(seqID, monoisotopicMass, 0, string.Empty)
         {
         }
@@ -60,7 +47,6 @@ namespace PHRPReader
         /// <param name="monoisotopicMass">Theoretical, monoisotopic mass (including the modified residues)</param>
         /// <param name="modCount">Number of modifications</param>
         /// <param name="modDescription">Comma-separated list of modifications, for example "itrac:1,Phosph:3,IodoAcet:15"</param>
-        /// <remarks></remarks>
         public clsSeqInfo(int seqID, double monoisotopicMass, int modCount, string modDescription)
         {
             SeqID = seqID;
@@ -74,7 +60,6 @@ namespace PHRPReader
         /// Update the monoisotopic mass for this sequence
         /// </summary>
         /// <param name="monoMass"></param>
-        /// <remarks></remarks>
         public void UpdateMonoisotopicMass(double monoMass)
         {
             MonoisotopicMass = monoMass;

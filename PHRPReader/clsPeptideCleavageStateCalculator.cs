@@ -212,7 +212,6 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <remarks></remarks>
         public clsPeptideCleavageStateCalculator()
         {
             mTerminusSymbols = new SortedSet<char> {
@@ -238,7 +237,6 @@ namespace PHRPReader
         /// Determines the cleavage state of the specified peptide
         /// </summary>
         /// <param name="sequenceWithPrefixAndSuffix"></param>
-        /// <returns></returns>
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
         public PeptideCleavageStateConstants ComputeCleavageState(string sequenceWithPrefixAndSuffix)
         {
@@ -256,7 +254,6 @@ namespace PHRPReader
         /// <param name="cleanSequence"></param>
         /// <param name="prefixResidues"></param>
         /// <param name="suffixResidues"></param>
-        /// <returns></returns>
         /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
         public PeptideCleavageStateConstants ComputeCleavageState(string cleanSequence, string prefixResidues, string suffixResidues)
         {
@@ -336,7 +333,6 @@ namespace PHRPReader
         /// Count the number of missed cleavages in the peptide
         /// </summary>
         /// <param name="sequenceWithPrefixAndSuffix"></param>
-        /// <returns></returns>
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
         public short ComputeNumberOfMissedCleavages(string sequenceWithPrefixAndSuffix)
         {
@@ -374,7 +370,6 @@ namespace PHRPReader
         /// Determine the terminus state of the peptide
         /// </summary>
         /// <param name="sequenceWithPrefixAndSuffix"></param>
-        /// <returns></returns>
         /// <remarks>Peptide must have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
         public PeptideTerminusStateConstants ComputeTerminusState(string sequenceWithPrefixAndSuffix)
         {
@@ -391,7 +386,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="prefix"></param>
         /// <param name="suffix"></param>
-        /// <returns></returns>
         /// <remarks>For example, if the peptide is -.PEPTIDE.G, pass prefix="-" and suffix="G"</remarks>
         public PeptideTerminusStateConstants ComputeTerminusState(char prefix, char suffix)
         {
@@ -431,7 +425,6 @@ namespace PHRPReader
         /// <param name="cleanSequence"></param>
         /// <param name="prefixResidues"></param>
         /// <param name="suffixResidues"></param>
-        /// <returns></returns>
         /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
         public PeptideTerminusStateConstants ComputeTerminusState(string cleanSequence, string prefixResidues, string suffixResidues)
         {
@@ -465,7 +458,6 @@ namespace PHRPReader
         /// <param name="sequenceWithMods"></param>
         /// <param name="checkForPrefixAndSuffixResidues"></param>
         /// <returns>Clean peptide sequence</returns>
-        /// <remarks></remarks>
         public static string ExtractCleanSequenceFromSequenceWithMods(string sequenceWithMods, bool checkForPrefixAndSuffixResidues)
         {
             if (sequenceWithMods == null)
@@ -534,8 +526,6 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default enzyme RegEx match specifications
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public static udtEnzymeMatchSpecType GetDefaultEnzymeMatchSpec()
         {
             var udtEnzymeMatchSpec = default(udtEnzymeMatchSpecType);
@@ -581,7 +571,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="leftResidueRegEx"></param>
         /// <param name="rightResidueRegEx"></param>
-        /// <remarks></remarks>
         public void SetEnzymeMatchSpec(string leftResidueRegEx, string rightResidueRegEx)
         {
             if (leftResidueRegEx != null && rightResidueRegEx != null)
@@ -622,7 +611,6 @@ namespace PHRPReader
         /// Select a standard enzyme match rule
         /// </summary>
         /// <param name="standardCleavageAgent"></param>
-        /// <remarks></remarks>
         public void SetStandardEnzymeMatchSpec(StandardCleavageAgentConstants standardCleavageAgent)
         {
             switch (standardCleavageAgent)
@@ -788,7 +776,6 @@ namespace PHRPReader
         /// <param name="chLeftChar"></param>
         /// <param name="chRightChar"></param>
         /// <returns>True if the characters match the currently defined cleavage rule</returns>
-        /// <remarks></remarks>
         public bool TestCleavageRule(char chLeftChar, char chRightChar)
         {
             if (mUsingStandardTrypsinRules)

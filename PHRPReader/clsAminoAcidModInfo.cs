@@ -68,17 +68,11 @@
         /// <summary>
         /// True if the location of the modification is ambiguous
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool AmbiguousMod => EndResidueLocInPeptide > ResidueLocInPeptide;
 
         /// <summary>
         /// For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, whill be the same as ResidueLocInPeptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int EndResidueLocInPeptide { get; }
 
         /// <summary>
@@ -94,8 +88,6 @@
         /// <summary>
         /// Indicates the residue number modified; the first residue is at position 1
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>For ambiguous mods, indicates the first residue on which the mod could appear</remarks>
         public int ResidueLocInPeptide { get; }
 

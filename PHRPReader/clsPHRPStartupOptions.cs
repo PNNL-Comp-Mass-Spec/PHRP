@@ -24,8 +24,6 @@
         /// <summary>
         /// Maximum number of proteins to associate with each PSM
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Set to 0 to load all proteins</remarks>
         public int MaxProteinsPerPSM { get; set; }
 
@@ -33,9 +31,6 @@
         /// Use this to override the default peptide mass calculator class;
         /// this is useful if custom amino acids are in use
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public clsPeptideMassCalculator PeptideMassCalculator { get; set; }
 
         /// <summary>

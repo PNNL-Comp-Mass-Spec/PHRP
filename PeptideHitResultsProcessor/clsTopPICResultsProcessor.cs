@@ -50,7 +50,7 @@ namespace PeptideHitResultsProcessor
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
         /// <summary>
-        /// Regex to match mods in square brackets, examples:
+        /// RegEx to match mods in square brackets, examples:
         /// [11.94403]
         /// [15.98154]
         /// [-109.08458]
@@ -190,7 +190,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <remarks></remarks>
         private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
@@ -390,7 +389,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="searchResults"></param>
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
-        /// <remarks></remarks>
         private void AssignRankAndDeltaNormValues(
             IList<udtTopPICSearchResultType> searchResults,
             int startIndex,
@@ -455,7 +453,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="peptide">Sequence with mods, which can be either numeric or named ([15.98154] or [Acetyl])</param>
         /// <param name="totalModMass"></param>
-        /// <returns></returns>
+        /// <returns>Mass of the peptide plus totalModMass</returns>
         private double ComputePeptideMass(string peptide, double totalModMass)
         {
             var cleanSequence = GetCleanSequence(peptide);
@@ -476,8 +474,6 @@ namespace PeptideHitResultsProcessor
         /// Computes the total of all modification masses defined for the peptide
         /// </summary>
         /// <param name="peptide">Peptide sequence, with mod masses in the form [23.5432] or [Acetyl]</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private double ComputeTotalModMass(string peptide)
         {
             double totalModMass = 0;
@@ -515,8 +511,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath)
@@ -611,7 +605,7 @@ namespace PeptideHitResultsProcessor
                         startIndex = endIndex + 1;
                     }
 
-                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    // Sort the data in filteredSearchResults then write out to disk
                     SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                 }
 
@@ -716,7 +710,7 @@ namespace PeptideHitResultsProcessor
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-            // Note that TopPIC synopsis files are normally sorted on PValue value, ascending
+            // Note that TopPIC synopsis files are normally sorted on PValue, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique PValue encountered
             // Although this was a possibility with Inspect, it likely never occurs for TopPIC
@@ -926,7 +920,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileEntry(
             string lineIn,
             ref udtTopPICSearchResultType udtSearchResult,
@@ -1122,11 +1116,11 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse the header line of a TopPIC results file
+        /// Parse the header line of a TopPIC results file, populating columnMapping
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileHeaderLine(string lineIn, IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
             // Header prior to November 2018:
@@ -1202,11 +1196,11 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse the header line of a TopPIC _syn.txt file
+        /// Parse the header line of a TopPIC _syn.txt file, populating columnMapping
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int> columnMapping)
         {
             var columnNames = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs();
@@ -1249,7 +1243,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
         /// <param name="peptideSequenceWithMods"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICSynFileEntry(
             string lineIn,
             clsSearchResultsTopPIC searchResult,
@@ -1411,7 +1405,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath">TopPIC results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
@@ -1670,7 +1664,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
-        /// <remarks></remarks>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

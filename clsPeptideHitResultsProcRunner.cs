@@ -76,7 +76,6 @@ namespace PeptideHitResultsProcRunner
         /// <summary>
         /// Create Protein Mods Using PHRP Data File
         /// </summary>
-        /// <returns></returns>
         /// <remarks>
         /// Setting this to true assumes the input file is a valid PHRP data file
         /// Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
@@ -109,7 +108,6 @@ namespace PeptideHitResultsProcRunner
         /// <summary>
         /// Use Existing MTS PepToProtein Map File
         /// </summary>
-        /// <returns></returns>
         /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
 
@@ -337,7 +335,7 @@ namespace PeptideHitResultsProcRunner
         /// <param name="outputDirectoryPath"></param>
         /// <param name="parameterFilePath"></param>
         /// <param name="resetErrorCode"></param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath, bool resetErrorCode)
         {
 
@@ -418,7 +416,6 @@ namespace PeptideHitResultsProcRunner
         /// <param name="sourceDirectoryPath">Path to the directory containing the input file</param>
         /// <param name="fileNameOrPath">File to find (either filename or full file path)</param>
         /// <returns>The path to the file if found, or fileNameOrPath if not found</returns>
-        /// <remarks></remarks>
         protected string ResolveFilePath(string sourceDirectoryPath, string fileNameOrPath)
         {
             if (File.Exists(fileNameOrPath))

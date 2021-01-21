@@ -150,7 +150,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <remarks></remarks>
         private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
@@ -305,7 +304,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="searchResults"></param>
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
-        /// <remarks></remarks>
         private void AssignRankAndDeltaNormValues(
             IList<udtMODPlusSearchResultType> searchResults,
             int startIndex,
@@ -388,8 +386,6 @@ namespace PeptideHitResultsProcessor
         /// Computes the total of all modification masses defined for the peptide
         /// </summary>
         /// <param name="peptide">Peptide sequence, with mod masses in the form +53.8 or -23</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private double ComputeTotalModMass(string peptide)
         {
             double totalModMass = 0;
@@ -472,8 +468,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath)
@@ -596,7 +591,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="modPlusParamFilePath"></param>
         /// <param name="modInfo"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>
         /// We don't care about the dynamic mods because there are so many possible mods.
         /// We'll add each dynamic mod as we encounter it in the results
@@ -680,8 +675,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMODPlusSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
@@ -865,8 +859,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMODPlusResultsFileEntry(
             string lineIn,
             ref udtMODPlusSearchResultType udtSearchResult,
@@ -1034,7 +1027,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
-        /// <remarks></remarks>
         private bool ParseMODPlusResultsFileHeaderLine(string lineIn, IDictionary<MODPlusResultsFileColumns, int> columnMapping)
         {
             // The expected column order from MODPlus:
@@ -1123,7 +1115,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMODPlusSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMODPlus.MODPlusSynFileColumns, int> columnMapping)
         {
             var columnNames = clsPHRPParserMODPlus.GetColumnHeaderNamesAndIDs();
@@ -1290,7 +1282,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath">MODPlus results file (Dataset_MODPlus.id.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
@@ -1693,7 +1685,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="proteinName"></param>
         /// <param name="peptidePosition"></param>
         /// <param name="errorLog"></param>
-        /// <remarks></remarks>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

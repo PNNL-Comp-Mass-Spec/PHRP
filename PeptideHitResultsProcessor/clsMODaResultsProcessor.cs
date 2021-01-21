@@ -138,7 +138,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <remarks></remarks>
         private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
@@ -293,7 +292,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="searchResults"></param>
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
-        /// <remarks></remarks>
         private void AssignRankAndDeltaNormValues(
             IList<udtMODaSearchResultType> searchResults,
             int startIndex,
@@ -358,8 +356,6 @@ namespace PeptideHitResultsProcessor
         /// Computes the total of all modification masses defined for the peptide
         /// </summary>
         /// <param name="peptide">Peptide sequence, with mod masses in the form +53.8 or -23</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private double ComputeTotalModMass(string peptide)
         {
             double totalModMass = 0;
@@ -442,8 +438,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath)
@@ -561,8 +556,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="modaParamFilePath"></param>
         /// <param name="modInfo"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool ExtractModInfoFromMODaParamFile(string modaParamFilePath, out List<clsModificationDefinition> modInfo)
         {
             var success = false;
@@ -773,7 +767,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="outputDirectoryPath"></param>
         /// <param name="pepToProteinMapping"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
         private bool ParseMODaSynopsisFile(
             string inputFilePath,
@@ -993,7 +987,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaResultsFileEntry(
             string lineIn,
             ref udtMODaSearchResultType udtSearchResult,
@@ -1137,7 +1131,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
-        /// <remarks></remarks>
         private bool ParseMODaResultsFileHeaderLine(string lineIn, IDictionary<MODaResultsFileColumns, int> columnMapping)
         {
             // The expected column order from MODa:
@@ -1223,7 +1216,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMODa.MODaSynFileColumns, int> columnMapping)
         {
             var columnNames = clsPHRPParserMODa.GetColumnHeaderNamesAndIDs();
@@ -1266,7 +1259,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
         /// <param name="peptideSequenceWithMods"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaSynFileEntry(
             string lineIn,
             clsSearchResultsMODa searchResult,
@@ -1398,7 +1391,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath">MODa results file (Dataset_moda.id.txt)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
@@ -1767,7 +1760,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
-        /// <remarks></remarks>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

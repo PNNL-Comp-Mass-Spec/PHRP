@@ -62,8 +62,6 @@ namespace PHRPReader
         /// Returns the mass value associated with the given mass correction tag
         /// </summary>
         /// <param name="massCorrectionTag"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string GetModificationMassAsText(string massCorrectionTag)
         {
             if (mModDefMassesAsText.TryGetValue(massCorrectionTag, out var modMass))

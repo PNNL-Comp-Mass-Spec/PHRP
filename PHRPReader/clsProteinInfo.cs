@@ -47,7 +47,6 @@
         /// <param name="seqID"></param>
         /// <param name="cleavageState"></param>
         /// <param name="terminusState"></param>
-        /// <remarks></remarks>
         public clsProteinInfo(
             string proteinName,
             int seqID,
@@ -122,7 +121,6 @@
         /// <summary>
         /// Protein name
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             return ProteinName;

@@ -161,7 +161,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <remarks></remarks>
         private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
@@ -345,7 +344,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="searchResults"></param>
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
-        /// <remarks></remarks>
         private void AssignRankAndDeltaNormValues(
             IList<udtMSAlignSearchResultType> searchResults,
             int startIndex,
@@ -428,8 +426,6 @@ namespace PeptideHitResultsProcessor
         /// Computes the total of all modification masses defined for the peptide
         /// </summary>
         /// <param name="peptide">Peptide sequence, with mod masses in the form [23.5432]</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private double ComputeTotalModMass(string peptide)
         {
             double totalModMass = 0;
@@ -462,8 +458,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath)
@@ -1073,11 +1068,11 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse the header line of a MSAlign results file
+        /// Parse the header line of a MSAlign results file, populating columnMapping
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMSAlignResultsFileHeaderLine(string lineIn, IDictionary<MSAlignResultsFileColumns, int> columnMapping)
         {
             // The expected header from MSAlign v0.5 is:
@@ -1152,11 +1147,11 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse the header line of a MSAlign _syn.txt file
+        /// Parse the header line of a MSAlign _syn.txt file, populating columnMapping
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMSAlignSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int> columnMapping)
         {
             var columnNames = clsPHRPParserMSAlign.GetColumnHeaderNamesAndIDs();
@@ -1344,7 +1339,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath">MSAlign results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
@@ -1455,7 +1450,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFile"></param>
         /// <param name="synOutputFilePath"></param>
         /// <param name="outputDirectoryPath"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool CreateProteinModsFileWork(string baseName, FileInfo inputFile, string synOutputFilePath, string outputDirectoryPath)
         {
             bool success;
@@ -1666,7 +1661,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="udtSearchResult"></param>
         /// <param name="includeSpeciesAndFragMethod"></param>
         /// <param name="errorLog"></param>
-        /// <remarks></remarks>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

@@ -11,7 +11,6 @@ namespace PHRPReader
         /// Elements in the empirical formula
         /// Keys are element symbols, values are element counts
         /// </summary>
-        /// <returns></returns>
         public Dictionary<string, int> ElementCounts { get; }
 
         /// <summary>
@@ -101,7 +100,6 @@ namespace PHRPReader
         /// <summary>
         /// String representation of the empirical formula
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             if (ElementCounts.Count == 0)

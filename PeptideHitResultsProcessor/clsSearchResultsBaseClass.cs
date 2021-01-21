@@ -34,7 +34,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Mass difference, in Da, between ^12C and ^13C
         /// </summary>
-        /// <remarks></remarks>
         public const double MASS_C13 = 1.00335483;
         #endregion
 
@@ -45,19 +44,16 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Residue or residues before the start of the peptide sequence
         /// </summary>
-        /// <remarks></remarks>
         private string mPeptidePreResidues;
 
         /// <summary>
         /// Residue or residues after the end of the peptide sequence
         /// </summary>
-        /// <remarks></remarks>
         private string mPeptidePostResidues;
 
         /// <summary>
         /// Peptide sequence without any modification symbols
         /// </summary>
-        /// <remarks></remarks>
         private string mPeptideCleanSequence;
 
         private clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants mPeptideCleavageState;
@@ -65,19 +61,16 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Terminus state of the peptide
         /// </summary>
-        /// <remarks></remarks>
         private clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants mPeptideTerminusState;
 
         /// <summary>
         /// List of modifications present in the current peptide
         /// </summary>
-        /// <remarks></remarks>
         private readonly List<clsAminoAcidModInfo> mSearchResultModifications;
 
         /// <summary>
         /// Possible modifications that the peptide could have
         /// </summary>
-        /// <remarks></remarks>
         private readonly clsPeptideModificationContainer mPeptideMods;
 
         private readonly clsPeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
@@ -91,88 +84,56 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Most recent error message
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string ErrorMessage => mErrorMessage;
 
         /// <summary>
         /// RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MSGFDB, and MODa
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int ResultID { get; set; }
 
         /// <summary>
         /// Group ID assigned by XTandem
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int GroupID { get; set; }
 
         /// <summary>
         /// Scan number
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string Scan { get; set; }
 
         /// <summary>
         /// Charge state
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string Charge { get; set; }
 
         /// <summary>
         /// Observed precursor m/z value converted to M+H
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string ParentIonMH { get; set; }
 
         /// <summary>
         /// Multiple protein count: 0 if the peptide is only in 1 protein; 1 if the protein is in 2 proteins, etc.
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string MultipleProteinCount { get; set; }
 
         /// <summary>
         /// First protein for this PSM
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string ProteinName { get; set; }
 
         /// <summary>
         /// Typically only used by XTandem; actually holds the Log of the expectation value
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string ProteinExpectationValue { get; set; }
 
         /// <summary>
         /// Typically only used by XTandem; actually holds the Log of the intensity
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string ProteinIntensity { get; set; }
 
         /// <summary>
         /// Number of the first residue of a protein; typically always 1
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Initialized to 0 (unknown) then later changed 1 when ProteinSeqResidueNumberEnd is defined </remarks>
         public int ProteinSeqResidueNumberStart { get; set; }
 
@@ -180,32 +141,22 @@ namespace PeptideHitResultsProcessor
         /// The residue number of the last residue in the protein's sequence
         /// For example, 100 if the protein has 100 residues total
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>>Initialized to 0 (unknown)</remarks>
         public int ProteinSeqResidueNumberEnd { get; set; }
 
         /// <summary>
         /// Position in the protein's residues of the first residue in the peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int PeptideLocInProteinStart { get; set; }
 
         /// <summary>
         /// Position in the protein's residues of the last residue in the peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int PeptideLocInProteinEnd { get; set; }
 
         /// <summary>
-        ///  Residue or residues before the start of the peptide sequence
+        /// Residue or residues before the start of the peptide sequence
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
         public string PeptidePreResidues
         {
@@ -222,8 +173,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Residue or residues after the end of the peptide sequence
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
         public string PeptidePostResidues
         {
@@ -240,8 +189,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Peptide sequence without any modification symbols
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Calls ComputePeptideCleavageStateInProtein</remarks>
         public string PeptideCleanSequence
         {
@@ -256,25 +203,17 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Peptide sequence with modification symbols
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Mod symbols are single characters, like *, #, @, etc.</remarks>
         public string PeptideSequenceWithMods { get; set; }
 
         /// <summary>
         /// Cleavage state of the peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants PeptideCleavageState => mPeptideCleavageState;
 
         /// <summary>
         /// Terminus state of the peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants PeptideTerminusState => mPeptideTerminusState;
 
         /// <summary>
@@ -282,9 +221,6 @@ namespace PeptideHitResultsProcessor
         /// In Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, this is a monoisotopic mass
         /// In Inspect, MS-GF+, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string PeptideMH { get; set; }
 
         /// <summary>
@@ -293,9 +229,6 @@ namespace PeptideHitResultsProcessor
         /// In XTandem, Inspect, MS-GF+, and MSAlign the DelM value is listed as Observed - Theoretical,
         /// however, PHRP negates that value while reading the synopsis file to match Sequest
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string PeptideDeltaMass { get; set; }
 
         /// <summary>
@@ -311,17 +244,11 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Theoretical (computed) monoisotopic mass for a given peptide sequence, including any modified residues
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public double PeptideMonoisotopicMass { get; set; }
 
         /// <summary>
         /// Number of peptide residue modifications (dynamic or static)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int SearchResultModificationCount => mSearchResultModifications.Count;
 
         #endregion
@@ -331,7 +258,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="peptideMods"></param>
         /// <param name="peptideSeqMassCalculator"></param>
-        /// <remarks></remarks>
         protected clsSearchResultsBaseClass(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
         {
             mSearchResultModifications = new List<clsAminoAcidModInfo>();
@@ -350,7 +276,6 @@ namespace PeptideHitResultsProcessor
         /// Add the modification symbols for the current peptide to the clean sequence
         /// </summary>
         /// <returns>Sequence with mod symbols</returns>
-        /// <remarks></remarks>
         public string AddSearchResultModificationsToCleanSequence()
         {
             // Initialize sequenceWithMods to the clean sequence; we'll insert the mod symbols below if mSearchResultModifications.Count > 0
@@ -384,7 +309,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Update .PeptideSequenceWithMods and .PeptideModDescription using the modifications defined for this peptide
         /// </summary>
-        /// <remarks></remarks>
         public void ApplyModificationInformation()
         {
             PeptideSequenceWithMods = AddSearchResultModificationsToCleanSequence();
@@ -394,7 +318,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Clear all values
         /// </summary>
-        /// <remarks></remarks>
         public virtual void Clear()
         {
             ResultID = 0;
@@ -418,7 +341,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Clear cached peptide information
         /// </summary>
-        /// <remarks></remarks>
         public void ClearPeptideDetailsInfo()
         {
             PeptideLocInProteinStart = 0;
@@ -444,7 +366,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Clear the Protein sequence start residue and end residue values (ProteinSeqResidueNumberStart and ProteinSeqResidueNumberEnd)
         /// </summary>
-        /// <remarks></remarks>
         public void ClearProteinSequenceInfo()
         {
             ProteinSeqResidueNumberStart = 0;
@@ -454,7 +375,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Clear the modifications for this peptide
         /// </summary>
-        /// <remarks></remarks>
         public void ClearSearchResultModifications()
         {
             mSearchResultModifications.Clear();
@@ -466,9 +386,8 @@ namespace PeptideHitResultsProcessor
         /// <param name="delM">Delta mass, in Da</param>
         /// <param name="precursorMonoMass">Precursor monoisotopic mass</param>
         /// <param name="adjustPrecursorMassForC13">True to correct for C13 isotopic selection errors</param>
-        /// <param name="peptideMonoisotopicMass"></param>
+        /// <param name="peptideMonoisotopicMass">Peptide's monoisotopic mass</param>
         /// <returns>Delta mass, in ppm</returns>
-        /// <remarks></remarks>
         public static double ComputeDelMCorrectedPPM(
             double delM,
             double precursorMonoMass,
@@ -517,7 +436,6 @@ namespace PeptideHitResultsProcessor
         /// Computes the theoretical monoisotopic mass for the given peptide
         /// Also updates mPeptideDeltaMassCorrectedPpm
         /// </summary>
-        /// <remarks></remarks>
         public void ComputeMonoisotopicMass()
         {
             var modifiedResidues = new List<clsPeptideMassCalculator.udtPeptideSequenceModInfoType>();
@@ -542,7 +460,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Update PeptideCleavageState and PeptideTerminusState based on PeptideCleanSequence, PeptidePreResidues and PeptidePostResidues
         /// </summary>
-        /// <remarks></remarks>
         public void ComputePeptideCleavageStateInProtein()
         {
             // Determine the peptide's terminus state and cleavage state within the protein
@@ -554,8 +471,6 @@ namespace PeptideHitResultsProcessor
         /// Determine the terminus state for the given residue in the peptide
         /// </summary>
         /// <param name="residueLocInPeptide">Residue number (1-based)</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public clsAminoAcidModInfo.ResidueTerminusStateConstants DetermineResidueTerminusState(int residueLocInPeptide)
         {
             var residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
@@ -608,8 +523,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="residueLocInPeptide"></param>
         /// <param name="modificationMass"></param>
         /// <param name="chAffectedAtom"></param>
-        /// <returns></returns>
-        /// <remarks>Returns True if index is valid; otherwise, returns false</remarks>
+        /// <returns>True if index is valid; otherwise, returns false</returns>
         public bool GetSearchResultModDetailsByIndex(
             int index,
             out char residue,
@@ -639,7 +553,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="index">Modification entry index (0-based)</param>
         /// <returns>Modification info details if a valid index, otherwise nothing</returns>
-        /// <remarks></remarks>
         public clsAminoAcidModInfo GetSearchResultModDetailsByIndex(int index)
         {
             if (index >= 0 && index < mSearchResultModifications.Count)
@@ -658,15 +571,13 @@ namespace PeptideHitResultsProcessor
 
         /// <summary>
         /// Associates the given modification symbol with the given residue
-        /// Returns false if the modification symbol is unknown
         /// </summary>
         /// <param name="modificationSymbol"></param>
         /// <param name="chTargetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if the modification symbol is unknown</returns>
         public bool SearchResultAddDynamicModification(
             char modificationSymbol,
             char chTargetResidue,
@@ -716,7 +627,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <returns>True if mod successfully added</returns>
-        /// <remarks></remarks>
         public bool SearchResultAddModification(
             double modificationMass,
             char chTargetResidue,
@@ -738,7 +648,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="updateModOccurrenceCounts"></param>
         /// <param name="modMassDigitsOfPrecision">Digits of precision to use when comparing modificationMass to the masses of known mods</param>
         /// <returns>True if mod successfully added</returns>
-        /// <remarks></remarks>
         public bool SearchResultAddModification(
             double modificationMass,
             char chTargetResidue,
@@ -783,8 +692,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public bool SearchResultAddModification(
             clsModificationDefinition modificationDefinition,
             char chTargetResidue,
@@ -818,8 +726,7 @@ namespace PeptideHitResultsProcessor
         /// Adds any defined isotopic modifications to the peptide
         /// </summary>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public bool SearchResultAddIsotopicModifications(bool updateModOccurrenceCounts)
         {
             var success = false;
@@ -974,7 +881,6 @@ namespace PeptideHitResultsProcessor
         /// Updates the N-Terminal mass applied to peptides when computing their mass if it is significantly different than the currently defined N-terminal peptide mass
         /// </summary>
         /// <param name="nTerminalMassChange"></param>
-        /// <remarks></remarks>
         public void UpdatePeptideNTerminusMass(double nTerminalMassChange)
         {
             if (Math.Round(Math.Abs(nTerminalMassChange - mPeptideSeqMassCalculator.PeptideNTerminusMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) > 0)
@@ -987,7 +893,6 @@ namespace PeptideHitResultsProcessor
         /// Updates the C-Terminal mass applied to peptides when computing their mass if significantly different than the currently defined C-terminal peptide mass
         /// </summary>
         /// <param name="cTerminalMassChange"></param>
-        /// <remarks></remarks>
         public void UpdatePeptideCTerminusMass(double cTerminalMassChange)
         {
             if (Math.Round(Math.Abs(cTerminalMassChange - mPeptideSeqMassCalculator.PeptideCTerminusMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) > 0)
@@ -1016,7 +921,7 @@ namespace PeptideHitResultsProcessor
         /// Obtain the peptide sequence
         /// </summary>
         /// <param name="returnSequenceWithMods">When true, include the mod symbols in the sequence</param>
-        /// <returns></returns>
+        /// <returns>Peptide, with prefix and suffix letters, e.g. K.PEPTIDER.S</returns>
         /// <remarks>
         /// If you want to guarantee that mod symbols are included in the peptide sequence,
         /// You must call ApplyModificationInformation before using this function
@@ -1099,7 +1004,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="sequenceWithMods"></param>
         /// <param name="checkForPrefixAndSuffixResidues"></param>
         /// <param name="autoPopulateCleanSequence">When true, populates PeptideCleanSequence, which automatically calls ComputePeptideCleavageStateInProtein</param>
-        /// <remarks></remarks>
         public void SetPeptideSequenceWithMods(string sequenceWithMods, bool checkForPrefixAndSuffixResidues, bool autoPopulateCleanSequence)
         {
             // Sequence with mods, but without the prefix or suffix residues
@@ -1201,8 +1105,6 @@ namespace PeptideHitResultsProcessor
             /// </summary>
             /// <param name="x"></param>
             /// <param name="y"></param>
-            /// <returns></returns>
-            /// <remarks></remarks>
             public int Compare(clsAminoAcidModInfo x, clsAminoAcidModInfo y)
             {
                 if (x == null)

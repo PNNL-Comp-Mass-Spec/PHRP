@@ -223,13 +223,11 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Peptide search tool parameter file name
         /// </summary>
-        /// <returns></returns>
         public virtual string ParameterFileName { get; set; }
 
         /// <summary>
         /// XML settings file with section PeptideHitResultsProcessorOptions
         /// </summary>
-        /// <returns></returns>
         public virtual string SettingsFileName { get; set; }
 
         public virtual bool CreateInspectSynopsisFile { get; set; }
@@ -281,13 +279,11 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Starts the spectra file creation process
         /// </summary>
-        /// <returns></returns>
         public abstract ProcessStatus Start();
 
         /// <summary>
         /// Aborts spectra file creation
         /// </summary>
-        /// <returns></returns>
         public abstract ProcessStatus Abort();
 
         #endregion

@@ -56,37 +56,31 @@ namespace PHRPReader
             /// <summary>
             /// Unknown mod type on a residue; essentially treated as a dynamic mod
             /// </summary>
-            /// <remarks></remarks>
             UnknownType = 0,
 
             /// <summary>
             /// Dynamic mod on a residue or peptide terminus; supported by Sequest and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
             /// </summary>
-            /// <remarks></remarks>
             DynamicMod = 1,
 
             /// <summary>
             /// Static mod on a residue or peptide terminus; supported by Sequest but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
             /// </summary>
-            /// <remarks></remarks>
             StaticMod = 2,
 
             /// <summary>
             /// Peptide terminus static mod (DMS Symbol is T); used by Sequest and MSGFDB; note that terminal mods are always dynamic in X!Tandem
             /// </summary>
-            /// <remarks></remarks>
             TerminalPeptideStaticMod = 3,
 
             /// <summary>
             /// Isotopic mod, e.g. N15, or C13; supported by Sequest; most likely not supported by XTandem
             /// </summary>
-            /// <remarks></remarks>
             IsotopicMod = 4,
 
             /// <summary>
             /// Protein terminus static mod; supported by Sequest; this mod is also supported by X!Tandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
             /// </summary>
-            /// <remarks></remarks>
             ProteinTerminusStaticMod = 5
         }
 
@@ -131,8 +125,6 @@ namespace PHRPReader
         /// <summary>
         /// One letter symbol for this modification
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>
         /// Use NO_SYMBOL_MODIFICATION_SYMBOL (a dash) if no symbol
         /// (necessary for isotopic mods or protein terminus static mods)
@@ -156,9 +148,6 @@ namespace PHRPReader
         /// <summary>
         /// Monoisotopic modification mass
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public double ModificationMass
         {
             get => mModificationMass;
@@ -172,16 +161,12 @@ namespace PHRPReader
         /// <summary>
         /// Modification mass, stored as text
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Represents the original string value read from the data file</remarks>
         public string ModificationMassAsText { get; set; }
 
         /// <summary>
         /// Residues that this modification can apply to
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>
         /// If an empty string, the modification can apply to any residue or terminus;
         /// Otherwise, should contain a space-free, comma-free list of one letter amino acid residue symbols that this mod can apply to.
@@ -207,16 +192,11 @@ namespace PHRPReader
         /// <summary>
         /// Modification type
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public ModificationTypeConstants ModificationType { get; set; }
 
         /// <summary>
         /// Modification name, for example Phosph, IodoAcet, Plus1Oxy, or Methyl
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Maximum length is 8 characters; cannot contain a colon, comma, or space</remarks>
         public string MassCorrectionTag
         {
@@ -237,8 +217,6 @@ namespace PHRPReader
         /// <summary>
         /// Only used with Isotopic modifications, indicating the atom affected (e.g. C, H, N, O, or S)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>
         /// Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL (a dash) for positional modifications
         /// (including terminus modifications)
@@ -262,17 +240,11 @@ namespace PHRPReader
         /// <summary>
         /// Number of times this modification was observed in the given dataset
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int OccurrenceCount { get; set; }
 
         /// <summary>
         /// True if this was an unknown mass that was auto defined
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool UnknownModAutoDefined { get; set; }
 
         #endregion
@@ -358,7 +330,6 @@ namespace PHRPReader
         /// <summary>
         /// Initialize the modification definition
         /// </summary>
-        /// <remarks></remarks>
         public void Clear()
         {
             mModificationSymbol = NO_SYMBOL_MODIFICATION_SYMBOL;
@@ -377,7 +348,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
-        /// <remarks></remarks>
         public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition b)
         {
             return EquivalentMassTypeTagAndAtom(this, b);
@@ -389,7 +359,6 @@ namespace PHRPReader
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
-        /// <remarks></remarks>
         public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition a, clsModificationDefinition b)
         {
             var equivalent =
@@ -406,7 +375,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
-        /// <remarks></remarks>
         public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition b)
         {
             return EquivalentMassTypeTagAtomAndResidues(this, b);
@@ -418,7 +386,6 @@ namespace PHRPReader
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
-        /// <remarks></remarks>
         public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition a, clsModificationDefinition b)
         {
             // First compare a to b but ignore .ModificationSymbol and .AffectedResidues
@@ -467,7 +434,6 @@ namespace PHRPReader
         /// <param name="residues2"></param>
         /// <param name="allowResidues2ToBeSubsetOfResidues1"></param>
         /// <returns>True if they contain the same residues</returns>
-        /// <remarks></remarks>
         public static bool EquivalentTargetResidues(string residues1, string residues2, bool allowResidues2ToBeSubsetOfResidues1)
         {
             var equivalent = false;
@@ -519,10 +485,8 @@ namespace PHRPReader
 
         /// <summary>
         /// Returns True if this modification can affect the peptide or protein terminus
-        /// Note that some modifications can affect either peptide termini or internal residues
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <remarks>Note that some modifications can affect either peptide termini or internal residues</remarks>
         public bool CanAffectPeptideOrProteinTerminus()
         {
             var terminalSymbols = GetTerminalSymbols();
@@ -545,8 +509,6 @@ namespace PHRPReader
         /// <summary>
         /// Returns true if this modification can affect peptide residues
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public bool CanAffectPeptideResidues()
         {
             var terminalSymbols = GetTerminalSymbols();
@@ -575,8 +537,6 @@ namespace PHRPReader
         /// <summary>
         /// Retrieve the protein and peptide terminus symbols
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public static SortedSet<char> GetTerminalSymbols()
         {
             var terminalSymbols = new SortedSet<char>
@@ -594,8 +554,6 @@ namespace PHRPReader
         /// Retrieve the modification type for the given modification type symbol
         /// </summary>
         /// <param name="modificationTypeSymbol">D, S, T, I, or P</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public static ModificationTypeConstants ModificationSymbolToModificationType(char modificationTypeSymbol)
         {
             if (modificationTypeSymbol == default(char))
@@ -649,8 +607,7 @@ namespace PHRPReader
         /// Check whether the target residues contain the given residue
         /// </summary>
         /// <param name="chComparisonResidue"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public bool TargetResiduesContain(char chComparisonResidue)
         {
             if (chComparisonResidue == default(char))
@@ -664,7 +621,6 @@ namespace PHRPReader
         /// <summary>
         /// Description of this modification definition
         /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             return string.Format("{0} {1}, {2:F4}; {3}", ModificationType, MassCorrectionTag, ModificationMass, TargetResidues);

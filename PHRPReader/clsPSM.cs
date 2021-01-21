@@ -55,8 +55,6 @@ namespace PHRPReader
         /// <summary>
         /// Returns a dictionary with additional search engine scores stored as key/value pairs
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Update scores using SetScore</remarks>
         // ReSharper disable once UnusedMember.Global
         public IReadOnlyDictionary<string, string> AdditionalScores => mAdditionalScores;
@@ -64,16 +62,11 @@ namespace PHRPReader
         /// <summary>
         /// Assumed charge of the spectrum in which this peptide was identified
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public short Charge { get; set; }
 
         /// <summary>
         /// Peptide cleavage state (with regards to ProteinFirst)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>
         /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
         /// </remarks>
@@ -83,9 +76,6 @@ namespace PHRPReader
         /// Collision mode (CID, ETD, HCD)
         /// PepXML allows this to be CID, ETD, ECD, ETD/CID, or HCD
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string CollisionMode { get; set; }
 
         /// <summary>
@@ -110,40 +100,27 @@ namespace PHRPReader
         /// <summary>
         /// Elution time (in minutes) of the spectrum
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public float ElutionTimeMinutes { get; set; }
 
         /// <summary>
         /// Mass difference, in daltons, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string MassErrorDa { get; set; }
 
         /// <summary>
         /// Mass difference, in ppm, between the monoisotopic mass of the precursor ion and the calculated (theoretical) monoisotopic mass of the peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string MassErrorPPM { get; set; }
 
         /// <summary>
         /// List of modified residues
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>A given residue is allowed to have more than one modification</remarks>
         public List<clsAminoAcidModInfo> ModifiedResidues { get; }
 
         /// <summary>
         /// MSGF Spectral E-Value associated with this peptide (aka SpecEValue or SpecProb)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>
         /// Ranges from 0 to 1, where 0 is the best score and 1 is the worse score
         /// Stored as a string to preserve formatting
@@ -153,8 +130,6 @@ namespace PHRPReader
         /// <summary>
         /// MSGF Spectral E-Value associated with this peptide (aka SpecEValue or SpecProb)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>
         /// Ranges from 0 to 1, where 0 is the best score and 1 is the worse score
         /// Stored as a string to preserve formatting
@@ -169,8 +144,6 @@ namespace PHRPReader
         /// <summary>
         /// Number of missed cleavages (internal K or R)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>
         /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
         /// </remarks>
@@ -179,8 +152,6 @@ namespace PHRPReader
         /// <summary>
         /// Number of tryptic termini (or similar if not using trypsin)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>
         /// 2 means fully tryptic, 1 means partially tryptic, 0 means non-tryptic
         /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
@@ -192,25 +163,17 @@ namespace PHRPReader
         /// Peptide sequence, with or without prefix and suffix residues; may contain mod symbols
         /// Example, R.AAS*PQDLAGGYTSSLACHR.A
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string Peptide { get; private set; }
 
         /// <summary>
         /// Peptide residues without any modification symbols or flanking residues
         /// For example, AASPQDLAGGYTSSLACHR
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string PeptideCleanSequence { get; private set; }
 
         /// <summary>
         /// Computed monoisotopic mass (uncharged, theoretical mass, including mods)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>This mass is computed by PHRP using the PrecursorNeutralMass plus any modification masses associated with the peptide's residues</remarks>
         public double PeptideMonoisotopicMass { get; set; }
 
@@ -218,9 +181,6 @@ namespace PHRPReader
         /// Peptide sequence where all modified residues have the modification masses displayed as numeric values
         /// For example, R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public string PeptideWithNumericMods
         {
             get => mPeptideWithNumericMods;
@@ -240,8 +200,6 @@ namespace PHRPReader
         /// <summary>
         /// First protein associated with this peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Retrieve full list of proteins using the Proteins property</remarks>
         // ReSharper disable once UnusedMember.Global
         public string ProteinFirst
@@ -255,17 +213,12 @@ namespace PHRPReader
         /// <summary>
         /// Uncharged monoisotopic mass of the precursor (observed mass based on m/z and charge)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>This mass is based on the mass or m/z value reported by the search engine</remarks>
         public double PrecursorNeutralMass { get; set; }
 
         /// <summary>
         /// List of proteins associated with this peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public IReadOnlyList<string> Proteins => mProteins;
 
         /// <summary>
@@ -276,26 +229,17 @@ namespace PHRPReader
         /// <summary>
         /// ResultID of this peptide (typically assigned by the search engine)
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int ResultID { get; set; }
 
         /// <summary>
         /// List of scans that were combined prior to identifying this peptide
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public SortedSet<int> ScanList { get; }
 
         /// <summary>
         /// Scan number of the mass spectrum in which this peptide was identified
         /// Will automatically update ScanList if it does not yet contain this scan number
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int ScanNumber
         {
             get => mScanNumber;
@@ -324,8 +268,6 @@ namespace PHRPReader
         /// <summary>
         /// Rank of this peptide in the given spectrum
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
         /// <remarks>Top scoring peptide is rank 1, next lowest score is rank 2, etc.</remarks>
         public int ScoreRank { get; set; }
 
@@ -333,9 +275,6 @@ namespace PHRPReader
         /// Sequence ID value assigned by PHRP
         /// Required for looking up information from the SeqInfo files
         /// </summary>
-        /// <value></value>
-        /// <returns></returns>
-        /// <remarks></remarks>
         public int SeqID { get; set; }
 
         #endregion
@@ -343,7 +282,6 @@ namespace PHRPReader
         /// <summary>
         /// Constructor; auto-calls Clear()
         /// </summary>
-        /// <remarks></remarks>
         public clsPSM()
         {
             ScanList = new SortedSet<int>();
@@ -370,7 +308,6 @@ namespace PHRPReader
         /// Add the details for a modified residue
         /// </summary>
         /// <param name="modInfo">Modification info class</param>
-        /// <remarks></remarks>
         public void AddModifiedResidue(clsAminoAcidModInfo modInfo)
         {
             ModifiedResidues.Add(modInfo);
@@ -383,7 +320,6 @@ namespace PHRPReader
         /// <param name="residueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
         /// <param name="residueTerminusState">Terminus state of residue</param>
         /// <param name="modDefinition">Modification details</param>
-        /// <remarks></remarks>
         public void AddModifiedResidue(
             char residue,
             int residueLocInPeptide,
@@ -401,7 +337,6 @@ namespace PHRPReader
         /// <param name="residueTerminusState">Terminus state of residue</param>
         /// <param name="modDefinition">Modification details</param>
         /// <param name="endResidueLocInPeptide">For ambiguous mods, the residue number of the last residue that could have this modification</param>
-        /// <remarks></remarks>
         public void AddModifiedResidue(
             char residue,
             int residueLocInPeptide,
@@ -464,7 +399,6 @@ namespace PHRPReader
         /// <summary>
         /// Reset the peptide to default values (and empty strings)
         /// </summary>
-        /// <remarks></remarks>
         public void Clear()
         {
             mDataLineText = string.Empty;
@@ -511,8 +445,6 @@ namespace PHRPReader
         /// <summary>
         /// Duplicate this PSM object and return a new one
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
         public clsPSM Clone()
         {
@@ -603,7 +535,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise 0</returns>
-        /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
         public double GetScoreDbl(string scoreName)
         {
@@ -616,7 +547,6 @@ namespace PHRPReader
         /// <param name="scoreName">Score name</param>
         /// <param name="valueIfMissing">Value to return if the score is not defined</param>
         /// <returns>Score if defined, otherwise valueIfMissing</returns>
-        /// <remarks></remarks>
         public double GetScoreDbl(string scoreName, double valueIfMissing)
         {
             var scoreValue = GetScore(scoreName);
@@ -633,7 +563,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise 0</returns>
-        /// <remarks></remarks>
         // ReSharper disable once UnusedMember.Global
         public int GetScoreInt(string scoreName)
         {
@@ -646,7 +575,6 @@ namespace PHRPReader
         /// <param name="scoreName">Score name</param>
         /// <param name="valueIfMissing">Value to return if the score is not defined</param>
         /// <returns>Score if defined, otherwise valueIfMissing</returns>
-        /// <remarks></remarks>
         public int GetScoreInt(string scoreName, int valueIfMissing)
         {
             var scoreValue = GetScore(scoreName);
@@ -686,7 +614,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="peptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
         /// <param name="cleavageStateCalculator">Cleavage state calculator object</param>
-        /// <remarks></remarks>
         public void SetPeptide(string peptide, clsPeptideCleavageStateCalculator cleavageStateCalculator)
         {
             SetPeptide(peptide);
@@ -698,7 +625,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="scoreName"></param>
         /// <param name="scoreValue"></param>
-        /// <remarks></remarks>
         public void SetScore(string scoreName, string scoreValue)
         {
             if (mAdditionalScores.ContainsKey(scoreName))
@@ -717,7 +643,6 @@ namespace PHRPReader
         /// <param name="scoreName"></param>
         /// <param name="scoreValue"></param>
         /// <returns>True if the score is defined, otherwise false</returns>
-        /// <remarks></remarks>
         public bool TryGetScore(string scoreName, out string scoreValue)
         {
             scoreValue = string.Empty;
@@ -728,7 +653,6 @@ namespace PHRPReader
         /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic termini based on the peptide sequence
         /// </summary>
         /// <param name="cleavageStateCalculator"></param>
-        /// <remarks></remarks>
         public void UpdateCleavageInfo(clsPeptideCleavageStateCalculator cleavageStateCalculator)
         {
             NumMissedCleavages = cleavageStateCalculator.ComputeNumberOfMissedCleavages(Peptide);

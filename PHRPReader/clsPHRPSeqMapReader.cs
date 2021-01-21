@@ -92,8 +92,7 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputDirectoryPath">Input file path</param>
         /// <param name="peptideHitResultType">Peptide Hit result type</param>
-        /// <remarks></remarks>
-        public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.PeptideHitResultTypes peptideHitResultType) 
+        public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.PeptideHitResultTypes peptideHitResultType)
             : this(datasetName, inputDirectoryPath, peptideHitResultType, clsPHRPReader.GetPHRPSynopsisFileName(peptideHitResultType, datasetName))
         {
         }
@@ -105,7 +104,6 @@ namespace PHRPReader
         /// <param name="inputDirectoryPath">Input file path</param>
         /// <param name="peptideHitResultType">Peptide Hit result type</param>
         /// <param name="phrpDataFileName">The base PHRP data file name; used when calling AutoSwitchToLegacyMSGFDBIfRequired and AutoSwitchToFHTIfRequired</param>
-        /// <remarks></remarks>
         public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.PeptideHitResultTypes peptideHitResultType, string phrpDataFileName)
         {
             DatasetName = datasetName;
@@ -170,7 +168,6 @@ namespace PHRPReader
         /// <param name="resultToSeqMapFilename">ResultToSeqMap filename</param>
         /// <param name="seqToProteinMapFilename"></param>
         /// <param name="seqInfoFilename">SeqInfo filename</param>
-        /// <remarks></remarks>
         public clsPHRPSeqMapReader(string inputDirectoryPath, string resultToSeqMapFilename, string seqToProteinMapFilename, string seqInfoFilename)
         {
             InputDirectoryPath = inputDirectoryPath;
@@ -207,8 +204,7 @@ namespace PHRPReader
         /// <param name="resultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
         /// <param name="seqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
         /// <param name="seqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
-        /// <returns>True if success, false if an error</returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public bool GetProteinMapping(
             SortedList<int, int> resultToSeqMap,
             SortedList<int, List<clsProteinInfo>> seqToProteinMap,
@@ -225,8 +221,7 @@ namespace PHRPReader
         /// <param name="seqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
         /// <param name="seqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
         /// <param name="pepToProteinMap">PepToProteinMap list (output); keys are clean peptide sequences (no mods), Values are Protein name and residue start/end locations for the peptide</param>
-        /// <returns>True if success, false if an error</returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public bool GetProteinMapping(
             SortedList<int, int> resultToSeqMap,
             SortedList<int, List<clsProteinInfo>> seqToProteinMap,
@@ -323,7 +318,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="pepToProteinMap">Peptide to protein mapping</param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>The PepToProtMap file contains Residue_Start and Residue_End columns</remarks>
         private bool LoadPepToProtMapData(string filePath, IDictionary<string, clsPepToProteinMapInfo> pepToProteinMap)
         {
@@ -404,8 +399,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="resultToSeqMap">Result to sequence mapping</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool LoadResultToSeqMapping(string filePath, IDictionary<int, int> resultToSeqMap)
         {
 
@@ -454,8 +448,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="seqInfo">Sequences</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private void LoadSeqInfo(string filePath, IDictionary<int, clsSeqInfo> seqInfo)
         {
 
@@ -527,8 +519,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="seqToProteinMap">Sequence to protein map</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool LoadSeqToProteinMapping(string filePath, IDictionary<int, List<clsProteinInfo>> seqToProteinMap)
         {
             var headerLineParsed = false;

@@ -128,8 +128,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Initializes m_PeptideHitResultsProcessor then starts a separate thread to process the file
         /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
         protected virtual ProcessStatus ProcessPeptideHitResultsFile()
         {
             try
@@ -247,7 +245,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Initializes module variables and verifies that mandatory parameters have been properly specified
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         protected virtual bool InitSetup()
         {
             // Output directory name

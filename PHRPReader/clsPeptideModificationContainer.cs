@@ -136,7 +136,6 @@ namespace PHRPReader
         /// <param name="modificationDefinition"></param>
         /// <param name="useNextAvailableModificationSymbol"></param>
         /// <returns>The index of the newly added modification, or the index of the modification that modificationDefinition matches </returns>
-        /// <remarks></remarks>
         private int AddModification(clsModificationDefinition modificationDefinition, bool useNextAvailableModificationSymbol)
         {
             int modificationIndex;
@@ -304,8 +303,6 @@ namespace PHRPReader
         /// The name will always start with + or - then will have the modification mass, rounded as necessary to give an 8 character name
         /// </summary>
         /// <param name="modificationMass"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private string GenerateGenericModMassName(double modificationMass)
         {
             int formatDigits;
@@ -392,7 +389,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modificationMass"></param>
         /// <returns>The mass correction tag name if a match, otherwise nothing</returns>
-        /// <remarks></remarks>
         private string GetBestIntegerBasedMassCorrectionTag(double modificationMass)
         {
             var closestMassCorrectionTag = string.Empty;
@@ -413,7 +409,6 @@ namespace PHRPReader
         /// Get a modification, by index
         /// </summary>
         /// <param name="index"></param>
-        /// <returns></returns>
         public clsModificationDefinition GetModificationByIndex(int index)
         {
             if (index >= 0 && index < Modifications.Count)
@@ -428,7 +423,6 @@ namespace PHRPReader
         /// Get the modification type, by modification index
         /// </summary>
         /// <param name="index"></param>
-        /// <returns></returns>
         public clsModificationDefinition.ModificationTypeConstants GetModificationTypeByIndex(int index)
         {
             if (index >= 0 && index < Modifications.Count)
@@ -1146,7 +1140,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="fileNotFound"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         public bool ReadMassCorrectionTagsFile(string filePath, ref bool fileNotFound)
         {
             bool success;
@@ -1218,7 +1212,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="fileNotFound"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         public bool ReadModificationDefinitionsFile(string filePath, ref bool fileNotFound)
         {
 

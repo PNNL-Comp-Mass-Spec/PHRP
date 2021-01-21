@@ -183,7 +183,6 @@ namespace PHRPReader
             /// <summary>
             /// Mod type, name, mass, residues
             /// </summary>
-            /// <returns></returns>
             public override string ToString()
             {
                 return string.Format("{0} {1}, {2}; {3}", ModType, ModName, ModMass, Residues);
@@ -212,7 +211,6 @@ namespace PHRPReader
         /// Search engine name, typically MS-GF+
         /// This name is only used in log messages
         /// </param>
-        /// <remarks></remarks>
         public clsMSGFPlusParamFileModExtractor(string toolName)
         {
             mErrorMessage = string.Empty;
@@ -289,7 +287,6 @@ namespace PHRPReader
         /// <param name="modSpecFormat"></param>
         /// <param name="modInfo"></param>
         /// <returns>True if success; false if a problem</returns>
-        /// <remarks></remarks>
         public bool ExtractModInfoFromParamFile(string paramFilePath, ModSpecFormats modSpecFormat, out List<udtModInfoType> modInfo)
         {
             var tagNamesToFind = new List<string> {
@@ -479,7 +476,7 @@ namespace PHRPReader
         /// <param name="splitLine"></param>
         /// <param name="unnamedModID"></param>
         /// <param name="udtModInfo"></param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseModSpecMSGFPlus(
             string paramFilePath,
             IReadOnlyList<string> splitLine,
@@ -630,7 +627,7 @@ namespace PHRPReader
         /// <param name="modType">MSGFPlusModType.DynamicMod or MSGFPlusModType.StaticMod</param>
         /// <param name="unnamedModID"></param>
         /// <param name="udtModInfo"></param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseModSpecTopPIC(
             string paramFilePath,
             IReadOnlyList<string> splitLine,

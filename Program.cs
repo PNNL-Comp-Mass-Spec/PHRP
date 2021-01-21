@@ -246,7 +246,6 @@ namespace PeptideHitResultsProcRunner
         /// <summary>
         /// Obtain the command line arguments, excluding the Exe
         /// </summary>
-        /// <returns></returns>
         private static string GetCommandLineArgs()
         {
             var commandLineArgs = Environment.GetCommandLineArgs();
@@ -262,7 +261,6 @@ namespace PeptideHitResultsProcRunner
         /// <param name="valueText">Text to parse</param>
         /// <param name="value">Output parameter</param>
         /// <returns>True if successfully parsed value; the result of the parse is in value</returns>
-        /// <remarks></remarks>
         private static bool ParseBoolean(string valueText, out bool value)
         {
             if (string.IsNullOrEmpty(valueText))

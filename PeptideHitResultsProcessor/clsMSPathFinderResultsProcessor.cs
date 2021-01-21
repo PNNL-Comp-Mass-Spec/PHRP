@@ -32,7 +32,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <remarks></remarks>
         public clsMSPathFinderResultsProcessor()
         {
             FileDate = "September 28, 2020";
@@ -169,7 +168,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <param name="modInfo"></param>
-        /// <remarks></remarks>
         private void AddModificationsToResidues(
             clsSearchResultsMSPathFinder searchResult,
             bool updateModOccurrenceCounts,
@@ -298,8 +296,6 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="modificationList">Comma separated list of modifications, e.g. Dehydro 52,Dehydro 63</param>
         /// <param name="modInfo"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
         private double ComputeTotalModMass(
             string modificationList,
             IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
@@ -424,8 +420,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath"></param>
         /// <param name="outputFilePath"></param>
         /// <param name="modInfo"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath,
@@ -464,7 +459,6 @@ namespace PeptideHitResultsProcessor
                         if (!headerParsed)
                         {
                             // Parse the header line
-
                             var success = ParseMSPathFinderResultsFileHeaderLine(lineIn, columnMapping);
                             if (!success)
                             {
@@ -627,8 +621,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="outputDirectoryPath"></param>
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
         /// <param name="modInfo"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathfinderSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
@@ -855,8 +848,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="columnMapping"></param>
         /// <param name="modInfo"></param>
         /// <param name="rowNumber">Row number (used for error reporting)</param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderResultsFileEntry(
             string lineIn,
             ref udtMSPathFinderSearchResultType udtSearchResult,
@@ -954,12 +946,11 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse the MSPathFinder results file header line
+        /// Parse the MSPathFinder results file header line, populating columnMapping
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
-        /// <remarks></remarks>
         private bool ParseMSPathFinderResultsFileHeaderLine(string lineIn, IDictionary<MSPathFinderResultsFileColumns, int> columnMapping)
         {
             // The expected column order from MassMSPathFinder:
@@ -1052,11 +1043,11 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        /// Parse the header line of a MSPathFinder _syn.txt file
+        /// Parse the header line of a MSPathFinder _syn.txt file, populating columnMapping
         /// </summary>
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int> columnMapping)
         {
             var columnNames = clsPHRPParserMSPathFinder.GetColumnHeaderNamesAndIDs();
@@ -1099,7 +1090,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="resultsProcessed"></param>
         /// <param name="columnMapping"></param>
         /// <param name="peptideSequence"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderSynFileEntry(
             string lineIn,
             clsSearchResultsMSPathFinder searchResult,
@@ -1242,7 +1233,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="inputFilePath">MSPathFinder results file (Dataset_IcTda.tsv)</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file</param>
-        /// <returns>True if success, False if failure</returns>
+        /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
             var success = false;
@@ -1382,7 +1373,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="startIndex">Start index for data in this scan</param>
         /// <param name="endIndex">End index for data in this scan</param>
         /// <param name="filteredSearchResults">Output parameter: the actual filtered search results</param>
-        /// <remarks></remarks>
         private void StoreSynMatches(
             IList<udtMSPathFinderSearchResultType> searchResults,
             int startIndex,
@@ -1444,7 +1434,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
         /// <param name="errorLog"></param>
-        /// <remarks></remarks>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,

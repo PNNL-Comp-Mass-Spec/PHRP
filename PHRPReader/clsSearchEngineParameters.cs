@@ -37,7 +37,6 @@ namespace PHRPReader
         /// <summary>
         /// Enzyme name
         /// </summary>
-        /// <returns></returns>
         public string Enzyme
         {
             get => mEnzyme;
@@ -52,13 +51,11 @@ namespace PHRPReader
         /// <summary>
         /// FASTA file path
         /// </summary>
-        /// <returns></returns>
         public string FastaFilePath { get; set; }
 
         /// <summary>
         /// Fragment mass type
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Typically "monoisotopic" or "average"</remarks>
         public string FragmentMassType
         {
@@ -74,44 +71,37 @@ namespace PHRPReader
         /// <summary>
         /// Maximum number of internal cleavages (missed cleavage points)
         /// </summary>
-        /// <returns></returns>
         public int MaxNumberInternalCleavages { get; set; }
 
         /// <summary>
         /// 0 means no-enzyme, 1 means partially tryptic, 2 means fully tryptic
         /// </summary>
-        /// <returns></returns>
         /// <remarks>For trypsin, this is NTT or Number of Tryptic Termini</remarks>
         public int MinNumberTermini { get; set; }
 
         /// <summary>
         /// Dynamic and static mods to search for
         /// </summary>
-        /// <returns></returns>
         public List<clsModificationDefinition> ModInfo => mModInfo;
 
         /// <summary>
         /// Parameter dictionary (key/value pairs)
         /// </summary>
-        /// <returns></returns>
         public Dictionary<string, string> Parameters => mParameters;
 
         /// <summary>
         /// Precursor mass tolerance, in Daltons; 0 if unknown
         /// </summary>
-        /// <returns></returns>
         public double PrecursorMassToleranceDa { get; set; }
 
         /// <summary>
         /// Precursor mass tolerance, in ppm; 0 if unknown
         /// </summary>
-        /// <returns></returns>
         public double PrecursorMassTolerancePpm { get; set; }
 
         /// <summary>
         /// Precursor mass type
         /// </summary>
-        /// <returns></returns>
         /// <remarks>Typically "monoisotopic" or "average"</remarks>
         public string PrecursorMassType
         {
@@ -127,25 +117,21 @@ namespace PHRPReader
         /// <summary>
         /// Search engine name
         /// </summary>
-        /// <returns></returns>
         public string SearchEngineName => mSearchEngineName;
 
         /// <summary>
         /// Search engine parameter file path
         /// </summary>
-        /// <returns></returns>
         public string SearchEngineParamFilePath => string.IsNullOrWhiteSpace(mSearchEngineParamFilePath) ? string.Empty : mSearchEngineParamFilePath;
 
         /// <summary>
         /// Search engine version
         /// </summary>
-        /// <returns></returns>
         public string SearchEngineVersion => mSearchEngineVersion;
 
         /// <summary>
         /// Search date
         /// </summary>
-        /// <returns></returns>
         public DateTime SearchDate => mSearchDate;
 
         #endregion

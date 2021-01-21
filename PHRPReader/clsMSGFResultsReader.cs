@@ -61,7 +61,6 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <remarks></remarks>
         public clsMSGFResultsReader()
         {
             mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);

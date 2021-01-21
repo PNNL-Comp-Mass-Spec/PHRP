@@ -165,7 +165,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        /// <remarks></remarks>
         public clsPHRPParserMSGFPlus(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
@@ -177,7 +176,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
-        /// <remarks></remarks>
         public clsPHRPParserMSGFPlus(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
             : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSGFPlus, loadModsAndSeqInfo)
         {
@@ -189,7 +187,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        /// <remarks></remarks>
         public clsPHRPParserMSGFPlus(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
             : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSGFPlus, startupOptions)
         {
@@ -202,7 +199,6 @@ namespace PHRPReader
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
         /// <param name="resultType"></param>
         /// <returns>Precursor tolerance, in Da</returns>
-        /// <remarks></remarks>
         public static double DeterminePrecursorMassTolerance(
             clsSearchEngineParameters searchEngineParams,
             out double tolerancePPM,
@@ -295,7 +291,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="searchEngineParams"></param>
         /// <param name="chargeCarrierMass"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>This function is used by clsPHRPMassErrorValidator in the Analysis Manager</remarks>
         public static bool GetCustomChargeCarrierMass(clsSearchEngineParameters searchEngineParams, out double chargeCarrierMass)
         {
@@ -314,7 +310,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of header names</returns>
         protected override List<string> GetColumnHeaderNames()
         {
             var headerNames = new List<string>();
@@ -325,7 +321,7 @@ namespace PHRPReader
         /// <summary>
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Dictionary of header names and enum values</returns>
         /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
         public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
@@ -464,12 +460,11 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Parses the specified MSGFDB (aka MS-GF+) parameter file
+        /// Parses the specified MS-GF+ (previously MSGFDB) parameter file
         /// </summary>
         /// <param name="searchEngineParamFilePath"></param>
         /// <param name="searchEngineParams"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public override bool LoadSearchEngineParameters(string searchEngineParamFilePath, out clsSearchEngineParameters searchEngineParams)
         {
             searchEngineParams = new clsSearchEngineParameters(MSGFPLUS_SEARCH_ENGINE_NAME, mModInfo);
@@ -631,7 +626,7 @@ namespace PHRPReader
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
@@ -829,8 +824,7 @@ namespace PHRPReader
         /// <param name="modFileProcessor"></param>
         /// <param name="peptideMassCalculator"></param>
         /// <param name="errorMessage"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public static bool UpdateMassCalculatorMasses(
             string searchEngineParamFilePath,
             clsMSGFPlusParamFileModExtractor modFileProcessor,

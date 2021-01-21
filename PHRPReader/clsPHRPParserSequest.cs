@@ -143,7 +143,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        /// <remarks></remarks>
         public clsPHRPParserSequest(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
@@ -155,7 +154,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
-        /// <remarks></remarks>
         public clsPHRPParserSequest(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
             : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.Sequest, loadModsAndSeqInfo)
         {
@@ -167,7 +165,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        /// <remarks></remarks>
         public clsPHRPParserSequest(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
             : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.Sequest, startupOptions)
         {
@@ -191,7 +188,6 @@ namespace PHRPReader
         /// <param name="searchEngineParams"></param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
         /// <returns>Precursor tolerance, in Da</returns>
-        /// <remarks></remarks>
         private double DeterminePrecursorMassTolerance(clsSearchEngineParameters searchEngineParams, out double tolerancePPM)
         {
             double toleranceDa = 0;
@@ -234,7 +230,7 @@ namespace PHRPReader
                         // Tolerance is in daltons
                         toleranceDa = value;
 
-                        // Convert from dalton to PPM (assuming a mass of 2000 m/z)
+                        // Convert from Dalton to PPM (assuming a mass of 2000 m/z)
                         tolerancePPM = clsPeptideMassCalculator.MassToPPM(toleranceDa, 2000);
                     }
                 }
@@ -246,7 +242,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of header names</returns>
         protected override List<string> GetColumnHeaderNames()
         {
             var headerNames = new List<string>();
@@ -257,7 +253,7 @@ namespace PHRPReader
         /// <summary>
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, SequestSynopsisFileColumns> GetColumnHeaderNamesAndIDs()
         {
             var headerColumns = new SortedDictionary<string, SequestSynopsisFileColumns>(StringComparer.OrdinalIgnoreCase)
@@ -400,8 +396,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
         {
             searchEngineParams = new clsSearchEngineParameters(SEQ_SEARCH_ENGINE_NAME, mModInfo) {
@@ -635,7 +630,7 @@ namespace PHRPReader
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {

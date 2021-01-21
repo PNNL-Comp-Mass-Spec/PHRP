@@ -135,7 +135,6 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        /// <remarks></remarks>
         public clsPHRPParserXTandem(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
@@ -146,7 +145,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
-        /// <remarks></remarks>
         public clsPHRPParserXTandem(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
             : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.XTandem, loadModsAndSeqInfo)
         {
@@ -158,7 +156,6 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        /// <remarks></remarks>
         public clsPHRPParserXTandem(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
             : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.XTandem, startupOptions)
         {
@@ -180,7 +177,6 @@ namespace PHRPReader
         /// <param name="searchEngineParams"></param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
         /// <returns>Precursor tolerance, in Da</returns>
-        /// <remarks></remarks>
         private double DeterminePrecursorMassTolerance(clsSearchEngineParameters searchEngineParams, out double tolerancePPM)
         {
             var isPPM = false;
@@ -224,7 +220,7 @@ namespace PHRPReader
         /// <summary>
         /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of header names</returns>
         protected override List<string> GetColumnHeaderNames()
         {
             var headerNames = new List<string>();
@@ -235,7 +231,7 @@ namespace PHRPReader
         /// <summary>
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Dictionary of header names and enum values</returns>
         public static SortedDictionary<string, XTandemSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
             var headerColumns = new SortedDictionary<string, XTandemSynFileColumns>(StringComparer.OrdinalIgnoreCase)
@@ -359,7 +355,6 @@ namespace PHRPReader
         /// Additional search engine parameter file names
         /// </summary>
         /// <param name="searchEngineParamFilePath"></param>
-        /// <returns></returns>
         public static List<string> GetAdditionalSearchEngineParamFileNames(string searchEngineParamFilePath)
         {
             var fileNames = new List<string>();
@@ -511,8 +506,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
+        /// <returns>True if successful, false if an error</returns>
         public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
         {
             searchEngineParams = new clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME, mModInfo);
@@ -527,7 +521,7 @@ namespace PHRPReader
         /// <param name="searchEngineParams"></param>
         /// <param name="lookForDefaultParamsFileName"></param>
         /// <param name="determineFastaFileNameUsingTaxonomyFile"></param>
-        /// <returns></returns>
+        /// <returns>True if successful, false if an error</returns>
         public bool ParseXTandemParamFile(
             string paramFileName,
             clsSearchEngineParameters searchEngineParams,
@@ -705,7 +699,7 @@ namespace PHRPReader
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
-        /// <returns>True if success, false if an error</returns>
+        /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
