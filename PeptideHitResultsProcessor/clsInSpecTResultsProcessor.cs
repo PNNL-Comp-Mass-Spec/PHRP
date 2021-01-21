@@ -32,7 +32,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsInSpecTResultsProcessor()
         {
-            mFileDate = "April 17, 2019";
+            FileDate = "April 17, 2019";
             InitializeLocalVariables();
         }
 

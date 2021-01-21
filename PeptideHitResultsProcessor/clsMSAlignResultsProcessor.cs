@@ -20,7 +20,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMSAlignResultsProcessor()
         {
-            mFileDate = "July 10, 2019";
+            FileDate = "July 10, 2019";
             InitializeLocalVariables();
         }
 

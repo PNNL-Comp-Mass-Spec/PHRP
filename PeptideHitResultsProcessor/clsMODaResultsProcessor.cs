@@ -21,7 +21,7 @@ namespace PeptideHitResultsProcessor
     {
         public clsMODaResultsProcessor()
         {
-            mFileDate = "July 10, 2019";
+            FileDate = "July 10, 2019";
             InitializeLocalVariables();
         }
 

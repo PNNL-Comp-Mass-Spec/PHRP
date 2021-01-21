@@ -31,7 +31,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSGFPlusResultsProcessor()
         {
-            mFileDate = "July 23, 2019";
+            FileDate = "July 23, 2019";
             mModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();

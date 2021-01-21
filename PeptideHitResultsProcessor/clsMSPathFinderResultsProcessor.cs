@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         public clsMSPathFinderResultsProcessor()
         {
-            mFileDate = "September 28, 2020";
+            FileDate = "September 28, 2020";
 
             mGetModName = new Regex(@"(?<ModName>.+) (?<ResidueNumber>\d+)", RegexOptions.Compiled);
         }

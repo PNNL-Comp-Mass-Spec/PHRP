@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         protected clsPHRPBaseClass()
         {
-            mFileDate = "July 23, 2019";
+            FileDate = "October 25, 2020";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -225,8 +225,6 @@ namespace PeptideHitResultsProcessor
         protected ePHRPErrorCodes mErrorCode = ePHRPErrorCodes.NoError;
         protected string mErrorMessage = string.Empty;
 
-        protected string mFileDate;
-
         protected readonly clsPeptideMassCalculator mPeptideSeqMassCalculator;
 
         protected readonly clsPeptideModificationContainer mPeptideMods;
@@ -293,7 +291,7 @@ namespace PeptideHitResultsProcessor
 
         public string FileVersion => GetVersionForExecutingAssembly();
 
-        public string FileDate => mFileDate;
+        public string FileDate { get; protected set; }
 
         public bool IgnorePeptideToProteinMapperErrors { get; set; }
 

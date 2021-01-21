@@ -115,7 +115,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public clsXTandemResultsProcessor()
         {
-            mFileDate = "July 10, 2019";
+            FileDate = "July 10, 2019";
 
             mSeqsWithMods = new Dictionary<string, int>();
             mSeqsWithoutMods = new SortedSet<string>();
