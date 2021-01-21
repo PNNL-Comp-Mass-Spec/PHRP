@@ -27,6 +27,8 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsTopPICResultsProcessor : clsPHRPBaseClass
     {
+        // Ignore Spelling: monoisotopic, Battelle, txt, enums
+
         public clsTopPICResultsProcessor()
         {
             mFileDate = "July 10, 2019";

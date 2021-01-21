@@ -18,9 +18,11 @@ namespace PeptideHitResultsProcessor
     /// </remarks>
     public class clsMSAlignResultsProcessor : clsPHRPBaseClass
     {
+        // Ignore Spelling: monoisotopic, enums
+
         public clsMSAlignResultsProcessor()
         {
-            mFileDate = "July 10, 2019";
+            mFileDate = "January 20, 2021";
             InitializeLocalVariables();
         }
 

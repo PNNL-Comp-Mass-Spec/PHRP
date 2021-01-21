@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcRunner
     /// </summary>
     public class clsPeptideHitResultsProcRunner : PRISM.FileProcessor.ProcessFilesBase
     {
-        // Ignore Spelling: parm, proc, MODa
+        // Ignore Spelling: Battelle, parm, proc, MODa, enums, fasta
 
         public clsPeptideHitResultsProcRunner()
         {
