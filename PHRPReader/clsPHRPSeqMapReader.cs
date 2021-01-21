@@ -67,7 +67,7 @@ namespace PHRPReader
         /// <summary>
         /// PHRP result type
         /// </summary>
-        public clsPHRPReader.ePeptideHitResultType PeptideHitResultType { get; }
+        public clsPHRPReader.PeptideHitResultTypes PeptideHitResultType { get; }
 
         /// <summary>
         /// PepToProtMap filename
@@ -91,9 +91,10 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputDirectoryPath">Input file path</param>
-        /// <param name="ePeptideHitResultType">Peptide Hit result type</param>
+        /// <param name="peptideHitResultType">Peptide Hit result type</param>
         /// <remarks></remarks>
-        public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType) : this(datasetName, inputDirectoryPath, ePeptideHitResultType, clsPHRPReader.GetPHRPSynopsisFileName(ePeptideHitResultType, datasetName))
+        public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.PeptideHitResultTypes peptideHitResultType) 
+            : this(datasetName, inputDirectoryPath, peptideHitResultType, clsPHRPReader.GetPHRPSynopsisFileName(peptideHitResultType, datasetName))
         {
         }
 
@@ -102,10 +103,10 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputDirectoryPath">Input file path</param>
-        /// <param name="ePeptideHitResultType">Peptide Hit result type</param>
+        /// <param name="peptideHitResultType">Peptide Hit result type</param>
         /// <param name="phrpDataFileName">The base PHRP data file name; used when calling AutoSwitchToLegacyMSGFDBIfRequired and AutoSwitchToFHTIfRequired</param>
         /// <remarks></remarks>
-        public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.ePeptideHitResultType ePeptideHitResultType, string phrpDataFileName)
+        public clsPHRPSeqMapReader(string datasetName, string inputDirectoryPath, clsPHRPReader.PeptideHitResultTypes peptideHitResultType, string phrpDataFileName)
         {
             DatasetName = datasetName;
 
@@ -121,39 +122,39 @@ namespace PHRPReader
                 InputDirectoryPath = string.Empty;
             }
 
-            PeptideHitResultType = ePeptideHitResultType;
+            PeptideHitResultType = PeptideHitResultType;
 
-            ResultToSeqMapFilename = clsPHRPReader.GetPHRPResultToSeqMapFileName(PeptideHitResultType, DatasetName);
+            ResultToSeqMapFilename = clsPHRPReader.GetPHRPResultToSeqMapFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(ResultToSeqMapFilename))
             {
-                ErrorMessage = "Unable to determine ResultToSeqMap filename for PeptideHitResultType: " + PeptideHitResultType.ToString();
+                ErrorMessage = "Unable to determine ResultToSeqMap filename for peptideHitResultType: " + peptideHitResultType.ToString();
                 throw new Exception(ErrorMessage);
             }
 
             ResultToSeqMapFilename = clsPHRPReader.FindPHRPFile(InputDirectoryPath, phrpDataFileName, ResultToSeqMapFilename, out _);
 
-            SeqToProteinMapFilename = clsPHRPReader.GetPHRPSeqToProteinMapFileName(PeptideHitResultType, DatasetName);
+            SeqToProteinMapFilename = clsPHRPReader.GetPHRPSeqToProteinMapFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(SeqToProteinMapFilename))
             {
-                ErrorMessage = "Unable to determine SeqToProteinMap filename for PeptideHitResultType: " + PeptideHitResultType.ToString();
+                ErrorMessage = "Unable to determine SeqToProteinMap filename for peptideHitResultType: " + peptideHitResultType.ToString();
                 throw new Exception(ErrorMessage);
             }
 
             SeqToProteinMapFilename = clsPHRPReader.FindPHRPFile(InputDirectoryPath, phrpDataFileName, SeqToProteinMapFilename, out _);
 
-            mSeqInfoFilename = clsPHRPReader.GetPHRPSeqInfoFileName(PeptideHitResultType, DatasetName);
+            mSeqInfoFilename = clsPHRPReader.GetPHRPSeqInfoFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(mSeqInfoFilename))
             {
-                ErrorMessage = "Unable to determine SeqInfo filename for PeptideHitResultType: " + PeptideHitResultType.ToString();
+                ErrorMessage = "Unable to determine SeqInfo filename for peptideHitResultType: " + peptideHitResultType.ToString();
                 throw new Exception(ErrorMessage);
             }
 
             mSeqInfoFilename = clsPHRPReader.FindPHRPFile(InputDirectoryPath, phrpDataFileName, mSeqInfoFilename, out _);
 
-            PepToProteinMapFilename = clsPHRPReader.GetPHRPPepToProteinMapFileName(PeptideHitResultType, DatasetName);
+            PepToProteinMapFilename = clsPHRPReader.GetPHRPPepToProteinMapFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(PepToProteinMapFilename))
             {
-                ErrorMessage = "Unable to determine PepToProtMap filename for PeptideHitResultType: " + PeptideHitResultType.ToString();
+                ErrorMessage = "Unable to determine PepToProtMap filename for PeptideHitResultType: " + peptideHitResultType.ToString();
                 throw new Exception(ErrorMessage);
             }
 
@@ -180,7 +181,7 @@ namespace PHRPReader
             }
 
             PeptideHitResultType = clsPHRPReader.AutoDetermineResultType(resultToSeqMapFilename);
-            if (PeptideHitResultType == clsPHRPReader.ePeptideHitResultType.Unknown)
+            if (PeptideHitResultType == clsPHRPReader.PeptideHitResultTypes.Unknown)
             {
                 ErrorMessage = "Unable to auto-determine the PeptideHit result type based on filename " + resultToSeqMapFilename;
                 throw new Exception(ErrorMessage);
@@ -591,8 +592,8 @@ namespace PHRPReader
                             continue;
                         }
 
-                        var eCleavageState = (clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants)clsPHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, columnHeaders, 0);
-                        var eTerminusState = (clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants)clsPHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, columnHeaders, 0);
+                        var eCleavageState = (clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants)clsPHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, columnHeaders, 0);
+                        var eTerminusState = (clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants)clsPHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, columnHeaders, 0);
 
                         var proteinInfo = new clsProteinInfo(proteinName, seqID, eCleavageState, eTerminusState);
 

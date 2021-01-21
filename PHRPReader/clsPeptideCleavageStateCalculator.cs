@@ -72,7 +72,7 @@ namespace PHRPReader
         /// <summary>
         /// Peptide cleavage state
         /// </summary>
-        public enum ePeptideCleavageStateConstants
+        public enum PeptideCleavageStateConstants
         {
             /// <summary>
             /// Unknown cleavage specificity
@@ -98,7 +98,7 @@ namespace PHRPReader
         /// <summary>
         /// Peptide terminus state
         /// </summary>
-        public enum ePeptideTerminusStateConstants
+        public enum PeptideTerminusStateConstants
         {
             /// <summary>
             /// The peptide is located in the middle of the protein
@@ -124,7 +124,7 @@ namespace PHRPReader
         /// <summary>
         /// Standard enzymes
         /// </summary>
-        public enum eStandardCleavageAgentConstants
+        public enum StandardCleavageAgentConstants
         {
 #pragma warning disable 1591
             Trypsin = 0,
@@ -220,7 +220,7 @@ namespace PHRPReader
                 TERMINUS_SYMBOL_XTANDEM_NTerminus,
                 TERMINUS_SYMBOL_XTANDEM_CTerminus };
 
-            SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin);
+            SetStandardEnzymeMatchSpec(StandardCleavageAgentConstants.Trypsin);
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace PHRPReader
         /// <param name="eCleavageState"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static short CleavageStateToShort(ePeptideCleavageStateConstants eCleavageState)
+        public static short CleavageStateToShort(PeptideCleavageStateConstants eCleavageState)
         {
             return Convert.ToInt16(eCleavageState);
         }
@@ -240,14 +240,14 @@ namespace PHRPReader
         /// <param name="sequenceWithPrefixAndSuffix"></param>
         /// <returns></returns>
         /// <remarks>Peptide can have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
-        public ePeptideCleavageStateConstants ComputeCleavageState(string sequenceWithPrefixAndSuffix)
+        public PeptideCleavageStateConstants ComputeCleavageState(string sequenceWithPrefixAndSuffix)
         {
             if (SplitPrefixAndSuffixFromSequence(sequenceWithPrefixAndSuffix, out var primarySequence, out var prefix, out var suffix))
             {
                 return ComputeCleavageState(primarySequence, prefix, suffix);
             }
 
-            return ePeptideCleavageStateConstants.NonSpecific;
+            return PeptideCleavageStateConstants.NonSpecific;
         }
 
         /// <summary>
@@ -258,10 +258,10 @@ namespace PHRPReader
         /// <param name="suffixResidues"></param>
         /// <returns></returns>
         /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
-        public ePeptideCleavageStateConstants ComputeCleavageState(string cleanSequence, string prefixResidues, string suffixResidues)
+        public PeptideCleavageStateConstants ComputeCleavageState(string cleanSequence, string prefixResidues, string suffixResidues)
         {
             if (string.IsNullOrEmpty(cleanSequence))
-                return ePeptideCleavageStateConstants.NonSpecific;
+                return PeptideCleavageStateConstants.NonSpecific;
 
             // Find the letter closest to the end of prefixResidues
             var prefix = FindLetterNearestEnd(prefixResidues);
@@ -278,35 +278,35 @@ namespace PHRPReader
             // Determine the terminus state of this peptide
             var ePeptideTerminusState = ComputeTerminusState(prefix, suffix);
 
-            ePeptideCleavageStateConstants ePeptideCleavageState;
+            PeptideCleavageStateConstants ePeptideCleavageState;
 
-            if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinNandCCTerminus)
+            if (ePeptideTerminusState == PeptideTerminusStateConstants.ProteinNandCCTerminus)
             {
                 // The peptide spans the entire length of the protein; mark it as fully tryptic
-                ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
+                ePeptideCleavageState = PeptideCleavageStateConstants.Full;
             }
-            else if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinNTerminus)
+            else if (ePeptideTerminusState == PeptideTerminusStateConstants.ProteinNTerminus)
             {
                 // Peptides at the N-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
                 if (TestCleavageRule(chSequenceEnd, suffix))
                 {
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
+                    ePeptideCleavageState = PeptideCleavageStateConstants.Full;
                 }
                 else
                 {
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
+                    ePeptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
                 }
             }
-            else if (ePeptideTerminusState == ePeptideTerminusStateConstants.ProteinCTerminus)
+            else if (ePeptideTerminusState == PeptideTerminusStateConstants.ProteinCTerminus)
             {
                 // Peptides at the C-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
                 if (TestCleavageRule(prefix, chSequenceStart))
                 {
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
+                    ePeptideCleavageState = PeptideCleavageStateConstants.Full;
                 }
                 else
                 {
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
+                    ePeptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
                 }
             }
             else
@@ -317,15 +317,15 @@ namespace PHRPReader
 
                 if (ruleMatchStart && ruleMatchEnd)
                 {
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.Full;
+                    ePeptideCleavageState = PeptideCleavageStateConstants.Full;
                 }
                 else if (ruleMatchStart || ruleMatchEnd)
                 {
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.Partial;
+                    ePeptideCleavageState = PeptideCleavageStateConstants.Partial;
                 }
                 else
                 {
-                    ePeptideCleavageState = ePeptideCleavageStateConstants.NonSpecific;
+                    ePeptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
                 }
             }
 
@@ -376,14 +376,14 @@ namespace PHRPReader
         /// <param name="sequenceWithPrefixAndSuffix"></param>
         /// <returns></returns>
         /// <remarks>Peptide must have prefix and suffix letters, for example K.PEPTIDE.G</remarks>
-        public ePeptideTerminusStateConstants ComputeTerminusState(string sequenceWithPrefixAndSuffix)
+        public PeptideTerminusStateConstants ComputeTerminusState(string sequenceWithPrefixAndSuffix)
         {
             if (SplitPrefixAndSuffixFromSequence(sequenceWithPrefixAndSuffix, out var primarySequence, out var prefix, out var suffix))
             {
                 return ComputeTerminusState(primarySequence, prefix, suffix);
             }
 
-            return ePeptideTerminusStateConstants.None;
+            return PeptideTerminusStateConstants.None;
         }
 
         /// <summary>
@@ -393,9 +393,9 @@ namespace PHRPReader
         /// <param name="suffix"></param>
         /// <returns></returns>
         /// <remarks>For example, if the peptide is -.PEPTIDE.G, pass prefix="-" and suffix="G"</remarks>
-        public ePeptideTerminusStateConstants ComputeTerminusState(char prefix, char suffix)
+        public PeptideTerminusStateConstants ComputeTerminusState(char prefix, char suffix)
         {
-            ePeptideTerminusStateConstants ePeptideTerminusState;
+            PeptideTerminusStateConstants ePeptideTerminusState;
 
             if (mTerminusSymbols.Contains(prefix))
             {
@@ -403,23 +403,23 @@ namespace PHRPReader
                 if (mTerminusSymbols.Contains(suffix))
                 {
                     // The peptide spans the entire length of the protein
-                    ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNandCCTerminus;
+                    ePeptideTerminusState = PeptideTerminusStateConstants.ProteinNandCCTerminus;
                 }
                 else
                 {
                     // The peptide is located at the protein's N-terminus
-                    ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinNTerminus;
+                    ePeptideTerminusState = PeptideTerminusStateConstants.ProteinNTerminus;
                 }
             }
             else if (mTerminusSymbols.Contains(suffix))
             {
                 // Suffix character matches a terminus symbol
                 // The peptide is located at the protein's C-terminus
-                ePeptideTerminusState = ePeptideTerminusStateConstants.ProteinCTerminus;
+                ePeptideTerminusState = PeptideTerminusStateConstants.ProteinCTerminus;
             }
             else
             {
-                ePeptideTerminusState = ePeptideTerminusStateConstants.None;
+                ePeptideTerminusState = PeptideTerminusStateConstants.None;
             }
 
             return ePeptideTerminusState;
@@ -433,15 +433,15 @@ namespace PHRPReader
         /// <param name="suffixResidues"></param>
         /// <returns></returns>
         /// <remarks>Peptide cannot have prefix and suffix letters, and thus must be in the form PEPTIDE</remarks>
-        public ePeptideTerminusStateConstants ComputeTerminusState(string cleanSequence, string prefixResidues, string suffixResidues)
+        public PeptideTerminusStateConstants ComputeTerminusState(string cleanSequence, string prefixResidues, string suffixResidues)
         {
             // Determine the terminus state of cleanSequence
 
-            ePeptideTerminusStateConstants ePeptideTerminusState;
+            PeptideTerminusStateConstants ePeptideTerminusState;
 
             if (string.IsNullOrEmpty(cleanSequence))
             {
-                ePeptideTerminusState = ePeptideTerminusStateConstants.None;
+                ePeptideTerminusState = PeptideTerminusStateConstants.None;
             }
             else
             {
@@ -551,7 +551,7 @@ namespace PHRPReader
             if (mEnzymeMatchSpec.LeftResidueRegEx == null || mEnzymeMatchSpec.RightResidueRegEx == null)
             {
                 // Note that calling SetStandardEnzymeMatchSpec will cause this sub to also be called
-                SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants.Trypsin);
+                SetStandardEnzymeMatchSpec(StandardCleavageAgentConstants.Trypsin);
                 return;
             }
 
@@ -621,41 +621,41 @@ namespace PHRPReader
         /// <summary>
         /// Select a standard enzyme match rule
         /// </summary>
-        /// <param name="eStandardCleavageAgent"></param>
+        /// <param name="standardCleavageAgent"></param>
         /// <remarks></remarks>
-        public void SetStandardEnzymeMatchSpec(eStandardCleavageAgentConstants eStandardCleavageAgent)
+        public void SetStandardEnzymeMatchSpec(StandardCleavageAgentConstants standardCleavageAgent)
         {
-            switch (eStandardCleavageAgent)
+            switch (standardCleavageAgent)
             {
-                case eStandardCleavageAgentConstants.Trypsin:
+                case StandardCleavageAgentConstants.Trypsin:
                     SetEnzymeMatchSpec(TRYPSIN_LEFT_RESIDUE_REGEX, TRYPSIN_RIGHT_RESIDUE_REGEX);
                     break;
-                case eStandardCleavageAgentConstants.TrypsinWithoutProlineRule:
+                case StandardCleavageAgentConstants.TrypsinWithoutProlineRule:
                     SetEnzymeMatchSpec("[KR]", "[A-Z]");
                     break;
-                case eStandardCleavageAgentConstants.TrypsinPlusFVLEY:
+                case StandardCleavageAgentConstants.TrypsinPlusFVLEY:
                     SetEnzymeMatchSpec("[KRFYVEL]", "[A-Z]");
                     break;
-                case eStandardCleavageAgentConstants.Chymotrypsin:
+                case StandardCleavageAgentConstants.Chymotrypsin:
                     SetEnzymeMatchSpec("[FWYL]", "[A-Z]");
                     break;
-                case eStandardCleavageAgentConstants.ChymotrypsinAndTrypsin:
+                case StandardCleavageAgentConstants.ChymotrypsinAndTrypsin:
                     SetEnzymeMatchSpec("[FWYLKR]", "[A-Z]");
 
                     break;
-                case eStandardCleavageAgentConstants.V8_aka_GluC:
+                case StandardCleavageAgentConstants.V8_aka_GluC:
                     SetEnzymeMatchSpec("[ED]", "[A-Z]");
                     break;
-                case eStandardCleavageAgentConstants.CyanBr:
+                case StandardCleavageAgentConstants.CyanBr:
                     SetEnzymeMatchSpec("[M]", "[A-Z]");
                     break;
-                case eStandardCleavageAgentConstants.EndoArgC:
+                case StandardCleavageAgentConstants.EndoArgC:
                     SetEnzymeMatchSpec("[R]", "[A-Z]");
                     break;
-                case eStandardCleavageAgentConstants.EndoLysC:
+                case StandardCleavageAgentConstants.EndoLysC:
                     SetEnzymeMatchSpec("[K]", "[A-Z]");
                     break;
-                case eStandardCleavageAgentConstants.EndoAspN:
+                case StandardCleavageAgentConstants.EndoAspN:
                     SetEnzymeMatchSpec("[A-Z]", "[D]");
                     break;
                 default:

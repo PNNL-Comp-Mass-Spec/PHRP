@@ -30,7 +30,7 @@
         /// <summary>
         /// Terminus state enum
         /// </summary>
-        public enum eResidueTerminusStateConstants
+        public enum ResidueTerminusStateConstants
         {
             /// <summary>
             /// The residue is in the middle of the peptide
@@ -102,7 +102,7 @@
         /// <summary>
         /// Residue terminus state
         /// </summary>
-        public eResidueTerminusStateConstants ResidueTerminusState { get; }
+        public ResidueTerminusStateConstants ResidueTerminusState { get; }
 
         /// <summary>
         /// Constructor
@@ -111,7 +111,7 @@
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="modDefinition"></param>
-        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, eResidueTerminusStateConstants residueTerminusState, clsModificationDefinition modDefinition)
+        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusStateConstants residueTerminusState, clsModificationDefinition modDefinition)
         {
             ModDefinition = modDefinition;
             Residue = residue;
@@ -128,7 +128,7 @@
         /// <param name="residueTerminusState"></param>
         /// <param name="modDefinition"></param>
         /// <param name="endResidueLocInPeptide"></param>
-        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, eResidueTerminusStateConstants residueTerminusState, clsModificationDefinition modDefinition, int endResidueLocInPeptide)
+        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusStateConstants residueTerminusState, clsModificationDefinition modDefinition, int endResidueLocInPeptide)
         {
             ModDefinition = modDefinition;
             Residue = residue;

@@ -66,7 +66,7 @@ namespace PeptideHitResultsProcessor
         private const string REVERSED_PROTEIN_SEQUENCE_INDICATOR = ":reversed";
         private const string PROTEIN_DESCRIPTION_LABEL = "description";
 
-        private enum eCurrentXMLDataFileSectionConstants
+        private enum CurrentXMLDataFileSectionConstants
         {
             UnknownFile = 0,
             Start = 1,
@@ -76,7 +76,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private const int INPUT_PARAM_LABEL_NAMES_MAX_INDEX = 13;
-        private enum eInputParamLabelNames
+        private enum InputParamLabelNames
         {
             Residue_StaticModMass = 0,
             Residue_PotentialModMass = 1,
@@ -226,7 +226,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private bool ParseXTandemInputParameterModInfo(
-            clsModificationDefinition.eModificationTypeConstants modificationType,
+            clsModificationDefinition.ModificationTypeConstants modificationType,
             int sortOrder,
             bool parsingMotifDef,
             string paramValue,
@@ -401,7 +401,7 @@ namespace PeptideHitResultsProcessor
 
                         modInfo.ModificationMass = modificationMass;
                         modInfo.TargetResidues = targetResidues;
-                        modInfo.ModificationType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
+                        modInfo.ModificationType = clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
                         udtModInfo[modInfoCount] = modInfo;
                         modInfoCount += 1;
                     }
@@ -454,7 +454,7 @@ namespace PeptideHitResultsProcessor
                     var success = ParseXTandemResultsFileInputParameters(inputFilePath);
                     if (!success)
                     {
-                        SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile, true);
+                        SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile, true);
                         return false;
                     }
 
@@ -468,7 +468,7 @@ namespace PeptideHitResultsProcessor
                     // Open the input file and parse it
 
                     // Initialize the stream reader and the XML Text Reader
-                    eCurrentXMLDataFileSectionConstants eCurrentXMLDataFileSection;
+                    CurrentXMLDataFileSectionConstants currentXMLDataFileSection;
                     using (var reader = new StreamReader(inputFilePath))
                     using (var xmlReader = new XmlTextReader(reader))
                     using (var writer = new StreamWriter(outputFilePath, false))
@@ -482,7 +482,7 @@ namespace PeptideHitResultsProcessor
                             return false;
 
                         // Parse the input file
-                        eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
+                        currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.UnknownFile;
 
                         while (xmlReader.Read() && !AbortProcessing)
                         {
@@ -508,7 +508,7 @@ namespace PeptideHitResultsProcessor
                                         var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
                                         if (currentGroupType == XTANDEM_XML_GROUP_TYPE_MODEL)
                                         {
-                                            eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.SearchResults;
+                                            currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.SearchResults;
 
                                             ParseXTandemResultsFileEntry(xmlReader, writer, ref searchResultCount, ref searchResults,
                                                                          ref errorLog, groupElementReaderDepth);
@@ -533,13 +533,13 @@ namespace PeptideHitResultsProcessor
 
                                     break;
                                 case XTANDEM_XML_ROOT_ELEMENT:
-                                    eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.Start;
+                                    currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.Start;
                                     break;
                             }
                         }
                     }
 
-                    if (eCurrentXMLDataFileSection == eCurrentXMLDataFileSectionConstants.UnknownFile)
+                    if (currentXMLDataFileSection == CurrentXMLDataFileSectionConstants.UnknownFile)
                     {
                         mErrorMessage = "Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: " + "\n" + inputFilePath;
                     }
@@ -582,7 +582,7 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -593,7 +593,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
 
@@ -1113,11 +1113,11 @@ namespace PeptideHitResultsProcessor
             {
                 // Open the input file and parse it
                 // Initialize the stream reader and the XML Text Reader
-                eCurrentXMLDataFileSectionConstants eCurrentXMLDataFileSection;
+                CurrentXMLDataFileSectionConstants currentXMLDataFileSection;
                 using (var xmlReader = new XmlTextReader(inputFilePath))
                 {
                     // Parse the file
-                    eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
+                    currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.UnknownFile;
 
                     while (xmlReader.Read() && !AbortProcessing)
                     {
@@ -1140,7 +1140,7 @@ namespace PeptideHitResultsProcessor
                                             var currentGroupType = XMLTextReaderGetAttributeValue(xmlReader, "type", string.Empty);
                                             if (currentGroupType == XTANDEM_XML_GROUP_TYPE_PARAMETERS)
                                             {
-                                                eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.InputParameters;
+                                                currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.InputParameters;
 
                                                 // Read the Label for this group
                                                 var currentGroupLabel = XMLTextReaderGetAttributeValue(xmlReader, "label", string.Empty);
@@ -1164,7 +1164,7 @@ namespace PeptideHitResultsProcessor
 
                                         break;
                                     case XTANDEM_XML_ROOT_ELEMENT:
-                                        eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.Start;
+                                        currentXMLDataFileSection = CurrentXMLDataFileSectionConstants.Start;
                                         break;
                                     default:
                                         // Skip this element
@@ -1176,7 +1176,7 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                if (eCurrentXMLDataFileSection == eCurrentXMLDataFileSectionConstants.UnknownFile)
+                if (currentXMLDataFileSection == CurrentXMLDataFileSectionConstants.UnknownFile)
                 {
                     SetErrorMessage("Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: " + inputFilePath);
                     success = false;
@@ -1189,7 +1189,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 success = false;
             }
 
@@ -1216,20 +1216,20 @@ namespace PeptideHitResultsProcessor
             // Initialize udtParamLabels; this specifies the parameters to examine
             // Note: When populating this we use .ToLower() to make sure all of the text is lowercase
             var udtParamLabels = new string[INPUT_PARAM_LABEL_NAMES_MAX_INDEX + 1];
-            udtParamLabels[(int)eInputParamLabelNames.Residue_StaticModMass] = "residue, modification mass".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Residue_PotentialModMass] = "residue, potential modification mass".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Residue_PotentialModMotif] = "residue, potential modification motif".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialModMass] = "refine, potential modification mass".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialModMotif] = "refine, potential modification motif".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialNTerminusMods] = "refine, potential N-terminus modifications".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialCTerminusMods] = "refine, potential C-terminus modifications".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Protein_NTerminal_ResidueModMass] = "protein, N-terminal residue modification mass".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Protein_CTerminal_ResidueModMass] = "protein, C-terminal residue modification mass".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_NTerminalMassChange] = "protein, cleavage N-terminal mass change".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_CTerminalMassChange] = "protein, cleavage C-terminal mass change".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_Site] = "protein, cleavage site".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Refine_ModificationMass] = "refine, modification mass".ToLower();
-            udtParamLabels[(int)eInputParamLabelNames.Scoring_Include_Reverse] = "scoring, include reverse".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Residue_StaticModMass] = "residue, modification mass".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Residue_PotentialModMass] = "residue, potential modification mass".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Residue_PotentialModMotif] = "residue, potential modification motif".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Refine_PotentialModMass] = "refine, potential modification mass".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Refine_PotentialModMotif] = "refine, potential modification motif".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Refine_PotentialNTerminusMods] = "refine, potential N-terminus modifications".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Refine_PotentialCTerminusMods] = "refine, potential C-terminus modifications".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Protein_NTerminal_ResidueModMass] = "protein, N-terminal residue modification mass".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Protein_CTerminal_ResidueModMass] = "protein, C-terminal residue modification mass".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Protein_Cleavage_NTerminalMassChange] = "protein, cleavage N-terminal mass change".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Protein_Cleavage_CTerminalMassChange] = "protein, cleavage C-terminal mass change".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Protein_Cleavage_Site] = "protein, cleavage site".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Refine_ModificationMass] = "refine, modification mass".ToLower();
+            udtParamLabels[(int)InputParamLabelNames.Scoring_Include_Reverse] = "scoring, include reverse".ToLower();
 
             // Make sure all of the text in udtParamLabels() is lowercase
             for (var index = 0; index <= udtParamLabels.Length - 1; index++)
@@ -1263,57 +1263,57 @@ namespace PeptideHitResultsProcessor
                                 if (value != null)
                                 {
                                     var noteLabelLower = noteLabel.ToLower();
-                                    if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_StaticModMass]))
+                                    if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Residue_StaticModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.StaticMod, Convert.ToInt32(eInputParamLabelNames.Residue_StaticModMass), false, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.StaticMod, Convert.ToInt32(InputParamLabelNames.Residue_StaticModMass), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_PotentialModMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Residue_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Residue_PotentialModMass), false, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMass), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Residue_PotentialModMotif]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Residue_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Residue_PotentialModMotif), true, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMotif), true, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialModMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Refine_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialModMass), false, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMass), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialModMotif]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Refine_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialModMotif), true, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMotif), true, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialNTerminusMods]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Refine_PotentialNTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialNTerminusMods), false, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialNTerminusMods), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_PotentialCTerminusMods]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Refine_PotentialCTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.eModificationTypeConstants.DynamicMod, Convert.ToInt32(eInputParamLabelNames.Refine_PotentialCTerminusMods), false, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialCTerminusMods), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_NTerminal_ResidueModMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Protein_NTerminal_ResidueModMass]))
                                     {
-                                        ParseXTandemInputParameterProteinTerminusMod(Convert.ToInt32(eInputParamLabelNames.Protein_NTerminal_ResidueModMass), true, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterProteinTerminusMod(Convert.ToInt32(InputParamLabelNames.Protein_NTerminal_ResidueModMass), true, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_CTerminal_ResidueModMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Protein_CTerminal_ResidueModMass]))
                                     {
-                                        ParseXTandemInputParameterProteinTerminusMod(Convert.ToInt32(eInputParamLabelNames.Protein_CTerminal_ResidueModMass), false, value, ref modInfoCount, ref udtModInfo);
+                                        ParseXTandemInputParameterProteinTerminusMod(Convert.ToInt32(InputParamLabelNames.Protein_CTerminal_ResidueModMass), false, value, ref modInfoCount, ref udtModInfo);
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_NTerminalMassChange]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Protein_Cleavage_NTerminalMassChange]))
                                     {
                                         if (clsPHRPParser.IsNumber(value))
                                         {
                                             PeptideNTerminusMassChange = double.Parse(value);
                                         }
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_CTerminalMassChange]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Protein_Cleavage_CTerminalMassChange]))
                                     {
                                         if (clsPHRPParser.IsNumber(value))
                                         {
                                             PeptideCTerminusMassChange = double.Parse(value);
                                         }
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Protein_Cleavage_Site]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Protein_Cleavage_Site]))
                                     {
                                         // In X!Tandem the LeftSpec and RightSpec values are separated by a vertical bar (CLEAVAGE_SPEC_SEP)
                                         // Look for CLEAVAGE_SPEC_SEP in value
@@ -1341,14 +1341,14 @@ namespace PeptideHitResultsProcessor
                                             EnzymeMatchSpec = new clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType(leftSpec, rightSpec);
                                         }
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Refine_ModificationMass]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Refine_ModificationMass]))
                                     {
                                         if (!string.IsNullOrWhiteSpace(value))
                                         {
                                             staticModsAreResetForRefinement = true;
                                         }
                                     }
-                                    else if (noteLabelLower.Equals(udtParamLabels[(int)eInputParamLabelNames.Scoring_Include_Reverse]))
+                                    else if (noteLabelLower.Equals(udtParamLabels[(int)InputParamLabelNames.Scoring_Include_Reverse]))
                                     {
                                         if (!string.IsNullOrWhiteSpace(value))
                                         {
@@ -1393,12 +1393,12 @@ namespace PeptideHitResultsProcessor
                 for (var index = 0; index < modInfoCount;)
                 {
                     var modDeleted = false;
-                    if (udtModInfo[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                    if (udtModInfo[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod)
                     {
                         var indexCompare = 0;
                         while (indexCompare < modInfoCount)
                         {
-                            if (indexCompare != index && udtModInfo[indexCompare].ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod)
+                            if (indexCompare != index && udtModInfo[indexCompare].ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod)
                             {
                                 // See if this modification has a similar mass (within MASS_DIGITS_OF_PRECISION digits of precision)
                                 if (Math.Abs(Math.Round(Math.Abs(udtModInfo[indexCompare].ModificationMass - udtModInfo[index].ModificationMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)) < float.Epsilon)
@@ -1424,10 +1424,10 @@ namespace PeptideHitResultsProcessor
 
                     if (!modDeleted)
                     {
-                        if (udtModInfo[index].ModificationType == clsModificationDefinition.eModificationTypeConstants.StaticMod && staticModsAreResetForRefinement)
+                        if (udtModInfo[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod && staticModsAreResetForRefinement)
                         {
                             // Update this static mod to be a dynamic mod
-                            udtModInfo[index].ModificationType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
+                            udtModInfo[index].ModificationType = clsModificationDefinition.ModificationTypeConstants.DynamicMod;
                         }
                         index += 1;
                     }
@@ -1513,7 +1513,7 @@ namespace PeptideHitResultsProcessor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1522,7 +1522,7 @@ namespace PeptideHitResultsProcessor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1564,13 +1564,13 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (2): " + ex.Message);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (1):" + ex.Message);
-                SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 
             return success;
@@ -1617,7 +1617,7 @@ namespace PeptideHitResultsProcessor
 
                     // Now create the Protein Mods file
                     success = CreateProteinModDetailsFile(xtandemXTFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.ePeptideHitResultType.XTandem);
+                                                          clsPHRPReader.PeptideHitResultTypes.XTandem);
                 }
             }
 

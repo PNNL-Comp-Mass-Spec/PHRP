@@ -149,7 +149,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
         public clsPHRPParserMSAlign(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSAlign, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSAlign, loadModsAndSeqInfo)
         {
         }
 
@@ -161,7 +161,7 @@ namespace PHRPReader
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
         public clsPHRPParserMSAlign(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSAlign, startupOptions)
+            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSAlign, startupOptions)
         {
         }
 
@@ -361,7 +361,7 @@ namespace PHRPReader
 
             try
             {
-                success = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MSAlign, searchEngineParams);
+                success = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.PeptideHitResultTypes.MSAlign, searchEngineParams);
 
                 if (success)
                 {
@@ -378,7 +378,7 @@ namespace PHRPReader
                                 modDef = new clsModificationDefinition(
                                     clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                     57.0215, "C",
-                                    clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                    clsModificationDefinition.ModificationTypeConstants.StaticMod,
                                     "IodoAcet");
 
                                 searchEngineParams.AddModification(modDef);
@@ -388,7 +388,7 @@ namespace PHRPReader
                                 modDef = new clsModificationDefinition(
                                     clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                     58.0055, "C",
-                                    clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                    clsModificationDefinition.ModificationTypeConstants.StaticMod,
                                     "IodoAcid");
 
                                 searchEngineParams.AddModification(modDef);

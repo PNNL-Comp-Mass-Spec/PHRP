@@ -72,7 +72,7 @@ namespace PHRPReader
         /// <summary>
         /// MS-GF+ modification type
         /// </summary>
-        public enum eMSGFPlusModType
+        public enum MSGFPlusModType
         {
             /// <summary>
             /// Unknown
@@ -145,7 +145,7 @@ namespace PHRPReader
         ///   ModMass:    Composition string, for example C5H7N1O2S0 for Hydroxyproline
         ///   ModMassVal: Computed mass of the composition string
         ///   Residues:   Single letter abbreviation for the custom amino acid, for example J or X
-        ///   ModType:    eMSGFPlusModType.CustomAA
+        ///   ModType:    MSGFPlusModType.CustomAA
         ///   ModSymbol:  ?   (a question mark; not used)
         /// </remarks>
         public struct udtModInfoType
@@ -173,7 +173,7 @@ namespace PHRPReader
             /// <summary>
             /// Modification type
             /// </summary>
-            public eMSGFPlusModType ModType;
+            public MSGFPlusModType ModType;
 
             /// <summary>
             /// Modification symbol: *, #, @, ... ; dash if a static mod
@@ -339,7 +339,7 @@ namespace PHRPReader
                             continue;
                         }
 
-                        var modType = eMSGFPlusModType.Unknown;
+                        var modType = MSGFPlusModType.Unknown;
 
                         foreach (var tagName in tagNamesToFind)
                         {
@@ -360,13 +360,13 @@ namespace PHRPReader
                                 switch (tagName)
                                 {
                                     case PARAM_TAG_MOD_STATIC:
-                                        modType = eMSGFPlusModType.StaticMod;
+                                        modType = MSGFPlusModType.StaticMod;
                                         break;
                                     case PARAM_TAG_MOD_DYNAMIC:
-                                        modType = eMSGFPlusModType.DynamicMod;
+                                        modType = MSGFPlusModType.DynamicMod;
                                         break;
                                     case PARAM_TAG_CUSTOM_AA:
-                                        modType = eMSGFPlusModType.CustomAA;
+                                        modType = MSGFPlusModType.CustomAA;
                                         break;
                                 }
 
@@ -381,17 +381,17 @@ namespace PHRPReader
                             var lineInNoSpaces = TrimComment(trimmedLine).Replace(" ", string.Empty);
                             if (lineInNoSpaces.Contains(",opt,"))
                             {
-                                modType = eMSGFPlusModType.DynamicMod;
+                                modType = MSGFPlusModType.DynamicMod;
                                 modSpec = lineInNoSpaces;
                             }
                             else if (lineInNoSpaces.Contains(",fix,"))
                             {
-                                modType = eMSGFPlusModType.StaticMod;
+                                modType = MSGFPlusModType.StaticMod;
                                 modSpec = lineInNoSpaces;
                             }
                             else if (lineInNoSpaces.Contains(",custom,"))
                             {
-                                modType = eMSGFPlusModType.CustomAA;
+                                modType = MSGFPlusModType.CustomAA;
                                 modSpec = lineInNoSpaces;
                             }
                         }
@@ -491,7 +491,7 @@ namespace PHRPReader
             //   Mass or EmpiricalFormula:   Mod mass, or empirical formula (like C2H3N1O1 or H-2O-1)
             //   Residues:  affected residues or N/C-terminus or *
             //   ModType:   fix or opt
-            //   Position:  any, N-term, Prot-N-term, etc.; see eMSGFPlusModType.CustomAA
+            //   Position:  any, N-term, Prot-N-term, etc.; see MSGFPlusModType.CustomAA
             //   ModName:   UniMod name or custom name
 
             // Custom amino acids using a different format:
@@ -524,24 +524,24 @@ namespace PHRPReader
                 switch (splitLine[2].Trim().ToLower())
                 {
                     case "opt":
-                        udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                        udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         break;
                     case "fix":
-                        udtModInfo.ModType = eMSGFPlusModType.StaticMod;
+                        udtModInfo.ModType = MSGFPlusModType.StaticMod;
                         break;
                     case "custom":
-                        udtModInfo.ModType = eMSGFPlusModType.CustomAA;
+                        udtModInfo.ModType = MSGFPlusModType.CustomAA;
                         break;
                     default:
                         ReportWarning(string.Format(
                                           "Unrecognized Mod Type {0} in the {1} parameter file; should be 'opt', 'fix', or 'custom'; will assume 'opt'",
                                           splitLine[2], mToolName));
 
-                        udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                        udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         break;
                 }
 
-                if (udtModInfo.ModType != eMSGFPlusModType.CustomAA)
+                if (udtModInfo.ModType != MSGFPlusModType.CustomAA)
                 {
                     switch (splitLine[3].Trim().ToLower().Replace("-", string.Empty))
                     {
@@ -550,52 +550,52 @@ namespace PHRPReader
                             break;
 
                         case "nterm":
-                            if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                            if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                             {
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                                udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
                             udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                            if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                                udtModInfo.ModType = eMSGFPlusModType.DynNTermPeptide;
+                            if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
+                                udtModInfo.ModType = MSGFPlusModType.DynNTermPeptide;
 
                             break;
 
                         case "cterm":
-                            if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                            if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                             {
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                                udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
                             udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                            if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                                udtModInfo.ModType = eMSGFPlusModType.DynCTermPeptide;
+                            if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
+                                udtModInfo.ModType = MSGFPlusModType.DynCTermPeptide;
 
                             break;
 
                         case "protnterm":
                             // Includes Prot-N-Term, Prot-n-Term, ProtNTerm, etc.
-                            if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                            if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                             {
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                                udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
                             udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
-                            if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                                udtModInfo.ModType = eMSGFPlusModType.DynNTermProtein;
+                            if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
+                                udtModInfo.ModType = MSGFPlusModType.DynNTermProtein;
 
                             break;
 
                         case "protcterm":
                             // Includes Prot-C-Term, Prot-c-Term, ProtCterm, etc.
-                            if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                            if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                             {
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                                udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                                udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
                             udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
-                            if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                                udtModInfo.ModType = eMSGFPlusModType.DynCTermProtein;
+                            if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
+                                udtModInfo.ModType = MSGFPlusModType.DynCTermProtein;
 
                             break;
 
@@ -627,14 +627,14 @@ namespace PHRPReader
         /// </summary>
         /// <param name="paramFilePath"></param>
         /// <param name="splitLine"></param>
-        /// <param name="modType">eMSGFPlusModType.DynamicMod or eMSGFPlusModType.StaticMod</param>
+        /// <param name="modType">MSGFPlusModType.DynamicMod or MSGFPlusModType.StaticMod</param>
         /// <param name="unnamedModID"></param>
         /// <param name="udtModInfo"></param>
         /// <returns>True if success, false if an error</returns>
         private bool ParseModSpecTopPIC(
             string paramFilePath,
             IReadOnlyList<string> splitLine,
-            eMSGFPlusModType modType,
+            MSGFPlusModType modType,
             ref int unnamedModID,
             out udtModInfoType udtModInfo)
         {
@@ -672,26 +672,26 @@ namespace PHRPReader
                         break;
 
                     case "nterm":
-                        if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                        if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                         {
                             // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                            udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                            udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         }
                         udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                        if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                            udtModInfo.ModType = eMSGFPlusModType.DynNTermPeptide;
+                        if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
+                            udtModInfo.ModType = MSGFPlusModType.DynNTermPeptide;
 
                         break;
 
                     case "cterm":
-                        if (udtModInfo.ModType == eMSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
+                        if (udtModInfo.ModType == MSGFPlusModType.StaticMod && udtModInfo.Residues != "*")
                         {
                             // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
-                            udtModInfo.ModType = eMSGFPlusModType.DynamicMod;
+                            udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         }
                         udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
-                        if (udtModInfo.ModType == eMSGFPlusModType.DynamicMod)
-                            udtModInfo.ModType = eMSGFPlusModType.DynCTermPeptide;
+                        if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
+                            udtModInfo.ModType = MSGFPlusModType.DynCTermPeptide;
 
                         break;
 
@@ -787,53 +787,53 @@ namespace PHRPReader
                         chTargetResidue = default;
                     }
 
-                    var eModType = clsModificationDefinition.eModificationTypeConstants.DynamicMod;
-                    clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState;
+                    var eModType = clsModificationDefinition.ModificationTypeConstants.DynamicMod;
+                    clsAminoAcidModInfo.ResidueTerminusStateConstants eResidueTerminusState;
 
-                    if (udtModInfo.ModType == eMSGFPlusModType.DynNTermPeptide)
+                    if (udtModInfo.ModType == MSGFPlusModType.DynNTermPeptide)
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
+                        eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                     }
-                    else if (udtModInfo.ModType == eMSGFPlusModType.DynCTermPeptide)
+                    else if (udtModInfo.ModType == MSGFPlusModType.DynCTermPeptide)
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
+                        eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                     }
-                    else if (udtModInfo.ModType == eMSGFPlusModType.DynNTermProtein)
+                    else if (udtModInfo.ModType == MSGFPlusModType.DynNTermProtein)
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
+                        eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
                     }
-                    else if (udtModInfo.ModType == eMSGFPlusModType.DynCTermProtein)
+                    else if (udtModInfo.ModType == MSGFPlusModType.DynCTermProtein)
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
+                        eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
                     }
                     else
                     {
                         switch (chTargetResidue)
                         {
                             case clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS:
-                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
-                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                    eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
+                                eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                                if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                                 break;
                             case clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS:
-                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
-                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                    eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
+                                eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                                if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                                 break;
                             case clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS:
-                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
-                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                    eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
+                                eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
+                                if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
                                 break;
                             case clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS:
-                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
-                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                    eModType = clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod;
+                                eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
+                                if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
                                 break;
                             default:
-                                eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None;
-                                if (udtModInfo.ModType == eMSGFPlusModType.StaticMod)
-                                    eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod;
+                                eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
+                                if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
+                                    eModType = clsModificationDefinition.ModificationTypeConstants.StaticMod;
                                 break;
                         }
                     }

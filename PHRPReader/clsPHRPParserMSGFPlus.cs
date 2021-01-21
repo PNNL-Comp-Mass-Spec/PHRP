@@ -179,7 +179,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
         public clsPHRPParserMSGFPlus(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSGFPlus, loadModsAndSeqInfo)
         {
         }
 
@@ -191,7 +191,7 @@ namespace PHRPReader
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
         public clsPHRPParserMSGFPlus(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus, startupOptions)
+            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSGFPlus, startupOptions)
         {
         }
 
@@ -206,7 +206,7 @@ namespace PHRPReader
         public static double DeterminePrecursorMassTolerance(
             clsSearchEngineParameters searchEngineParams,
             out double tolerancePPM,
-            clsPHRPReader.ePeptideHitResultType resultType)
+            clsPHRPReader.PeptideHitResultTypes resultType)
         {
             var reExtraToleranceWithUnits = new Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var reExtraToleranceNoUnits = new Regex("([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -216,7 +216,7 @@ namespace PHRPReader
 
             tolerancePPM = 0;
 
-            if (resultType == clsPHRPReader.ePeptideHitResultType.TopPIC)
+            if (resultType == clsPHRPReader.PeptideHitResultTypes.TopPIC)
             {
                 // TopPIC
                 if (!searchEngineParams.Parameters.TryGetValue("ErrorTolerance", out tolerance))
@@ -246,8 +246,8 @@ namespace PHRPReader
                     continue;
 
                 Match reMatch;
-                if (resultType == clsPHRPReader.ePeptideHitResultType.MSPathFinder ||
-                    resultType == clsPHRPReader.ePeptideHitResultType.TopPIC)
+                if (resultType == clsPHRPReader.PeptideHitResultTypes.MSPathFinder ||
+                    resultType == clsPHRPReader.PeptideHitResultTypes.TopPIC)
                 {
                     reMatch = reExtraToleranceNoUnits.Match(item);
                 }
@@ -262,8 +262,8 @@ namespace PHRPReader
                 if (!double.TryParse(reMatch.Groups[1].Value, out var toleranceCurrent))
                     continue;
 
-                if (resultType == clsPHRPReader.ePeptideHitResultType.MSPathFinder ||
-                    resultType == clsPHRPReader.ePeptideHitResultType.TopPIC)
+                if (resultType == clsPHRPReader.PeptideHitResultTypes.MSPathFinder ||
+                    resultType == clsPHRPReader.PeptideHitResultTypes.TopPIC)
                 {
                     // Units are always ppm
                     tolerancePPM = toleranceCurrent;
@@ -487,7 +487,7 @@ namespace PHRPReader
             {
                 mPeptideMassCalculator.ResetAminoAcidMasses();
 
-                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFilePath, clsPHRPReader.ePeptideHitResultType.MSGFPlus, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFilePath, clsPHRPReader.PeptideHitResultTypes.MSGFPlus, searchEngineParams);
 
                 if (!success)
                 {
@@ -594,7 +594,7 @@ namespace PHRPReader
                 }
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, clsPHRPReader.ePeptideHitResultType.MSGFPlus);
+                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, clsPHRPReader.PeptideHitResultTypes.MSGFPlus);
                 searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
 
                 // Look for Custom Amino Acid definitions
@@ -855,7 +855,7 @@ namespace PHRPReader
                 return false;
             }
 
-            var customAminoAcidDefs = (from item in modInfo where item.ModType == clsMSGFPlusParamFileModExtractor.eMSGFPlusModType.CustomAA select item).ToList();
+            var customAminoAcidDefs = (from item in modInfo where item.ModType == clsMSGFPlusParamFileModExtractor.MSGFPlusModType.CustomAA select item).ToList();
             if (customAminoAcidDefs.Count == 0)
             {
                 // There are no custom amino acids

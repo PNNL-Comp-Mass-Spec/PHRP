@@ -77,7 +77,7 @@ namespace PHRPReader
         /// <remarks>
         /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
         /// </remarks>
-        public clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants CleavageState { get; set; }
+        public clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants CleavageState { get; set; }
 
         /// <summary>
         /// Collision mode (CID, ETD, HCD)
@@ -387,7 +387,7 @@ namespace PHRPReader
         public void AddModifiedResidue(
             char residue,
             int residueLocInPeptide,
-            clsAminoAcidModInfo.eResidueTerminusStateConstants residueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             clsModificationDefinition modDefinition)
         {
             ModifiedResidues.Add(new clsAminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDefinition));
@@ -405,7 +405,7 @@ namespace PHRPReader
         public void AddModifiedResidue(
             char residue,
             int residueLocInPeptide,
-            clsAminoAcidModInfo.eResidueTerminusStateConstants residueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             clsModificationDefinition modDefinition,
             int endResidueLocInPeptide)
         {
@@ -483,7 +483,7 @@ namespace PHRPReader
             CollisionMode = UNKNOWN_COLLISION_MODE;
             MSGFSpecEValue = string.Empty;
 
-            CleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Unknown;
+            CleavageState = clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Unknown;
             NumMissedCleavages = 0;
             NumTrypticTermini = 0;
 
@@ -735,11 +735,11 @@ namespace PHRPReader
 
             CleavageState = cleavageStateCalculator.ComputeCleavageState(Peptide);
 
-            if (CleavageState == clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Full)
+            if (CleavageState == clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)
             {
                 NumTrypticTermini = 2;
             }
-            else if (CleavageState == clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.Partial)
+            else if (CleavageState == clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)
             {
                 NumTrypticTermini = 1;
             }
