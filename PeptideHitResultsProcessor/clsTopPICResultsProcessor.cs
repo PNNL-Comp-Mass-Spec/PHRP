@@ -62,7 +62,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file created directly by TopPIC
         /// </summary>
-        private enum eTopPICResultsFileColumns
+        private enum TopPICResultsFileColumns
         {
             SpectrumFileName = 0,
             Prsm_ID = 1,
@@ -229,7 +229,7 @@ namespace PeptideHitResultsProcessor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.ModificationTypeConstants.StaticMod)
                         {
                             var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
@@ -520,7 +520,7 @@ namespace PeptideHitResultsProcessor
             string outputFilePath)
         {
 
-            var columnMapping = new Dictionary<eTopPICResultsFileColumns, int>();
+            var columnMapping = new Dictionary<TopPICResultsFileColumns, int>();
 
             try
             {
@@ -556,7 +556,7 @@ namespace PeptideHitResultsProcessor
                             if (!validHeader)
                             {
                                 // Error parsing header
-                                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                                 return false;
                             }
 
@@ -624,7 +624,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -650,12 +650,12 @@ namespace PeptideHitResultsProcessor
                 clsMSGFPlusParamFileModExtractor.ModSpecFormats.TopPIC,
                 out modInfo);
 
-            if (!success || mErrorCode != ePHRPErrorCodes.NoError)
+            if (!success || mErrorCode != PHRPErrorCodes.NoError)
             {
-                if (mErrorCode == ePHRPErrorCodes.NoError)
+                if (mErrorCode == PHRPErrorCodes.NoError)
                 {
                     SetErrorMessage("Unknown error extracting the modification definitions from the TopPIC parameter file");
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 }
                 return false;
             }
@@ -780,7 +780,7 @@ namespace PeptideHitResultsProcessor
                                 if (!validHeader)
                                 {
                                     // Error parsing header
-                                    SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                                    SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                                     return false;
                                 }
                                 headerParsed = true;
@@ -900,7 +900,7 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -911,7 +911,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
 
@@ -929,7 +929,7 @@ namespace PeptideHitResultsProcessor
             string lineIn,
             ref udtTopPICSearchResultType udtSearchResult,
             ref string errorLog,
-            IDictionary<eTopPICResultsFileColumns, int> columnMapping)
+            IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
 
             string[] splitLine = null;
@@ -948,16 +948,16 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
-                if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
+                if (!GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
                 {
                     ReportError("Prsm_ID column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
 
-                if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Scans], out udtSearchResult.Scans))
+                if (!GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Scans], out udtSearchResult.Scans))
                 {
                     ReportError("Scan(s) column is missing or invalid", true);
                 }
@@ -982,12 +982,12 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Peaks], out udtSearchResult.Peaks);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Charge], out udtSearchResult.Charge);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Peaks], out udtSearchResult.Peaks);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Charge], out udtSearchResult.Charge);
                 udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
                 // Monoisotopic mass value of the observed precursor_mz
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
 
                 // precursorMonoMass is Observed m/z, converted to monoisotopic mass
                 if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
@@ -1002,10 +1002,10 @@ namespace PeptideHitResultsProcessor
                 // peptideMonoMassTopPIC is Theoretical peptide monoisotopic mass, including mods, as computed by TopPIC
                 double peptideMonoMassTopPIC;
 
-                if (columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass] >= 0)
+                if (columnMapping[TopPICResultsFileColumns.Adjusted_precursor_mass] >= 0)
                 {
                     // Theoretical monoisotopic mass of the peptide (including mods), as computed by TopPIC
-                    GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
+                    GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
 
                     double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassTopPIC);
                 }
@@ -1014,17 +1014,17 @@ namespace PeptideHitResultsProcessor
                     peptideMonoMassTopPIC = 0;
                 }
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Protein_accession], out udtSearchResult.Protein);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_accession], out udtSearchResult.Protein);
                 udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Protein_description], out udtSearchResult.ProteinDescription);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_description], out udtSearchResult.ProteinDescription);
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.First_residue], out udtSearchResult.ResidueStart);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Last_residue], out udtSearchResult.ResidueEnd);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.First_residue], out udtSearchResult.ResidueStart);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Last_residue], out udtSearchResult.ResidueEnd);
 
-                if (!GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform], out udtSearchResult.Proteoform))
+                if (!GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform], out udtSearchResult.Proteoform))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
@@ -1067,13 +1067,13 @@ namespace PeptideHitResultsProcessor
                 // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                 udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_Mod_Count);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.MIScore], out udtSearchResult.MIScore);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_Mod_Count);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.MIScore], out udtSearchResult.MIScore);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Variable_PTMs], out udtSearchResult.VariablePTMs);
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
                 if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
                     udtSearchResult.PValueNum = 0;
 
@@ -1083,8 +1083,8 @@ namespace PeptideHitResultsProcessor
                 udtSearchResult.Matched_peaks = AssureInteger(udtSearchResult.Matched_peaks, 0);                    // Matched_Peak_Count
                 udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0);    // Matched_Fragment_Ion_Count
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
 
                 if (string.Equals(udtSearchResult.Qvalue, "infinity", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1095,7 +1095,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Qvalue = string.Empty;
                 }
 
-                GetColumnValue(splitLine, columnMapping[eTopPICResultsFileColumns.Proteoform_FDR], out udtSearchResult.Proteoform_FDR);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_FDR], out udtSearchResult.Proteoform_FDR);
 
                 return true;
             }
@@ -1125,7 +1125,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns></returns>
-        private bool ParseTopPICResultsFileHeaderLine(string lineIn, IDictionary<eTopPICResultsFileColumns, int> columnMapping)
+        private bool ParseTopPICResultsFileHeaderLine(string lineIn, IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
             // Header prior to November 2018:
             // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein name    First residue    Last residue    Proteoform    #unexpected modifications    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR    #Variable PTMs
@@ -1133,35 +1133,35 @@ namespace PeptideHitResultsProcessor
             // Header for TopPIC 1.2 and newer
             // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein accession    Protein description    First residue    Last residue    Proteoform    #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR
 
-            var columnNames = new SortedDictionary<string, eTopPICResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
+            var columnNames = new SortedDictionary<string, TopPICResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {"Data file name", eTopPICResultsFileColumns.SpectrumFileName},
-                {"Prsm ID", eTopPICResultsFileColumns.Prsm_ID},
-                {"Spectrum ID", eTopPICResultsFileColumns.Spectrum_ID},
-                {"Fragmentation", eTopPICResultsFileColumns.FragMethod},
-                {"Scan(s)", eTopPICResultsFileColumns.Scans},
-                {"Retention time", eTopPICResultsFileColumns.RetentionTime},
-                {"#peaks", eTopPICResultsFileColumns.Peaks},
-                {"Charge", eTopPICResultsFileColumns.Charge},
-                {"Precursor mass", eTopPICResultsFileColumns.Precursor_mass},
-                {"Adjusted precursor mass", eTopPICResultsFileColumns.Adjusted_precursor_mass},
-                {"Proteoform ID", eTopPICResultsFileColumns.Proteoform_ID},
-                {"Feature intensity", eTopPICResultsFileColumns.Feature_intensity},
-                {"Protein name", eTopPICResultsFileColumns.Protein_accession},
-                {"Protein accession", eTopPICResultsFileColumns.Protein_accession},
-                {"Protein description", eTopPICResultsFileColumns.Protein_description},
-                {"First residue", eTopPICResultsFileColumns.First_residue},
-                {"Last residue", eTopPICResultsFileColumns.Last_residue},
-                {"Proteoform", eTopPICResultsFileColumns.Proteoform},
-                {"#unexpected modifications", eTopPICResultsFileColumns.Unexpected_modifications},
-                {"MIScore", eTopPICResultsFileColumns.MIScore},
-                {"#variable PTMs", eTopPICResultsFileColumns.Variable_PTMs},
-                {"#matched peaks", eTopPICResultsFileColumns.Matched_peaks},
-                {"#matched fragment ions", eTopPICResultsFileColumns.Matched_fragment_ions},
-                {"P-value", eTopPICResultsFileColumns.Pvalue},
-                {"E-value", eTopPICResultsFileColumns.Evalue},
-                {"Q-value (spectral FDR)", eTopPICResultsFileColumns.Qvalue},
-                {"Proteoform FDR", eTopPICResultsFileColumns.Proteoform_FDR}
+                {"Data file name", TopPICResultsFileColumns.SpectrumFileName},
+                {"Prsm ID", TopPICResultsFileColumns.Prsm_ID},
+                {"Spectrum ID", TopPICResultsFileColumns.Spectrum_ID},
+                {"Fragmentation", TopPICResultsFileColumns.FragMethod},
+                {"Scan(s)", TopPICResultsFileColumns.Scans},
+                {"Retention time", TopPICResultsFileColumns.RetentionTime},
+                {"#peaks", TopPICResultsFileColumns.Peaks},
+                {"Charge", TopPICResultsFileColumns.Charge},
+                {"Precursor mass", TopPICResultsFileColumns.Precursor_mass},
+                {"Adjusted precursor mass", TopPICResultsFileColumns.Adjusted_precursor_mass},
+                {"Proteoform ID", TopPICResultsFileColumns.Proteoform_ID},
+                {"Feature intensity", TopPICResultsFileColumns.Feature_intensity},
+                {"Protein name", TopPICResultsFileColumns.Protein_accession},
+                {"Protein accession", TopPICResultsFileColumns.Protein_accession},
+                {"Protein description", TopPICResultsFileColumns.Protein_description},
+                {"First residue", TopPICResultsFileColumns.First_residue},
+                {"Last residue", TopPICResultsFileColumns.Last_residue},
+                {"Proteoform", TopPICResultsFileColumns.Proteoform},
+                {"#unexpected modifications", TopPICResultsFileColumns.Unexpected_modifications},
+                {"MIScore", TopPICResultsFileColumns.MIScore},
+                {"#variable PTMs", TopPICResultsFileColumns.Variable_PTMs},
+                {"#matched peaks", TopPICResultsFileColumns.Matched_peaks},
+                {"#matched fragment ions", TopPICResultsFileColumns.Matched_fragment_ions},
+                {"P-value", TopPICResultsFileColumns.Pvalue},
+                {"E-value", TopPICResultsFileColumns.Evalue},
+                {"Q-value (spectral FDR)", TopPICResultsFileColumns.Qvalue},
+                {"Proteoform FDR", TopPICResultsFileColumns.Proteoform_FDR}
             };
 
             columnMapping.Clear();
@@ -1169,7 +1169,7 @@ namespace PeptideHitResultsProcessor
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (eTopPICResultsFileColumns resultColumn in Enum.GetValues(typeof(eTopPICResultsFileColumns)))
+                foreach (TopPICResultsFileColumns resultColumn in Enum.GetValues(typeof(TopPICResultsFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1416,7 +1416,7 @@ namespace PeptideHitResultsProcessor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1425,7 +1425,7 @@ namespace PeptideHitResultsProcessor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1500,13 +1500,13 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in clsTopPICResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in clsTopPICResultsProcessor.ProcessFile (1):" + ex.Message, ex);
-                SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 
             return success;
@@ -1530,7 +1530,7 @@ namespace PeptideHitResultsProcessor
             if (sourcePHRPDataFiles.Count == 0)
             {
                 SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 success = false;
             }
             else
@@ -1569,7 +1569,7 @@ namespace PeptideHitResultsProcessor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.ePeptideHitResultType.TopPIC);
+                                                          clsPHRPReader.PeptideHitResultTypes.TopPIC);
                 }
             }
 
@@ -1728,7 +1728,7 @@ namespace PeptideHitResultsProcessor
 
         private void ModExtractorErrorHandler(string message, Exception ex)
         {
-            SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+            SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
         }
 
         #endregion

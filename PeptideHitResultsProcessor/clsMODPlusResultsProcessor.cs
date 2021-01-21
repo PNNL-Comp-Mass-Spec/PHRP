@@ -53,7 +53,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file (_MODPlus.id.txt) created by MODPlus's tda_plus.jar file
         /// </summary>
-        private enum eMODPlusResultsFileColumns
+        private enum MODPlusResultsFileColumns
         {
             SpectrumFileName = 0,
             SpectrumIndex = 1,
@@ -182,7 +182,7 @@ namespace PeptideHitResultsProcessor
                     // Look for static mods to associate with this residue
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.ModificationTypeConstants.StaticMod)
                             continue;
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -429,7 +429,7 @@ namespace PeptideHitResultsProcessor
                 // Look for static mods to associate with this residue
                 for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                 {
-                    if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                    if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.ModificationTypeConstants.StaticMod)
                         continue;
 
                     var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -480,7 +480,7 @@ namespace PeptideHitResultsProcessor
         {
             try
             {
-                var columnMapping = new Dictionary<eMODPlusResultsFileColumns, int>();
+                var columnMapping = new Dictionary<MODPlusResultsFileColumns, int>();
                 var errorLog = string.Empty;
 
                 // Open the input file and parse it
@@ -586,7 +586,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -610,7 +610,7 @@ namespace PeptideHitResultsProcessor
                 if (string.IsNullOrEmpty(modPlusParamFilePath))
                 {
                     SetErrorMessage("MODPlus Parameter File name not defined; unable to extract mod info");
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                     return false;
                 }
 
@@ -649,10 +649,10 @@ namespace PeptideHitResultsProcessor
                             {
                                 var massCorrectionTag = mPeptideMods.LookupMassCorrectionTagByMass(modMassDa);
 
-                                var eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod;
+                                var eModType = clsModificationDefinition.ModificationTypeConstants.StaticMod;
                                 if (residue == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residue == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                                 {
-                                    eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
+                                    eModType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                                 }
 
                                 var modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL, modMassDa, residue, eModType, massCorrectionTag);
@@ -669,7 +669,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage("Error reading the MODPlus parameter file (" + Path.GetFileName(modPlusParamFilePath) + "): " + ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
         }
@@ -749,7 +749,7 @@ namespace PeptideHitResultsProcessor
                                 if (!validHeader)
                                 {
                                     // Error parsing header
-                                    SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                                    SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                                     return false;
                                 }
                                 headerParsed = true;
@@ -841,7 +841,7 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -852,7 +852,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
 
@@ -871,7 +871,7 @@ namespace PeptideHitResultsProcessor
             string lineIn,
             ref udtMODPlusSearchResultType udtSearchResult,
             ref string errorLog,
-            IDictionary<eMODPlusResultsFileColumns, int> columnMapping)
+            IDictionary<MODPlusResultsFileColumns, int> columnMapping)
         {
             // Parses an entry from the MODPlus results file
 
@@ -888,9 +888,9 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
 
-                if (!GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.SpectrumIndex], out udtSearchResult.SpectrumIndex))
+                if (!GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.SpectrumIndex], out udtSearchResult.SpectrumIndex))
                 {
                     ReportError("Index column is missing or invalid", true);
                 }
@@ -904,11 +904,11 @@ namespace PeptideHitResultsProcessor
                     ReportError("Index column is not numeric", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.ScanNumber], out udtSearchResult.ScanNum);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.ScanNumber], out udtSearchResult.ScanNum);
 
                 // Monoisotopic mass value of the observed precursor_mz
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.ObservedMonoMass], out udtSearchResult.Precursor_mass);
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.ObservedMonoMass], out udtSearchResult.Precursor_mass);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.Charge], out udtSearchResult.Charge);
                 udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
                 // precursorMonoMass is Observed m/z, converted to monoisotopic mass
@@ -921,30 +921,30 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.CalculatedMonoMass], out udtSearchResult.CalculatedMonoMass);
 
                 // Theoretical peptide monoisotopic mass, including mods, as computed by MODPlus
                 double.TryParse(udtSearchResult.CalculatedMonoMass, out var peptideMonoMassMODPlus);
 
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.DeltaMass], out udtSearchResult.DeltaMass);
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.Score], out udtSearchResult.Score);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.DeltaMass], out udtSearchResult.DeltaMass);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.Score], out udtSearchResult.Score);
                 if (!double.TryParse(udtSearchResult.Score, out udtSearchResult.ScoreNum))
                     udtSearchResult.ScoreNum = 0;
 
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.Probability], out udtSearchResult.Probability);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.Probability], out udtSearchResult.Probability);
                 if (!double.TryParse(udtSearchResult.Probability, out udtSearchResult.ProbabilityNum))
                     udtSearchResult.ProbabilityNum = 0;
 
-                if (!GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.Peptide], out udtSearchResult.Peptide))
+                if (!GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.Peptide], out udtSearchResult.Peptide))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.NTT], out udtSearchResult.NTT);
+                GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.NTT], out udtSearchResult.NTT);
 
-                if (splitLine.Length > (int)eMODPlusResultsFileColumns.ProteinAndPeptidePositionList)
+                if (splitLine.Length > (int)MODPlusResultsFileColumns.ProteinAndPeptidePositionList)
                 {
-                    GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.ProteinAndPeptidePositionList], out udtSearchResult.ProteinList);
+                    GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.ProteinAndPeptidePositionList], out udtSearchResult.ProteinList);
 
                     // The protein column will have both the protein name and the peptide position
                     // For example, ref|YP_001038741.1[R.67~78.L(2)]
@@ -959,9 +959,9 @@ namespace PeptideHitResultsProcessor
                     }
                     else
                     {
-                        if (splitLine.Length > (int)eMODPlusResultsFileColumns.ModificationAnnotation)
+                        if (splitLine.Length > (int)MODPlusResultsFileColumns.ModificationAnnotation)
                         {
-                            GetColumnValue(splitLine, columnMapping[eMODPlusResultsFileColumns.ModificationAnnotation], out udtSearchResult.ModificationAnnotation);
+                            GetColumnValue(splitLine, columnMapping[MODPlusResultsFileColumns.ModificationAnnotation], out udtSearchResult.ModificationAnnotation);
                         }
                     }
                 }
@@ -1035,26 +1035,26 @@ namespace PeptideHitResultsProcessor
         /// <param name="columnMapping"></param>
         /// <returns>True if this is a valid header line, otherwise false (meaning it is a data line)</returns>
         /// <remarks></remarks>
-        private bool ParseMODPlusResultsFileHeaderLine(string lineIn, IDictionary<eMODPlusResultsFileColumns, int> columnMapping)
+        private bool ParseMODPlusResultsFileHeaderLine(string lineIn, IDictionary<MODPlusResultsFileColumns, int> columnMapping)
         {
             // The expected column order from MODPlus:
             //   SpectrumFile   Index   ScanNo   ObservedMW   Charge   CalculatedMW   DeltaMass   Score   Probability   Peptide   NTT    Protein   ModificationAnnotation
 
-            var columnNames = new SortedDictionary<string, eMODPlusResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
+            var columnNames = new SortedDictionary<string, MODPlusResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {"SpectrumFile", eMODPlusResultsFileColumns.SpectrumFileName},
-                {"Index", eMODPlusResultsFileColumns.SpectrumIndex},
-                {"ScanNo", eMODPlusResultsFileColumns.ScanNumber},
-                {"ObservedMW", eMODPlusResultsFileColumns.ObservedMonoMass},
-                {"Charge", eMODPlusResultsFileColumns.Charge},
-                {"CalculatedMW", eMODPlusResultsFileColumns.CalculatedMonoMass},
-                {"DeltaMass", eMODPlusResultsFileColumns.DeltaMass},
-                {"Score", eMODPlusResultsFileColumns.Score},
-                {"Probability", eMODPlusResultsFileColumns.Probability},
-                {"Peptide", eMODPlusResultsFileColumns.Peptide},
-                {"NTT", eMODPlusResultsFileColumns.NTT},
-                {"Protein", eMODPlusResultsFileColumns.ProteinAndPeptidePositionList},
-                {"ModificationAnnotation", eMODPlusResultsFileColumns.ModificationAnnotation}
+                {"SpectrumFile", MODPlusResultsFileColumns.SpectrumFileName},
+                {"Index", MODPlusResultsFileColumns.SpectrumIndex},
+                {"ScanNo", MODPlusResultsFileColumns.ScanNumber},
+                {"ObservedMW", MODPlusResultsFileColumns.ObservedMonoMass},
+                {"Charge", MODPlusResultsFileColumns.Charge},
+                {"CalculatedMW", MODPlusResultsFileColumns.CalculatedMonoMass},
+                {"DeltaMass", MODPlusResultsFileColumns.DeltaMass},
+                {"Score", MODPlusResultsFileColumns.Score},
+                {"Probability", MODPlusResultsFileColumns.Probability},
+                {"Peptide", MODPlusResultsFileColumns.Peptide},
+                {"NTT", MODPlusResultsFileColumns.NTT},
+                {"Protein", MODPlusResultsFileColumns.ProteinAndPeptidePositionList},
+                {"ModificationAnnotation", MODPlusResultsFileColumns.ModificationAnnotation}
             };
 
             columnMapping.Clear();
@@ -1062,7 +1062,7 @@ namespace PeptideHitResultsProcessor
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (eMODPlusResultsFileColumns resultColumn in Enum.GetValues(typeof(eMODPlusResultsFileColumns)))
+                foreach (MODPlusResultsFileColumns resultColumn in Enum.GetValues(typeof(MODPlusResultsFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1099,7 +1099,7 @@ namespace PeptideHitResultsProcessor
                 if (useDefaultHeaders)
                 {
                     // Use default column mappings
-                    foreach (eMODPlusResultsFileColumns resultColumn in Enum.GetValues(typeof(eMODPlusResultsFileColumns)))
+                    foreach (MODPlusResultsFileColumns resultColumn in Enum.GetValues(typeof(MODPlusResultsFileColumns)))
                     {
                         columnMapping[resultColumn] = (int)resultColumn;
                     }
@@ -1297,7 +1297,7 @@ namespace PeptideHitResultsProcessor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1306,7 +1306,7 @@ namespace PeptideHitResultsProcessor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1376,13 +1376,13 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in clsMODPlusResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in ProcessFile (1):" + ex.Message, ex);
-                SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 
             return success;
@@ -1416,7 +1416,7 @@ namespace PeptideHitResultsProcessor
             if (sourcePHRPDataFiles.Count == 0)
             {
                 SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 success = false;
             }
             else
@@ -1451,7 +1451,7 @@ namespace PeptideHitResultsProcessor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.ePeptideHitResultType.MODPlus);
+                                                          clsPHRPReader.PeptideHitResultTypes.MODPlus);
                 }
             }
 
@@ -1478,7 +1478,7 @@ namespace PeptideHitResultsProcessor
                 {
                     mPeptideMods.LookupModificationDefinitionByMassAndModType(
                         modInfo.ModificationMass, modInfo.ModificationType, default,
-                        clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
+                        clsAminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
                 }
                 else
                 {
@@ -1486,7 +1486,7 @@ namespace PeptideHitResultsProcessor
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
                             modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
-                            clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
+                            clsAminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
                     }
                 }
             }

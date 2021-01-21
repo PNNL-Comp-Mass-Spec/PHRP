@@ -58,13 +58,13 @@ namespace PeptideHitResultsProcessor
         /// <remarks></remarks>
         private string mPeptideCleanSequence;
 
-        private clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants mPeptideCleavageState;
+        private clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants mPeptideCleavageState;
 
         /// <summary>
         /// Terminus state of the peptide
         /// </summary>
         /// <remarks></remarks>
-        private clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants mPeptideTerminusState;
+        private clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants mPeptideTerminusState;
 
         /// <summary>
         /// List of modifications present in the current peptide
@@ -265,7 +265,7 @@ namespace PeptideHitResultsProcessor
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants PeptideCleavageState => mPeptideCleavageState;
+        public clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants PeptideCleavageState => mPeptideCleavageState;
 
         /// <summary>
         /// Terminus state of the peptide
@@ -273,7 +273,7 @@ namespace PeptideHitResultsProcessor
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants PeptideTerminusState => mPeptideTerminusState;
+        public clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants PeptideTerminusState => mPeptideTerminusState;
 
         /// <summary>
         /// In XTandem this is the theoretical monoisotopic MH
@@ -337,7 +337,7 @@ namespace PeptideHitResultsProcessor
             mPeptideMods = peptideMods;
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
-            mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.eStandardCleavageAgentConstants.Trypsin);
+            mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.StandardCleavageAgentConstants.Trypsin);
 
             mPeptideSeqMassCalculator = peptideSeqMassCalculator ?? throw new Exception("peptideSeqMassCalculator instance cannot be null");
 
@@ -368,8 +368,8 @@ namespace PeptideHitResultsProcessor
                 for (var index = mSearchResultModifications.Count - 1; index >= 0; index += -1)
                 {
                     var resultMod = mSearchResultModifications[index];
-                    if (resultMod.ModDefinition.ModificationType == clsModificationDefinition.eModificationTypeConstants.DynamicMod ||
-                        resultMod.ModDefinition.ModificationType == clsModificationDefinition.eModificationTypeConstants.UnknownType)
+                    if (resultMod.ModDefinition.ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod ||
+                        resultMod.ModDefinition.ModificationType == clsModificationDefinition.ModificationTypeConstants.UnknownType)
                     {
                         sequenceWithMods = sequenceWithMods.Insert(resultMod.ResidueLocInPeptide, resultMod.ModDefinition.ModificationSymbol.ToString());
                     }
@@ -427,8 +427,8 @@ namespace PeptideHitResultsProcessor
             mPeptideCleanSequence = string.Empty;
             PeptideSequenceWithMods = string.Empty;
 
-            mPeptideCleavageState = clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants.NonSpecific;
-            mPeptideTerminusState = clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.None;
+            mPeptideCleavageState = clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific;
+            mPeptideTerminusState = clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.None;
 
             PeptideMH = string.Empty;
             PeptideDeltaMass = string.Empty;
@@ -554,9 +554,9 @@ namespace PeptideHitResultsProcessor
         /// <param name="residueLocInPeptide">Residue number (1-based)</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public clsAminoAcidModInfo.eResidueTerminusStateConstants DetermineResidueTerminusState(int residueLocInPeptide)
+        public clsAminoAcidModInfo.ResidueTerminusStateConstants DetermineResidueTerminusState(int residueLocInPeptide)
         {
-            var eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None;
+            var residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
             if (residueLocInPeptide == 1)
             {
                 // Residue is at the peptide's N-terminus
@@ -566,16 +566,16 @@ namespace PeptideHitResultsProcessor
                     if (PeptideLocInProteinEnd == ProteinSeqResidueNumberEnd)
                     {
                         // The protein only contains one Residue, and we're currently examining it
-                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNandCCTerminus;
+                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNandCCTerminus;
                     }
                     else
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
+                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
                     }
                 }
                 else
                 {
-                    eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
+                    residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                 }
             }
             else
@@ -586,16 +586,16 @@ namespace PeptideHitResultsProcessor
                     if (PeptideLocInProteinEnd == ProteinSeqResidueNumberEnd)
                     {
                         // Residue is at the protein's C-terminus
-                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
+                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
                     }
                     else
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
+                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                     }
                 }
             }
 
-            return eResidueTerminusState;
+            return residueTerminusState;
         }
 
         /// <summary>
@@ -661,7 +661,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modificationSymbol"></param>
         /// <param name="chTargetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
-        /// <param name="eResidueTerminusState"></param>
+        /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <returns></returns>
         /// <remarks></remarks>
@@ -669,14 +669,14 @@ namespace PeptideHitResultsProcessor
             char modificationSymbol,
             char chTargetResidue,
             int residueLocInPeptide,
-            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             bool updateModOccurrenceCounts)
         {
             var success = false;
 
             // Find the modification that uses this modification symbol and applies to this target residue
             var modificationDefinition = mPeptideMods.LookupDynamicModificationDefinitionByTargetInfo(
-                modificationSymbol, chTargetResidue, eResidueTerminusState, out var existingModFound);
+                modificationSymbol, chTargetResidue, residueTerminusState, out var existingModFound);
 
             if (existingModFound)
             {
@@ -691,7 +691,7 @@ namespace PeptideHitResultsProcessor
                         modificationDefinition,
                         chTargetResidue,
                         residueLocInPeptide,
-                        eResidueTerminusState,
+                        residueTerminusState,
                         updateModOccurrenceCounts);
                 }
 
@@ -699,7 +699,7 @@ namespace PeptideHitResultsProcessor
             }
 
             // Modification not found
-            mErrorMessage = "Modification symbol not found: " + modificationSymbol + "; TerminusState = " + eResidueTerminusState.ToString();
+            mErrorMessage = "Modification symbol not found: " + modificationSymbol + "; TerminusState = " + residueTerminusState.ToString();
             return false;
 
         }
@@ -711,7 +711,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modificationMass"></param>
         /// <param name="chTargetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
-        /// <param name="eResidueTerminusState"></param>
+        /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <returns>True if mod successfully added</returns>
         /// <remarks></remarks>
@@ -719,10 +719,10 @@ namespace PeptideHitResultsProcessor
             double modificationMass,
             char chTargetResidue,
             int residueLocInPeptide,
-            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             bool updateModOccurrenceCounts)
         {
-            return SearchResultAddModification(modificationMass, chTargetResidue, residueLocInPeptide, eResidueTerminusState, updateModOccurrenceCounts, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION);
+            return SearchResultAddModification(modificationMass, chTargetResidue, residueLocInPeptide, residueTerminusState, updateModOccurrenceCounts, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION);
         }
 
         /// <summary>
@@ -732,7 +732,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modificationMass"></param>
         /// <param name="chTargetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
-        /// <param name="eResidueTerminusState"></param>
+        /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <param name="modMassDigitsOfPrecision">Digits of precision to use when comparing modificationMass to the masses of known mods</param>
         /// <returns>True if mod successfully added</returns>
@@ -741,7 +741,7 @@ namespace PeptideHitResultsProcessor
             double modificationMass,
             char chTargetResidue,
             int residueLocInPeptide,
-            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             bool updateModOccurrenceCounts, byte modMassDigitsOfPrecision)
         {
             var success = false;
@@ -758,7 +758,7 @@ namespace PeptideHitResultsProcessor
                 var modificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(
                     modificationMass,
                     chTargetResidue,
-                    eResidueTerminusState,
+                    residueTerminusState,
                     out _,
                     true, modMassDigitsOfPrecision);
 
@@ -766,7 +766,7 @@ namespace PeptideHitResultsProcessor
                     modificationDefinition,
                     chTargetResidue,
                     residueLocInPeptide,
-                    eResidueTerminusState,
+                    residueTerminusState,
                     updateModOccurrenceCounts);
             }
 
@@ -779,7 +779,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modificationDefinition"></param>
         /// <param name="chTargetResidue"></param>
         /// <param name="residueLocInPeptide"></param>
-        /// <param name="eResidueTerminusState"></param>
+        /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
         /// <returns></returns>
         /// <remarks></remarks>
@@ -787,12 +787,12 @@ namespace PeptideHitResultsProcessor
             clsModificationDefinition modificationDefinition,
             char chTargetResidue,
             int residueLocInPeptide,
-            clsAminoAcidModInfo.eResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             bool updateModOccurrenceCounts)
         {
             var success = false;
 
-            if (residueLocInPeptide < 1 & modificationDefinition.ModificationType != clsModificationDefinition.eModificationTypeConstants.IsotopicMod)
+            if (residueLocInPeptide < 1 & modificationDefinition.ModificationType != clsModificationDefinition.ModificationTypeConstants.IsotopicMod)
             {
                 // Invalid position; ignore this modification
                 mErrorMessage = "Invalid value for residueLocInPeptide: " + residueLocInPeptide + " (modificationDefinition.ModificationType = " + modificationDefinition.ModificationType + ")";
@@ -805,7 +805,7 @@ namespace PeptideHitResultsProcessor
                     modificationDefinition.OccurrenceCount += 1;
                 }
 
-                mSearchResultModifications.Add(new clsAminoAcidModInfo(chTargetResidue, residueLocInPeptide, eResidueTerminusState, modificationDefinition));
+                mSearchResultModifications.Add(new clsAminoAcidModInfo(chTargetResidue, residueLocInPeptide, residueTerminusState, modificationDefinition));
                 success = true;
             }
 
@@ -824,13 +824,13 @@ namespace PeptideHitResultsProcessor
 
             for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
             {
-                if (mPeptideMods.GetModificationTypeByIndex(index) == clsModificationDefinition.eModificationTypeConstants.IsotopicMod)
+                if (mPeptideMods.GetModificationTypeByIndex(index) == clsModificationDefinition.ModificationTypeConstants.IsotopicMod)
                 {
                     var residueLocInPeptide = 0;
 
                     var mod = mPeptideMods.GetModificationByIndex(index);
-                    // TODO: VERIFY: success = SearchResultAddModification(ref mPeptideMods.GetModificationByIndex(index), clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, residueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, updateModOccurrenceCounts);
-                    success = SearchResultAddModification(mod, clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, residueLocInPeptide, clsAminoAcidModInfo.eResidueTerminusStateConstants.None, updateModOccurrenceCounts);
+                    // TODO: VERIFY: success = SearchResultAddModification(ref mPeptideMods.GetModificationByIndex(index), clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, residueLocInPeptide, clsAminoAcidModInfo.ResidueTerminusStateConstants.None, updateModOccurrenceCounts);
+                    success = SearchResultAddModification(mod, clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, residueLocInPeptide, clsAminoAcidModInfo.ResidueTerminusStateConstants.None, updateModOccurrenceCounts);
                 }
             }
 
@@ -855,34 +855,34 @@ namespace PeptideHitResultsProcessor
             {
                 var addModification = false;
 
-                var eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.None;
+                var residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
 
-                if (mPeptideMods.GetModificationTypeByIndex(modificationIndex) == clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod)
+                if (mPeptideMods.GetModificationTypeByIndex(modificationIndex) == clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod)
                 {
                     modificationDefinition = mPeptideMods.GetModificationByIndex(modificationIndex);
                     if (modificationDefinition.TargetResidues == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
                         residueLocInPeptide = 1;
-                        if (mPeptideTerminusState == clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinNTerminus | mPeptideTerminusState == clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinNandCCTerminus)
+                        if (mPeptideTerminusState == clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNTerminus | mPeptideTerminusState == clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNandCCTerminus)
                         {
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
+                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
                         }
                         else
                         {
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideNTerminus;
+                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                         }
                         addModification = true;
                     }
                     else if (modificationDefinition.TargetResidues == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
                         residueLocInPeptide = mPeptideCleanSequence.Length;
-                        if (mPeptideTerminusState == clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinCTerminus | mPeptideTerminusState == clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinNandCCTerminus)
+                        if (mPeptideTerminusState == clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinCTerminus | mPeptideTerminusState == clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNandCCTerminus)
                         {
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
+                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
                         }
                         else
                         {
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.PeptideCTerminus;
+                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                         }
                         addModification = true;
                     }
@@ -891,24 +891,24 @@ namespace PeptideHitResultsProcessor
                         // Invalid target residue for a peptide terminus static mod; do not add the modification
                     }
                 }
-                else if (mPeptideMods.GetModificationTypeByIndex(modificationIndex) == clsModificationDefinition.eModificationTypeConstants.ProteinTerminusStaticMod)
+                else if (mPeptideMods.GetModificationTypeByIndex(modificationIndex) == clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod)
                 {
                     modificationDefinition = mPeptideMods.GetModificationByIndex(modificationIndex);
                     if (modificationDefinition.TargetResidues == clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString())
                     {
-                        if (mPeptideTerminusState == clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinNTerminus | mPeptideTerminusState == clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinNandCCTerminus)
+                        if (mPeptideTerminusState == clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNTerminus | mPeptideTerminusState == clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNandCCTerminus)
                         {
                             residueLocInPeptide = 1;
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinNTerminus;
+                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
                             addModification = true;
                         }
                     }
                     else if (modificationDefinition.TargetResidues == clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString())
                     {
-                        if (mPeptideTerminusState == clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinCTerminus | mPeptideTerminusState == clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants.ProteinNandCCTerminus)
+                        if (mPeptideTerminusState == clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinCTerminus | mPeptideTerminusState == clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNandCCTerminus)
                         {
                             residueLocInPeptide = mPeptideCleanSequence.Length;
-                            eResidueTerminusState = clsAminoAcidModInfo.eResidueTerminusStateConstants.ProteinCTerminus;
+                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
                             addModification = true;
                         }
                     }
@@ -957,7 +957,7 @@ namespace PeptideHitResultsProcessor
                             modificationDefinition,
                             mPeptideCleanSequence[residueLocInPeptide - 1],
                             residueLocInPeptide,
-                            eResidueTerminusState,
+                            residueTerminusState,
                             updateModOccurrenceCounts);
                     }
                 }
@@ -1131,11 +1131,11 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Define standard RegEx values for finding enzyme cleavage sites
         /// </summary>
-        /// <param name="eStandardCleavageAgent"></param>
+        /// <param name="standardCleavageAgent"></param>
         /// <remarks>Define custom RegEx values using SetEnzymeMatchSpec</remarks>
-        public void SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.eStandardCleavageAgentConstants eStandardCleavageAgent)
+        public void SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.StandardCleavageAgentConstants standardCleavageAgent)
         {
-            mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(eStandardCleavageAgent);
+            mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(standardCleavageAgent);
         }
 
         /// <summary>

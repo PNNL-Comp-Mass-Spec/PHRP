@@ -138,7 +138,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
         public clsPHRPParserMODa(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MODa, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MODa, loadModsAndSeqInfo)
         {
         }
 
@@ -150,7 +150,7 @@ namespace PHRPReader
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
         public clsPHRPParserMODa(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MODa, startupOptions)
+            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MODa, startupOptions)
         {
         }
 
@@ -351,7 +351,7 @@ namespace PHRPReader
         {
             try
             {
-                var success = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.ePeptideHitResultType.MODa, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.PeptideHitResultTypes.MODa, searchEngineParams);
 
                 if (!success)
                 {
@@ -389,10 +389,10 @@ namespace PHRPReader
                     if (Math.Abs(modMassDa) < float.Epsilon)
                         continue;
 
-                    var eModType = clsModificationDefinition.eModificationTypeConstants.StaticMod;
+                    var eModType = clsModificationDefinition.ModificationTypeConstants.StaticMod;
                     if (residueSpec.Value == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residueSpec.Value == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
-                        eModType = clsModificationDefinition.eModificationTypeConstants.TerminalPeptideStaticMod;
+                        eModType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                     }
 
                     var modDef = new clsModificationDefinition(

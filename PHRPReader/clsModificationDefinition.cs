@@ -51,7 +51,7 @@ namespace PHRPReader
         /// <summary>
         /// Modification types
         /// </summary>
-        public enum eModificationTypeConstants
+        public enum ModificationTypeConstants
         {
             /// <summary>
             /// Unknown mod type on a residue; essentially treated as a dynamic mod
@@ -210,7 +210,7 @@ namespace PHRPReader
         /// <value></value>
         /// <returns></returns>
         /// <remarks></remarks>
-        public eModificationTypeConstants ModificationType { get; set; }
+        public ModificationTypeConstants ModificationType { get; set; }
 
         /// <summary>
         /// Modification name, for example Phosph, IodoAcet, Plus1Oxy, or Methyl
@@ -304,7 +304,7 @@ namespace PHRPReader
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
         /// <param name="modificationType"></param>
-        public clsModificationDefinition(double modificationMass, string targetResidues, eModificationTypeConstants modificationType)
+        public clsModificationDefinition(double modificationMass, string targetResidues, ModificationTypeConstants modificationType)
         {
             Clear();
 
@@ -321,7 +321,7 @@ namespace PHRPReader
         /// <param name="targetResidues"></param>
         /// <param name="modificationType"></param>
         /// <param name="massCorrectionTag"></param>
-        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, eModificationTypeConstants modificationType, string massCorrectionTag)
+        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationTypeConstants modificationType, string massCorrectionTag)
         {
             Clear();
 
@@ -342,7 +342,7 @@ namespace PHRPReader
         /// <param name="massCorrectionTag"></param>
         /// <param name="chAffectedAtom"></param>
         /// <param name="unknownModAutoDefined"></param>
-        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, eModificationTypeConstants modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
+        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationTypeConstants modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
         {
             Clear();
 
@@ -365,7 +365,7 @@ namespace PHRPReader
             mModificationMass = 0;
             ModificationMassAsText = "0";
             mTargetResidues = string.Empty;
-            ModificationType = eModificationTypeConstants.UnknownType;
+            ModificationType = ModificationTypeConstants.UnknownType;
             mMassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME;
             mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
             OccurrenceCount = 0;
@@ -436,8 +436,8 @@ namespace PHRPReader
                 }
                 else if (a.TargetResidues != null && b.TargetResidues != null)
                 {
-                    if (a.ModificationType == eModificationTypeConstants.DynamicMod ||
-                        a.ModificationType == eModificationTypeConstants.StaticMod)
+                    if (a.ModificationType == ModificationTypeConstants.DynamicMod ||
+                        a.ModificationType == ModificationTypeConstants.StaticMod)
                     {
                         // Matching dynamic or static modification definitions
                         // Make sure each of the residues in b.TargetResidues is present in .TargetResidues
@@ -527,7 +527,7 @@ namespace PHRPReader
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (ModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || ModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
+            if (ModificationType == ModificationTypeConstants.ProteinTerminusStaticMod || ModificationType == ModificationTypeConstants.TerminalPeptideStaticMod)
             {
                 return true;
             }
@@ -551,7 +551,7 @@ namespace PHRPReader
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (ModificationType == eModificationTypeConstants.ProteinTerminusStaticMod || ModificationType == eModificationTypeConstants.TerminalPeptideStaticMod)
+            if (ModificationType == ModificationTypeConstants.ProteinTerminusStaticMod || ModificationType == ModificationTypeConstants.TerminalPeptideStaticMod)
             {
                 return false;
             }
@@ -596,27 +596,27 @@ namespace PHRPReader
         /// <param name="modificationTypeSymbol">D, S, T, I, or P</param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public static eModificationTypeConstants ModificationSymbolToModificationType(char modificationTypeSymbol)
+        public static ModificationTypeConstants ModificationSymbolToModificationType(char modificationTypeSymbol)
         {
             if (modificationTypeSymbol == default(char))
             {
-                return eModificationTypeConstants.UnknownType;
+                return ModificationTypeConstants.UnknownType;
             }
 
             switch (modificationTypeSymbol)
             {
                 case 'D':
-                    return eModificationTypeConstants.DynamicMod;
+                    return ModificationTypeConstants.DynamicMod;
                 case 'S':
-                    return eModificationTypeConstants.StaticMod;
+                    return ModificationTypeConstants.StaticMod;
                 case 'T':
-                    return eModificationTypeConstants.TerminalPeptideStaticMod;
+                    return ModificationTypeConstants.TerminalPeptideStaticMod;
                 case 'I':
-                    return eModificationTypeConstants.IsotopicMod;
+                    return ModificationTypeConstants.IsotopicMod;
                 case 'P':
-                    return eModificationTypeConstants.ProteinTerminusStaticMod;
+                    return ModificationTypeConstants.ProteinTerminusStaticMod;
                 default:
-                    return eModificationTypeConstants.UnknownType;
+                    return ModificationTypeConstants.UnknownType;
             }
         }
 
@@ -626,19 +626,19 @@ namespace PHRPReader
         /// <param name="eModificationType"></param>
         /// <returns>D, S, T, I, or P</returns>
         /// <remarks></remarks>
-        public static char ModificationTypeToModificationSymbol(eModificationTypeConstants eModificationType)
+        public static char ModificationTypeToModificationSymbol(ModificationTypeConstants eModificationType)
         {
             switch (eModificationType)
             {
-                case eModificationTypeConstants.DynamicMod:
+                case ModificationTypeConstants.DynamicMod:
                     return 'D';
-                case eModificationTypeConstants.StaticMod:
+                case ModificationTypeConstants.StaticMod:
                     return 'S';
-                case eModificationTypeConstants.TerminalPeptideStaticMod:
+                case ModificationTypeConstants.TerminalPeptideStaticMod:
                     return 'T';
-                case eModificationTypeConstants.IsotopicMod:
+                case ModificationTypeConstants.IsotopicMod:
                     return 'I';
-                case eModificationTypeConstants.ProteinTerminusStaticMod:
+                case ModificationTypeConstants.ProteinTerminusStaticMod:
                     return 'P';
                 default:
                     return '?';

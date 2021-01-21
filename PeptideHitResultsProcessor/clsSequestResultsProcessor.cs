@@ -74,7 +74,7 @@ namespace PeptideHitResultsProcessor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.ModificationTypeConstants.StaticMod)
                         {
                             var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
@@ -88,7 +88,7 @@ namespace PeptideHitResultsProcessor
                                 if (!success)
                                 {
                                     // Error adding this static mod
-                                    SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
+                                    SetErrorCode(PHRPErrorCodes.UnspecifiedError);
                                     mErrorMessage = "Error calling searchResult.SearchResultAddModification for peptide '" + sequenceWithMods + "': " + searchResult.ErrorMessage;
                                     break;
                                 }
@@ -103,7 +103,7 @@ namespace PeptideHitResultsProcessor
                     if (!success)
                     {
                         // Error adding this dynamic mod
-                        SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
+                        SetErrorCode(PHRPErrorCodes.UnspecifiedError);
                         mErrorMessage = "Error calling searchResult.SearchResultAddDynamicModification for peptide '" + sequenceWithMods + "': " + searchResult.ErrorMessage;
                         break;
                     }
@@ -359,7 +359,7 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -370,7 +370,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
 
@@ -499,7 +499,7 @@ namespace PeptideHitResultsProcessor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -508,7 +508,7 @@ namespace PeptideHitResultsProcessor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
                     return false;
                 }
 
@@ -538,7 +538,7 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error calling ParseSynopsisOrFirstHitsFile" + ex.Message);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                     success = false;
                 }
 
@@ -555,7 +555,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage("Error in clsSequestResultsProcessor.ProcessFile:  " + ex.Message);
-                SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 
             return success;
@@ -613,7 +613,7 @@ namespace PeptideHitResultsProcessor
                 ValidatePHRPReaderSupportFiles(inputFile.FullName, outputDirectoryPath);
 
                 // Now create the Protein Mods file
-                success = CreateProteinModDetailsFile(inputFile.FullName, outputDirectoryPath, mtsPepToProteinMapFilePath, clsPHRPReader.ePeptideHitResultType.Sequest);
+                success = CreateProteinModDetailsFile(inputFile.FullName, outputDirectoryPath, mtsPepToProteinMapFilePath, clsPHRPReader.PeptideHitResultTypes.Sequest);
             }
 
             if (!success)

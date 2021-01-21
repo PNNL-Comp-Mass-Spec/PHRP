@@ -45,7 +45,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the tab-delimited file created directly by MSAlign
         /// </summary>
-        private enum eMSAlignResultsFileColumns
+        private enum MSAlignResultsFileColumns
         {
             SpectrumFileName = 0,
             Prsm_ID = 1,
@@ -213,7 +213,7 @@ namespace PeptideHitResultsProcessor
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
                         // Only add this modification if it is a static mod; dynamic mods are handled later in this method when a ']' is found
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.eModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.ModificationTypeConstants.StaticMod)
                             continue;
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -467,7 +467,7 @@ namespace PeptideHitResultsProcessor
             string outputFilePath)
         {
 
-            var columnMapping = new Dictionary<eMSAlignResultsFileColumns, int>();
+            var columnMapping = new Dictionary<MSAlignResultsFileColumns, int>();
 
             try
             {
@@ -504,7 +504,7 @@ namespace PeptideHitResultsProcessor
                             if (!validHeader)
                             {
                                 // Error parsing header
-                                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                                 return false;
                             }
 
@@ -572,7 +572,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -594,7 +594,7 @@ namespace PeptideHitResultsProcessor
                 if (string.IsNullOrEmpty(msAlignParamFilePath))
                 {
                     SetErrorMessage("MSAlign Parameter File name not defined; unable to extract mod info");
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                     return false;
                 }
 
@@ -634,7 +634,7 @@ namespace PeptideHitResultsProcessor
                                         case "C57":
                                             modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    57.0215, "C",
-                                                                                   clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                                                                   clsModificationDefinition.ModificationTypeConstants.StaticMod,
                                                                                    "IodoAcet");
                                             modInfo.Add(modDef);
                                             break;
@@ -642,7 +642,7 @@ namespace PeptideHitResultsProcessor
                                         case "C58":
                                             modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    58.0055, "C",
-                                                                                   clsModificationDefinition.eModificationTypeConstants.StaticMod,
+                                                                                   clsModificationDefinition.ModificationTypeConstants.StaticMod,
                                                                                    "IodoAcid");
                                             modInfo.Add(modDef);
                                             break;
@@ -661,7 +661,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage("Error reading the MSAlign parameter file (" + Path.GetFileName(msAlignParamFilePath) + "): " + ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 success = false;
             }
 
@@ -743,7 +743,7 @@ namespace PeptideHitResultsProcessor
                                 if (!validHeader)
                                 {
                                     // Error parsing header
-                                    SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                                    SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                                     return false;
                                 }
                                 headerParsed = true;
@@ -863,7 +863,7 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -874,7 +874,7 @@ namespace PeptideHitResultsProcessor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
 
@@ -884,7 +884,7 @@ namespace PeptideHitResultsProcessor
             string lineIn,
             ref udtMSAlignSearchResultType udtSearchResult,
             ref string errorLog,
-            IDictionary<eMSAlignResultsFileColumns, int> columnMapping)
+            IDictionary<MSAlignResultsFileColumns, int> columnMapping)
         {
             // Parses an entry from the MSAlign results file
 
@@ -902,15 +902,15 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
-                if (!GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.SpectrumFileName], out udtSearchResult.SpectrumFileName);
+                if (!GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Prsm_ID], out udtSearchResult.Prsm_ID))
                 {
                     ReportError("Prsm_ID column is missing or invalid", true);
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Spectrum_ID], out udtSearchResult.Spectrum_ID);
 
-                if (!GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Scans], out udtSearchResult.Scans))
+                if (!GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Scans], out udtSearchResult.Scans))
                 {
                     ReportError("Scan(s) column is missing or invalid", true);
                 }
@@ -935,12 +935,12 @@ namespace PeptideHitResultsProcessor
                     }
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Peaks], out udtSearchResult.Peaks);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Charge], out udtSearchResult.Charge);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Peaks], out udtSearchResult.Peaks);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Charge], out udtSearchResult.Charge);
                 udtSearchResult.ChargeNum = Convert.ToInt16(CIntSafe(udtSearchResult.Charge, 0));
 
                 // Monoisotopic mass value of the observed precursor_mz
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Precursor_mass], out udtSearchResult.Precursor_mass);
 
                 // precursorMonoMass is Observed m/z, converted to monoisotopic mass
                 if (double.TryParse(udtSearchResult.Precursor_mass, out var precursorMonoMass))
@@ -955,10 +955,10 @@ namespace PeptideHitResultsProcessor
                 // peptideMonoMassMSAlign is Theoretical peptide monoisotopic mass, including mods, as computed by MSAlign
                 double peptideMonoMassMSAlign;
 
-                if (columnMapping[eMSAlignResultsFileColumns.Adjusted_precursor_mass] >= 0)
+                if (columnMapping[MSAlignResultsFileColumns.Adjusted_precursor_mass] >= 0)
                 {
                     // Theoretical monoisotopic mass of the peptide (including mods), as computed by MSAlign
-                    GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
+                    GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Adjusted_precursor_mass], out udtSearchResult.Adjusted_precursor_mass);
 
                     double.TryParse(udtSearchResult.Adjusted_precursor_mass, out peptideMonoMassMSAlign);
                 }
@@ -967,17 +967,17 @@ namespace PeptideHitResultsProcessor
                     peptideMonoMassMSAlign = 0;
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Protein_ID], out udtSearchResult.Protein_ID);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Species_ID], out udtSearchResult.Species_ID);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Protein_name], out udtSearchResult.Protein);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Protein_ID], out udtSearchResult.Protein_ID);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Species_ID], out udtSearchResult.Species_ID);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Protein_name], out udtSearchResult.Protein);
                 udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Protein_mass], out udtSearchResult.Protein_mass);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Protein_mass], out udtSearchResult.Protein_mass);
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.First_residue], out udtSearchResult.First_residue);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Last_residue], out udtSearchResult.Last_residue);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.First_residue], out udtSearchResult.First_residue);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Last_residue], out udtSearchResult.Last_residue);
 
-                if (!GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Peptide], out udtSearchResult.Peptide))
+                if (!GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Peptide], out udtSearchResult.Peptide))
                 {
                     ReportError("Peptide column is missing or invalid", true);
                 }
@@ -1020,10 +1020,10 @@ namespace PeptideHitResultsProcessor
                 // Store the monoisotopic MH value in .MH; note that this is (M+H)+
                 udtSearchResult.MH = PRISM.StringUtilities.DblToString(mPeptideSeqMassCalculator.ConvoluteMass(peptideMonoMassPHRP, 0), 6);
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_modifications);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Unexpected_modifications], out udtSearchResult.Unexpected_modifications);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Matched_peaks], out udtSearchResult.Matched_peaks);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Matched_fragment_ions], out udtSearchResult.Matched_fragment_ions);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Pvalue], out udtSearchResult.Pvalue);
                 if (!double.TryParse(udtSearchResult.Pvalue, out udtSearchResult.PValueNum))
                     udtSearchResult.PValueNum = 0;
 
@@ -1033,8 +1033,8 @@ namespace PeptideHitResultsProcessor
                 udtSearchResult.Matched_peaks = AssureInteger(udtSearchResult.Matched_peaks, 0); // Matched_Peak_Count
                 udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0); // Matched_Fragment_Ion_Count
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.Evalue], out udtSearchResult.Evalue);
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.FDR], out udtSearchResult.FDR);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.Evalue], out udtSearchResult.Evalue);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.FDR], out udtSearchResult.FDR);
 
                 if (string.Equals(udtSearchResult.FDR, "infinity", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1045,7 +1045,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.FDR = string.Empty;
                 }
 
-                GetColumnValue(splitLine, columnMapping[eMSAlignResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
+                GetColumnValue(splitLine, columnMapping[MSAlignResultsFileColumns.FragMethod], out udtSearchResult.FragMethod);
 
                 return true;
             }
@@ -1076,7 +1076,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns></returns>
-        private bool ParseMSAlignResultsFileHeaderLine(string lineIn, IDictionary<eMSAlignResultsFileColumns, int> columnMapping)
+        private bool ParseMSAlignResultsFileHeaderLine(string lineIn, IDictionary<MSAlignResultsFileColumns, int> columnMapping)
         {
             // The expected header from MSAlign v0.5 is:
             //                   Prsm_ID    Spectrum_ID    Protein_Sequence_ID    Spectrum_ID    Scan(s)    #peaks    Charge    Precursor_mass                                                           Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions               E-value
@@ -1087,31 +1087,31 @@ namespace PeptideHitResultsProcessor
             // The expected header from MSAlign_Histone v0.9 is
             // Data_file_name    Prsm_ID    Spectrum_ID                                          Scan(s)    #peaks    Charge    Precursor_mass    Adjusted_precursor_mass    Protein_ID    Species_ID    Protein_name    Protein_mass    First_residue    Last_residue    Peptide    #unexpected_modifications    #matched_peaks    #matched_fragment_ions    P-value    E-value    FDR    FragMethod
 
-            var columnNames = new SortedDictionary<string, eMSAlignResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
+            var columnNames = new SortedDictionary<string, MSAlignResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {"Data_file_name", eMSAlignResultsFileColumns.SpectrumFileName},
-                {"Prsm_ID", eMSAlignResultsFileColumns.Prsm_ID},
-                {"Spectrum_ID", eMSAlignResultsFileColumns.Spectrum_ID},
-                {"Protein_Sequence_ID", eMSAlignResultsFileColumns.Protein_Sequence_ID},
-                {"Scan(s)", eMSAlignResultsFileColumns.Scans},
-                {"#peaks", eMSAlignResultsFileColumns.Peaks},
-                {"Charge", eMSAlignResultsFileColumns.Charge},
-                {"Precursor_mass", eMSAlignResultsFileColumns.Precursor_mass},
-                {"Adjusted_precursor_mass", eMSAlignResultsFileColumns.Adjusted_precursor_mass},
-                {"Protein_ID", eMSAlignResultsFileColumns.Protein_ID},
-                {"Species_ID", eMSAlignResultsFileColumns.Species_ID},
-                {"Protein_name", eMSAlignResultsFileColumns.Protein_name},
-                {"Protein_mass", eMSAlignResultsFileColumns.Protein_mass},
-                {"First_residue", eMSAlignResultsFileColumns.First_residue},
-                {"Last_residue", eMSAlignResultsFileColumns.Last_residue},
-                {"Peptide", eMSAlignResultsFileColumns.Peptide},
-                {"#unexpected_modifications", eMSAlignResultsFileColumns.Unexpected_modifications},
-                {"#matched_peaks", eMSAlignResultsFileColumns.Matched_peaks},
-                {"#matched_fragment_ions", eMSAlignResultsFileColumns.Matched_fragment_ions},
-                {"P-value", eMSAlignResultsFileColumns.Pvalue},
-                {"E-value", eMSAlignResultsFileColumns.Evalue},
-                {"FDR", eMSAlignResultsFileColumns.FDR},
-                {"FragMethod", eMSAlignResultsFileColumns.FragMethod}
+                {"Data_file_name", MSAlignResultsFileColumns.SpectrumFileName},
+                {"Prsm_ID", MSAlignResultsFileColumns.Prsm_ID},
+                {"Spectrum_ID", MSAlignResultsFileColumns.Spectrum_ID},
+                {"Protein_Sequence_ID", MSAlignResultsFileColumns.Protein_Sequence_ID},
+                {"Scan(s)", MSAlignResultsFileColumns.Scans},
+                {"#peaks", MSAlignResultsFileColumns.Peaks},
+                {"Charge", MSAlignResultsFileColumns.Charge},
+                {"Precursor_mass", MSAlignResultsFileColumns.Precursor_mass},
+                {"Adjusted_precursor_mass", MSAlignResultsFileColumns.Adjusted_precursor_mass},
+                {"Protein_ID", MSAlignResultsFileColumns.Protein_ID},
+                {"Species_ID", MSAlignResultsFileColumns.Species_ID},
+                {"Protein_name", MSAlignResultsFileColumns.Protein_name},
+                {"Protein_mass", MSAlignResultsFileColumns.Protein_mass},
+                {"First_residue", MSAlignResultsFileColumns.First_residue},
+                {"Last_residue", MSAlignResultsFileColumns.Last_residue},
+                {"Peptide", MSAlignResultsFileColumns.Peptide},
+                {"#unexpected_modifications", MSAlignResultsFileColumns.Unexpected_modifications},
+                {"#matched_peaks", MSAlignResultsFileColumns.Matched_peaks},
+                {"#matched_fragment_ions", MSAlignResultsFileColumns.Matched_fragment_ions},
+                {"P-value", MSAlignResultsFileColumns.Pvalue},
+                {"E-value", MSAlignResultsFileColumns.Evalue},
+                {"FDR", MSAlignResultsFileColumns.FDR},
+                {"FragMethod", MSAlignResultsFileColumns.FragMethod}
             };
 
             columnMapping.Clear();
@@ -1119,7 +1119,7 @@ namespace PeptideHitResultsProcessor
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (eMSAlignResultsFileColumns resultColumn in Enum.GetValues(typeof(eMSAlignResultsFileColumns)))
+                foreach (MSAlignResultsFileColumns resultColumn in Enum.GetValues(typeof(MSAlignResultsFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1349,7 +1349,7 @@ namespace PeptideHitResultsProcessor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(ePHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1358,7 +1358,7 @@ namespace PeptideHitResultsProcessor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(ePHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1434,13 +1434,13 @@ namespace PeptideHitResultsProcessor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in clsMSAlignResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
-                    SetErrorCode(ePHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in ProcessFile (1):" + ex.Message, ex);
-                SetErrorCode(ePHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 
             return success;
@@ -1470,7 +1470,7 @@ namespace PeptideHitResultsProcessor
             if (sourcePHRPDataFiles.Count == 0)
             {
                 SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(ePHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 success = false;
             }
             else
@@ -1509,7 +1509,7 @@ namespace PeptideHitResultsProcessor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.ePeptideHitResultType.MSAlign);
+                                                          clsPHRPReader.PeptideHitResultTypes.MSAlign);
                 }
             }
 
@@ -1553,7 +1553,7 @@ namespace PeptideHitResultsProcessor
                 {
                     mPeptideMods.LookupModificationDefinitionByMassAndModType(
                         modInfo.ModificationMass, modInfo.ModificationType, default,
-                        clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
+                        clsAminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
                 }
                 else
                 {
@@ -1561,7 +1561,7 @@ namespace PeptideHitResultsProcessor
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
                             modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
-                            clsAminoAcidModInfo.eResidueTerminusStateConstants.None, out _, true);
+                            clsAminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
                     }
                 }
             }
@@ -1613,7 +1613,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="errorLog"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
-            IDictionary<eMSAlignResultsFileColumns, int> columnMapping,
+            IDictionary<MSAlignResultsFileColumns, int> columnMapping,
             out bool includeSpeciesAndFragMethod,
             ref string errorLog)
         {
@@ -1628,8 +1628,8 @@ namespace PeptideHitResultsProcessor
                 List<string> headerNames;
 
                 // Only include Species_ID and FragMethod if defined in the column mapping
-                columnMapping.TryGetValue(eMSAlignResultsFileColumns.Species_ID, out var colIndexSpeciesId);
-                columnMapping.TryGetValue(eMSAlignResultsFileColumns.FragMethod, out var colIndexFragMethod);
+                columnMapping.TryGetValue(MSAlignResultsFileColumns.Species_ID, out var colIndexSpeciesId);
+                columnMapping.TryGetValue(MSAlignResultsFileColumns.FragMethod, out var colIndexFragMethod);
 
                 if (colIndexSpeciesId >= 0 || colIndexFragMethod >= 0)
                 {

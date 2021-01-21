@@ -143,7 +143,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         /// <remarks></remarks>
         public clsPHRPParserMSPathFinder(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSPathFinder, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSPathFinder, loadModsAndSeqInfo)
         {
         }
 
@@ -155,7 +155,7 @@ namespace PHRPReader
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks></remarks>
         public clsPHRPParserMSPathFinder(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, clsPHRPReader.ePeptideHitResultType.MSPathFinder, startupOptions)
+            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSPathFinder, startupOptions)
         {
         }
 
@@ -325,7 +325,7 @@ namespace PHRPReader
         {
             try
             {
-                var resultType = clsPHRPReader.ePeptideHitResultType.MSPathFinder;
+                var resultType = clsPHRPReader.PeptideHitResultTypes.MSPathFinder;
                 var success = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, searchEngineParamFileName, resultType, searchEngineParams);
 
                 if (!success)

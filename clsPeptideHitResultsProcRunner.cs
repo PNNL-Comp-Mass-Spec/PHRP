@@ -41,7 +41,7 @@ namespace PeptideHitResultsProcRunner
         /// <summary>
         /// Error codes specialized for this class
         /// </summary>
-        public enum eResultsProcessorErrorCodes
+        public enum ResultsProcessorErrorCodes
         {
             NoError = 0,
             UnspecifiedError = -1
@@ -54,7 +54,7 @@ namespace PeptideHitResultsProcRunner
         #endregion
 
         #region "Class wide Variables"
-        protected clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants mPeptideHitResultsFileFormat;
+        protected clsPHRPBaseClass.PeptideHitResultsFileFormatConstants mPeptideHitResultsFileFormat;
 
         protected bool mObtainModificationDefinitionsFromDMS;
 
@@ -62,7 +62,7 @@ namespace PeptideHitResultsProcRunner
 
         private clsPHRPBaseClass mPeptideHitResultsProcessor;
 
-        protected eResultsProcessorErrorCodes mLocalErrorCode;
+        protected ResultsProcessorErrorCodes mLocalErrorCode;
         #endregion
 
         #region "Properties"
@@ -90,7 +90,7 @@ namespace PeptideHitResultsProcRunner
 
         public float InspectSynopsisFilePValueThreshold { get; set; }
 
-        public eResultsProcessorErrorCodes LocalErrorCode => mLocalErrorCode;
+        public ResultsProcessorErrorCodes LocalErrorCode => mLocalErrorCode;
 
         public string MassCorrectionTagsFilePath { get; set; }
 
@@ -143,10 +143,10 @@ namespace PeptideHitResultsProcRunner
             {
                 switch (mLocalErrorCode)
                 {
-                    case eResultsProcessorErrorCodes.NoError:
+                    case ResultsProcessorErrorCodes.NoError:
                         errorMessage = string.Empty;
                         break;
-                    case eResultsProcessorErrorCodes.UnspecifiedError:
+                    case ResultsProcessorErrorCodes.UnspecifiedError:
                         errorMessage = "Unspecified localized error";
                         break;
                     default:
@@ -165,7 +165,7 @@ namespace PeptideHitResultsProcRunner
 
         private void InitializeLocalVariables()
         {
-            mPeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
+            mPeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine;
 
             MassCorrectionTagsFilePath = string.Empty;
             ModificationDefinitionsFilePath = string.Empty;
@@ -188,7 +188,7 @@ namespace PeptideHitResultsProcRunner
 
             WarnMissingParameterFileSection = true;
 
-            mLocalErrorCode = eResultsProcessorErrorCodes.NoError;
+            mLocalErrorCode = ResultsProcessorErrorCodes.NoError;
         }
 
         private void InitializePeptideHitResultsProcessor(string inputFilePath)
@@ -304,11 +304,11 @@ namespace PeptideHitResultsProcRunner
                     var value = settingsFile.GetParam(OPTIONS_SECTION, "PeptideHitResultsFileFormat", Convert.ToInt32(mPeptideHitResultsFileFormat));
                     try
                     {
-                        mPeptideHitResultsFileFormat = (clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants)value;
+                        mPeptideHitResultsFileFormat = (clsPHRPBaseClass.PeptideHitResultsFileFormatConstants)value;
                     }
                     catch (Exception)
                     {
-                        mPeptideHitResultsFileFormat = clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine;
+                        mPeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine;
                     }
                 }
             }
@@ -345,7 +345,7 @@ namespace PeptideHitResultsProcRunner
 
             if (resetErrorCode)
             {
-                SetLocalErrorCode(eResultsProcessorErrorCodes.NoError);
+                SetLocalErrorCode(ResultsProcessorErrorCodes.NoError);
             }
 
             if (!LoadParameterFileSettings(parameterFilePath))
@@ -439,9 +439,9 @@ namespace PeptideHitResultsProcRunner
             return fileNameOrPath;
         }
 
-        private void SetLocalErrorCode(eResultsProcessorErrorCodes eNewErrorCode, bool leaveExistingErrorCodeUnchanged = false)
+        private void SetLocalErrorCode(ResultsProcessorErrorCodes eNewErrorCode, bool leaveExistingErrorCodeUnchanged = false)
         {
-            if (leaveExistingErrorCodeUnchanged && mLocalErrorCode != eResultsProcessorErrorCodes.NoError)
+            if (leaveExistingErrorCodeUnchanged && mLocalErrorCode != ResultsProcessorErrorCodes.NoError)
             {
                 // An error code is already defined; do not change it
             }
@@ -449,7 +449,7 @@ namespace PeptideHitResultsProcRunner
             {
                 mLocalErrorCode = eNewErrorCode;
 
-                if (eNewErrorCode == eResultsProcessorErrorCodes.NoError)
+                if (eNewErrorCode == ResultsProcessorErrorCodes.NoError)
                 {
                     if (ErrorCode == ProcessFilesErrorCodes.LocalizedError)
                     {
@@ -468,95 +468,95 @@ namespace PeptideHitResultsProcRunner
 
             try
             {
-                clsPHRPReader.ePeptideHitResultType ePeptideHitResultType;
+                clsPHRPReader.PeptideHitResultTypes PeptideHitResultType;
                 switch (mPeptideHitResultsFileFormat)
                 {
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Sequest;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.Sequest;
                         LogMessage("Detected SEQUEST First Hits file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Sequest;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestSynopsisFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.Sequest;
                         LogMessage("Detected SEQUEST Synopsis file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.XTandem;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.XTandemXMLFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.XTandem;
                         LogMessage("Detected X!Tandem XML file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InspectTXTFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.Inspect;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.InspectTXTFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.Inspect;
                         LogMessage("Detected Inspect results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSGFPlus;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.MSGFPlus;
                         LogMessage("Detected MSGF+ results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSAlign;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSAlignTXTFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.MSAlign;
                         LogMessage("Detected MSAlign results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MODPlus;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MODPlusTXTFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.MODPlus;
                         LogMessage("Detected MODPlus results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.MSPathFinder;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.MSPathFinder;
                         LogMessage("Detected MSPathfinder results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.TopPICTXTFile:
-                        ePeptideHitResultType = clsPHRPReader.ePeptideHitResultType.TopPIC;
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.TopPICTXTFile:
+                        PeptideHitResultType = clsPHRPReader.PeptideHitResultTypes.TopPIC;
                         LogMessage("Detected TopPIC results file");
                         break;
 
                     default:
-                        // Includes ePeptideHitResultsFileFormatConstants.AutoDetermine
-                        ePeptideHitResultType = clsPHRPReader.AutoDetermineResultType(inputFilePath);
+                        // Includes PeptideHitResultsFileFormatConstants.AutoDetermine
+                        PeptideHitResultType = clsPHRPReader.AutoDetermineResultType(inputFilePath);
                         break;
                 }
 
-                if (ePeptideHitResultType == clsPHRPReader.ePeptideHitResultType.Unknown)
+                if (PeptideHitResultType == clsPHRPReader.PeptideHitResultTypes.Unknown)
                 {
                     ShowErrorMessage("Error: Could not determine the format of the PHRP data file: " + inputFilePath);
                     return false;
                 }
 
-                switch (ePeptideHitResultType)
+                switch (PeptideHitResultType)
                 {
-                    case clsPHRPReader.ePeptideHitResultType.Sequest:
+                    case clsPHRPReader.PeptideHitResultTypes.Sequest:
                         mPeptideHitResultsProcessor = new clsSequestResultsProcessor();
                         break;
 
-                    case clsPHRPReader.ePeptideHitResultType.XTandem:
+                    case clsPHRPReader.PeptideHitResultTypes.XTandem:
                         mPeptideHitResultsProcessor = new clsXTandemResultsProcessor();
                         break;
 
-                    case clsPHRPReader.ePeptideHitResultType.Inspect:
+                    case clsPHRPReader.PeptideHitResultTypes.Inspect:
                         mPeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
                         break;
 
-                    case clsPHRPReader.ePeptideHitResultType.MSGFPlus:
+                    case clsPHRPReader.PeptideHitResultTypes.MSGFPlus:
                         mPeptideHitResultsProcessor = new clsMSGFPlusResultsProcessor();
                         break;
 
-                    case clsPHRPReader.ePeptideHitResultType.MSAlign:
+                    case clsPHRPReader.PeptideHitResultTypes.MSAlign:
                         mPeptideHitResultsProcessor = new clsMSAlignResultsProcessor();
                         break;
 
-                    case clsPHRPReader.ePeptideHitResultType.MODa:
+                    case clsPHRPReader.PeptideHitResultTypes.MODa:
                         mPeptideHitResultsProcessor = new clsMODaResultsProcessor();
                         break;
 
                     default:
                         // Unknown format
-                        ShowErrorMessage("Error: Unrecognized value for ePeptideHitResultType: " + ePeptideHitResultType);
+                        ShowErrorMessage("Error: Unrecognized value for PeptideHitResultType: " + PeptideHitResultType);
                         return false;
                 }
 
@@ -596,8 +596,8 @@ namespace PeptideHitResultsProcRunner
 
             try
             {
-                clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants ePeptideHitResultsFormat;
-                if (mPeptideHitResultsFileFormat == clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine)
+                clsPHRPBaseClass.PeptideHitResultsFileFormatConstants ePeptideHitResultsFormat;
+                if (mPeptideHitResultsFileFormat == clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine)
                 {
                     ePeptideHitResultsFormat = clsPHRPBaseClass.DetermineResultsFileFormat(inputFilePath);
                 }
@@ -606,7 +606,7 @@ namespace PeptideHitResultsProcRunner
                     ePeptideHitResultsFormat = mPeptideHitResultsFileFormat;
                 }
 
-                if (ePeptideHitResultsFormat == clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine)
+                if (ePeptideHitResultsFormat == clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine)
                 {
                     // If ePeptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
 
@@ -636,57 +636,57 @@ namespace PeptideHitResultsProcRunner
 
                 switch (ePeptideHitResultsFormat)
                 {
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
                         mPeptideHitResultsProcessor = new clsSequestResultsProcessor();
                         LogMessage("Detected SEQUEST First Hits file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.SequestSynopsisFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestSynopsisFile:
                         mPeptideHitResultsProcessor = new clsSequestResultsProcessor();
                         LogMessage("Detected SEQUEST Synopsis file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.XTandemXMLFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.XTandemXMLFile:
                         mPeptideHitResultsProcessor = new clsXTandemResultsProcessor();
                         LogMessage("Detected X!Tandem XML file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.InspectTXTFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.InspectTXTFile:
                         mPeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
                         LogMessage("Detected Inspect results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
                         mPeptideHitResultsProcessor = new clsMSGFPlusResultsProcessor();
                         LogMessage("Detected MSGF+ results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSAlignTXTFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSAlignTXTFile:
                         mPeptideHitResultsProcessor = new clsMSAlignResultsProcessor();
                         LogMessage("Detected MSAlign results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODaTXTFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MODaTXTFile:
                         mPeptideHitResultsProcessor = new clsMODaResultsProcessor();
                         LogMessage("Detected MODa results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MODPlusTXTFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MODPlusTXTFile:
                         mPeptideHitResultsProcessor = new clsMODPlusResultsProcessor();
                         LogMessage("Detected MODPlus results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
                         mPeptideHitResultsProcessor = new clsMSPathFinderResultsProcessor();
                         LogMessage("Detected MSPathFinder results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.TopPICTXTFile:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.TopPICTXTFile:
                         mPeptideHitResultsProcessor = new clsTopPICResultsProcessor();
                         LogMessage("Detected TopPIC results file");
                         break;
 
-                    case clsPHRPBaseClass.ePeptideHitResultsFileFormatConstants.AutoDetermine:
+                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine:
                         throw new Exception("This code should not be reached; logic error in AutoDetermine: branch of switch (ePeptideHitResultsFormat)");
                     default:
                         // Unknown format
