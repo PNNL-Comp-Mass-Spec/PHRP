@@ -208,14 +208,14 @@ namespace PeptideHitResultsProcessor
                             continue;
                         }
 
-                        var eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
+                        var residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
                         if (residueLocInPeptide <= 1)
                         {
-                            eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                         }
                         else if (residueLocInPeptide >= finalResidueLoc)
                         {
-                            eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                         }
 
                         // Now that we know the terminus position, assure that residueLocInPeptide is 1 not 0
@@ -236,7 +236,7 @@ namespace PeptideHitResultsProcessor
                         }
 
                         // Associate the mod with the given residue
-                        searchResult.SearchResultAddModification(modDef.ModMassVal, chMostRecentResidue, residueLocInPeptide, eResidueTerminusState, updateModOccurrenceCounts);
+                        searchResult.SearchResultAddModification(modDef.ModMassVal, chMostRecentResidue, residueLocInPeptide, residueTerminusState, updateModOccurrenceCounts);
 
                         matchFound = true;
                         break;
@@ -1005,10 +1005,10 @@ namespace PeptideHitResultsProcessor
                     {
                         for (var index = 0; index <= splitLine.Length - 1; index++)
                         {
-                            if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
+                            if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                             {
                                 // Recognized column name; update columnMapping
-                                columnMapping[eResultFileColumn] = index;
+                                columnMapping[resultFileColumn] = index;
                                 useDefaultHeaders = false;
                             }
                             else
@@ -1065,10 +1065,10 @@ namespace PeptideHitResultsProcessor
                 var splitLine = lineIn.Split('\t');
                 for (var index = 0; index <= splitLine.Length - 1; index++)
                 {
-                    if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
+                    if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[eResultFileColumn] = index;
+                        columnMapping[resultFileColumn] = index;
                     }
                 }
             }

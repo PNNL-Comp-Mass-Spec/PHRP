@@ -37,7 +37,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         protected clsPHRPBaseClass()
         {
-            FileDate = "October 25, 2020";
+            FileDate = "January 21, 2021";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -367,14 +367,14 @@ namespace PeptideHitResultsProcessor
         }
 
         public static string AutoDefinePeptideHitResultsFilePath(
-            PeptideHitResultsFileFormatConstants ePeptideHitResultFileFormat,
+            PeptideHitResultsFileFormatConstants peptideHitResultFileFormat,
             string sourceDirectoryPath,
             string baseName)
         {
             if (string.IsNullOrEmpty(baseName))
                 return AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath);
 
-            switch (ePeptideHitResultFileFormat)
+            switch (peptideHitResultFileFormat)
             {
                 case PeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
                     return Path.Combine(sourceDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX);
@@ -1137,7 +1137,7 @@ namespace PeptideHitResultsProcessor
             string phrpDataFilePath,
             string outputDirectoryPath,
             string mtsPepToProteinMapFilePath,
-            clsPHRPReader.PeptideHitResultTypes ePHRPResultType)
+            clsPHRPReader.PeptideHitResultTypes phrpResultType)
         {
             try
             {
@@ -1207,7 +1207,7 @@ namespace PeptideHitResultsProcessor
                                      COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
                                      COLUMN_NAME_MSGF_SPECPROB);
 
-                    var loadMSGFResults = ePHRPResultType != clsPHRPReader.PeptideHitResultTypes.MSGFPlus;
+                    var loadMSGFResults = phrpResultType != clsPHRPReader.PeptideHitResultTypes.MSGFPlus;
 
                     // Update the Mass Calculator to use the one tracked by this class
                     // (since this class's calculator knows about custom amino acids and custom charge carriers)
@@ -1219,7 +1219,7 @@ namespace PeptideHitResultsProcessor
                         PeptideMassCalculator = mPeptideSeqMassCalculator
                     };
 
-                    using (var reader = new clsPHRPReader(phrpDataFilePath, ePHRPResultType, startupOptions))
+                    using (var reader = new clsPHRPReader(phrpDataFilePath, phrpResultType, startupOptions))
                     {
                         reader.EchoMessagesToConsole = false;
                         reader.SkipDuplicatePSMs = true;
@@ -1649,8 +1649,10 @@ namespace PeptideHitResultsProcessor
         /// Returns true if the character is a letter between A and Z or a and z
         /// </summary>
         /// <param name="chChar">Character to examine</param>
-        /// <returns></returns>
-        /// <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
+        /// <remarks>
+        /// Note that the Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters
+        /// In contrast, this method only returns True for normal letters between A and Z (case insensitive)
+        /// </remarks>
         public static bool IsLetterAtoZ(char chChar)
         {
             if (RegexIsLetter.IsMatch(chChar.ToString()))
@@ -2151,12 +2153,12 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected void SetErrorCode(PHRPErrorCodes eNewErrorCode)
+        protected void SetErrorCode(PHRPErrorCodes newErrorCode)
         {
-            SetErrorCode(eNewErrorCode, false);
+            SetErrorCode(newErrorCode, false);
         }
 
-        protected void SetErrorCode(PHRPErrorCodes eNewErrorCode, bool leaveExistingErrorCodeUnchanged)
+        protected void SetErrorCode(PHRPErrorCodes newErrorCode, bool leaveExistingErrorCodeUnchanged)
         {
             if (leaveExistingErrorCodeUnchanged && mErrorCode != PHRPErrorCodes.NoError)
             {
@@ -2164,7 +2166,7 @@ namespace PeptideHitResultsProcessor
             }
             else
             {
-                mErrorCode = eNewErrorCode;
+                mErrorCode = newErrorCode;
             }
         }
 

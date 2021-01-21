@@ -204,9 +204,9 @@ namespace PHRPReader
 
         private clsModificationDefinition AddUnknownModification(
             double modificationMass,
-            clsModificationDefinition.ModificationTypeConstants eModType,
+            clsModificationDefinition.ModificationTypeConstants modType,
             char chTargetResidue,
-            clsAminoAcidModInfo.ResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             bool addToModificationListIfUnknown,
             bool useNextAvailableModificationSymbol,
             char modSymbol,
@@ -223,10 +223,10 @@ namespace PHRPReader
                 targetResidues = chTargetResidue.ToString();
             }
 
-            if (eResidueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
+            if (residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
             {
                 // Assume this is a terminus mod
-                switch (eResidueTerminusState)
+                switch (residueTerminusState)
                 {
                     case clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus:
                     case clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus:
@@ -238,7 +238,7 @@ namespace PHRPReader
                         targetResidues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
                         break;
                     default:
-                        throw new Exception("Unrecognized ResidueTerminusStateConstants enum: " + eResidueTerminusState);
+                        throw new Exception("Unrecognized ResidueTerminusStateConstants enum: " + residueTerminusState);
                 }
             }
 
@@ -253,7 +253,7 @@ namespace PHRPReader
                 modSymbol,
                 modificationMass,
                 targetResidues,
-                eModType,
+                modType,
                 massCorrectionTag,
                 clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, true);
 
@@ -587,19 +587,19 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modificationSymbol"></param>
         /// <param name="chTargetResidue"></param>
-        /// <param name="eResidueTerminusState"></param>
+        /// <param name="residueTerminusState"></param>
         /// <param name="existingModFound"></param>
         /// <returns>Modification details</returns>
         /// <remarks>If modificationSymbol does not match any of the mods, a modification with a mass of 0 is returned</remarks>
         public clsModificationDefinition LookupDynamicModificationDefinitionByTargetInfo(
             char modificationSymbol,
             char chTargetResidue,
-            clsAminoAcidModInfo.ResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             out bool existingModFound)
         {
 
             existingModFound = false;
-            if (chTargetResidue != default(char) || eResidueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
+            if (chTargetResidue != default(char) || residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
@@ -624,9 +624,9 @@ namespace PHRPReader
                         existingModFound = true;
                     }
 
-                    if (!existingModFound && eResidueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
+                    if (!existingModFound && residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
                     {
-                        switch (eResidueTerminusState)
+                        switch (residueTerminusState)
                         {
                             case clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus:
                             case clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNandCCTerminus:
@@ -645,7 +645,7 @@ namespace PHRPReader
 
                         if (!existingModFound)
                         {
-                            switch (eResidueTerminusState)
+                            switch (residueTerminusState)
                             {
                                 case clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus:
                                 case clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNandCCTerminus:
@@ -663,7 +663,7 @@ namespace PHRPReader
                             }
                         }
 
-                        if (!existingModFound && (eResidueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus || eResidueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNandCCTerminus))
+                        if (!existingModFound && (residueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus || residueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNandCCTerminus))
                         {
                             // Protein N-Terminus residue could also match a Peptide N-terminal mod; check for this
                             if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS))
@@ -672,7 +672,7 @@ namespace PHRPReader
                             }
                         }
 
-                        if (!existingModFound && (eResidueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus || eResidueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNandCCTerminus))
+                        if (!existingModFound && (residueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus || residueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNandCCTerminus))
                         {
                             // Protein C-Terminus residue could also match a Peptide C-terminal mod; check for this
                             if (Modifications[index].TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS))
@@ -744,7 +744,7 @@ namespace PHRPReader
         /// If defined, returns the first modification with the given mass and containing the residue in .TargetResidues;
         /// if no match, looks for the first modification with the given mass and no defined .TargetResidues
         /// </param>
-        /// <param name="eResidueTerminusState"></param>
+        /// <param name="residueTerminusState"></param>
         /// <param name="existingModFound"></param>
         /// <param name="addToModificationListIfUnknown"></param>
         /// <param name="massDigitsOfPrecision"></param>
@@ -753,7 +753,7 @@ namespace PHRPReader
         public clsModificationDefinition LookupModificationDefinitionByMass(
             double modificationMass,
             char chTargetResidue,
-            clsAminoAcidModInfo.ResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             out bool existingModFound,
             bool addToModificationListIfUnknown,
             byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
@@ -761,7 +761,7 @@ namespace PHRPReader
             clsModificationDefinition modificationDefinition;
 
             existingModFound = false;
-            if (chTargetResidue != default(char) || eResidueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
+            if (chTargetResidue != default(char) || residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
@@ -787,9 +787,9 @@ namespace PHRPReader
                         existingModFound = true;
                     }
 
-                    if (!existingModFound && eResidueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
+                    if (!existingModFound && residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
                     {
-                        switch (eResidueTerminusState)
+                        switch (residueTerminusState)
                         {
                             case clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus:
                             case clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus:
@@ -884,11 +884,11 @@ namespace PHRPReader
             }
 
             // Still no match; define a new custom modification
-            const clsModificationDefinition.ModificationTypeConstants eModType = clsModificationDefinition.ModificationTypeConstants.DynamicMod;
+            const clsModificationDefinition.ModificationTypeConstants modType = clsModificationDefinition.ModificationTypeConstants.DynamicMod;
             const char modSymbol = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
             const bool useNextAvailableModificationSymbol = true;
 
-            modificationDefinition = AddUnknownModification(modificationMass, eModType, chTargetResidue, eResidueTerminusState, addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol, massDigitsOfPrecision);
+            modificationDefinition = AddUnknownModification(modificationMass, modType, chTargetResidue, residueTerminusState, addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol, massDigitsOfPrecision);
 
             return modificationDefinition;
         }
@@ -939,11 +939,11 @@ namespace PHRPReader
         /// Looks for an existing modification with the given modification mass, modification type, and target residues
         /// </summary>
         /// <param name="modificationMass"></param>
-        /// <param name="eModType"></param>
+        /// <param name="modType"></param>
         /// <param name="chTargetResidue">
         /// If defined, returns the first modification with the given mass and containing the residue in .TargetResidues;
         /// if no match, looks for the first modification with the given mass and no defined .TargetResidues</param>
-        /// <param name="eResidueTerminusState"></param>
+        /// <param name="residueTerminusState"></param>
         /// <param name="existingModFound"></param>
         /// <param name="addToModificationListIfUnknown"></param>
         /// <param name="massDigitsOfPrecision"></param>
@@ -951,9 +951,9 @@ namespace PHRPReader
         /// <remarks>If chTargetResidue is nothing, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         public clsModificationDefinition LookupModificationDefinitionByMassAndModType(
             double modificationMass,
-            clsModificationDefinition.ModificationTypeConstants eModType,
+            clsModificationDefinition.ModificationTypeConstants modType,
             char chTargetResidue,
-            clsAminoAcidModInfo.ResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             out bool existingModFound,
             bool addToModificationListIfUnknown,
             byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
@@ -969,7 +969,7 @@ namespace PHRPReader
             char modSymbol;
             bool useNextAvailableModificationSymbol;
 
-            switch (eModType)
+            switch (modType)
             {
                 case clsModificationDefinition.ModificationTypeConstants.StaticMod:
                 case clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod:
@@ -984,13 +984,13 @@ namespace PHRPReader
             }
 
             existingModFound = false;
-            if (chTargetResidue != default(char) || eResidueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
+            if (chTargetResidue != default(char) || residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
                 // First compare against modifications with 1 or more residues in .TargetResidues
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (Modifications[index].ModificationType == eModType &&
+                    if (Modifications[index].ModificationType == modType &&
                         (Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod ||
                          Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod ||
                          Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
@@ -1008,9 +1008,9 @@ namespace PHRPReader
                             existingModFound = true;
                         }
 
-                        if (!existingModFound && eResidueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
+                        if (!existingModFound && residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
                         {
-                            switch (eResidueTerminusState)
+                            switch (residueTerminusState)
                             {
                                 case clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus:
                                 case clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus:
@@ -1044,7 +1044,7 @@ namespace PHRPReader
             // Compare against modifications with empty .TargetResidues
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if (Modifications[index].ModificationType == eModType &&
+                if (Modifications[index].ModificationType == modType &&
                     (Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod ||
                      Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod ||
                      Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
@@ -1078,7 +1078,7 @@ namespace PHRPReader
 
                     modificationDefinition = mStandardRefinementModifications[index];
                     modificationDefinition.ModificationSymbol = modSymbol;
-                    modificationDefinition.ModificationType = eModType;
+                    modificationDefinition.ModificationType = modType;
 
                     if (!addToModificationListIfUnknown || mDefaultModificationSymbols.Count <= 0)
                         return modificationDefinition;
@@ -1100,7 +1100,7 @@ namespace PHRPReader
             // Compare against modifications of the same type, but ignore .TargetResidues
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if (Modifications[index].ModificationType != eModType)
+                if (Modifications[index].ModificationType != modType)
                     continue;
 
                 if (Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision) > float.Epsilon)
@@ -1117,7 +1117,7 @@ namespace PHRPReader
             }
 
             // Still no match; define a new custom modification
-            modificationDefinition = AddUnknownModification(modificationMass, eModType, chTargetResidue, eResidueTerminusState, addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol, massDigitsOfPrecision);
+            modificationDefinition = AddUnknownModification(modificationMass, modType, chTargetResidue, residueTerminusState, addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol, massDigitsOfPrecision);
 
             return modificationDefinition;
         }

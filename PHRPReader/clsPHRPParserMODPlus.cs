@@ -422,17 +422,17 @@ namespace PHRPReader
                     if (Math.Abs(modMassDa - 0) < float.Epsilon)
                         continue;
 
-                    var eModType = clsModificationDefinition.ModificationTypeConstants.StaticMod;
+                    var modType = clsModificationDefinition.ModificationTypeConstants.StaticMod;
                     if (residue == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residue == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
-                        eModType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
+                        modType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                     }
 
                     var modDef = new clsModificationDefinition(
                         clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                         modMassDa,
                         residue,
-                        eModType,
+                        modType,
                         "Mod" + modMassDa.ToString("0"));
 
                     searchEngineParams.AddModification(modDef);

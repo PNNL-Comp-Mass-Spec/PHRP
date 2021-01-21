@@ -436,7 +436,7 @@ namespace PeptideHitResultsProcRunner
             return fileNameOrPath;
         }
 
-        private void SetLocalErrorCode(ResultsProcessorErrorCodes eNewErrorCode, bool leaveExistingErrorCodeUnchanged = false)
+        private void SetLocalErrorCode(ResultsProcessorErrorCodes newErrorCode, bool leaveExistingErrorCodeUnchanged = false)
         {
             if (leaveExistingErrorCodeUnchanged && mLocalErrorCode != ResultsProcessorErrorCodes.NoError)
             {
@@ -444,9 +444,9 @@ namespace PeptideHitResultsProcRunner
             }
             else
             {
-                mLocalErrorCode = eNewErrorCode;
+                mLocalErrorCode = newErrorCode;
 
-                if (eNewErrorCode == ResultsProcessorErrorCodes.NoError)
+                if (newErrorCode == ResultsProcessorErrorCodes.NoError)
                 {
                     if (ErrorCode == ProcessFilesErrorCodes.LocalizedError)
                     {
@@ -593,19 +593,19 @@ namespace PeptideHitResultsProcRunner
 
             try
             {
-                clsPHRPBaseClass.PeptideHitResultsFileFormatConstants ePeptideHitResultsFormat;
+                clsPHRPBaseClass.PeptideHitResultsFileFormatConstants peptideHitResultsFormat;
                 if (mPeptideHitResultsFileFormat == clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine)
                 {
-                    ePeptideHitResultsFormat = clsPHRPBaseClass.DetermineResultsFileFormat(inputFilePath);
+                    peptideHitResultsFormat = clsPHRPBaseClass.DetermineResultsFileFormat(inputFilePath);
                 }
                 else
                 {
-                    ePeptideHitResultsFormat = mPeptideHitResultsFileFormat;
+                    peptideHitResultsFormat = mPeptideHitResultsFileFormat;
                 }
 
-                if (ePeptideHitResultsFormat == clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine)
+                if (peptideHitResultsFormat == clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine)
                 {
-                    // If ePeptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
+                    // If peptideHitResultsFormat is still AutoDetermine that means we couldn't figure out the format
 
                     ShowErrorMessage("Could not determine the format of the input file.");
 
@@ -631,7 +631,7 @@ namespace PeptideHitResultsProcRunner
                     return false;
                 }
 
-                switch (ePeptideHitResultsFormat)
+                switch (peptideHitResultsFormat)
                 {
                     case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
                         mPeptideHitResultsProcessor = new clsSequestResultsProcessor();
@@ -684,10 +684,10 @@ namespace PeptideHitResultsProcRunner
                         break;
 
                     case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine:
-                        throw new Exception("This code should not be reached; logic error in AutoDetermine: branch of switch (ePeptideHitResultsFormat)");
+                        throw new Exception("This code should not be reached; logic error in AutoDetermine: branch of switch (peptideHitResultsFormat)");
                     default:
                         // Unknown format
-                        throw new Exception("This code should not be reached; logic error in default: branch of switch (ePeptideHitResultsFormat)");
+                        throw new Exception("This code should not be reached; logic error in default: branch of switch (peptideHitResultsFormat)");
                 }
 
                 if (mPeptideHitResultsProcessor == null)

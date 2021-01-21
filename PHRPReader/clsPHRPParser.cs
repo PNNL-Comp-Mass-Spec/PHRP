@@ -427,7 +427,7 @@ namespace PHRPReader
         /// Returns the appropriate PHRPParser class based on the input file name
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
-        /// ''' <param name="datasetName">Dataset Name</param>
+        /// <param name="datasetName">Dataset Name</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type from inputFilePath</remarks>
         public static clsPHRPParser GetParser(string inputFilePath, string datasetName, bool loadModsAndSeqInfo)
@@ -1328,11 +1328,11 @@ namespace PHRPReader
                 // Thus, if residueLoc = 1 or residueLoc = currentPSM.PeptideCleanSequence.Length, we'll first look for a peptide or protein terminal static mod
 
                 bool favorTerminalMods;
-                clsAminoAcidModInfo.ResidueTerminusStateConstants eResidueTerminusState;
+                clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState;
 
                 if (residueLoc == 1)
                 {
-                    eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                    residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                     if (nTerminalModsAdded.Contains(massCorrectionTag))
                     {
                         // We have likely already added this modification as an N-terminal mod, thus, don't favor terminal mods this time
@@ -1348,7 +1348,7 @@ namespace PHRPReader
                 }
                 else if (residueLoc == peptideResidueCount)
                 {
-                    eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                    residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                     if (cTerminalModsAdded.Contains(massCorrectionTag))
                     {
                         favorTerminalMods = false;
@@ -1360,7 +1360,7 @@ namespace PHRPReader
                 }
                 else
                 {
-                    eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
+                    residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
                     favorTerminalMods = false;
                 }
 
@@ -1374,7 +1374,7 @@ namespace PHRPReader
                 }
                 else
                 {
-                    matchFound = UpdatePSMFindMatchingModInfo(massCorrectionTag, favorTerminalMods, eResidueTerminusState,
+                    matchFound = UpdatePSMFindMatchingModInfo(massCorrectionTag, favorTerminalMods, residueTerminusState,
                                                                  out matchedModDef);
                 }
 
@@ -1386,13 +1386,13 @@ namespace PHRPReader
                     {
                         // Ambiguous modification
                         currentPSM.AddModifiedResidue(currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
-                                                  eResidueTerminusState, matchedModDef, matches.First().ResidueEnd);
+                                                  residueTerminusState, matchedModDef, matches.First().ResidueEnd);
                     }
                     else
                     {
                         // Normal, non-ambiguous modified residue
                         currentPSM.AddModifiedResidue(currentPSM.PeptideCleanSequence[residueLoc - 1], residueLoc,
-                                                  eResidueTerminusState, matchedModDef);
+                                                  residueTerminusState, matchedModDef);
                     }
 
                     if (residueLoc == 1)
@@ -1497,7 +1497,7 @@ namespace PHRPReader
         private bool UpdatePSMFindMatchingModInfo(
             string massCorrectionTag,
             bool favorTerminalMods,
-            clsAminoAcidModInfo.ResidueTerminusStateConstants eResidueTerminusState,
+            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             out clsModificationDefinition matchedModDef)
         {
             matchedModDef = new clsModificationDefinition();
@@ -1532,7 +1532,7 @@ namespace PHRPReader
                             if (mod.ModificationType == clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
                                 mod.ModificationType == clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod)
                             {
-                                if (eResidueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus &&
+                                if (residueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus &&
                                     (mod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)))
                                 {
                                     matchFound = true;
@@ -1540,7 +1540,7 @@ namespace PHRPReader
                                     break;
                                 }
 
-                                if (eResidueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus &&
+                                if (residueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus &&
                                     (mod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)))
                                 {
                                     matchFound = true;

@@ -581,12 +581,11 @@ namespace PHRPReader
         /// <summary>
         /// Retrieve the modification type symbol for the given modification Type
         /// </summary>
-        /// <param name="eModificationType"></param>
+        /// <param name="modificationType"></param>
         /// <returns>D, S, T, I, or P</returns>
-        /// <remarks></remarks>
-        public static char ModificationTypeToModificationSymbol(ModificationTypeConstants eModificationType)
+        public static char ModificationTypeToModificationSymbol(ModificationTypeConstants modificationType)
         {
-            switch (eModificationType)
+            switch (modificationType)
             {
                 case ModificationTypeConstants.DynamicMod:
                     return 'D';

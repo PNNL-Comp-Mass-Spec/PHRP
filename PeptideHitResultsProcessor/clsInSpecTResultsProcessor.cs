@@ -410,7 +410,7 @@ namespace PeptideHitResultsProcessor
             string inputFilePath,
             string outputFilePath,
             IReadOnlyList<udtModInfoType> inspectModInfo,
-            FilteredOutputFileTypeConstants eFilteredOutputFileType)
+            FilteredOutputFileTypeConstants filteredOutputFileType)
         {
 
             var udtSearchResult = new udtInspectSearchResultType();
@@ -427,14 +427,14 @@ namespace PeptideHitResultsProcessor
                 var previousScan = int.MinValue;
                 IComparer<udtInspectSearchResultType> sortComparer;
 
-                if (eFilteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
+                if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
                 {
                     // Writes the synopsis file, which writes every record with a p-value below a set threshold or a TotalPRMScore above a certain threshold
                     sortComparer = new InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc();
                 }
                 else
                 {
-                    if (eFilteredOutputFileType == FilteredOutputFileTypeConstants.FHTbyTotalPRM)
+                    if (filteredOutputFileType == FilteredOutputFileTypeConstants.FHTbyTotalPRM)
                     {
                         // Write the PRM first-hits file, which writes the record with the highest TotalPRMScore
                         sortComparer = new InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc();
@@ -491,7 +491,7 @@ namespace PeptideHitResultsProcessor
                             if (previousScan != int.MinValue && previousScan != udtSearchResult.ScanNum)
                             {
                                 // New scan encountered; sort and filter the data in searchResultsCurrentScan, then call StoreTopFHTMatch or StoreSynMatches
-                                if (eFilteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
+                                if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
                                 {
                                     StoreSynMatches(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan,
                                                     filteredSearchResults, ref errorLog, ref sortComparer);
@@ -516,7 +516,7 @@ namespace PeptideHitResultsProcessor
                         // Store the last record
                         if (currentScanResultsCount > 0)
                         {
-                            if (eFilteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
+                            if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
                             {
                                 StoreSynMatches(writer, ref resultID, currentScanResultsCount, searchResultsCurrentScan, filteredSearchResults,
                                                 ref errorLog, ref sortComparer);
@@ -901,10 +901,10 @@ namespace PeptideHitResultsProcessor
                 var splitLine = lineIn.Split('\t');
                 for (var index = 0; index <= splitLine.Length - 1; index++)
                 {
-                    if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
+                    if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[eResultFileColumn] = index;
+                        columnMapping[resultFileColumn] = index;
                     }
                 }
             }
@@ -1794,21 +1794,21 @@ namespace PeptideHitResultsProcessor
                         targetResidue = default;
                     }
 
-                    clsAminoAcidModInfo.ResidueTerminusStateConstants eResidueTerminusState;
+                    clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState;
                     if (modDef.ModType == InspectModType.DynNTermPeptide)
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                     }
                     else if (modDef.ModType == InspectModType.DynCTermPeptide)
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                     }
                     else
                     {
-                        eResidueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
+                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
                     }
 
-                    var modificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(modMass, targetResidue, eResidueTerminusState, out _, true);
+                    var modificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(modMass, targetResidue, residueTerminusState, out _, true);
 
                     if (residueIndex == resIndexStart)
                     {

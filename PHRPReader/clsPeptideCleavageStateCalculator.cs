@@ -225,12 +225,10 @@ namespace PHRPReader
         /// <summary>
         /// Converts Cleavage State to 0, 1, or 2
         /// </summary>
-        /// <param name="eCleavageState"></param>
-        /// <returns></returns>
-        /// <remarks></remarks>
-        public static short CleavageStateToShort(PeptideCleavageStateConstants eCleavageState)
+        /// <param name="cleavageState"></param>
+        public static short CleavageStateToShort(PeptideCleavageStateConstants cleavageState)
         {
-            return Convert.ToInt16(eCleavageState);
+            return Convert.ToInt16(cleavageState);
         }
 
         /// <summary>
@@ -273,37 +271,37 @@ namespace PHRPReader
             var chSequenceEnd = FindLetterNearestEnd(cleanSequence);
 
             // Determine the terminus state of this peptide
-            var ePeptideTerminusState = ComputeTerminusState(prefix, suffix);
+            var peptideTerminusState = ComputeTerminusState(prefix, suffix);
 
-            PeptideCleavageStateConstants ePeptideCleavageState;
+            PeptideCleavageStateConstants peptideCleavageState;
 
-            if (ePeptideTerminusState == PeptideTerminusStateConstants.ProteinNandCCTerminus)
+            if (peptideTerminusState == PeptideTerminusStateConstants.ProteinNandCCTerminus)
             {
                 // The peptide spans the entire length of the protein; mark it as fully tryptic
-                ePeptideCleavageState = PeptideCleavageStateConstants.Full;
+                peptideCleavageState = PeptideCleavageStateConstants.Full;
             }
-            else if (ePeptideTerminusState == PeptideTerminusStateConstants.ProteinNTerminus)
+            else if (peptideTerminusState == PeptideTerminusStateConstants.ProteinNTerminus)
             {
                 // Peptides at the N-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
                 if (TestCleavageRule(chSequenceEnd, suffix))
                 {
-                    ePeptideCleavageState = PeptideCleavageStateConstants.Full;
+                    peptideCleavageState = PeptideCleavageStateConstants.Full;
                 }
                 else
                 {
-                    ePeptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
+                    peptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
                 }
             }
-            else if (ePeptideTerminusState == PeptideTerminusStateConstants.ProteinCTerminus)
+            else if (peptideTerminusState == PeptideTerminusStateConstants.ProteinCTerminus)
             {
                 // Peptides at the C-terminus of a protein can only be fully tryptic or non-tryptic, never partially tryptic
                 if (TestCleavageRule(prefix, chSequenceStart))
                 {
-                    ePeptideCleavageState = PeptideCleavageStateConstants.Full;
+                    peptideCleavageState = PeptideCleavageStateConstants.Full;
                 }
                 else
                 {
-                    ePeptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
+                    peptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
                 }
             }
             else
@@ -314,19 +312,19 @@ namespace PHRPReader
 
                 if (ruleMatchStart && ruleMatchEnd)
                 {
-                    ePeptideCleavageState = PeptideCleavageStateConstants.Full;
+                    peptideCleavageState = PeptideCleavageStateConstants.Full;
                 }
                 else if (ruleMatchStart || ruleMatchEnd)
                 {
-                    ePeptideCleavageState = PeptideCleavageStateConstants.Partial;
+                    peptideCleavageState = PeptideCleavageStateConstants.Partial;
                 }
                 else
                 {
-                    ePeptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
+                    peptideCleavageState = PeptideCleavageStateConstants.NonSpecific;
                 }
             }
 
-            return ePeptideCleavageState;
+            return peptideCleavageState;
         }
 
         /// <summary>
@@ -389,7 +387,7 @@ namespace PHRPReader
         /// <remarks>For example, if the peptide is -.PEPTIDE.G, pass prefix="-" and suffix="G"</remarks>
         public PeptideTerminusStateConstants ComputeTerminusState(char prefix, char suffix)
         {
-            PeptideTerminusStateConstants ePeptideTerminusState;
+            PeptideTerminusStateConstants peptideTerminusState;
 
             if (mTerminusSymbols.Contains(prefix))
             {
@@ -397,26 +395,26 @@ namespace PHRPReader
                 if (mTerminusSymbols.Contains(suffix))
                 {
                     // The peptide spans the entire length of the protein
-                    ePeptideTerminusState = PeptideTerminusStateConstants.ProteinNandCCTerminus;
+                    peptideTerminusState = PeptideTerminusStateConstants.ProteinNandCCTerminus;
                 }
                 else
                 {
                     // The peptide is located at the protein's N-terminus
-                    ePeptideTerminusState = PeptideTerminusStateConstants.ProteinNTerminus;
+                    peptideTerminusState = PeptideTerminusStateConstants.ProteinNTerminus;
                 }
             }
             else if (mTerminusSymbols.Contains(suffix))
             {
                 // Suffix character matches a terminus symbol
                 // The peptide is located at the protein's C-terminus
-                ePeptideTerminusState = PeptideTerminusStateConstants.ProteinCTerminus;
+                peptideTerminusState = PeptideTerminusStateConstants.ProteinCTerminus;
             }
             else
             {
-                ePeptideTerminusState = PeptideTerminusStateConstants.None;
+                peptideTerminusState = PeptideTerminusStateConstants.None;
             }
 
-            return ePeptideTerminusState;
+            return peptideTerminusState;
         }
 
         /// <summary>
@@ -430,11 +428,11 @@ namespace PHRPReader
         {
             // Determine the terminus state of cleanSequence
 
-            PeptideTerminusStateConstants ePeptideTerminusState;
+            PeptideTerminusStateConstants peptideTerminusState;
 
             if (string.IsNullOrEmpty(cleanSequence))
             {
-                ePeptideTerminusState = PeptideTerminusStateConstants.None;
+                peptideTerminusState = PeptideTerminusStateConstants.None;
             }
             else
             {
@@ -444,10 +442,10 @@ namespace PHRPReader
                 // Find the letter closest to the start of suffixResidues
                 var suffix = FindLetterNearestStart(suffixResidues);
 
-                ePeptideTerminusState = ComputeTerminusState(prefix, suffix);
+                peptideTerminusState = ComputeTerminusState(prefix, suffix);
             }
 
-            return ePeptideTerminusState;
+            return peptideTerminusState;
         }
 
         private static readonly Regex RegexNotLetter = new Regex("[^A-Za-z]", RegexOptions.Compiled);

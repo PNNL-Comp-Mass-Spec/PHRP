@@ -1478,12 +1478,12 @@ namespace PeptideHitResultsProcessor
                                 if (Math.Abs(modificationMass - 0) > float.Epsilon)
                                 {
                                     var residueLocInPeptide = modifiedResiduePosInProtein - searchResult.PeptideLocInProteinStart + 1;
-                                    var eResidueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
+                                    var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
 
                                     searchResult.SearchResultAddModification(modificationMass,
                                                                              targetResidue,
                                                                              residueLocInPeptide,
-                                                                             eResidueTerminusState,
+                                                                             residueTerminusState,
                                                                              updateModOccurrenceCounts);
                                 }
                             }

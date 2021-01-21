@@ -542,9 +542,9 @@ namespace PeptideHitResultsProcessor
             // Remove any non-letter characters before calling .ComputeCleavageState()
             var cleanSequence = GetCleanSequence(sequenceWithMods, out var prefix, out var suffix);
 
-            var eCleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(cleanSequence, prefix, suffix);
+            var cleavageState = mPeptideCleavageStateCalculator.ComputeCleavageState(cleanSequence, prefix, suffix);
 
-            return Convert.ToInt16(eCleavageState);
+            return Convert.ToInt16(cleavageState);
         }
 
         /// <summary>
@@ -770,7 +770,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="msgfPlusModInfo">Used to replace Mod text entries in the peptides with Mod Symbols</param>
         /// <param name="isMsgfPlus">Output parameter: this function will set this to True if we're processing MS-GF+ results</param>
         /// <param name="specIdToIndex"></param>
-        /// <param name="eFilteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
+        /// <param name="filteredOutputFileType">Synopsis file or first hits file (sorting on various columns)</param>
         /// <returns>True if successful, false if an error</returns>
         private bool CreateFHTorSYNResultsFile(
             string inputFilePath,
@@ -779,7 +779,7 @@ namespace PeptideHitResultsProcessor
             IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
             out bool isMsgfPlus,
             IDictionary<string, int> specIdToIndex,
-            FilteredOutputFileTypeConstants eFilteredOutputFileType)
+            FilteredOutputFileTypeConstants filteredOutputFileType)
         {
 
             var searchResultsCurrentScan = new List<udtMSGFPlusSearchResultType>();
@@ -904,7 +904,7 @@ namespace PeptideHitResultsProcessor
                                 continue;
                             }
 
-                            if (eFilteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
+                            if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
                             {
                                 // Synopsis file
                                 validSearchResult = MSGFPlusResultPassesSynFilter(searchResultsCurrentScan[0]);
@@ -972,7 +972,7 @@ namespace PeptideHitResultsProcessor
                         // Sort the SearchResults by scan, charge, and ascending SpecEValue
                         searchResultsPrefiltered.Sort(new MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide());
 
-                        if (eFilteredOutputFileType == FilteredOutputFileTypeConstants.FHTFile)
+                        if (filteredOutputFileType == FilteredOutputFileTypeConstants.FHTFile)
                         {
                             // Update the protein names in searchResultsPrefiltered using scanChargeFirstHit
                             // This step is typically not necessary, but is often required for SplitFasta results
@@ -1020,7 +1020,7 @@ namespace PeptideHitResultsProcessor
                             }
 
                             // Store the results for this scan
-                            if (eFilteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
+                            if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
                             {
                                 StoreSynMatches(searchResultsPrefiltered, startIndex, endIndex, filteredSearchResults);
                             }
@@ -2000,10 +2000,10 @@ namespace PeptideHitResultsProcessor
                 var splitLine = lineIn.Split('\t');
                 for (var index = 0; index <= splitLine.Length - 1; index++)
                 {
-                    if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
+                    if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[eResultFileColumn] = index;
+                        columnMapping[resultFileColumn] = index;
                     }
                     else
                     {
@@ -2044,10 +2044,10 @@ namespace PeptideHitResultsProcessor
                 var splitLine = lineIn.Split('\t');
                 for (var index = 0; index <= splitLine.Length - 1; index++)
                 {
-                    if (columnNames.TryGetValue(splitLine[index], out var eResultFileColumn))
+                    if (columnNames.TryGetValue(splitLine[index], out var resultFileColumn))
                     {
                         // Recognized column name; update columnMapping
-                        columnMapping[eResultFileColumn] = index;
+                        columnMapping[resultFileColumn] = index;
                     }
                 }
             }
@@ -2098,7 +2098,7 @@ namespace PeptideHitResultsProcessor
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
-                        errorLog += "Error reading ResultID value from MS-GF+ Results line " +
+                        errorLog += "Error reading ResultID value from MS-GF+ results line " +
                                     (resultsProcessed + 1) + "\n";
                     }
 
