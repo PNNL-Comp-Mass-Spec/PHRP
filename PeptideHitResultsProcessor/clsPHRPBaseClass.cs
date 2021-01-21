@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using PeptideToProteinMapEngine;
 using PHRPReader;
+using ProteinCoverageSummarizer;
 
 namespace PeptideHitResultsProcessor
 {
@@ -973,21 +974,25 @@ namespace PeptideHitResultsProcessor
 
                 var peptideToProteinMapResults = new SortedSet<string>();
 
-                var peptideToProteinMapper = new clsPeptideToProteinMapEngine
+                var options = new ProteinCoverageSummarizerOptions()
                 {
-                    DeleteTempFiles = true,
                     IgnoreILDifferences = false,
-                    InspectParameterFilePath = string.Empty,
-                    LogMessagesToFile = false,
                     MatchPeptidePrefixAndSuffixToProtein = false,
                     OutputProteinSequence = false,
-                    PeptideInputFileFormat = clsPeptideToProteinMapEngine.ePeptideInputFileFormatConstants.PHRPFile,
                     PeptideFileSkipFirstLine = false,
-                    ProteinDataRemoveSymbolCharacters = true,
+                    RemoveSymbolCharacters = true,
                     ProteinInputFilePath = FastaFilePath,
                     SaveProteinToPeptideMappingFile = true,
                     SearchAllProteinsForPeptideSequence = true,
                     SearchAllProteinsSkipCoverageComputationSteps = true
+                };
+
+                var peptideToProteinMapper = new clsPeptideToProteinMapEngine(options)
+                {
+                    DeleteTempFiles = true,
+                    InspectParameterFilePath = string.Empty,
+                    LogMessagesToFile = false,
+                    PeptideInputFileFormat = clsPeptideToProteinMapEngine.PeptideInputFileFormatConstants.PHRPFile
                 };
 
                 RegisterEvents(peptideToProteinMapper);
