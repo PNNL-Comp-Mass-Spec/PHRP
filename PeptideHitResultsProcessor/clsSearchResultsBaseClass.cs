@@ -28,6 +28,8 @@ namespace PeptideHitResultsProcessor
     /// </remarks>
     public abstract class clsSearchResultsBaseClass
     {
+        // Ignore Spelling: Da, MODa, acetyl
+
         #region "Constants and Enums"
         /// <summary>
         /// Mass difference, in Da, between ^12C and ^13C

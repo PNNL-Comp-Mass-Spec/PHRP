@@ -30,6 +30,8 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public abstract class clsPHRPBaseClass : PRISM.EventNotifier
     {
+        // Ignore Spelling: Da, A-Za-z, Fscore, prot, mts, MSFragger, xxx
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -1357,7 +1359,7 @@ namespace PeptideHitResultsProcessor
         {
             if (items.Count > largeListThreshold && items.Count + countToAdd > items.Capacity)
             {
-                // .NET by default will double the size of the list to accomodate these new items
+                // .NET by default will double the size of the list to accommodate these new items
                 // Instead, expand the list by 20% of the current size
                 items.Capacity = items.Capacity + Convert.ToInt32(items.Count / 5);
             }
@@ -1843,7 +1845,7 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                // Open proteinToPeptideMappingFilePath for reading
+                // Open the peptide to protein map file for reading
                 using (var reader = new StreamReader(new FileStream(pepToProteinMapFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     var linesRead = 0;
