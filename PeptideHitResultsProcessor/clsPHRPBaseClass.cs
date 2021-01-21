@@ -321,54 +321,6 @@ namespace PeptideHitResultsProcessor
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
-        /// MSGFDB synopsis file p-value threshold
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>Lower p-values are higher confidence results; renamed to EValue in MS-GF+</remarks>
-        [Obsolete("Use MSGFDBSynopsisFileEValueThreshold")]
-        public float MSGFDBSynopsisFilePValueThreshold
-        {
-            get => MSGFDBSynopsisFileEValueThreshold;
-            set => MSGFDBSynopsisFileEValueThreshold = value;
-        }
-
-        /// <summary>
-        /// MSGFDB synopsis file specEValue threshold
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>Lower SpecProb values are higher confidence results; renamed to SpecEValue in MS-GF+</remarks>
-        [Obsolete("Use MSGFDBSynopsisFileSpecEValueThreshold")]
-        public float MSGFDBSynopsisFileSpecProbThreshold
-        {
-            get => MSGFDBSynopsisFileSpecEValueThreshold;
-            set => MSGFDBSynopsisFileSpecEValueThreshold = value;
-        }
-
-        /// <summary>
-        /// Used by clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>Lower E-values are higher confidence results</remarks>
-        [Obsolete("Use MSGFPlusSynopsisFileEValueThreshold")]
-        public float MSGFDBSynopsisFileEValueThreshold
-        {
-            get => MSGFPlusSynopsisFileEValueThreshold;
-            set => MSGFPlusSynopsisFileEValueThreshold = value;
-        }
-
-        /// <summary>
-        /// clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
-        [Obsolete("Use MSGFPlusSynopsisFileSpecEValueThreshold")]
-        public float MSGFDBSynopsisFileSpecEValueThreshold
-        {
-            get => MSGFPlusSynopsisFileSpecEValueThreshold;
-            set => MSGFPlusSynopsisFileSpecEValueThreshold = value;
-        }
-
-        /// <summary>
         /// Used by clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
         /// </summary>
         /// <returns></returns>
