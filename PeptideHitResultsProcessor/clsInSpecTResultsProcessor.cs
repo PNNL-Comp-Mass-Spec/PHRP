@@ -470,7 +470,7 @@ namespace PeptideHitResultsProcessor
                         var filteredSearchResults = new List<udtInspectSearchResultType>();
 
                         // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream && !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
 
@@ -749,7 +749,7 @@ namespace PeptideHitResultsProcessor
                         // Check for phosphorylation
                         // Inspect requires that it be defined in the parameter file as: mod,80,STY,opt,phosphorylation
                         //  However, we want to use the more precise mass of 79.9663
-                        if (modDef.ModName == PHOS_MOD_NAME.ToLower() & modDef.ModMass == "80")
+                        if (modDef.ModName == PHOS_MOD_NAME.ToLower() && modDef.ModMass == "80")
                         {
                             modDef.ModMass = PHOS_MOD_MASS;
                         }
@@ -842,7 +842,7 @@ namespace PeptideHitResultsProcessor
                 // Initialize pepToProteinMapping
                 pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
-                // Read the data in proteinToPeptideMappingFilePath
+                // Read the data in the peptide to protein map file
                 success = LoadPeptideToProteinMapInfo(pepToProteinMapFilePath, pepToProteinMapping, out var headerLine);
 
                 if (success)
@@ -983,7 +983,7 @@ namespace PeptideHitResultsProcessor
                             return false;
 
                         // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream && !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))

@@ -490,7 +490,7 @@ namespace PeptideHitResultsProcessor
                     var filteredSearchResults = new List<udtMSAlignSearchResultType>();
 
                     // Parse the input file
-                    while (!reader.EndOfStream & !AbortProcessing)
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(lineIn))
@@ -729,7 +729,7 @@ namespace PeptideHitResultsProcessor
                             return false;
 
                         // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream && !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
@@ -1040,7 +1040,7 @@ namespace PeptideHitResultsProcessor
                 {
                     udtSearchResult.FDR = "10";
                 }
-                else if (!string.IsNullOrEmpty(udtSearchResult.FDR) & !double.TryParse(udtSearchResult.FDR, out _))
+                else if (!string.IsNullOrEmpty(udtSearchResult.FDR) && !double.TryParse(udtSearchResult.FDR, out _))
                 {
                     udtSearchResult.FDR = string.Empty;
                 }

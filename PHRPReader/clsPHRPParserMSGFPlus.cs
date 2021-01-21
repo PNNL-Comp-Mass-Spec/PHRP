@@ -208,8 +208,8 @@ namespace PHRPReader
             out double tolerancePPM,
             clsPHRPReader.ePeptideHitResultType resultType)
         {
-            var reExtraToleranceWithUnits = new Regex(@"([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var reExtraToleranceNoUnits = new Regex(@"([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var reExtraToleranceWithUnits = new Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var reExtraToleranceNoUnits = new Regex("([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             string tolerance;
             double toleranceDa = 0;
@@ -280,7 +280,7 @@ namespace PHRPReader
                 toleranceDa = Math.Max(toleranceDa, toleranceCurrent);
             }
 
-            if (Math.Abs(tolerancePPM) < float.Epsilon & Math.Abs(toleranceDa) > float.Epsilon)
+            if (Math.Abs(tolerancePPM) < float.Epsilon && Math.Abs(toleranceDa) > float.Epsilon)
             {
                 tolerancePPM = clsPeptideMassCalculator.MassToPPM(toleranceDa, 2000);
             }

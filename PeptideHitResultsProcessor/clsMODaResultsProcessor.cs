@@ -468,7 +468,7 @@ namespace PeptideHitResultsProcessor
                     var filteredSearchResults = new List<udtMODaSearchResultType>();
 
                     // Parse the input file
-                    while (!reader.EndOfStream & !AbortProcessing)
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
                         var skipLine = false;
@@ -831,7 +831,7 @@ namespace PeptideHitResultsProcessor
                             return false;
 
                         // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream && !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
@@ -1105,7 +1105,7 @@ namespace PeptideHitResultsProcessor
                 {
                     udtSearchResult.Probability = "0";
                 }
-                else if (!string.IsNullOrEmpty(udtSearchResult.Probability) & !double.TryParse(udtSearchResult.Probability, out _))
+                else if (!string.IsNullOrEmpty(udtSearchResult.Probability) && !double.TryParse(udtSearchResult.Probability, out _))
                 {
                     udtSearchResult.Probability = string.Empty;
                 }

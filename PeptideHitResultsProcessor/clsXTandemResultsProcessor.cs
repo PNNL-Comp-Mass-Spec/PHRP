@@ -75,7 +75,7 @@ namespace PeptideHitResultsProcessor
             PerformanceParameters = 4
         }
 
-        const int INPUT_PARAM_LABEL_NAMES_MAX_INDEX = 13;
+        private const int INPUT_PARAM_LABEL_NAMES_MAX_INDEX = 13;
         private enum eInputParamLabelNames
         {
             Residue_StaticModMass = 0,
@@ -484,7 +484,7 @@ namespace PeptideHitResultsProcessor
                         // Parse the input file
                         eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
 
-                        while (xmlReader.Read() & !AbortProcessing)
+                        while (xmlReader.Read() && !AbortProcessing)
                         {
                             XMLTextReaderSkipWhitespace(xmlReader);
                             if (xmlReader.ReadState != ReadState.Interactive)
@@ -671,7 +671,7 @@ namespace PeptideHitResultsProcessor
 
                 // Continue reading the XML file, loading the information
 
-                while (xmlReader.Read() & !AbortProcessing)
+                while (xmlReader.Read() && !AbortProcessing)
                 {
                     XMLTextReaderSkipWhitespace(xmlReader);
                     if (xmlReader.ReadState != ReadState.Interactive)
@@ -1119,7 +1119,7 @@ namespace PeptideHitResultsProcessor
                     // Parse the file
                     eCurrentXMLDataFileSection = eCurrentXMLDataFileSectionConstants.UnknownFile;
 
-                    while (xmlReader.Read() & !AbortProcessing)
+                    while (xmlReader.Read() && !AbortProcessing)
                     {
                         XMLTextReaderSkipWhitespace(xmlReader);
                         if (xmlReader.ReadState != ReadState.Interactive)
@@ -1318,7 +1318,7 @@ namespace PeptideHitResultsProcessor
                                         // In X!Tandem the LeftSpec and RightSpec values are separated by a vertical bar (CLEAVAGE_SPEC_SEP)
                                         // Look for CLEAVAGE_SPEC_SEP in value
                                         var barLoc = value.IndexOf(CLEAVAGE_SPEC_SEP);
-                                        if (barLoc > 0 & barLoc < value.Length - 1)
+                                        if (barLoc > 0 && barLoc < value.Length - 1)
                                         {
                                             var leftSpec = value.Substring(0, barLoc);
                                             var rightSpec = value.Substring(barLoc + 1);
@@ -1352,7 +1352,7 @@ namespace PeptideHitResultsProcessor
                                     {
                                         if (!string.IsNullOrWhiteSpace(value))
                                         {
-                                            if (value.Trim().ToLower() == "yes")
+                                            if (string.Equals(value.Trim(), "yes", StringComparison.OrdinalIgnoreCase))
                                             {
                                                 mLookForReverseSequenceTag = true;
                                             }
@@ -1759,7 +1759,7 @@ namespace PeptideHitResultsProcessor
                 success = true;
             }
 
-            if (success && xmlReader.NodeType != XmlNodeType.Whitespace & xmlReader.HasValue)
+            if (success && xmlReader.NodeType != XmlNodeType.Whitespace && xmlReader.HasValue)
             {
                 value = xmlReader.Value;
             }

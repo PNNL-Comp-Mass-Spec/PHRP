@@ -66,8 +66,8 @@ namespace PHRPReader
         /// </summary>
         public const char TERMINUS_SYMBOL_XTANDEM_CTerminus = ']';
 
-        private const string TRYPSIN_LEFT_RESIDUE_REGEX = @"[KR]";
-        private const string TRYPSIN_RIGHT_RESIDUE_REGEX = @"[^P]";
+        private const string TRYPSIN_LEFT_RESIDUE_REGEX = "[KR]";
+        private const string TRYPSIN_RIGHT_RESIDUE_REGEX = "[^P]";
 
         /// <summary>
         /// Peptide cleavage state
@@ -457,7 +457,7 @@ namespace PHRPReader
             return ePeptideTerminusState;
         }
 
-        private static readonly Regex RegexNotLetter = new Regex(@"[^A-Za-z]", RegexOptions.Compiled);
+        private static readonly Regex RegexNotLetter = new Regex("[^A-Za-z]", RegexOptions.Compiled);
 
         /// <summary>
         /// Removes all modification symbols (*, #, +, 8, etc.) from the peptide; optionally removes prefix and suffix letters
@@ -587,28 +587,28 @@ namespace PHRPReader
             if (leftResidueRegEx != null && rightResidueRegEx != null)
             {
                 if (leftResidueRegEx.Length == 0)
-                    leftResidueRegEx = @"[A-Z]";
+                    leftResidueRegEx = "[A-Z]";
                 if (rightResidueRegEx.Length == 0)
-                    rightResidueRegEx = @"[A-Z]";
+                    rightResidueRegEx = "[A-Z]";
 
-                if (leftResidueRegEx == GENERIC_RESIDUE_SYMBOL.ToString() || leftResidueRegEx == @"[" + GENERIC_RESIDUE_SYMBOL + @"]")
+                if (leftResidueRegEx == GENERIC_RESIDUE_SYMBOL.ToString() || leftResidueRegEx == "[" + GENERIC_RESIDUE_SYMBOL + "]")
                 {
-                    leftResidueRegEx = @"[A-Z]";
+                    leftResidueRegEx = "[A-Z]";
                 }
 
-                if (rightResidueRegEx == GENERIC_RESIDUE_SYMBOL.ToString() || rightResidueRegEx == @"[" + GENERIC_RESIDUE_SYMBOL + @"]")
+                if (rightResidueRegEx == GENERIC_RESIDUE_SYMBOL.ToString() || rightResidueRegEx == "[" + GENERIC_RESIDUE_SYMBOL + "]")
                 {
-                    rightResidueRegEx = @"[A-Z]";
+                    rightResidueRegEx = "[A-Z]";
                 }
 
-                if (leftResidueRegEx == @"[^" + GENERIC_RESIDUE_SYMBOL + @"]")
+                if (leftResidueRegEx == "[^" + GENERIC_RESIDUE_SYMBOL + "]")
                 {
-                    leftResidueRegEx = @"[^A-Z]";
+                    leftResidueRegEx = "[^A-Z]";
                 }
 
-                if (rightResidueRegEx == @"[^" + GENERIC_RESIDUE_SYMBOL + @"]")
+                if (rightResidueRegEx == "[^" + GENERIC_RESIDUE_SYMBOL + "]")
                 {
-                    rightResidueRegEx = @"[^A-Z]";
+                    rightResidueRegEx = "[^A-Z]";
                 }
 
                 mEnzymeMatchSpec.LeftResidueRegEx = leftResidueRegEx;
@@ -631,32 +631,32 @@ namespace PHRPReader
                     SetEnzymeMatchSpec(TRYPSIN_LEFT_RESIDUE_REGEX, TRYPSIN_RIGHT_RESIDUE_REGEX);
                     break;
                 case eStandardCleavageAgentConstants.TrypsinWithoutProlineRule:
-                    SetEnzymeMatchSpec(@"[KR]", @"[A-Z]");
+                    SetEnzymeMatchSpec("[KR]", "[A-Z]");
                     break;
                 case eStandardCleavageAgentConstants.TrypsinPlusFVLEY:
-                    SetEnzymeMatchSpec(@"[KRFYVEL]", @"[A-Z]");
+                    SetEnzymeMatchSpec("[KRFYVEL]", "[A-Z]");
                     break;
                 case eStandardCleavageAgentConstants.Chymotrypsin:
-                    SetEnzymeMatchSpec(@"[FWYL]", @"[A-Z]");
+                    SetEnzymeMatchSpec("[FWYL]", "[A-Z]");
                     break;
                 case eStandardCleavageAgentConstants.ChymotrypsinAndTrypsin:
-                    SetEnzymeMatchSpec(@"[FWYLKR]", @"[A-Z]");
+                    SetEnzymeMatchSpec("[FWYLKR]", "[A-Z]");
 
                     break;
                 case eStandardCleavageAgentConstants.V8_aka_GluC:
-                    SetEnzymeMatchSpec(@"[ED]", @"[A-Z]");
+                    SetEnzymeMatchSpec("[ED]", "[A-Z]");
                     break;
                 case eStandardCleavageAgentConstants.CyanBr:
-                    SetEnzymeMatchSpec(@"[M]", @"[A-Z]");
+                    SetEnzymeMatchSpec("[M]", "[A-Z]");
                     break;
                 case eStandardCleavageAgentConstants.EndoArgC:
-                    SetEnzymeMatchSpec(@"[R]", @"[A-Z]");
+                    SetEnzymeMatchSpec("[R]", "[A-Z]");
                     break;
                 case eStandardCleavageAgentConstants.EndoLysC:
-                    SetEnzymeMatchSpec(@"[K]", @"[A-Z]");
+                    SetEnzymeMatchSpec("[K]", "[A-Z]");
                     break;
                 case eStandardCleavageAgentConstants.EndoAspN:
-                    SetEnzymeMatchSpec(@"[A-Z]", @"[D]");
+                    SetEnzymeMatchSpec("[A-Z]", "[D]");
                     break;
                 default:
                     break;

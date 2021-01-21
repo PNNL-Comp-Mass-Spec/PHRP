@@ -314,12 +314,7 @@ namespace PHRPReader
         {
             get
             {
-                if (PHRPParser == null)
-                {
-                    return ePeptideHitResultType.Unknown;
-                }
-
-                return PHRPParser.PeptideHitResultType;
+                return PHRPParser == null ? ePeptideHitResultType.Unknown : PHRPParser.PeptideHitResultType;
             }
         }
 
@@ -333,12 +328,7 @@ namespace PHRPReader
         {
             get
             {
-                if (mSourceFileLineCount > 0)
-                {
-                    return mSourceFileLinesRead / Convert.ToSingle(mSourceFileLineCount) * 100f;
-                }
-
-                return 0;
+                return mSourceFileLineCount > 0 ? mSourceFileLinesRead / Convert.ToSingle(mSourceFileLineCount) * 100f : 0;
             }
         }
 
@@ -360,12 +350,7 @@ namespace PHRPReader
         {
             get
             {
-                if (PHRPParser == null)
-                {
-                    return new SortedList<int, int>();
-                }
-
-                return PHRPParser.ResultToSeqMap;
+                return PHRPParser == null ? new SortedList<int, int>() : PHRPParser.ResultToSeqMap;
             }
         }
 
@@ -379,12 +364,7 @@ namespace PHRPReader
         {
             get
             {
-                if (PHRPParser == null)
-                {
-                    return new SortedList<int, clsSeqInfo>();
-                }
-
-                return PHRPParser.SeqInfo;
+                return PHRPParser == null ? new SortedList<int, clsSeqInfo>() : PHRPParser.SeqInfo;
             }
         }
 
@@ -398,12 +378,7 @@ namespace PHRPReader
         {
             get
             {
-                if (PHRPParser == null)
-                {
-                    return new SortedList<int, List<clsProteinInfo>>();
-                }
-
-                return PHRPParser.SeqToProteinMap;
+                return PHRPParser == null ? new SortedList<int, List<clsProteinInfo>>() : PHRPParser.SeqToProteinMap;
             }
         }
 
@@ -567,7 +542,7 @@ namespace PHRPReader
             }
 
             var basePHRPFile = new FileInfo(basePHRPFileName);
-            if (basePHRPFile.Name.ToLower().Contains("_fht"))
+            if (basePHRPFile.Name.IndexOf("_fht", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 // basePHRPFileName is first-hits-file based
 
@@ -602,7 +577,7 @@ namespace PHRPReader
         public static string AutoSwitchToLegacyMSGFDBIfRequired(string filePath, string basePHRPFileName)
         {
             var basePHRPFile = new FileInfo(basePHRPFileName);
-            if (basePHRPFile.Name.ToLower().Contains("_msgfdb"))
+            if (basePHRPFile.Name.IndexOf("_msgfdb", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 var dataFile = new FileInfo(filePath);
                 var charIndex = dataFile.Name.LastIndexOf("_msgfplus", StringComparison.OrdinalIgnoreCase);
@@ -1842,12 +1817,7 @@ namespace PHRPReader
                 return "PQD";
             }
 
-            if (collisionMode.StartsWith("SID"))
-            {
-                return "SID";
-            }
-
-            return string.Empty;
+            return collisionMode.StartsWith("SID") ? "SID" : string.Empty;
         }
 
         private static string GetLegacyMSGFPlusName(string msgfPlusName)
@@ -2193,12 +2163,7 @@ namespace PHRPReader
         /// <remarks>The Char.IsLetter() function returns True for "º" and various other Unicode ModifierLetter characters; use this function to only return True for normal letters between A and Z</remarks>
         public static bool IsLetterAtoZ(char chChar)
         {
-            if (RegexIsLetter.IsMatch(chChar.ToString()))
-            {
-                return true;
-            }
-
-            return false;
+            return RegexIsLetter.IsMatch(chChar.ToString());
         }
 
         /// <summary>
@@ -2236,16 +2201,11 @@ namespace PHRPReader
             {
                 if (dataLine.IndexOf(item, StringComparison.OrdinalIgnoreCase) > -1)
                 {
-                    matchCount += 1;
+                    matchCount++;
                 }
             }
 
-            if (matchCount == valuesToFind.Length)
-            {
-                return true;
-            }
-
-            return false;
+            return matchCount == valuesToFind.Length;
         }
 
         /// <summary>
@@ -2310,12 +2270,7 @@ namespace PHRPReader
                 var colIndex = LookupColumnIndex(columnName, columnHeaders);
                 if (colIndex >= 0 && colIndex < dataColumns.Length)
                 {
-                    if (string.IsNullOrWhiteSpace(dataColumns[colIndex]))
-                    {
-                        return string.Empty;
-                    }
-
-                    return dataColumns[colIndex];
+                    return string.IsNullOrWhiteSpace(dataColumns[colIndex]) ? string.Empty : dataColumns[colIndex];
                 }
             }
 
@@ -2335,12 +2290,7 @@ namespace PHRPReader
                 var colIndex = LookupColumnIndex(columnEnum, columnHeaders);
                 if (colIndex >= 0 && colIndex < dataColumns.Length)
                 {
-                    if (string.IsNullOrWhiteSpace(dataColumns[colIndex]))
-                    {
-                        return string.Empty;
-                    }
-
-                    return dataColumns[colIndex];
+                    return string.IsNullOrWhiteSpace(dataColumns[colIndex]) ? string.Empty : dataColumns[colIndex];
                 }
             }
 
@@ -2649,7 +2599,7 @@ namespace PHRPReader
         {
             Regex matcher;
 
-            if (filterText.ToLower().Contains("msx"))
+            if (filterText.IndexOf("msx", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 matcher = mFindParentIonOnlyMsx;
             }
@@ -3131,7 +3081,7 @@ namespace PHRPReader
 
 
 
-                if (!ValidateRequiredFileExists("ModSummary file", modSummaryFilePath) && inputFile.Name.ToLower().Contains("_fht"))
+                if (!ValidateRequiredFileExists("ModSummary file", modSummaryFilePath) && inputFile.Name.IndexOf("_fht", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     SetLocalErrorCode(ePHRPReaderErrorCodes.RequiredInputFileNotFound);
                     return false;

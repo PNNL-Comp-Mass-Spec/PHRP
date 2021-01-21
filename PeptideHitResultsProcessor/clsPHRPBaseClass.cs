@@ -49,7 +49,7 @@ namespace PeptideHitResultsProcessor
             mSeqToProteinMap = new SortedSet<string>();
 
             // Define a RegEx to replace all of the non-letter characters
-            mReplaceSymbols = new Regex(@"[^A-Za-z]", RegexOptions.Compiled);
+            mReplaceSymbols = new Regex("[^A-Za-z]", RegexOptions.Compiled);
 
             mProteinNameOrder = new Dictionary<string, int>();
 
@@ -2580,7 +2580,7 @@ namespace PeptideHitResultsProcessor
 
                 var targetPath = Path.Combine(outputDirectory.FullName, msgfFileName);
 
-                if (File.Exists(sourcePath) & !File.Exists(targetPath))
+                if (File.Exists(sourcePath) && !File.Exists(targetPath))
                 {
                     File.Copy(sourcePath, targetPath);
                 }
@@ -2606,13 +2606,13 @@ namespace PeptideHitResultsProcessor
         public static bool ValidateProteinFastaFile(string fastaFilePath, out string warningMessage)
         {
             // This RegEx looks for standard amino acids, skipping A, T, C, and G
-            var reDefiniteAminoAcid = new Regex(@"[DEFHIKLMNPQRSVWY]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            var reDefiniteAminoAcid = new Regex(@"[DEFHIKLMNPQRSVWY]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             // This RegEx looks for A, T, C, and G
-            var rePotentialNucleicAcid = new Regex(@"[ATCG]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            var rePotentialNucleicAcid = new Regex(@"[ATCG]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             // This matches any letter
-            var reLetter = new Regex(@"[A-Z]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            var reLetter = new Regex(@"[A-Z]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             var validProteinCount = 0;
             var invalidProteinCount = 0;

@@ -144,7 +144,7 @@ namespace PeptideHitResultsProcessor
         {
             try
             {
-                if (clsPHRPParser.IsNumber(PeptideHyperscore) & clsPHRPParser.IsNumber(mPeptideNextScore))
+                if (clsPHRPParser.IsNumber(PeptideHyperscore) && clsPHRPParser.IsNumber(mPeptideNextScore))
                 {
                     PeptideDeltaCn2 = (Convert.ToSingle(PeptideHyperscore) - Convert.ToSingle(mPeptideNextScore)) / Convert.ToSingle(PeptideHyperscore);
                 }

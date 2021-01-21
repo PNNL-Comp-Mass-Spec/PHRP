@@ -458,12 +458,7 @@ namespace PHRPReader
                 return clsSearchEngineParameters.MASS_TYPE_MONOISOTOPIC;
             }
 
-            if (resolutionType == "low")
-            {
-                return clsSearchEngineParameters.MASS_TYPE_AVERAGE;
-            }
-
-            return "unknown";
+            return resolutionType == "low" ? clsSearchEngineParameters.MASS_TYPE_AVERAGE : "unknown";
         }
 
         private string GetAttribute(XmlNode node, string attributeName)

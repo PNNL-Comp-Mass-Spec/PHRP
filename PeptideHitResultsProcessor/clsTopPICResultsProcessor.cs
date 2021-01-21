@@ -542,7 +542,7 @@ namespace PeptideHitResultsProcessor
                     var filteredSearchResults = new List<udtTopPICSearchResultType>();
 
                     // Parse the input file
-                    while (!reader.EndOfStream & !AbortProcessing)
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
                         if (string.IsNullOrWhiteSpace(lineIn))
@@ -766,7 +766,7 @@ namespace PeptideHitResultsProcessor
                             return false;
 
                         // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream && !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
@@ -1090,7 +1090,7 @@ namespace PeptideHitResultsProcessor
                 {
                     udtSearchResult.Qvalue = "10";
                 }
-                else if (!string.IsNullOrEmpty(udtSearchResult.Qvalue) & !double.TryParse(udtSearchResult.Qvalue, out _))
+                else if (!string.IsNullOrEmpty(udtSearchResult.Qvalue) && !double.TryParse(udtSearchResult.Qvalue, out _))
                 {
                     udtSearchResult.Qvalue = string.Empty;
                 }

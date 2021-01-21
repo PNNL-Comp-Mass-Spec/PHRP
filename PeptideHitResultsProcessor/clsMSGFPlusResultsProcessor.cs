@@ -856,7 +856,7 @@ namespace PeptideHitResultsProcessor
                         var columnMapping = new Dictionary<eMSGFPlusResultsFileColumns, int>();
 
                         // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream && !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))
@@ -1275,7 +1275,7 @@ namespace PeptideHitResultsProcessor
                 // Initialize pepToProteinMapping
                 pepToProteinMapping.Clear();
 
-                // Read the data in proteinToPeptideMappingFilePath
+                // Read the data in the peptide to protein map file
                 var success = LoadPeptideToProteinMapInfo(pepToProteinMapFilePath, pepToProteinMapping, out var headerLine);
 
                 if (!success)
@@ -1460,7 +1460,7 @@ namespace PeptideHitResultsProcessor
                         var peptidesNotFoundInPepToProtMapping = 0;
 
                         // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream && !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
                             if (string.IsNullOrWhiteSpace(lineIn))

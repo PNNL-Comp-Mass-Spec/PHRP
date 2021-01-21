@@ -349,7 +349,7 @@ namespace PHRPReader
                 var expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
 
                 isSynopsisFile = string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase) ||
-                                 inputFile.Name.ToLower().EndsWith("_syn.txt");
+                                 inputFile.Name.EndsWith("_syn.txt", StringComparison.OrdinalIgnoreCase);
             }
 
             mErrorMessage = string.Empty;

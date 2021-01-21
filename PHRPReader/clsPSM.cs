@@ -248,12 +248,7 @@ namespace PHRPReader
         {
             get
             {
-                if (mProteins.Count == 0)
-                {
-                    return string.Empty;
-                }
-
-                return mProteins[0];
+                return mProteins.Count == 0 ? string.Empty : mProteins[0];
             }
         }
 
@@ -726,12 +721,7 @@ namespace PHRPReader
         public bool TryGetScore(string scoreName, out string scoreValue)
         {
             scoreValue = string.Empty;
-            if (mAdditionalScores.TryGetValue(scoreName, out scoreValue))
-            {
-                return true;
-            }
-
-            return false;
+            return mAdditionalScores.TryGetValue(scoreName, out scoreValue);
         }
 
         /// <summary>

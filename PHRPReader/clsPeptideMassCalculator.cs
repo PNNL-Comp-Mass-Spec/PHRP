@@ -411,7 +411,7 @@ namespace PHRPReader
             return mass;
         }
 
-        private static readonly Regex RegexModMasses = new Regex(@"[+-][0-9.]+", RegexOptions.Compiled);
+        private static readonly Regex RegexModMasses = new Regex("[+-][0-9.]+", RegexOptions.Compiled);
 
         /// <summary>
         /// Compute the mass of peptide sequence sequence.  Supports peptide sequences with with numeric mod masses
@@ -469,12 +469,7 @@ namespace PHRPReader
 
             var peptideMass = ComputeSequenceMass(sbSequenceWithoutMods.ToString());
 
-            if (peptideMass < 0)
-            {
-                return -1;
-            }
-
-            return peptideMass + modMassTotal;
+            return peptideMass < 0 ? -1 : peptideMass + modMassTotal;
         }
 
         private short ConvertAminoAcidCharToIndex(char aminoAcidSymbol)
@@ -696,17 +691,17 @@ namespace PHRPReader
 
             var sbRegEx = new StringBuilder();
 
-            sbRegEx.Append(@"(?<ElementSymbol>");
+            sbRegEx.Append("(?<ElementSymbol>");
 
             foreach (var element in elementMonoMasses)
             {
-                sbRegEx.Append(element.Key + @"|");
+                sbRegEx.Append(element.Key + "|");
             }
 
             // Remove the trailing vertical bar
             sbRegEx.Remove(sbRegEx.Length - 1, 1);
 
-            sbRegEx.Append(@")");
+            sbRegEx.Append(")");
 
             // RegEx will be of the form: (?<ElementSymbol>H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al)(?<ElementCount>[+-]?\d*)
             var reAtomicFormulaRegEx = new Regex(sbRegEx + @"(?<ElementCount>[+-]?\d*)", REGEX_OPTIONS);

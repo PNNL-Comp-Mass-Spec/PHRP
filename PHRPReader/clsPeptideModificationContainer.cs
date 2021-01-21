@@ -272,12 +272,7 @@ namespace PHRPReader
                 newModIndex = AddModification(modificationDefinition, useNextAvailableModificationSymbol: false);
             }
 
-            if (newModIndex >= 0)
-            {
-                return Modifications[newModIndex];
-            }
-
-            return modificationDefinition;
+            return newModIndex >= 0 ? Modifications[newModIndex] : modificationDefinition;
 
             // Either addToModificationListIfUnknown = False or no more default modification symbols
             // Return modificationDefinition, which has .ModificationSymbol = LAST_RESORT_MODIFICATION_SYMBOL
@@ -387,12 +382,9 @@ namespace PHRPReader
                 modMassName += "0";
             }
 
-            if (modMassName.Length > 8)
-            {
-                throw new ArgumentOutOfRangeException("Generated Mod Name is longer than 8 characters: " + modMassName);
-            }
-
-            return modMassName;
+            return modMassName.Length > 8
+                ? throw new ArgumentOutOfRangeException("Generated Mod Name is longer than 8 characters: " + modMassName)
+                : modMassName;
         }
 
         /// <summary>
@@ -424,7 +416,7 @@ namespace PHRPReader
         /// <returns></returns>
         public clsModificationDefinition GetModificationByIndex(int index)
         {
-            if (index >= 0 & index < Modifications.Count)
+            if (index >= 0 && index < Modifications.Count)
             {
                 return Modifications[index];
             }
@@ -439,7 +431,7 @@ namespace PHRPReader
         /// <returns></returns>
         public clsModificationDefinition.eModificationTypeConstants GetModificationTypeByIndex(int index)
         {
-            if (index >= 0 & index < Modifications.Count)
+            if (index >= 0 && index < Modifications.Count)
             {
                 return Modifications[index].ModificationType;
             }
@@ -866,12 +858,7 @@ namespace PHRPReader
                             {
                                 // Append modificationDefinition to mModifications()
                                 var newModIndex = AddModification(modificationDefinition, true);
-                                if (newModIndex >= 0)
-                                {
-                                    return Modifications[newModIndex];
-                                }
-
-                                return modificationDefinition;
+                                return newModIndex >= 0 ? Modifications[newModIndex] : modificationDefinition;
                             }
 
                             // Either addToModificationListIfUnknown = False or no more default modification symbols

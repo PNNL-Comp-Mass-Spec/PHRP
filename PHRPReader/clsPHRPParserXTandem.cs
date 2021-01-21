@@ -831,7 +831,7 @@ namespace PHRPReader
                 success = true;
             }
 
-            if (success && xmlReader.NodeType != XmlNodeType.Whitespace & xmlReader.HasValue)
+            if (success && xmlReader.NodeType != XmlNodeType.Whitespace && xmlReader.HasValue)
             {
                 value = xmlReader.Value;
             }

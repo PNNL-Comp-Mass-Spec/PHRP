@@ -658,12 +658,7 @@ namespace PHRPReader
                 return false;
             }
 
-            if (TargetResidues.IndexOf(chComparisonResidue) >= 0)
-            {
-                return true;
-            }
-
-            return false;
+            return TargetResidues.IndexOf(chComparisonResidue) >= 0;
         }
 
         /// <summary>

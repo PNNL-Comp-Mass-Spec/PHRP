@@ -451,7 +451,7 @@ namespace PeptideHitResultsProcessor
                     var filteredSearchResults = new List<udtMSPathFinderSearchResultType>();
 
                     // Parse the input file
-                    while (!reader.EndOfStream & !AbortProcessing)
+                    while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
                         rowNumber += 1;
@@ -686,7 +686,7 @@ namespace PeptideHitResultsProcessor
                             return false;
 
                         // Parse the input file
-                        while (!reader.EndOfStream & !AbortProcessing)
+                        while (!reader.EndOfStream && !AbortProcessing)
                         {
                             var lineIn = reader.ReadLine();
 

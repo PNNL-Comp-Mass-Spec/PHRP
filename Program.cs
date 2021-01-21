@@ -24,7 +24,7 @@ using PRISM;
 
 namespace PeptideHitResultsProcRunner
 {
-    static class Program
+    internal static class Program
     {
         // Ignore Spelling: Prot, MODa
 
