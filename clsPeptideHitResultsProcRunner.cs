@@ -18,6 +18,7 @@ using System.IO;
 using PeptideHitResultsProcessor;
 using PHRPReader;
 using PRISM;
+using PRISM.Logging;
 
 namespace PeptideHitResultsProcRunner
 {
@@ -396,12 +397,13 @@ namespace PeptideHitResultsProcRunner
             catch (Exception ex)
             {
                 HandleException("Error in ProcessFile", ex);
+                OnDebugEvent(StackTraceFormatter.GetExceptionStackTraceMultiLine(ex));
             }
 
             return success;
         }
 
-        private void RegisterResultsProcessEvents(EventNotifier resultsProcessor)
+        private void RegisterResultsProcessEvents(IEventNotifier resultsProcessor)
         {
             resultsProcessor.ErrorEvent += PeptideHitResultsProcessor_ErrorOccurred;
             resultsProcessor.StatusEvent += PeptideHitResultsProcessor_MessageEvent;
