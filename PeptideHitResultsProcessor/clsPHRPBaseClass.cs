@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using PeptideToProteinMapEngine;
 using PHRPReader;
+using PRISM.FileProcessor;
 using ProteinCoverageSummarizer;
 
 namespace PeptideHitResultsProcessor
@@ -2262,6 +2263,26 @@ namespace PeptideHitResultsProcessor
             mProgressPercentComplete = percentComplete;
 
             OnProgressUpdate(ProgressStepDescription, ProgressPercentComplete);
+        }
+
+        /// <summary>
+        /// Update progress while creating the synopsis file
+        /// </summary>
+        /// <param name="reader"></param>
+        protected void UpdateSynopsisFileCreationProgress(StreamReader reader)
+        {
+            var percentComplete = reader.BaseStream.Position / (float)reader.BaseStream.Length * 100;
+
+            if (!CreateProteinModsFile)
+            {
+                UpdateProgress(percentComplete);
+                return;
+            }
+
+            var adjustedPercentComplete = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
+                0, PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE, percentComplete);
+
+            UpdateProgress(adjustedPercentComplete);
         }
 
         /// <summary>

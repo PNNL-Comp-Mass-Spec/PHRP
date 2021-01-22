@@ -573,13 +573,7 @@ namespace PeptideHitResultsProcessor
                         }
 
                         // Update the progress
-                        var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
-                        if (CreateProteinModsFile)
-                        {
-                            percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
-                        }
-
-                        UpdateProgress(percentComplete);
+                        UpdateSynopsisFileCreationProgress(reader);
                     }
 
                     // Sort the SearchResults by scan, charge, and ascending PValue
@@ -866,12 +860,7 @@ namespace PeptideHitResultsProcessor
                             }
 
                             // Update the progress
-                            var percentComplete = Convert.ToSingle(reader.BaseStream.Position / reader.BaseStream.Length * 100);
-                            if (CreateProteinModsFile)
-                            {
-                                percentComplete = percentComplete * (PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE / 100);
-                            }
-                            UpdateProgress(percentComplete);
+                            UpdateSynopsisFileCreationProgress(reader);
                         }
                     }
 
