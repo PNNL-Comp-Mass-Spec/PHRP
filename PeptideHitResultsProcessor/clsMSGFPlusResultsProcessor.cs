@@ -1252,6 +1252,9 @@ namespace PeptideHitResultsProcessor
                 {
                     Console.WriteLine();
                     ReportWarning("PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
+                    ReportMessage(
+                        "The PepToProteinMap file is created by Protein Coverage Summarizer. " +
+                        "Proteins associated with each peptide will be based on data in the input file");
                     return false;
                 }
 
@@ -2306,6 +2309,11 @@ namespace PeptideHitResultsProcessor
                 {
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
+                    if (inputFile.DirectoryName == null)
+                    {
+                        ReportWarning("Unable to determine the parent directory of the input file: " + inputFile.FullName);
+                        return false;
+                    }
 
                     var pepToProteinMapping = new List<udtPepToProteinMappingType>();
 
