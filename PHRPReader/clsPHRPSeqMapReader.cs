@@ -367,16 +367,18 @@ namespace PHRPReader
                                 }
                             }
 
-                            if (linesRead % 100 == 0)
+                            if (linesRead % 100 != 0)
+                                continue;
+
+                            if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds < 5)
                             {
-                                if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds >= 5)
-                                {
-                                    var pctComplete = reader.BaseStream.Position / Convert.ToDouble(reader.BaseStream.Length) * 100;
-                                    Console.WriteLine(" ... caching PepToProtMapData: " + pctComplete.ToString("0.0") + "% complete");
-                                    lastProgress = DateTime.UtcNow;
-                                    notifyComplete = true;
-                                }
+                                continue;
                             }
+
+                            var percentComplete = reader.BaseStream.Position / (float)reader.BaseStream.Length * 100;
+                            Console.WriteLine(" ... caching PepToProtMapData: {0:0.0}% complete", percentComplete);
+                            lastProgress = DateTime.UtcNow;
+                            notifyComplete = true;
                         }
                     }
                 }
