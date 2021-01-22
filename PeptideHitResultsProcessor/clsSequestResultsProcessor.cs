@@ -339,7 +339,6 @@ namespace PeptideHitResultsProcessor
                         {
                             SaveModificationSummaryFile(Path.Combine(outputDirectoryPath, modificationSummaryFilePath));
                         }
-
                     }
 
                     // Inform the user if any errors occurred
@@ -368,7 +367,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         private bool ParseSequestResultsFileEntry(
@@ -381,7 +379,6 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-
                 // Reset searchResult
                 searchResult.Clear();
 
@@ -478,7 +475,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>

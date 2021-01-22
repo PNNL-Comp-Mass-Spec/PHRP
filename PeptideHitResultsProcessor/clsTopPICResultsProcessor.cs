@@ -330,7 +330,6 @@ namespace PeptideHitResultsProcessor
                                 OnDebugEvent(ErrorMessage);
                             }
                         }
-
                     }
 
                     parsingModInfo = false;
@@ -515,7 +514,6 @@ namespace PeptideHitResultsProcessor
             string inputFilePath,
             string outputFilePath)
         {
-
             var columnMapping = new Dictionary<TopPICResultsFileColumns, int>();
 
             try
@@ -899,7 +897,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -916,14 +913,12 @@ namespace PeptideHitResultsProcessor
             ref string errorLog,
             IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
-
             string[] splitLine = null;
 
             double precursorMZ = 0;
 
             try
             {
-
                 udtSearchResult.Clear();
                 splitLine = lineIn.TrimEnd().Split('\t');
 
@@ -1101,7 +1096,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1241,7 +1235,6 @@ namespace PeptideHitResultsProcessor
             IDictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
-
             string[] splitLine = null;
 
             // Reset searchResult
@@ -1385,7 +1378,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>

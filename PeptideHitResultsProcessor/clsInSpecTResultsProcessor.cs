@@ -412,7 +412,6 @@ namespace PeptideHitResultsProcessor
             IReadOnlyList<udtModInfoType> inspectModInfo,
             FilteredOutputFileTypeConstants filteredOutputFileType)
         {
-
             var udtSearchResult = new udtInspectSearchResultType();
 
             var resultID = 0;
@@ -598,7 +597,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="chargeText"></param>
         private double ComputePeptideMHFromPrecursorInfo(string precursorMZText, string precursorErrorText, string chargeText)
         {
-
             double peptideMH = 0;
 
             if (string.IsNullOrWhiteSpace(precursorMZText) || precursorMZText == "0")
@@ -1132,7 +1130,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1274,7 +1271,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1424,7 +1420,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>
@@ -2063,7 +2058,6 @@ namespace PeptideHitResultsProcessor
 
                 if (x.ChargeNum < y.ChargeNum)
                 {
-
                     return -1;
                 }
                 // Charge is the same; check FScore (sort on descending FScore)

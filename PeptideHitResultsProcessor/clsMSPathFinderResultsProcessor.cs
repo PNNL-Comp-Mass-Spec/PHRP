@@ -84,8 +84,6 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// These columns correspond to the Synopsis file created by this class
         /// </summary>
-
-
         #endregion
 
         #region "Structures"
@@ -824,7 +822,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -930,7 +927,6 @@ namespace PeptideHitResultsProcessor
 
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1095,7 +1091,6 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-
                 splitLine = lineIn.TrimEnd().Split('\t');
 
                 if (splitLine.Length < 15)
@@ -1404,7 +1399,6 @@ namespace PeptideHitResultsProcessor
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
                 writer.WriteLine(CollapseList(headerNames));
-
             }
             catch (Exception)
             {

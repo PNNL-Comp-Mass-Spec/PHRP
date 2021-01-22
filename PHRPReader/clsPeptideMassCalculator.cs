@@ -228,7 +228,6 @@ namespace PHRPReader
                                                     out List<string> unknownSymbols)
         {
             return ComputeMonoisotopicMass(elementalComposition, out unknownSymbols);
-
         }
 
         /// <summary>

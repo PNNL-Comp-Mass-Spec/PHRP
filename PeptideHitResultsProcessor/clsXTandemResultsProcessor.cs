@@ -34,7 +34,6 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsXTandemResultsProcessor : clsPHRPBaseClass
     {
-
         // ReSharper disable CommentTypo
 
         // Ignore Spelling: bioml, aa, hyperscore, nextscore, mh, Seqs
@@ -571,7 +570,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         private bool ParseXTandemResultsFileEntry(

@@ -42,7 +42,6 @@ namespace PHRPReader
 
         private const string MODa_SEARCH_ENGINE_NAME = "MODa";
 
-
         /// <summary>
         /// These columns correspond to the Synopsis file created by clsMODaResultsProcessor
         /// </summary>
@@ -66,7 +65,6 @@ namespace PHRPReader
         }
 
 #pragma warning restore 1591
-
 
         #endregion
 

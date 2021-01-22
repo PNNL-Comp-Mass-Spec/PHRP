@@ -966,7 +966,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1111,7 +1110,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1265,7 +1263,6 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-
                 splitLine = lineIn.TrimEnd().Split('\t');
 
                 if (splitLine.Length < 13)

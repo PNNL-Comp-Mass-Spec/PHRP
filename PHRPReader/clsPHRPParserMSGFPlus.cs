@@ -108,7 +108,6 @@ namespace PHRPReader
 
 #pragma warning restore 1591
 
-
         #endregion
 
         #region "Properties"
@@ -798,7 +797,6 @@ namespace PHRPReader
                 ReportError("Error parsing line " + linesRead + " in the MSGFDB data file: " + ex.Message);
                 return false;
             }
-
         }
 
         private bool UpdateMassCalculatorMasses(string searchEngineParamFilePath)

@@ -391,7 +391,6 @@ namespace PHRPReader
                 ReportError("Error in ReadSearchEngineParamFile: " + ex.Message);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -481,7 +480,6 @@ namespace PHRPReader
 
                     AddScore(psm, columns, DATA_COLUMN_Proteoform_FDR);
                     AddScore(psm, columns, DATA_COLUMN_Variable_PTMs);
-
                 }
             }
             catch (Exception ex)

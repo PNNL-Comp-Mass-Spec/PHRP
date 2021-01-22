@@ -597,7 +597,6 @@ namespace PHRPReader
             clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             out bool existingModFound)
         {
-
             existingModFound = false;
             if (chTargetResidue != default(char) || residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
             {
@@ -932,7 +931,6 @@ namespace PHRPReader
                     modMass = 0;
                     return false;
             }
-
         }
 
         /// <summary>
@@ -1215,7 +1213,6 @@ namespace PHRPReader
         /// <returns>True if successful, false if an error</returns>
         public bool ReadModificationDefinitionsFile(string filePath, ref bool fileNotFound)
         {
-
             bool success;
 
             try

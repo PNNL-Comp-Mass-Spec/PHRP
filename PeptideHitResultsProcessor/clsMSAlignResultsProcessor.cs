@@ -463,7 +463,6 @@ namespace PeptideHitResultsProcessor
             string inputFilePath,
             string outputFilePath)
         {
-
             var columnMapping = new Dictionary<MSAlignResultsFileColumns, int>();
 
             try
@@ -637,7 +636,6 @@ namespace PeptideHitResultsProcessor
                                                                                    "IodoAcid");
                                             modInfo.Add(modDef);
                                             break;
-
                                     }
                                 }
                             }
@@ -863,7 +861,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         private bool ParseMSAlignResultsFileEntry(
@@ -1053,7 +1050,6 @@ namespace PeptideHitResultsProcessor
 
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1319,7 +1315,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>

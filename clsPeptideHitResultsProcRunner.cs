@@ -339,7 +339,6 @@ namespace PeptideHitResultsProcRunner
         /// <returns>True if successful, False if failure</returns>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath, bool resetErrorCode)
         {
-
             var success = false;
 
             if (resetErrorCode)
@@ -464,7 +463,6 @@ namespace PeptideHitResultsProcRunner
 
         private bool StartCreateProteinModsViaPHRPData(string inputFilePath, string outputDirectoryPath)
         {
-
             try
             {
                 clsPHRPReader.PeptideHitResultTypes PeptideHitResultType;
@@ -587,12 +585,10 @@ namespace PeptideHitResultsProcRunner
                 HandleException("Error calling CreateProteinModDetailsFile in StartCreateProteinModsViaPHRPData", ex);
                 return false;
             }
-
         }
 
         private bool StartPHRP(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
-
             try
             {
                 clsPHRPBaseClass.PeptideHitResultsFileFormatConstants peptideHitResultsFormat;
@@ -719,7 +715,6 @@ namespace PeptideHitResultsProcRunner
                 HandleException("Error calling ProcessFile in StartPHRP", ex);
                 return false;
             }
-
         }
 
         private void PeptideHitResultsProcessor_ErrorOccurred(string message, Exception ex)
@@ -732,7 +727,6 @@ namespace PeptideHitResultsProcRunner
             {
                 LogMessage(message, MessageTypeConstants.ErrorMsg);
             }
-
         }
 
         private void PeptideHitResultsProcessor_MessageEvent(string message)
@@ -749,6 +743,5 @@ namespace PeptideHitResultsProcRunner
         {
             LogMessage(warningMessage, MessageTypeConstants.Warning);
         }
-
     }
 }

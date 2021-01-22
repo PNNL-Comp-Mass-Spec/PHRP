@@ -184,7 +184,6 @@ namespace PeptideHitResultsProcessor
                 m_PeptideHitResultsProcessor.ProgressComplete += mPeptideHitResultsProcessor_ProgressComplete;
                 m_PeptideHitResultsProcessor.ProgressReset += mPeptideHitResultsProcessor_ProgressReset;
 
-
                 // Define the auxiliary file paths
                 m_PeptideHitResultsProcessor.MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath;
                 m_PeptideHitResultsProcessor.ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath;

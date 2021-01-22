@@ -843,7 +843,6 @@ namespace PHRPReader
             {
                 HandleException("Exception reading PHRP Mod Summary file", ex);
             }
-
         }
 
         private bool LoadSeqInfo()
@@ -1245,7 +1244,6 @@ namespace PHRPReader
                 ReportError("Error in ReadSearchEngineVersion: " + ex.Message);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1280,7 +1278,6 @@ namespace PHRPReader
 
         private void StoreModInfo(clsPSM currentPSM, clsSeqInfo seqInfo)
         {
-
             var nTerminalModsAdded = new List<string>();
             var cTerminalModsAdded = new List<string>();
             var peptideResidueCount = currentPSM.PeptideCleanSequence.Length;
@@ -1499,7 +1496,6 @@ namespace PHRPReader
             {
                 return false;
             }
-
 
             var matchedDefs = new List<clsModificationDefinition>();
 

@@ -9,7 +9,6 @@ namespace PeptideHitResultsProcessor
     /// <remarks>Note that the peptide hit results file format will determined using AnalysisToolName</remarks>
     public abstract class IPeptideHitResultsProcessor : PRISM.EventNotifier
     {
-
         #region "Enums"
 
         /// <summary>
@@ -68,7 +67,6 @@ namespace PeptideHitResultsProcessor
         #region "Structures"
         public struct InitializationParams
         {
-
             /// <summary>
             /// Source directory path
             /// </summary>

@@ -184,6 +184,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Structures"
+
         protected struct udtSearchOptionModificationInfoType
         {
             public int SortOrder;
@@ -422,7 +423,6 @@ namespace PeptideHitResultsProcessor
 
                 case PeptideHitResultsFileFormatConstants.TopPICTXTFile:
                     return Path.Combine(sourceDirectoryPath, baseName + TopPIC_RESULTS_FILE_SUFFIX);
-
             }
 
             return AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath);
@@ -604,7 +604,6 @@ namespace PeptideHitResultsProcessor
         /// <returns>True if successful, False if failure</returns>
         protected bool CleanupFilePaths(ref string inputFilePath, ref string outputDirectoryPath)
         {
-
             try
             {
                 // Make sure inputFilePath points to a valid file
@@ -685,7 +684,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="filePath"></param>
         public static PeptideHitResultsFileFormatConstants DetermineResultsFileFormat(string filePath)
         {
-
             if (string.IsNullOrWhiteSpace(filePath))
                 return PeptideHitResultsFileFormatConstants.AutoDetermine;
 
@@ -1104,10 +1102,12 @@ namespace PeptideHitResultsProcessor
                             {
                                 var lineIn = reader.ReadLine();
 
-                                if (string.IsNullOrWhiteSpace(lineIn)) continue;
+                                if (string.IsNullOrWhiteSpace(lineIn))
+                                    continue;
 
                                 var splitLine = lineIn.Split(new[] { '\t' }, 2);
-                                if (splitLine.Length < 2) continue;
+                                if (splitLine.Length < 2)
+                                    continue;
 
                                 var peptideAndProteinKey = splitLine[0] + "_" + splitLine[1];
 
@@ -1355,7 +1355,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         protected void DeleteFileIgnoreErrors(string filePath)
@@ -1658,7 +1657,6 @@ namespace PeptideHitResultsProcessor
                 "Protein_Expectation_Value_Log(e)",
                 "Protein_Intensity_Log(I)"
             };
-
 
             // Initialize the ResultToSeqMap file
             mResultToSeqMapFile = new StreamWriter(resultToSeqMapFilePath);
@@ -2343,7 +2341,6 @@ namespace PeptideHitResultsProcessor
         /// <returns>True if the file has data; otherwise false</returns>
         public static bool ValidateFileHasData(string filePath, string fileDescription, out string errorMessage, int numericDataColIndex)
         {
-
             var dataFound = false;
 
             errorMessage = string.Empty;
@@ -2397,7 +2394,6 @@ namespace PeptideHitResultsProcessor
                 {
                     errorMessage = fileDescription + " is empty (no data)";
                 }
-
             }
             catch (Exception)
             {
@@ -2406,7 +2402,6 @@ namespace PeptideHitResultsProcessor
             }
 
             return dataFound;
-
         }
 
         /// <summary>
@@ -2453,7 +2448,6 @@ namespace PeptideHitResultsProcessor
                                     "The monoisotopic mass computed by PHRP is more than {0:F2} Da away from " +
                                     "the mass computed by {1}: {2:F4} vs. {3:F4}; peptide {4}",
                                     massDiffThreshold, toolName, peptideMonoMassFromPHRP, peptideMonoMassFromTool, first30Residues));
-
         }
 
         private bool ValidatePeptideToProteinMapResults(string peptideToProteinMapFilePath, bool ignorePeptideToProteinMapperErrors)
@@ -2543,7 +2537,6 @@ namespace PeptideHitResultsProcessor
 
         protected void ValidatePHRPReaderSupportFiles(string phrpDataFilePath, string outputDirectoryPath)
         {
-
             try
             {
                 if (string.IsNullOrWhiteSpace(outputDirectoryPath))
@@ -2725,7 +2718,6 @@ namespace PeptideHitResultsProcessor
                                      reader.CurrentPSM.MSGFSpecEValue);
                 }
             }
-
         }
 
         #region "PeptideToProteinMapper Event Handlers"

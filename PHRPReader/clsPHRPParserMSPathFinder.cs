@@ -44,7 +44,6 @@ namespace PHRPReader
 
         private const string MSPathFinder_SEARCH_ENGINE_NAME = "MSPathFinder";
 
-
         /// <summary>
         /// These columns correspond to the Synopsis file created by clsMSPathFinderResultsProcessor
         /// </summary>
@@ -71,7 +70,6 @@ namespace PHRPReader
         }
 
 #pragma warning restore 1591
-
 
         #endregion
 

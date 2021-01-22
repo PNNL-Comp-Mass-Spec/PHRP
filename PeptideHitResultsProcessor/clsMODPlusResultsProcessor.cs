@@ -838,7 +838,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -861,7 +860,6 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-
                 udtSearchResult.Clear();
                 var splitLine = lineIn.TrimEnd().Split('\t');
 
@@ -1007,7 +1005,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1156,7 +1153,6 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-
                 splitLine = lineIn.TrimEnd().Split('\t');
 
                 if (splitLine.Length < 13)

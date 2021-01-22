@@ -849,7 +849,6 @@ namespace PHRPReader
 
                 return false;
             }
-
         }
 
         /// <summary>
@@ -2589,7 +2588,6 @@ namespace PHRPReader
 
         private void ReadAndCacheMSGFData()
         {
-
             try
             {
                 var msgfFilePath = GetMSGFFileName(mInputFilePath);
@@ -2601,12 +2599,10 @@ namespace PHRPReader
             {
                 HandleException("Exception determining MSGF file path", ex);
             }
-
         }
 
         private void ReadAndCacheMSGFData(string msgfFilePath)
         {
-
             try
             {
                 msgfFilePath = AutoSwitchToLegacyMSGFDBIfRequired(msgfFilePath, mInputFilePath);
@@ -2631,7 +2627,6 @@ namespace PHRPReader
             {
                 HandleException("Exception reading MSGF file", ex);
             }
-
         }
 
         /// <summary>
@@ -2798,7 +2793,6 @@ namespace PHRPReader
             {
                 HandleException("Exception determining Scan Stats file path", ex);
             }
-
         }
 
         private void ReadScanStatsData(string scanStatsFilePath)
@@ -2824,7 +2818,6 @@ namespace PHRPReader
             {
                 HandleException("Exception reading Scan Stats file", ex);
             }
-
         }
 
         private void ReadExtendedScanStatsData()
@@ -2840,7 +2833,6 @@ namespace PHRPReader
             {
                 HandleException("Exception determining Scan Stats file path", ex);
             }
-
         }
 
         private void ReadExtendedScanStatsData(string extendedScanStatsFilePath)
@@ -2870,7 +2862,6 @@ namespace PHRPReader
             {
                 HandleException("Exception reading Extended Scan Stats file", ex);
             }
-
         }
 
         private void ReportError(string message)
@@ -2942,7 +2933,6 @@ namespace PHRPReader
 
         private bool ValidateInputFiles(string inputFilePath, ref PeptideHitResultTypes resultType, ref string modSummaryFilePath)
         {
-
             var inputFile = new FileInfo(inputFilePath);
             if (!inputFile.Exists)
             {
@@ -2999,8 +2989,6 @@ namespace PHRPReader
                                                         inputFile.Name,
                                                         modSummaryFileName,
                                                         out _);
-
-
 
                 if (!ValidateRequiredFileExists("ModSummary file", modSummaryFilePath) && inputFile.Name.IndexOf("_fht", StringComparison.OrdinalIgnoreCase) >= 0)
                 {

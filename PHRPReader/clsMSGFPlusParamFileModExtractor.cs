@@ -452,7 +452,6 @@ namespace PHRPReader
                                 }
                                 break;
                         }
-
                     }
                 }
 
@@ -483,7 +482,6 @@ namespace PHRPReader
             ref int unnamedModID,
             out udtModInfoType udtModInfo)
         {
-
             // Modification definition format:
             //   Mass or EmpiricalFormula:   Mod mass, or empirical formula (like C2H3N1O1 or H-2O-1)
             //   Residues:  affected residues or N/C-terminus or *
@@ -502,7 +500,6 @@ namespace PHRPReader
 
             try
             {
-
                 udtModInfo.ModMass = splitLine[0].Trim();
 
                 // udtModInfo.ModMass could be a number, or could be an empirical formula
@@ -608,7 +605,6 @@ namespace PHRPReader
                 udtModInfo.ModName = ParseModSpecGetName(splitLine[4], ref unnamedModID);
 
                 return true;
-
             }
             catch (Exception ex)
             {
@@ -635,7 +631,6 @@ namespace PHRPReader
             ref int unnamedModID,
             out udtModInfoType udtModInfo)
         {
-
             // Modification definition format:
             //   ModName:   UniMod name or custom name
             //   Mass:      Mod mass
@@ -647,7 +642,6 @@ namespace PHRPReader
 
             try
             {
-
                 udtModInfo.ModMass = splitLine[1].Trim();
 
                 // udtModInfo.ModMass should be a number
@@ -705,7 +699,6 @@ namespace PHRPReader
                 // splitLine[4] has UniModID
 
                 return true;
-
             }
             catch (Exception ex)
             {

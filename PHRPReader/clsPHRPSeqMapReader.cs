@@ -406,7 +406,6 @@ namespace PHRPReader
         /// <returns>True if successful, false if an error</returns>
         private bool LoadResultToSeqMapping(string filePath, IDictionary<int, int> resultToSeqMap)
         {
-
             try
             {
                 // Read the data from the result to sequence map file
@@ -454,7 +453,6 @@ namespace PHRPReader
         /// <param name="seqInfo">Sequences</param>
         private void LoadSeqInfo(string filePath, IDictionary<int, clsSeqInfo> seqInfo)
         {
-
             var headerLineParsed = false;
 
             try
@@ -515,7 +513,6 @@ namespace PHRPReader
             {
                 throw new Exception("Exception loading Seq Info from " + Path.GetFileName(filePath) + ": " + ex.Message);
             }
-
         }
 
         /// <summary>
@@ -541,7 +538,6 @@ namespace PHRPReader
                     {SEQ_PROT_MAP_COLUMN_Protein_EValue, 4},
                     {SEQ_PROT_MAP_COLUMN_Protein_Intensity, 5}
                 };
-
 
                 // Read the data from the sequence to protein map file
                 using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))

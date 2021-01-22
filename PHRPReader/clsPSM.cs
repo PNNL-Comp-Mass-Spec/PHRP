@@ -377,7 +377,6 @@ namespace PHRPReader
         /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
         public void AddProteinDetail(clsProteinInfo proteinInfo)
         {
-
             var proteinName = proteinInfo.ProteinName;
 
             if (mProteinDetails.ContainsKey(proteinName))
@@ -393,7 +392,6 @@ namespace PHRPReader
             {
                 mProteins.Add(proteinName);
             }
-
         }
 
         /// <summary>

@@ -66,7 +66,6 @@ namespace PeptideHitResultsProcessor
 
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
-
         // Match mod masses (positive or negative) at start, e.g.
         // ReSharper disable CommentTypo
         // +57.021HWWTLTTDRINK         matches +57.021
@@ -263,7 +262,6 @@ namespace PeptideHitResultsProcessor
         /// <param name="updateModOccurrenceCounts"></param>
         private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
-
             var chMostRecentLetter = '-';
             var residueLocInPeptide = 0;
 
@@ -534,7 +532,6 @@ namespace PeptideHitResultsProcessor
             {
                 return false;
             }
-
         }
 
         private short ComputeCleavageState(string sequenceWithMods)
@@ -781,7 +778,6 @@ namespace PeptideHitResultsProcessor
             IDictionary<string, int> specIdToIndex,
             FilteredOutputFileTypeConstants filteredOutputFileType)
         {
-
             var searchResultsCurrentScan = new List<udtMSGFPlusSearchResultType>();
             var searchResultsPrefiltered = new List<udtMSGFPlusSearchResultType>();
 
@@ -1058,7 +1054,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1169,7 +1164,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
                 return parentMassToleranceInfo;
             }
-
         }
 
         /// <summary>
@@ -1226,8 +1220,6 @@ namespace PeptideHitResultsProcessor
             List<udtPepToProteinMappingType> pepToProteinMapping,
             out string mtsPepToProteinMapFilePath)
         {
-
-
             mtsPepToProteinMapFilePath = string.Empty;
 
             try
@@ -1308,7 +1300,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1590,7 +1581,6 @@ namespace PeptideHitResultsProcessor
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
                 return false;
             }
-
         }
 
         private bool ParseMSGFPlusResultsFileEntry(
@@ -1614,7 +1604,6 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-
                 var proteinInfo = new Dictionary<string, udtTerminusCharsType>();
 
                 // Reset searchResults
@@ -1813,7 +1802,6 @@ namespace PeptideHitResultsProcessor
 
                                 // Note that this will be a C13-corrected precursor error; not the true precursor error
                                 udtSearchResult.PMErrorDa = MassErrorToString(precursorErrorDa);
-
                             }
                         }
                     }
@@ -1924,7 +1912,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         /// <summary>
@@ -1935,7 +1922,6 @@ namespace PeptideHitResultsProcessor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSGFPlusResultsFileHeaderLine(string lineIn, IDictionary<MSGFPlusResultsFileColumns, int> columnMapping)
         {
-
             // The expected header from MSGFDB is:
             // #SpecFile    SpecIndex    Scan#     FragMethod    Precursor                    PMError(Da)           Charge    Peptide    Protein    DeNovoScore    MSGFScore    SpecProb      P-value   FDR       PepFDR
             // or
@@ -2070,7 +2056,6 @@ namespace PeptideHitResultsProcessor
             IDictionary<clsPHRPParserMSGFPlus.MSGFPlusSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
-
             string[] splitLine = null;
 
             // Reset searchResult
@@ -2227,7 +2212,6 @@ namespace PeptideHitResultsProcessor
                 }
                 return false;
             }
-
         }
 
         private bool ParseParentMassTolerance(string toleranceText, out double tolerance, out bool isPPM)
@@ -2270,7 +2254,6 @@ namespace PeptideHitResultsProcessor
         /// <remarks>Use SearchToolParameterFilePath to define the search engine parameter file</remarks>
         public override bool ProcessFile(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
         {
-
             var success = false;
 
             if (!LoadParameterFileSettings(parameterFilePath))
@@ -2339,7 +2322,6 @@ namespace PeptideHitResultsProcessor
                         RegisterEvents(modFileProcessor);
 
                         modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
-
 
                         clsPHRPParserMSGFPlus.UpdateMassCalculatorMasses(SearchToolParameterFilePath, modFileProcessor, mPeptideSeqMassCalculator,
                             out var localErrorMsg);

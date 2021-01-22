@@ -47,7 +47,6 @@ namespace PHRPReader
 
         private const string MODPlus_SEARCH_ENGINE_NAME = "MODPlus";
 
-
         /// <summary>
         /// These columns correspond to the Synopsis file created by clsMODPlusResultsProcessor
         /// </summary>
@@ -73,7 +72,6 @@ namespace PHRPReader
         }
 
 #pragma warning restore 1591
-
 
         #endregion
 

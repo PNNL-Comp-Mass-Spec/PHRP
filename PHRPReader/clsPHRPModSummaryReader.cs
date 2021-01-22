@@ -9,7 +9,6 @@ namespace PHRPReader
     /// </summary>
     public class clsPHRPModSummaryReader
     {
-
 #pragma warning disable 1591
         public const string MOD_SUMMARY_COLUMN_Modification_Symbol = "Modification_Symbol";
         public const string MOD_SUMMARY_COLUMN_Modification_Mass = "Modification_Mass";
@@ -74,7 +73,6 @@ namespace PHRPReader
 
         private bool ReadModSummaryFile(string modSummaryFilePath)
         {
-
             mModificationDefs.Clear();
 
             if (string.IsNullOrEmpty(modSummaryFilePath))

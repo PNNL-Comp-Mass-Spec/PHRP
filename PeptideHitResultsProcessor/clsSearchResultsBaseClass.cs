@@ -614,7 +614,6 @@ namespace PeptideHitResultsProcessor
             // Modification not found
             mErrorMessage = "Modification symbol not found: " + modificationSymbol + "; TerminusState = " + residueTerminusState.ToString();
             return false;
-
         }
 
         /// <summary>

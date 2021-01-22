@@ -78,7 +78,6 @@ namespace PHRPReader
 
 #pragma warning restore 1591
 
-
         #endregion
 
         #region "Properties"
@@ -394,7 +393,6 @@ namespace PHRPReader
                         }
                         else
                         {
-
                             ParseXTandemParamFileWork(paramFile.Directory.FullName, paramFile.Name, searchEngineParams, false, true,
                                                       ref errorMessage);
 
@@ -659,7 +657,6 @@ namespace PHRPReader
 
         private static bool MoveToNextInputParam(XmlReader xmlReader, out KeyValuePair<string, string> kvParameter)
         {
-
             while (xmlReader.Read())
             {
                 XMLTextReaderSkipWhitespace(xmlReader);

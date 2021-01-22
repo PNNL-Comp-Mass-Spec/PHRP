@@ -5,7 +5,6 @@ using PHRPReader;
 
 namespace PHRP_UnitTests
 {
-
     [TestFixture]
     public class PeptideMassCalculatorUnitTests
     {
@@ -138,7 +137,6 @@ namespace PHRP_UnitTests
             Assert.AreEqual(newMz, newMzAlt, 1E-05, "The two overloads of ConvoluteMass reported conflicting mass values");
 
             Assert.AreEqual(expectedMz, newMz, 0.0001, "Unexpected convoluted m/z");
-
         }
 
         [Test]
