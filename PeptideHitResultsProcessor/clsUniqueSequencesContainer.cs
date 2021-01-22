@@ -88,7 +88,7 @@ namespace PeptideHitResultsProcessor
                 {
                     mMasterSequences.Add(key, mNextUniqueSeqID);
                     uniqueSeqID = mNextUniqueSeqID;
-                    mNextUniqueSeqID += 1;
+                    mNextUniqueSeqID++;
                 }
             }
             catch (Exception)

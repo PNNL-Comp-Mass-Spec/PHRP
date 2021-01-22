@@ -214,7 +214,7 @@ namespace PeptideHitResultsProcessor
                 if (!parsingModInfo && IsLetterAtoZ(chChar))
                 {
                     chMostRecentResidue = chChar;
-                    residueLocInPeptide += 1;
+                    residueLocInPeptide++;
 
                     if (storeAmbiguousResidue)
                     {
@@ -420,7 +420,7 @@ namespace PeptideHitResultsProcessor
                     if (Math.Abs(result.PValueNum - lastValue) > double.Epsilon)
                     {
                         lastValue = result.PValueNum;
-                        currentRank += 1;
+                        currentRank++;
                     }
                 }
 
@@ -588,7 +588,7 @@ namespace PeptideHitResultsProcessor
                         while (endIndex + 1 < searchResultsUnfiltered.Count &&
                                searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                         {
-                            endIndex += 1;
+                            endIndex++;
                         }
 
                         // Store the results for this scan
@@ -779,7 +779,7 @@ namespace PeptideHitResultsProcessor
                                                                             resultsProcessed, columnMapping,
                                                                             out var currentPeptideWithMods);
 
-                            resultsProcessed += 1;
+                            resultsProcessed++;
                             if (!validSearchResult)
                                 continue;
 
@@ -846,7 +846,7 @@ namespace PeptideHitResultsProcessor
                                             SaveResultsFileEntrySeqInfo(searchResult, false);
                                         }
 
-                                        pepToProteinMapIndex += 1;
+                                        pepToProteinMapIndex++;
                                     } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
                                              currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
                                 }
@@ -1084,7 +1084,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the TopPIC results file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing TopPIC Results in ParseTopPICResultsFileEntry for RowIndex '" + splitLine[0] + "'" +
                                        "\n";
@@ -1367,7 +1367,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the synopsis or first hits file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing TopPIC Results for RowIndex '" + splitLine[0] + "'" + "\n";
                     }
@@ -1586,7 +1586,7 @@ namespace PeptideHitResultsProcessor
             foreach (var result in query)
             {
                 WriteSearchResultToFile(index, writer, result, ref errorLog);
-                index += 1;
+                index++;
             }
         }
 
@@ -1737,15 +1737,15 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Charge is the same; check Pvalue
-                var result = string.Compare(x.Pvalue, y.Pvalue, StringComparison.Ordinal);
+                var result = string.CompareOrdinal(x.Pvalue, y.Pvalue);
                 if (result == 0)
                 {
                     // Pvalue is the same; check peptide
-                    result = string.Compare(x.Proteoform, y.Proteoform, StringComparison.Ordinal);
+                    result = string.CompareOrdinal(x.Proteoform, y.Proteoform);
                     if (result == 0)
                     {
                         // Peptide is the same, check Protein
-                        result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
+                        result = string.CompareOrdinal(x.Protein, y.Protein);
                     }
                 }
                 return result;

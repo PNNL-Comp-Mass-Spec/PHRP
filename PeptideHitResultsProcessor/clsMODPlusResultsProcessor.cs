@@ -176,7 +176,7 @@ namespace PeptideHitResultsProcessor
                     }
 
                     mostRecentResidue = chChar;
-                    residueLocInPeptide += 1;
+                    residueLocInPeptide++;
 
                     // Look for static mods to associate with this residue
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
@@ -339,7 +339,7 @@ namespace PeptideHitResultsProcessor
                     if (Math.Abs(result.ScoreNum - lastValue) > double.Epsilon)
                     {
                         lastValue = result.ScoreNum;
-                        currentRank += 1;
+                        currentRank++;
                     }
                 }
 
@@ -551,7 +551,7 @@ namespace PeptideHitResultsProcessor
                         while (endIndex + 1 < searchResultsUnfiltered.Count &&
                                searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                         {
-                            endIndex += 1;
+                            endIndex++;
                         }
 
                         // Store the results for this scan
@@ -615,7 +615,7 @@ namespace PeptideHitResultsProcessor
                 doc.Load(paramFile.FullName);
 
                 var nodeList = doc.SelectNodes("/search/modifications/fixed/mod");
-                if (nodeList != null && nodeList.Count > 0)
+                if (nodeList?.Count > 0)
                 {
                     // Store the fixed mods
 
@@ -748,7 +748,7 @@ namespace PeptideHitResultsProcessor
                                                                                 resultsProcessed, columnMapping,
                                                                                 out var currentPeptideWithMods);
 
-                            resultsProcessed += 1;
+                            resultsProcessed++;
                             if (!validSearchResult)
                             {
                                 continue;
@@ -1247,7 +1247,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the synopsis or first hits file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing MODPlus Results for RowIndex '" + splitLine[0] + "'" + "\n";
                     }
@@ -1494,7 +1494,7 @@ namespace PeptideHitResultsProcessor
                 {
                     // This code should not be reached
                     WriteSearchResultToFile(resultID, writer, result, "Unknown_Protein", string.Empty, ref errorLog);
-                    resultID += 1;
+                    resultID++;
                 }
 
                 foreach (var proteinEntry in proteinList)
@@ -1515,7 +1515,7 @@ namespace PeptideHitResultsProcessor
                     }
 
                     WriteSearchResultToFile(resultID, writer, result, proteinName, peptidePosition, ref errorLog);
-                    resultID += 1;
+                    resultID++;
                 }
             }
         }
@@ -1540,7 +1540,7 @@ namespace PeptideHitResultsProcessor
                         searchResults[index].ChargeNum == searchResults[indexEnd + 1].ChargeNum &&
                         searchResults[index].Peptide == searchResults[indexEnd + 1].Peptide)
                     {
-                        indexEnd += 1;
+                        indexEnd++;
                     }
                     else
                     {
@@ -1567,11 +1567,11 @@ namespace PeptideHitResultsProcessor
 
                 if (isReverse)
                 {
-                    reversePeptideCount += 1;
+                    reversePeptideCount++;
                 }
                 else
                 {
-                    forwardPeptideCount += 1;
+                    forwardPeptideCount++;
                 }
 
                 double fDR = 1;
@@ -1756,11 +1756,11 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Probability is the same; check peptide
-                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
+                var result = string.CompareOrdinal(x.Peptide, y.Peptide);
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein
-                    result = string.Compare(x.ProteinList, y.ProteinList, StringComparison.Ordinal);
+                    result = string.CompareOrdinal(x.ProteinList, y.ProteinList);
                 }
                 return result;
             }
@@ -1803,11 +1803,11 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Charge is the same; check peptide
-                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
+                var result = string.CompareOrdinal(x.Peptide, y.Peptide);
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein
-                    result = string.Compare(x.ProteinList, y.ProteinList, StringComparison.Ordinal);
+                    result = string.CompareOrdinal(x.ProteinList, y.ProteinList);
                 }
                 return result;
             }

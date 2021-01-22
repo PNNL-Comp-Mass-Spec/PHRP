@@ -262,7 +262,7 @@ namespace PHRPReader
 
             var monoisotopicMass = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormulaInstance.ElementCounts, out var unknownSymbols);
 
-            if (unknownSymbols != null && unknownSymbols.Count > 0)
+            if (unknownSymbols?.Count > 0)
             {
                 var errMsg = "Error parsing empirical formula '" + empiricalFormula + "', ";
                 if (unknownSymbols.Count == 1)
@@ -714,7 +714,7 @@ namespace PHRPReader
         {
             if (string.IsNullOrWhiteSpace(modName))
             {
-                unnamedModID += 1;
+                unnamedModID++;
                 return "UnnamedMod" + unnamedModID;
             }
 

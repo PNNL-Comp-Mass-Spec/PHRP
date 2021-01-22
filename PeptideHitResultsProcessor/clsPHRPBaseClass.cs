@@ -506,7 +506,7 @@ namespace PeptideHitResultsProcessor
                         if (mProteinNameOrder.ContainsKey(proteinName))
                             continue;
 
-                        proteinNumber += 1;
+                        proteinNumber++;
 
                         mProteinNameOrder.Add(proteinName, proteinNumber);
                     }
@@ -1180,6 +1180,8 @@ namespace PeptideHitResultsProcessor
                 Console.WriteLine();
 
                 var progressAtStart = mProgressPercentComplete;
+
+                ResetProgress(mProgressStepDescription);
                 UpdateProgress("Creating the Protein Mod Details file", PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE);
 
                 // Confirm that the PHRP data file exists
@@ -1289,7 +1291,7 @@ namespace PeptideHitResultsProcessor
                             {
                                 do
                                 {
-                                    psmCount += 1;
+                                    psmCount++;
 
                                     var skipProtein = false;
                                     if (!ProteinModsFileIncludesReversedProteins)
@@ -1297,7 +1299,7 @@ namespace PeptideHitResultsProcessor
                                         skipProtein = IsReversedProtein(pepToProteinMapping[pepToProteinMapIndex].Protein);
                                         if (skipProtein)
                                         {
-                                            psmCountSkippedSinceReversedOrScrambledProtein += 1;
+                                            psmCountSkippedSinceReversedOrScrambledProtein++;
                                         }
                                     }
 
@@ -1310,7 +1312,7 @@ namespace PeptideHitResultsProcessor
                                                              ref psmCountSkippedSinceReversedOrScrambledProtein);
                                     }
 
-                                    pepToProteinMapIndex += 1;
+                                    pepToProteinMapIndex++;
                                 } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
                                          reader.CurrentPSM.Peptide == pepToProteinMapping[pepToProteinMapIndex].Peptide);
                             }
@@ -1321,7 +1323,10 @@ namespace PeptideHitResultsProcessor
                                                     "Peptide not found in pepToProteinMapping: " + reader.CurrentPSM.Peptide);
                             }
 
-                            UpdateProgress(progressAtStart + reader.PercentComplete * (100 - progressAtStart) / 100);
+                            var overallProgress = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
+                                progressAtStart, 100, reader.PercentComplete);
+
+                            UpdateProgress(overallProgress);
                         }
 
                         if (psmCount > 0)
@@ -1379,7 +1384,7 @@ namespace PeptideHitResultsProcessor
             {
                 // .NET by default will double the size of the list to accommodate these new items
                 // Instead, expand the list by 20% of the current size
-                items.Capacity = items.Capacity + Convert.ToInt32(items.Count / 5);
+                items.Capacity += Convert.ToInt32(items.Count / 5);
             }
         }
 
@@ -1400,7 +1405,7 @@ namespace PeptideHitResultsProcessor
                 // Step Backward until the first match is found
                 while (pepToProteinMapIndex > 0 && pepToProteinMapping[pepToProteinMapIndex - 1].Peptide == peptideToFind)
                 {
-                    pepToProteinMapIndex -= 1;
+                    pepToProteinMapIndex--;
                 }
             }
 
@@ -2312,10 +2317,10 @@ namespace PeptideHitResultsProcessor
                 return;
             }
 
-            var adjustedPercentComplete = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
+            var overallProgress = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
                 0, PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE, percentComplete);
 
-            UpdateProgress(adjustedPercentComplete);
+            UpdateProgress(overallProgress);
         }
 
         /// <summary>
@@ -2470,24 +2475,24 @@ namespace PeptideHitResultsProcessor
                     while (!reader.EndOfStream)
                     {
                         var lineIn = reader.ReadLine();
-                        linesRead += 1;
+                        linesRead++;
 
                         if (linesRead <= 1 || string.IsNullOrEmpty(lineIn))
                             continue;
 
                         var splitLine = lineIn.Split(chSplitChars, 2);
-                        if (splitLine.Length <= 0)
+                        if (splitLine.Length == 0)
                             continue;
 
                         if (splitLine[0] != lastPeptide)
                         {
-                            peptideCount += 1;
+                            peptideCount++;
                             lastPeptide = string.Copy(splitLine[0]);
                         }
 
                         if (lineIn.Contains(PROTEIN_NAME_NO_MATCH))
                         {
-                            peptideCountNoMatch += 1;
+                            peptideCountNoMatch++;
                         }
                     }
                 }
@@ -2634,11 +2639,11 @@ namespace PeptideHitResultsProcessor
 
                     if (definiteAminoAcidCount > 0.1 * letterCount)
                     {
-                        validProteinCount += 1;
+                        validProteinCount++;
                     }
                     else if (potentialNucleicAcidCount > 0.95 * letterCount)
                     {
-                        invalidProteinCount += 1;
+                        invalidProteinCount++;
                     }
 
                     if (validProteinCount + invalidProteinCount >= 500)
@@ -2703,7 +2708,7 @@ namespace PeptideHitResultsProcessor
                 if (pepToProteinMapping[pepToProteinMapIndex].Protein == PROTEIN_NAME_NO_MATCH && IsReversedProtein(reader.CurrentPSM.ProteinFirst))
                 {
                     // Skip this result
-                    psmCountSkippedSinceReversedOrScrambledProtein += 1;
+                    psmCountSkippedSinceReversedOrScrambledProtein++;
                 }
                 else
                 {
@@ -2728,10 +2733,10 @@ namespace PeptideHitResultsProcessor
             {
                 mNextPeptideToProteinMapperLevel += 25;
 
-                var percentCompleteAdjusted = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
+                var overallProgress = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
                     PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE, PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE, percentComplete);
 
-                UpdateProgress(percentCompleteAdjusted);
+                UpdateProgress(overallProgress);
 
                 if (!HasEventListenerProgressUpdate)
                 {
@@ -2792,7 +2797,7 @@ namespace PeptideHitResultsProcessor
                 if (y.ModName == null)
                     y.ModName = string.Empty;
 
-                return string.Compare(x.ModName, y.ModName, StringComparison.Ordinal);
+                return string.CompareOrdinal(x.ModName, y.ModName);
             }
         }
 
@@ -2800,10 +2805,10 @@ namespace PeptideHitResultsProcessor
         {
             public int Compare(udtPepToProteinMappingType x, udtPepToProteinMappingType y)
             {
-                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
+                var result = string.CompareOrdinal(x.Peptide, y.Peptide);
                 if (result == 0)
                 {
-                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
+                    result = string.CompareOrdinal(x.Protein, y.Protein);
                 }
                 return result;
             }
@@ -2813,7 +2818,7 @@ namespace PeptideHitResultsProcessor
         {
             public int Compare(udtPepToProteinMappingType x, udtPepToProteinMappingType y)
             {
-                return string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
+                return string.CompareOrdinal(x.Peptide, y.Peptide);
             }
         }
 

@@ -258,7 +258,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Compute the mass of peptide sequence sequence (it cannot contain modification symbols)
+        /// Compute the mass of the peptide sequence (it cannot contain modification symbols)
         /// </summary>
         /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers); can have prefix and suffix letters</param>
         /// <returns>Monoisotopic mass, or -1 if an error</returns>
@@ -303,7 +303,7 @@ namespace PHRPReader
                     }
 
                     mass += mAminoAcidMasses[aminoAcidIndex];
-                    validResidueCount += 1;
+                    validResidueCount++;
                 }
                 catch (Exception)
                 {
@@ -406,7 +406,7 @@ namespace PHRPReader
         private static readonly Regex RegexModMasses = new Regex("[+-][0-9.]+", RegexOptions.Compiled);
 
         /// <summary>
-        /// Compute the mass of peptide sequence sequence.  Supports peptide sequences with with numeric mod masses
+        /// Compute the mass of the peptide sequence.  Supports peptide sequences with numeric mod masses
         /// Examples of numeric mods:
         ///  R.A+144.102063AS+79.9663PQDLAGGYTSSLAC+57.0215HR.A
         ///  K.Q-17.0265QIEESTSDYDKEK.L

@@ -70,7 +70,7 @@ namespace PeptideHitResultsProcessor
                 if (IsLetterAtoZ(chChar))
                 {
                     mostRecentLetter = chChar;
-                    residueLocInPeptide += 1;
+                    residueLocInPeptide++;
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
@@ -464,7 +464,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the synopsis or first hits file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing Sequest Results for RowIndex '" + splitLine[0] + "'" + "\n";
                     }

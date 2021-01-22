@@ -18,7 +18,6 @@ using System.IO;
 using PeptideHitResultsProcessor;
 using PHRPReader;
 using PRISM;
-using PRISM.Logging;
 
 namespace PeptideHitResultsProcRunner
 {
@@ -137,7 +136,7 @@ namespace PeptideHitResultsProcRunner
 
             string errorMessage;
 
-            if (ErrorCode == ProcessFilesErrorCodes.LocalizedError |
+            if (ErrorCode == ProcessFilesErrorCodes.LocalizedError ||
                 ErrorCode == ProcessFilesErrorCodes.NoError)
             {
                 switch (mLocalErrorCode)
@@ -402,7 +401,7 @@ namespace PeptideHitResultsProcRunner
             return success;
         }
 
-        private void RegisterResultsProcessEvents(IEventNotifier resultsProcessor)
+        private void RegisterResultsProcessEvents(clsPHRPBaseClass resultsProcessor)
         {
             resultsProcessor.ErrorEvent += PeptideHitResultsProcessor_ErrorOccurred;
             resultsProcessor.StatusEvent += PeptideHitResultsProcessor_MessageEvent;

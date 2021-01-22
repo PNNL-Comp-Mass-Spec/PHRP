@@ -569,7 +569,7 @@ namespace PHRPReader
                     while (!reader.EndOfStream)
                     {
                         reader.ReadLine();
-                        totalLines += 1;
+                        totalLines++;
                     }
                 }
             }
@@ -1127,7 +1127,7 @@ namespace PHRPReader
                 {
                     if (File.Exists(baseName + suffix))
                     {
-                        auxFileCount += 1;
+                        auxFileCount++;
                     }
                 }
 
@@ -1460,7 +1460,7 @@ namespace PHRPReader
                         if (IsLetterAtoZ(peptide[index]))
                         {
                             mostRecentResidue = peptide[index];
-                            residueLocInPeptide += 1;
+                            residueLocInPeptide++;
 
                             if (residueLocInPeptide == 1)
                             {
@@ -1517,7 +1517,7 @@ namespace PHRPReader
                             }
                         }
                     }
-                    index += 1;
+                    index++;
                 }
 
                 peptideWithNumericMods = mNewPeptide.ToString();
@@ -2302,7 +2302,7 @@ namespace PHRPReader
             else if (!mSourceFile.EndOfStream)
             {
                 lineIn = mSourceFile.ReadLine();
-                mSourceFileLinesRead += 1;
+                mSourceFileLinesRead++;
                 success = true;
             }
             else
@@ -2398,7 +2398,7 @@ namespace PHRPReader
                 }
             }
 
-            if (mMSGFCachedResults != null && mMSGFCachedResults.Count > 0)
+            if (mMSGFCachedResults?.Count > 0)
             {
                 if (mMSGFCachedResults.TryGetValue(mPSMCurrent.ResultID, out var specEValueText))
                 {
@@ -2421,7 +2421,7 @@ namespace PHRPReader
                 while (readNext && !mSourceFile.EndOfStream)
                 {
                     lineIn = mSourceFile.ReadLine();
-                    mSourceFileLinesRead += 1;
+                    mSourceFileLinesRead++;
 
                     if (string.IsNullOrEmpty(lineIn))
                         continue;
@@ -2906,7 +2906,7 @@ namespace PHRPReader
         private bool TryGetScanStats(int scanNumber,
             out clsScanStatsInfo scanStatsInfo)
         {
-            if (mScanStats != null && mScanStats.Count > 0)
+            if (mScanStats?.Count > 0)
             {
                 if (mScanStats.TryGetValue(scanNumber, out scanStatsInfo))
                 {

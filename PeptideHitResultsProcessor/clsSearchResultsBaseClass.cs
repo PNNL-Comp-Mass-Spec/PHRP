@@ -403,7 +403,7 @@ namespace PeptideHitResultsProcessor
                 while (delM > 0.5)
                 {
                     delM -= MASS_C13;
-                    correctionCount += 1;
+                    correctionCount++;
                 }
             }
             else
@@ -413,7 +413,7 @@ namespace PeptideHitResultsProcessor
                 while (delM < -0.5)
                 {
                     delM += MASS_C13;
-                    correctionCount -= 1;
+                    correctionCount--;
                 }
             }
 
@@ -711,7 +711,7 @@ namespace PeptideHitResultsProcessor
                 if (updateModOccurrenceCounts)
                 {
                     // Increment OccurrenceCount
-                    modificationDefinition.OccurrenceCount += 1;
+                    modificationDefinition.OccurrenceCount++;
                 }
 
                 mSearchResultModifications.Add(new clsAminoAcidModInfo(chTargetResidue, residueLocInPeptide, residueTerminusState, modificationDefinition));
@@ -1122,7 +1122,7 @@ namespace PeptideHitResultsProcessor
                     return -1;
                 }
 
-                return string.Compare(x.ModDefinition.MassCorrectionTag, y.ModDefinition.MassCorrectionTag, StringComparison.Ordinal);
+                return string.CompareOrdinal(x.ModDefinition.MassCorrectionTag, y.ModDefinition.MassCorrectionTag);
             }
         }
     }

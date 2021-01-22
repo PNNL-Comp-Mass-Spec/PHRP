@@ -164,7 +164,7 @@ namespace PeptideHitResultsProcessor
                     }
 
                     mostRecentResidue = chChar;
-                    residueLocInPeptide += 1;
+                    residueLocInPeptide++;
 
                     // Look for static mods to associate with this residue
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
@@ -327,7 +327,7 @@ namespace PeptideHitResultsProcessor
                     if (Math.Abs(result.ProbabilityNum - lastValue) > double.Epsilon)
                     {
                         lastValue = result.ProbabilityNum;
-                        currentRank += 1;
+                        currentRank++;
                     }
                 }
 
@@ -499,7 +499,7 @@ namespace PeptideHitResultsProcessor
                             UpdateSynopsisFileCreationProgress(reader);
                         }
 
-                        resultsProcessed += 1;
+                        resultsProcessed++;
                     }
 
                     // Sort the SearchResults by scan, charge, and Descending probability
@@ -516,7 +516,7 @@ namespace PeptideHitResultsProcessor
                         while (endIndex + 1 < searchResultsUnfiltered.Count &&
                                searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                         {
-                            endIndex += 1;
+                            endIndex++;
                         }
 
                         // Store the results for this scan
@@ -582,7 +582,7 @@ namespace PeptideHitResultsProcessor
                                 continue;
 
                             var dataLine = lineIn.Trim();
-                            if (dataLine.Length <= 0)
+                            if (dataLine.Length == 0)
                                 continue;
 
                             if (dataLine.StartsWith("#"))
@@ -847,7 +847,7 @@ namespace PeptideHitResultsProcessor
                                                                           columnMapping,
                                                                           out var currentPeptideWithMods);
 
-                            resultsProcessed += 1;
+                            resultsProcessed++;
                             if (!validSearchResult)
                             {
                                 continue;
@@ -916,7 +916,7 @@ namespace PeptideHitResultsProcessor
                                             SaveResultsFileEntrySeqInfo(searchResult, false);
                                         }
 
-                                        pepToProteinMapIndex += 1;
+                                        pepToProteinMapIndex++;
                                     } while (pepToProteinMapIndex < pepToProteinMapping.Count && currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
                                 }
                                 else
@@ -1357,7 +1357,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the synopsis or first hits file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing MODa Results for RowIndex '" + splitLine[0] + "'" + "\n";
                     }
@@ -1599,7 +1599,7 @@ namespace PeptideHitResultsProcessor
             foreach (var result in query)
             {
                 WriteSearchResultToFile(index, writer, result, ref errorLog);
-                index += 1;
+                index++;
             }
         }
 
@@ -1623,7 +1623,7 @@ namespace PeptideHitResultsProcessor
                         searchResults[index].ChargeNum == searchResults[indexEnd + 1].ChargeNum &&
                         searchResults[index].Peptide == searchResults[indexEnd + 1].Peptide)
                     {
-                        indexEnd += 1;
+                        indexEnd++;
                     }
                     else
                     {
@@ -1645,11 +1645,11 @@ namespace PeptideHitResultsProcessor
 
                 if (isReverse)
                 {
-                    reversePeptideCount += 1;
+                    reversePeptideCount++;
                 }
                 else
                 {
-                    forwardPeptideCount += 1;
+                    forwardPeptideCount++;
                 }
 
                 double fDR = 1;
@@ -1828,11 +1828,11 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // Probability is the same; check peptide
-                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
+                var result = string.CompareOrdinal(x.Peptide, y.Peptide);
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein
-                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
+                    result = string.CompareOrdinal(x.Protein, y.Protein);
                 }
                 return result;
             }

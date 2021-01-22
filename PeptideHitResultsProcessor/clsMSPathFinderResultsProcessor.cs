@@ -447,7 +447,7 @@ namespace PeptideHitResultsProcessor
                     while (!reader.EndOfStream && !AbortProcessing)
                     {
                         var lineIn = reader.ReadLine();
-                        rowNumber += 1;
+                        rowNumber++;
 
                         if (string.IsNullOrWhiteSpace(lineIn))
                         {
@@ -503,7 +503,7 @@ namespace PeptideHitResultsProcessor
                         while (endIndex + 1 < searchResultsUnfiltered.Count &&
                                searchResultsUnfiltered[endIndex + 1].ScanNum == searchResultsUnfiltered[startIndex].ScanNum)
                         {
-                            endIndex += 1;
+                            endIndex++;
                         }
 
                         // Store the results for this scan
@@ -697,7 +697,7 @@ namespace PeptideHitResultsProcessor
                                                                                      resultsProcessed, columnMapping,
                                                                                      out _);
 
-                            resultsProcessed += 1;
+                            resultsProcessed++;
                             if (!validSearchResult)
                             {
                                 continue;
@@ -1196,7 +1196,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the synopsis or first hits file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing MSPathFinder Results for RowIndex '" + splitLine[0] + "'" + "\n";
                     }
@@ -1345,7 +1345,7 @@ namespace PeptideHitResultsProcessor
             foreach (var result in query)
             {
                 WriteSearchResultToFile(index, writer, result, ref errorLog);
-                index += 1;
+                index++;
             }
         }
 
@@ -1506,11 +1506,11 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // SpecEValue is the same; check sequence
-                var result = string.Compare(x.Sequence, y.Sequence, StringComparison.Ordinal);
+                var result = string.CompareOrdinal(x.Sequence, y.Sequence);
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein
-                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
+                    result = string.CompareOrdinal(x.Protein, y.Protein);
                 }
                 return result;
             }

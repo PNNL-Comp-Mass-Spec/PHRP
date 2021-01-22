@@ -336,7 +336,7 @@ namespace PHRPReader
                     while (!reader.EndOfStream)
                     {
                         var lineIn = reader.ReadLine();
-                        linesRead += 1;
+                        linesRead++;
 
                         if (!string.IsNullOrEmpty(lineIn))
                         {

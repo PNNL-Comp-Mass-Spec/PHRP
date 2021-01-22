@@ -461,7 +461,7 @@ namespace PHRPReader
                     {
                         if (residues1.IndexOf(chChar) >= 0)
                         {
-                            matchCount += 1;
+                            matchCount++;
                         }
                         else
                         {

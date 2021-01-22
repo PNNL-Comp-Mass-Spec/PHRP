@@ -1616,7 +1616,7 @@ namespace PeptideHitResultsProcessor
         {
             // Update .ResultID to the next available number
             searchResult.ResultID = mNextResultID;
-            mNextResultID += 1;
+            mNextResultID++;
 
             // Write the results to the output file
             var data = new List<string>

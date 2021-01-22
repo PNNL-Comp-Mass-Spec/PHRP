@@ -331,19 +331,19 @@ namespace PHRPReader
                 doc.Load(paramFilePath);
 
                 var dbNodes = doc.SelectNodes("/search/database");
-                if (dbNodes != null && dbNodes.Count > 0)
+                if (dbNodes?.Count > 0)
                 {
                     searchEngineParams.FastaFilePath = GetAttribute(dbNodes[0], "local_path");
                 }
 
                 var enzymeNodes = doc.SelectNodes("/search/enzyme_rule");
-                if (enzymeNodes != null && enzymeNodes.Count > 0)
+                if (enzymeNodes?.Count > 0)
                 {
                     searchEngineParams.Enzyme = GetAttribute(enzymeNodes[0], "name");
                 }
 
                 var instrumentResolutionNodes = doc.SelectNodes("/search/instrument_resolution");
-                if (instrumentResolutionNodes != null && instrumentResolutionNodes.Count > 0)
+                if (instrumentResolutionNodes?.Count > 0)
                 {
                     searchEngineParams.PrecursorMassType = ConvertResolutionModeToMassType(GetAttribute(instrumentResolutionNodes[0], "ms"));
 
@@ -352,7 +352,7 @@ namespace PHRPReader
                 }
 
                 var enzymeConstraintNodes = doc.SelectNodes("/search/parameters/enzyme_constraint");
-                if (enzymeConstraintNodes != null && enzymeConstraintNodes.Count > 0)
+                if (enzymeConstraintNodes?.Count > 0)
                 {
                     if (int.TryParse(GetAttribute(enzymeConstraintNodes[0], "max_miss_cleavages"), out var maxNumberInternalCleavages))
                     {
@@ -366,7 +366,7 @@ namespace PHRPReader
 
                 var massTolParamNode = doc.SelectNodes("/search/parameters/peptide_mass_tol");
 
-                if (massTolParamNode != null && massTolParamNode.Count > 0)
+                if (massTolParamNode?.Count > 0)
                 {
                     var tolerance = GetAttribute(massTolParamNode[0], "value");
                     var massUnits = GetAttribute(massTolParamNode[0], "unit");
@@ -457,7 +457,7 @@ namespace PHRPReader
 
         private string GetAttribute(XmlNode node, string attributeName)
         {
-            if (node.Attributes != null && node.Attributes.Count > 0)
+            if (node.Attributes?.Count > 0)
             {
                 try
                 {

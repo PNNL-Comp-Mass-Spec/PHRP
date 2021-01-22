@@ -637,7 +637,7 @@ namespace PHRPReader
                 if (clsPHRPReader.IsLetterAtoZ(primarySequence[charIndex]))
                 {
                     // Found a letter
-                    residueNumber += 1;
+                    residueNumber++;
 
                     if (charIndex > 0 && primarySequence[charIndex - 1] == '(')
                     {
@@ -902,7 +902,7 @@ namespace PHRPReader
                             mResultIDToProteins.Add(mapItem.Key, proteinsForResultID);
                         }
 
-                        entriesParsed += 1;
+                        entriesParsed++;
                         if (DateTime.UtcNow.Subtract(lastProgress).TotalSeconds >= 5)
                         {
                             var pctComplete = entriesParsed / Convert.ToDouble(ResultToSeqMap.Count) * 100;
@@ -1292,7 +1292,7 @@ namespace PHRPReader
             // Split seqInfo.ModDescription on the comma character
             var mods = seqInfo.ModDescription.Split(',');
 
-            if (mods.Length <= 0)
+            if (mods.Length == 0)
                 return;
 
             // Parse currentPSM.Peptide to look for ambiguous mods, for example -30.09 in I.(TIIQ)[-30.09]APQGVSLQYTSR.Q

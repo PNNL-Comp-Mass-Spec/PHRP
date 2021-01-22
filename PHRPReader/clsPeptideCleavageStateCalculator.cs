@@ -354,7 +354,7 @@ namespace PHRPReader
                 {
                     if (TestCleavageRule(previousLetter[0], chCurrent))
                     {
-                        numMissedCleavages += 1;
+                        numMissedCleavages++;
                     }
                 }
 
@@ -491,7 +491,7 @@ namespace PHRPReader
                 chMatch = text[index];
                 while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && index > 0)
                 {
-                    index -= 1;
+                    index--;
                     chMatch = text[index];
                 }
             }
@@ -513,7 +513,7 @@ namespace PHRPReader
                 chMatch = text[index];
                 while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && index < text.Length - 1)
                 {
-                    index += 1;
+                    index++;
                     chMatch = text[index];
                 }
             }

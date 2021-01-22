@@ -606,7 +606,7 @@ namespace PHRPReader
                 {
                     if (Modifications[index].ModificationType != clsModificationDefinition.ModificationTypeConstants.DynamicMod &&
                         Modifications[index].ModificationType != clsModificationDefinition.ModificationTypeConstants.UnknownType ||
-                        Modifications[index].TargetResidues.Length <= 0)
+                        Modifications[index].TargetResidues.Length == 0)
                     {
                         continue;
                     }
@@ -769,7 +769,7 @@ namespace PHRPReader
                     if (Modifications[index].ModificationType != clsModificationDefinition.ModificationTypeConstants.DynamicMod &&
                         Modifications[index].ModificationType != clsModificationDefinition.ModificationTypeConstants.StaticMod &&
                         Modifications[index].ModificationType != clsModificationDefinition.ModificationTypeConstants.UnknownType ||
-                        Modifications[index].TargetResidues.Length <= 0)
+                        Modifications[index].TargetResidues.Length == 0)
                     {
                         continue;
                     }
@@ -1325,14 +1325,14 @@ namespace PHRPReader
 
                             // Check whether the modification type is Static and the .TargetResidues are one of: <>[]
                             // If so, update the modification type as needed
-                            if (modificationDefinition.TargetResidues != null && modificationDefinition.TargetResidues.Trim().Length == 1 && modificationDefinition.ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod)
+                            if (modificationDefinition.TargetResidues?.Trim().Length == 1 && modificationDefinition.ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod)
                             {
-                                if (modificationDefinition.TargetResidues[0] == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS |
+                                if (modificationDefinition.TargetResidues[0] == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS ||
                                     modificationDefinition.TargetResidues[0] == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
                                 {
                                     modificationDefinition.ModificationType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                                 }
-                                else if (modificationDefinition.TargetResidues[0] == clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS |
+                                else if (modificationDefinition.TargetResidues[0] == clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS ||
                                          modificationDefinition.TargetResidues[0] == clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
                                 {
                                     modificationDefinition.ModificationType = clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
@@ -1650,11 +1650,11 @@ namespace PHRPReader
                             {
                                 chDefaultModificationSymbols[indexCopy] = chDefaultModificationSymbols[indexCopy + 1];
                             }
-                            defaultModificationSymbolCount -= 1;
+                            defaultModificationSymbolCount--;
                         }
                         else
                         {
-                            indexCompare += 1;
+                            indexCompare++;
                         }
                     }
                 }

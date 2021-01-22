@@ -218,7 +218,7 @@ namespace PeptideHitResultsProcessor
             }
 
             searchResultsCurrentScan[currentScanResultsCount] = udtSearchResult;
-            currentScanResultsCount += 1;
+            currentScanResultsCount++;
         }
 
         private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
@@ -238,7 +238,7 @@ namespace PeptideHitResultsProcessor
                 if (IsLetterAtoZ(chChar))
                 {
                     mostRecentLetter = chChar;
-                    residueLocInPeptide += 1;
+                    residueLocInPeptide++;
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
@@ -304,7 +304,7 @@ namespace PeptideHitResultsProcessor
                     if (Math.Abs(searchResultsCurrentScan[index].FScoreNum - lastValue) > float.Epsilon)
                     {
                         lastValue = searchResultsCurrentScan[index].FScoreNum;
-                        currentRank += 1;
+                        currentRank++;
                     }
                 }
 
@@ -344,7 +344,7 @@ namespace PeptideHitResultsProcessor
                     if (Math.Abs(searchResultsCurrentScan[index].TotalPRMScoreNum - lastValue) > float.Epsilon)
                     {
                         lastValue = searchResultsCurrentScan[index].TotalPRMScoreNum;
-                        currentRank += 1;
+                        currentRank++;
                     }
                 }
 
@@ -481,7 +481,7 @@ namespace PeptideHitResultsProcessor
 
                             var validSearchResult = ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, ref errorLog, resultsProcessed);
 
-                            resultsProcessed += 1;
+                            resultsProcessed++;
                             if (!validSearchResult)
                             {
                                 continue;
@@ -671,7 +671,7 @@ namespace PeptideHitResultsProcessor
                             continue;
 
                         var dataLine = lineIn.Trim();
-                        if (dataLine.Length <= 0)
+                        if (dataLine.Length == 0)
                             continue;
 
                         if (dataLine[0] == '#')
@@ -737,7 +737,7 @@ namespace PeptideHitResultsProcessor
                         }
                         else
                         {
-                            unnamedModID += 1;
+                            unnamedModID++;
                             modDef.ModName = "UnnamedMod" + unnamedModID.ToString();
                         }
 
@@ -1079,7 +1079,7 @@ namespace PeptideHitResultsProcessor
                                             SaveResultsFileEntrySeqInfo(searchResult, false);
                                         }
 
-                                        pepToProteinMapIndex += 1;
+                                        pepToProteinMapIndex++;
                                     } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
                                              currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
                                 }
@@ -1260,7 +1260,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the synopsis or first hits file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing InSpecT Results for RowIndex '" + splitLine[0] + "'" + "\n";
                     }
@@ -1409,7 +1409,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the synopsis or first hits file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing InSpecT Results for RowIndex '" + splitLine[0] + "'" + "\n";
                     }
@@ -1823,7 +1823,7 @@ namespace PeptideHitResultsProcessor
             }
             else
             {
-                resultID += 1;
+                resultID++;
                 WriteSearchResultToFile(resultID, writer, udtSearchResult, ref errorLog);
             }
         }
@@ -1840,7 +1840,7 @@ namespace PeptideHitResultsProcessor
             foreach (var result in query)
             {
                 WriteSearchResultToFile(index, writer, result, ref errorLog);
-                index += 1;
+                index++;
             }
         }
 

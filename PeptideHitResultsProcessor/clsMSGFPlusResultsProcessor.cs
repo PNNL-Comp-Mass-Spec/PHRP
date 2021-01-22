@@ -274,7 +274,7 @@ namespace PeptideHitResultsProcessor
                 if (IsLetterAtoZ(chChar))
                 {
                     chMostRecentLetter = chChar;
-                    residueLocInPeptide += 1;
+                    residueLocInPeptide++;
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
@@ -360,7 +360,7 @@ namespace PeptideHitResultsProcessor
                 }
                 else if (peptideNew[peptideNew.Length - 1] == '.')
                 {
-                    peptideNew = peptideNew + kvProteinInfo.Value.CTerm;
+                    peptideNew += kvProteinInfo.Value.CTerm;
                 }
                 else
                 {
@@ -385,7 +385,7 @@ namespace PeptideHitResultsProcessor
                 if (currentScanGroupID < 0)
                 {
                     currentScanGroupID = nextScanGroupID;
-                    nextScanGroupID += 1;
+                    nextScanGroupID++;
                 }
 
                 udtScanGroupInfo.ScanGroupID = currentScanGroupID;
@@ -466,7 +466,7 @@ namespace PeptideHitResultsProcessor
                     if (Math.Abs(currentResult.SpecEValueNum - lastValue) > double.Epsilon)
                     {
                         lastValue = currentResult.SpecEValueNum;
-                        currentRank += 1;
+                        currentRank++;
                     }
                 }
 
@@ -495,7 +495,7 @@ namespace PeptideHitResultsProcessor
                     // We could try to handle this, listing the modification mass in place of the modification symbol in the _ModDetails.txt file, but will
                     // instead abort processing
 
-                    mNumericModErrors += 1;
+                    mNumericModErrors++;
 
                     if (mNumericModErrors < 250)
                     {
@@ -735,7 +735,7 @@ namespace PeptideHitResultsProcessor
                 {
                     // Match found; use the mod symbol
                     modSymbols += msgfPlusModInfo[bestMatchIndex].ModSymbol;
-                    modSymbolsFound += 1;
+                    modSymbolsFound++;
 
                     if (msgfPlusModInfo[bestMatchIndex].ModType == clsMSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod)
                     {
@@ -895,7 +895,7 @@ namespace PeptideHitResultsProcessor
                                                                                   columnMapping, ref nextScanGroupID, scanGroupDetails,
                                                                                   scanGroupCombo, specIdToIndex);
 
-                            if (!validSearchResult || searchResultsCurrentScan.Count <= 0)
+                            if (!validSearchResult || searchResultsCurrentScan.Count == 0)
                             {
                                 continue;
                             }
@@ -1006,7 +1006,7 @@ namespace PeptideHitResultsProcessor
                             while (endIndex + 1 < searchResultsPrefiltered.Count &&
                                    searchResultsPrefiltered[endIndex + 1].ScanNum == searchResultsPrefiltered[startIndex].ScanNum)
                             {
-                                endIndex += 1;
+                                endIndex++;
                             }
 
                             // Store the results for this scan
@@ -1457,7 +1457,7 @@ namespace PeptideHitResultsProcessor
                                                                            resultsProcessed, columnMapping,
                                                                            out var currentPeptideWithMods);
 
-                            resultsProcessed += 1;
+                            resultsProcessed++;
                             if (!validSearchResult)
                             {
                                 continue;
@@ -1527,7 +1527,7 @@ namespace PeptideHitResultsProcessor
                                             SaveResultsFileEntrySeqInfo(searchResult, false);
                                         }
 
-                                        pepToProteinMapIndex += 1;
+                                        pepToProteinMapIndex++;
                                     } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
                                              currentPeptideWithMods == pepToProteinMapping[pepToProteinMapIndex].Peptide);
                                 }
@@ -1782,7 +1782,7 @@ namespace PeptideHitResultsProcessor
                                  pMErrorPPM > mParentMassToleranceInfo.ToleranceRight * 1.5))
                             {
                                 // PPM error computed by MS-GF+ is more than 1.5-fold larger than the ppm-based parent ion tolerance; don't trust the value computed by MS-GF+
-                                mPrecursorMassErrorWarningCount += 1;
+                                mPrecursorMassErrorWarningCount++;
                                 ShowPeriodicWarning(mPrecursorMassErrorWarningCount,
                                                     10,
                                                     string.Format("Precursor mass error computed by MS-GF+ is 1.5-fold larger than the search tolerance: {0} vs. {1:F0}ppm,{2:F0}ppm",
@@ -2201,7 +2201,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing this row from the synopsis or first hits file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    if (splitLine != null && splitLine.Length > 0)
+                    if (splitLine?.Length > 0)
                     {
                         errorLog += "Error parsing MSGFDB Results for RowIndex '" + splitLine[0] + "'" + "\n";
                     }
@@ -2589,7 +2589,7 @@ namespace PeptideHitResultsProcessor
             var index = peptide.Length - 1;
             while (index > 0 && !IsLetterAtoZ(peptide[index]))
             {
-                index -= 1;
+                index--;
             }
             var indexLastResidue = index;
 
@@ -2597,7 +2597,7 @@ namespace PeptideHitResultsProcessor
             index = 0;
             while (index < peptide.Length && !IsLetterAtoZ(peptide[index]))
             {
-                index += 1;
+                index++;
             }
             var indexFirstResidue = index;
 
@@ -2645,7 +2645,7 @@ namespace PeptideHitResultsProcessor
                         }
                     }
 
-                    index += 1;
+                    index++;
 
                     if (index == indexLastResidue)
                         possibleCTerminalMod = true;
@@ -2681,7 +2681,7 @@ namespace PeptideHitResultsProcessor
                     {
                         var addOn = reMatch.Groups[1].Value.Length;
                         if (addOn == 0)
-                            index += 1;
+                            index++;
                         else
                             index += addOn;
                     }
@@ -2696,7 +2696,7 @@ namespace PeptideHitResultsProcessor
             indexFirstResidue = 0;
             while (indexFirstResidue < peptide.Length && !IsLetterAtoZ(peptide[indexFirstResidue]))
             {
-                indexFirstResidue += 1;
+                indexFirstResidue++;
             }
 
             if (indexFirstResidue > 0 && indexFirstResidue < peptide.Length)
@@ -2829,7 +2829,7 @@ namespace PeptideHitResultsProcessor
             foreach (var result in query)
             {
                 WriteSearchResultToFile(resultID, writer, result, ref errorLog, includeFDRandPepFDR, includeEFDR, includeIMSFields, isMsgfPlus);
-                resultID += 1;
+                resultID++;
             }
         }
 
@@ -3212,11 +3212,11 @@ namespace PeptideHitResultsProcessor
                 }
 
                 // SpecEValue is the same; check peptide
-                var result = string.Compare(x.Peptide, y.Peptide, StringComparison.Ordinal);
+                var result = string.CompareOrdinal(x.Peptide, y.Peptide);
                 if (result == 0)
                 {
                     // Peptide is the same, check Protein
-                    result = string.Compare(x.Protein, y.Protein, StringComparison.Ordinal);
+                    result = string.CompareOrdinal(x.Protein, y.Protein);
                 }
                 return result;
             }
