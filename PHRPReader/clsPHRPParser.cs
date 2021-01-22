@@ -293,7 +293,7 @@ namespace PHRPReader
 
             mDatasetName = datasetName;
 
-            mPeptideHitResultType = PeptideHitResultType;
+            mPeptideHitResultType = peptideHitResultType;
 
             MaxProteinsPerPSM = startupOptions.MaxProteinsPerPSM;
 

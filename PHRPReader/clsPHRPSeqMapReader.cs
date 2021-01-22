@@ -120,7 +120,7 @@ namespace PHRPReader
                 InputDirectoryPath = string.Empty;
             }
 
-            PeptideHitResultType = PeptideHitResultType;
+            PeptideHitResultType = peptideHitResultType;
 
             ResultToSeqMapFilename = clsPHRPReader.GetPHRPResultToSeqMapFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(ResultToSeqMapFilename))
