@@ -868,26 +868,37 @@ namespace PeptideHitResultsProcessor
                 pepToProteinMapFileName = pepToProteinMapBaseName + FILENAME_SUFFIX_PEP_TO_PROTEIN_MAPPING + ".txt";
             }
 
-            string pepToProteinMapFilePath;
+            var inputFile = new FileInfo(inputFilePath);
+            var pepToProteinMapFilePath = string.IsNullOrWhiteSpace(inputFile.DirectoryName) ?
+                                              pepToProteinMapFileName :
+                                              Path.Combine(inputFile.DirectoryName, pepToProteinMapFileName);
 
+            var pepToProteinMapFile = new FileInfo(pepToProteinMapFilePath);
             if (string.IsNullOrWhiteSpace(outputDirectoryPath))
             {
-                var inputFile = new FileInfo(inputFilePath);
-                if (string.IsNullOrWhiteSpace(inputFile.DirectoryName))
-                {
-                    pepToProteinMapFilePath = pepToProteinMapFileName;
-                }
-                else
-                {
-                    pepToProteinMapFilePath = Path.Combine(inputFile.DirectoryName, pepToProteinMapFileName);
-                }
-            }
-            else
-            {
-                pepToProteinMapFilePath = Path.Combine(outputDirectoryPath, pepToProteinMapFileName);
+                return pepToProteinMapFile.FullName;
             }
 
-            return pepToProteinMapFilePath;
+            var alternatePepToProteinMapFilePath = Path.Combine(outputDirectoryPath, pepToProteinMapFileName);
+            var alternatePepToProteinMapFile = new FileInfo(alternatePepToProteinMapFilePath);
+
+            if (pepToProteinMapFile.Exists && !alternatePepToProteinMapFile.Exists)
+            {
+                return pepToProteinMapFile.FullName;
+            }
+
+            if (!pepToProteinMapFile.Exists && alternatePepToProteinMapFile.Exists)
+            {
+                return alternatePepToProteinMapFile.FullName;
+            }
+
+            if (pepToProteinMapFile.Exists && alternatePepToProteinMapFile.Exists &&
+                alternatePepToProteinMapFile.LastWriteTime > pepToProteinMapFile.LastWriteTime)
+            {
+                return alternatePepToProteinMapFile.FullName;
+            }
+
+            return pepToProteinMapFile.FullName;
         }
 
         protected string ConstructPepToProteinMapFilePath(string inputFilePath, string outputDirectoryPath, bool mts, List<string> suffixesToFind, int charsToRemove)
@@ -898,14 +909,22 @@ namespace PeptideHitResultsProcessor
 
             foreach (var item in suffixesToFind)
             {
-                if (!baseName.EndsWith(item, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!baseName.EndsWith(item, StringComparison.OrdinalIgnoreCase))
+                    continue;
 
                 // baseName matches something like Dataset_msgfplus_syn
-                var baseNameTrimmed = baseName.Substring(0, baseName.Length - charsToRemove);
-                return ConstructPepToProteinMapFilePathWork(baseNameTrimmed, outputDirectoryPath, mts);
+                baseName = baseName.Substring(0, baseName.Length - charsToRemove);
+                break;
             }
 
-            return ConstructPepToProteinMapFilePathWork(baseName, outputDirectoryPath, mts);
+            var inputDirectoryPath = Path.GetDirectoryName(inputFilePath);
+
+            if (inputDirectoryPath == null)
+            {
+                return ConstructPepToProteinMapFilePathWork(baseName, outputDirectoryPath, mts);
+            }
+
+            return ConstructPepToProteinMapFilePathWork(Path.Combine(inputDirectoryPath, baseName), outputDirectoryPath, mts);
         }
 
         /// <summary>

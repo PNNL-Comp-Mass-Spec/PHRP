@@ -2402,7 +2402,7 @@ namespace PeptideHitResultsProcessor
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
                         // LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
-                        var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(outputDirectoryPath, baseName) + ".txt", outputDirectoryPath, mts: false);
+                        var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(inputFile.DirectoryName, baseName) + ".txt", outputDirectoryPath, mts: false);
 
                         ResetProgress("Loading the PepToProtein map file (if it exists): " + Path.GetFileName(pepToProteinMapFilePath), true);
 
