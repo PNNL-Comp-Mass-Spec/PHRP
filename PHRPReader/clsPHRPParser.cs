@@ -865,7 +865,6 @@ namespace PHRPReader
                         MaxProteinsPerSeqID = MaxProteinsPerPSM
                     };
 
-
                 // Read the files
                 success = reader.GetProteinMapping(ResultToSeqMap, SeqToProteinMap, SeqInfo, PepToProteinMap);
 
@@ -887,14 +886,6 @@ namespace PHRPReader
                         if (SeqToProteinMap.TryGetValue(mapItem.Value, out var proteinsForSeqID))
                         {
                             proteinsForResultID = (from protein in proteinsForSeqID select protein.ProteinName).ToList();
-                            // proteinsForResultID = new List<string>(proteinsForSeqID.Count);
-                            // foreach (clsProteinInfo protein in proteinsForSeqID)
-                            // {
-                            //     if (!proteinsForResultID.Contains(protein.ProteinName))
-                            //     {
-                            //         proteinsForResultID.Add(protein.ProteinName);
-                            //     }
-                            // }
                         }
                         else
                         {
