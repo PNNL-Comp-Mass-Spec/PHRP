@@ -407,6 +407,7 @@ namespace PeptideHitResultsProcRunner
             resultsProcessor.StatusEvent += PeptideHitResultsProcessor_MessageEvent;
             resultsProcessor.ProgressUpdate += PeptideHitResultsProcessor_ProgressChanged;
             resultsProcessor.WarningEvent += PeptideHitResultsProcessor_WarningMessageEvent;
+            resultsProcessor.ProgressReset += PeptideHitResultsProcessor_ProgressReset;
         }
 
         /// <summary>
@@ -736,6 +737,11 @@ namespace PeptideHitResultsProcRunner
         private void PeptideHitResultsProcessor_ProgressChanged(string taskDescription, float percentComplete)
         {
             UpdateProgress(taskDescription, percentComplete);
+        }
+
+        private void PeptideHitResultsProcessor_ProgressReset()
+        {
+            ResetProgress();
         }
 
         private void PeptideHitResultsProcessor_WarningMessageEvent(string warningMessage)
