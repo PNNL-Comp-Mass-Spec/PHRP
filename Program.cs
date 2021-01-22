@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MODa
 
-        public const string PROGRAM_DATE = "December 31, 2020";
+        public const string PROGRAM_DATE = "January 22, 2021";
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional
