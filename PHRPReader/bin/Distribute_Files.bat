@@ -32,12 +32,11 @@ call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResul
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Test_PHRPReader\bin"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideListToXML\bin"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideListToXML\Lib"
-call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\x86"
-call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\x64"
-call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\AnyCPU"
+call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\Debug"
+call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\bin\Release"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib"
-call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\x64"
-call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\AnyCPU"
+call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\Debug"
+call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\bin\Release"
 pause
 
 call Distribute_Files_Work.bat "F:\Documents\projects\DataMining\Protein_Coverage_Summarizer\PeptideToProteinMapper\PeptideToProteinMapEngine\Lib"
