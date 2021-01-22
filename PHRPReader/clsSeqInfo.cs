@@ -64,5 +64,13 @@ namespace PHRPReader
         {
             MonoisotopicMass = monoMass;
         }
+
+        /// <summary>
+        /// Show the sequence ID and monoisotopic mass
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format("ID {0}: {1:F3} Da", SeqID, MonoisotopicMass);
+        }
     }
 }
