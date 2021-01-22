@@ -67,6 +67,26 @@ namespace PHRPReader
         /// <summary>
         /// Peptide hit results type
         /// </summary>
+        [Obsolete("Superseded by enum PeptideHitResultTypes")]
+        public enum ePeptideHitResultType
+        {
+            Unknown = 0,
+            Sequest = 1,
+            XTandem = 2,
+            Inspect = 3,
+            [Obsolete("Use MSGFPlus")]
+            MSGFDB = 4,
+            MSGFPlus = 4,      // Aka MS-GF+
+            MSAlign = 5,
+            MODa = 6,
+            MODPlus = 7,
+            MSPathFinder = 8,
+            TopPIC = 9
+        }
+
+        /// <summary>
+        /// Peptide hit results type
+        /// </summary>
         public enum PeptideHitResultTypes
         {
             Unknown = 0,
