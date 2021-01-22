@@ -843,7 +843,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                HandleException("Error in InitializeParser", ex);
+                HandleException("Error in clsPHRPReader.InitializeParser", ex);
                 if (!mInitialized)
                     throw new Exception(ErrorMessage, ex);
 

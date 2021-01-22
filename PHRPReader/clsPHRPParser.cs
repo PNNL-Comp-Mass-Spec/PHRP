@@ -22,6 +22,8 @@ namespace PHRPReader
     /// </summary>
     public abstract class clsPHRPParser : PRISM.EventNotifier
     {
+        // Ignore Spelling: MODa, iTraq, Defs
+
         #region "Structures"
 
         /// <summary>

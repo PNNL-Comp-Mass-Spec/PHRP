@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor
     /// </remarks>
     public abstract class clsSearchResultsBaseClass
     {
-        // Ignore Spelling: Da, MODa, acetyl
+        // Ignore Spelling: Da, MODa, acetyl, delM, Oxy
 
         #region "Constants and Enums"
         /// <summary>
@@ -87,7 +87,7 @@ namespace PeptideHitResultsProcessor
         public string ErrorMessage => mErrorMessage;
 
         /// <summary>
-        /// RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MSGFDB, and MODa
+        /// RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MS-GF+, and MODa
         /// </summary>
         public int ResultID { get; set; }
 

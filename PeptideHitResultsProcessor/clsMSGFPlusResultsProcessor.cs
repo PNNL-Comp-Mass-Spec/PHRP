@@ -821,7 +821,7 @@ namespace PeptideHitResultsProcessor
                 try
                 {
                     // Open the input file and parse it
-                    // Initialize the stream reader and the stream Text writer
+                    // Initialize the stream reader and the stream writer
                     string errorLog;
 
                     using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
@@ -2396,7 +2396,7 @@ namespace PeptideHitResultsProcessor
                         // LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
                         var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(outputDirectoryPath, baseName) + ".txt", outputDirectoryPath, mts: false);
 
-                        ResetProgress("Loading the PepToProtein map file: " + Path.GetFileName(pepToProteinMapFilePath), true);
+                        ResetProgress("Loading the PepToProtein map file (if it exists): " + Path.GetFileName(pepToProteinMapFilePath), true);
 
                         LoadPeptideToProteinMapInfoMSGFDB(pepToProteinMapFilePath, outputDirectoryPath, msgfPlusModInfo, isMsgfPlus, pepToProteinMapping, out var mtsPepToProteinMapFilePath);
 

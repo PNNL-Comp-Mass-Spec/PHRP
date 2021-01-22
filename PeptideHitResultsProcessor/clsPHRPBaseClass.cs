@@ -1093,7 +1093,7 @@ namespace PeptideHitResultsProcessor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in CreatePepToProteinMapFile:" + ex.Message, ex);
+                SetErrorMessage("Error in CreatePepToProteinMapFile: " + ex.Message, ex);
                 SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
             }
 
@@ -2704,7 +2704,7 @@ namespace PeptideHitResultsProcessor
 
                 if (!HasEventListenerProgressUpdate)
                 {
-                    Console.WriteLine(" PeptideToProteinMapper is " + percentComplete.ToString("0") + "% complete");
+                    Console.WriteLine(" PeptideToProteinMapper is {0:0}% complete", percentComplete);
                 }
             }
         }

@@ -35,6 +35,12 @@ namespace PeptideHitResultsProcessor
     public class clsXTandemResultsProcessor : clsPHRPBaseClass
     {
 
+        // ReSharper disable CommentTypo
+
+        // Ignore Spelling: bioml, aa, hyperscore, nextscore, mh, Seqs
+
+        // ReSharper restore CommentTypo
+
         #region "Constants and Enums"
 
         // Note: TOOL_NAME is used by clsAnalysisManagerPeptideHitResultsProcessor.InitSetup

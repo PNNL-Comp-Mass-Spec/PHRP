@@ -13,6 +13,8 @@ namespace PHRPReader
     /// </summary>
     public class clsSeqInfo
     {
+        // Ignore Spelling: itrac, Phosph, IodoAcet, Da
+
         /// <summary>
         /// Sequence ID
         /// </summary>

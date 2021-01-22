@@ -11,6 +11,8 @@ namespace PHRPReader
     /// </summary>
     public class clsPHRPSeqMapReader
     {
+        // Ignore Spelling: PepToProtMap
+
         #region "Constants"
 
 #pragma warning disable 1591

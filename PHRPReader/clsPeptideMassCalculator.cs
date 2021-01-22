@@ -321,7 +321,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Compute the mass of peptide sequence sequence; uses the information in udtResidueModificationInfo() to determine modification masses
+        /// Compute the mass of the peptide sequence; uses the information in udtResidueModificationInfo() to determine modification masses
         /// </summary>
         /// <param name="sequence"></param>
         /// <param name="modCount"></param>
