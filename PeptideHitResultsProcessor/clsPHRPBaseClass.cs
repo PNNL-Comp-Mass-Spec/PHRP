@@ -2719,7 +2719,11 @@ namespace PeptideHitResultsProcessor
             if (percentComplete >= mNextPeptideToProteinMapperLevel)
             {
                 mNextPeptideToProteinMapperLevel += 25;
-                UpdateProgress(PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE + percentComplete * (PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE - PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE) / 100);
+
+                var percentCompleteAdjusted = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
+                    PROGRESS_PERCENT_CREATING_PEP_TO_PROTEIN_MAPPING_FILE, PROGRESS_PERCENT_CREATING_PROTEIN_MODS_FILE, percentComplete);
+
+                UpdateProgress(percentCompleteAdjusted);
 
                 if (!HasEventListenerProgressUpdate)
                 {
