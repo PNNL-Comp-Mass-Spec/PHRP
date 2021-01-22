@@ -191,6 +191,22 @@ namespace PeptideHitResultsProcessor
             public string TargetResidues;
             public clsModificationDefinition.ModificationTypeConstants ModificationType;
 
+            /// <summary>
+            /// Duplicate this modification via a deep copy
+            /// </summary>
+            public udtSearchOptionModificationInfoType Clone()
+            {
+                var modInfo = new udtSearchOptionModificationInfoType
+                {
+                    SortOrder = SortOrder,
+                    ModificationMass = ModificationMass,
+                    TargetResidues = TargetResidues,
+                    ModificationType = ModificationType
+                };
+
+                return modInfo;
+            }
+
             public override string ToString()
             {
                 return ModificationType + ": " + ModificationMass + " @ " + TargetResidues;
