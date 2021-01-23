@@ -17,9 +17,9 @@ namespace PeptideHitResultsProcessor
         public enum ProcessResults
         {
             /// <summary>
-            /// /Operation succeeded
+            /// Spectra file creation aborted
             /// </summary>
-            PH_SUCCESS = 0,
+            PH_ABORTED = -2,
 
             /// <summary>
             /// Operation failed
@@ -27,9 +27,9 @@ namespace PeptideHitResultsProcessor
             PH_FAILURE = -1,
 
             /// <summary>
-            /// Spectra file creation aborted
+            /// Operation succeeded
             /// </summary>
-            PH_ABORTED = -2
+            PH_SUCCESS = 0,
         }
 
         /// <summary>
