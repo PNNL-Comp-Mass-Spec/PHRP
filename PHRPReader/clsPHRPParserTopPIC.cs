@@ -172,30 +172,6 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Determines the precursor mass tolerance
-        /// </summary>
-        /// <param name="searchEngineParams"></param>
-        /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
-        /// <returns>Precursor tolerance, in Da</returns>
-        private double DeterminePrecursorMassTolerance(clsSearchEngineParameters searchEngineParams, out double tolerancePPM)
-        {
-            double toleranceDa = 0;
-
-            tolerancePPM = 0;
-
-            if (searchEngineParams.Parameters.TryGetValue("errorTolerance", out var tolerance))
-            {
-                // Parent mass tolerance, in ppm
-                if (double.TryParse(tolerance, out tolerancePPM))
-                {
-                    toleranceDa = clsPeptideMassCalculator.PPMToMass(tolerancePPM, 2000);
-                }
-            }
-
-            return toleranceDa;
-        }
-
-        /// <summary>
         /// Get the header names in the PHRP synopsis or first hits file for this tool
         /// </summary>
         /// <returns>List of header names</returns>

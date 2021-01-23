@@ -60,7 +60,6 @@ namespace PeptideHitResultsProcessor
         private const string XTANDEM_XML_GROUP_TYPE_SUPPORT = "support";
         private const string XTANDEM_XML_GROUP_TYPE_PARAMETERS = "parameters";
 
-        private const string XML_ERROR_ROOT_LEVEL_INVALID = "The data at the root level is invalid";
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
         private const string SCAN_NUMBER_EXTRACTION_REGEX_A = @"scan=(\d+)";

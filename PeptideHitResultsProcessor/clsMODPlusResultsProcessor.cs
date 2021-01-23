@@ -348,24 +348,6 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private string AssureInteger(string integerText, int defaultValue)
-        {
-            if (integerText.EndsWith(".0"))
-                integerText = integerText.Substring(0, integerText.Length - 2);
-
-            if (int.TryParse(integerText, out var value))
-            {
-                return value.ToString();
-            }
-
-            if (double.TryParse(integerText, out var doubleValue))
-            {
-                return doubleValue.ToString("0");
-            }
-
-            return defaultValue.ToString();
-        }
-
         private double ComputePeptideMass(string peptide, double totalModMass)
         {
             var cleanSequence = GetCleanSequence(peptide);
