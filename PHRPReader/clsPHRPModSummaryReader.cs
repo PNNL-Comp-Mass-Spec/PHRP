@@ -18,7 +18,6 @@ namespace PHRPReader
         public const string MOD_SUMMARY_COLUMN_Occurrence_Count = "Occurrence_Count";
 #pragma warning restore 1591
 
-        private readonly List<clsModificationDefinition> mModificationDefs;
 
         // The keys in this dictionary are MassCorrectionTag names and the values are the modification mass, stored as text (as it appears in the _ModSummary file)
         private readonly Dictionary<string, string> mModDefMassesAsText;
@@ -26,7 +25,7 @@ namespace PHRPReader
         /// <summary>
         /// Modification list
         /// </summary>
-        public List<clsModificationDefinition> ModificationDefs => mModificationDefs;
+        public List<clsModificationDefinition> ModificationDefs { get; }
 
         /// <summary>
         /// True if the mod summary was successfully loaded
@@ -39,7 +38,7 @@ namespace PHRPReader
         /// <param name="modSummaryFilePath"></param>
         public clsPHRPModSummaryReader(string modSummaryFilePath)
         {
-            mModificationDefs = new List<clsModificationDefinition>();
+            ModificationDefs = new List<clsModificationDefinition>();
             mModDefMassesAsText = new Dictionary<string, string>();
 
             Success = false;
@@ -73,7 +72,7 @@ namespace PHRPReader
 
         private bool ReadModSummaryFile(string modSummaryFilePath)
         {
-            mModificationDefs.Clear();
+            ModificationDefs.Clear();
 
             if (string.IsNullOrEmpty(modSummaryFilePath))
             {
@@ -165,7 +164,7 @@ namespace PHRPReader
                             ModificationMassAsText = modMassText
                         };
 
-                    mModificationDefs.Add(modDef);
+                    ModificationDefs.Add(modDef);
 
                     if (!mModDefMassesAsText.ContainsKey(massCorrectionTag))
                     {

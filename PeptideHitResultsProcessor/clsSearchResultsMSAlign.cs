@@ -22,7 +22,7 @@ namespace PeptideHitResultsProcessor
     public class clsSearchResultsMSAlign : clsSearchResultsBaseClass
     {
         #region "Properties"
-        
+
         public string Prsm_ID { get; set; }
         public string Spectrum_ID { get; set; }
 

@@ -29,10 +29,6 @@ namespace PHRPReader
 
         private string mEnzyme;
 
-        private readonly List<clsModificationDefinition> mModInfo;
-
-        private readonly Dictionary<string, string> mParameters;
-
         #region "Properties"
         /// <summary>
         /// Enzyme name
@@ -82,12 +78,12 @@ namespace PHRPReader
         /// <summary>
         /// Dynamic and static mods to search for
         /// </summary>
-        public List<clsModificationDefinition> ModInfo => mModInfo;
+        public List<clsModificationDefinition> ModInfo { get; }
 
         /// <summary>
         /// Parameter dictionary (key/value pairs)
         /// </summary>
-        public Dictionary<string, string> Parameters => mParameters;
+        public Dictionary<string, string> Parameters { get; }
 
         /// <summary>
         /// Precursor mass tolerance, in Daltons; 0 if unknown
@@ -166,17 +162,17 @@ namespace PHRPReader
             mSearchEngineName = searchEngineName;
             mSearchEngineParamFilePath = string.Empty;
 
-            mModInfo = modInfo;
+            ModInfo = modInfo;
 
-            mModInfo = modInfo ?? new List<clsModificationDefinition>();
+            ModInfo = modInfo ?? new List<clsModificationDefinition>();
 
-            if (mParameters == null)
+            if (Parameters == null)
             {
-                mParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                Parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
             else
             {
-                mParameters = parameters;
+                Parameters = parameters;
             }
         }
 
@@ -186,7 +182,7 @@ namespace PHRPReader
         /// <param name="modInfo"></param>
         public void AddModification(clsModificationDefinition modInfo)
         {
-            mModInfo.Add(modInfo);
+            ModInfo.Add(modInfo);
         }
 
         /// <summary>
@@ -205,13 +201,13 @@ namespace PHRPReader
         /// <param name="paramValue"></param>
         public void AddUpdateParameter(string paramName, string paramValue)
         {
-            if (mParameters.ContainsKey(paramName))
+            if (Parameters.ContainsKey(paramName))
             {
-                mParameters[paramName] = paramValue;
+                Parameters[paramName] = paramValue;
             }
             else
             {
-                mParameters.Add(paramName, paramValue);
+                Parameters.Add(paramName, paramValue);
             }
         }
 
@@ -220,7 +216,7 @@ namespace PHRPReader
         /// </summary>
         public void ClearModifications()
         {
-            mModInfo.Clear();
+            ModInfo.Clear();
         }
 
         /// <summary>
@@ -228,7 +224,7 @@ namespace PHRPReader
         /// </summary>
         public void ClearParameters()
         {
-            mParameters.Clear();
+            Parameters.Clear();
         }
 
         private void InitializeDefaults()

@@ -187,12 +187,6 @@ namespace PHRPReader
         private Regex mRightRegEx;
         private bool mUsingStandardTrypsinRules;
 
-        /// <summary>
-        /// This array holds TERMINUS_SYMBOL_SEQUEST, TERMINUS_SYMBOL_XTANDEM_NTerminus, and TERMINUS_SYMBOL_XTANDEM_CTerminus
-        /// and is useful for quickly checking for the presence of a terminus symbol using a binary search
-        /// </summary>
-        private readonly SortedSet<char> mTerminusSymbols;
-
         #endregion
 
         #region "Properties"
@@ -209,7 +203,11 @@ namespace PHRPReader
         /// <summary>
         /// Array of peptide terminus symbols
         /// </summary>
-        public SortedSet<char> TerminusSymbols => mTerminusSymbols;
+        /// <remarks>
+        /// This holds TERMINUS_SYMBOL_SEQUEST, TERMINUS_SYMBOL_XTANDEM_NTerminus, and TERMINUS_SYMBOL_XTANDEM_CTerminus
+        /// and is useful for quickly checking for the presence of a terminus symbol using a binary search
+        /// </remarks>
+        public SortedSet<char> TerminusSymbols { get; }
 
         #endregion
 
@@ -218,7 +216,7 @@ namespace PHRPReader
         /// </summary>
         public clsPeptideCleavageStateCalculator()
         {
-            mTerminusSymbols = new SortedSet<char> {
+            TerminusSymbols = new SortedSet<char> {
                 TERMINUS_SYMBOL_SEQUEST,
                 TERMINUS_SYMBOL_XTANDEM_NTerminus,
                 TERMINUS_SYMBOL_XTANDEM_CTerminus };
@@ -393,10 +391,10 @@ namespace PHRPReader
         {
             PeptideTerminusStateConstants peptideTerminusState;
 
-            if (mTerminusSymbols.Contains(prefix))
+            if (TerminusSymbols.Contains(prefix))
             {
                 // Prefix character matches a terminus symbol
-                if (mTerminusSymbols.Contains(suffix))
+                if (TerminusSymbols.Contains(suffix))
                 {
                     // The peptide spans the entire length of the protein
                     peptideTerminusState = PeptideTerminusStateConstants.ProteinNandCCTerminus;
@@ -407,7 +405,7 @@ namespace PHRPReader
                     peptideTerminusState = PeptideTerminusStateConstants.ProteinNTerminus;
                 }
             }
-            else if (mTerminusSymbols.Contains(suffix))
+            else if (TerminusSymbols.Contains(suffix))
             {
                 // Suffix character matches a terminus symbol
                 // The peptide is located at the protein's C-terminus
@@ -487,7 +485,7 @@ namespace PHRPReader
             {
                 var index = text.Length - 1;
                 chMatch = text[index];
-                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && index > 0)
+                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index > 0)
                 {
                     index--;
                     chMatch = text[index];
@@ -509,7 +507,7 @@ namespace PHRPReader
             {
                 var index = 0;
                 chMatch = text[index];
-                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || mTerminusSymbols.Contains(chMatch)) && index < text.Length - 1)
+                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index < text.Length - 1)
                 {
                     index++;
                     chMatch = text[index];
