@@ -17,6 +17,8 @@ namespace PHRPReader
     /// </summary>
     public class clsPHRPParserMODa : clsPHRPParser
     {
+        // Ignore Spelling: MODa
+
         #region "Constants"
 
 #pragma warning disable 1591

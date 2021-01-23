@@ -191,13 +191,13 @@ namespace PHRPReader
             {
                 // Parent mass tolerance, in ppm
                 double.TryParse(toleranceText, out tolerancePPM);
-                // Convert from PPM to dalton (assuming a mass of 2000 m/z)
+                // Convert from PPM to Dalton (assuming a mass of 2000 m/z)
                 tolerance = clsPeptideMassCalculator.PPMToMass(tolerancePPM, 2000);
             }
 
             if (searchEngineParams.Parameters.TryGetValue("PMTolerance", out toleranceText))
             {
-                // Parent mass tolerance, in Da
+                // Parent mass tolerance, in Dalton
                 double.TryParse(toleranceText, out toleranceDa);
 
                 // Convert from Dalton to PPM (assuming a mass of 2000 m/z)

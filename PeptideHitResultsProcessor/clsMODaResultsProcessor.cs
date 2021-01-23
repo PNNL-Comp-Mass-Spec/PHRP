@@ -19,6 +19,8 @@ namespace PeptideHitResultsProcessor
 {
     public class clsMODaResultsProcessor : clsPHRPBaseClass
     {
+        // Ignore Spelling: MODa
+
         public clsMODaResultsProcessor()
         {
             FileDate = "July 10, 2019";

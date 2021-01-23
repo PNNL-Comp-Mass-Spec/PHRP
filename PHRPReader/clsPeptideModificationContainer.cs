@@ -451,7 +451,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        ///  Find the mass correction tag with the given mass, adding to the unknown modification list if not  found
+        /// Find the mass correction tag with the given mass, adding to the unknown modification list if not  found
         /// </summary>
         /// <param name="modificationMass"></param>
         /// <param name="massDigitsOfPrecision"></param>

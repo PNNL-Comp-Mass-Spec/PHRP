@@ -1662,7 +1662,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        ///  Write out the header line for synopsis / first hits file
+        /// Write out the header line for synopsis / first hits file
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="errorLog"></param>

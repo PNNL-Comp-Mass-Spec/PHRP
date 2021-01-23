@@ -19,11 +19,14 @@ using System.Text.RegularExpressions;
 namespace PHRPReader
 {
     /// <summary>
-    ///  This class reads a tab-delimited text file (created by the Peptide File Extractor or by PHRP)
-    ///  and returns the data for each peptide hit search result
-    ///
-    ///  It also integrates MSGF results with the peptide hit search results
-    ///  And, it integrates scan stats values (to determine elution time)
+    /// <para>
+    /// This class reads a tab-delimited text file (created by the Peptide File Extractor or by PHRP)
+    /// and returns the data for each peptide hit search result
+    /// </para>
+    /// <para>
+    /// It also integrates MSGF results with the peptide hit search results
+    /// And, it integrates scan stats values (to determine elution time)
+    /// </para>
     /// </summary>
     public class clsPHRPReader : PRISM.EventNotifier, IDisposable
     {

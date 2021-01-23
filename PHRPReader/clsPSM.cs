@@ -523,7 +523,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        ///  Returns the value stored for the specified score (as a double)
+        /// Returns the value stored for the specified score (as a double)
         /// </summary>
         /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise 0</returns>
@@ -534,7 +534,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        ///  Returns the value stored for the specified score (as a double)
+        /// Returns the value stored for the specified score (as a double)
         /// </summary>
         /// <param name="scoreName">Score name</param>
         /// <param name="valueIfMissing">Value to return if the score is not defined</param>
@@ -551,7 +551,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        ///  Returns the value stored for the specified score (as an integer)
+        /// Returns the value stored for the specified score (as an integer)
         /// </summary>
         /// <param name="scoreName">Score name</param>
         /// <returns>Score if defined, otherwise 0</returns>
@@ -562,7 +562,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        ///  Returns the value stored for the specified score (as an integer)
+        /// Returns the value stored for the specified score (as an integer)
         /// </summary>
         /// <param name="scoreName">Score name</param>
         /// <param name="valueIfMissing">Value to return if the score is not defined</param>

@@ -474,7 +474,7 @@ namespace PeptideHitResultsProcessor
         }
 
         /// <summary>
-        ///  Verifies that the specified file exists
+        /// Verifies that the specified file exists
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>True if the file exists, otherwise false</returns>

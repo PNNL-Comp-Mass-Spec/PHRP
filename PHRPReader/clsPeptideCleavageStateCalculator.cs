@@ -23,27 +23,31 @@ namespace PHRPReader
     /// It can also be used to remove modification symbols from a sequence using ExtractCleanSequenceFromSequenceWithMods
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The sequence can simply contain single-letter amino acid symbols (capital letters) or a mix
     /// of amino acid symbols and modification symbols, for example:
     ///   A.BCDEFGHIJK.L
     ///   A.B*CDEFGHIJK.L
     ///   A.BCDEFGHIJK*.L
     ///   A.BCDEFGHIJK.L
-    ///
+    /// </para>
+    /// <para>
     /// Function ComputeCleavageState is overloaded to either except the peptide sequence with
     /// prefix and suffix letters (e.g. A.BCDEFGHIJK.L) or accept the primary peptide sequence,
     /// the prefix residue(s), and the suffix residue(s).
-    ///
-    /// Use EnzymeMatchSpec to specify the residues to match for cleavage
-    ///
-    /// The default cleavage specification is for trypsin: [KR]|[^P]
-    ///
+    /// </para>
+    /// <para>Use EnzymeMatchSpec to specify the residues to match for cleavage</para>
+    /// <para>The default cleavage specification is for trypsin: [KR]|[^P]</para>
+    /// <para>
     /// Note: Function SplitPrefixAndSuffixFromSequence will change peptides that look like:
     ///      E.TGMLTQKFARSLGMLAVDNQARV..   to   E.TGMLTQKFARSLGMLAVDNQARV.
     ///   or ..TGMLTQKFARSLGMLAVDNQARV.R   to   .TGMLTQKFARSLGMLAVDNQARV.R
+    /// </para>
     /// </remarks>
     public class clsPeptideCleavageStateCalculator
     {
+        // Ignore Spelling: A-Za-z, udt
+
         #region "Constants and Enums"
 
         /// <summary>

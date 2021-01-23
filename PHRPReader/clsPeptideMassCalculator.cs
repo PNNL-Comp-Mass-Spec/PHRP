@@ -659,7 +659,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Create a regex for parsing an empirical formula that optionally contains element counts and optionally contains plus or minus signs
+        /// Create a RegEx for parsing an empirical formula that optionally contains element counts and optionally contains plus or minus signs
         /// Examples of supported empirical formulas:
         ///  CHNOS
         ///  C3H3NOS4
