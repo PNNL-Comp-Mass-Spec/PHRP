@@ -1036,7 +1036,7 @@ namespace PHRPReader
         {
             var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
 
-            var success = ReadKeyValuePairSearchEngineParamFile(searchEngineName, paramFilePath, PeptideHitResultType, searchEngineParams,
+            var success = ReadKeyValuePairSearchEngineParamFile(searchEngineName, paramFilePath, peptideHitResultType, searchEngineParams,
                 out var errorMessage, out var warningMessage);
 
             if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -1157,9 +1157,9 @@ namespace PHRPReader
             try
             {
                 // Read the Tool_Version_Info file to determine the analysis time and the tool version
-                var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, clsPHRPReader.GetToolVersionInfoFilename(PeptideHitResultType));
+                var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, clsPHRPReader.GetToolVersionInfoFilename(peptideHitResultType));
 
-                if (!File.Exists(toolVersionInfoFilePath) && PeptideHitResultType == clsPHRPReader.PeptideHitResultTypes.MSGFPlus)
+                if (!File.Exists(toolVersionInfoFilePath) && peptideHitResultType == clsPHRPReader.PeptideHitResultTypes.MSGFPlus)
                 {
                     // This could be an older MS-GF+ job; check for a _MSGFDB.txt tool version file
                     var alternativeVersionInfoFilePath = Path.Combine(InputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");
