@@ -1656,7 +1656,7 @@ namespace PeptideHitResultsProcessor
                 // Primary Columns
                 //
                 // TopPIC
-                // ResultID  Scan  Prsm_ID  Spectrum_ID  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Protein  Protein_Mass  Unexpected_Mod_Count  Peak_Count  Matched_Peak_Count  Matched_Fragment_Ion_Count  PValue  Rank_PValue  EValue  QValue  ProteoformFDR  FragMethod  VariablePTMs
+                // ResultID  Scan  Prsm_ID  Spectrum_ID  FragMethod  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Proteoform_ID  Feature_intensity  Protein  ResidueStart  ResidueEnd  Unexpected_Mod_Count  Peak_Count  Matched_Peak_Count  Matched_Fragment_Ion_Count  PValue  Rank_PValue  EValue  QValue  ProteoformFDR  VariablePTMs
 
                 var data = new List<string>
                 {
@@ -1670,11 +1670,10 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.DelM,
                     udtSearchResult.DelM_PPM,
                     udtSearchResult.MH,
-                    udtSearchResult.Proteoform,
+                    udtSearchResult.Proteoform,                // aka Peptide
                     udtSearchResult.Proteoform_ID,
                     udtSearchResult.Feature_Intensity,
                     udtSearchResult.Protein,
-                    udtSearchResult.ProteinDescription,
                     udtSearchResult.ResidueStart,
                     udtSearchResult.ResidueEnd,
                     udtSearchResult.Unexpected_Mod_Count,       // Unexpected_Mod_Count
