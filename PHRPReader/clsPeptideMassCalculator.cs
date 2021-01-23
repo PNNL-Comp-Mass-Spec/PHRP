@@ -432,7 +432,7 @@ namespace PHRPReader
 
             var reMatch = RegexModMasses.Match(primarySequence);
 
-            var sbSequenceWithoutMods = new StringBuilder();
+            var sequenceWithoutMods = new StringBuilder();
             var startIndex = 0;
             double modMassTotal = 0;
 
@@ -440,7 +440,7 @@ namespace PHRPReader
             {
                 if (reMatch.Index > startIndex)
                 {
-                    sbSequenceWithoutMods.Append(primarySequence.Substring(startIndex, reMatch.Index - startIndex));
+                    sequenceWithoutMods.Append(primarySequence, startIndex, reMatch.Index - startIndex);
                 }
 
                 var modMassText = reMatch.ToString();
@@ -455,10 +455,10 @@ namespace PHRPReader
 
             if (startIndex < primarySequence.Length)
             {
-                sbSequenceWithoutMods.Append(primarySequence.Substring(startIndex, primarySequence.Length - startIndex));
+                sequenceWithoutMods.Append(primarySequence, startIndex, primarySequence.Length - startIndex);
             }
 
-            var peptideMass = ComputeSequenceMass(sbSequenceWithoutMods.ToString());
+            var peptideMass = ComputeSequenceMass(sequenceWithoutMods.ToString());
 
             return peptideMass < 0 ? -1 : peptideMass + modMassTotal;
         }
@@ -671,22 +671,22 @@ namespace PHRPReader
         {
             const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline;
 
-            var sbRegEx = new StringBuilder();
+            var regExSpec = new StringBuilder();
 
-            sbRegEx.Append("(?<ElementSymbol>");
+            regExSpec.Append("(?<ElementSymbol>");
 
             foreach (var element in elementMonoMasses)
             {
-                sbRegEx.Append(element.Key + "|");
+                regExSpec.Append(element.Key).Append('|');
             }
 
             // Remove the trailing vertical bar
-            sbRegEx.Remove(sbRegEx.Length - 1, 1);
+            regExSpec.Remove(regExSpec.Length - 1, 1);
 
-            sbRegEx.Append(")");
+            regExSpec.Append(")");
 
             // RegEx will be of the form: (?<ElementSymbol>H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al)(?<ElementCount>[+-]?\d*)
-            var reAtomicFormulaRegEx = new Regex(sbRegEx + @"(?<ElementCount>[+-]?\d*)", REGEX_OPTIONS);
+            var reAtomicFormulaRegEx = new Regex(regExSpec + @"(?<ElementCount>[+-]?\d*)", REGEX_OPTIONS);
 
             return reAtomicFormulaRegEx;
         }
