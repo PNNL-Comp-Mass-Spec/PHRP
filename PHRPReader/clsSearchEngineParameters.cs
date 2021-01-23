@@ -201,14 +201,8 @@ namespace PHRPReader
         /// <param name="paramValue"></param>
         public void AddUpdateParameter(string paramName, string paramValue)
         {
-            if (Parameters.ContainsKey(paramName))
-            {
-                Parameters[paramName] = paramValue;
-            }
-            else
-            {
-                Parameters.Add(paramName, paramValue);
-            }
+            // Add/update the dictionary
+            Parameters[paramName] = paramValue;
         }
 
         /// <summary>

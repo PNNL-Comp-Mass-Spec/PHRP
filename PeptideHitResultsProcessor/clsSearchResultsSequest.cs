@@ -85,13 +85,10 @@ namespace PeptideHitResultsProcessor
 
         private void ComputePeptideXCorrNext()
         {
-            float xCorr = 0;
-            float delCN2 = 0;
-
             try
             {
-                if (float.TryParse(PeptideXCorr, out xCorr) &&
-                    float.TryParse(PeptideDeltaCn2, out delCN2))
+                if (float.TryParse(PeptideXCorr, out var xCorr) &&
+                    float.TryParse(PeptideDeltaCn2, out var delCN2))
                 {
                     PeptideXCorrNext = (xCorr - delCN2 * xCorr).ToString();
                 }

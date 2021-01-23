@@ -19,7 +19,7 @@ namespace PeptideHitResultsProcessor
     /// This class is used to track the peptide details for a TopPIC search result
     /// See clsSearchResultsBaseClass for additional information
     /// </summary>
-    class clsSearchResultsTopPIC : clsSearchResultsBaseClass
+    internal class clsSearchResultsTopPIC : clsSearchResultsBaseClass
     {
         #region "Properties"
 

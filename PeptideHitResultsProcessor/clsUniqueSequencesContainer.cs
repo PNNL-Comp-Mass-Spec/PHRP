@@ -30,7 +30,7 @@ namespace PeptideHitResultsProcessor
 
         #region "Class wide Variables"
 
-        private Dictionary<string, int> mMasterSequences;
+        private readonly Dictionary<string, int> mMasterSequences;
 
         private int mNextUniqueSeqID;
 

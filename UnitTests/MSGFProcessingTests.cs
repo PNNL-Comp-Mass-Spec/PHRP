@@ -72,7 +72,7 @@ namespace PHRP_UnitTests
 
             // ReSharper disable StringLiteralTypo
 
-            var peptide = "-187.152+229.163ATK-187.152+229.163QIFDC+57.021K+229.163";
+            const string peptide = "-187.152+229.163ATK-187.152+229.163QIFDC+57.021K+229.163";
             var processor = new clsMSGFPlusResultsProcessor();
 
             var replaced = processor.ReplaceMSGFModTextWithSymbol(peptide, modInfo, true, out _);
@@ -80,7 +80,7 @@ namespace PHRP_UnitTests
             Console.WriteLine("Replaced: {0}", replaced);
             Assert.AreEqual("A#TK#QIFDCK", replaced);
 
-            var peptide1 = "+229.163ITVVGVGAVGM+15.995AC+57.021AISILMK+229.163";
+            const string peptide1 = "+229.163ITVVGVGAVGM+15.995AC+57.021AISILMK+229.163";
             var replaced1 = processor.ReplaceMSGFModTextWithSymbol(peptide1, modInfo, true, out _);
             Console.WriteLine("Original: {0}", peptide1);
             Console.WriteLine("Replaced: {0}", replaced1);
