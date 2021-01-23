@@ -19,6 +19,7 @@ namespace PHRPReader
         #region "Constants"
 
 #pragma warning disable 1591
+
         public const string DATA_COLUMN_Dataset = "Dataset";
         public const string DATA_COLUMN_ScanNumber = "ScanNumber";
         public const string DATA_COLUMN_ScanTime = "ScanTime";

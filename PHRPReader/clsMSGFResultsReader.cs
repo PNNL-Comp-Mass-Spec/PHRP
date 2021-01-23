@@ -20,6 +20,7 @@ namespace PHRPReader
         #region "Constants"
 
 #pragma warning disable 1591
+
         public const string DATA_COLUMN_ResultID = "Result_ID";
         public const string DATA_COLUMN_Scan = "Scan";
         public const string DATA_COLUMN_Charge = "Charge";
@@ -27,6 +28,7 @@ namespace PHRPReader
         public const string DATA_COLUMN_Peptide = "Peptide";
         public const string DATA_COLUMN_SpecProb = "SpecProb";
         public const string DATA_COLUMN_Notes = "Notes";
+
 #pragma warning restore 1591
 
         #endregion

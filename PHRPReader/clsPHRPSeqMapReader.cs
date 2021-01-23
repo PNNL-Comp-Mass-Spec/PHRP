@@ -16,6 +16,7 @@ namespace PHRPReader
         #region "Constants"
 
 #pragma warning disable 1591
+
         public const string SEQ_PROT_MAP_COLUMN_Unique_Seq_ID = "Unique_Seq_ID";
         public const string SEQ_PROT_MAP_COLUMN_Cleavage_State = "Cleavage_State";
         public const string SEQ_PROT_MAP_COLUMN_Terminus_State = "Terminus_State";
@@ -28,6 +29,7 @@ namespace PHRPReader
         public const string SEQ_INFO_COLUMN_Mod_Count = "Mod_Count";
         public const string SEQ_INFO_COLUMN_Mod_Description = "Mod_Description";
         public const string SEQ_INFO_COLUMN_Monoisotopic_Mass = "Monoisotopic_Mass";
+
 #pragma warning restore 1591
 
         #endregion

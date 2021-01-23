@@ -27,6 +27,7 @@ namespace PHRPReader
         #region "Constants"
 
 #pragma warning disable 1591
+
         public const string DATA_COLUMN_Result_ID = "Result_ID";
         public const string DATA_COLUMN_Group_ID = "Group_ID";
         public const string DATA_COLUMN_Scan = "Scan";
