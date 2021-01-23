@@ -379,14 +379,8 @@ namespace PHRPReader
         {
             var proteinName = proteinInfo.ProteinName;
 
-            if (mProteinDetails.ContainsKey(proteinName))
-            {
-                mProteinDetails[proteinName] = proteinInfo;
-            }
-            else
-            {
-                mProteinDetails.Add(proteinName, proteinInfo);
-            }
+            // Add/update the dictionary
+            mProteinDetails[proteinName] = proteinInfo;
 
             if (!mProteins.Contains(proteinName))
             {
@@ -625,14 +619,8 @@ namespace PHRPReader
         /// <param name="scoreValue"></param>
         public void SetScore(string scoreName, string scoreValue)
         {
-            if (mAdditionalScores.ContainsKey(scoreName))
-            {
-                mAdditionalScores[scoreName] = scoreValue;
-            }
-            else
-            {
-                mAdditionalScores.Add(scoreName, scoreValue);
-            }
+            // Add/update the dictionary
+            mAdditionalScores[scoreName] = scoreValue;
         }
 
         /// <summary>
@@ -643,7 +631,6 @@ namespace PHRPReader
         /// <returns>True if the score is defined, otherwise false</returns>
         public bool TryGetScore(string scoreName, out string scoreValue)
         {
-            scoreValue = string.Empty;
             return mAdditionalScores.TryGetValue(scoreName, out scoreValue);
         }
 

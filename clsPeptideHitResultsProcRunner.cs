@@ -370,7 +370,7 @@ namespace PeptideHitResultsProcRunner
                     if (!CleanupFilePaths(ref inputFilePath, ref outputDirectoryPath))
                     {
                         SetBaseClassErrorCode(ProcessFilesErrorCodes.FilePathError);
-                        if (inputFilePath != null && inputFilePath.Contains(".."))
+                        if (inputFilePath?.Contains("..") == true)
                         {
                             var inputFile = new FileInfo(inputFilePath);
                             OnStatusEvent("Absolute path: " + inputFile.DirectoryName);

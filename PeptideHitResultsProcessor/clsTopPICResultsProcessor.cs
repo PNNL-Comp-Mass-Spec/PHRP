@@ -604,7 +604,7 @@ namespace PeptideHitResultsProcessor
                 // Inform the user if any errors occurred
                 if (errorLog.Length > 0)
                 {
-                    SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                    SetErrorMessage("Invalid Lines: \n" + errorLog);
                 }
 
                 return true;
@@ -821,7 +821,7 @@ namespace PeptideHitResultsProcessor
                                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                 {
                                     errorLog += "Error adding modifications to sequence at RowIndex '" +
-                                                searchResult.ResultID + "'" + "\n";
+                                                searchResult.ResultID + "'\n";
                                 }
                             }
 
@@ -875,7 +875,7 @@ namespace PeptideHitResultsProcessor
                     // Inform the user if any errors occurred
                     if (errorLog.Length > 0)
                     {
-                        SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + errorLog);
                     }
 
                     return true;
@@ -1091,7 +1091,7 @@ namespace PeptideHitResultsProcessor
                     }
                     else
                     {
-                        errorLog += "Error parsing TopPIC Results in ParseTopPICResultsFileEntry" + "\n";
+                        errorLog += "Error parsing TopPIC Results in ParseTopPICResultsFileEntry\n";
                     }
                 }
                 return false;
@@ -1369,11 +1369,11 @@ namespace PeptideHitResultsProcessor
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing TopPIC Results for RowIndex '" + splitLine[0] + "'" + "\n";
+                        errorLog += "Error parsing TopPIC Results for RowIndex '" + splitLine[0] + "'\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing TopPIC Results in ParseTopPICSynFileEntry" + "\n";
+                        errorLog += "Error parsing TopPIC Results in ParseTopPICSynFileEntry\n";
                     }
                 }
                 return false;
@@ -1633,7 +1633,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits header" + "\n";
+                    errorLog += "Error writing synopsis / first hits header\n";
                 }
             }
         }
@@ -1695,7 +1695,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits record" + "\n";
+                    errorLog += "Error writing synopsis / first hits record\n";
                 }
             }
         }

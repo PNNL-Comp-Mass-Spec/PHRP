@@ -515,7 +515,7 @@ namespace PeptideHitResultsProcessor
 
                     if (currentXMLDataFileSection == CurrentXMLDataFileSectionConstants.UnknownFile)
                     {
-                        mErrorMessage = "Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: " + "\n" + inputFilePath;
+                        mErrorMessage = "Root element '" + XTANDEM_XML_ROOT_ELEMENT + "' not found in the input file: \n" + inputFilePath;
                     }
                     else
                     {
@@ -547,7 +547,7 @@ namespace PeptideHitResultsProcessor
                         // Inform the user if any errors occurred
                         if (errorLog.Length > 0)
                         {
-                            SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                            SetErrorMessage("Invalid Lines: \n" + errorLog);
                         }
                     }
 
@@ -980,7 +980,7 @@ namespace PeptideHitResultsProcessor
                                     {
                                         if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                                         {
-                                            errorLog += "Error adding modifications to sequence for Group ID '" + groupIDInXMLFile + "'" + "\n";
+                                            errorLog += "Error adding modifications to sequence for Group ID '" + groupIDInXMLFile + "'\n";
                                         }
                                     }
 
@@ -1071,7 +1071,7 @@ namespace PeptideHitResultsProcessor
                 // Error parsing values from this group ID in the XML file
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error parsing value for Group ID '" + groupIDInXMLFile + "'" + "\n";
+                    errorLog += "Error parsing value for Group ID '" + groupIDInXMLFile + "'\n";
                 }
                 success = false;
             }
@@ -1684,7 +1684,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits header" + "\n";
+                    errorLog += "Error writing synopsis / first hits header\n";
                 }
             }
         }

@@ -294,7 +294,7 @@ namespace PHRPReader
         {
             get
             {
-                return PHRPParser == null ? PeptideHitResultTypes.Unknown : PHRPParser.PeptideHitResultType;
+                return (PHRPParser?.PeptideHitResultType) ?? PeptideHitResultTypes.Unknown;
             }
         }
 
@@ -2027,49 +2027,39 @@ namespace PHRPReader
         /// <returns>Filename</returns>
         public static string GetToolVersionInfoFilename(PeptideHitResultTypes resultType)
         {
-            var toolVersionInfoFilename = string.Empty;
-
             switch (resultType)
             {
                 case PeptideHitResultTypes.Sequest:
-                    toolVersionInfoFilename = "Tool_Version_Info_Sequest.txt";
-                    break;
+                    return "Tool_Version_Info_Sequest.txt";
 
                 case PeptideHitResultTypes.XTandem:
-                    toolVersionInfoFilename = "Tool_Version_Info_XTandem.txt";
-                    break;
+                    return "Tool_Version_Info_XTandem.txt";
 
                 case PeptideHitResultTypes.Inspect:
-                    toolVersionInfoFilename = "Tool_Version_Info_Inspect.txt";
-                    break;
+                    return "Tool_Version_Info_Inspect.txt";
 
                 case PeptideHitResultTypes.MSGFPlus:
                     // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
-                    toolVersionInfoFilename = "Tool_Version_Info_MSGFPlus.txt";
-                    break;
+                    return "Tool_Version_Info_MSGFPlus.txt";
 
                 case PeptideHitResultTypes.MSAlign:
-                    toolVersionInfoFilename = "Tool_Version_Info_MSAlign.txt";
-                    break;
+                    return "Tool_Version_Info_MSAlign.txt";
 
                 case PeptideHitResultTypes.MODa:
-                    toolVersionInfoFilename = "Tool_Version_Info_MODa.txt";
-                    break;
+                    return "Tool_Version_Info_MODa.txt";
 
                 case PeptideHitResultTypes.MODPlus:
-                    toolVersionInfoFilename = "Tool_Version_Info_MODPlus.txt";
-                    break;
+                    return "Tool_Version_Info_MODPlus.txt";
 
                 case PeptideHitResultTypes.MSPathFinder:
-                    toolVersionInfoFilename = "Tool_Version_Info_MSPathFinder.txt";
-                    break;
+                    return "Tool_Version_Info_MSPathFinder.txt";
 
                 case PeptideHitResultTypes.TopPIC:
-                    toolVersionInfoFilename = "Tool_Version_Info_TopPIC.txt";
-                    break;
-            }
+                    return "Tool_Version_Info_TopPIC.txt";
 
-            return toolVersionInfoFilename;
+                default:
+                    return string.Empty;
+            }
         }
 
         private void HandleException(string baseMessage, Exception ex)
@@ -2082,7 +2072,7 @@ namespace PHRPReader
             ReportError(baseMessage + ": " + ex.Message);
         }
 
-        private static readonly Regex RegexIsLetter = new Regex(@"[A-Za-z]", RegexOptions.Compiled);
+        private static readonly Regex RegexIsLetter = new Regex("[A-Za-z]", RegexOptions.Compiled);
 
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z
@@ -2348,8 +2338,6 @@ namespace PHRPReader
                 return false;
             }
 
-            var matchFound = true;
-
             // The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
             // If it wasn't loaded, this class can update .PeptideWithNumericMods and .PeptideMods
             // by inferring the mods using mDynamicMods and mStaticMods (which were populated using the PHRP ModSummary file)
@@ -2458,7 +2446,7 @@ namespace PHRPReader
                     {
                         // Update the protein list
                         var additionalProteins = newPSM.Proteins.Except(mPSMCurrent.Proteins, StringComparer.OrdinalIgnoreCase).ToList();
-                        if (additionalProteins.Any())
+                        if (additionalProteins.Count > 0)
                         {
                             foreach (var item in additionalProteins)
                                 mPSMCurrent.AddProtein(item);
@@ -2474,7 +2462,7 @@ namespace PHRPReader
                 }
             }
 
-            return matchFound;
+            return true;
         }
 
         private void ComputePrecursorNeutralMass()

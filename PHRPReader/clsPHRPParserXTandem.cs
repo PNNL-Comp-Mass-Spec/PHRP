@@ -685,7 +685,7 @@ namespace PHRPReader
                 }
             }
 
-            kvParameter = default(KeyValuePair<string, string>);
+            kvParameter = default;
             return false;
         }
 

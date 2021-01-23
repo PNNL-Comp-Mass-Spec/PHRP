@@ -43,7 +43,7 @@ namespace PeptideHitResultsProcessor
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
         // Note that as of April 2014, all mod masses reported by MODa are simply integers, meaning matching a trailing period is not necessary
-        private const string MODA_MOD_MASS_REGEX = @"([+-][0-9.]+)";
+        private const string MODA_MOD_MASS_REGEX = "([+-][0-9.]+)";
 
         private const byte MODA_MASS_DIGITS_OF_PRECISION = 0;
 
@@ -532,7 +532,7 @@ namespace PeptideHitResultsProcessor
                 // Inform the user if any errors occurred
                 if (errorLog.Length > 0)
                 {
-                    SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                    SetErrorMessage("Invalid Lines: \n" + errorLog);
                 }
 
                 return true;
@@ -944,7 +944,7 @@ namespace PeptideHitResultsProcessor
                     // Inform the user if any errors occurred
                     if (errorLog.Length > 0)
                     {
-                        SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + errorLog);
                     }
 
                     return true;
@@ -1101,11 +1101,11 @@ namespace PeptideHitResultsProcessor
                 {
                     if (!string.IsNullOrEmpty(rowIndex))
                     {
-                        errorLog += "Error parsing MODa Results in ParseMODaResultsFileEntry for RowIndex '" + rowIndex + "'" + "\n";
+                        errorLog += "Error parsing MODa Results in ParseMODaResultsFileEntry for RowIndex '" + rowIndex + "'\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing MODa Results in ParseMODaResultsFileEntry" + "\n";
+                        errorLog += "Error parsing MODa Results in ParseMODaResultsFileEntry\n";
                     }
                 }
                 return false;
@@ -1359,11 +1359,11 @@ namespace PeptideHitResultsProcessor
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MODa Results for RowIndex '" + splitLine[0] + "'" + "\n";
+                        errorLog += "Error parsing MODa Results for RowIndex '" + splitLine[0] + "'\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing MODa Results in ParseMODaSynFileEntry" + "\n";
+                        errorLog += "Error parsing MODa Results in ParseMODaSynFileEntry\n";
                     }
                 }
             }
@@ -1734,7 +1734,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits header" + "\n";
+                    errorLog += "Error writing synopsis / first hits header\n";
                 }
             }
         }
@@ -1784,7 +1784,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits record" + "\n";
+                    errorLog += "Error writing synopsis / first hits record\n";
                 }
             }
         }

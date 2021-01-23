@@ -637,15 +637,7 @@ namespace PHRPReader
             {
                 var columns = line.Split('\t');
 
-                bool msgfPlusResults;
-                if (clsPHRPReader.LookupColumnIndex(DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders) >= 0)
-                {
-                    msgfPlusResults = true;
-                }
-                else
-                {
-                    msgfPlusResults = false;
-                }
+                var msgfPlusResults = clsPHRPReader.LookupColumnIndex(DATA_COLUMN_MSGFPlus_SpecEValue, mColumnHeaders) >= 0;
 
                 psm.DataLineText = line;
                 psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);

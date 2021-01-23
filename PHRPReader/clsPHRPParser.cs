@@ -1339,14 +1339,7 @@ namespace PHRPReader
                 else if (residueLoc == peptideResidueCount)
                 {
                     residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
-                    if (cTerminalModsAdded.Contains(massCorrectionTag))
-                    {
-                        favorTerminalMods = false;
-                    }
-                    else
-                    {
-                        favorTerminalMods = true;
-                    }
+                    favorTerminalMods = !cTerminalModsAdded.Contains(massCorrectionTag);
                 }
                 else
                 {

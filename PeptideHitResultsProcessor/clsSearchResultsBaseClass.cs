@@ -734,7 +734,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (mPeptideMods.GetModificationTypeByIndex(index) == clsModificationDefinition.ModificationTypeConstants.IsotopicMod)
                 {
-                    var residueLocInPeptide = 0;
+                    const int residueLocInPeptide = 0;
 
                     var mod = mPeptideMods.GetModificationByIndex(index);
                     // TODO: VERIFY: success = SearchResultAddModification(ref mPeptideMods.GetModificationByIndex(index), clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL, residueLocInPeptide, clsAminoAcidModInfo.ResidueTerminusStateConstants.None, updateModOccurrenceCounts);

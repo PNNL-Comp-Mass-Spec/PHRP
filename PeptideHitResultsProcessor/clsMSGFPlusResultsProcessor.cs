@@ -1036,7 +1036,7 @@ namespace PeptideHitResultsProcessor
                     // Inform the user if any errors occurred
                     if (errorLog.Length > 0)
                     {
-                        SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + errorLog);
                     }
 
                     return true;
@@ -1559,7 +1559,7 @@ namespace PeptideHitResultsProcessor
                     // Inform the user if any errors occurred
                     if (errorLog.Length > 0)
                     {
-                        SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + errorLog);
                     }
 
                     return successOverall;
@@ -1907,7 +1907,7 @@ namespace PeptideHitResultsProcessor
                     }
                     else
                     {
-                        errorLog += "Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry" + "\n";
+                        errorLog += "Error parsing MS-GF+ Results in ParseMSGFPlusResultsFileEntry\n";
                     }
                 }
                 return false;
@@ -2203,11 +2203,11 @@ namespace PeptideHitResultsProcessor
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MSGFDB Results for RowIndex '" + splitLine[0] + "'" + "\n";
+                        errorLog += "Error parsing MSGFDB Results for RowIndex '" + splitLine[0] + "'\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing MSGFDB Results in ParseMSGFPlusSynFileEntry" + "\n";
+                        errorLog += "Error parsing MSGFDB Results in ParseMSGFPlusSynFileEntry\n";
                     }
                 }
                 return false;
@@ -2236,12 +2236,7 @@ namespace PeptideHitResultsProcessor
                 return false;
             }
 
-            if (double.TryParse(toleranceText, out tolerance))
-            {
-                return true;
-            }
-
-            return false;
+            return double.TryParse(toleranceText, out tolerance);
         }
 
         /// <summary>
@@ -2507,7 +2502,7 @@ namespace PeptideHitResultsProcessor
             if (!success)
             {
                 // Do not treat this as a fatal error
-                success = true;
+                return true;
             }
 
             return true;
@@ -2855,7 +2850,7 @@ namespace PeptideHitResultsProcessor
                 {
                     using (var writer = new StreamWriter(new FileStream(scanGroupFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                     {
-                        writer.WriteLine("Scan_Group_ID" + "\t" + "Charge" + "\t" + "Scan");
+                        writer.WriteLine("Scan_Group_ID\tCharge\tScan");
 
                         foreach (var udtScanGroupInfo in scanGroupDetails)
                         {
@@ -3083,7 +3078,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits header" + "\n";
+                    errorLog += "Error writing synopsis / first hits header\n";
                 }
             }
         }
@@ -3168,7 +3163,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits record" + "\n";
+                    errorLog += "Error writing synopsis / first hits record\n";
                 }
             }
         }

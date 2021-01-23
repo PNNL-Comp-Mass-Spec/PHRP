@@ -369,7 +369,7 @@ namespace PHRPReader
         {
             try
             {
-                var resultType = clsPHRPReader.PeptideHitResultTypes.TopPIC;
+                const clsPHRPReader.PeptideHitResultTypes resultType = clsPHRPReader.PeptideHitResultTypes.TopPIC;
                 var success = ReadKeyValuePairSearchEngineParamFile(TopPIC_SEARCH_ENGINE_NAME, searchEngineParamFileName, resultType, searchEngineParams);
 
                 if (!success)

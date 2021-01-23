@@ -344,7 +344,7 @@ namespace PeptideHitResultsProcessor
                     // Inform the user if any errors occurred
                     if (errorLog.Length > 0)
                     {
-                        SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + errorLog);
                         return false;
                     }
 
@@ -466,11 +466,11 @@ namespace PeptideHitResultsProcessor
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing Sequest Results for RowIndex '" + splitLine[0] + "'" + "\n";
+                        errorLog += "Error parsing Sequest Results for RowIndex '" + splitLine[0] + "'\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing Sequest Results in ParseSequestResultsFileEntry" + "\n";
+                        errorLog += "Error parsing Sequest Results in ParseSequestResultsFileEntry\n";
                     }
                 }
                 return false;
@@ -610,7 +610,7 @@ namespace PeptideHitResultsProcessor
             if (!success)
             {
                 // Do not treat this as a fatal error
-                success = true;
+                return true;
             }
 
             return true;

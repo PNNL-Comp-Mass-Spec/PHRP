@@ -44,7 +44,7 @@ namespace PeptideHitResultsProcessor
 
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
-        private const string MODPlus_MOD_MASS_REGEX = @"([+-][0-9.]+)";
+        private const string MODPlus_MOD_MASS_REGEX = "([+-][0-9.]+)";
 
         private const byte MODPlus_MASS_DIGITS_OF_PRECISION = 3;
 
@@ -567,7 +567,7 @@ namespace PeptideHitResultsProcessor
                 // Inform the user if any errors occurred
                 if (errorLog.Length > 0)
                 {
-                    SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                    SetErrorMessage("Invalid Lines: \n" + errorLog);
                 }
 
                 return true;
@@ -816,7 +816,7 @@ namespace PeptideHitResultsProcessor
                     // Inform the user if any errors occurred
                     if (errorLog.Length > 0)
                     {
-                        SetErrorMessage("Invalid Lines: " + "\n" + errorLog);
+                        SetErrorMessage("Invalid Lines: \n" + errorLog);
                     }
 
                     return true;
@@ -996,11 +996,11 @@ namespace PeptideHitResultsProcessor
                 {
                     if (!string.IsNullOrEmpty(rowIndex))
                     {
-                        errorLog += "Error parsing MODPlus Results in ParseMODPlusResultsFileEntry for RowIndex '" + rowIndex + "'" + "\n";
+                        errorLog += "Error parsing MODPlus Results in ParseMODPlusResultsFileEntry for RowIndex '" + rowIndex + "'\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing MODPlus Results in ParseMODPlusResultsFileEntry" + "\n";
+                        errorLog += "Error parsing MODPlus Results in ParseMODPlusResultsFileEntry\n";
                     }
                 }
                 return false;
@@ -1249,11 +1249,11 @@ namespace PeptideHitResultsProcessor
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MODPlus Results for RowIndex '" + splitLine[0] + "'" + "\n";
+                        errorLog += "Error parsing MODPlus Results for RowIndex '" + splitLine[0] + "'\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing MODPlus Results in ParseMODPlusSynFileEntry" + "\n";
+                        errorLog += "Error parsing MODPlus Results in ParseMODPlusSynFileEntry\n";
                     }
                 }
             }
@@ -1435,7 +1435,7 @@ namespace PeptideHitResultsProcessor
             if (!success)
             {
                 // Do not treat this as a fatal error
-                success = true;
+                return true;
             }
 
             return true;
@@ -1656,7 +1656,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits header" + "\n";
+                    errorLog += "Error writing synopsis / first hits header\n";
                 }
             }
         }
@@ -1712,7 +1712,7 @@ namespace PeptideHitResultsProcessor
             {
                 if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                 {
-                    errorLog += "Error writing synopsis / first hits record" + "\n";
+                    errorLog += "Error writing synopsis / first hits record\n";
                 }
             }
         }

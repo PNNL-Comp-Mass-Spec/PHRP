@@ -481,7 +481,7 @@ namespace PeptideHitResultsProcessor
             }
 
             mProteinNameOrder.Clear();
-            var reExtractProteinName = new Regex(@"^>([^ ]+)", RegexOptions.Compiled);
+            var reExtractProteinName = new Regex("^>([^ ]+)", RegexOptions.Compiled);
 
             ReportMessage("Caching protein names from the FASTA file");
 
@@ -1682,7 +1682,7 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private static readonly Regex RegexIsLetter = new Regex(@"[A-Za-z]", RegexOptions.Compiled);
+        private static readonly Regex RegexIsLetter = new Regex("[A-Za-z]", RegexOptions.Compiled);
 
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z
@@ -1694,12 +1694,7 @@ namespace PeptideHitResultsProcessor
         /// </remarks>
         public static bool IsLetterAtoZ(char chChar)
         {
-            if (RegexIsLetter.IsMatch(chChar.ToString()))
-            {
-                return true;
-            }
-
-            return false;
+            return RegexIsLetter.IsMatch(chChar.ToString());
         }
 
         protected bool IsReversedProtein(string proteinName)
@@ -2593,13 +2588,13 @@ namespace PeptideHitResultsProcessor
         public static bool ValidateProteinFastaFile(string fastaFilePath, out string warningMessage)
         {
             // This RegEx looks for standard amino acids, skipping A, T, C, and G
-            var reDefiniteAminoAcid = new Regex(@"[DEFHIKLMNPQRSVWY]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var reDefiniteAminoAcid = new Regex("[DEFHIKLMNPQRSVWY]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             // This RegEx looks for A, T, C, and G
-            var rePotentialNucleicAcid = new Regex(@"[ATCG]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var rePotentialNucleicAcid = new Regex("[ATCG]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             // This matches any letter
-            var reLetter = new Regex(@"[A-Z]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var reLetter = new Regex("[A-Z]", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             var validProteinCount = 0;
             var invalidProteinCount = 0;

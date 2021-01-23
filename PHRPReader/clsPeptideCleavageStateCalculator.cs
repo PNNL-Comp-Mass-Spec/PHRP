@@ -428,24 +428,18 @@ namespace PHRPReader
         {
             // Determine the terminus state of cleanSequence
 
-            PeptideTerminusStateConstants peptideTerminusState;
-
             if (string.IsNullOrEmpty(cleanSequence))
             {
-                peptideTerminusState = PeptideTerminusStateConstants.None;
-            }
-            else
-            {
-                // Find the letter closest to the end of prefixResidues
-                var prefix = FindLetterNearestEnd(prefixResidues);
-
-                // Find the letter closest to the start of suffixResidues
-                var suffix = FindLetterNearestStart(suffixResidues);
-
-                peptideTerminusState = ComputeTerminusState(prefix, suffix);
+                return PeptideTerminusStateConstants.None;
             }
 
-            return peptideTerminusState;
+            // Find the letter closest to the end of prefixResidues
+            var prefix = FindLetterNearestEnd(prefixResidues);
+
+            // Find the letter closest to the start of suffixResidues
+            var suffix = FindLetterNearestStart(suffixResidues);
+
+            return ComputeTerminusState(prefix, suffix);
         }
 
         private static readonly Regex RegexNotLetter = new Regex("[^A-Za-z]", RegexOptions.Compiled);
@@ -548,15 +542,9 @@ namespace PHRPReader
                 mLeftRegEx = new Regex(mEnzymeMatchSpec.LeftResidueRegEx, REGEX_OPTIONS);
                 mRightRegEx = new Regex(mEnzymeMatchSpec.RightResidueRegEx, REGEX_OPTIONS);
 
-                if (mEnzymeMatchSpec.LeftResidueRegEx == TRYPSIN_LEFT_RESIDUE_REGEX &&
-                    mEnzymeMatchSpec.RightResidueRegEx == TRYPSIN_RIGHT_RESIDUE_REGEX)
-                {
-                    mUsingStandardTrypsinRules = true;
-                }
-                else
-                {
-                    mUsingStandardTrypsinRules = false;
-                }
+                mUsingStandardTrypsinRules =
+                    mEnzymeMatchSpec.LeftResidueRegEx == TRYPSIN_LEFT_RESIDUE_REGEX &&
+                    mEnzymeMatchSpec.RightResidueRegEx == TRYPSIN_RIGHT_RESIDUE_REGEX;
             }
             catch (Exception)
             {

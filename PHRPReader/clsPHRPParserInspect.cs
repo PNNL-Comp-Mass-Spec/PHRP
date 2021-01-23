@@ -204,9 +204,7 @@ namespace PHRPReader
                 tolerancePPM = clsPeptideMassCalculator.MassToPPM(toleranceDa, 2000);
             }
 
-            tolerance = Math.Max(tolerance, toleranceDa);
-
-            return tolerance;
+            return Math.Max(tolerance, toleranceDa);
         }
 
         /// <summary>

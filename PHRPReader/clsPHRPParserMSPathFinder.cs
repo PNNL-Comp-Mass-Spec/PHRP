@@ -318,7 +318,7 @@ namespace PHRPReader
         {
             try
             {
-                var resultType = clsPHRPReader.PeptideHitResultTypes.MSPathFinder;
+                const clsPHRPReader.PeptideHitResultTypes resultType = clsPHRPReader.PeptideHitResultTypes.MSPathFinder;
                 var success = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, searchEngineParamFileName, resultType, searchEngineParams);
 
                 if (!success)
