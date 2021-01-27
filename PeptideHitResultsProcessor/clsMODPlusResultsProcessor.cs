@@ -20,7 +20,7 @@ namespace PeptideHitResultsProcessor
 {
     public class clsMODPlusResultsProcessor : clsPHRPBaseClass
     {
-        // Ignore Spelling: MODa, tda, methylation, udt, fht, modp
+        // Ignore Spelling: MODa, tda, methylation, udt, fht, modp, ModDefs, massdiff
 
         public clsMODPlusResultsProcessor()
         {
@@ -551,7 +551,7 @@ namespace PeptideHitResultsProcessor
                         startIndex = endIndex + 1;
                     }
 
-                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    // Sort the data in filteredSearchResults then write out to disk
                     SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                 }
 

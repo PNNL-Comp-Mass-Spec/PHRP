@@ -30,6 +30,8 @@ namespace PeptideHitResultsProcessor
     /// <remarks>The modification definition information is determined from the InSpecT parameter file</remarks>
     public class clsInSpecTResultsProcessor : clsPHRPBaseClass
     {
+        // Ignore Spelling: fht, txt, phos, methylation, nterminal, cterminal, Pos, ModDefs, Da
+
         public clsInSpecTResultsProcessor()
         {
             FileDate = "April 17, 2019";
@@ -291,7 +293,7 @@ namespace PeptideHitResultsProcessor
 
             var currentRank = 0;
 
-            // Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending RankFScore
+            // Sort searchResultsCurrentScan by ascending scan, ascending charge, and descending RankFScore
             // All of the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeFScore);
 
@@ -315,7 +317,7 @@ namespace PeptideHitResultsProcessor
                 searchResultsCurrentScan[index].RankFScore = currentRank;
             }
 
-            // Sort udtFilteredSearchResults by ascending scan, ascending charge, and descending MQScore (note that MQScore can be negative)
+            // Sort searchResultsCurrentScan by ascending scan, ascending charge, and descending MQScore (note that MQScore can be negative)
             // All of the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeMQScore);
 
@@ -331,7 +333,7 @@ namespace PeptideHitResultsProcessor
                 }
             }
 
-            // Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending PValue
+            // Sort searchResultsCurrentScan by ascending scan, ascending charge, descending TotalPRMScore, and descending PValue
             // All of the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortScanChargeTotalPRMDesc);
 
@@ -480,7 +482,7 @@ namespace PeptideHitResultsProcessor
                                 continue;
                             }
 
-                            // Initialize udtSearchResult
+                            // Initialize searchResult
                             udtSearchResult.Clear();
 
                             var validSearchResult = ParseInspectResultsFileEntry(lineIn, inspectModInfo, ref udtSearchResult, ref errorLog, resultsProcessed);
@@ -535,7 +537,7 @@ namespace PeptideHitResultsProcessor
 
                         if (SortFHTAndSynFiles)
                         {
-                            // Sort the data in udtFilteredSearchResults then write out to disk
+                            // Sort the data in filteredSearchResults then write out to disk
                             SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                         }
                     }
@@ -1160,7 +1162,6 @@ namespace PeptideHitResultsProcessor
 
             try
             {
-                // Reset udtSearchResult
                 udtSearchResult.Clear();
 
                 splitLine = lineIn.TrimEnd().Split('\t');
@@ -1837,7 +1838,7 @@ namespace PeptideHitResultsProcessor
             IEnumerable<udtInspectSearchResultType> filteredSearchResults,
             ref string errorLog)
         {
-            // Sort udtFilteredSearchResults by descending TotalPRMScore, ascending scan, ascending charge, ascending peptide, and ascending protein
+            // Sort filteredSearchResults by descending TotalPRMScore, ascending scan, ascending charge, ascending peptide, and ascending protein
             var query = from item in filteredSearchResults orderby item.TotalPRMScoreNum descending, item.ScanNum, item.ChargeNum, item.PeptideAnnotation, item.Protein select item;
 
             var index = 1;
@@ -1861,7 +1862,7 @@ namespace PeptideHitResultsProcessor
 
             AssignRankAndDeltaNormValues(ref searchResultsCurrentScan, currentScanResultsCount);
 
-            // Sort udtFilteredSearchResults by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on sortComparer)
+            // Sort searchResultsCurrentScan by ascending scan, ascending charge, then descending TotalPRMScore or descending FScore (depending on sortComparer)
             // All of the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortComparer);
 
@@ -1887,7 +1888,7 @@ namespace PeptideHitResultsProcessor
         {
             AssignRankAndDeltaNormValues(ref searchResultsCurrentScan, currentScanResultsCount);
 
-            // Sort udtFilteredSearchResults by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
+            // Sort searchResultsCurrentScan by ascending scan, ascending charge, descending TotalPRMScore, and descending FScore
             // All of the data in searchResultsCurrentScan should have the same scan number
             Array.Sort(searchResultsCurrentScan, 0, currentScanResultsCount, sortComparer);
 

@@ -21,6 +21,8 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsSearchResultsMSGFPlus : clsSearchResultsBaseClass
     {
+        // Ignore Spelling: tda
+
         #region "Properties"
 
         public string FragMethod { get; set; }

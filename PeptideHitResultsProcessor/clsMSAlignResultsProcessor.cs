@@ -18,11 +18,11 @@ namespace PeptideHitResultsProcessor
     /// </remarks>
     public class clsMSAlignResultsProcessor : clsPHRPBaseClass
     {
-        // Ignore Spelling: monoisotopic, enums
+        // Ignore Spelling: monoisotopic, enums, txt, histone, methylation, fht, Da, Prsm, IodoAcet, IodoAcid, Frag, pvalue, Defs
 
         public clsMSAlignResultsProcessor()
         {
-            FileDate = "January 20, 2021";
+            FileDate = "January 27, 2021";
             InitializeLocalVariables();
         }
 
@@ -562,7 +562,7 @@ namespace PeptideHitResultsProcessor
                         startIndex = endIndex + 1;
                     }
 
-                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    // Sort the data in filteredSearchResults then write out to disk
                     SortAndWriteFilteredSearchResults(writer, filteredSearchResults, includeSpeciesAndFragMethod, ref errorLog);
                 }
 

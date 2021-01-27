@@ -5,6 +5,8 @@ namespace PeptideHitResultsProcessor
 {
     public class clsFirstHitInfo
     {
+        // Ignore Spelling: Readonly
+
         // ReSharper disable once UnassignedReadonlyField
         private readonly string mPrimarySequence;
 

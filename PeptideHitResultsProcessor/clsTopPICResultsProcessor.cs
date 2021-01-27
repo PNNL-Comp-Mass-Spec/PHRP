@@ -27,7 +27,7 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsTopPICResultsProcessor : clsPHRPBaseClass
     {
-        // Ignore Spelling: monoisotopic, Battelle, txt, enums, acetyl, methylation, toppic, syn, fht, Prsm, Da, Pvalue
+        // Ignore Spelling: monoisotopic, Battelle, txt, enums, acetyl, methylation, toppic, syn, fht, Prsm, Da, Pvalue, Frag
 
         public clsTopPICResultsProcessor()
         {

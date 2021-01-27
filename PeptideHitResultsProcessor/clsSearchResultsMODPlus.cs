@@ -26,7 +26,7 @@ namespace PeptideHitResultsProcessor
         public string Spectrum_Index { get; set; }
 
         /// <summary>
-        /// Observed precursor m/z, converted to monoisotopic mass by MODa
+        /// Observed precursor m/z
         /// </summary>
         public string Precursor_mz { get; set; }
 

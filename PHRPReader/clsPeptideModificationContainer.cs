@@ -866,6 +866,7 @@ namespace PHRPReader
             // Compare against modifications with empty .TargetResidues
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
+                // ReSharper disable once InvertIf
                 if ((Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod ||
                      Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod ||
                      Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.UnknownType) &&
@@ -1758,11 +1759,7 @@ namespace PHRPReader
             clsModificationDefinition.ModificationTypeConstants modificationType,
             int massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
         {
-            // Returns True if the modification was matched or was added
-            // Returns False if an error
-
-            // Look for mods in mModifications with matching .ModificationType, .ModificationMass (within tolerance),
-            //   and .TargetResidues vs. udtModDefinition
+            // Look for mods in mModifications with matching .ModificationType, .ModificationMass (within tolerance), and .TargetResidues
             // If not found, add a new entry to mModifications
 
             var matchFound = false;

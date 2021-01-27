@@ -23,7 +23,10 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsSearchResultsXTandem : clsSearchResultsBaseClass
     {
+        // Ignore Spelling: delM
+
         #region "Class wide Variables"
+
         // Note: ProteinExpectationValue and ProteinIntensity are defined in clsSearchResultsBaseClass
         // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
         private string mPeptideNextScore;

@@ -30,6 +30,8 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsSequestResultsProcessor : clsPHRPBaseClass
     {
+        // Ignore Spelling: fht, methylation
+
         public clsSequestResultsProcessor()
         {
             FileDate = "April 17, 2019";

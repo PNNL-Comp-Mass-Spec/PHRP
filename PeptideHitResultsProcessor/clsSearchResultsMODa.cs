@@ -21,6 +21,8 @@ namespace PeptideHitResultsProcessor
     /// </summary>
     public class clsSearchResultsMODa : clsSearchResultsBaseClass
     {
+        // Ignore Spelling: MODa
+
         #region "Properties"
 
         public string Spectrum_Index { get; set; }

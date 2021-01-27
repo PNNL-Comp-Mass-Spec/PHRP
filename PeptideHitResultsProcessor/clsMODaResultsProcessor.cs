@@ -19,7 +19,7 @@ namespace PeptideHitResultsProcessor
 {
     public class clsMODaResultsProcessor : clsPHRPBaseClass
     {
-        // Ignore Spelling: MODa
+        // Ignore Spelling: moda, MODa, txt, fht, mgf, methylation, ModDefs
 
         public clsMODaResultsProcessor()
         {
@@ -52,7 +52,7 @@ namespace PeptideHitResultsProcessor
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
         /// <summary>
-        /// These columns correspond to the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
+        /// These columns correspond to the tab-delimited file (_moda.id.txt) created by java file anal_moda.jar
         /// </summary>
         private enum MODaResultsFileColumns
         {
@@ -74,7 +74,7 @@ namespace PeptideHitResultsProcessor
         #region "Structures"
 
         /// <summary>
-        /// This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
+        /// This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by java file anal_moda.jar
         /// </summary>
         private struct udtMODaSearchResultType
         {
@@ -534,7 +534,7 @@ namespace PeptideHitResultsProcessor
                         startIndex = endIndex + 1;
                     }
 
-                    // Sort the data in udtFilteredSearchResults then write out to disk
+                    // Sort the data in filteredSearchResults then write out to disk
                     SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
                 }
 

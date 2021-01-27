@@ -107,7 +107,7 @@ namespace PeptideHitResultsProcessor
             /// Mass correction tags filename
             /// </summary>
             /// <remarks>
-            /// If this is empty, it will be auto-defined using: Const DEFAULT_MASS_CORRECTION_TAGS_FILENAME = "Mass_Correction_Tags.txt"
+            /// If this is empty, it will be auto-defined as "Mass_Correction_Tags.txt"
             /// </remarks>
             public string MassCorrectionTagsFileName;
 

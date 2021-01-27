@@ -38,7 +38,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         protected clsPHRPBaseClass()
         {
-            FileDate = "January 26, 2021";
+            FileDate = "January 27, 2021";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
