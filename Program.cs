@@ -84,7 +84,6 @@ namespace PeptideHitResultsProcRunner
         /// <returns>0 if no error, error code if an error</returns>
         public static int Main()
         {
-            int returnCode;
             var parseCommandLine = new clsParseCommandLine();
 
             mInputFilePath = string.Empty;
@@ -134,92 +133,93 @@ namespace PeptideHitResultsProcRunner
                     string.IsNullOrWhiteSpace(mInputFilePath))
                 {
                     ShowProgramHelp();
-                    returnCode = -1;
+                    return  -1;
                 }
-                else
+
+                // Note: Most of the options will get overridden if defined in the parameter file
+                mPeptideHitResultsProcRunner = new clsPeptideHitResultsProcRunner
                 {
-                    // Note: Most of the options will get overridden if defined in the parameter file
-                    mPeptideHitResultsProcRunner = new clsPeptideHitResultsProcRunner
-                    {
-                        LogMessagesToFile = mLogMessagesToFile,
-                        LogFilePath = mLogFilePath,
-                        LogDirectoryPath = mLogDirectoryPath,
-                        MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath,
-                        ModificationDefinitionsFilePath = mModificationDefinitionsFilePath,
-                        SearchToolParameterFilePath = mSearchToolParameterFilePath,
-                        WarnMissingParameterFileSection = true,
-                        CreateProteinModsFile = mCreateProteinModsFile,
-                        FastaFilePath = mFastaFilePath,
-                        IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors,
-                        ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins,
-                        UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile,
-                        CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile,
-                        MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold,
-                        MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold,
-                        CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFPlusFirstHitsFile,
-                        CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFPlusSynopsisFile,
-                        InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold,
-                        MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
-                    };
+                    LogMessagesToFile = mLogMessagesToFile,
+                    LogFilePath = mLogFilePath,
+                    LogDirectoryPath = mLogDirectoryPath,
+                    MassCorrectionTagsFilePath = mMassCorrectionTagsFilePath,
+                    ModificationDefinitionsFilePath = mModificationDefinitionsFilePath,
+                    SearchToolParameterFilePath = mSearchToolParameterFilePath,
+                    WarnMissingParameterFileSection = true,
+                    CreateProteinModsFile = mCreateProteinModsFile,
+                    FastaFilePath = mFastaFilePath,
+                    IgnorePeptideToProteinMapperErrors = mIgnorePeptideToProteinMapperErrors,
+                    ProteinModsFileIncludesReversedProteins = mProteinModsFileIncludesReversedProteins,
+                    UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile,
+                    CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile,
+                    MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold,
+                    MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold,
+                    CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFPlusFirstHitsFile,
+                    CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFPlusSynopsisFile,
+                    InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold,
+                    MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
+                };
 
-                    var commandLineArgs = GetCommandLineArgs();
-                    if (mLogMessagesToFile && !string.IsNullOrEmpty(commandLineArgs))
-                    {
-                        mPeptideHitResultsProcRunner.SkipConsoleWriteIfNoStatusListener = true;
-                        mPeptideHitResultsProcRunner.LogAdditionalMessage(commandLineArgs);
-                        mPeptideHitResultsProcRunner.SkipConsoleWriteIfNoStatusListener = false;
-                    }
+                var commandLineArgs = GetCommandLineArgs();
+                if (mLogMessagesToFile && !string.IsNullOrEmpty(commandLineArgs))
+                {
+                    mPeptideHitResultsProcRunner.SkipConsoleWriteIfNoStatusListener = true;
+                    mPeptideHitResultsProcRunner.LogAdditionalMessage(commandLineArgs);
+                    mPeptideHitResultsProcRunner.SkipConsoleWriteIfNoStatusListener = false;
+                }
 
-                    mPeptideHitResultsProcRunner.ErrorEvent += PeptideHitResultsProcRunner_ErrorEvent;
-                    mPeptideHitResultsProcRunner.StatusEvent += PeptideHitResultsProcRunner_MessageEvent;
-                    mPeptideHitResultsProcRunner.ProgressUpdate += PeptideHitResultsProcRunner_ProgressChanged;
-                    mPeptideHitResultsProcRunner.ProgressReset += PeptideHitResultsProcRunner_ProgressReset;
-                    mPeptideHitResultsProcRunner.WarningEvent += PeptideHitResultsProcRunner_WarningEvent;
+                mPeptideHitResultsProcRunner.ErrorEvent += PeptideHitResultsProcRunner_ErrorEvent;
+                mPeptideHitResultsProcRunner.StatusEvent += PeptideHitResultsProcRunner_MessageEvent;
+                mPeptideHitResultsProcRunner.ProgressUpdate += PeptideHitResultsProcRunner_ProgressChanged;
+                mPeptideHitResultsProcRunner.ProgressReset += PeptideHitResultsProcRunner_ProgressReset;
+                mPeptideHitResultsProcRunner.WarningEvent += PeptideHitResultsProcRunner_WarningEvent;
 
-                    if (mRecurseDirectories)
+                int returnCode;
+                if (mRecurseDirectories)
+                {
+                    Console.WriteLine("Recursively processing files in the input file's directory and below");
+
+                    if (mPeptideHitResultsProcRunner.ProcessFilesAndRecurseDirectories(mInputFilePath, mOutputDirectoryPath, mOutputDirectoryAlternatePath,
+                        mRecreateDirectoryHierarchyInAlternatePath, mParameterFilePath,
+                        mMaxLevelsToRecurse))
                     {
-                        if (mPeptideHitResultsProcRunner.ProcessFilesAndRecurseDirectories(mInputFilePath, mOutputDirectoryPath, mOutputDirectoryAlternatePath,
-                                                                                           mRecreateDirectoryHierarchyInAlternatePath, mParameterFilePath,
-                                                                                           mMaxLevelsToRecurse))
-                        {
-                            returnCode = 0;
-                        }
-                        else
-                        {
-                            returnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
-                        }
+                        returnCode = 0;
                     }
                     else
                     {
-                        if (mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputDirectoryPath, mParameterFilePath))
+                        returnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
+                    }
+                }
+                else
+                {
+                    if (mPeptideHitResultsProcRunner.ProcessFilesWildcard(mInputFilePath, mOutputDirectoryPath, mParameterFilePath))
+                    {
+                        returnCode = 0;
+                    }
+                    else
+                    {
+                        var errorCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
+                        if (errorCode == 0)
                         {
-                            returnCode = 0;
+                            returnCode = -1;
+                            ShowErrorMessage("ProcessFilesWildcard returned Success=False");
                         }
                         else
                         {
-                            returnCode = (int)mPeptideHitResultsProcRunner.ErrorCode;
-                            if (returnCode == 0)
-                            {
-                                returnCode = -1;
-                                ShowErrorMessage("ProcessFilesWildcard returned Success=False");
-                            }
-                            else
-                            {
-                                ShowErrorMessage("Error while processing: " + mPeptideHitResultsProcRunner.GetErrorMessage());
-                            }
+                            returnCode = errorCode;
+                            ShowErrorMessage("Error while processing: " + mPeptideHitResultsProcRunner.GetErrorMessage());
                         }
                     }
-
-                    DisplayProgressPercent(mLastProgressReportValue, true);
                 }
+
+                DisplayProgressPercent(mLastProgressReportValue, true);
+                return returnCode;
             }
             catch (Exception ex)
             {
                 ShowErrorMessage("Error occurred in modMain->Main: " + Environment.NewLine + ex.Message);
-                returnCode = -1;
+                return -1;
             }
-
-            return returnCode;
         }
 
         private static void DisplayProgressPercent(int percentComplete, bool addCarriageReturn)
