@@ -1609,21 +1609,21 @@ namespace PHRPReader
         {
             mStandardRefinementModifications = new List<clsModificationDefinition>();
 
-            var modificationMass = -17.026549;
+            const double NH3_LOSS = -17.026549;
             mStandardRefinementModifications.Add(new clsModificationDefinition(
                 clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL,
-                modificationMass,
+                NH3_LOSS,
                 "Q",
                 clsModificationDefinition.ModificationTypeConstants.DynamicMod,
-                LookupMassCorrectionTagByMass(modificationMass)));
+                LookupMassCorrectionTagByMass(NH3_LOSS)));
 
-            modificationMass = -18.0106;
+            const double H2O_LOSS = -18.0106;
             mStandardRefinementModifications.Add(new clsModificationDefinition(
                 clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL,
-                modificationMass,
+                H2O_LOSS,
                 "E",
                 clsModificationDefinition.ModificationTypeConstants.DynamicMod,
-                LookupMassCorrectionTagByMass(modificationMass)));
+                LookupMassCorrectionTagByMass(H2O_LOSS)));
         }
 
         private void ValidateModificationsVsDefaultModificationSymbols()

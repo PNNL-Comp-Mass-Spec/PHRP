@@ -27,12 +27,12 @@ namespace Test_PHRPReader
             //const string resultsMSAlign = @"\\proto-9\VOrbiETD02\2014_1\Synocho_D2_2\MSA201402281500_Auto1030272"
 
             string synOrFhtFile;
-            var matchedResultType = clsPHRPReader.ePeptideHitResultType.Unknown;
+            var matchedResultType = clsPHRPReader.PeptideHitResultTypes.Unknown;
 
             if (false) {
                 Console.WriteLine();
                 synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathSequest, out matchedResultType);
-                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.PeptideHitResultTypes.Unknown) {
                     TestPHRPReader(synOrFhtFile, blnSkipDuplicates: true);
                 }
             }
@@ -45,7 +45,7 @@ namespace Test_PHRPReader
             if (true & msgfPlusDirectory.Exists) {
                 Console.WriteLine();
                 synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathMSGFPlus, out matchedResultType);
-                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.PeptideHitResultTypes.Unknown) {
                     TestPHRPReader(synOrFhtFile, blnSkipDuplicates: false);
                 }
             }
@@ -53,7 +53,7 @@ namespace Test_PHRPReader
             if (true & msgfPlusDirectory.Exists) {
                 Console.WriteLine();
                 synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathMSGFPlus, out matchedResultType);
-                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+                if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.PeptideHitResultTypes.Unknown) {
                     TestPHRPReader(synOrFhtFile, blnSkipDuplicates: true);
                 }
             }
@@ -82,7 +82,7 @@ namespace Test_PHRPReader
 
             Console.WriteLine();
             synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathSequest);
-            if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+            if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.PeptideHitResultTypes.Unknown) {
                 startTimeNoSkipDup = DateTime.UtcNow;
                 TestPHRPReader(synOrFhtFile, blnSkipDuplicates: false);
                 endTimeNoSkipDup = DateTime.UtcNow;
@@ -90,7 +90,7 @@ namespace Test_PHRPReader
 
             Console.WriteLine();
             synOrFhtFile = clsPHRPReader.AutoDetermineBestInputFile(resultsPathSequest, out matchedResultType);
-            if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.ePeptideHitResultType.Unknown) {
+            if (!string.IsNullOrEmpty(synOrFhtFile) && matchedResultType != clsPHRPReader.PeptideHitResultTypes.Unknown) {
                 startTimeSkipDup = DateTime.UtcNow;
                 TestPHRPReader(synOrFhtFile, blnSkipDuplicates: true);
                 endTimeSkipDup = DateTime.UtcNow;
@@ -137,10 +137,10 @@ namespace Test_PHRPReader
 
         private static void TestPHRPReader(string synOrFhtFile, bool blnSkipDuplicates)
         {
-            var fiInputFile = new FileInfo(synOrFhtFile);
+            var inputFile = new FileInfo(synOrFhtFile);
 
             Console.WriteLine("Instantiating reader");
-            var oStartupOptions = new clsPHRPStartupOptions
+            var startupOptions = new clsPHRPStartupOptions
             {
                 LoadModsAndSeqInfo = true,
                 LoadMSGFResults = true,
@@ -149,7 +149,7 @@ namespace Test_PHRPReader
             };
 
             var phrpReader =
-                new clsPHRPReader(fiInputFile.FullName, clsPHRPReader.ePeptideHitResultType.Unknown, oStartupOptions)
+                new clsPHRPReader(inputFile.FullName, clsPHRPReader.PeptideHitResultTypes.Unknown, startupOptions)
                 {
                     EchoMessagesToConsole = false,
                     SkipDuplicatePSMs = blnSkipDuplicates
@@ -170,7 +170,7 @@ namespace Test_PHRPReader
             const bool fastReadEnabled = true;
             phrpReader.FastReadMode = fastReadEnabled;
 
-            var oMassCalculator = new clsPeptideMassCalculator();
+            var massCalculator = new clsPeptideMassCalculator();
 
             if (!phrpReader.CanRead) {
                 Console.WriteLine("Aborting since PHRPReader is not ready: " + phrpReader.ErrorMessage);
@@ -187,93 +187,93 @@ namespace Test_PHRPReader
             Console.WriteLine("Reading data");
 
             while (phrpReader.MoveNext()) {
-                var oPsm = phrpReader.CurrentPSM;
+                var psm = phrpReader.CurrentPSM;
 
                 intPSMsRead += 1;
                 lstValues.Clear();
 
                 phrpReader.FinalizeCurrentPSM();
 
-                clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(oPsm.Peptide, out _, out _, out _);
+                clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(psm.Peptide, out _, out _, out _);
 
-                var strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, out _);
+                var strMassErrorPPM = GetCorrectedMassErrorPPM(psm, out _);
 
                 lstValues.Add(phrpReader.DatasetName + "_dta.txt");                                         // #SpecFile
                 lstValues.Add("index=" + intPSMsRead);                                                      // SpecID
-                lstValues.Add(oPsm.ScanNumber.ToString());                                                      // ScanNum
-                lstValues.Add(oPsm.CollisionMode);                                                              // FragMethod
-                lstValues.Add(oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString(CultureInfo.InvariantCulture));      // Precursor m/z
+                lstValues.Add(psm.ScanNumber.ToString());                                                      // ScanNum
+                lstValues.Add(psm.CollisionMode);                                                              // FragMethod
+                lstValues.Add(massCalculator.ConvoluteMass(psm.PrecursorNeutralMass, 0, psm.Charge).ToString(CultureInfo.InvariantCulture));      // Precursor m/z
 
                 lstValues.Add(strMassErrorPPM);                                                                 // PrecursorError(ppm)
-                lstValues.Add(oPsm.Charge.ToString());                                                          // Charge
-                lstValues.Add(oPsm.NumTrypticTerminii.ToString());                                              // Tryptic state (0, 1, or 2)
-                lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods));                                     // Peptide
+                lstValues.Add(psm.Charge.ToString());                                                          // Charge
+                lstValues.Add(psm.NumTrypticTerminii.ToString());                                              // Tryptic state (0, 1, or 2)
+                lstValues.Add(CleanupPeptide(psm.PeptideWithNumericMods));                                     // Peptide
 
-                if (oPsm.SeqID <= 0) {
-                    lstValues.Add("**" + oPsm.SeqID + "**");                                                // SeqID is undefined
+                if (psm.SeqID <= 0) {
+                    lstValues.Add("**" + psm.SeqID + "**");                                                // SeqID is undefined
                 } else {
-                    lstValues.Add(oPsm.SeqID.ToString());                                                        // SeqID
+                    lstValues.Add(psm.SeqID.ToString());                                                        // SeqID
                 }
 
-                lstValues.Add(oPsm.ProteinFirst);                                                                // Protein First
+                lstValues.Add(psm.ProteinFirst);                                                                // Protein First
 
-                if (oPsm.ProteinDetails.Count > 0) {
-                    var oFirstProteinDetail = oPsm.ProteinDetails.First();                                       // Protein Details first
+                if (psm.ProteinDetails.Count > 0) {
+                    var firstProteinDetail = psm.ProteinDetails.First();                                       // Protein Details first
 
-                    if (!string.Equals(oPsm.ProteinFirst, oFirstProteinDetail.Key)) {
-                        lstValues.Add(oFirstProteinDetail.Key);
+                    if (!string.Equals(psm.ProteinFirst, firstProteinDetail.Key)) {
+                        lstValues.Add(firstProteinDetail.Key);
                     } else {
                         lstValues.Add("<Match>");
                     }
-                    lstValues.Add(oFirstProteinDetail.Value.ResidueStart.ToString());
-                    lstValues.Add(oFirstProteinDetail.Value.ResidueEnd.ToString());
+                    lstValues.Add(firstProteinDetail.Value.ResidueStart.ToString());
+                    lstValues.Add(firstProteinDetail.Value.ResidueEnd.ToString());
                 }
 
-                var strXCorr = GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_XCorr, "0");
+                var strXCorr = GetScore(psm, clsPHRPParserSequest.DATA_COLUMN_XCorr, "0");
                 lstValues.Add(strXCorr);                                                              // XCorr
 
-                lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_Sp, "0"));              // SP
-                lstValues.Add(oPsm.MSGFSpecEValue);                                                   // MSGF SpecEValue
-                lstValues.Add(GetScore(oPsm, clsPHRPParserSequest.DATA_COLUMN_DelCn2, "0"));          // DelCn2
+                lstValues.Add(GetScore(psm, clsPHRPParserSequest.DATA_COLUMN_Sp, "0"));              // SP
+                lstValues.Add(psm.MSGFSpecEValue);                                                   // MSGF SpecEValue
+                lstValues.Add(GetScore(psm, clsPHRPParserSequest.DATA_COLUMN_DelCn2, "0"));          // DelCn2
 
-                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_PValue, "0"));           // PValue
-                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_EValue, "0"));           // EValue
-                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, "0"));           // SpecEValue
-                lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_FDR, "1"));              // FDR
+                lstValues.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_PValue, "0"));           // PValue
+                lstValues.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_EValue, "0"));           // EValue
+                lstValues.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_Rank_MSGFPlus_SpecEValue, "0"));           // SpecEValue
+                lstValues.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_FDR, "1"));              // FDR
 
-                if (oPsm.PeptideCleanSequence == "QQIEESTSDYDKEK") {
-                    Console.WriteLine(oPsm.Peptide + " in scan " + oPsm.ScanNumber);
+                if (psm.PeptideCleanSequence == "QQIEESTSDYDKEK") {
+                    Console.WriteLine(psm.Peptide + " in scan " + psm.ScanNumber);
 
-                    var parentIonMZ = oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge);
+                    var parentIonMZ = massCalculator.ConvoluteMass(psm.PrecursorNeutralMass, 0, psm.Charge);
 
                     Console.WriteLine("ParentIonMZ   = " + parentIonMZ);
-                    Console.WriteLine("PeptideWithNumericMods   = " + oPsm.PeptideWithNumericMods);
+                    Console.WriteLine("PeptideWithNumericMods   = " + psm.PeptideWithNumericMods);
                 }
 
-                if (oPsm.ModifiedResidues.Count > 0) {
+                if (psm.ModifiedResidues.Count > 0) {
                     intModifiedPSMsRead += 1;
 
                     if (intModifiedPSMsRead % 500 == 0) {
-                        Console.WriteLine("PeptideWithNumericMods   = " + oPsm.PeptideWithNumericMods);
-                        foreach (var modifiedResidue in oPsm.ModifiedResidues) {
+                        Console.WriteLine("PeptideWithNumericMods   = " + psm.PeptideWithNumericMods);
+                        foreach (var modifiedResidue in psm.ModifiedResidues) {
                             Console.WriteLine("  " + modifiedResidue.Residue + modifiedResidue.EndResidueLocInPeptide + ": " + modifiedResidue.ModDefinition.ModificationMassAsText);
                         }
                     }
 
-                    var dblPeptideMassRecomputed = oMassCalculator.ComputeSequenceMassNumericMods(oPsm.PeptideWithNumericMods);
-                    if (Math.Abs(oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed) > 0.1) {
-                        Console.WriteLine("  Peptide mass disagreement: " + (oPsm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"));
+                    var dblPeptideMassRecomputed = massCalculator.ComputeSequenceMassNumericMods(psm.PeptideWithNumericMods);
+                    if (Math.Abs(psm.PeptideMonoisotopicMass - dblPeptideMassRecomputed) > 0.1) {
+                        Console.WriteLine("  Peptide mass disagreement: " + (psm.PeptideMonoisotopicMass - dblPeptideMassRecomputed).ToString("0.0000000"));
                     }
                 }
 
                 var strFlattened = FlattenList(lstValues);
 
                 if (intPSMsRead % 1000 == 0) {
-                    //Console.WriteLine(intPSMsRead.ToString().PadRight(8) & " " & oPsm.Peptide.PadRight(40) & "   " & strXCorr)
+                    //Console.WriteLine(intPSMsRead.ToString().PadRight(8) & " " & psm.Peptide.PadRight(40) & "   " & strXCorr)
                     Console.WriteLine(strFlattened);
                 }
 
-                dctCachedValues.Add(intPSMsRead, oPsm);
+                dctCachedValues.Add(intPSMsRead, psm);
             }
         }
 
@@ -298,14 +298,14 @@ namespace Test_PHRPReader
             return string.Join(chSepChar, lstValues);
         }
 
-        private static string GetCorrectedMassErrorPPM(clsPSM oPsm, out int intIsotopeError)
+        private static string GetCorrectedMassErrorPPM(clsPSM psm, out int intIsotopeError)
         {
             const double MASS_C13 = 1.00335483;
 
             double dblMassErrorPPM = 0;
             intIsotopeError = 0;
 
-            if (double.TryParse(oPsm.MassErrorDa, out var dblDelM)) {
+            if (double.TryParse(psm.MassErrorDa, out var dblDelM)) {
                 // Examine dblDelM to determine which isotope was chosen
                 if (dblDelM >= -0.5) {
                     // This is the typical case
@@ -322,15 +322,15 @@ namespace Test_PHRPReader
                     }
                 }
 
-                dblMassErrorPPM = clsPeptideMassCalculator.MassToPPM(dblDelM, oPsm.PrecursorNeutralMass);
+                dblMassErrorPPM = clsPeptideMassCalculator.MassToPPM(dblDelM, psm.PrecursorNeutralMass);
             }
 
             return dblMassErrorPPM.ToString("0.0000");
         }
 
-        private static string GetScore(clsPSM oPsm, string strScoreName, string strValueIfMissing)
+        private static string GetScore(clsPSM psm, string strScoreName, string strValueIfMissing)
         {
-            if (!oPsm.TryGetScore(strScoreName, out var strScoreValue)) {
+            if (!psm.TryGetScore(strScoreName, out var strScoreValue)) {
                 strScoreValue = strValueIfMissing;
             }
 
