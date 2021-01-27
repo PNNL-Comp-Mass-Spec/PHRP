@@ -2720,6 +2720,11 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        /// <summary>
+        /// Override this method to display the name of each class
+        /// </summary>
+        public abstract override string ToString();
+
         #region "PeptideToProteinMapper Event Handlers"
 
         private void PeptideToProteinMapper_ProgressChanged(string taskDescription, float percentComplete)

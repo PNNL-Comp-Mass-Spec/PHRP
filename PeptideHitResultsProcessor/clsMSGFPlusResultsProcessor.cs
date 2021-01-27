@@ -3168,6 +3168,14 @@ namespace PeptideHitResultsProcessor
             }
         }
 
+        /// <summary>
+        /// Override this method to display the name of each class
+        /// </summary>
+        public override string ToString()
+        {
+            return TOOL_NAME + " results processor";
+        }
+
         #region "IComparer Classes"
 
         private class MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide : IComparer<udtMSGFPlusSearchResultType>
