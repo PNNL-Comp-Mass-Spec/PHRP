@@ -612,10 +612,10 @@ namespace PeptideHitResultsProcessor
 
                     foreach (XmlNode node in nodeList)
                     {
-                        var modName = node.Attributes["name"].Value;
-                        var residue = node.Attributes["site"].Value.Trim();
-                        var modPosition = node.Attributes["position"].Value;
-                        var modMass = node.Attributes["massdiff"].Value;
+                        var modName = node.Attributes?["name"].Value;
+                        var residue = node.Attributes?["site"].Value.Trim();
+                        var modPosition = node.Attributes?["position"].Value;
+                        var modMass = node.Attributes?["massdiff"].Value;
 
                         // Replace N-Term or C-Term with < or >
                         if (string.Equals(residue, "n-term", StringComparison.OrdinalIgnoreCase))
@@ -735,9 +735,8 @@ namespace PeptideHitResultsProcessor
                                 continue;
                             }
 
-                            var validSearchResult = ParseMODPlusSynFileEntry(lineIn, searchResult, ref errorLog,
-                                                                                resultsProcessed, columnMapping,
-                                                                                out var currentPeptideWithMods);
+                            var validSearchResult = ParseMODPlusSynFileEntry(
+                                lineIn, searchResult, ref errorLog, resultsProcessed, columnMapping, out _);
 
                             resultsProcessed++;
                             if (!validSearchResult)
