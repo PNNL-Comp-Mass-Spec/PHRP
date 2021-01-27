@@ -77,6 +77,7 @@ namespace PeptideHitResultsProcRunner
         private static DateTime mLastProgressReportTime;
         private static int mLastProgressReportValue;
         private static DateTime mLastProgressReportValueTime;
+        private static bool mSkippedInitialProgressValue;
 
         /// <summary>
         /// Program entry point
@@ -648,6 +649,12 @@ namespace PeptideHitResultsProcRunner
 
             if (percentComplete >= mLastProgressReportValue)
             {
+                if (!mSkippedInitialProgressValue)
+                {
+                    mSkippedInitialProgressValue = true;
+                    return;
+                }
+
                 if (mLastProgressReportValue > 0)
                 {
                     Console.WriteLine();
