@@ -992,7 +992,7 @@ namespace PHRPReader
         /// </summary>
         public void ResetTerminusMasses()
         {
-            // See comment in Sub InitializeAminoAcidData concerning these masses
+            // See comment in method InitializeAminoAcidData concerning these masses
 
             PeptideNTerminusMass = DEFAULT_N_TERMINUS_MASS_CHANGE;
             PeptideCTerminusMass = DEFAULT_C_TERMINUS_MASS_CHANGE;

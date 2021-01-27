@@ -534,7 +534,7 @@ namespace PHRPReader
 
             if (mEnzymeMatchSpec.LeftResidueRegEx == null || mEnzymeMatchSpec.RightResidueRegEx == null)
             {
-                // Note that calling SetStandardEnzymeMatchSpec will cause this sub to also be called
+                // Note that calling SetStandardEnzymeMatchSpec will cause this method to also be called
                 SetStandardEnzymeMatchSpec(StandardCleavageAgentConstants.Trypsin);
                 return;
             }

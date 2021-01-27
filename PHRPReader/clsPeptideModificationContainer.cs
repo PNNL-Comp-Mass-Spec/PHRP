@@ -1137,7 +1137,7 @@ namespace PHRPReader
             ErrorMessage = string.Empty;
             SetDefaultMassCorrectionTags();
 
-            // Note that this sub will call UpdateDefaultModificationSymbols()
+            // Note that this method will call UpdateDefaultModificationSymbols()
             ClearModifications();
 
             UpdateStandardRefinementModifications();
@@ -1396,7 +1396,7 @@ namespace PHRPReader
                         }
                     }
 
-                    // Note that this sub will call UpdateDefaultModificationSymbols()
+                    // Note that this method will call UpdateDefaultModificationSymbols()
                     ValidateModificationsVsDefaultModificationSymbols();
                     success = true;
                 }

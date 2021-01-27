@@ -38,7 +38,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         protected clsPHRPBaseClass()
         {
-            FileDate = "January 22, 2021";
+            FileDate = "January 26, 2021";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -208,6 +208,9 @@ namespace PeptideHitResultsProcessor
                 return modInfo;
             }
 
+            /// <summary>
+            /// Show the modification type and mass
+            /// </summary>
             public override string ToString()
             {
                 return ModificationType + ": " + ModificationMass + " @ " + TargetResidues;
@@ -282,6 +285,7 @@ namespace PeptideHitResultsProcessor
         /// Ranges from 0 to 100, but can contain decimal percentage values
         /// </summary>
         protected float mProgressPercentComplete;
+
         #endregion
 
         #region "Properties"

@@ -98,7 +98,9 @@ namespace PeptideHitResultsProcessor
 
         #region "Structures"
 
-        // This data structure holds rows read from the tab-delimited file created directly by TopPIC
+        /// <summary>
+        /// This data structure holds rows read from the tab-delimited file created directly by TopPIC
+        /// </summary>
         private struct udtTopPICSearchResultType
         {
             public string SpectrumFileName;

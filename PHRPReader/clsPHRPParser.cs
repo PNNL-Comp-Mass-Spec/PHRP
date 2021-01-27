@@ -5,7 +5,7 @@
 // Created 04/04/2012
 //
 // This class is the base class for classes used to parse PHRP data lines
-// It must be derived by a sub-class customized for the specific analysis tool (Sequest, X!Tandem, Inspect, etc.)
+// It must be inherited by a class customized for the specific analysis tool (MS-GF+, X!Tandem, MSPathFinder, etc.)
 //
 //*********************************************************************************************************
 

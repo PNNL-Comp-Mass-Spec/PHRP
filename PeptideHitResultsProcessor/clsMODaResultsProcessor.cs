@@ -72,7 +72,10 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Structures"
-        // This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
+
+        /// <summary>
+        /// This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by MODa's anal_moda.jar file
+        /// </summary>
         private struct udtMODaSearchResultType
         {
             public string SpectrumFileName;

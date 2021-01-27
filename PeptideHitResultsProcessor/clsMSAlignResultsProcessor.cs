@@ -78,7 +78,9 @@ namespace PeptideHitResultsProcessor
 
         #region "Structures"
 
-        // This data structure holds rows read from the tab-delimited file created directly by MSAlign
+        /// <summary>
+        /// This data structure holds rows read from the tab-delimited file created directly by MSAlign
+        /// </summary>
         private struct udtMSAlignSearchResultType
         {
             public string SpectrumFileName;
@@ -679,7 +681,7 @@ namespace PeptideHitResultsProcessor
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
-            // Note that MSAlign synopsis files are normally sorted on PValue value, ascending
+            // Note that MSAlign synopsis files are normally sorted on PValue, ascending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique PValue encountered
             // Although this was a possibility with Inspect, it likely never occurs for MSAlign

@@ -75,7 +75,10 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Structures"
-        // This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created by MODPlus's tda_plus.jar file
+
+        /// <summary>
+        /// This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created by MODPlus's tda_plus.jar file
+        /// </summary>
         private struct udtMODPlusSearchResultType
         {
             public string SpectrumFileName;

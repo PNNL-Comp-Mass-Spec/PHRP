@@ -81,13 +81,16 @@ namespace PeptideHitResultsProcessor
             PepQValue = 20
         }
 
-        /// <summary>
-        /// These columns correspond to the Synopsis file created by this class
-        /// </summary>
         #endregion
 
         #region "Structures"
-        // This data structure holds rows read from the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
+
+        /// <summary>
+        /// This data structure holds rows read from the tab-delimited file (_IcTda.tsv) created directly by MSPathFinder
+        /// </summary>
+        /// <remarks>
+        /// These columns correspond to the Synopsis file created by this class
+        /// </remarks>
         private struct udtMSPathFinderSearchResultType
         {
             public string Scan;
