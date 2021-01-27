@@ -30,6 +30,9 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Battelle, parm, proc, MODa, enums, fasta
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public clsPeptideHitResultsProcRunner()
         {
             mFileDate = Program.PROGRAM_DATE;
@@ -54,6 +57,7 @@ namespace PeptideHitResultsProcRunner
         #endregion
 
         #region "Class wide Variables"
+
         protected clsPHRPBaseClass.PeptideHitResultsFileFormatConstants mPeptideHitResultsFileFormat;
 
         protected bool mObtainModificationDefinitionsFromDMS;
@@ -63,6 +67,11 @@ namespace PeptideHitResultsProcRunner
         private clsPHRPBaseClass mPeptideHitResultsProcessor;
 
         protected ResultsProcessorErrorCodes mLocalErrorCode;
+
+        private bool mOptionsDisplayed = false;
+
+        private bool mFilePathsShown = false;
+
         #endregion
 
         #region "Properties"
@@ -114,6 +123,21 @@ namespace PeptideHitResultsProcRunner
         public bool WarnMissingParameterFileSection { get; set; }
 
         #endregion
+
+        /// <summary>
+        /// If filePath is an empty string, return textIfEmptyPath
+        /// Otherwise, return the file path, truncated if over the specified maximum length
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="textIfEmptyPath"></param>
+        /// <param name="maxPathLength"></param>
+        private string FilePathOrText(string filePath, string textIfEmptyPath, int maxPathLength = 110)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return textIfEmptyPath;
+
+            return PathUtils.CompactPathString(filePath, maxPathLength);
+        }
 
         public override IList<string> GetDefaultExtensionsToParse()
         {
@@ -461,10 +485,95 @@ namespace PeptideHitResultsProcRunner
             }
         }
 
+        private void ShowCurrentFilePaths(string inputFilePath, string outputDirectoryPath, string parameterFilePath)
+        {
+            LogMessage(string.Format("{0,-45} {1}",
+                "Input file:", PathUtils.CompactPathString(inputFilePath, 110)));
+
+            if (string.IsNullOrWhiteSpace(outputDirectoryPath))
+            {
+                LogMessage(string.Format("{0,-45} {1}",
+                    "Output directory:", "Same directory as the input file"));
+            }
+            else
+            {
+                LogMessage(string.Format("{0,-45} {1}",
+                    "Output directory:", PathUtils.CompactPathString(outputDirectoryPath, 110)));
+            }
+
+            if(!string.IsNullOrWhiteSpace(parameterFilePath))
+            {
+                LogMessage(string.Format("{0,-45} {1}",
+                    "Parameter file:", PathUtils.CompactPathString(parameterFilePath, 110)));
+            }
+        }
+
+        private void ShowProcessingOptions(clsPHRPBaseClass resultsProcessor)
+        {
+            Console.WriteLine();
+            LogMessage("Processing options for " + resultsProcessor.ToString());
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Search Tool Parameter File:", FilePathOrText(resultsProcessor.SearchToolParameterFilePath, "Not defined")));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Modification Definitions File:", FilePathOrText(resultsProcessor.ModificationDefinitionsFilePath, "Not defined")));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Mass Correction Tags File:", FilePathOrText(resultsProcessor.MassCorrectionTagsFilePath, "Use internally defined tags")));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "FASTA File:", FilePathOrText(resultsProcessor.FastaFilePath, "Not defined")));
+
+            Console.WriteLine();
+            LogMessage(string.Format("{0,-45} {1}",
+                "Create Protein Mods File:", resultsProcessor.CreateProteinModsFile));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Ignore Peptide to Protein Mapper Errors:", resultsProcessor.IgnorePeptideToProteinMapperErrors));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Protein Mods File Includes Reversed Proteins:", resultsProcessor.ProteinModsFileIncludesReversedProteins));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Use Existing MTS PepToProtein Map File:", resultsProcessor.UseExistingMTSPepToProteinMapFile));
+
+            if (resultsProcessor is clsInSpecTResultsProcessor)
+            {
+                Console.WriteLine();
+                LogMessage(string.Format("{0,-45} {1}",
+                    "Create Inspect First Hits File:", resultsProcessor.CreateInspectFirstHitsFile));
+
+                LogMessage(string.Format("{0,-45} {1}",
+                    "Create Inspect Synopsis File:", resultsProcessor.CreateInspectSynopsisFile));
+
+                LogMessage(string.Format("{0,-45} {1:E2}",
+                    "Inspect Synopsis File PValue Threshold:", resultsProcessor.InspectSynopsisFilePValueThreshold));
+            }
+
+            Console.WriteLine();
+            LogMessage(string.Format("{0,-49} {1:E2}",
+                "MODa/MODPlus Synopsis File Probability Threshold:", resultsProcessor.MODaMODPlusSynopsisFileProbabilityThreshold));
+
+            LogMessage(string.Format("{0,-49} {1:E2}",
+                "MSGFPlus Synopsis File EValue Threshold:", resultsProcessor.MSGFPlusSynopsisFileEValueThreshold));
+
+            LogMessage(string.Format("{0,-49} {1:E2}",
+                "MSGFPlus Synopsis File SpecEValue Threshold:", resultsProcessor.MSGFPlusSynopsisFileSpecEValueThreshold));
+
+            Console.WriteLine();
+        }
+
         private bool StartCreateProteinModsViaPHRPData(string inputFilePath, string outputDirectoryPath)
         {
             try
             {
+                if (!mFilePathsShown)
+                {
+                    ShowCurrentFilePaths(inputFilePath, outputDirectoryPath, string.Empty);
+                    mFilePathsShown = true;
+                }
+
                 clsPHRPReader.PeptideHitResultTypes PeptideHitResultType;
                 switch (mPeptideHitResultsFileFormat)
                 {
@@ -568,6 +677,12 @@ namespace PeptideHitResultsProcRunner
 
                 InitializePeptideHitResultsProcessor(inputFilePath);
 
+                if (!mOptionsDisplayed)
+                {
+                    ShowProcessingOptions(mPeptideHitResultsProcessor);
+                    mOptionsDisplayed = true;
+                }
+
                 var success = mPeptideHitResultsProcessor.CreateProteinModDetailsFile(inputFilePath, outputDirectoryPath);
 
                 if (!success)
@@ -591,6 +706,12 @@ namespace PeptideHitResultsProcRunner
         {
             try
             {
+                if (!mFilePathsShown)
+                {
+                    ShowCurrentFilePaths(inputFilePath, outputDirectoryPath, string.Empty);
+                    mFilePathsShown = true;
+                }
+
                 clsPHRPBaseClass.PeptideHitResultsFileFormatConstants peptideHitResultsFormat;
                 if (mPeptideHitResultsFileFormat == clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine)
                 {
@@ -698,6 +819,12 @@ namespace PeptideHitResultsProcRunner
                 RegisterResultsProcessEvents(mPeptideHitResultsProcessor);
 
                 InitializePeptideHitResultsProcessor(inputFilePath);
+
+                if (!mOptionsDisplayed)
+                {
+                    ShowProcessingOptions(mPeptideHitResultsProcessor);
+                    mOptionsDisplayed = true;
+                }
 
                 var success = mPeptideHitResultsProcessor.ProcessFile(inputFilePath, outputDirectoryPath, parameterFilePath);
                 if (!success)
