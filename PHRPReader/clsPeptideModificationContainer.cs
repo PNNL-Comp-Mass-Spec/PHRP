@@ -16,6 +16,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace PHRPReader
 {
@@ -297,6 +298,39 @@ namespace PHRPReader
         {
             UpdateDefaultModificationSymbols(DEFAULT_MODIFICATION_SYMBOLS);
             Modifications.Clear();
+        }
+
+        /// <summary>
+        /// Find the modification in matchedMods with smallest delta mass value
+        /// </summary>
+        /// <param name="matchedMods">List of modifications where keys are absolute value of delta mass and values are the modification definition</param>
+        /// <param name="chTargetResidue"></param>
+        /// <param name="addTargetResidue">If true, add the target residue to the modification definition's target residues list (if missing)</param>
+        private clsModificationDefinition FindClosestMatchedMod(
+            IReadOnlyCollection<KeyValuePair<double, clsModificationDefinition>> matchedMods,
+            char chTargetResidue,
+            bool addTargetResidue = false)
+        {
+            var closestMatch = matchedMods.First();
+
+            foreach (var mod in matchedMods.Skip(1))
+            {
+                if (mod.Key < closestMatch.Key)
+                {
+                    closestMatch = mod;
+                }
+            }
+
+            if (!addTargetResidue)
+                return closestMatch.Value;
+
+            // Assure that the target residues contain chTargetResidue
+            if (chTargetResidue != default(char) && !closestMatch.Value.TargetResiduesContain(chTargetResidue))
+            {
+                closestMatch.Value.TargetResidues += chTargetResidue;
+            }
+
+            return closestMatch.Value;
         }
 
         /// <summary>
@@ -764,6 +798,8 @@ namespace PHRPReader
 
             existingModFound = false;
 
+            var matchedMods = new List<KeyValuePair<double, clsModificationDefinition>>();
+
             if (chTargetResidue != default(char) || residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
@@ -778,10 +814,11 @@ namespace PHRPReader
                         continue;
                     }
 
-                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) > float.Epsilon)
-                    {
+                    // Absolute value of the mass difference
+                    var deltaMassAbs = Math.Abs(Modifications[index].ModificationMass - modificationMass);
+
+                    if (Math.Abs(Math.Round(deltaMassAbs, massDigitsOfPrecision)) > float.Epsilon)
                         continue;
-                    }
 
                     // Matching mass found
                     // Now see if .TargetResidues contains chTargetResidue
@@ -814,9 +851,14 @@ namespace PHRPReader
 
                     if (existingModFound)
                     {
-                        // Match found
-                        return Modifications[index];
+                        // Match found; add to the list of candidate mods
+                        matchedMods.Add(new KeyValuePair<double, clsModificationDefinition>(deltaMassAbs, Modifications[index]));
                     }
+                }
+
+                if (matchedMods.Count > 0)
+                {
+                    return FindClosestMatchedMod(matchedMods, chTargetResidue);
                 }
             }
 
@@ -824,14 +866,25 @@ namespace PHRPReader
             // Compare against modifications with empty .TargetResidues
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if ((Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod || Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.UnknownType) && string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
+                if ((Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod ||
+                     Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod ||
+                     Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.UnknownType) &&
+                    string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
-                    {
-                        // Matching mass found
-                        return Modifications[index];
-                    }
+                    // Absolute value of the mass difference
+                    var deltaMassAbs = Math.Abs(Modifications[index].ModificationMass - modificationMass);
+
+                    if (Math.Abs(Math.Round(deltaMassAbs, massDigitsOfPrecision)) > float.Epsilon)
+                        continue;
+
+                    // Match found; add to the list of candidate mods
+                    matchedMods.Add(new KeyValuePair<double, clsModificationDefinition>(deltaMassAbs, Modifications[index]));
                 }
+            }
+
+            if (matchedMods.Count > 0)
+            {
+                return FindClosestMatchedMod(matchedMods, chTargetResidue);
             }
 
             // Still no match; look for the modification mass and residue in mStandardRefinementModifications
@@ -840,29 +893,32 @@ namespace PHRPReader
             {
                 for (var index = 0; index <= mStandardRefinementModifications.Count - 1; index++)
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(mStandardRefinementModifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
+                    // Absolute value of the mass difference
+                    var deltaMassAbs = Math.Abs(mStandardRefinementModifications[index].ModificationMass - modificationMass);
+
+                    if (Math.Abs(Math.Round(deltaMassAbs, massDigitsOfPrecision)) > float.Epsilon)
+                        continue;
+
+                    // Matching mass found
+                    // Now see if .TargetResidues contains chTargetResidue
+                    if (!mStandardRefinementModifications[index].TargetResiduesContain(chTargetResidue))
+                        continue;
+
+                    existingModFound = true;
+
+                    modificationDefinition = mStandardRefinementModifications[index];
+                    modificationDefinition.ModificationSymbol = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
+
+                    if (addToModificationListIfUnknown && mDefaultModificationSymbols.Count > 0)
                     {
-                        // Matching mass found
-                        // Now see if .TargetResidues contains chTargetResidue
-                        if (mStandardRefinementModifications[index].TargetResiduesContain(chTargetResidue))
-                        {
-                            existingModFound = true;
-
-                            modificationDefinition = mStandardRefinementModifications[index];
-                            modificationDefinition.ModificationSymbol = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
-
-                            if (addToModificationListIfUnknown && mDefaultModificationSymbols.Count > 0)
-                            {
-                                // Append modificationDefinition to mModifications()
-                                var newModIndex = AddModification(modificationDefinition, true);
-                                return newModIndex >= 0 ? Modifications[newModIndex] : modificationDefinition;
-                            }
-
-                            // Either addToModificationListIfUnknown = False or no more default modification symbols
-                            // Return modificationDefinition, which has .ModificationSymbol = LAST_RESORT_MODIFICATION_SYMBOL
-                            return modificationDefinition;
-                        }
+                        // Append modificationDefinition to mModifications()
+                        var newModIndex = AddModification(modificationDefinition, true);
+                        return newModIndex >= 0 ? Modifications[newModIndex] : modificationDefinition;
                     }
+
+                    // Either addToModificationListIfUnknown = False or no more default modification symbols
+                    // Return modificationDefinition, which has .ModificationSymbol = LAST_RESORT_MODIFICATION_SYMBOL
+                    return modificationDefinition;
                 }
             }
 
@@ -870,20 +926,22 @@ namespace PHRPReader
             // Compare against dynamic and unknown-type modifications, but ignore .TargetResidues
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if (Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod || Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.UnknownType)
+                if (Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.DynamicMod ||
+                    Modifications[index].ModificationType == clsModificationDefinition.ModificationTypeConstants.UnknownType)
                 {
-                    if (Math.Abs(Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision)) < float.Epsilon)
-                    {
-                        // Matching mass found
-                        // Assure that the target residues contain chTargetResidue
-                        if (chTargetResidue != default(char) && !Modifications[index].TargetResiduesContain(chTargetResidue))
-                        {
-                            Modifications[index].TargetResidues += chTargetResidue;
-                        }
+                    var deltaMassAbs = Math.Abs(Modifications[index].ModificationMass - modificationMass);
 
-                        return Modifications[index];
-                    }
+                    if (Math.Abs(Math.Round(deltaMassAbs, massDigitsOfPrecision)) > float.Epsilon)
+                        continue;
+
+                    // Match found; add to the list of candidate mods
+                    matchedMods.Add(new KeyValuePair<double, clsModificationDefinition>(deltaMassAbs, Modifications[index]));
                 }
+            }
+
+            if (matchedMods.Count > 0)
+            {
+                return FindClosestMatchedMod(matchedMods, chTargetResidue, true);
             }
 
             // Still no match; define a new custom modification
