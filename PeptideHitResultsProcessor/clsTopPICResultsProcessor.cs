@@ -237,9 +237,11 @@ namespace PeptideHitResultsProcessor
                             if (modificationDefinition.TargetResiduesContain(chChar))
                             {
                                 // Match found; add this modification
+                                var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
+
                                 searchResult.SearchResultAddModification(
                                     modificationDefinition, chChar, residueLocInPeptide,
-                                    searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
+                                    residueTerminusState, updateModOccurrenceCounts);
                             }
                         }
                     }
@@ -288,9 +290,14 @@ namespace PeptideHitResultsProcessor
                         residueLocForMod = 1;
                     }
 
+                    var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocForMod);
+
                     if (double.TryParse(modMassOrName, out var modMass))
                     {
-                        var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts);
+                        var success = searchResult.SearchResultAddModification(
+                            modMass, residueForMod, residueLocForMod,
+                            residueTerminusState, updateModOccurrenceCounts);
+
                         if (!success)
                         {
                             var errorMessage = searchResult.ErrorMessage;
@@ -306,7 +313,10 @@ namespace PeptideHitResultsProcessor
                         // Named mod
                         if (LookupModificationMassByName(modMassOrName, out var modMassFromUniMod))
                         {
-                            var success = searchResult.SearchResultAddModification(modMassFromUniMod, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts);
+                            var success = searchResult.SearchResultAddModification(
+                                modMassFromUniMod, residueForMod, residueLocForMod,
+                                residueTerminusState, updateModOccurrenceCounts);
+
                             if (!success)
                             {
                                 var errorMessage = searchResult.ErrorMessage;

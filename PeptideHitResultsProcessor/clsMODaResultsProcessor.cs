@@ -179,9 +179,11 @@ namespace PeptideHitResultsProcessor
                         if (modificationDefinition.TargetResiduesContain(chChar))
                         {
                             // Match found; add this modification
+                            var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
+
                             searchResult.SearchResultAddModification(
                                 modificationDefinition, chChar, residueLocInPeptide,
-                                searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
+                                residueTerminusState, updateModOccurrenceCounts);
                         }
                     }
                 }

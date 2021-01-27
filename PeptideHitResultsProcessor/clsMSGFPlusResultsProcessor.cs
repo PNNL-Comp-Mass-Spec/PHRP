@@ -117,6 +117,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Structures"
+
         private struct udtMSGFPlusSearchResultType
         {
             // ReSharper disable once NotAccessedField.Local
@@ -237,6 +238,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         #region "Class wide Variables"
+
         private readonly clsPeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
         private udtParentMassToleranceType mParentMassToleranceInfo;
@@ -285,9 +287,11 @@ namespace PeptideHitResultsProcessor
                             if (modificationDefinition.TargetResiduesContain(chChar))
                             {
                                 // Match found; add this modification
+                                var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
+
                                 searchResult.SearchResultAddModification(
                                     modificationDefinition, chChar, residueLocInPeptide,
-                                    searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
+                                    residueTerminusState, updateModOccurrenceCounts);
                             }
                         }
                     }

@@ -1462,11 +1462,9 @@ namespace PeptideHitResultsProcessor
                                     var residueLocInPeptide = modifiedResiduePosInProtein - searchResult.PeptideLocInProteinStart + 1;
                                     var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
 
-                                    searchResult.SearchResultAddModification(modificationMass,
-                                                                             targetResidue,
-                                                                             residueLocInPeptide,
-                                                                             residueTerminusState,
-                                                                             updateModOccurrenceCounts);
+                                    searchResult.SearchResultAddModification(
+                                        modificationMass, targetResidue, residueLocInPeptide,
+                                        residueTerminusState, updateModOccurrenceCounts);
                                 }
                             }
                             break;

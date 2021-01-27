@@ -189,9 +189,11 @@ namespace PeptideHitResultsProcessor
                         if (modificationDefinition.TargetResiduesContain(chChar))
                         {
                             // Match found; add this modification
+                            var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
+
                             searchResult.SearchResultAddModification(
                                 modificationDefinition, chChar, residueLocInPeptide,
-                                searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
+                                residueTerminusState, updateModOccurrenceCounts);
                         }
                     }
                 }
@@ -280,6 +282,8 @@ namespace PeptideHitResultsProcessor
                     // Modification is at the peptide N-terminus
                     residueLocForMod = 1;
                 }
+
+                var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocForMod);
 
                 var success = searchResult.SearchResultAddModification(
                     modMass, residueForMod, residueLocForMod,

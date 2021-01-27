@@ -155,8 +155,9 @@ namespace PeptideHitResultsProcessor
 
         #region "Class wide Variables"
 
-        #endregion
         private readonly Regex mGetModName;
+
+        #endregion
 
         /// <summary>
         /// Step through the Modifications and associate each modification with the residues
@@ -234,7 +235,9 @@ namespace PeptideHitResultsProcessor
                         }
 
                         // Associate the mod with the given residue
-                        searchResult.SearchResultAddModification(modDef.ModMassVal, chMostRecentResidue, residueLocInPeptide, residueTerminusState, updateModOccurrenceCounts);
+                        searchResult.SearchResultAddModification(
+                            modDef.ModMassVal, chMostRecentResidue, residueLocInPeptide,
+                            residueTerminusState, updateModOccurrenceCounts);
 
                         matchFound = true;
                         break;

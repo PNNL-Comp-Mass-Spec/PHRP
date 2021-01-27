@@ -81,9 +81,11 @@ namespace PeptideHitResultsProcessor
                             if (modificationDefinition.TargetResiduesContain(chChar))
                             {
                                 // Match found; add this modification
+                                var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocInPeptide);
+
                                 success = searchResult.SearchResultAddModification(
                                     modificationDefinition, chChar, residueLocInPeptide,
-                                    searchResult.DetermineResidueTerminusState(residueLocInPeptide), updateModOccurrenceCounts);
+                                    residueTerminusState, updateModOccurrenceCounts);
 
                                 if (!success)
                                 {
