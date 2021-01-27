@@ -31,6 +31,7 @@ namespace PeptideHitResultsProcessor
         public string Precursor_mz { get; set; }
 
         public string MODPlusComputedDelM { get; set; }
+
         public string MODPlusComputedDelMPPM { get; set; }
 
         public string MODPlusScore { get; set; }
@@ -38,8 +39,6 @@ namespace PeptideHitResultsProcessor
         public string Probability { get; set; }
 
         public string PeptidePosition { get; set; }
-
-        public string ModificationAnnotation { get; set; }
 
         #endregion
 
@@ -60,17 +59,13 @@ namespace PeptideHitResultsProcessor
         public override void Clear()
         {
             base.Clear();
+
             Spectrum_Index = string.Empty;
-
             Precursor_mz = string.Empty;
-
             MODPlusComputedDelM = string.Empty;
             MODPlusComputedDelMPPM = string.Empty;
-
             MODPlusScore = string.Empty;
-
             Probability = string.Empty;
-
             PeptidePosition = string.Empty;
         }
     }
