@@ -164,7 +164,12 @@ namespace PeptideHitResultsProcessor
         private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
-            const int MOD_MASS_DIGITS_OF_PRECISION = 3;
+
+            // Preferably use three digits of precision, but allow two digits of precision
+            // since the MSAlign_ResultTable.txt file lists modifications with just two digits after the decimal, e.g. (DIQM)[16.00]
+            const int MSALIGN_MASS_DIGITS_OF_PRECISION = 3;
+
+            const int MSALIGN_MASS_DIGITS_OF_PRECISION_LOOSE = 2;
 
             var parsingModMass = false;
             var modMassDigits = string.Empty;
@@ -190,6 +195,7 @@ namespace PeptideHitResultsProcessor
             // i.e. we don't know which residue to associate the mod with
 
             var sequence = searchResult.PeptideSequenceWithMods;
+
             for (var index = 0; index <= sequence.Length - 1; index++)
             {
                 var chChar = sequence[index];
@@ -277,7 +283,12 @@ namespace PeptideHitResultsProcessor
                             residueLocForMod = 1;
                         }
 
-                        var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod, searchResult.DetermineResidueTerminusState(residueLocForMod), updateModOccurrenceCounts, MOD_MASS_DIGITS_OF_PRECISION);
+                        var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocForMod);
+
+                        var success = searchResult.SearchResultAddModification(
+                            modMass, residueForMod, residueLocForMod,
+                            residueTerminusState, updateModOccurrenceCounts,
+                            MSALIGN_MASS_DIGITS_OF_PRECISION, MSALIGN_MASS_DIGITS_OF_PRECISION_LOOSE);
 
                         if (!success)
                         {

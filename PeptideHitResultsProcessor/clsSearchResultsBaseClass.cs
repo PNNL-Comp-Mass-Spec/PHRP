@@ -633,7 +633,11 @@ namespace PeptideHitResultsProcessor
             clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             bool updateModOccurrenceCounts)
         {
-            return SearchResultAddModification(modificationMass, chTargetResidue, residueLocInPeptide, residueTerminusState, updateModOccurrenceCounts, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION);
+            return SearchResultAddModification(
+                modificationMass, chTargetResidue, residueLocInPeptide, residueTerminusState,
+                updateModOccurrenceCounts,
+                clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION,
+                clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION);
         }
 
         /// <summary>
@@ -645,14 +649,17 @@ namespace PeptideHitResultsProcessor
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        /// <param name="modMassDigitsOfPrecision">Digits of precision to use when comparing modificationMass to the masses of known mods</param>
+        /// <param name="modMassDigitsOfPrecision">Number of digits after the decimal point to round to when comparing modificationMass to the masses of known mods</param>
+        /// <param name="modMassDigitsOfPrecisionLoose">Number of digits after the decimal point to round to, for a more lenient match (if no match found using modMassDigitsOfPrecision)</param>
         /// <returns>True if mod successfully added</returns>
         public bool SearchResultAddModification(
             double modificationMass,
             char chTargetResidue,
             int residueLocInPeptide,
             clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
-            bool updateModOccurrenceCounts, byte modMassDigitsOfPrecision)
+            bool updateModOccurrenceCounts,
+            byte modMassDigitsOfPrecision,
+            byte modMassDigitsOfPrecisionLoose)
         {
             var success = false;
 
@@ -670,7 +677,9 @@ namespace PeptideHitResultsProcessor
                     chTargetResidue,
                     residueTerminusState,
                     out _,
-                    true, modMassDigitsOfPrecision);
+                    true,
+                    modMassDigitsOfPrecision,
+                    modMassDigitsOfPrecisionLoose);
 
                 success = SearchResultAddModification(
                     modificationDefinition,

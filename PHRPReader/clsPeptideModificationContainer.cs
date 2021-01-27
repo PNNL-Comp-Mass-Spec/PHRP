@@ -210,7 +210,8 @@ namespace PHRPReader
             bool addToModificationListIfUnknown,
             bool useNextAvailableModificationSymbol,
             char modSymbol,
-            byte massDigitsOfPrecision)
+            byte massDigitsOfPrecision,
+            byte massDigitsOfPrecisionLoose)
         {
             string targetResidues;
 
@@ -247,7 +248,7 @@ namespace PHRPReader
                 modSymbol = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
             }
 
-            var massCorrectionTag = LookupMassCorrectionTagByMass(modificationMass, massDigitsOfPrecision, true, massDigitsOfPrecision);
+            var massCorrectionTag = LookupMassCorrectionTagByMass(modificationMass, massDigitsOfPrecision, true, massDigitsOfPrecisionLoose);
 
             var modificationDefinition = new clsModificationDefinition(
                 modSymbol,
@@ -490,9 +491,9 @@ namespace PHRPReader
         /// Find the mass correction tag with the given mass, adding to the unknown modification list if not found and addToModificationListIfUnknown is true
         /// </summary>
         /// <param name="modificationMass"></param>
-        /// <param name="massDigitsOfPrecision"></param>
+        /// <param name="massDigitsOfPrecision">Number of digits after the decimal point to round to when comparing mod masses</param>
         /// <param name="addToModificationListIfUnknown"></param>
-        /// <param name="massDigitsOfPrecisionLoose"></param>
+        /// <param name="massDigitsOfPrecisionLoose">Number of digits after the decimal point to round to, for a more lenient match (if no match found using massDigitsOfPrecision)</param>
         /// <returns>Mod name, or empty string if no match</returns>
         public string LookupMassCorrectionTagByMass(
             double modificationMass,
@@ -746,7 +747,8 @@ namespace PHRPReader
         /// <param name="residueTerminusState"></param>
         /// <param name="existingModFound"></param>
         /// <param name="addToModificationListIfUnknown"></param>
-        /// <param name="massDigitsOfPrecision"></param>
+        /// <param name="massDigitsOfPrecision">Number of digits after the decimal point to round to when comparing mod masses</param>
+        /// <param name="massDigitsOfPrecisionLoose">Number of digits after the decimal point to round to, for a more lenient match (if no match found using massDigitsOfPrecision)</param>
         /// <returns>The best matched modification; if no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown is True</returns>
         /// <remarks>If chTargetResidue is nothing, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         public clsModificationDefinition LookupModificationDefinitionByMass(
@@ -755,11 +757,13 @@ namespace PHRPReader
             clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             out bool existingModFound,
             bool addToModificationListIfUnknown,
-            byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
+            byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION,
+            byte massDigitsOfPrecisionLoose = MASS_DIGITS_OF_PRECISION)
         {
             clsModificationDefinition modificationDefinition;
 
             existingModFound = false;
+
             if (chTargetResidue != default(char) || residueTerminusState != clsAminoAcidModInfo.ResidueTerminusStateConstants.None)
             {
                 // The residue was provided and/or the residue is located at a peptide or protein terminus
@@ -887,7 +891,10 @@ namespace PHRPReader
             const char modSymbol = clsModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
             const bool useNextAvailableModificationSymbol = true;
 
-            modificationDefinition = AddUnknownModification(modificationMass, modType, chTargetResidue, residueTerminusState, addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol, massDigitsOfPrecision);
+            modificationDefinition = AddUnknownModification(
+                modificationMass, modType, chTargetResidue, residueTerminusState,
+                addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol,
+                massDigitsOfPrecision, massDigitsOfPrecisionLoose);
 
             return modificationDefinition;
         }
@@ -944,7 +951,8 @@ namespace PHRPReader
         /// <param name="residueTerminusState"></param>
         /// <param name="existingModFound"></param>
         /// <param name="addToModificationListIfUnknown"></param>
-        /// <param name="massDigitsOfPrecision"></param>
+        /// <param name="massDigitsOfPrecision">Number of digits after the decimal point to round to when comparing mod masses</param>
+        /// <param name="massDigitsOfPrecisionLoose">Number of digits after the decimal point to round to, for a more lenient match (if no match found using massDigitsOfPrecision)</param>
         /// <returns>The best matched modification; if no match is found, returns a newly created modification definition, adding it to mModifications if addToModificationListIfUnknown = True</returns>
         /// <remarks>If chTargetResidue is nothing, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         public clsModificationDefinition LookupModificationDefinitionByMassAndModType(
@@ -954,7 +962,8 @@ namespace PHRPReader
             clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
             out bool existingModFound,
             bool addToModificationListIfUnknown,
-            byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
+            byte massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION,
+            byte massDigitsOfPrecisionLoose = MASS_DIGITS_OF_PRECISION)
         {
             // If chTargetResidue is defined, returns the first modification with the given mass and containing the residue in .TargetResidues
             // If no match is found, looks for the first modification with the given mass and no defined .TargetResidues
@@ -1115,7 +1124,10 @@ namespace PHRPReader
             }
 
             // Still no match; define a new custom modification
-            modificationDefinition = AddUnknownModification(modificationMass, modType, chTargetResidue, residueTerminusState, addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol, massDigitsOfPrecision);
+            modificationDefinition = AddUnknownModification(
+                modificationMass, modType, chTargetResidue, residueTerminusState,
+                addToModificationListIfUnknown, useNextAvailableModificationSymbol, modSymbol,
+                massDigitsOfPrecision, massDigitsOfPrecisionLoose);
 
             return modificationDefinition;
         }

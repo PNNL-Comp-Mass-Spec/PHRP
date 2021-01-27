@@ -48,6 +48,8 @@ namespace PeptideHitResultsProcessor
 
         private const byte MODPlus_MASS_DIGITS_OF_PRECISION = 3;
 
+        private const byte MODPlus_MASS_DIGITS_OF_PRECISION_LOOSE = 2;
+
         private const RegexOptions REGEX_OPTIONS = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase;
 
         /// <summary>
@@ -287,8 +289,8 @@ namespace PeptideHitResultsProcessor
 
                 var success = searchResult.SearchResultAddModification(
                     modMass, residueForMod, residueLocForMod,
-                    searchResult.DetermineResidueTerminusState(residueLocForMod),
-                    updateModOccurrenceCounts, MODPlus_MASS_DIGITS_OF_PRECISION);
+                    residueTerminusState, updateModOccurrenceCounts,
+                    MODPlus_MASS_DIGITS_OF_PRECISION, MODPlus_MASS_DIGITS_OF_PRECISION_LOOSE);
 
                 if (!success)
                 {

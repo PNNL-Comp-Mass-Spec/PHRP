@@ -273,10 +273,12 @@ namespace PeptideHitResultsProcessor
                     residueLocForMod = 1;
                 }
 
-                var success = searchResult.SearchResultAddModification(modMass, residueForMod, residueLocForMod,
-                                                                       searchResult.DetermineResidueTerminusState(residueLocForMod),
-                                                                       updateModOccurrenceCounts,
-                                                                       MODA_MASS_DIGITS_OF_PRECISION);
+                var residueTerminusState = searchResult.DetermineResidueTerminusState(residueLocForMod);
+
+                var success = searchResult.SearchResultAddModification(
+                    modMass, residueForMod, residueLocForMod,
+                    residueTerminusState, updateModOccurrenceCounts,
+                    MODA_MASS_DIGITS_OF_PRECISION, MODA_MASS_DIGITS_OF_PRECISION);
 
                 if (!success)
                 {
