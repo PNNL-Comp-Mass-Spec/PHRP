@@ -41,7 +41,7 @@ PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputDirectoryPath]
 ```
 
 The input file should be one of the following:
-* MSGF+ results file (_msgfplus.tsv or _msgfdb.tsv or .tsv)
+* MS-GF+ results file (_msgfplus.tsv or _msgfdb.tsv or .tsv)
 * MSGF-DB results file (_msgfdb.txt)
 * MSAlign results file (_MSAlign_ResultTable.txt)
 * MODa results file (_moda.id.txt)
@@ -86,8 +86,8 @@ delimited, with the first column containing the mass correction tag name and the
 containing the mass (the name cannot contain commas or colons and can be, at most, 8 
 characters long).
 
-Use /N to specify the parameter file provided to the search tool.  This is only used when 
-processing Inspect or MSGF-DB files.
+Use /N to specify the parameter file provided to the search tool.  This is used when 
+processing MS-GF+, MSAlign, MODa, MODPlus, MSPathFinder, TopPIC and Inspect files.
 
 When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used 
 to determine which peptides are written to the the synopsis file.  The default is 
