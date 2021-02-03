@@ -78,20 +78,21 @@ namespace PeptideHitResultsProcessor
             Adjusted_precursor_mass = 9,     // Theoretical monoisotopic mass of the peptide (including mods)
             Proteoform_ID = 10,
             Feature_intensity = 11,
-            Protein_accession = 12,
-            Protein_description = 13,
-            First_residue = 14,
-            Last_residue = 15,
-            Proteoform = 16,
-            Unexpected_modifications = 17,
-            MIScore = 18,
-            Variable_PTMs = 19,
-            Matched_peaks = 20,
-            Matched_fragment_ions = 21,
-            Pvalue = 22,
-            Evalue = 23,
-            Qvalue = 24,                     //  Spectral FDR, or PepFDR
-            Proteoform_FDR = 25
+            Feature_score = 12,
+            Protein_accession = 13,
+            Protein_description = 14,
+            First_residue = 15,
+            Last_residue = 16,
+            Proteoform = 17,
+            Unexpected_modifications = 18,
+            MIScore = 19,
+            Variable_PTMs = 20,
+            Matched_peaks = 21,
+            Matched_fragment_ions = 22,
+            Pvalue = 23,
+            Evalue = 24,
+            Qvalue = 25,                     //  Spectral FDR, or PepFDR
+            Proteoform_QValue = 26
         }
 
         #endregion
@@ -120,6 +121,7 @@ namespace PeptideHitResultsProcessor
             public string DelM_PPM;                     // Computed using DelM and Adjusted_precursor_mass
             public string Proteoform_ID;
             public string Feature_Intensity;
+            public string Feature_Score;
             public string Protein;
             public string ProteinDescription;
             public string ResidueStart;                 // First_residue
@@ -134,8 +136,9 @@ namespace PeptideHitResultsProcessor
             public double PValueNum;
             public int RankPValue;
             public string Evalue;
+            public double EValueNum;
             public string Qvalue;
-            public string Proteoform_FDR;
+            public string Proteoform_QValue;
 
             public void Clear()
             {
@@ -156,6 +159,7 @@ namespace PeptideHitResultsProcessor
                 DelM_PPM = string.Empty;
                 Proteoform_ID = string.Empty;
                 Feature_Intensity = string.Empty;
+                Feature_Score = string.Empty;
                 Protein = string.Empty;
                 ProteinDescription = string.Empty;
                 ResidueStart = string.Empty;
@@ -170,8 +174,9 @@ namespace PeptideHitResultsProcessor
                 PValueNum = 0;
                 RankPValue = 0;
                 Evalue = string.Empty;
+                EValueNum = 0;
                 Qvalue = string.Empty;
-                Proteoform_FDR = string.Empty;
+                Proteoform_QValue = string.Empty;
             }
         }
 
@@ -400,10 +405,12 @@ namespace PeptideHitResultsProcessor
         /// <param name="searchResults"></param>
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
+        /// <param name="sortOnPValue"></param>
         private void AssignRankAndDeltaNormValues(
             IList<udtTopPICSearchResultType> searchResults,
             int startIndex,
-            int endIndex)
+            int endIndex,
+            bool sortOnPValue)
         {
             // Duplicate a portion of searchResults so that we can sort by PValue
 
@@ -413,7 +420,16 @@ namespace PeptideHitResultsProcessor
                 resultsSubset.Add(index, searchResults[index]);
             }
 
-            var resultsByProbability = (from item in resultsSubset orderby item.Value.PValueNum select item).ToList();
+            List<KeyValuePair<int, udtTopPICSearchResultType>> resultsByProbability;
+
+            if (sortOnPValue)
+            {
+                resultsByProbability = (from item in resultsSubset orderby item.Value.PValueNum select item).ToList();
+            }
+            else
+            {
+                resultsByProbability = (from item in resultsSubset orderby item.Value.EValueNum select item).ToList();
+            }
 
             double lastValue = 0;
             var currentRank = -1;
@@ -422,16 +438,18 @@ namespace PeptideHitResultsProcessor
             {
                 var result = searchResults[entry.Key];
 
+                var currentValue = sortOnPValue ? result.PValueNum : result.EValueNum;
+
                 if (currentRank < 0)
                 {
-                    lastValue = result.PValueNum;
+                    lastValue = currentValue;
                     currentRank = 1;
                 }
                 else
                 {
-                    if (Math.Abs(result.PValueNum - lastValue) > double.Epsilon)
+                    if (Math.Abs(currentValue - lastValue) > double.Epsilon)
                     {
-                        lastValue = result.PValueNum;
+                        lastValue = currentValue;
                         currentRank++;
                     }
                 }
@@ -589,6 +607,8 @@ namespace PeptideHitResultsProcessor
                     // Sort the SearchResults by scan, charge, and ascending PValue
                     searchResultsUnfiltered.Sort(new TopPICSearchResultsComparerScanChargePValuePeptide());
 
+                    var sortOnPValue = columnMapping[TopPICResultsFileColumns.Pvalue] >= 0;
+
                     // Now filter the data
 
                     // Initialize variables
@@ -604,13 +624,13 @@ namespace PeptideHitResultsProcessor
                         }
 
                         // Store the results for this scan
-                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults);
+                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults, sortOnPValue);
 
                         startIndex = endIndex + 1;
                     }
 
                     // Sort the data in filteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog);
+                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog, sortOnPValue);
                 }
 
                 // Inform the user if any errors occurred
@@ -1008,6 +1028,7 @@ namespace PeptideHitResultsProcessor
 
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_ID], out udtSearchResult.Proteoform_ID);
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_intensity], out udtSearchResult.Feature_Intensity);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Feature_score], out udtSearchResult.Feature_Score);
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Protein_accession], out udtSearchResult.Protein);
                 udtSearchResult.Protein = TruncateProteinName(udtSearchResult.Protein);
 
@@ -1076,6 +1097,9 @@ namespace PeptideHitResultsProcessor
                 udtSearchResult.Matched_fragment_ions = AssureInteger(udtSearchResult.Matched_fragment_ions, 0);    // Matched_Fragment_Ion_Count
 
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Evalue], out udtSearchResult.Evalue);
+                if (!double.TryParse(udtSearchResult.Evalue, out udtSearchResult.EValueNum))
+                    udtSearchResult.EValueNum = 0;
+
                 GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Qvalue], out udtSearchResult.Qvalue);
 
                 if (string.Equals(udtSearchResult.Qvalue, "infinity", StringComparison.OrdinalIgnoreCase))
@@ -1087,7 +1111,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Qvalue = string.Empty;
                 }
 
-                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_FDR], out udtSearchResult.Proteoform_FDR);
+                GetColumnValue(splitLine, columnMapping[TopPICResultsFileColumns.Proteoform_QValue], out udtSearchResult.Proteoform_QValue);
 
                 return true;
             }
@@ -1121,8 +1145,12 @@ namespace PeptideHitResultsProcessor
             // Header prior to November 2018:
             // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein name    First residue    Last residue    Proteoform    #unexpected modifications    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR    #Variable PTMs
 
-            // Header for TopPIC 1.2 and newer
+            // Header for TopPIC 1.2 and 1.3
             // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Protein accession    Protein description    First residue    Last residue    Proteoform    #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    P-value    E-value    Q-value (spectral FDR)    Proteoform FDR
+
+            // Header for TopPIC 1.4
+            // The P-Value column has been removed and the Q-Value and "Proteoform FDR" columns have been renamed
+            // Data file name    Prsm ID    Spectrum ID    Fragmentation    Scan(s)    Retention time    #peaks    Charge    Precursor mass    Adjusted precursor mass    Proteoform ID    Feature intensity    Feature score    Protein accession    Protein description    First residue    Last residue    Proteoform    #unexpected modifications    MIScore    #variable PTMs    #matched peaks    #matched fragment ions    E-value    Spectrum-level Q-value    Proteoform-level Q-value
 
             var columnNames = new SortedDictionary<string, TopPICResultsFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
@@ -1138,6 +1166,7 @@ namespace PeptideHitResultsProcessor
                 {"Adjusted precursor mass", TopPICResultsFileColumns.Adjusted_precursor_mass},
                 {"Proteoform ID", TopPICResultsFileColumns.Proteoform_ID},
                 {"Feature intensity", TopPICResultsFileColumns.Feature_intensity},
+                {"Feature score", TopPICResultsFileColumns.Feature_score},
                 {"Protein name", TopPICResultsFileColumns.Protein_accession},
                 {"Protein accession", TopPICResultsFileColumns.Protein_accession},
                 {"Protein description", TopPICResultsFileColumns.Protein_description},
@@ -1152,7 +1181,9 @@ namespace PeptideHitResultsProcessor
                 {"P-value", TopPICResultsFileColumns.Pvalue},
                 {"E-value", TopPICResultsFileColumns.Evalue},
                 {"Q-value (spectral FDR)", TopPICResultsFileColumns.Qvalue},
-                {"Proteoform FDR", TopPICResultsFileColumns.Proteoform_FDR}
+                {"Spectrum-level Q-value", TopPICResultsFileColumns.Qvalue},
+                {"Proteoform FDR", TopPICResultsFileColumns.Proteoform_QValue},
+                {"Proteoform-level Q-value", TopPICResultsFileColumns.Proteoform_QValue}
             };
 
             columnMapping.Clear();
@@ -1198,7 +1229,7 @@ namespace PeptideHitResultsProcessor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int> columnMapping)
         {
-            var columnNames = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs();
+            var columnNames = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs(true);
 
             columnMapping.Clear();
 
@@ -1353,7 +1384,7 @@ namespace PeptideHitResultsProcessor
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.EValue], out string eValue);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.QValue], out string qValue);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.FragMethod], out string fragMethod);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Proteoform_FDR], out string proteoformFDR);
+                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Proteoform_QValue], out string proteoformFDR);
                 GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.VariablePTMs], out string variablePTMs);
 
                 searchResult.Prsm_ID = prsmId;
@@ -1589,10 +1620,21 @@ namespace PeptideHitResultsProcessor
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
             IEnumerable<udtTopPICSearchResultType> filteredSearchResults,
-            ref string errorLog)
+            ref string errorLog,
+            bool sortOnPValue)
         {
-            // Sort filteredSearchResults by ascending PValue, ascending scan, ascending charge, ascending peptide, and ascending protein
-            var query = from item in filteredSearchResults orderby item.PValueNum, item.ScanNum, item.ChargeNum, item.Proteoform, item.Protein select item;
+            IOrderedEnumerable<udtTopPICSearchResultType> query;
+
+            if (sortOnPValue)
+            {
+                // Sort filteredSearchResults by ascending PValue, ascending scan, ascending charge, ascending peptide, and ascending protein
+                query = from item in filteredSearchResults orderby item.PValueNum, item.ScanNum, item.ChargeNum, item.Proteoform, item.Protein select item;
+            }
+            else 
+            {
+                // Sort filteredSearchResults by ascending EValue, ascending scan, ascending charge, ascending peptide, and ascending protein
+                query = from item in filteredSearchResults orderby item.EValueNum, item.ScanNum, item.ChargeNum, item.Proteoform, item.Protein select item;
+            }
 
             var index = 1;
             foreach (var result in query)
@@ -1606,16 +1648,18 @@ namespace PeptideHitResultsProcessor
             IList<udtTopPICSearchResultType> searchResults,
             int startIndex,
             int endIndex,
-            ICollection<udtTopPICSearchResultType> filteredSearchResults)
+            ICollection<udtTopPICSearchResultType> filteredSearchResults,
+            bool sortOnPValue)
         {
-            AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
+            AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex, sortOnPValue);
 
             // The calling procedure already sorted by scan, charge, and PValue; no need to re-sort
 
             // Now store or write out the matches that pass the filters
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (searchResults[index].PValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold)
+                if (sortOnPValue && searchResults[index].PValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold ||
+                    !sortOnPValue && searchResults[index].EValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }
@@ -1635,7 +1679,7 @@ namespace PeptideHitResultsProcessor
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
-                var headerColumns = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs();
+                var headerColumns = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs(false);
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
@@ -1668,7 +1712,7 @@ namespace PeptideHitResultsProcessor
                 // Primary Columns
                 //
                 // TopPIC
-                // ResultID  Scan  Prsm_ID  Spectrum_ID  FragMethod  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Proteoform_ID  Feature_intensity  Protein  ResidueStart  ResidueEnd  Unexpected_Mod_Count  Peak_Count  Matched_Peak_Count  Matched_Fragment_Ion_Count  PValue  Rank_PValue  EValue  QValue  ProteoformFDR  VariablePTMs
+                // ResultID  Scan  Prsm_ID  Spectrum_ID  FragMethod  Charge  PrecursorMZ  DelM  DelM_PPM  MH  Peptide  Proteoform_ID  Feature_Intensity  Feature_Score  Protein  ResidueStart  ResidueEnd  Unexpected_Mod_Count  Peak_Count  Matched_Peak_Count  Matched_Fragment_Ion_Count  PValue  Rank_PValue  EValue  QValue  ProteoformFDR  VariablePTMs
 
                 var data = new List<string>
                 {
@@ -1685,6 +1729,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Proteoform,                // aka Peptide
                     udtSearchResult.Proteoform_ID,
                     udtSearchResult.Feature_Intensity,
+                    udtSearchResult.Feature_Score,
                     udtSearchResult.Protein,
                     udtSearchResult.ResidueStart,
                     udtSearchResult.ResidueEnd,
@@ -1696,7 +1741,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.RankPValue.ToString(),
                     udtSearchResult.Evalue,
                     udtSearchResult.Qvalue,
-                    udtSearchResult.Proteoform_FDR,
+                    udtSearchResult.Proteoform_QValue,
                     udtSearchResult.VariablePTMs
                 };
 

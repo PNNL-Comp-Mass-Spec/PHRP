@@ -17,6 +17,8 @@ namespace PHRPReader
     /// </summary>
     public class clsPHRPParserTopPIC : clsPHRPParser
     {
+        // Ignore Spelling: toppic, prsm, Frag, Da, Prot
+
         #region "Constants and Enums"
 
 #pragma warning disable 1591
@@ -32,7 +34,8 @@ namespace PHRPReader
         public const string DATA_COLUMN_MH = "MH";
         public const string DATA_COLUMN_Peptide = "Peptide";
         public const string DATA_COLUMN_Proteoform_ID = "Proteoform_ID";
-        public const string DATA_COLUMN_Feature_intensity = "Feature_intensity";
+        public const string DATA_COLUMN_Feature_Intensity = "Feature_Intensity";
+        public const string DATA_COLUMN_Feature_Score = "Feature_Score";
         public const string DATA_COLUMN_Protein = "Protein";
         public const string DATA_COLUMN_ResidueStart = "ResidueStart";
         public const string DATA_COLUMN_ResidueEnd = "ResidueEnd";
@@ -45,6 +48,7 @@ namespace PHRPReader
         public const string DATA_COLUMN_EValue = "EValue";
         public const string DATA_COLUMN_QValue = "QValue";
         public const string DATA_COLUMN_Proteoform_FDR = "Proteoform_FDR";
+        public const string DATA_COLUMN_Proteoform_QValue = "Proteoform_QValue";
         public const string DATA_COLUMN_FragMethod = "FragMethod";
         public const string DATA_COLUMN_Variable_PTMs = "Variable_PTMs";
 
@@ -68,22 +72,23 @@ namespace PHRPReader
             DelM = 7,                            // Precursor error, in Da
             DelMPPM = 8,                         // Precursor error, in ppm
             MH = 9,                              // Theoretical monoisotopic peptide MH (computed by PHRP); note that this is (M+H)+
-            Peptide = 10,                         // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
+            Peptide = 10,                        // This is the sequence with prefix and suffix residues and also with modification mass values, e.g. [42.01]
             Proteoform_ID = 11,
             Feature_Intensity = 12,
-            Protein = 13,                        // Protein Name
-            ResidueStart = 14,
-            ResidueEnd = 15,
-            Unexpected_Mod_Count = 16,
-            Peak_Count = 17,
-            Matched_Peak_Count = 18,
-            Matched_Fragment_Ion_Count = 19,
-            PValue = 20,
-            Rank_PValue = 21,
-            EValue = 22,
-            QValue = 23,
-            Proteoform_FDR = 24,
-            VariablePTMs = 25
+            Feature_Score = 13,
+            Protein = 14,                        // Protein Name
+            ResidueStart = 15,
+            ResidueEnd = 16,
+            Unexpected_Mod_Count = 17,
+            Peak_Count = 18,
+            Matched_Peak_Count = 19,
+            Matched_Fragment_Ion_Count = 20,
+            PValue = 21,
+            Rank_PValue = 22,
+            EValue = 23,
+            QValue = 24,
+            Proteoform_QValue = 25,
+            VariablePTMs = 26
         }
 
 #pragma warning restore 1591
@@ -178,7 +183,7 @@ namespace PHRPReader
         protected override List<string> GetColumnHeaderNames()
         {
             var headerNames = new List<string>();
-            headerNames.AddRange(GetColumnHeaderNamesAndIDs().Keys);
+            headerNames.AddRange(GetColumnHeaderNamesAndIDs(true).Keys);
             return headerNames;
         }
 
@@ -186,7 +191,7 @@ namespace PHRPReader
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
         /// <returns>Dictionary of header names and enum values</returns>
-        public static SortedDictionary<string, TopPICSynFileColumns> GetColumnHeaderNamesAndIDs()
+        public static SortedDictionary<string, TopPICSynFileColumns> GetColumnHeaderNamesAndIDs(bool includeLegacyNames)
         {
             var headerColumns = new SortedDictionary<string, TopPICSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
@@ -202,7 +207,8 @@ namespace PHRPReader
                 {DATA_COLUMN_MH, TopPICSynFileColumns.MH},
                 {DATA_COLUMN_Peptide, TopPICSynFileColumns.Peptide},
                 {DATA_COLUMN_Proteoform_ID, TopPICSynFileColumns.Proteoform_ID},
-                {DATA_COLUMN_Feature_intensity, TopPICSynFileColumns.Feature_Intensity},
+                {DATA_COLUMN_Feature_Intensity, TopPICSynFileColumns.Feature_Intensity},
+                {DATA_COLUMN_Feature_Score, TopPICSynFileColumns.Feature_Score},
                 {DATA_COLUMN_Protein, TopPICSynFileColumns.Protein},
                 {DATA_COLUMN_ResidueStart, TopPICSynFileColumns.ResidueStart},
                 {DATA_COLUMN_ResidueEnd, TopPICSynFileColumns.ResidueEnd},
@@ -213,10 +219,20 @@ namespace PHRPReader
                 {DATA_COLUMN_PValue, TopPICSynFileColumns.PValue},
                 {DATA_COLUMN_Rank_PValue, TopPICSynFileColumns.Rank_PValue},
                 {DATA_COLUMN_EValue, TopPICSynFileColumns.EValue},
-                {DATA_COLUMN_QValue, TopPICSynFileColumns.QValue},
-                {DATA_COLUMN_Proteoform_FDR, TopPICSynFileColumns.Proteoform_FDR},
-                {DATA_COLUMN_Variable_PTMs, TopPICSynFileColumns.VariablePTMs}
+                {DATA_COLUMN_QValue, TopPICSynFileColumns.QValue}
             };
+
+            if (!includeLegacyNames)
+            {
+                headerColumns.Add(DATA_COLUMN_Proteoform_QValue, TopPICSynFileColumns.Proteoform_QValue);
+                headerColumns.Add(DATA_COLUMN_Variable_PTMs, TopPICSynFileColumns.VariablePTMs);
+
+                return headerColumns;
+            }
+
+            headerColumns.Add(DATA_COLUMN_Proteoform_FDR, TopPICSynFileColumns.Proteoform_QValue);
+            headerColumns.Add(DATA_COLUMN_Proteoform_QValue, TopPICSynFileColumns.Proteoform_QValue);
+            headerColumns.Add(DATA_COLUMN_Variable_PTMs, TopPICSynFileColumns.VariablePTMs);
 
             return headerColumns;
         }
@@ -230,7 +246,7 @@ namespace PHRPReader
         // ReSharper disable once UnusedMember.Global
         public static Dictionary<TopPICSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
-            var headerColumns = GetColumnHeaderNamesAndIDs();
+            var headerColumns = GetColumnHeaderNamesAndIDs(true);
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
         }
 
@@ -381,6 +397,7 @@ namespace PHRPReader
         public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
         {
             const int SCAN_NOT_FOUND_FLAG = -100;
+            const string NOT_FOUND = "==SCORE_NOT_FOUND==";
 
             var columns = line.Split('\t');
 
@@ -395,75 +412,82 @@ namespace PHRPReader
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
+                    return false;
+                }
+
+                psm.ResultID = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+                psm.ScoreRank = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1);
+
+                var peptide = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+
+                if (fastReadMode)
+                {
+                    psm.SetPeptide(peptide, updateCleanSequence: false);
                 }
                 else
                 {
-                    psm.ResultID = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                    psm.ScoreRank = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1);
-
-                    var peptide = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
-
-                    if (fastReadMode)
-                    {
-                        psm.SetPeptide(peptide, updateCleanSequence: false);
-                    }
-                    else
-                    {
-                        psm.SetPeptide(peptide, mCleavageStateCalculator);
-                    }
-
-                    psm.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
-
-                    var protein = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
-                    psm.AddProtein(protein);
-
-                    var precursorMZ = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
-                    psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
-
-                    psm.MassErrorDa = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
-                    psm.MassErrorPPM = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
-
-                    success = true;
+                    psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                if (success)
+                psm.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+
+                var protein = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                psm.AddProtein(protein);
+
+                var precursorMZ = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
+
+                psm.MassErrorDa = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
+                psm.MassErrorPPM = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+
+                if (!fastReadMode)
                 {
-                    if (!fastReadMode)
-                    {
-                        UpdatePSMUsingSeqInfo(psm);
-                    }
-
-                    // Store the remaining scores
-                    AddScore(psm, columns, DATA_COLUMN_Prsm_ID);
-                    AddScore(psm, columns, DATA_COLUMN_Spectrum_ID);
-                    AddScore(psm, columns, DATA_COLUMN_FragMethod);
-
-                    AddScore(psm, columns, DATA_COLUMN_MH);
-
-                    AddScore(psm, columns, DATA_COLUMN_Proteoform_ID);
-                    AddScore(psm, columns, DATA_COLUMN_Feature_intensity);
-                    AddScore(psm, columns, DATA_COLUMN_ResidueStart);
-                    AddScore(psm, columns, DATA_COLUMN_ResidueEnd);
-
-                    AddScore(psm, columns, DATA_COLUMN_Unexpected_Mod_Count);
-                    AddScore(psm, columns, DATA_COLUMN_Peak_Count);
-                    AddScore(psm, columns, DATA_COLUMN_Matched_Peak_Count);
-                    AddScore(psm, columns, DATA_COLUMN_Matched_Fragment_Ion_Count);
-
-                    AddScore(psm, columns, DATA_COLUMN_PValue);
-                    AddScore(psm, columns, DATA_COLUMN_EValue);
-                    AddScore(psm, columns, DATA_COLUMN_QValue);
-
-                    AddScore(psm, columns, DATA_COLUMN_Proteoform_FDR);
-                    AddScore(psm, columns, DATA_COLUMN_Variable_PTMs);
+                    UpdatePSMUsingSeqInfo(psm);
                 }
+
+                psm.MSGFSpecEValue = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_EValue, mColumnHeaders);
+
+                // Store the remaining scores
+                AddScore(psm, columns, DATA_COLUMN_Prsm_ID);
+                AddScore(psm, columns, DATA_COLUMN_Spectrum_ID);
+                AddScore(psm, columns, DATA_COLUMN_FragMethod);
+
+                AddScore(psm, columns, DATA_COLUMN_MH);
+
+                AddScore(psm, columns, DATA_COLUMN_Proteoform_ID);
+                AddScore(psm, columns, DATA_COLUMN_Feature_Intensity);
+                AddScore(psm, columns, DATA_COLUMN_Feature_Score);
+                AddScore(psm, columns, DATA_COLUMN_ResidueStart);
+                AddScore(psm, columns, DATA_COLUMN_ResidueEnd);
+
+                AddScore(psm, columns, DATA_COLUMN_Unexpected_Mod_Count);
+                AddScore(psm, columns, DATA_COLUMN_Peak_Count);
+                AddScore(psm, columns, DATA_COLUMN_Matched_Peak_Count);
+                AddScore(psm, columns, DATA_COLUMN_Matched_Fragment_Ion_Count);
+
+                AddScore(psm, columns, DATA_COLUMN_PValue);
+                AddScore(psm, columns, DATA_COLUMN_EValue);
+                AddScore(psm, columns, DATA_COLUMN_QValue);
+
+                var proteoformQValue = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Proteoform_QValue, mColumnHeaders, NOT_FOUND);
+                if (proteoformQValue != NOT_FOUND)
+                {
+                    psm.SetScore(DATA_COLUMN_Proteoform_QValue, proteoformQValue);
+                }
+                else
+                {
+                    AddScore(psm, columns, DATA_COLUMN_Proteoform_FDR);
+                }
+
+                AddScore(psm, columns, DATA_COLUMN_Variable_PTMs);
+
+                return true;
             }
             catch (Exception ex)
             {
                 ReportError("Error parsing line " + linesRead + " in the TopPIC data file: " + ex.Message);
+                return false;
             }
-
-            return success;
         }
     }
 }
