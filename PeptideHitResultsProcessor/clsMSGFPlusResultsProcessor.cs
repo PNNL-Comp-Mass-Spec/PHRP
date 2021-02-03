@@ -30,8 +30,8 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public clsMSGFPlusResultsProcessor()
         {
-            FileDate = "July 23, 2019";
-            mModMassRegEx = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
+            FileDate = "February 3, 2021";
+            mModMassRegEx = new Regex(MSGFPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
 
             mPeptideCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
             mPeptideCleavageStateCalculator.SetStandardEnzymeMatchSpec(clsPeptideCleavageStateCalculator.StandardCleavageAgentConstants.Trypsin);
@@ -46,18 +46,18 @@ namespace PeptideHitResultsProcessor
         public const string FILENAME_SUFFIX_MSGFDB_FILE = "_msgfdb";
         public const string FILENAME_SUFFIX_MSGFPLUS_FILE = "_msgfplus";
 
-        public const string N_TERMINUS_SYMBOL_MSGFDB = "_.";
+        public const string N_TERMINUS_SYMBOL_MSGFPlus = "_.";
 
-        public const string C_TERMINUS_SYMBOL_MSGFDB = "._";
+        public const string C_TERMINUS_SYMBOL_MSGFPlus = "._";
 
         /// <summary>
-        /// Filter passing peptides have MSGFDB_SpecEValue less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
+        /// Filter passing peptides have MS-GF+ less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
         /// This filter is also used by MSPathFinder
         /// </summary>
         public const float DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD = 5E-07f;
 
         /// <summary>
-        /// Filter passing peptides have MSGFDB_SpecEValue less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
+        /// Filter passing peptides have MS-GF+ less than 5E-7 Or EValue less than 0.75 or QValue less than 10%
         /// This filter is also used by MSPathFinder
         /// </summary>
         public const float DEFAULT_SYN_FILE_EVALUE_THRESHOLD = 0.75f;
@@ -72,9 +72,9 @@ namespace PeptideHitResultsProcessor
         // -57.021+42.011HWWTLTTDRINK  matches -57.021+42.011 (two separate mods)
         // +42.011MDHTPQSQLK           matches +42.011
         // ReSharper restore CommentTypo
-        private const string MSGFDB_N_TERMINAL_MOD_MASS_REGEX = @"^([0-9\.\+\-]+)";
+        private const string MSGFPlus_N_TERMINAL_MOD_MASS_REGEX = @"^([0-9\.\+\-]+)";
 
-        private const string MSGFDB_MOD_MASS_REGEX = @"([+-][0-9\.]+)";
+        private const string MSGFPlus_MOD_MASS_REGEX = @"([+-][0-9\.]+)";
 
         private const string PROTEIN_AND_TERM_SYMBOLS_REGEX = @"([^;]+)\(pre=(.),post=(.)\)";
 
@@ -127,8 +127,8 @@ namespace PeptideHitResultsProcessor
             public int ScanNum;
             public string FragMethod;
             public string PrecursorMZ;
-            public string PMErrorDa;                // Corresponds to PMError(Da); MSGFDB stores this value as Observed - Theoretical
-            public string PMErrorPPM;               // Corresponds to PMError(ppm); MSGFDB stores this value as Observed - Theoretical
+            public string PMErrorDa;                // Corresponds to PMError(Da); MS-GF+ stores this value as Observed - Theoretical
+            public string PMErrorPPM;               // Corresponds to PMError(ppm); MS-GF+ stores this value as Observed - Theoretical
             public string MH;
             public string Charge;
             public short ChargeNum;
@@ -964,7 +964,7 @@ namespace PeptideHitResultsProcessor
                         searchResultsPrefiltered.TrimExcess();
 
                         // Sort the SearchResults by scan, charge, and ascending SpecEValue
-                        searchResultsPrefiltered.Sort(new MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide());
+                        searchResultsPrefiltered.Sort(new MSGFPlusSearchResultsComparerScanChargeSpecEValuePeptide());
 
                         if (filteredOutputFileType == FilteredOutputFileTypeConstants.FHTFile)
                         {
@@ -1216,7 +1216,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="pepToProteinMapping"></param>
         /// <param name="mtsPepToProteinMapFilePath"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool LoadPeptideToProteinMapInfoMSGFDB(
+        private bool LoadPeptideToProteinMapInfoMSGFPlus(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
             IReadOnlyList<clsMSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
@@ -1727,7 +1727,7 @@ namespace PeptideHitResultsProcessor
 
                 // Precursor mass error could be in PPM or Da
                 //   In MSGFDB, the header line will have PMError(ppm)        or PMError(Da)
-                //   In MS-GF+,  the header line will have PrecursorError(ppm) or PrecursorError(Da)
+                //   In MS-GF+, the header line will have PrecursorError(ppm) or PrecursorError(Da)
                 double precursorErrorDa = 0;
 
                 if (columnMapping[MSGFPlusResultsFileColumns.PMErrorPPM] >= 0)
@@ -2207,11 +2207,11 @@ namespace PeptideHitResultsProcessor
                 {
                     if (splitLine?.Length > 0)
                     {
-                        errorLog += "Error parsing MSGFDB Results for RowIndex '" + splitLine[0] + "'\n";
+                        errorLog += "Error parsing MS-GF+ Results for RowIndex '" + splitLine[0] + "'\n";
                     }
                     else
                     {
-                        errorLog += "Error parsing MSGFDB Results in ParseMSGFPlusSynFileEntry\n";
+                        errorLog += "Error parsing MS-GF+ Results in ParseMSGFPlusSynFileEntry\n";
                     }
                 }
                 return false;
@@ -2246,7 +2246,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Main processing function
         /// </summary>
-        /// <param name="inputFilePath">MSGFDB results file</param>
+        /// <param name="inputFilePath">MS-GF+ results file</param>
         /// <param name="outputDirectoryPath">Output directory</param>
         /// <param name="parameterFilePath">Parameter file for data processing</param>
         /// <returns>True if successful, False if failure</returns>
@@ -2382,12 +2382,12 @@ namespace PeptideHitResultsProcessor
                             out var isMsgfPlus, specIdToIndex, FilteredOutputFileTypeConstants.SynFile);
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
-                        // LoadPeptideToProteinMapInfoMSGFDB also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
+                        // LoadPeptideToProteinMapInfoMSGFPlus also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
                         var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(inputFile.DirectoryName, baseName) + ".txt", outputDirectoryPath, mts: false);
 
                         ResetProgress("Loading the PepToProtein map file (if it exists): " + Path.GetFileName(pepToProteinMapFilePath), true);
 
-                        LoadPeptideToProteinMapInfoMSGFDB(pepToProteinMapFilePath, outputDirectoryPath, msgfPlusModInfo, isMsgfPlus, pepToProteinMapping, out var mtsPepToProteinMapFilePath);
+                        LoadPeptideToProteinMapInfoMSGFPlus(pepToProteinMapFilePath, outputDirectoryPath, msgfPlusModInfo, isMsgfPlus, pepToProteinMapping, out var mtsPepToProteinMapFilePath);
 
                         // Create the other PHRP-specific files
                         ResetProgress("Creating the PHRP files for " + Path.GetFileName(synOutputFilePath), true);
@@ -2512,8 +2512,8 @@ namespace PeptideHitResultsProcessor
             return true;
         }
 
-        private static readonly Regex NTerminalModMassMatcher = new Regex(MSGFDB_N_TERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
-        private static readonly Regex ModMassMatcher = new Regex(MSGFDB_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex NTerminalModMassMatcher = new Regex(MSGFPlus_N_TERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ModMassMatcher = new Regex(MSGFPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
@@ -2755,14 +2755,14 @@ namespace PeptideHitResultsProcessor
 
         private string ReplaceTerminus(string peptide)
         {
-            if (peptide.StartsWith(N_TERMINUS_SYMBOL_MSGFDB))
+            if (peptide.StartsWith(N_TERMINUS_SYMBOL_MSGFPlus))
             {
-                peptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST + "." + peptide.Substring(N_TERMINUS_SYMBOL_MSGFDB.Length);
+                peptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST + "." + peptide.Substring(N_TERMINUS_SYMBOL_MSGFPlus.Length);
             }
 
-            if (peptide.EndsWith(C_TERMINUS_SYMBOL_MSGFDB))
+            if (peptide.EndsWith(C_TERMINUS_SYMBOL_MSGFPlus))
             {
-                peptide = peptide.Substring(0, peptide.Length - C_TERMINUS_SYMBOL_MSGFDB.Length) + "." + clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
+                peptide = peptide.Substring(0, peptide.Length - C_TERMINUS_SYMBOL_MSGFPlus.Length) + "." + clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
             }
 
             return peptide;
@@ -3182,7 +3182,7 @@ namespace PeptideHitResultsProcessor
 
         #region "IComparer Classes"
 
-        private class MSGFDBSearchResultsComparerScanChargeSpecEValuePeptide : IComparer<udtMSGFPlusSearchResultType>
+        private class MSGFPlusSearchResultsComparerScanChargeSpecEValuePeptide : IComparer<udtMSGFPlusSearchResultType>
         {
             public int Compare(udtMSGFPlusSearchResultType x, udtMSGFPlusSearchResultType y)
             {
