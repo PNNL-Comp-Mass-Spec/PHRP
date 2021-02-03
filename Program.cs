@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MODa
 
-        public const string PROGRAM_DATE = "January 27, 2021";
+        public const string PROGRAM_DATE = "February 3, 2021";
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional
@@ -300,7 +300,7 @@ namespace PeptideHitResultsProcRunner
 
             var validParameters = new List<string> { "I", "O", "P", "M", "T", "N", "ProteinMods",
                 "F", "Fasta", "IgnorePepToProtMapErrors", "ProteinModsViaPHRP", "ProteinModsIncludeReversed",
-                "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "InsFHT", "InsSyn", "SynProb", "S", "A",
+                "MSGFPlusEValue", "MSGFPlusSpecEValue", "SynPValue", "FHT", "Syn", "InsFHT", "InsSyn", "SynProb", "S", "A",
                 "R", "L" };
 
             try
@@ -360,6 +360,23 @@ namespace PeptideHitResultsProcRunner
                 if (parseCommandLine.IsParameterPresent("UseExistingPepToProteinMapFile"))
                     mUseExistingMTSPepToProteinMapFile = true;
 
+                if (parseCommandLine.RetrieveValueForParameter("FHT", out value))
+                {
+                    if (ParseBoolean(value, out var blnValue))
+                    {
+                        mCreateFirstHitsFile = blnValue;
+                    }
+                }
+
+                if (parseCommandLine.RetrieveValueForParameter("Syn", out value))
+                {
+                    if (ParseBoolean(value, out var blnValue))
+                    {
+                        mCreateSynopsisFile = blnValue;
+                    }
+                }
+
+                // InsFHT is a synonym for command line argument /FHT
                 if (parseCommandLine.RetrieveValueForParameter("InsFHT", out value))
                 {
                     if (ParseBoolean(value, out var blnValue))
@@ -368,6 +385,7 @@ namespace PeptideHitResultsProcRunner
                     }
                 }
 
+                // InsSyn is a synonym for command line argument /Syn
                 if (parseCommandLine.RetrieveValueForParameter("InsSyn", out value))
                 {
                     if (ParseBoolean(value, out var blnValue))

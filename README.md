@@ -36,7 +36,7 @@ PeptideHitResultsProcRunner.exe InputFilePath [/O:OutputDirectoryPath]
  [/ProteinModsViaPHRP] [/IgnorePepToProtMapErrors]
  [/ProteinModsIncludeReversed] [/UseExistingPepToProteinMapFile]
  [/T:MassCorrectionTagsFilePath] [/N:SearchToolParameterFilePath] 
- [/SynPvalue:0.2] [/InsFHT:True|False] [/InsSyn:True|False]
+ [/SynPvalue:0.2] [/FHT:True|False] [/Syn:True|False]
  [/S:[MaxLevel]] [/A:AlternateOutputDirectoryPath] [/R] [/L:[LogFilePath]]
 ```
 
@@ -94,11 +94,11 @@ to determine which peptides are written to the the synopsis file.  The default i
 /SynPvalue:0.2  Note that peptides with a TotalPRMScore >= 50 or an FScore >= 0 will also be 
 included in the synopsis file.
 
-Use /InsFHT:True or /InsFHT:False to toggle the creation of a first-hits file (_fht.txt) when 
-processing Inspect or MSGF-DB results (default is /InsFHT:True)
+Use /FHT:True or /FHT:False to toggle the creation of a first-hits file (_fht.txt) when 
+processing Inspect or MSGF-DB results (default is /FHT:True)
 
-Use /InsSyn:True or /InsSyn:False to toggle the creation of a synopsis file (_syn.txt) when 
-processing Inspect or MSGF-DB results (default is /InsSyn:True)
+Use /Syn:True or /Syn:False to toggle the creation of a synopsis file (_syn.txt) when 
+processing Inspect or MSGF-DB results (default is /Syn:True)
 
 Use /S to process all valid files in the input directory and subdirectories. Include a 
 number after /S (like /S:2) to limit the level of subdirectories to examine.
