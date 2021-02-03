@@ -38,7 +38,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         protected clsPHRPBaseClass()
         {
-            FileDate = "January 27, 2021";
+            FileDate = "February 3, 2021";
 
             mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
 
@@ -263,7 +263,7 @@ namespace PeptideHitResultsProcessor
 
         /// <summary>
         /// Tracks the protein names in the order that they are listed in the FASTA file
-        /// Keys are protein Names, values are a sequentially assigned integer
+        /// Keys are protein names, values are a sequentially assigned integer
         /// </summary>
         protected readonly Dictionary<string, int> mProteinNameOrder;
 
