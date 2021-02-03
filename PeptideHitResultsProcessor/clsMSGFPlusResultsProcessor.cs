@@ -2383,7 +2383,10 @@ namespace PeptideHitResultsProcessor
 
                         // Load the PeptideToProteinMap information; if the file doesn't exist, a warning will be displayed, but processing will continue
                         // LoadPeptideToProteinMapInfoMSGFPlus also creates _msgfplus_PepToProtMapMTS.txt file with the new mod symbols and corrected termini symbols
-                        var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(Path.Combine(inputFile.DirectoryName, baseName) + ".txt", outputDirectoryPath, mts: false);
+
+                        var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
+
+                        var pepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: false);
 
                         ResetProgress("Loading the PepToProtein map file (if it exists): " + Path.GetFileName(pepToProteinMapFilePath), true);
 
@@ -2441,7 +2444,8 @@ namespace PeptideHitResultsProcessor
 
                 if (string.IsNullOrEmpty(mtsPepToProteinMapFilePath))
                 {
-                    mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, mts: true);
+                    var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
+                    mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: true);
                 }
 
                 var sourcePHRPDataFiles = new List<string>();

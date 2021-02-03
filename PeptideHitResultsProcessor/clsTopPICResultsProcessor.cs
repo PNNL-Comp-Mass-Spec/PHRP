@@ -1538,7 +1538,8 @@ namespace PeptideHitResultsProcessor
 
             // Create the MTSPepToProteinMap file
 
-            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseName, outputDirectoryPath, mts: true);
+            var baseNameFilePath = Path.Combine(inputFile.DirectoryName ?? string.Empty, baseName);
+            var mtsPepToProteinMapFilePath = ConstructPepToProteinMapFilePath(baseNameFilePath, outputDirectoryPath, mts: true);
 
             var sourcePHRPDataFiles = new List<string>();
 
