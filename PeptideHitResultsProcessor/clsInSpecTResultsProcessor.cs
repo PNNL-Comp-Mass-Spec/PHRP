@@ -1501,7 +1501,7 @@ namespace PeptideHitResultsProcessor
                     // Resolve the mods in mInspectModInfo with the ModDefs mods
                     ResolveInspectModsWithModDefinitions(inspectModInfo);
 
-                    if (CreateInspectFirstHitsFile)
+                    if (CreateFirstHitsFile)
                     {
                         // Create the first hits output file
                         ResetProgress("Creating the FHT file (top TotalPRMScore)", true);
@@ -1520,7 +1520,7 @@ namespace PeptideHitResultsProcessor
                         success = CreateFHTorSYNResultsFile(inputFilePath, outputFilePath, inspectModInfo, FilteredOutputFileTypeConstants.FHTbyFScore);
                     }
 
-                    if (CreateInspectSynopsisFile)
+                    if (CreateSynopsisFile)
                     {
                         // Create the synopsis output file
                         ResetProgress("Creating the SYN file", true);

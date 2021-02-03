@@ -98,8 +98,8 @@ namespace PeptideHitResultsProcessor
             ParameterFileName = options.ParameterFileName;
             SettingsFileName = options.SettingsFileName;
 
-            CreateInspectFirstHitsFile = options.CreateInspectFirstHitsFile;
-            CreateInspectSynopsisFile = options.CreateInspectSynopsisFile;
+            CreateFirstHitsFile = options.CreateFirstHitsFile;
+            CreateSynopsisFile = options.CreateSynopsisFile;
         }
 
         public override ProcessStatus Start()
@@ -190,8 +190,8 @@ namespace PeptideHitResultsProcessor
                 m_PeptideHitResultsProcessor.SearchToolParameterFilePath = m_ParameterFilePath;
                 m_PeptideHitResultsProcessor.InspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
-                m_PeptideHitResultsProcessor.CreateInspectFirstHitsFile = CreateInspectFirstHitsFile;
-                m_PeptideHitResultsProcessor.CreateInspectSynopsisFile = CreateInspectSynopsisFile;
+                m_PeptideHitResultsProcessor.CreateFirstHitsFile = CreateFirstHitsFile;
+                m_PeptideHitResultsProcessor.CreateSynopsisFile = CreateSynopsisFile;
 
                 m_thThread = new Thread(ProcessPeptideHitResultsFileWork);
                 m_thThread.Start();

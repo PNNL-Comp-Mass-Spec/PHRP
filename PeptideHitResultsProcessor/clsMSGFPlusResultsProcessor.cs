@@ -2342,7 +2342,7 @@ namespace PeptideHitResultsProcessor
 
                     string fhtOutputFilePath;
 
-                    if (CreateInspectFirstHitsFile)
+                    if (CreateFirstHitsFile)
                     {
                         // Read the FASTA file to cache the protein names in memory
                         // These will be used when creating the first hits file
@@ -2367,7 +2367,7 @@ namespace PeptideHitResultsProcessor
                         fhtOutputFilePath = string.Empty;
                     }
 
-                    if (CreateInspectSynopsisFile)
+                    if (CreateSynopsisFile)
                     {
                         // Create the synopsis output file
                         ResetProgress("Creating the SYN file", true);

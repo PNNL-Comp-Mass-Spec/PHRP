@@ -49,8 +49,8 @@ namespace PeptideHitResultsProcRunner
         // Consequently, the code will only try to create the _ProteinMods.txt file, it will not re-create the PHRP data files
         private static bool mCreateProteinModsUsingPHRPDataFile;
 
-        private static bool mCreateInspectOrMSGFPlusFirstHitsFile;
-        private static bool mCreateInspectOrMSGFPlusSynopsisFile;
+        private static bool mCreateFirstHitsFile;
+        private static bool mCreateSynopsisFile;
 
         private static float mMsgfPlusEValueThreshold;
         private static float mMsgfPlusSpecEValueThreshold;
@@ -107,8 +107,8 @@ namespace PeptideHitResultsProcRunner
             mMsgfPlusSpecEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
             // These should default to True
-            mCreateInspectOrMSGFPlusFirstHitsFile = true;
-            mCreateInspectOrMSGFPlusSynopsisFile = true;
+            mCreateFirstHitsFile = true;
+            mCreateSynopsisFile = true;
             mInspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
             mMODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
@@ -155,8 +155,8 @@ namespace PeptideHitResultsProcRunner
                     CreateProteinModsUsingPHRPDataFile = mCreateProteinModsUsingPHRPDataFile,
                     MsgfPlusEValueThreshold = mMsgfPlusEValueThreshold,
                     MsgfPlusSpecEValueThreshold = mMsgfPlusSpecEValueThreshold,
-                    CreateInspectOrMSGFDbFirstHitsFile = mCreateInspectOrMSGFPlusFirstHitsFile,
-                    CreateInspectOrMSGFDbSynopsisFile = mCreateInspectOrMSGFPlusSynopsisFile,
+                    CreateFirstHitsFile = mCreateFirstHitsFile,
+                    CreateSynopsisFile = mCreateSynopsisFile,
                     InspectSynopsisFilePValueThreshold = mInspectSynopsisFilePValueThreshold,
                     MODaMODPlusSynopsisFileProbabilityThreshold = mMODaMODPlusSynopsisFileProbabilityThreshold
                 };
@@ -364,7 +364,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (ParseBoolean(value, out var blnValue))
                     {
-                        mCreateInspectOrMSGFPlusFirstHitsFile = blnValue;
+                        mCreateFirstHitsFile = blnValue;
                     }
                 }
 
@@ -372,7 +372,7 @@ namespace PeptideHitResultsProcRunner
                 {
                     if (ParseBoolean(value, out var blnValue))
                     {
-                        mCreateInspectOrMSGFPlusSynopsisFile = blnValue;
+                        mCreateSynopsisFile = blnValue;
                     }
                 }
 

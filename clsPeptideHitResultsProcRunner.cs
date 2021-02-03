@@ -76,9 +76,9 @@ namespace PeptideHitResultsProcRunner
 
         #region "Properties"
 
-        public bool CreateInspectOrMSGFDbFirstHitsFile { get; set; }
+        public bool CreateFirstHitsFile { get; set; }
 
-        public bool CreateInspectOrMSGFDbSynopsisFile { get; set; }
+        public bool CreateSynopsisFile { get; set; }
 
         public bool CreateProteinModsFile { get; set; }
 
@@ -199,8 +199,8 @@ namespace PeptideHitResultsProcRunner
             ProteinModsFileIncludesReversedProteins = false;
             mUseExistingMTSPepToProteinMapFile = false;
 
-            CreateInspectOrMSGFDbFirstHitsFile = false;
-            CreateInspectOrMSGFDbSynopsisFile = false;
+            CreateFirstHitsFile = false;
+            CreateSynopsisFile = false;
             InspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
             MODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
@@ -232,8 +232,8 @@ namespace PeptideHitResultsProcRunner
             mPeptideHitResultsProcessor.ProteinModsFileIncludesReversedProteins = ProteinModsFileIncludesReversedProteins;
             mPeptideHitResultsProcessor.UseExistingMTSPepToProteinMapFile = mUseExistingMTSPepToProteinMapFile;
 
-            mPeptideHitResultsProcessor.CreateInspectFirstHitsFile = CreateInspectOrMSGFDbFirstHitsFile;
-            mPeptideHitResultsProcessor.CreateInspectSynopsisFile = CreateInspectOrMSGFDbSynopsisFile;
+            mPeptideHitResultsProcessor.CreateFirstHitsFile = CreateFirstHitsFile;
+            mPeptideHitResultsProcessor.CreateSynopsisFile = CreateSynopsisFile;
             mPeptideHitResultsProcessor.InspectSynopsisFilePValueThreshold = InspectSynopsisFilePValueThreshold;
 
             mPeptideHitResultsProcessor.MODaMODPlusSynopsisFileProbabilityThreshold = MODaMODPlusSynopsisFileProbabilityThreshold;
@@ -538,15 +538,15 @@ namespace PeptideHitResultsProcRunner
             LogMessage(string.Format("{0,-45} {1}",
                 "Use Existing MTS PepToProtein Map File:", resultsProcessor.UseExistingMTSPepToProteinMapFile));
 
+            Console.WriteLine();
+            LogMessage(string.Format("{0,-45} {1}",
+                "Create First Hits File:", resultsProcessor.CreateFirstHitsFile));
+
+            LogMessage(string.Format("{0,-45} {1}",
+                "Create Synopsis File:", resultsProcessor.CreateSynopsisFile));
+
             if (resultsProcessor is clsInSpecTResultsProcessor)
             {
-                Console.WriteLine();
-                LogMessage(string.Format("{0,-45} {1}",
-                    "Create Inspect First Hits File:", resultsProcessor.CreateInspectFirstHitsFile));
-
-                LogMessage(string.Format("{0,-45} {1}",
-                    "Create Inspect Synopsis File:", resultsProcessor.CreateInspectSynopsisFile));
-
                 LogMessage(string.Format("{0,-45} {1:E2}",
                     "Inspect Synopsis File PValue Threshold:", resultsProcessor.InspectSynopsisFilePValueThreshold));
             }

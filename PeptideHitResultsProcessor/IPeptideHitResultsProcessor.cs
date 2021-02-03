@@ -155,12 +155,12 @@ namespace PeptideHitResultsProcessor
             /// <summary>
             /// When true, create the Inspect synopsis file
             /// </summary>
-            public bool CreateInspectSynopsisFile;
+            public bool CreateSynopsisFile;
 
             /// <summary>
             /// When true, create the Inspect first hits file
             /// </summary>
-            public bool CreateInspectFirstHitsFile;
+            public bool CreateFirstHitsFile;
         }
         #endregion
 
@@ -228,9 +228,9 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         public virtual string SettingsFileName { get; set; }
 
-        public virtual bool CreateInspectSynopsisFile { get; set; }
+        public virtual bool CreateSynopsisFile { get; set; }
 
-        public virtual bool CreateInspectFirstHitsFile { get; set; }
+        public virtual bool CreateFirstHitsFile { get; set; }
 
         /// <summary>
         /// For passing miscellaneous parameters (not presently used)

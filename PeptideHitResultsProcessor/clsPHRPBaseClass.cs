@@ -294,9 +294,9 @@ namespace PeptideHitResultsProcessor
 
         public bool CreateModificationSummaryFile { get; set; }
 
-        public bool CreateInspectFirstHitsFile { get; set; }
+        public bool CreateFirstHitsFile { get; set; }
 
-        public bool CreateInspectSynopsisFile { get; set; }
+        public bool CreateSynopsisFile { get; set; }
 
         /// <summary>
         /// Create protein mods file
@@ -1593,8 +1593,8 @@ namespace PeptideHitResultsProcessor
             ProteinModsFileIncludesReversedProteins = false;
             UseExistingMTSPepToProteinMapFile = false;
 
-            CreateInspectFirstHitsFile = true;
-            CreateInspectSynopsisFile = true;
+            CreateFirstHitsFile = true;
+            CreateSynopsisFile = true;
 
             MassCorrectionTagsFilePath = string.Empty;
             ModificationDefinitionsFilePath = string.Empty;
