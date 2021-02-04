@@ -273,7 +273,8 @@ namespace PeptideHitResultsProcessor
                 {
                     // Mod Info End
 
-                    if (!parsingModInfo) continue;
+                    if (!parsingModInfo)
+                        continue;
 
                     char residueForMod;
                     int residueLocForMod;
@@ -556,6 +557,7 @@ namespace PeptideHitResultsProcessor
                 using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
                     var headerParsed = false;
+                    var dataHasPValues = false;
 
                     mDeltaMassWarningCount = 0;
 
@@ -586,8 +588,10 @@ namespace PeptideHitResultsProcessor
 
                             headerParsed = true;
 
+                            dataHasPValues = columnMapping[TopPICResultsFileColumns.Pvalue] >= 0;
+
                             // Write the header line
-                            WriteSynFHTFileHeader(writer, ref errorLog);
+                            WriteSynFHTFileHeader(writer, dataHasPValues, ref errorLog);
 
                             continue;
                         }
@@ -607,8 +611,6 @@ namespace PeptideHitResultsProcessor
                     // Sort the SearchResults by scan, charge, and ascending PValue
                     searchResultsUnfiltered.Sort(new TopPICSearchResultsComparerScanChargePValuePeptide());
 
-                    var sortOnPValue = columnMapping[TopPICResultsFileColumns.Pvalue] >= 0;
-
                     // Now filter the data
 
                     // Initialize variables
@@ -624,13 +626,13 @@ namespace PeptideHitResultsProcessor
                         }
 
                         // Store the results for this scan
-                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults, sortOnPValue);
+                        StoreSynMatches(searchResultsUnfiltered, startIndex, endIndex, filteredSearchResults, dataHasPValues);
 
                         startIndex = endIndex + 1;
                     }
 
                     // Sort the data in filteredSearchResults then write out to disk
-                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog, sortOnPValue);
+                    SortAndWriteFilteredSearchResults(writer, filteredSearchResults, ref errorLog, dataHasPValues);
                 }
 
                 // Inform the user if any errors occurred
@@ -1482,7 +1484,8 @@ namespace PeptideHitResultsProcessor
                     // Auto-replace "_TopPIC_PrSMs" or "_TopPIC_Proteoforms" with "_toppic"
                     foreach (var suffix in new List<string> { FILENAME_SUFFIX_TopPIC_PRSMs_FILE, FILENAME_SUFFIX_TopPIC_PROTEOFORMS_FILE })
                     {
-                        if (!baseName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) continue;
+                        if (!baseName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                            continue;
                         baseName = baseName.Substring(0, baseName.Length - suffix.Length) + "_toppic";
                         break;
                     }
@@ -1622,16 +1625,16 @@ namespace PeptideHitResultsProcessor
             TextWriter writer,
             IEnumerable<udtTopPICSearchResultType> filteredSearchResults,
             ref string errorLog,
-            bool sortOnPValue)
+            bool dataHasPValues)
         {
             IOrderedEnumerable<udtTopPICSearchResultType> query;
 
-            if (sortOnPValue)
+            if (dataHasPValues)
             {
                 // Sort filteredSearchResults by ascending PValue, ascending scan, ascending charge, ascending peptide, and ascending protein
                 query = from item in filteredSearchResults orderby item.PValueNum, item.ScanNum, item.ChargeNum, item.Proteoform, item.Protein select item;
             }
-            else 
+            else
             {
                 // Sort filteredSearchResults by ascending EValue, ascending scan, ascending charge, ascending peptide, and ascending protein
                 query = from item in filteredSearchResults orderby item.EValueNum, item.ScanNum, item.ChargeNum, item.Proteoform, item.Protein select item;
@@ -1640,7 +1643,7 @@ namespace PeptideHitResultsProcessor
             var index = 1;
             foreach (var result in query)
             {
-                WriteSearchResultToFile(index, writer, result, ref errorLog);
+                WriteSearchResultToFile(index, writer, result, dataHasPValues, ref errorLog);
                 index++;
             }
         }
@@ -1650,17 +1653,17 @@ namespace PeptideHitResultsProcessor
             int startIndex,
             int endIndex,
             ICollection<udtTopPICSearchResultType> filteredSearchResults,
-            bool sortOnPValue)
+            bool dataHasPValues)
         {
-            AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex, sortOnPValue);
+            AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex, dataHasPValues);
 
             // The calling procedure already sorted by scan, charge, and PValue; no need to re-sort
 
             // Now store or write out the matches that pass the filters
             for (var index = startIndex; index <= endIndex; index++)
             {
-                if (sortOnPValue && searchResults[index].PValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold ||
-                    !sortOnPValue && searchResults[index].EValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold)
+                if (dataHasPValues && searchResults[index].PValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold ||
+                    !dataHasPValues && searchResults[index].EValueNum <= MSAlignAndTopPICSynopsisFilePValueThreshold)
                 {
                     filteredSearchResults.Add(searchResults[index]);
                 }
@@ -1671,9 +1674,11 @@ namespace PeptideHitResultsProcessor
         /// Write out the header line for synopsis / first hits files
         /// </summary>
         /// <param name="writer"></param>
+        /// <param name="dataHasPValues"></param>
         /// <param name="errorLog"></param>
         private void WriteSynFHTFileHeader(
             TextWriter writer,
+            bool dataHasPValues,
             ref string errorLog)
         {
             try
@@ -1681,6 +1686,12 @@ namespace PeptideHitResultsProcessor
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
                 var headerColumns = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs(false);
+
+                if (!dataHasPValues)
+                {
+                    headerColumns.Remove(clsPHRPParserTopPIC.DATA_COLUMN_PValue);
+                    headerColumns.Remove(clsPHRPParserTopPIC.DATA_COLUMN_Rank_PValue);
+                }
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
@@ -1701,11 +1712,13 @@ namespace PeptideHitResultsProcessor
         /// <param name="resultID"></param>
         /// <param name="writer"></param>
         /// <param name="udtSearchResult"></param>
+        /// <param name="dataHasPValues"></param>
         /// <param name="errorLog"></param>
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
             udtTopPICSearchResultType udtSearchResult,
+            bool dataHasPValues,
             ref string errorLog)
         {
             try
@@ -1737,14 +1750,19 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Unexpected_Mod_Count,       // Unexpected_Mod_Count
                     udtSearchResult.Peaks,                      // Peak_count
                     udtSearchResult.Matched_peaks,              // Matched_Peak_Count
-                    udtSearchResult.Matched_fragment_ions,      // Matched_Fragment_Ion_Count
-                    udtSearchResult.Pvalue,
-                    udtSearchResult.RankPValue.ToString(),
-                    udtSearchResult.Evalue,
-                    udtSearchResult.Qvalue,
-                    udtSearchResult.Proteoform_QValue,
-                    udtSearchResult.VariablePTMs
+                    udtSearchResult.Matched_fragment_ions      // Matched_Fragment_Ion_Count
                 };
+
+                if (dataHasPValues)
+                {
+                    data.Add(udtSearchResult.Pvalue);
+                    data.Add(udtSearchResult.RankPValue.ToString());
+                }
+
+                data.Add(udtSearchResult.Evalue);
+                data.Add(udtSearchResult.Qvalue);
+                data.Add(udtSearchResult.Proteoform_QValue);
+                data.Add(udtSearchResult.VariablePTMs);
 
                 writer.WriteLine(CollapseList(data));
             }
