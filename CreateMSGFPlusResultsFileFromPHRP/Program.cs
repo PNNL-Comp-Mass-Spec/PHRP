@@ -26,6 +26,8 @@ namespace CreateMSGFPlusResultsFileFromPHRP
 
     internal static class Program
     {
+        // Ignore Spelling: Traq, msgfdb, fht, Frag, Novo, delM
+
         public const string PROGRAM_DATE = "February 23, 2021";
         private const double MASS_C13 = 1.00335483d;
 
