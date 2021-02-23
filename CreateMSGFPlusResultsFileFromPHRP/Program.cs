@@ -107,22 +107,14 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                     return false;
                 }
 
+                var inputFileDirectoryPath = inputFile.Directory != null ? inputFile.Directory.FullName : string.Empty;
+
+                var datasetName = GetDatasetName(inputFile.Name);
+
                 if (string.IsNullOrEmpty(mOutputFilePath))
                 {
                     // Auto-define the output file
-
-                    mOutputFilePath = Path.GetFileNameWithoutExtension(inputFile.Name);
-                    if (mOutputFilePath.EndsWith("_msgfdb_fht", StringComparison.OrdinalIgnoreCase) ||
-                        mOutputFilePath.EndsWith("_msgfdb_syn", StringComparison.OrdinalIgnoreCase) ||
-                        mOutputFilePath.EndsWith("_msgfplus_fht", StringComparison.OrdinalIgnoreCase) ||
-                        mOutputFilePath.EndsWith("_msgfplus_syn", StringComparison.OrdinalIgnoreCase))
-                    {
-                        mOutputFilePath = mOutputFilePath.Substring(0, mOutputFilePath.Length - 11);
-                    }
-
-                    var inputFileDirectoryPath = inputFile.Directory != null ? inputFile.Directory.FullName : string.Empty;
-
-                    mOutputFilePath = Path.Combine(inputFileDirectoryPath, mOutputFilePath + "_msgfplus.tsv");
+                    mOutputFilePath = Path.Combine(inputFileDirectoryPath, datasetName + "_msgfplus.tsv");
                 }
 
                 var phrpOptions = new clsPHRPStartupOptions
@@ -272,6 +264,25 @@ namespace CreateMSGFPlusResultsFileFromPHRP
             var massErrorPPM = clsPeptideMassCalculator.MassToPPM(delM, psm.PrecursorNeutralMass);
 
             return massErrorPPM.ToString("0.0000");
+        }
+
+        private static string GetDatasetName(string inputFileName)
+        {
+            var datasetName = Path.GetFileNameWithoutExtension(inputFileName);
+
+            if (datasetName.EndsWith("_msgfdb_fht", StringComparison.OrdinalIgnoreCase) ||
+                datasetName.EndsWith("_msgfdb_syn", StringComparison.OrdinalIgnoreCase))
+            {
+                return datasetName.Substring(0, datasetName.Length - 11);
+            }
+
+            if (datasetName.EndsWith("_msgfplus_fht", StringComparison.OrdinalIgnoreCase) ||
+                datasetName.EndsWith("_msgfplus_syn", StringComparison.OrdinalIgnoreCase))
+            {
+                return datasetName.Substring(0, datasetName.Length - 13);
+            }
+
+            return datasetName;
         }
 
         private static string GetPrecursorMZ(clsPeptideMassCalculator massCalculator, clsPSM psm)
