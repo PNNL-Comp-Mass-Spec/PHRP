@@ -171,10 +171,12 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                     // ReSharper disable once InconsistentNaming
                     var massErrorPPM = GetCorrectedMassErrorPPM(psm, out var isotopeErrorComputed);
 
+                    var elutionTimeMinutes = psm.ElutionTimeMinutes > 0 ? psm.ElutionTimeMinutes.ToString("0.00") : "0";
+
                     values.Add(phrpReader.DatasetName + ".mzML");                                               // #SpecFile
                     values.Add("index=" + itemsRead);                                                           // SpecID
                     values.Add(psm.ScanNumber.ToString());                                                      // ScanNum
-                    values.Add("0");                                                                            // ScanTime (unknown)
+                    values.Add(elutionTimeMinutes);                                                             // ScanTime (unknown)
                     values.Add(psm.CollisionMode);                                                              // FragMethod
                     values.Add(GetPrecursorMZ(massCalculator, psm));                                            // Precursor m/z
 
