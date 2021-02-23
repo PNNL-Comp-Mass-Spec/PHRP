@@ -10,10 +10,10 @@ using System.Threading;
 using PHRPReader;
 using PRISM;
 
-namespace CreateMSGFDBResultsFileFromPHRP
+namespace CreateMSGFPlusResultsFileFromPHRP
 {
 
-    // This program reads a PHRP-compatible _msgfdb_fht.txt file and creates the
+    // This program reads a PHRP-compatible _msgfplus_fht.txt file and creates the
     // equivalent tab-delimited _msgfplus.tsv file that would have been created
     // by MSGFPlus when converting the .mzIdentML file to a .tsv file
     //

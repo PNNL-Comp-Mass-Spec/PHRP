@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateMSGFDBResultsFileFromPHRP", "CreateMSGFDBResultsFileFromPHRP.csproj", "{87B0E83C-F50D-0A4B-3F3B-147276885A31}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateMSGFPlusResultsFileFromPHRP", "CreateMSGFPlusResultsFileFromPHRP.csproj", "{87B0E83C-F50D-0A4B-3F3B-147276885A31}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

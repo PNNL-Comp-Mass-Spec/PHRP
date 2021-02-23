@@ -5,8 +5,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{87B0E83C-F50D-0A4B-3F3B-147276885A31}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>CreateMSGFDBResultsFileFromPHRP</RootNamespace>
-    <AssemblyName>CreateMSGFDBResultsFileFromPHRP</AssemblyName>
+    <RootNamespace>CreateMSGFPlusResultsFileFromPHRP</RootNamespace>
+    <AssemblyName>CreateMSGFPlusResultsFileFromPHRP</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\CreateMSGFDBResultsFileFromPHRP.xml</DocumentationFile>
+    <DocumentationFile>bin\CreateMSGFPlusResultsFileFromPHRP.xml</DocumentationFile>
     <LangVersion>latest</LangVersion>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -34,7 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\CreateMSGFDBResultsFileFromPHRP.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\CreateMSGFPlusResultsFileFromPHRP.xml</DocumentationFile>
     <LangVersion>latest</LangVersion>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>

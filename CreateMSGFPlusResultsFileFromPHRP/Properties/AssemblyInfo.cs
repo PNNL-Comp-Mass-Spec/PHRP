@@ -8,10 +8,10 @@ using System.Runtime.InteropServices;
 
 // Review the values of the assembly attributes
 
-[assembly: AssemblyTitle("CreateMSGFDBResultsFileFromPHRP")]
+[assembly: AssemblyTitle("CreateMSGFPlusResultsFileFromPHRP")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyCompany("PNNL")]
-[assembly: AssemblyProduct("CreateMSGFDBResultsFileFromPHRP")]
+[assembly: AssemblyProduct("CreateMSGFPlusResultsFileFromPHRP")]
 [assembly: AssemblyCopyright("Copyright © PNNL 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
