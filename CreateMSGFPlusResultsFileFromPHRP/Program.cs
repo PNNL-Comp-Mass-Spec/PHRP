@@ -66,68 +66,60 @@ namespace CreateMSGFPlusResultsFileFromPHRP
 
         public static int Main()
         {
-            int intReturnCode;
             var commandLineParser = new clsParseCommandLine();
-            bool blnProceed;
-            intReturnCode = 0;
+            bool proceed;
+
             mInputFilePath = string.Empty;
             mOutputFilePath = string.Empty;
+
             try
             {
-                blnProceed = false;
+                proceed = false;
                 if (commandLineParser.ParseCommandLine())
                 {
                     if (SetOptionsUsingCommandLineParameters(commandLineParser))
-                        blnProceed = true;
+                        proceed = true;
                 }
 
-                if (!blnProceed || commandLineParser.NeedToShowHelp || commandLineParser.ParameterCount + commandLineParser.NonSwitchParameterCount == 0 || mInputFilePath.Length == 0)
+                if (!proceed || commandLineParser.NeedToShowHelp || commandLineParser.ParameterCount + commandLineParser.NonSwitchParameterCount == 0 || mInputFilePath.Length == 0)
                 {
                     ShowProgramHelp();
-                    intReturnCode = -1;
+                    return -1;
                 }
-                else
-                {
-                    ConvertFile();
-                }
+
+                ConvertFile();
+                return 0;
             }
             catch (Exception ex)
             {
                 ShowErrorMessage("Error occurred in modMain->Main", ex);
-                intReturnCode = -1;
+                return -1;
             }
-
-            return intReturnCode;
         }
 
-        private static string CleanupPeptide(string strPeptide)
+        private static string CleanupPeptide(string peptide)
         {
-
-            var strPrimarySequence = string.Empty;
-            var strPrefix = string.Empty;
-            var strSuffix = string.Empty;
-            Match reMatch;
-            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(strPeptide, out strPrimarySequence, out strPrefix, out strSuffix))
+            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptide, out var primarySequence, out var prefix, out var suffix))
             {
                 // Look for an N-terminal iTraq mod
-                reMatch = reFindItraq.Match(strPrimarySequence);
-                if (reMatch.Success)
+                var match = reFindItraq.Match(primarySequence);
+                if (match.Success)
                 {
-                    strPeptide = strPrefix + "." + reMatch.Groups[2].Value + reMatch.Groups[1].Value + reMatch.Groups[3].Value + "." + strSuffix;
+                    peptide = prefix + "." + match.Groups[2].Value + match.Groups[1].Value + match.Groups[3].Value + "." + suffix;
                 }
             }
 
-            return strPeptide;
+            return peptide;
         }
 
         private static bool ConvertFile()
         {
             try
             {
-                var fiInputFile = new FileInfo(mInputFilePath);
-                if (!fiInputFile.Exists)
+                var inputFile = new FileInfo(mInputFilePath);
+                if (!inputFile.Exists)
                 {
-                    ShowErrorMessage("Input file not found: " + fiInputFile.FullName);
+                    ShowErrorMessage("Input file not found: " + inputFile.FullName);
                     return false;
                 }
 
@@ -135,16 +127,16 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                 {
                     // Auto-define the output file
 
-                    mOutputFilePath = Path.GetFileNameWithoutExtension(fiInputFile.Name);
+                    mOutputFilePath = Path.GetFileNameWithoutExtension(inputFile.Name);
                     if (mOutputFilePath.ToLower().EndsWith("_msgfplus_fht") || mOutputFilePath.EndsWith("_msgfplus_syn"))
                     {
                         mOutputFilePath = mOutputFilePath.Substring(0, mOutputFilePath.Length - 11);
                     }
 
-                    mOutputFilePath = Path.Combine(fiInputFile.Directory.FullName, mOutputFilePath + "_msgfplus.tsv");
+                    mOutputFilePath = Path.Combine(inputFile.Directory.FullName, mOutputFilePath + "_msgfplus.tsv");
                 }
 
-                mPHRPReader = new clsPHRPReader(fiInputFile.FullName, clsPHRPReader.PeptideHitResultTypes.Unknown, true, false, false);
+                mPHRPReader = new clsPHRPReader(inputFile.FullName, clsPHRPReader.PeptideHitResultTypes.Unknown, true, false, false);
                 mPHRPReader.EchoMessagesToConsole = false;
                 mPHRPReader.SkipDuplicatePSMs = false;
                 if (!mPHRPReader.CanRead)
@@ -153,11 +145,12 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                     return false;
                 }
 
-                var oMassCalculator = new clsPeptideMassCalculator();
-                using (var swOutFile = new StreamWriter(new FileStream(mOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                var massCalculator = new clsPeptideMassCalculator();
+
+                using (var writer = new StreamWriter(new FileStream(mOutputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
                 {
-                    var lstValues = new List<string>();
-                    var intPSMsRead = 0;
+                    var values = new List<string>();
+                    var psmsRead = 0;
 
                     // Write the header line
                     var headerNames = new List<string> {
@@ -166,42 +159,42 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                         "Peptide", "Protein", "DeNovoScore", "MSGFScore",
                         "SpecEValue", "EValue", "QValue", "PepQValue" };
 
-                    swOutFile.WriteLine(FlattenList(headerNames));
+                    writer.WriteLine(FlattenList(headerNames));
 
-                    string strMassErrorPPM;
-                    int intIsotopeErrorComputed;
-                    string strIsotopeError;
+                    string massErrorPPM;
+                    int isotopeErrorComputed;
+                    string isotopeError;
                     while (mPHRPReader.MoveNext())
                     {
-                        var oPsm = mPHRPReader.CurrentPSM;
-                        intPSMsRead += 1;
-                        lstValues.Clear();
-                        intIsotopeErrorComputed = 0;
-                        strMassErrorPPM = GetCorrectedMassErrorPPM(oPsm, ref intIsotopeErrorComputed);
-                        lstValues.Add(mPHRPReader.DatasetName + "_dta.txt");                                             // #SpecFile
-                        lstValues.Add("index=" + intPSMsRead);                                                           // SpecID
-                        lstValues.Add(oPsm.ScanNumber.ToString());                                                       // ScanNum
-                        lstValues.Add("0");                                                                              // ScanTime (unknown)
-                        lstValues.Add(oPsm.CollisionMode);                                                               // FragMethod
-                        lstValues.Add(GetPrecursorMZ(oMassCalculator, oPsm));                                                             // Precursor m/z
-                        strIsotopeError = GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_Isotope_Error, "0");
-                        if (strIsotopeError == "0" & intIsotopeErrorComputed != 0)
+                        var psm = mPHRPReader.CurrentPSM;
+                        psmsRead += 1;
+                        values.Clear();
+                        isotopeErrorComputed = 0;
+                        massErrorPPM = GetCorrectedMassErrorPPM(psm, ref isotopeErrorComputed);
+                        values.Add(mPHRPReader.DatasetName + "_dta.txt");                                           // #SpecFile
+                        values.Add("index=" + psmsRead);                                                            // SpecID
+                        values.Add(psm.ScanNumber.ToString());                                                      // ScanNum
+                        values.Add("0");                                                                            // ScanTime (unknown)
+                        values.Add(psm.CollisionMode);                                                              // FragMethod
+                        values.Add(GetPrecursorMZ(massCalculator, psm));                                            // Precursor m/z
+                        isotopeError = GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_Isotope_Error, "0");
+                        if (isotopeError == "0" & isotopeErrorComputed != 0)
                         {
-                            strIsotopeError = intIsotopeErrorComputed.ToString();
+                            isotopeError = isotopeErrorComputed.ToString();
                         }
 
-                        lstValues.Add(strIsotopeError);                                                                  // IsotopeError
-                        lstValues.Add(strMassErrorPPM);                                                                  // PrecursorError(ppm)
-                        lstValues.Add(oPsm.Charge.ToString());                                                           // Charge
-                        lstValues.Add(CleanupPeptide(oPsm.PeptideWithNumericMods));                                      // Peptide
-                        lstValues.Add(oPsm.ProteinFirst);                                                                // Protein
-                        lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_DeNovoScore, "0"));                 // DeNovoScore
-                        lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFScore, "0"));                   // MSGFScore
-                        lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFPlus_SpecEValue, "0"));           // SpecEValue
-                        lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_EValue, "0"));                      // EValue
-                        lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_QValue, "0"));                      // QValue
-                        lstValues.Add(GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_PepQValue, "0"));                   // PepQValue
-                        swOutFile.WriteLine(FlattenList(lstValues));
+                        values.Add(isotopeError);                                                                   // IsotopeError
+                        values.Add(massErrorPPM);                                                                   // PrecursorError(ppm)
+                        values.Add(psm.Charge.ToString());                                                          // Charge
+                        values.Add(CleanupPeptide(psm.PeptideWithNumericMods));                                     // Peptide
+                        values.Add(psm.ProteinFirst);                                                               // Protein
+                        values.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_DeNovoScore, "0"));              // DeNovoScore
+                        values.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFScore, "0"));                // MSGFScore
+                        values.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_MSGFPlus_SpecEValue, "0"));      // SpecEValue
+                        values.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_EValue, "0"));                   // EValue
+                        values.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_QValue, "0"));                   // QValue
+                        values.Add(GetScore(psm, clsPHRPParserMSGFPlus.DATA_COLUMN_PepQValue, "0"));                // PepQValue
+                        writer.WriteLine(FlattenList(values));
                     }
                 }
 
@@ -216,25 +209,20 @@ namespace CreateMSGFPlusResultsFileFromPHRP
             return true;
         }
 
-        private static string FlattenList(List<string> lstValues)
+        private static string FlattenList(List<string> values, char sepChar = '\t')
         {
-            return FlattenList(lstValues);
-        }
-
-        private static string FlattenList(List<string> lstValues, char chSepChar = '\t')
-        {
-            var sbOutline = new StringBuilder();
-            for (int intIndex = 0, loopTo = lstValues.Count - 1; intIndex <= loopTo; intIndex++)
+            var outline = new StringBuilder();
+            for (int index = 0, loopTo = values.Count - 1; index <= loopTo; index++)
             {
-                if (intIndex > 0)
+                if (index > 0)
                 {
-                    sbOutline.Append(chSepChar);
+                    outline.Append(sepChar);
                 }
 
-                sbOutline.Append(lstValues[intIndex]);
+                outline.Append(values[index]);
             }
 
-            return sbOutline.ToString();
+            return outline.ToString();
         }
 
         private static string GetAppVersion()
@@ -244,86 +232,87 @@ namespace CreateMSGFPlusResultsFileFromPHRP
             return Assembly.GetExecutingAssembly().GetName().Version.ToString() + " (" + PROGRAM_DATE + ")";
         }
 
-        private static string GetCorrectedMassErrorPPM(clsPSM oPsm, ref int intIsotopeError)
+        private static string GetCorrectedMassErrorPPM(clsPSM psm, ref int isotopeError)
         {
-            double dblDelM;
-            var dblMassErrorPPM = 0d;
-            intIsotopeError = 0;
-            if (double.TryParse(oPsm.MassErrorDa, out dblDelM))
+            double delM;
+            var massErrorPPM = 0d;
+            isotopeError = 0;
+
+            if (double.TryParse(psm.MassErrorDa, out delM))
             {
 
-                // Examine dblDelM to determine which isotope was chosen
-                if (dblDelM >= -0.5d)
+                // Examine delM to determine which isotope was chosen
+                if (delM >= -0.5d)
                 {
                     // This is the typical case
-                    while (dblDelM > 0.5d)
+                    while (delM > 0.5d)
                     {
-                        dblDelM -= MASS_C13;
-                        intIsotopeError += 1;
+                        delM -= MASS_C13;
+                        isotopeError += 1;
                     }
                 }
                 else
                 {
                     // This happens less often; but we'll still account for it
-                    // In this case, intCorrectionCount will be negative
-                    while (dblDelM < -0.5d)
+                    // In this case, correctionCount will be negative
+                    while (delM < -0.5d)
                     {
-                        dblDelM += MASS_C13;
-                        intIsotopeError -= 1;
+                        delM += MASS_C13;
+                        isotopeError -= 1;
                     }
                 }
 
-                dblMassErrorPPM = clsPeptideMassCalculator.MassToPPM(dblDelM, oPsm.PrecursorNeutralMass);
+                massErrorPPM = clsPeptideMassCalculator.MassToPPM(delM, psm.PrecursorNeutralMass);
             }
 
-            return dblMassErrorPPM.ToString("0.0000");
+            return massErrorPPM.ToString("0.0000");
         }
 
-        private static string GetPrecursorMZ(clsPeptideMassCalculator oMassCalculator, clsPSM oPsm)
+        private static string GetPrecursorMZ(clsPeptideMassCalculator massCalculator, clsPSM psm)
         {
-            return oMassCalculator.ConvoluteMass(oPsm.PrecursorNeutralMass, 0, oPsm.Charge).ToString();
+            return massCalculator.ConvoluteMass(psm.PrecursorNeutralMass, 0, psm.Charge).ToString();
         }
 
-        private static string GetScore(clsPSM oPsm, string strScoreName, string strValueIfMissing)
+        private static string GetScore(clsPSM psm, string scoreName, string valueIfMissing)
         {
-            var strScoreValue = string.Empty;
-            if (!oPsm.TryGetScore(strScoreName, out strScoreValue))
+            var scoreValue = string.Empty;
+            if (!psm.TryGetScore(scoreName, out scoreValue))
             {
-                strScoreValue = strValueIfMissing;
+                scoreValue = valueIfMissing;
             }
 
-            return strScoreValue;
+            return scoreValue;
         }
 
         private static bool SetOptionsUsingCommandLineParameters(clsParseCommandLine commandLineParser)
         {
             // Returns True if no problems; otherwise, returns false
 
-            var strValue = string.Empty;
-            var lstValidParameters = new List<string>() { "I", "O" };
+            var value = string.Empty;
+            var validParameters = new List<string> { "I", "O" };
             try
             {
                 // Make sure no invalid parameters are present
-                if (commandLineParser.InvalidParametersPresent(lstValidParameters))
+                if (commandLineParser.InvalidParametersPresent(validParameters))
                 {
-                    ShowErrorMessage("Invalid command line parameters", (from item in commandLineParser.InvalidParameters(lstValidParameters)
+                    ShowErrorMessage("Invalid command line parameters", (from item in commandLineParser.InvalidParameters(validParameters)
                                                                          select ("/" + item)).ToList());
                     return false;
                 }
                 else
                 {
                     // Query commandLineParser to see if various parameters are present
-                    if (commandLineParser.RetrieveValueForParameter("I", out strValue))
+                    if (commandLineParser.RetrieveValueForParameter("I", out value))
                     {
-                        mInputFilePath = string.Copy(strValue);
+                        mInputFilePath = string.Copy(value);
                     }
                     else if (commandLineParser.NonSwitchParameterCount > 0)
                     {
                         mInputFilePath = commandLineParser.RetrieveNonSwitchParameter(0);
                     }
 
-                    if (commandLineParser.RetrieveValueForParameter("O", out strValue))
-                        mOutputFilePath = string.Copy(strValue);
+                    if (commandLineParser.RetrieveValueForParameter("O", out value))
+                        mOutputFilePath = string.Copy(value);
                     return true;
                 }
             }
@@ -378,9 +367,9 @@ namespace CreateMSGFPlusResultsFileFromPHRP
             Console.WriteLine(message);
         }
 
-        private static void PHRPReader_WarningEvent(string strWarningMessage)
+        private static void PHRPReader_WarningEvent(string warningMessage)
         {
-            Console.WriteLine("Warning: " + strWarningMessage);
+            Console.WriteLine("Warning: " + warningMessage);
         }
     }
 }
