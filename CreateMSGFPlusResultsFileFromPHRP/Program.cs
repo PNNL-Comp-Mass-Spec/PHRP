@@ -160,7 +160,14 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                     var intPSMsRead = 0;
 
                     // Write the header line
-                    swOutFile.WriteLine(FlattenList(new List<string>() { "#SpecFile", "SpecID", "ScanNum", "FragMethod", "Precursor", "IsotopeError", "PrecursorError(ppm)", "Charge", "Peptide", "Protein", "DeNovoScore", "MSGFScore", "SpecEValue", "EValue", "QValue", "PepQValue" }));
+                    var headerNames = new List<string> {
+                        "#SpecFile", "SpecId", "ScanNum", "ScanTime(Min)", "FragMethod",
+                        "Precursor", "IsotopeError", "PrecursorError(ppm)", "Charge",
+                        "Peptide", "Protein", "DeNovoScore", "MSGFScore",
+                        "SpecEValue", "EValue", "QValue", "PepQValue" };
+
+                    swOutFile.WriteLine(FlattenList(headerNames));
+
                     string strMassErrorPPM;
                     int intIsotopeErrorComputed;
                     string strIsotopeError;
@@ -174,6 +181,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                         lstValues.Add(mPHRPReader.DatasetName + "_dta.txt");                                             // #SpecFile
                         lstValues.Add("index=" + intPSMsRead);                                                           // SpecID
                         lstValues.Add(oPsm.ScanNumber.ToString());                                                       // ScanNum
+                        lstValues.Add("0");                                                                              // ScanTime (unknown)
                         lstValues.Add(oPsm.CollisionMode);                                                               // FragMethod
                         lstValues.Add(GetPrecursorMZ(oMassCalculator, oPsm));                                                             // Precursor m/z
                         strIsotopeError = GetScore(oPsm, clsPHRPParserMSGFPlus.DATA_COLUMN_Isotope_Error, "0");
