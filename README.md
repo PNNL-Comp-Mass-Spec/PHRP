@@ -1,6 +1,6 @@
 # Peptide Hit Results Processor
 
-The Peptide Hit Results Processor (PHRP) can be used to convert a MSGF+ .tsv 
+The Peptide Hit Results Processor (PHRP) can be used to convert a MS-GF+ .tsv 
 search result file or an X!Tandem results file (XML format) into a series 
 of tab-delimited text files summarizing the results. It also supports 
 results files from MSAlign, TopPIC, MODa, MODPlus, MSPathFinder, 
@@ -14,16 +14,18 @@ file that specifies the symbol to use for each modification mass.
 ## Example Data
 
 Example input and output files are in the Data directory:
-* MSGFPlus_Example has MSGF+ results
+* MSGFPlus_Example has MS-GF+ results
 * XTandem_Example has X!Tandem results
 
-For [MSGF+](https://github.com/sangtaekim/msgfplus) results, prior to running PHRP, use the 
+For [MS-GF+](https://github.com/sangtaekim/msgfplus) results, prior to running PHRP, use the 
 [Mzid-To-Tsv-Converter](https://github.com/PNNL-Comp-Mass-Spec/Mzid-To-Tsv-Converter)
 to convert the .mzid file to a tab-delimited .tsv file.
 
 ## Example Command line 
 
+```
 PeptideHitResultsProcRunner.exe /I:Dataset_msgfplus.tsv /M:MSGFDB_PartTryp_MetOx_20ppmParTol_ModDefs.txt /N:MSGFDB_PartTryp_MetOx_20ppmParTol.txt /T:Mass_Correction_Tags.txt /L /ProteinMods /F:Shewanella_oneidensis_MR1_2010-04-22_Tryp_Pig_Bov.revCat.fasta
+```
 
 ## Console Switches
 
@@ -59,56 +61,56 @@ directory as the input file.
 The parameter file path is optional.  If included, it should point to a valid XML parameter 
 file.
 
-Use /M to specify the file containing the modification definitions.  This file should be tab 
+Use `/M` to specify the file containing the modification definitions.  This file should be tab 
 delimited, with the first column containing the modification symbol, the second column 
 containing the modification mass, plus optionally a third column listing the residues that can 
 be modified with the given mass (1 letter residue symbols, no need to separated with commas or 
 spaces).
 
-Use /ProteinMods to indicate that the _ProteinMods.txt file should be created.  This requires 
+Use `/ProteinMods` to indicate that the _ProteinMods.txt file should be created.  This requires 
 that either an existing _PepToProtMapMTS.txt file exist, or that the Fasta file be defined 
-using /F
+using `/F`
 
-Use /ProteinModsViaPHRP to indicate that InputFilePath specifies a valid PHRP data file and 
+Use `/ProteinModsViaPHRP` to indicate that InputFilePath specifies a valid PHRP data file and 
 thus the PHRP data files should not be re-created; only the _ProteinMods.txt file should be 
 created.  This requires that either an existing _PepToProtMapMTS.txt file exist, or that the 
-Fasta file be defined using /F
+Fasta file be defined using `/F`
 
-Use /IgnorePepToProtMapErrors to ignore peptide to protein mapping errors that occur when 
+Use `/IgnorePepToProtMapErrors` to ignore peptide to protein mapping errors that occur when 
 creating a missing _PepToProtMapMTS.txt file
 
-Use /ProteinModsIncludeReversed to include Reversed proteins in the _ProteinMods.txt file
+Use `/ProteinModsIncludeReversed` to include Reversed proteins in the _ProteinMods.txt file
 
-Use /UseExistingPepToProteinMapFile to use an existing _PepToProtMapMTS.txt file if it exists
+Use `/UseExistingPepToProteinMapFile` to use an existing _PepToProtMapMTS.txt file if it exists
 
-Use /T to specify the file containing the mass correction tag info.  This file should be tab 
+Use `/T` to specify the file containing the mass correction tag info.  This file should be tab 
 delimited, with the first column containing the mass correction tag name and the second column 
 containing the mass (the name cannot contain commas or colons and can be, at most, 8 
 characters long).
 
-Use /N to specify the parameter file provided to the search tool.  This is used when 
+Use `/N` to specify the parameter file provided to the search tool.  This is used when 
 processing MS-GF+, MSAlign, MODa, MODPlus, MSPathFinder, TopPIC and Inspect files.
 
-When processing an Inspect results file, use /SynPvalue to customize the PValue threshold used 
+When processing an Inspect results file, use `/SynPvalue` to customize the PValue threshold used 
 to determine which peptides are written to the the synopsis file.  The default is 
-/SynPvalue:0.2  Note that peptides with a TotalPRMScore >= 50 or an FScore >= 0 will also be 
+`/SynPvalue:0.2`  Note that peptides with a TotalPRMScore >= 50 or an FScore >= 0 will also be 
 included in the synopsis file.
 
-Use /FHT:True or /FHT:False to toggle the creation of a first-hits file (_fht.txt) when 
-processing Inspect or MSGF-DB results (default is /FHT:True)
+Use `/FHT:True` or `/FHT:False` to toggle the creation of a first-hits file (_fht.txt) when 
+processing Inspect or MSGF-DB results (default is `/FHT:True)`
 
-Use /Syn:True or /Syn:False to toggle the creation of a synopsis file (_syn.txt) when 
-processing Inspect or MSGF-DB results (default is /Syn:True)
+Use `/Syn:True` or `/Syn:False` to toggle the creation of a synopsis file (_syn.txt) when 
+processing Inspect or MSGF-DB results (default is `/Syn:True)`
 
-Use /S to process all valid files in the input directory and subdirectories. Include a 
-number after /S (like /S:2) to limit the level of subdirectories to examine.
+Use `/S` to process all valid files in the input directory and subdirectories. Include a 
+number after `/S` (like `/S:2`) to limit the level of subdirectories to examine.
 
-When using /S, you can redirect the output of the results using /A.
+When using `/S`, you can redirect the output of the results using `/A`
 
-When using /S, you can use /R to re-create the input directory hierarchy in the alternate output 
+When using `/S`, you can use `/R` to re-create the input directory hierarchy in the alternate output 
 directory (if defined).
 
-Use /L to specify that a log file should be created.  Use /L:LogFilePath to specify the name 
+Use `/L` to specify that a log file should be created.  Use `/L:LogFilePath` to specify the name 
 (or full path) for the log file.
 
 ## Contacts
@@ -120,7 +122,7 @@ Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
 ## License
 
 The Peptide Hit Results Processor is licensed under the 2-Clause BSD License; 
-you may not use this file except in compliance with the License.  You may obtain 
+you may not use this program except in compliance with the License.  You may obtain 
 a copy of the License at https://opensource.org/licenses/BSD-2-Clause
 
 Copyright 2018 Battelle Memorial Institute
