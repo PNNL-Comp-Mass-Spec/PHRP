@@ -241,34 +241,36 @@ namespace CreateMSGFPlusResultsFileFromPHRP
 
         private static string GetCorrectedMassErrorPPM(clsPSM psm, out int isotopeError)
         {
-            var massErrorPPM = 0d;
             isotopeError = 0;
 
-            if (double.TryParse(psm.MassErrorDa, out var delM))
+            if (!double.TryParse(psm.MassErrorDa, out var delM))
             {
-                // Examine delM to determine which isotope was chosen
-                if (delM >= -0.5d)
-                {
-                    // This is the typical case
-                    while (delM > 0.5d)
-                    {
-                        delM -= MASS_C13;
-                        isotopeError++;
-                    }
-                }
-                else
-                {
-                    // This happens less often; but we'll still account for it
-                    // In this case, correctionCount will be negative
-                    while (delM < -0.5d)
-                    {
-                        delM += MASS_C13;
-                        isotopeError--;
-                    }
-                }
-
-                massErrorPPM = clsPeptideMassCalculator.MassToPPM(delM, psm.PrecursorNeutralMass);
+                return "0.0000";
             }
+
+            // Examine delM to determine which isotope was chosen
+            if (delM >= -0.5d)
+            {
+                // This is the typical case
+                while (delM > 0.5d)
+                {
+                    delM -= MASS_C13;
+                    isotopeError++;
+                }
+            }
+            else
+            {
+                // This happens less often; but we'll still account for it
+                // In this case, correctionCount will be negative
+                while (delM < -0.5d)
+                {
+                    delM += MASS_C13;
+                    isotopeError--;
+                }
+            }
+
+            // ReSharper disable once InconsistentNaming
+            var massErrorPPM = clsPeptideMassCalculator.MassToPPM(delM, psm.PrecursorNeutralMass);
 
             return massErrorPPM.ToString("0.0000");
         }
