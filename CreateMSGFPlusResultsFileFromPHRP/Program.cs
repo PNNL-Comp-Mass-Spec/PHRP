@@ -173,6 +173,7 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                     itemsRead++;
                     values.Clear();
 
+                    // ReSharper disable once InconsistentNaming
                     var massErrorPPM = GetCorrectedMassErrorPPM(psm, out var isotopeErrorComputed);
 
                     values.Add(phrpReader.DatasetName + ".mzML");                                               // #SpecFile
@@ -234,8 +235,6 @@ namespace CreateMSGFPlusResultsFileFromPHRP
 
         private static string GetAppVersion()
         {
-            // Return System.Windows.Forms.Application.ProductVersion & " (" & PROGRAM_DATE & ")"
-
             return Assembly.GetExecutingAssembly().GetName().Version + " (" + PROGRAM_DATE + ")";
         }
 
