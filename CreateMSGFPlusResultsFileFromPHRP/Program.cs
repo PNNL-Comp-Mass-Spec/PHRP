@@ -110,7 +110,9 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                     // Auto-define the output file
 
                     mOutputFilePath = Path.GetFileNameWithoutExtension(inputFile.Name);
-                    if (mOutputFilePath.EndsWith("_msgfplus_fht", StringComparison.OrdinalIgnoreCase) ||
+                    if (mOutputFilePath.EndsWith("_msgfdb_fht", StringComparison.OrdinalIgnoreCase) ||
+                        mOutputFilePath.EndsWith("_msgfdb_syn", StringComparison.OrdinalIgnoreCase) ||
+                        mOutputFilePath.EndsWith("_msgfplus_fht", StringComparison.OrdinalIgnoreCase) ||
                         mOutputFilePath.EndsWith("_msgfplus_syn", StringComparison.OrdinalIgnoreCase))
                     {
                         mOutputFilePath = mOutputFilePath.Substring(0, mOutputFilePath.Length - 11);
