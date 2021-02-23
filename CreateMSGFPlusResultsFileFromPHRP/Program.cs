@@ -117,11 +117,14 @@ namespace CreateMSGFPlusResultsFileFromPHRP
                     mOutputFilePath = Path.Combine(inputFileDirectoryPath, datasetName + "_msgfplus.tsv");
                 }
 
+                var scanStatsFilePath = Path.Combine(inputFileDirectoryPath, datasetName + "_ScanStats.txt");
+                var scanStatsFile = new FileInfo(scanStatsFilePath);
+
                 var phrpOptions = new clsPHRPStartupOptions
                 {
                     LoadModsAndSeqInfo = true,
                     LoadMSGFResults = false,
-                    LoadScanStatsData = false
+                    LoadScanStatsData = scanStatsFile.Exists
                 };
 
                 Console.WriteLine("Opening " + PathUtils.CompactPathString(inputFile.FullName, 100));
