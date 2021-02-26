@@ -396,40 +396,20 @@ namespace PeptideHitResultsProcessor
             if (string.IsNullOrEmpty(baseName))
                 return AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath);
 
-            switch (peptideHitResultFileFormat)
+            return peptideHitResultFileFormat switch
             {
-                case PeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.SequestSynopsisFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.XTandemXMLFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.InspectTXTFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + INSPECT_RESULTS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.MSAlignTXTFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + MSALIGN_RESULTS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.MODaTXTFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + MODa_RESULTS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.MODPlusTXTFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + MODPlus_RESULTS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX);
-
-                case PeptideHitResultsFileFormatConstants.TopPICTXTFile:
-                    return Path.Combine(sourceDirectoryPath, baseName + TopPIC_RESULTS_FILE_SUFFIX);
-            }
-
-            return AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath);
+                PeptideHitResultsFileFormatConstants.SequestFirstHitsFile => Path.Combine(sourceDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.SequestSynopsisFile => Path.Combine(sourceDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.XTandemXMLFile => Path.Combine(sourceDirectoryPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.InspectTXTFile => Path.Combine(sourceDirectoryPath, baseName + INSPECT_RESULTS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.MSAlignTXTFile => Path.Combine(sourceDirectoryPath, baseName + MSALIGN_RESULTS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.MODaTXTFile => Path.Combine(sourceDirectoryPath, baseName + MODa_RESULTS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.MODPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MODPlus_RESULTS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile => Path.Combine(sourceDirectoryPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX),
+                PeptideHitResultsFileFormatConstants.TopPICTXTFile => Path.Combine(sourceDirectoryPath, baseName + TopPIC_RESULTS_FILE_SUFFIX),
+                _ => AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath)
+            };
         }
 
         public static string AutoDefinePeptideHitResultsFilePath(string sourceDirectoryPath)
@@ -443,21 +423,14 @@ namespace PeptideHitResultsProcessor
             {
                 for (var index = 0; index <= 3; index++)
                 {
-                    switch (index)
+                    matchSpec = index switch
                     {
-                        case 0:
-                            matchSpec = "*" + SEQUEST_SYNOPSIS_FILE_SUFFIX;
-                            break;
-                        case 1:
-                            matchSpec = "*" + SEQUEST_FIRST_HITS_FILE_SUFFIX;
-                            break;
-                        case 2:
-                            matchSpec = "*" + XTANDEM_RESULTS_FILE_SUFFIX;
-                            break;
-                        case 3:
-                            matchSpec = "*" + INSPECT_RESULTS_FILE_SUFFIX;
-                            break;
-                    }
+                        0 => "*" + SEQUEST_SYNOPSIS_FILE_SUFFIX,
+                        1 => "*" + SEQUEST_FIRST_HITS_FILE_SUFFIX,
+                        2 => "*" + XTANDEM_RESULTS_FILE_SUFFIX,
+                        3 => "*" + INSPECT_RESULTS_FILE_SUFFIX,
+                        _ => matchSpec
+                    };
 
                     var sourceDirectory = new DirectoryInfo(sourceDirectoryPath);
                     foreach (var resultsFile in sourceDirectory.GetFiles(matchSpec))
@@ -1501,56 +1474,23 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         protected string GetErrorMessage()
         {
-            string message;
-
-            switch (ErrorCode)
+            var message = ErrorCode switch
             {
-                case PHRPErrorCodes.NoError:
-                    message = string.Empty;
-                    break;
-                case PHRPErrorCodes.InvalidInputFilePath:
-                    message = "Invalid input file path";
-                    break;
-                case PHRPErrorCodes.InvalidOutputDirectoryPath:
-                    message = "Invalid output directory path";
-                    break;
-                case PHRPErrorCodes.ParameterFileNotFound:
-                    message = "Parameter file not found";
-                    break;
-                case PHRPErrorCodes.MassCorrectionTagsFileNotFound:
-                    message = "Mass correction tags file not found";
-                    break;
-                case PHRPErrorCodes.ModificationDefinitionFileNotFound:
-                    message = "Modification definition file not found";
-
-                    break;
-                case PHRPErrorCodes.ErrorReadingInputFile:
-                    message = "Error reading input file";
-                    break;
-                case PHRPErrorCodes.ErrorCreatingOutputFiles:
-                    message = "Error creating output files";
-                    break;
-                case PHRPErrorCodes.ErrorReadingParameterFile:
-                    message = "Invalid parameter file";
-                    break;
-                case PHRPErrorCodes.ErrorReadingMassCorrectionTagsFile:
-                    message = "Error reading mass correction tags file";
-                    break;
-                case PHRPErrorCodes.ErrorReadingModificationDefinitionsFile:
-                    message = "Error reading modification definitions file";
-
-                    break;
-                case PHRPErrorCodes.FilePathError:
-                    message = "General file path error";
-                    break;
-                case PHRPErrorCodes.UnspecifiedError:
-                    message = "Unspecified error";
-                    break;
-                default:
-                    // This shouldn't happen
-                    message = "Unknown error state";
-                    break;
-            }
+                PHRPErrorCodes.NoError => string.Empty,
+                PHRPErrorCodes.InvalidInputFilePath => "Invalid input file path",
+                PHRPErrorCodes.InvalidOutputDirectoryPath => "Invalid output directory path",
+                PHRPErrorCodes.ParameterFileNotFound => "Parameter file not found",
+                PHRPErrorCodes.MassCorrectionTagsFileNotFound => "Mass correction tags file not found",
+                PHRPErrorCodes.ModificationDefinitionFileNotFound => "Modification definition file not found",
+                PHRPErrorCodes.ErrorReadingInputFile => "Error reading input file",
+                PHRPErrorCodes.ErrorCreatingOutputFiles => "Error creating output files",
+                PHRPErrorCodes.ErrorReadingParameterFile => "Invalid parameter file",
+                PHRPErrorCodes.ErrorReadingMassCorrectionTagsFile => "Error reading mass correction tags file",
+                PHRPErrorCodes.ErrorReadingModificationDefinitionsFile => "Error reading modification definitions file",
+                PHRPErrorCodes.FilePathError => "General file path error",
+                PHRPErrorCodes.UnspecifiedError => "Unspecified error",
+                _ => "Unknown error state"
+            };
 
             if (mErrorMessage.Length > 0)
             {
