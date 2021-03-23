@@ -26,9 +26,9 @@ namespace PeptideHitResultsProcRunner
 {
     internal static class Program
     {
-        // Ignore Spelling: Prot, MODa
+        // Ignore Spelling: Prot, MaxQuant, MODa
 
-        public const string PROGRAM_DATE = "February 3, 2021";
+        public const string PROGRAM_DATE = "March 23, 2021";
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional
@@ -483,9 +483,9 @@ namespace PeptideHitResultsProcRunner
             try
             {
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
-                                      "This program reads in an XTandem results file (XML format), Sequest Synopsis/First Hits file, " +
-                                      "Inspect search result file, MSGF+ search result file, or MSAlign results file then creates " +
-                                      "a tab-delimited text file with the data in a standard format used at PNNL."));
+                                      "This program reads in a result file from a variety of MS/MS identification tools including " +
+                                      "MS-GF+, X!Tandem, MaxQuant, MSAlign, ModPlus, and MSPathFinder, " +
+                                      "then creates a tab-delimited text file with the data in a standard format used at PNNL."));
                 Console.WriteLine();
                 Console.WriteLine(ConsoleMsgUtils.WrapParagraph(
                                       "It will insert modification symbols into the peptide sequences for modified peptides. " +

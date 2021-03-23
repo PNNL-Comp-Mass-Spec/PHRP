@@ -3,7 +3,7 @@
 The Peptide Hit Results Processor (PHRP) can be used to convert a MS-GF+ .tsv 
 search result file or an X!Tandem results file (XML format) into a series 
 of tab-delimited text files summarizing the results. It also supports 
-results files from MSAlign, TopPIC, MODa, MODPlus, MSPathFinder, 
+results files from MaxQuant, MSAlign, TopPIC, MODa, MODPlus, and MSPathFinder, 
 along with SEQUEST Synopsis/First Hits files.
 
 PHRP will insert modification symbols into the peptide sequences for modified peptides.
