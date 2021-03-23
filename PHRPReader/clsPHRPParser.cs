@@ -127,7 +127,7 @@ namespace PHRPReader
         public int MaxProteinsPerPSM { get; set; }
 
         /// <summary>
-        /// Peptide hit result type; Sequest, XTandem, Inspect, or MSGFDB
+        /// Peptide hit result type; Sequest, XTandem, Inspect, MSGFPlus, etc.
         /// </summary>
         public clsPHRPReader.PeptideHitResultTypes PeptideHitResultType => mPeptideHitResultType;
 

@@ -1750,7 +1750,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.Unexpected_Mod_Count,       // Unexpected_Mod_Count
                     udtSearchResult.Peaks,                      // Peak_count
                     udtSearchResult.Matched_peaks,              // Matched_Peak_Count
-                    udtSearchResult.Matched_fragment_ions      // Matched_Fragment_Ion_Count
+                    udtSearchResult.Matched_fragment_ions       // Matched_Fragment_Ion_Count
                 };
 
                 if (dataHasPValues)

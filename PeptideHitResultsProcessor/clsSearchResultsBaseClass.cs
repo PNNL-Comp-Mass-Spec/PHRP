@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor
     /// </remarks>
     public abstract class clsSearchResultsBaseClass
     {
-        // Ignore Spelling: Da, MODa, acetyl, delM, Oxy
+        // Ignore Spelling: Da, MaxQuant, MODa, acetyl, delM, Oxy
 
         #region "Constants and Enums"
         /// <summary>
@@ -87,13 +87,14 @@ namespace PeptideHitResultsProcessor
         public string ErrorMessage => mErrorMessage;
 
         /// <summary>
-        /// RowIndex for Synopsis/First Hits files; auto-assigned for XTandem, Inspect, MS-GF+, and MODa
+        /// RowIndex for Synopsis/First Hits files; auto-assigned for X!Tandem, Inspect, MS-GF+, and MODa
         /// </summary>
         public int ResultID { get; set; }
 
         /// <summary>
-        /// Group ID assigned by XTandem
+        /// Group ID assigned by X!Tandem
         /// </summary>
+        /// <remarks>MaxQuant protein group IDs are tracked by clsSearchResultsMaxQuant.ProteinGroupIDs</remarks>
         public int GroupID { get; set; }
 
         /// <summary>
@@ -122,12 +123,12 @@ namespace PeptideHitResultsProcessor
         public string ProteinName { get; set; }
 
         /// <summary>
-        /// Typically only used by XTandem; actually holds the Log of the expectation value
+        /// Typically only used by X!Tandem; actually holds the Log of the expectation value
         /// </summary>
         public string ProteinExpectationValue { get; set; }
 
         /// <summary>
-        /// Typically only used by XTandem; actually holds the Log of the intensity
+        /// Typically only used by X!Tandem; actually holds the Log of the intensity
         /// </summary>
         public string ProteinIntensity { get; set; }
 
@@ -217,7 +218,7 @@ namespace PeptideHitResultsProcessor
         public clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants PeptideTerminusState => mPeptideTerminusState;
 
         /// <summary>
-        /// In XTandem this is the theoretical monoisotopic MH
+        /// In X!Tandem this is the theoretical monoisotopic MH
         /// In Sequest it was historically the average mass MH, though when a monoisotopic mass parent tolerance is specified, this is a monoisotopic mass
         /// In Inspect, MS-GF+, and MSAlign, this is the theoretical monoisotopic MH; note that this is (M+H)+
         /// </summary>
@@ -226,7 +227,7 @@ namespace PeptideHitResultsProcessor
         /// <summary>
         /// Difference in mass between the peptide's computed mass and the parent ion mass (i.e. the mass chosen for fragmentation)
         /// In Sequest this is Theoretical Mass - Observed Mass
-        /// In XTandem, Inspect, MS-GF+, and MSAlign the DelM value is listed as Observed - Theoretical,
+        /// In X!Tandem, Inspect, MS-GF+, and MSAlign the DelM value is listed as Observed - Theoretical,
         /// however, PHRP negates that value while reading the synopsis file to match Sequest
         /// </summary>
         public string PeptideDeltaMass { get; set; }

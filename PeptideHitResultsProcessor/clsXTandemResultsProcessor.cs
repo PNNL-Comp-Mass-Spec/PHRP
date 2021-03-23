@@ -1360,8 +1360,8 @@ namespace PeptideHitResultsProcessor
                 // Before continuing, look for Static residue mods in modifications
 
                 // If any are found, and if an identical dynamic residue mod is already present, delete the static residue mod
-                // Additionally, if <note type="input" label="refine, modification mass">none</note> was present in the XTandem results file,
-                //  auto update all static mods to dynamic mods since they are reset during refinement
+                // Additionally, if <note type="input" label="refine, modification mass">none</note> was present in the X!Tandem results file,
+                // auto update all static mods to dynamic mods since they are reset during refinement
 
                 var validatedModifications = new List<udtSearchOptionModificationInfoType>();
                 var sortedModInfo = (from item in modifications orderby item.SortOrder, item.ModificationMass select item).ToList();
