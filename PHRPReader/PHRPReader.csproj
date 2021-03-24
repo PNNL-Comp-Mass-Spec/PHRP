@@ -49,8 +49,8 @@
     <Compile Include="MSGFPlusParamFileModExtractor.cs" />
     <Compile Include="PeptideCleavageStateCalculator.cs" />
     <Compile Include="PeptideMassCalculator.cs" />
-    <Compile Include="PHRPReader.cs" />
-    <Compile Include="PHRPStartupOptions.cs" />
+    <Compile Include="ReaderFactory.cs" />
+    <Compile Include="StartupOptions.cs" />
     <Compile Include="Data\AminoAcidModInfo.cs" />
     <Compile Include="Data\EmpiricalFormula.cs" />
     <Compile Include="Data\ModificationDefinition.cs" />
