@@ -162,7 +162,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public InspectSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.Inspect, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.Inspect, loadModsAndSeqInfo)
         {
         }
 
@@ -173,7 +173,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public InspectSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.Inspect, startupOptions)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.Inspect, startupOptions)
         {
         }
 
@@ -386,7 +386,7 @@ namespace PHRPReader.Reader
 
             try
             {
-                success = ReadKeyValuePairSearchEngineParamFile(INS_SEARCH_ENGINE_NAME, searchEngineParamFileName, PHRPReader.PeptideHitResultTypes.Inspect, searchEngineParams);
+                success = ReadKeyValuePairSearchEngineParamFile(INS_SEARCH_ENGINE_NAME, searchEngineParamFileName, Enums.PeptideHitResultTypes.Inspect, searchEngineParams);
 
                 if (success)
                 {

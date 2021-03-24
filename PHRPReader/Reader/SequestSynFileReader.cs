@@ -157,7 +157,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public SequestSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.Sequest, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.Sequest, loadModsAndSeqInfo)
         {
         }
 
@@ -168,7 +168,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public SequestSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.Sequest, startupOptions)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.Sequest, startupOptions)
         {
         }
 

@@ -779,7 +779,7 @@ namespace PHRPReader
                         chTargetResidue = default;
                     }
 
-                    var modType = Enums.ResidueModificationType.DynamicMod;
+                    var modType = ModificationDefinition.ResidueModificationType.DynamicMod;
                     AminoAcidModInfo.ResidueTerminusState residueTerminusState;
 
                     if (udtModInfo.ModType == MSGFPlusModType.DynNTermPeptide)
@@ -805,27 +805,27 @@ namespace PHRPReader
                             case AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = Enums.ResidueModificationType.TerminalPeptideStaticMod;
+                                    modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
                                 break;
                             case AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = Enums.ResidueModificationType.TerminalPeptideStaticMod;
+                                    modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
                                 break;
                             case AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = Enums.ResidueModificationType.ProteinTerminusStaticMod;
+                                    modType = ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
                                 break;
                             case AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = Enums.ResidueModificationType.ProteinTerminusStaticMod;
+                                    modType = ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
                                 break;
                             default:
                                 residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = Enums.ResidueModificationType.StaticMod;
+                                    modType = ModificationDefinition.ResidueModificationType.StaticMod;
                                 break;
                         }
                     }

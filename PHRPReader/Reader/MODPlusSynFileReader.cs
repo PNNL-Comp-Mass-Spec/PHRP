@@ -144,7 +144,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public MODPlusSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MODPlus, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MODPlus, loadModsAndSeqInfo)
         {
         }
 
@@ -155,7 +155,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public MODPlusSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MODPlus, startupOptions)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MODPlus, startupOptions)
         {
         }
 
@@ -423,10 +423,10 @@ namespace PHRPReader.Reader
                     if (Math.Abs(modMassDa - 0) < float.Epsilon)
                         continue;
 
-                    var modType = Enums.ResidueModificationType.StaticMod;
+                    var modType = ModificationDefinition.ResidueModificationType.StaticMod;
                     if (residue == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residue == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
-                        modType = Enums.ResidueModificationType.TerminalPeptideStaticMod;
+                        modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
                     }
 
                     var modDef = new ModificationDefinition(

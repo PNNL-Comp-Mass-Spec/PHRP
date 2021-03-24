@@ -163,7 +163,7 @@ namespace PHRPReader.Data
                     if (matchFound)
                     {
                         var mod = Modifications[modificationIndex];
-                        if (mod.ModificationType == Enums.ResidueModificationType.DynamicMod || mod.ModificationType == Enums.ResidueModificationType.StaticMod)
+                        if (mod.ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod || mod.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod)
                         {
                             // Matching dynamic or static modification definitions
                             // Merge the two modifications by making sure each of the residues in modificationDefinition.TargetResidues is present in .TargetResidues
@@ -206,7 +206,7 @@ namespace PHRPReader.Data
 
         private ModificationDefinition AddUnknownModification(
             double modificationMass,
-            Enums.ResidueModificationType modType,
+            ModificationDefinition.ResidueModificationType modType,
             char chTargetResidue,
             AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             bool addToModificationListIfUnknown,
@@ -459,14 +459,14 @@ namespace PHRPReader.Data
         /// Get the modification type, by modification index
         /// </summary>
         /// <param name="index"></param>
-        public Enums.ResidueModificationType GetModificationTypeByIndex(int index)
+        public ModificationDefinition.ResidueModificationType GetModificationTypeByIndex(int index)
         {
             if (index >= 0 && index < Modifications.Count)
             {
                 return Modifications[index].ModificationType;
             }
 
-            return Enums.ResidueModificationType.UnknownType;
+            return ModificationDefinition.ResidueModificationType.UnknownType;
         }
 
         /// <summary>
@@ -640,8 +640,8 @@ namespace PHRPReader.Data
                 // First compare against modifications with 1 or more residues in .TargetResidues
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (Modifications[index].ModificationType != Enums.ResidueModificationType.DynamicMod &&
-                        Modifications[index].ModificationType != Enums.ResidueModificationType.UnknownType ||
+                    if (Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.DynamicMod &&
+                        Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.UnknownType ||
                         Modifications[index].TargetResidues.Length == 0)
                     {
                         continue;
@@ -734,8 +734,8 @@ namespace PHRPReader.Data
             {
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (Modifications[index].ModificationType != Enums.ResidueModificationType.DynamicMod &&
-                        Modifications[index].ModificationType != Enums.ResidueModificationType.UnknownType)
+                    if (Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.DynamicMod &&
+                        Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.UnknownType)
                     {
                         continue;
                     }
@@ -807,9 +807,9 @@ namespace PHRPReader.Data
                 // First compare against modifications with 1 or more residues in .TargetResidues
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
-                    if (Modifications[index].ModificationType != Enums.ResidueModificationType.DynamicMod &&
-                        Modifications[index].ModificationType != Enums.ResidueModificationType.StaticMod &&
-                        Modifications[index].ModificationType != Enums.ResidueModificationType.UnknownType ||
+                    if (Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.DynamicMod &&
+                        Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.StaticMod &&
+                        Modifications[index].ModificationType != ModificationDefinition.ResidueModificationType.UnknownType ||
                         Modifications[index].TargetResidues.Length == 0)
                     {
                         continue;
@@ -868,9 +868,9 @@ namespace PHRPReader.Data
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
                 // ReSharper disable once InvertIf
-                if ((Modifications[index].ModificationType == Enums.ResidueModificationType.DynamicMod ||
-                     Modifications[index].ModificationType == Enums.ResidueModificationType.StaticMod ||
-                     Modifications[index].ModificationType == Enums.ResidueModificationType.UnknownType) &&
+                if ((Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
+                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.StaticMod ||
+                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.UnknownType) &&
                     string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
                     // Absolute value of the mass difference
@@ -928,8 +928,8 @@ namespace PHRPReader.Data
             // Compare against dynamic and unknown-type modifications, but ignore .TargetResidues
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
-                if (Modifications[index].ModificationType == Enums.ResidueModificationType.DynamicMod ||
-                    Modifications[index].ModificationType == Enums.ResidueModificationType.UnknownType)
+                if (Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
+                    Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
                 {
                     var deltaMassAbs = Math.Abs(Modifications[index].ModificationMass - modificationMass);
 
@@ -947,7 +947,7 @@ namespace PHRPReader.Data
             }
 
             // Still no match; define a new custom modification
-            const Enums.ResidueModificationType modType = Enums.ResidueModificationType.DynamicMod;
+            const ModificationDefinition.ResidueModificationType modType = ModificationDefinition.ResidueModificationType.DynamicMod;
             const char modSymbol = ModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL;
             const bool useNextAvailableModificationSymbol = true;
 
@@ -1017,7 +1017,7 @@ namespace PHRPReader.Data
         /// <remarks>If chTargetResidue is nothing, follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
         public ModificationDefinition LookupModificationDefinitionByMassAndModType(
             double modificationMass,
-            Enums.ResidueModificationType modType,
+            ModificationDefinition.ResidueModificationType modType,
             char chTargetResidue,
             AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             out bool existingModFound,
@@ -1038,9 +1038,9 @@ namespace PHRPReader.Data
 
             switch (modType)
             {
-                case Enums.ResidueModificationType.StaticMod:
-                case Enums.ResidueModificationType.ProteinTerminusStaticMod:
-                case Enums.ResidueModificationType.TerminalPeptideStaticMod:
+                case ModificationDefinition.ResidueModificationType.StaticMod:
+                case ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod:
+                case ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod:
                     modSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
                     useNextAvailableModificationSymbol = false;
                     break;
@@ -1058,11 +1058,11 @@ namespace PHRPReader.Data
                 for (var index = 0; index <= Modifications.Count - 1; index++)
                 {
                     if (Modifications[index].ModificationType == modType &&
-                        (Modifications[index].ModificationType == Enums.ResidueModificationType.DynamicMod ||
-                         Modifications[index].ModificationType == Enums.ResidueModificationType.StaticMod ||
-                         Modifications[index].ModificationType == Enums.ResidueModificationType.TerminalPeptideStaticMod ||
-                         Modifications[index].ModificationType == Enums.ResidueModificationType.ProteinTerminusStaticMod ||
-                         Modifications[index].ModificationType == Enums.ResidueModificationType.UnknownType) &&
+                        (Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
+                         Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.StaticMod ||
+                         Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod ||
+                         Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod ||
+                         Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.UnknownType) &&
                         Modifications[index].TargetResidues.Length > 0)
                     {
                         if (Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision) > float.Epsilon)
@@ -1112,11 +1112,11 @@ namespace PHRPReader.Data
             for (var index = 0; index <= Modifications.Count - 1; index++)
             {
                 if (Modifications[index].ModificationType == modType &&
-                    (Modifications[index].ModificationType == Enums.ResidueModificationType.DynamicMod ||
-                     Modifications[index].ModificationType == Enums.ResidueModificationType.StaticMod ||
-                     Modifications[index].ModificationType == Enums.ResidueModificationType.TerminalPeptideStaticMod ||
-                     Modifications[index].ModificationType == Enums.ResidueModificationType.ProteinTerminusStaticMod ||
-                     Modifications[index].ModificationType == Enums.ResidueModificationType.UnknownType) &&
+                    (Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
+                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.StaticMod ||
+                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod ||
+                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod ||
+                     Modifications[index].ModificationType == ModificationDefinition.ResidueModificationType.UnknownType) &&
                     string.IsNullOrWhiteSpace(Modifications[index].TargetResidues))
                 {
                     if (Math.Round(Math.Abs(Modifications[index].ModificationMass - modificationMass), massDigitsOfPrecision) < float.Epsilon)
@@ -1370,9 +1370,9 @@ namespace PHRPReader.Data
                                     }
 
                                     // If the .ModificationType is unknown, change it to Dynamic
-                                    if (modificationDefinition.ModificationType == Enums.ResidueModificationType.UnknownType)
+                                    if (modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
                                     {
-                                        modificationDefinition.ModificationType = Enums.ResidueModificationType.DynamicMod;
+                                        modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
                                     }
 
                                     if (splitLine.Length >= 5)
@@ -1397,17 +1397,17 @@ namespace PHRPReader.Data
 
                             // Check whether the modification type is Static and the .TargetResidues are one of: <>[]
                             // If so, update the modification type as needed
-                            if (modificationDefinition.TargetResidues?.Trim().Length == 1 && modificationDefinition.ModificationType == Enums.ResidueModificationType.StaticMod)
+                            if (modificationDefinition.TargetResidues?.Trim().Length == 1 && modificationDefinition.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod)
                             {
                                 if (modificationDefinition.TargetResidues[0] == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS ||
                                     modificationDefinition.TargetResidues[0] == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
                                 {
-                                    modificationDefinition.ModificationType = Enums.ResidueModificationType.TerminalPeptideStaticMod;
+                                    modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
                                 }
                                 else if (modificationDefinition.TargetResidues[0] == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS ||
                                          modificationDefinition.TargetResidues[0] == AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
                                 {
-                                    modificationDefinition.ModificationType = Enums.ResidueModificationType.ProteinTerminusStaticMod;
+                                    modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
                                 }
                             }
 
@@ -1415,14 +1415,14 @@ namespace PHRPReader.Data
                             var validMod = true;
                             switch (modificationDefinition.ModificationType)
                             {
-                                case Enums.ResidueModificationType.IsotopicMod:
+                                case ModificationDefinition.ResidueModificationType.IsotopicMod:
                                     modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
                                     if (modificationDefinition.AffectedAtom == PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL)
                                     {
                                         validMod = false;
                                     }
                                     break;
-                                case Enums.ResidueModificationType.TerminalPeptideStaticMod:
+                                case ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod:
                                     modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
                                     if (modificationDefinition.TargetResidues != AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() &&
                                         modificationDefinition.TargetResidues != AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
@@ -1430,7 +1430,7 @@ namespace PHRPReader.Data
                                         validMod = false;
                                     }
                                     break;
-                                case Enums.ResidueModificationType.ProteinTerminusStaticMod:
+                                case ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod:
                                     modificationDefinition.ModificationSymbol = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL;
                                     if (modificationDefinition.TargetResidues != AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString() &&
                                         modificationDefinition.TargetResidues != AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString())
@@ -1438,8 +1438,8 @@ namespace PHRPReader.Data
                                         validMod = false;
                                     }
                                     break;
-                                case Enums.ResidueModificationType.UnknownType:
-                                    modificationDefinition.ModificationType = Enums.ResidueModificationType.DynamicMod;
+                                case ModificationDefinition.ResidueModificationType.UnknownType:
+                                    modificationDefinition.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
                                     break;
                             }
 
@@ -1686,7 +1686,7 @@ namespace PHRPReader.Data
                 ModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL,
                 NH3_LOSS,
                 "Q",
-                Enums.ResidueModificationType.DynamicMod,
+                ModificationDefinition.ResidueModificationType.DynamicMod,
                 LookupMassCorrectionTagByMass(NH3_LOSS)));
 
             const double H2O_LOSS = -18.0106;
@@ -1694,7 +1694,7 @@ namespace PHRPReader.Data
                 ModificationDefinition.LAST_RESORT_MODIFICATION_SYMBOL,
                 H2O_LOSS,
                 "E",
-                Enums.ResidueModificationType.DynamicMod,
+                ModificationDefinition.ResidueModificationType.DynamicMod,
                 LookupMassCorrectionTagByMass(H2O_LOSS)));
         }
 
@@ -1757,7 +1757,7 @@ namespace PHRPReader.Data
         public bool VerifyModificationPresent(
             double modificationMass,
             string targetResidues,
-            Enums.ResidueModificationType modificationType,
+            ModificationDefinition.ResidueModificationType modificationType,
             int massDigitsOfPrecision = MASS_DIGITS_OF_PRECISION)
         {
             // Look for mods in mModifications with matching .ModificationType, .ModificationMass (within tolerance), and .TargetResidues

@@ -72,7 +72,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// PHRP result type
         /// </summary>
-        public PHRPReader.PeptideHitResultTypes PeptideHitResultType { get; }
+        public Enums.PeptideHitResultTypes PeptideHitResultType { get; }
 
         /// <summary>
         /// PepToProtMap filename
@@ -97,7 +97,7 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputDirectoryPath">Input file path</param>
         /// <param name="peptideHitResultType">Peptide Hit result type</param>
-        public PHRPSeqMapReader(string datasetName, string inputDirectoryPath, PHRPReader.PeptideHitResultTypes peptideHitResultType)
+        public PHRPSeqMapReader(string datasetName, string inputDirectoryPath, Enums.PeptideHitResultTypes peptideHitResultType)
             : this(datasetName, inputDirectoryPath, peptideHitResultType, PHRPReader.GetPHRPSynopsisFileName(peptideHitResultType, datasetName))
         {
         }
@@ -109,7 +109,7 @@ namespace PHRPReader.Reader
         /// <param name="inputDirectoryPath">Input file path</param>
         /// <param name="peptideHitResultType">Peptide Hit result type</param>
         /// <param name="phrpDataFileName">The base PHRP data file name; used when calling AutoSwitchToLegacyMSGFDBIfRequired and AutoSwitchToFHTIfRequired</param>
-        public PHRPSeqMapReader(string datasetName, string inputDirectoryPath, PHRPReader.PeptideHitResultTypes peptideHitResultType, string phrpDataFileName)
+        public PHRPSeqMapReader(string datasetName, string inputDirectoryPath, Enums.PeptideHitResultTypes peptideHitResultType, string phrpDataFileName)
         {
             DatasetName = datasetName;
 
@@ -183,7 +183,7 @@ namespace PHRPReader.Reader
             }
 
             PeptideHitResultType = PHRPReader.AutoDetermineResultType(resultToSeqMapFilename);
-            if (PeptideHitResultType == PHRPReader.PeptideHitResultTypes.Unknown)
+            if (PeptideHitResultType == Enums.PeptideHitResultTypes.Unknown)
             {
                 ErrorMessage = "Unable to auto-determine the PeptideHit result type based on filename " + resultToSeqMapFilename;
                 throw new Exception(ErrorMessage);

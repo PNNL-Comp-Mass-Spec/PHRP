@@ -177,7 +177,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public MSGFPlusSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MSGFPlus, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSGFPlus, loadModsAndSeqInfo)
         {
         }
 
@@ -188,7 +188,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public MSGFPlusSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MSGFPlus, startupOptions)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSGFPlus, startupOptions)
         {
         }
 
@@ -202,7 +202,7 @@ namespace PHRPReader.Reader
         public static double DeterminePrecursorMassTolerance(
             SearchEngineParameters searchEngineParams,
             out double tolerancePPM,
-            PHRPReader.PeptideHitResultTypes resultType)
+            Enums.PeptideHitResultTypes resultType)
         {
             var reExtraToleranceWithUnits = new Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var reExtraToleranceNoUnits = new Regex("([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -212,7 +212,7 @@ namespace PHRPReader.Reader
 
             tolerancePPM = 0;
 
-            if (resultType == PHRPReader.PeptideHitResultTypes.TopPIC)
+            if (resultType == Enums.PeptideHitResultTypes.TopPIC)
             {
                 // TopPIC
                 if (!searchEngineParams.Parameters.TryGetValue("ErrorTolerance", out tolerance))
@@ -242,8 +242,8 @@ namespace PHRPReader.Reader
                     continue;
 
                 Match reMatch;
-                if (resultType == PHRPReader.PeptideHitResultTypes.MSPathFinder ||
-                    resultType == PHRPReader.PeptideHitResultTypes.TopPIC)
+                if (resultType == Enums.PeptideHitResultTypes.MSPathFinder ||
+                    resultType == Enums.PeptideHitResultTypes.TopPIC)
                 {
                     reMatch = reExtraToleranceNoUnits.Match(item);
                 }
@@ -258,8 +258,8 @@ namespace PHRPReader.Reader
                 if (!double.TryParse(reMatch.Groups[1].Value, out var toleranceCurrent))
                     continue;
 
-                if (resultType == PHRPReader.PeptideHitResultTypes.MSPathFinder ||
-                    resultType == PHRPReader.PeptideHitResultTypes.TopPIC)
+                if (resultType == Enums.PeptideHitResultTypes.MSPathFinder ||
+                    resultType == Enums.PeptideHitResultTypes.TopPIC)
                 {
                     // Units are always ppm
                     tolerancePPM = toleranceCurrent;
@@ -482,7 +482,7 @@ namespace PHRPReader.Reader
             {
                 mPeptideMassCalculator.ResetAminoAcidMasses();
 
-                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFilePath, PHRPReader.PeptideHitResultTypes.MSGFPlus, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFilePath, Enums.PeptideHitResultTypes.MSGFPlus, searchEngineParams);
 
                 if (!success)
                 {
@@ -589,7 +589,7 @@ namespace PHRPReader.Reader
                 }
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, PHRPReader.PeptideHitResultTypes.MSGFPlus);
+                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, Enums.PeptideHitResultTypes.MSGFPlus);
                 searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
 
                 // Look for Custom Amino Acid definitions

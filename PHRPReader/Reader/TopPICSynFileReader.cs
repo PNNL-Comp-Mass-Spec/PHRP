@@ -163,7 +163,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public TopPICSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.TopPIC, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.TopPIC, loadModsAndSeqInfo)
         {
         }
 
@@ -174,7 +174,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public TopPICSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.TopPIC, startupOptions)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.TopPIC, startupOptions)
         {
         }
 
@@ -363,7 +363,7 @@ namespace PHRPReader.Reader
         {
             try
             {
-                const PHRPReader.PeptideHitResultTypes resultType = PHRPReader.PeptideHitResultTypes.TopPIC;
+                const Enums.PeptideHitResultTypes resultType = Enums.PeptideHitResultTypes.TopPIC;
                 var success = ReadKeyValuePairSearchEngineParamFile(TopPIC_SEARCH_ENGINE_NAME, searchEngineParamFileName, resultType, searchEngineParams);
 
                 if (!success)

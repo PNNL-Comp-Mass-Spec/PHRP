@@ -8,40 +8,41 @@ namespace PHRPReader
 {
     public class Enums
     {
+#pragma warning disable 1591
+
         /// <summary>
-        /// Modification types
+        /// Peptide hit results type
         /// </summary>
-        public enum ResidueModificationType
+        public enum PeptideHitResultTypes
         {
-            /// <summary>
-            /// Unknown mod type on a residue; essentially treated as a dynamic mod
-            /// </summary>
-            UnknownType = 0,
-
-            /// <summary>
-            /// Dynamic mod on a residue or peptide terminus; supported by Sequest and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
-            /// </summary>
-            DynamicMod = 1,
-
-            /// <summary>
-            /// Static mod on a residue or peptide terminus; supported by Sequest but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
-            /// </summary>
-            StaticMod = 2,
-
-            /// <summary>
-            /// Peptide terminus static mod (DMS Symbol is T); used by Sequest and MSGFDB; note that terminal mods are always dynamic in X!Tandem
-            /// </summary>
-            TerminalPeptideStaticMod = 3,
-
-            /// <summary>
-            /// Isotopic mod, e.g. N15, or C13; supported by Sequest; most likely not supported by XTandem
-            /// </summary>
-            IsotopicMod = 4,
-
-            /// <summary>
-            /// Protein terminus static mod; supported by Sequest; this mod is also supported by X!Tandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
-            /// </summary>
-            ProteinTerminusStaticMod = 5
+            Unknown = 0,
+            Sequest = 1,
+            XTandem = 2,
+            Inspect = 3,
+            [Obsolete("Use MSGFPlus")]
+            MSGFDB = 4,
+            MSGFPlus = 4,      // Aka MS-GF+
+            MSAlign = 5,
+            MODa = 6,
+            MODPlus = 7,
+            MSPathFinder = 8,
+            TopPIC = 9
         }
+
+        /// <summary>
+        /// PHRP Reader error codes
+        /// </summary>
+        public enum PHRPReaderErrorCodes
+        {
+            NoError = 0,
+            InvalidInputFilePath = 1,
+            InputFileFormatNotRecognized = 2,
+            RequiredInputFileNotFound = 3,
+            MissingRawOrMzXmlFile = 4,
+            MSGFProgramNotFound = 5,
+            UnspecifiedError = -1
+        }
+
+#pragma warning restore 1591
     }
 }

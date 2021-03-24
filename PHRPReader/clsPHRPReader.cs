@@ -32,59 +32,6 @@ namespace PHRPReader
         public const string SCAN_STATS_FILENAME_SUFFIX = "_ScanStats.txt";
         public const string EXTENDED_SCAN_STATS_FILENAME_SUFFIX = "_ScanStatsEx.txt";
 
-        /// <summary>
-        /// Peptide hit results type
-        /// </summary>
-        [Obsolete("Superseded by enum PeptideHitResultTypes")]
-        public enum ePeptideHitResultType
-        {
-            Unknown = 0,
-            Sequest = 1,
-            XTandem = 2,
-            Inspect = 3,
-            [Obsolete("Use MSGFPlus")] MSGFDB = 4,
-            MSGFPlus = 4, // Aka MS-GF+
-            MSAlign = 5,
-            MODa = 6,
-            MODPlus = 7,
-            MSPathFinder = 8,
-            TopPIC = 9
-        }
-
-        /// <summary>
-        /// Peptide hit results type
-        /// </summary>
-        [Obsolete("Superseded by enum PeptideHitResultType")]
-        public enum PeptideHitResultTypes
-        {
-            Unknown = 0,
-            Sequest = 1,
-            XTandem = 2,
-            Inspect = 3,
-            [Obsolete("Use MSGFPlus")] MSGFDB = 4,
-            MSGFPlus = 4, // Aka MS-GF+
-            MSAlign = 5,
-            MODa = 6,
-            MODPlus = 7,
-            MSPathFinder = 8,
-            TopPIC = 9
-        }
-
-        /// <summary>
-        /// PHRP Reader error codes
-        /// </summary>
-        [Obsolete("Superseded by enum ReaderErrorCode")]
-        public enum PHRPReaderErrorCodes
-        {
-            NoError = 0,
-            InvalidInputFilePath = 1,
-            InputFileFormatNotRecognized = 2,
-            RequiredInputFileNotFound = 3,
-            MissingRawOrMzXmlFile = 4,
-            MSGFProgramNotFound = 5,
-            UnspecifiedError = -1
-        }
-
 #pragma warning restore 1591
 
         #endregion
@@ -157,7 +104,7 @@ namespace PHRPReader
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, MSGFPlus, etc.
         /// </summary>
-        public PeptideHitResultTypes PeptideHitResultType => PeptideHitResultTypes.Unknown;
+        public Enums.PeptideHitResultTypes PeptideHitResultType => Enums.PeptideHitResultTypes.Unknown;
 
         /// <summary>
         /// Returns a number between 0 and 100 indicating the percentage of the source file that has been read
@@ -193,7 +140,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
         public clsPHRPReader(string inputFilePath)
-            : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
+            : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
         }
 
@@ -203,7 +150,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
-        public clsPHRPReader(string inputFilePath, PeptideHitResultTypes resultType)
+        public clsPHRPReader(string inputFilePath, Enums.PeptideHitResultTypes resultType)
             : this(inputFilePath, resultType, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
         }
@@ -215,7 +162,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
-            : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
+            : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
         }
 
@@ -227,7 +174,7 @@ namespace PHRPReader
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         public clsPHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
-            : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
+            : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
         {
         }
 
@@ -237,7 +184,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="startupOptions">Startup options</param>
         public clsPHRPReader(string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : this(inputFilePath, PeptideHitResultTypes.Unknown, startupOptions)
+            : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, startupOptions)
         {
         }
 
@@ -248,7 +195,7 @@ namespace PHRPReader
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        public clsPHRPReader(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
+        public clsPHRPReader(string inputFilePath, Enums.PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, resultType, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
         }
@@ -261,7 +208,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
-        public clsPHRPReader(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults,
+        public clsPHRPReader(string inputFilePath, Enums.PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults,
                              bool loadScanStats)
         {
             ErrorMessages = new List<string>();
@@ -274,7 +221,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <param name="startupOptions">Startup options</param>
-        public clsPHRPReader(string inputFilePath, PeptideHitResultTypes resultType, clsPHRPStartupOptions startupOptions)
+        public clsPHRPReader(string inputFilePath, Enums.PeptideHitResultTypes resultType, clsPHRPStartupOptions startupOptions)
         {
             ErrorMessages = new List<string>();
             WarningMessages = new List<string>();
@@ -324,9 +271,9 @@ namespace PHRPReader
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
-        public static string AutoDetermineBestInputFile(string inputDirectoryPath, out PeptideHitResultTypes matchedResultType)
+        public static string AutoDetermineBestInputFile(string inputDirectoryPath, out Enums.PeptideHitResultTypes matchedResultType)
         {
-            matchedResultType = PeptideHitResultTypes.Unknown;
+            matchedResultType = Enums.PeptideHitResultTypes.Unknown;
             return string.Empty;
         }
 
@@ -351,7 +298,7 @@ namespace PHRPReader
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, string datasetName,
-                                                        out PeptideHitResultTypes matchedResultType)
+                                                        out Enums.PeptideHitResultTypes matchedResultType)
         {
             var datasetNames = new List<string>
             {
@@ -370,9 +317,9 @@ namespace PHRPReader
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, List<string> datasetNames,
-                                                        out PeptideHitResultTypes matchedResultType)
+                                                        out Enums.PeptideHitResultTypes matchedResultType)
         {
-            matchedResultType = PeptideHitResultTypes.Unknown;
+            matchedResultType = Enums.PeptideHitResultTypes.Unknown;
             return string.Empty;
         }
 
@@ -395,7 +342,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <returns>Dataset name</returns>
         /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
-        public static string AutoDetermineDatasetName(string filePath, PeptideHitResultTypes resultType)
+        public static string AutoDetermineDatasetName(string filePath, Enums.PeptideHitResultTypes resultType)
         {
             return string.Empty;
         }
@@ -404,9 +351,9 @@ namespace PHRPReader
         /// Determine the PeptideHit result type given the input file path
         /// </summary>
         /// <param name="filePath"></param>
-        public static PeptideHitResultTypes AutoDetermineResultType(string filePath)
+        public static Enums.PeptideHitResultTypes AutoDetermineResultType(string filePath)
         {
-            return PeptideHitResultTypes.Unknown;
+            return Enums.PeptideHitResultTypes.Unknown;
         }
 
         /// <summary>
@@ -418,7 +365,7 @@ namespace PHRPReader
         /// <param name="inputFileName">Name or path of the input file, e.g. Dataset_msgfplus_syn.txt or Dataset_syn.txt</param>
         /// <param name="modSummaryFileNamePreferred">Output: preferred mod summary filename (based on whether a _syn.txt or _fht.txt file is present)</param>
         public static string FindModSummaryFile(
-            PeptideHitResultTypes peptideHitResultType,
+            Enums.PeptideHitResultTypes peptideHitResultType,
             string datasetName,
             string inputDirectoryPath,
             string inputFileName,
@@ -493,9 +440,9 @@ namespace PHRPReader
         /// Get the peptide hit result type for the given result type name
         /// </summary>
         /// <param name="ResultTypeName"></param>
-        public static PeptideHitResultTypes GetPeptideHitResultType(string ResultTypeName)
+        public static Enums.PeptideHitResultTypes GetPeptideHitResultType(string ResultTypeName)
         {
-            return PeptideHitResultTypes.Unknown;
+            return Enums.PeptideHitResultTypes.Unknown;
         }
 
         /// <summary>
@@ -512,7 +459,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPFirstHitsFileName(PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPFirstHitsFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
         {
             return string.Empty;
         }
@@ -523,7 +470,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPModSummaryFileName(PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPModSummaryFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
         {
             return string.Empty;
         }
@@ -534,7 +481,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPPepToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPPepToProteinMapFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
         {
             return string.Empty;
         }
@@ -545,7 +492,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPProteinModsFileName(PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPProteinModsFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
         {
             return string.Empty;
         }
@@ -556,7 +503,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPSynopsisFileName(PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPSynopsisFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
         {
             return string.Empty;
         }
@@ -567,7 +514,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPResultToSeqMapFileName(PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPResultToSeqMapFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
         {
             return string.Empty;
         }
@@ -578,7 +525,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPSeqInfoFileName(PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPSeqInfoFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
         {
             return string.Empty;
         }
@@ -589,7 +536,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPSeqToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPSeqToProteinMapFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
         {
             return string.Empty;
         }
@@ -619,7 +566,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="resultType"></param>
         /// <returns>Filename</returns>
-        public static string GetToolVersionInfoFilename(PeptideHitResultTypes resultType)
+        public static string GetToolVersionInfoFilename(Enums.PeptideHitResultTypes resultType)
         {
             return string.Empty;
         }

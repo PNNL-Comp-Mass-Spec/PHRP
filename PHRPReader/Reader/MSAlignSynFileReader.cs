@@ -150,7 +150,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public MSAlignSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MSAlign, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSAlign, loadModsAndSeqInfo)
         {
         }
 
@@ -161,7 +161,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public MSAlignSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MSAlign, startupOptions)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSAlign, startupOptions)
         {
         }
 
@@ -359,7 +359,7 @@ namespace PHRPReader.Reader
 
             try
             {
-                success = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, searchEngineParamFileName, PHRPReader.PeptideHitResultTypes.MSAlign, searchEngineParams);
+                success = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, searchEngineParamFileName, Enums.PeptideHitResultTypes.MSAlign, searchEngineParams);
 
                 if (success)
                 {
@@ -376,7 +376,7 @@ namespace PHRPReader.Reader
                                 modDef = new ModificationDefinition(
                                     ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                     57.0215, "C",
-                                    Enums.ResidueModificationType.StaticMod,
+                                    ModificationDefinition.ResidueModificationType.StaticMod,
                                     "IodoAcet");
 
                                 searchEngineParams.AddModification(modDef);
@@ -386,7 +386,7 @@ namespace PHRPReader.Reader
                                 modDef = new ModificationDefinition(
                                     ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                     58.0055, "C",
-                                    Enums.ResidueModificationType.StaticMod,
+                                    ModificationDefinition.ResidueModificationType.StaticMod,
                                     "IodoAcid");
 
                                 searchEngineParams.AddModification(modDef);

@@ -138,7 +138,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public MODaSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MODa, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MODa, loadModsAndSeqInfo)
         {
         }
 
@@ -149,7 +149,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public MODaSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MODa, startupOptions)
+            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MODa, startupOptions)
         {
         }
 
@@ -348,7 +348,7 @@ namespace PHRPReader.Reader
         {
             try
             {
-                var success = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, searchEngineParamFileName, PHRPReader.PeptideHitResultTypes.MODa, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, searchEngineParamFileName, Enums.PeptideHitResultTypes.MODa, searchEngineParams);
 
                 if (!success)
                 {
@@ -386,10 +386,10 @@ namespace PHRPReader.Reader
                     if (Math.Abs(modMassDa) < float.Epsilon)
                         continue;
 
-                    var modType = Enums.ResidueModificationType.StaticMod;
+                    var modType = ModificationDefinition.ResidueModificationType.StaticMod;
                     if (residueSpec.Value == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residueSpec.Value == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
-                        modType = Enums.ResidueModificationType.TerminalPeptideStaticMod;
+                        modType = ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod;
                     }
 
                     var modDef = new ModificationDefinition(
