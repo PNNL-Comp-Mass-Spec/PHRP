@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PeptideHitResultsProcessor
+﻿namespace PeptideHitResultsProcessor
 {
     public static class Enums
     {

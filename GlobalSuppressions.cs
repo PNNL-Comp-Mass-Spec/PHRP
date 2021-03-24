@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Allowed name", Scope = "type", Target = "~T:PeptideHitResultsProcRunner.clsPeptideHitResultsProcRunner")]
+[assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Allowed name", Scope = "type", Target = "~T:PeptideHitResultsProcRunner.PeptideHitResultsProcRunner")]
