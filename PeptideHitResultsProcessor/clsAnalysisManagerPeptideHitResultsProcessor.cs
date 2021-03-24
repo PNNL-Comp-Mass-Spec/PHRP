@@ -12,6 +12,7 @@ using System.Threading;
 
 namespace PeptideHitResultsProcessor
 {
+    [Obsolete("This class is unused")]
     public class clsAnalysisManagerPeptideHitResultsProcessor : IPeptideHitResultsProcessor
     {
         // Ignore Spelling: msgfdb

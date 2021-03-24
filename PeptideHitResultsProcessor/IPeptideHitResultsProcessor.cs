@@ -7,6 +7,7 @@ namespace PeptideHitResultsProcessor
     /// Defines minimum required functionality for classes that will process peptide hit results files
     /// </summary>
     /// <remarks>Note that the peptide hit results file format will determined using AnalysisToolName</remarks>
+    [Obsolete("This class is unused")]
     public abstract class IPeptideHitResultsProcessor : PRISM.EventNotifier
     {
         #region "Enums"
