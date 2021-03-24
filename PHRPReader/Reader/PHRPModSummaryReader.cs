@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using PHRPReader.Data;
 
-namespace PHRPReader
+namespace PHRPReader.Reader
 {
     /// <summary>
     /// ModSummary file reader
     /// </summary>
-    public class clsPHRPModSummaryReader
+    public class PHRPModSummaryReader
     {
         #region "Constants"
 
@@ -30,7 +31,7 @@ namespace PHRPReader
         /// <summary>
         /// Modification list
         /// </summary>
-        public List<clsModificationDefinition> ModificationDefs { get; }
+        public List<ModificationDefinition> ModificationDefs { get; }
 
         /// <summary>
         /// True if the mod summary was successfully loaded
@@ -41,9 +42,9 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="modSummaryFilePath"></param>
-        public clsPHRPModSummaryReader(string modSummaryFilePath)
+        public PHRPModSummaryReader(string modSummaryFilePath)
         {
-            ModificationDefs = new List<clsModificationDefinition>();
+            ModificationDefs = new List<ModificationDefinition>();
             mModDefMassesAsText = new Dictionary<string, string>();
 
             Success = false;
@@ -125,7 +126,7 @@ namespace PHRPReader
                                 if (splitLine[index] == "Occurence_Count")
                                     splitLine[index] = MOD_SUMMARY_COLUMN_Occurrence_Count;
                             }
-                            clsPHRPReader.ParseColumnHeaders(splitLine, columnHeaders);
+                            PHRPReader.ParseColumnHeaders(splitLine, columnHeaders);
                             skipLine = true;
                         }
 
@@ -135,15 +136,15 @@ namespace PHRPReader
                     if (skipLine || splitLine.Length < 4)
                         continue;
 
-                    var modSymbolText = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, columnHeaders);
-                    var modMassText = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Mass, columnHeaders);
-                    var targetResidues = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Target_Residues, columnHeaders);
-                    var modType = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Type, columnHeaders);
-                    var massCorrectionTag = clsPHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, columnHeaders);
+                    var modSymbolText = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, columnHeaders);
+                    var modMassText = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Mass, columnHeaders);
+                    var targetResidues = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Target_Residues, columnHeaders);
+                    var modType = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Type, columnHeaders);
+                    var massCorrectionTag = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, columnHeaders);
 
                     if (string.IsNullOrWhiteSpace(modSymbolText))
                     {
-                        modSymbolText = clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL.ToString();
+                        modSymbolText = ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL.ToString();
                     }
 
                     var modSymbol = modSymbolText[0];
@@ -153,18 +154,18 @@ namespace PHRPReader
                         throw new Exception("Modification mass is not numeric for MassCorrectionTag: " + massCorrectionTag + ": " + modMassText);
                     }
 
-                    clsModificationDefinition.ModificationTypeConstants modificationType;
+                    ModificationDefinition.ModificationTypeConstants modificationType;
                     if (string.IsNullOrWhiteSpace(modType))
                     {
-                        modificationType = clsModificationDefinition.ModificationTypeConstants.UnknownType;
+                        modificationType = ModificationDefinition.ModificationTypeConstants.UnknownType;
                     }
                     else
                     {
-                        modificationType = clsModificationDefinition.ModificationSymbolToModificationType(modType[0]);
+                        modificationType = ModificationDefinition.ModificationSymbolToModificationType(modType[0]);
                     }
 
                     var modDef =
-                        new clsModificationDefinition(modSymbol, modificationMass, targetResidues, modificationType, massCorrectionTag)
+                        new ModificationDefinition(modSymbol, modificationMass, targetResidues, modificationType, massCorrectionTag)
                         {
                             ModificationMassAsText = modMassText
                         };

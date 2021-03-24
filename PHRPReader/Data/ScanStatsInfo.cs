@@ -1,9 +1,9 @@
-﻿namespace PHRPReader
+﻿namespace PHRPReader.Data
 {
     /// <summary>
     /// Data loaded from a ScanStats file
     /// </summary>
-    public class clsScanStatsInfo
+    public class ScanStatsInfo
     {
         private string mScanTypeName;
 
@@ -68,7 +68,7 @@
         /// <param name="scanNumber"></param>
         /// <param name="scanTimeMinutes"></param>
         /// <param name="scanType"></param>
-        public clsScanStatsInfo(int scanNumber, float scanTimeMinutes, int scanType)
+        public ScanStatsInfo(int scanNumber, float scanTimeMinutes, int scanType)
         {
             ScanNumber = scanNumber;
             ScanTimeMinutes = scanTimeMinutes;

@@ -7,15 +7,17 @@
 // This class parses data lines from mspath_syn.txt files
 //
 //*********************************************************************************************************
+
 using System;
 using System.Collections.Generic;
+using PHRPReader.Data;
 
-namespace PHRPReader
+namespace PHRPReader.Reader
 {
     /// <summary>
     /// PHRP parser for MSPathfinder
     /// </summary>
-    public class clsPHRPParserMSPathFinder : clsPHRPParser
+    public class MSPathFinderSynFileReader : SynFileReaderBaseClass
     {
         #region "Constants"
 
@@ -128,7 +130,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        public clsPHRPParserMSPathFinder(string datasetName, string inputFilePath)
+        public MSPathFinderSynFileReader(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
         }
@@ -139,8 +141,8 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
-        public clsPHRPParserMSPathFinder(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSPathFinder, loadModsAndSeqInfo)
+        public MSPathFinderSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MSPathFinder, loadModsAndSeqInfo)
         {
         }
 
@@ -150,8 +152,8 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public clsPHRPParserMSPathFinder(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MSPathFinder, startupOptions)
+        public MSPathFinderSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
+            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MSPathFinder, startupOptions)
         {
         }
 
@@ -304,9 +306,9 @@ namespace PHRPReader
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
         /// <returns>True if successful, false if an error</returns>
-        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
+        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams)
         {
-            searchEngineParams = new clsSearchEngineParameters(MSPathFinder_SEARCH_ENGINE_NAME);
+            searchEngineParams = new SearchEngineParameters(MSPathFinder_SEARCH_ENGINE_NAME);
 
             var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
 
@@ -315,11 +317,11 @@ namespace PHRPReader
             return success;
         }
 
-        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, clsSearchEngineParameters searchEngineParams)
+        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, SearchEngineParameters searchEngineParams)
         {
             try
             {
-                const clsPHRPReader.PeptideHitResultTypes resultType = clsPHRPReader.PeptideHitResultTypes.MSPathFinder;
+                const PHRPReader.PeptideHitResultTypes resultType = PHRPReader.PeptideHitResultTypes.MSPathFinder;
                 var success = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, searchEngineParamFileName, resultType, searchEngineParams);
 
                 if (!success)
@@ -331,7 +333,7 @@ namespace PHRPReader
                 searchEngineParams.MinNumberTermini = 0;
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                searchEngineParams.PrecursorMassToleranceDa = clsPHRPParserMSGFPlus.DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, resultType);
+                searchEngineParams.PrecursorMassToleranceDa = MSGFPlusSynFileReader.DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, resultType);
                 searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
 
                 return true;
@@ -352,11 +354,11 @@ namespace PHRPReader
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-        public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
+        public override bool ParsePHRPDataLine(string line, int linesRead, out PSM psm, bool fastReadMode)
         {
             const int SCAN_NOT_FOUND_FLAG = -100;
 
-            psm = new clsPSM();
+            psm = new PSM();
 
             try
             {
@@ -364,17 +366,17 @@ namespace PHRPReader
                 var success = false;
 
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+                    psm.ResultID = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
                     psm.ScoreRank = 1;
 
-                    var sequence = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Sequence, mColumnHeaders);
+                    var sequence = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Sequence, mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -385,13 +387,13 @@ namespace PHRPReader
                         psm.SetPeptide(sequence, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
-                    var protein = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var protein = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
                     psm.AddProtein(protein);
 
                     // Store the sequence mass as the "precursor" mass, though MSPathFinderT results are from MS1 spectra, and thus we didn't do MS/MS on a precursor
-                    psm.PrecursorNeutralMass = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Mass, mColumnHeaders, 0.0);
+                    psm.PrecursorNeutralMass = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Mass, mColumnHeaders, 0.0);
 
                     // Collision mode, precursor neutral mass, etc. are not applicable
                     // psm.CollisionMode =

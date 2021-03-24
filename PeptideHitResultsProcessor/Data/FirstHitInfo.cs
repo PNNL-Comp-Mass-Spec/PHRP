@@ -28,7 +28,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="peptideCleanSeq"></param>
         public clsFirstHitInfo(string peptideSeqWithModsAndContext, string peptideCleanSeq)
         {
-            if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptideSeqWithModsAndContext, out mPrimarySequence, out mPrefix, out mSuffix))
+            if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptideSeqWithModsAndContext, out mPrimarySequence, out mPrefix, out mSuffix))
             {
                 throw new Exception("Unable to split the prefix and suffix from peptide " + peptideSeqWithModsAndContext);
             }

@@ -1,9 +1,9 @@
-﻿namespace PHRPReader
+﻿namespace PHRPReader.Data
 {
     /// <summary>
     /// Data loaded from a ScanStatsEx file
     /// </summary>
-    public class clsScanStatsExInfo
+    public class ScanStatsExInfo
     {
         /// <summary>
         /// Scan number
@@ -104,7 +104,7 @@
         /// Constructor
         /// </summary>
         /// <param name="scanNumber"></param>
-        public clsScanStatsExInfo(int scanNumber)
+        public ScanStatsExInfo(int scanNumber)
         {
             ScanNumber = scanNumber;
         }

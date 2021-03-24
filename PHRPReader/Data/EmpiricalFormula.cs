@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace PHRPReader
+namespace PHRPReader.Data
 {
     /// <summary>
     /// Empirical formula
     /// </summary>
-    public class clsEmpiricalFormula
+    public class EmpiricalFormula
     {
         /// <summary>
         /// Elements in the empirical formula
@@ -16,7 +16,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsEmpiricalFormula()
+        public EmpiricalFormula()
         {
             ElementCounts = new Dictionary<string, int>();
         }
@@ -24,7 +24,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor, initialized with an existing dictionary of element symbols and counts
         /// </summary>
-        public clsEmpiricalFormula(Dictionary<string, int> elementInfo)
+        public EmpiricalFormula(Dictionary<string, int> elementInfo)
         {
             ElementCounts = elementInfo;
         }
@@ -32,7 +32,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor, initialized with a list of element symbols
         /// </summary>
-        public clsEmpiricalFormula(IEnumerable<string> elementInfo)
+        public EmpiricalFormula(IEnumerable<string> elementInfo)
         {
             ElementCounts = new Dictionary<string, int>();
             foreach (var element in elementInfo)
@@ -44,7 +44,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor, initialized with a list of KeyValuePairs of element symbol and element count
         /// </summary>
-        public clsEmpiricalFormula(IEnumerable<KeyValuePair<string, int>> elementInfo)
+        public EmpiricalFormula(IEnumerable<KeyValuePair<string, int>> elementInfo)
         {
             ElementCounts = new Dictionary<string, int>();
             foreach (var element in elementInfo)
@@ -74,7 +74,7 @@ namespace PHRPReader
         /// Adds all of the elements from the given empirical formula
         /// </summary>
         /// <param name="empiricalFormula"></param>
-        public void AddElements(clsEmpiricalFormula empiricalFormula)
+        public void AddElements(EmpiricalFormula empiricalFormula)
         {
             foreach (var element in empiricalFormula.ElementCounts)
             {

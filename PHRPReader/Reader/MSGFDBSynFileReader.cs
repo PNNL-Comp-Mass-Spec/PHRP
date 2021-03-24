@@ -1,19 +1,19 @@
 ﻿using System;
 
-namespace PHRPReader
+namespace PHRPReader.Reader
 {
     /// <summary>
     /// Old PHRP parser for MS-GF+
     /// </summary>
     [Obsolete("Use clsPHRPParserMSGFPlus")]
-    public class clsPHRPParserMSGFDB : clsPHRPParserMSGFPlus
+    public class MSGFDBSynFileReader : MSGFPlusSynFileReader
     {
         /// <summary>
         /// Constructor; assumes loadModsAndSeqInfo=True
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        public clsPHRPParserMSGFDB(string datasetName, string inputFilePath)
+        public MSGFDBSynFileReader(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
         }
@@ -24,7 +24,7 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
-        public clsPHRPParserMSGFDB(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
+        public MSGFDBSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
             : base(datasetName, inputFilePath, loadModsAndSeqInfo)
         {
         }
@@ -35,7 +35,7 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public clsPHRPParserMSGFDB(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
+        public MSGFDBSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
             : base(datasetName, inputFilePath, startupOptions)
         {
         }

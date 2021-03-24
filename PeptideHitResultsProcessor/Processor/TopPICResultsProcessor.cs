@@ -18,6 +18,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PHRPReader;
+using PHRPReader.Data;
+using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor
 {
@@ -237,7 +239,7 @@ namespace PeptideHitResultsProcessor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == clsModificationDefinition.ModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == ModificationDefinition.ModificationTypeConstants.StaticMod)
                         {
                             var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
@@ -660,16 +662,16 @@ namespace PeptideHitResultsProcessor
         /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string topPICParamFilePath,
-            out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            out List<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
-            var modFileProcessor = new clsMSGFPlusParamFileModExtractor(TOOL_NAME);
+            var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
 
             RegisterEvents(modFileProcessor);
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
             var success = modFileProcessor.ExtractModInfoFromParamFile(
                 topPICParamFilePath,
-                clsMSGFPlusParamFileModExtractor.ModSpecFormats.TopPIC,
+                MSGFPlusParamFileModExtractor.ModSpecFormats.TopPIC,
                 out modInfo);
 
             if (!success || mErrorCode != PHRPErrorCodes.NoError)
@@ -697,7 +699,7 @@ namespace PeptideHitResultsProcessor
         {
             string primarySequence;
 
-            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out primarySequenceWithMods, out prefix, out suffix))
+            if (PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out primarySequenceWithMods, out prefix, out suffix))
             {
                 // Remove all mods
                 primarySequence = ModMatcher.Replace(primarySequenceWithMods, string.Empty);
@@ -742,7 +744,7 @@ namespace PeptideHitResultsProcessor
             // Although this was a possibility with Inspect, it likely never occurs for TopPIC
             //  But, we'll keep the check in place just in case
 
-            var columnMapping = new Dictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int>();
+            var columnMapping = new Dictionary<TopPICSynFileReader.TopPICSynFileColumns, int>();
 
             try
             {
@@ -1071,11 +1073,11 @@ namespace PeptideHitResultsProcessor
                     if (precursorMZ > 0)
                     {
                         udtSearchResult.DelM_PPM =
-                            PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(delM, precursorMZ), 5, 0.00005);
+                            PRISM.StringUtilities.DblToString(PeptideMassCalculator.MassToPPM(delM, precursorMZ), 5, 0.00005);
                     }
                     else
                     {
-                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(delM, 1000), 5, 0.00005);
+                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(PeptideMassCalculator.MassToPPM(delM, 1000), 5, 0.00005);
                     }
                 }
 
@@ -1229,16 +1231,16 @@ namespace PeptideHitResultsProcessor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ParseTopPICSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int> columnMapping)
+        private bool ParseTopPICSynFileHeaderLine(string lineIn, IDictionary<TopPICSynFileReader.TopPICSynFileColumns, int> columnMapping)
         {
-            var columnNames = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs(true);
+            var columnNames = TopPICSynFileReader.GetColumnHeaderNamesAndIDs(true);
 
             columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (clsPHRPParserTopPIC.TopPICSynFileColumns resultColumn in Enum.GetValues(typeof(clsPHRPParserTopPIC.TopPICSynFileColumns)))
+                foreach (TopPICSynFileReader.TopPICSynFileColumns resultColumn in Enum.GetValues(typeof(TopPICSynFileReader.TopPICSynFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1277,7 +1279,7 @@ namespace PeptideHitResultsProcessor
             clsSearchResultsTopPIC searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IDictionary<clsPHRPParserTopPIC.TopPICSynFileColumns, int> columnMapping,
+            IDictionary<TopPICSynFileReader.TopPICSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
             string[] splitLine = null;
@@ -1295,7 +1297,7 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.ResultID], out string value))
+                if (!GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.ResultID], out string value))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1308,13 +1310,13 @@ namespace PeptideHitResultsProcessor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1325,11 +1327,11 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.DelM], out string msAlignComputedDelM);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.DelM], out string msAlignComputedDelM);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.TopPICComputedDelM = msAlignComputedDelM;
@@ -1370,24 +1372,24 @@ namespace PeptideHitResultsProcessor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Prsm_ID], out string prsmId);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Spectrum_ID], out string spectrumId);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Prsm_ID], out string prsmId);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Spectrum_ID], out string spectrumId);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.MH], out string parentIonMH);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.MH], out string parentIonMH);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Peak_Count], out string peakCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.PValue], out string pValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Rank_PValue], out string rankPValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.EValue], out string eValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.QValue], out string qValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.FragMethod], out string fragMethod);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.Proteoform_QValue], out string proteoformFDR);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserTopPIC.TopPICSynFileColumns.VariablePTMs], out string variablePTMs);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Peak_Count], out string peakCount);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.PValue], out string pValue);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Rank_PValue], out string rankPValue);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.EValue], out string eValue);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.QValue], out string qValue);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.FragMethod], out string fragMethod);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.Proteoform_QValue], out string proteoformFDR);
+                GetColumnValue(splitLine, columnMapping[TopPICSynFileReader.TopPICSynFileColumns.VariablePTMs], out string variablePTMs);
 
                 searchResult.Prsm_ID = prsmId;
                 searchResult.Spectrum_ID = spectrumId;
@@ -1593,7 +1595,7 @@ namespace PeptideHitResultsProcessor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.PeptideHitResultTypes.TopPIC);
+                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.TopPIC);
                 }
             }
 
@@ -1610,12 +1612,12 @@ namespace PeptideHitResultsProcessor
         {
             if (peptide.StartsWith(N_TERMINUS_SYMBOL_TopPIC))
             {
-                peptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST + "." + peptide.Substring(N_TERMINUS_SYMBOL_TopPIC.Length);
+                peptide = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST + "." + peptide.Substring(N_TERMINUS_SYMBOL_TopPIC.Length);
             }
 
             if (peptide.EndsWith(C_TERMINUS_SYMBOL_TopPIC))
             {
-                peptide = peptide.Substring(0, peptide.Length - C_TERMINUS_SYMBOL_TopPIC.Length) + "." + clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
+                peptide = peptide.Substring(0, peptide.Length - C_TERMINUS_SYMBOL_TopPIC.Length) + "." + PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
             }
 
             return peptide;
@@ -1685,12 +1687,12 @@ namespace PeptideHitResultsProcessor
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
-                var headerColumns = clsPHRPParserTopPIC.GetColumnHeaderNamesAndIDs(false);
+                var headerColumns = TopPICSynFileReader.GetColumnHeaderNamesAndIDs(false);
 
                 if (!dataHasPValues)
                 {
-                    headerColumns.Remove(clsPHRPParserTopPIC.DATA_COLUMN_PValue);
-                    headerColumns.Remove(clsPHRPParserTopPIC.DATA_COLUMN_Rank_PValue);
+                    headerColumns.Remove(TopPICSynFileReader.DATA_COLUMN_PValue);
+                    headerColumns.Remove(TopPICSynFileReader.DATA_COLUMN_Rank_PValue);
                 }
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();

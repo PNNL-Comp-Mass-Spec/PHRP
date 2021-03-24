@@ -1,9 +1,9 @@
-﻿namespace PHRPReader
+﻿namespace PHRPReader.Data
 {
     /// <summary>
     /// Tracks modifications on a residue
     /// </summary>
-    public class clsAminoAcidModInfo
+    public class AminoAcidModInfo
     {
         #region "Constants and Enums"
 
@@ -71,14 +71,14 @@
         public bool AmbiguousMod => EndResidueLocInPeptide > ResidueLocInPeptide;
 
         /// <summary>
-        /// For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, whill be the same as ResidueLocInPeptide
+        /// For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, will be the same as ResidueLocInPeptide
         /// </summary>
         public int EndResidueLocInPeptide { get; }
 
         /// <summary>
         /// Modification definition
         /// </summary>
-        public clsModificationDefinition ModDefinition { get; }
+        public ModificationDefinition ModDefinition { get; }
 
         /// <summary>
         /// Amino acid residue symbol
@@ -103,7 +103,7 @@
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="modDefinition"></param>
-        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusStateConstants residueTerminusState, clsModificationDefinition modDefinition)
+        public AminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusStateConstants residueTerminusState, ModificationDefinition modDefinition)
         {
             ModDefinition = modDefinition;
             Residue = residue;
@@ -120,7 +120,7 @@
         /// <param name="residueTerminusState"></param>
         /// <param name="modDefinition"></param>
         /// <param name="endResidueLocInPeptide"></param>
-        public clsAminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusStateConstants residueTerminusState, clsModificationDefinition modDefinition, int endResidueLocInPeptide)
+        public AminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusStateConstants residueTerminusState, ModificationDefinition modDefinition, int endResidueLocInPeptide)
         {
             ModDefinition = modDefinition;
             Residue = residue;

@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using PHRPReader.Data;
 
 namespace PHRPReader
 {
@@ -26,7 +27,7 @@ namespace PHRPReader
     /// Residue modification information can be supplied by passing an array of modifications
     /// using the structure udtPeptideSequenceModInfoType
     /// </summary>
-    public class clsPeptideMassCalculator
+    public class PeptideMassCalculator
     {
         #region "Constants and Enums"
 
@@ -74,7 +75,7 @@ namespace PHRPReader
         /// <summary>
         /// Peptide sequence mod info
         /// </summary>
-        public struct udtPeptideSequenceModInfoType
+        public struct PeptideSequenceModInfo
         {
             /// <summary>
             /// Position that the modification occurs; not used by clsPeptideMassCalculator
@@ -113,7 +114,7 @@ namespace PHRPReader
 
         private const byte AMINO_ACID_LIST_MAX_INDEX = 25;
         private double[] mAminoAcidMasses;
-        private clsEmpiricalFormula[] mAminoAcidEmpiricalFormulas;
+        private EmpiricalFormula[] mAminoAcidEmpiricalFormulas;
 
         // Typically mPeptideNTerminusMass + mPeptideCTerminusMass = 18.0105633 (the mass of water)
 
@@ -163,7 +164,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor for shared (static) variables
         /// </summary>
-        static clsPeptideMassCalculator()
+        static PeptideMassCalculator()
         {
             mElementMonoMasses = GetElementMonoMasses();
 
@@ -173,7 +174,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsPeptideMassCalculator()
+        public PeptideMassCalculator()
         {
             ChargeCarrierMass = MASS_PROTON;
             mErrorMessage = string.Empty;
@@ -187,7 +188,7 @@ namespace PHRPReader
         /// <param name="empiricalFormula"></param>
         [Obsolete("Use ComputeMonoisotopicMass")]
         // ReSharper disable once IdentifierTypo
-        public static double ComputeMonoistopicMass(clsEmpiricalFormula empiricalFormula)
+        public static double ComputeMonoistopicMass(EmpiricalFormula empiricalFormula)
         {
             return ComputeMonoisotopicMass(empiricalFormula);
         }
@@ -197,7 +198,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="empiricalFormula"></param>
         /// <remarks>Throws an exception if an unknown symbol is encountered</remarks>
-        public static double ComputeMonoisotopicMass(clsEmpiricalFormula empiricalFormula)
+        public static double ComputeMonoisotopicMass(EmpiricalFormula empiricalFormula)
         {
             double monoisotopicMass = 0;
 
@@ -273,7 +274,7 @@ namespace PHRPReader
 
             if (RemovePrefixAndSuffixIfPresent)
             {
-                if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out primarySequence, out _, out _))
+                if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out primarySequence, out _, out _))
                 {
                     // Prefix and suffix residues not present; simply copy sequence to primarySequence
                     primarySequence = sequence;
@@ -328,9 +329,9 @@ namespace PHRPReader
         /// <returns>The computed mass, or -1 if an error</returns>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
         [Obsolete("This version uses an array for modified residues; use the version that takes a list")]
-        public double ComputeSequenceMass(string sequence, int modCount, ref udtPeptideSequenceModInfoType[] udtResidueModificationInfo)
+        public double ComputeSequenceMass(string sequence, int modCount, ref PeptideSequenceModInfo[] udtResidueModificationInfo)
         {
-            var modifiedResidues = new List<udtPeptideSequenceModInfoType>();
+            var modifiedResidues = new List<PeptideSequenceModInfo>();
 
             if (modCount > 0)
             {
@@ -350,7 +351,7 @@ namespace PHRPReader
         /// <param name="modifiedResidues">List of modified residues</param>
         /// <returns>The computed mass, or -1 if an error</returns>
         /// <remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
-        public double ComputeSequenceMass(string sequence, List<udtPeptideSequenceModInfoType> modifiedResidues)
+        public double ComputeSequenceMass(string sequence, List<PeptideSequenceModInfo> modifiedResidues)
         {
             // Note that this call to ComputeSequenceMass will reset mErrorMessage
             var mass = ComputeSequenceMass(sequence);
@@ -360,7 +361,7 @@ namespace PHRPReader
                 return mass;
             }
 
-            var empiricalFormula = new clsEmpiricalFormula();
+            var empiricalFormula = new EmpiricalFormula();
 
             foreach (var modifiedResidue in modifiedResidues)
             {
@@ -419,7 +420,7 @@ namespace PHRPReader
 
             if (RemovePrefixAndSuffixIfPresent)
             {
-                if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out primarySequence, out _, out _))
+                if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out primarySequence, out _, out _))
                 {
                     // Prefix and suffix residues not present; simply copy sequence to primarySequence
                     primarySequence = string.Copy(sequence);
@@ -563,9 +564,9 @@ namespace PHRPReader
         /// Convert an amino acid sequence into an empirical formula
         /// </summary>
         /// <param name="sequence">One letter amino acid symbols (no modification symbols or numbers)</param>
-        private clsEmpiricalFormula ConvertAminoAcidSequenceToEmpiricalFormula(string sequence)
+        private EmpiricalFormula ConvertAminoAcidSequenceToEmpiricalFormula(string sequence)
         {
-            var empiricalFormula = new clsEmpiricalFormula();
+            var empiricalFormula = new EmpiricalFormula();
 
             foreach (var chAminoAcidSymbol in sequence)
             {
@@ -618,20 +619,20 @@ namespace PHRPReader
         /// Returns a List with the number of atoms of C, H, N, O, and S in the specified amino acid
         /// </summary>
         /// <param name="chAminoAcidSymbol"></param>
-        public clsEmpiricalFormula GetAminoAcidEmpiricalFormula(char chAminoAcidSymbol)
+        public EmpiricalFormula GetAminoAcidEmpiricalFormula(char chAminoAcidSymbol)
         {
             // Returns the atom counts if success, 0 if an error
 
             if (chAminoAcidSymbol == default(char))
             {
-                return new clsEmpiricalFormula();
+                return new EmpiricalFormula();
             }
 
             var aminoAcidIndex = ConvertAminoAcidCharToIndex(chAminoAcidSymbol);
             if (aminoAcidIndex < 0 || aminoAcidIndex > AMINO_ACID_LIST_MAX_INDEX)
             {
                 // Invalid Index
-                return new clsEmpiricalFormula();
+                return new EmpiricalFormula();
             }
 
             return mAminoAcidEmpiricalFormulas[aminoAcidIndex];
@@ -645,9 +646,9 @@ namespace PHRPReader
         /// <param name="countN"></param>
         /// <param name="countO"></param>
         /// <param name="countS"></param>
-        private clsEmpiricalFormula GetAminoAcidEmpiricalFormula(int countC, int countH, int countN, int countO, int countS)
+        private EmpiricalFormula GetAminoAcidEmpiricalFormula(int countC, int countH, int countN, int countO, int countS)
         {
-            var empiricalFormula = new clsEmpiricalFormula();
+            var empiricalFormula = new EmpiricalFormula();
 
             empiricalFormula.AddElement("C", countC);
             empiricalFormula.AddElement("H", countH);
@@ -691,7 +692,7 @@ namespace PHRPReader
             return reAtomicFormulaRegEx;
         }
 
-        private double GetDefaultAminoAcidMass(char aminoAcidSymbol, out clsEmpiricalFormula empiricalFormula)
+        private double GetDefaultAminoAcidMass(char aminoAcidSymbol, out EmpiricalFormula empiricalFormula)
         {
             // These monoisotopic masses come from those traditionally used in DMS
             // They were originally assembled by Gordon Anderson for use in ICR-2LS
@@ -871,14 +872,14 @@ namespace PHRPReader
         /// </summary>
         /// <param name="empiricalFormula"></param>
         /// <returns>EmpiricalFormula instance tracking the element symbols and counts</returns>
-        public static clsEmpiricalFormula GetEmpiricalFormulaComponents(string empiricalFormula)
+        public static EmpiricalFormula GetEmpiricalFormulaComponents(string empiricalFormula)
         {
             // Originally MS-GF+ only allowed for elements C, H, N, O, S, and P in a dynamic or static mod definition
             // It now allows for any element
 
             var reMatches = mAtomicFormulaRegEx.Matches(empiricalFormula);
 
-            var empiricalFormulaInstance = new clsEmpiricalFormula();
+            var empiricalFormulaInstance = new EmpiricalFormula();
 
             if (reMatches.Count > 0)
             {
@@ -906,7 +907,7 @@ namespace PHRPReader
         private void InitializeAminoAcidData()
         {
             mAminoAcidMasses = new double[AMINO_ACID_LIST_MAX_INDEX + 1];
-            mAminoAcidEmpiricalFormulas = new clsEmpiricalFormula[AMINO_ACID_LIST_MAX_INDEX + 1];
+            mAminoAcidEmpiricalFormulas = new EmpiricalFormula[AMINO_ACID_LIST_MAX_INDEX + 1];
 
             for (byte index = 0; index <= AMINO_ACID_LIST_MAX_INDEX; index++)
             {
@@ -1006,7 +1007,7 @@ namespace PHRPReader
         /// <returns>True if successful, False if an invalid amino acid symbol</returns>
         public bool SetAminoAcidAtomCounts(char chAminoAcidSymbol, Dictionary<string, int> elementalComposition)
         {
-            var empiricalFormula = new clsEmpiricalFormula(elementalComposition);
+            var empiricalFormula = new EmpiricalFormula(elementalComposition);
             var success = SetAminoAcidAtomCounts(chAminoAcidSymbol, empiricalFormula);
             return success;
         }
@@ -1017,7 +1018,7 @@ namespace PHRPReader
         /// <param name="chAminoAcidSymbol">>Amino acid symbol</param>
         /// <param name="empiricalFormula">Empirical formula class</param>
         /// <returns>True if successful, False if an invalid amino acid symbol</returns>
-        public bool SetAminoAcidAtomCounts(char chAminoAcidSymbol, clsEmpiricalFormula empiricalFormula)
+        public bool SetAminoAcidAtomCounts(char chAminoAcidSymbol, EmpiricalFormula empiricalFormula)
         {
             if (chAminoAcidSymbol == default(char))
             {

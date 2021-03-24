@@ -11,18 +11,20 @@
 //	The taxonomy file that it references             (typically taxonomy.xml)
 //  The default input file defined in input.xml      (typically default_input.xml)
 //*********************************************************************************************************
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using PHRPReader.Data;
 using PRISM;
 
-namespace PHRPReader
+namespace PHRPReader.Reader
 {
     /// <summary>
     /// PHRP parser for X!Tandem
     /// </summary>
-    public class clsPHRPParserXTandem : clsPHRPParser
+    public class XTandemSynFileReader : SynFileReaderBaseClass
     {
         #region "Constants"
 
@@ -135,7 +137,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        public clsPHRPParserXTandem(string datasetName, string inputFilePath)
+        public XTandemSynFileReader(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
         }
@@ -145,8 +147,8 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
-        public clsPHRPParserXTandem(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.XTandem, loadModsAndSeqInfo)
+        public XTandemSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.XTandem, loadModsAndSeqInfo)
         {
         }
 
@@ -156,8 +158,8 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public clsPHRPParserXTandem(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.XTandem, startupOptions)
+        public XTandemSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
+            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.XTandem, startupOptions)
         {
         }
 
@@ -177,7 +179,7 @@ namespace PHRPReader
         /// <param name="searchEngineParams"></param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
         /// <returns>Precursor tolerance, in Da</returns>
-        private double DeterminePrecursorMassTolerance(clsSearchEngineParameters searchEngineParams, out double tolerancePPM)
+        private double DeterminePrecursorMassTolerance(SearchEngineParameters searchEngineParams, out double tolerancePPM)
         {
             var isPPM = false;
 
@@ -206,12 +208,12 @@ namespace PHRPReader
                 tolerancePPM = tolerance;
 
                 // Convert from PPM to dalton (assuming a mass of 2000 m/z)
-                tolerance = clsPeptideMassCalculator.PPMToMass(tolerance, 2000);
+                tolerance = PeptideMassCalculator.PPMToMass(tolerance, 2000);
             }
             else
             {
                 // Convert from dalton to PPM (assuming a mass of 2000 m/z)
-                tolerancePPM = clsPeptideMassCalculator.MassToPPM(tolerance, 2000);
+                tolerancePPM = PeptideMassCalculator.MassToPPM(tolerance, 2000);
             }
 
             return tolerance;
@@ -371,7 +373,7 @@ namespace PHRPReader
                 else
                 {
                     var paramFile = new FileInfo(searchEngineParamFilePath);
-                    var searchEngineParams = new clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME);
+                    var searchEngineParams = new SearchEngineParameters(XT_SEARCH_ENGINE_NAME);
 
                     try
                     {
@@ -506,9 +508,9 @@ namespace PHRPReader
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
         /// <returns>True if successful, false if an error</returns>
-        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
+        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams)
         {
-            searchEngineParams = new clsSearchEngineParameters(XT_SEARCH_ENGINE_NAME, mModInfo);
+            searchEngineParams = new SearchEngineParameters(XT_SEARCH_ENGINE_NAME, mModInfo);
 
             return ParseXTandemParamFile(searchEngineParamFileName, searchEngineParams, lookForDefaultParamsFileName: true);
         }
@@ -523,7 +525,7 @@ namespace PHRPReader
         /// <returns>True if successful, false if an error</returns>
         public bool ParseXTandemParamFile(
             string paramFileName,
-            clsSearchEngineParameters searchEngineParams,
+            SearchEngineParameters searchEngineParams,
             bool lookForDefaultParamsFileName,
             bool determineFastaFileNameUsingTaxonomyFile = true)
         {
@@ -573,7 +575,7 @@ namespace PHRPReader
         private static bool ParseXTandemParamFileWork(
             string inputDirectoryPath,
             string paramFileName,
-            clsSearchEngineParameters searchEngineParams,
+            SearchEngineParameters searchEngineParams,
             bool determineFastaFileNameUsingTaxonomyFile,
             bool lookForDefaultParamsFileName,
             ref string errorMessage)
@@ -699,7 +701,7 @@ namespace PHRPReader
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-        public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
+        public override bool ParsePHRPDataLine(string line, int linesRead, out PSM psm, bool fastReadMode)
         {
             const int SCAN_NOT_FOUND_FLAG = -100;
 
@@ -707,24 +709,24 @@ namespace PHRPReader
 
             var success = false;
 
-            psm = new clsPSM();
+            psm = new PSM();
 
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Result_ID, mColumnHeaders, 0);
+                    psm.ResultID = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Result_ID, mColumnHeaders, 0);
 
                     // X!Tandem only tracks the top-ranked peptide for each spectrum
                     psm.ScoreRank = 1;
 
-                    var peptide = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders);
+                    var peptide = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -735,7 +737,7 @@ namespace PHRPReader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
                     // Lookup the protein name(s) using mResultIDToProteins
                     if (mResultIDToProteins.TryGetValue(psm.ResultID, out var proteinsForResultID))
@@ -749,17 +751,17 @@ namespace PHRPReader
                     // The Peptide_MH value listed in X!Tandem files is the theoretical (computed) MH of the peptide
                     // We'll update this value below using massErrorDa
                     // We'll further update this value using the ScanStatsEx data
-                    var peptideMH = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0);
+                    var peptideMH = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH, 1, 0);
 
-                    psm.MassErrorDa = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Delta_Mass, mColumnHeaders);
+                    psm.MassErrorDa = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Delta_Mass, mColumnHeaders);
                     if (double.TryParse(psm.MassErrorDa, out var massErrorDa))
                     {
                         // Adjust the precursor mass
                         psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH - massErrorDa, 1, 0);
                     }
 
-                    psm.MassErrorPPM = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorPPM = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
 
                     success = true;
                 }

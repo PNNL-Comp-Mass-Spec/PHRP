@@ -20,6 +20,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using PHRPReader;
+using PHRPReader.Data;
+using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor
 {
@@ -230,7 +232,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private bool ParseXTandemInputParameterModInfo(
-            clsModificationDefinition.ModificationTypeConstants modificationType,
+            ModificationDefinition.ModificationTypeConstants modificationType,
             int sortOrder,
             bool parsingMotifDef,
             string paramValue,
@@ -284,7 +286,7 @@ namespace PeptideHitResultsProcessor
                             if (colonIndex > 0)
                             {
                                 // Colon found; see if the text up to colonIndex is a number
-                                if (clsPHRPParser.IsNumber(modDefs[index].Substring(0, colonIndex)))
+                                if (SynFileReaderBaseClass.IsNumber(modDefs[index].Substring(0, colonIndex)))
                                 {
                                     modificationMass = double.Parse(modDefs[index].Substring(0, colonIndex));
                                 }
@@ -292,7 +294,7 @@ namespace PeptideHitResultsProcessor
                             else
                             {
                                 // Colon not found; see if the text up to atSignIndex is a number
-                                if (clsPHRPParser.IsNumber(modDefs[index].Substring(0, atSignIndex)))
+                                if (SynFileReaderBaseClass.IsNumber(modDefs[index].Substring(0, atSignIndex)))
                                 {
                                     modificationMass = double.Parse(modDefs[index].Substring(0, atSignIndex));
                                 }
@@ -321,8 +323,8 @@ namespace PeptideHitResultsProcessor
                                 if (targetResidues.Length > 0)
                                 {
                                     // Convert from X!Tandem-style N-Terminus notation to DMS-style notation
-                                    targetResidues = targetResidues.Replace(clsPeptideModificationContainer.N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS);
-                                    targetResidues = targetResidues.Replace(clsPeptideModificationContainer.C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS);
+                                    targetResidues = targetResidues.Replace(PeptideModificationContainer.N_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS);
+                                    targetResidues = targetResidues.Replace(PeptideModificationContainer.C_TERMINAL_PEPTIDE_MOD_SYMBOL_XTANDEM, AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS);
                                 }
 
                                 // Append the new mod information to the modification list
@@ -372,7 +374,7 @@ namespace PeptideHitResultsProcessor
                     // See if paramValue is a non-zero number
 
                     var modificationMass = 0.0;
-                    if (clsPHRPParser.IsNumber(paramValue))
+                    if (SynFileReaderBaseClass.IsNumber(paramValue))
                     {
                         modificationMass = double.Parse(paramValue);
                     }
@@ -387,16 +389,16 @@ namespace PeptideHitResultsProcessor
                         string targetResidues;
                         if (nTerminus)
                         {
-                            targetResidues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                            targetResidues = AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
                         }
                         else
                         {
-                            targetResidues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                            targetResidues = AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
                         }
 
                         modInfo.ModificationMass = modificationMass;
                         modInfo.TargetResidues = targetResidues;
-                        modInfo.ModificationType = clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
+                        modInfo.ModificationType = ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
                         modifications.Add(modInfo);
                     }
                 }
@@ -1242,31 +1244,31 @@ namespace PeptideHitResultsProcessor
                                     var noteLabelLower = noteLabel.ToLower();
                                     if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_StaticModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.StaticMod, Convert.ToInt32(InputParamLabelNames.Residue_StaticModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.StaticMod, Convert.ToInt32(InputParamLabelNames.Residue_StaticModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMotif), true, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMotif), true, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMotif), true, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMotif), true, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialNTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialNTerminusMods), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialNTerminusMods), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialCTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(clsModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialCTerminusMods), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialCTerminusMods), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Protein_NTerminal_ResidueModMass]))
                                     {
@@ -1278,14 +1280,14 @@ namespace PeptideHitResultsProcessor
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Protein_Cleavage_NTerminalMassChange]))
                                     {
-                                        if (clsPHRPParser.IsNumber(value))
+                                        if (SynFileReaderBaseClass.IsNumber(value))
                                         {
                                             PeptideNTerminusMassChange = double.Parse(value);
                                         }
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Protein_Cleavage_CTerminalMassChange]))
                                     {
-                                        if (clsPHRPParser.IsNumber(value))
+                                        if (SynFileReaderBaseClass.IsNumber(value))
                                         {
                                             PeptideCTerminusMassChange = double.Parse(value);
                                         }
@@ -1315,7 +1317,7 @@ namespace PeptideHitResultsProcessor
                                                 rightSpec = rightSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END.ToString(), "]");
                                             }
 
-                                            EnzymeMatchSpec = new clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType(leftSpec, rightSpec);
+                                            EnzymeMatchSpec = new PeptideCleavageStateCalculator.udtEnzymeMatchSpecType(leftSpec, rightSpec);
                                         }
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_ModificationMass]))
@@ -1368,7 +1370,7 @@ namespace PeptideHitResultsProcessor
 
                 foreach (var modInfo in sortedModInfo)
                 {
-                    if (modInfo.ModificationType != clsModificationDefinition.ModificationTypeConstants.StaticMod)
+                    if (modInfo.ModificationType != ModificationDefinition.ModificationTypeConstants.StaticMod)
                     {
                         validatedModifications.Add(modInfo);
                         continue;
@@ -1380,16 +1382,16 @@ namespace PeptideHitResultsProcessor
                         if (comparisonMod.Equals(modInfo))
                             continue;
 
-                        if (comparisonMod.ModificationType != clsModificationDefinition.ModificationTypeConstants.DynamicMod)
+                        if (comparisonMod.ModificationType != ModificationDefinition.ModificationTypeConstants.DynamicMod)
                             continue;
 
                         // See if the comparison mod (which is a dynamic mod) has a similar mass as the current static mod in modInfo
                         // (within MASS_DIGITS_OF_PRECISION digits of precision)
-                        if (Math.Abs(Math.Round(Math.Abs(comparisonMod.ModificationMass - modInfo.ModificationMass), clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION)) < float.Epsilon)
+                        if (Math.Abs(Math.Round(Math.Abs(comparisonMod.ModificationMass - modInfo.ModificationMass), PeptideModificationContainer.MASS_DIGITS_OF_PRECISION)) < float.Epsilon)
                         {
                             // Matching mass
                             // Compare .TargetResidues
-                            if (clsModificationDefinition.EquivalentTargetResidues(comparisonMod.TargetResidues, modInfo.TargetResidues, true))
+                            if (ModificationDefinition.EquivalentTargetResidues(comparisonMod.TargetResidues, modInfo.TargetResidues, true))
                             {
                                 // Yes, the modifications match; do not add the static version of the modification to validatedModifications
                                 skipMod = true;
@@ -1403,11 +1405,11 @@ namespace PeptideHitResultsProcessor
                         continue;
                     }
 
-                    if (modInfo.ModificationType == clsModificationDefinition.ModificationTypeConstants.StaticMod && staticModsAreResetForRefinement)
+                    if (modInfo.ModificationType == ModificationDefinition.ModificationTypeConstants.StaticMod && staticModsAreResetForRefinement)
                     {
                         // Add this static mod as a dynamic mod
                         var updatedModInfo = modInfo.Clone();
-                        updatedModInfo.ModificationType = clsModificationDefinition.ModificationTypeConstants.DynamicMod;
+                        updatedModInfo.ModificationType = ModificationDefinition.ModificationTypeConstants.DynamicMod;
                         validatedModifications.Add(updatedModInfo);
                         continue;
                     }
@@ -1597,7 +1599,7 @@ namespace PeptideHitResultsProcessor
 
                     // Now create the Protein Mods file
                     success = CreateProteinModDetailsFile(xtandemXTFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.PeptideHitResultTypes.XTandem);
+                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.XTandem);
                 }
             }
 
@@ -1671,7 +1673,7 @@ namespace PeptideHitResultsProcessor
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
-                var headerColumns = clsPHRPParserXTandem.GetColumnHeaderNamesAndIDs();
+                var headerColumns = XTandemSynFileReader.GetColumnHeaderNamesAndIDs();
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 
@@ -1701,7 +1703,7 @@ namespace PeptideHitResultsProcessor
             xmlReader.MoveToAttribute(attributeName);
             if (xmlReader.ReadAttributeValue())
             {
-                if (clsPHRPParser.IsNumber(xmlReader.Value))
+                if (SynFileReaderBaseClass.IsNumber(xmlReader.Value))
                 {
                     return Convert.ToInt32(xmlReader.Value);
                 }
@@ -1715,7 +1717,7 @@ namespace PeptideHitResultsProcessor
             xmlReader.MoveToAttribute(attributeName);
             if (xmlReader.ReadAttributeValue())
             {
-                if (clsPHRPParser.IsNumber(xmlReader.Value))
+                if (SynFileReaderBaseClass.IsNumber(xmlReader.Value))
                 {
                     return Convert.ToDouble(xmlReader.Value);
                 }

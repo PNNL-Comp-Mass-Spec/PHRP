@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PHRPReader;
+using PHRPReader.Data;
+using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor
 {
@@ -222,7 +224,7 @@ namespace PeptideHitResultsProcessor
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
                         // Only add this modification if it is a static mod; dynamic mods are handled later in this method when a ']' is found
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != clsModificationDefinition.ModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != ModificationDefinition.ModificationTypeConstants.StaticMod)
                             continue;
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -588,11 +590,11 @@ namespace PeptideHitResultsProcessor
         /// <param name="msAlignParamFilePath"></param>
         /// <param name="modInfo"></param>
         /// <returns>True on success, false if an error</returns>
-        private bool ExtractModInfoFromMSAlignParamFile(string msAlignParamFilePath, out List<clsModificationDefinition> modInfo)
+        private bool ExtractModInfoFromMSAlignParamFile(string msAlignParamFilePath, out List<ModificationDefinition> modInfo)
         {
             var success = false;
 
-            modInfo = new List<clsModificationDefinition>();
+            modInfo = new List<ModificationDefinition>();
 
             try
             {
@@ -629,25 +631,25 @@ namespace PeptideHitResultsProcessor
                             else
                             {
                                 // Split the line on the equals sign
-                                var kvSetting = clsPHRPParser.ParseKeyValueSetting(dataLine, '=', "#");
+                                var kvSetting = SynFileReaderBaseClass.ParseKeyValueSetting(dataLine, '=', "#");
 
                                 if (string.Equals(kvSetting.Key, "cysteineProtection", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    clsModificationDefinition modDef;
+                                    ModificationDefinition modDef;
                                     switch (kvSetting.Value.ToUpper())
                                     {
                                         case "C57":
-                                            modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                                            modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    57.0215, "C",
-                                                                                   clsModificationDefinition.ModificationTypeConstants.StaticMod,
+                                                                                   ModificationDefinition.ModificationTypeConstants.StaticMod,
                                                                                    "IodoAcet");
                                             modInfo.Add(modDef);
                                             break;
 
                                         case "C58":
-                                            modDef = new clsModificationDefinition(clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                                            modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    58.0055, "C",
-                                                                                   clsModificationDefinition.ModificationTypeConstants.StaticMod,
+                                                                                   ModificationDefinition.ModificationTypeConstants.StaticMod,
                                                                                    "IodoAcid");
                                             modInfo.Add(modDef);
                                             break;
@@ -687,7 +689,7 @@ namespace PeptideHitResultsProcessor
             // Although this was a possibility with Inspect, it likely never occurs for MSAlign
             //  But, we'll keep the check in place just in case
 
-            var columnMapping = new Dictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int>();
+            var columnMapping = new Dictionary<MSAlignSynFileReader.MSAlignSynFileColumns, int>();
 
             try
             {
@@ -1007,11 +1009,11 @@ namespace PeptideHitResultsProcessor
                     if (precursorMZ > 0)
                     {
                         udtSearchResult.DelM_PPM =
-                            PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(delM, precursorMZ), 5, 0.00005);
+                            PRISM.StringUtilities.DblToString(PeptideMassCalculator.MassToPPM(delM, precursorMZ), 5, 0.00005);
                     }
                     else
                     {
-                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(clsPeptideMassCalculator.MassToPPM(delM, 1000), 5, 0.00005);
+                        udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(PeptideMassCalculator.MassToPPM(delM, 1000), 5, 0.00005);
                     }
                 }
 
@@ -1152,16 +1154,16 @@ namespace PeptideHitResultsProcessor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ParseMSAlignSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int> columnMapping)
+        private bool ParseMSAlignSynFileHeaderLine(string lineIn, IDictionary<MSAlignSynFileReader.MSAlignSynFileColumns, int> columnMapping)
         {
-            var columnNames = clsPHRPParserMSAlign.GetColumnHeaderNamesAndIDs();
+            var columnNames = MSAlignSynFileReader.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (clsPHRPParserMSAlign.MSAlignSynFileColumns resultColumn in Enum.GetValues(typeof(clsPHRPParserMSAlign.MSAlignSynFileColumns)))
+                foreach (MSAlignSynFileReader.MSAlignSynFileColumns resultColumn in Enum.GetValues(typeof(MSAlignSynFileReader.MSAlignSynFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1190,7 +1192,7 @@ namespace PeptideHitResultsProcessor
             clsSearchResultsMSAlign searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IDictionary<clsPHRPParserMSAlign.MSAlignSynFileColumns, int> columnMapping,
+            IDictionary<MSAlignSynFileReader.MSAlignSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
             // Parses an entry from the MSAlign Synopsis file
@@ -1210,7 +1212,7 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.ResultID], out string value))
+                if (!GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.ResultID], out string value))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1223,13 +1225,13 @@ namespace PeptideHitResultsProcessor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1240,11 +1242,11 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.DelM], out string msAlignComputedDelM);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.DelM], out string msAlignComputedDelM);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.DelMPPM], out string msAlignComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.MSAlignComputedDelM = msAlignComputedDelM;
@@ -1277,24 +1279,24 @@ namespace PeptideHitResultsProcessor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Prsm_ID], out string prsmId);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Spectrum_ID], out string spectrumId);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Prsm_ID], out string prsmId);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Spectrum_ID], out string spectrumId);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.MH], out string parentIonMH);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.MH], out string parentIonMH);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Protein_Mass], out string proteinMass);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Peak_Count], out string peakCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.PValue], out string pValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Rank_PValue], out string rankPValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.EValue], out string eValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.FDR], out string fdr);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.Species_ID], out string speciesId);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSAlign.MSAlignSynFileColumns.FragMethod], out string fragMethod);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Protein_Mass], out string proteinMass);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Unexpected_Mod_Count], out string unexpectedModCount);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Peak_Count], out string peakCount);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Matched_Peak_Count], out string matchedPeakCount);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Matched_Fragment_Ion_Count], out string matchedFragmentIonCount);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.PValue], out string pValue);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Rank_PValue], out string rankPValue);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.EValue], out string eValue);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.FDR], out string fdr);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.Species_ID], out string speciesId);
+                GetColumnValue(splitLine, columnMapping[MSAlignSynFileReader.MSAlignSynFileColumns.FragMethod], out string fragMethod);
 
                 searchResult.Prsm_ID = prsmId;
                 searchResult.Spectrum_ID = spectrumId;
@@ -1506,7 +1508,7 @@ namespace PeptideHitResultsProcessor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.PeptideHitResultTypes.MSAlign);
+                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.MSAlign);
                 }
             }
 
@@ -1524,12 +1526,12 @@ namespace PeptideHitResultsProcessor
         {
             if (peptide.StartsWith(N_TERMINUS_SYMBOL_MSALIGN))
             {
-                peptide = clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST + "." + peptide.Substring(N_TERMINUS_SYMBOL_MSALIGN.Length);
+                peptide = PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST + "." + peptide.Substring(N_TERMINUS_SYMBOL_MSALIGN.Length);
             }
 
             if (peptide.EndsWith(C_TERMINUS_SYMBOL_MSALIGN))
             {
-                peptide = peptide.Substring(0, peptide.Length - C_TERMINUS_SYMBOL_MSALIGN.Length) + "." + clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
+                peptide = peptide.Substring(0, peptide.Length - C_TERMINUS_SYMBOL_MSALIGN.Length) + "." + PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST;
             }
 
             return peptide;
@@ -1539,7 +1541,7 @@ namespace PeptideHitResultsProcessor
         /// Call .LookupModificationDefinitionByMass for each entry in msAlignModInfo
         /// </summary>
         /// <param name="msAlignModInfo"></param>
-        private void ResolveMSAlignModsWithModDefinitions(IReadOnlyCollection<clsModificationDefinition> msAlignModInfo)
+        private void ResolveMSAlignModsWithModDefinitions(IReadOnlyCollection<ModificationDefinition> msAlignModInfo)
         {
             if (msAlignModInfo == null)
                 return;
@@ -1550,7 +1552,7 @@ namespace PeptideHitResultsProcessor
                 {
                     mPeptideMods.LookupModificationDefinitionByMassAndModType(
                         modInfo.ModificationMass, modInfo.ModificationType, default,
-                        clsAminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
+                        AminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
                 }
                 else
                 {
@@ -1558,7 +1560,7 @@ namespace PeptideHitResultsProcessor
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
                             modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
-                            clsAminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
+                            AminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
                     }
                 }
             }
@@ -1620,7 +1622,7 @@ namespace PeptideHitResultsProcessor
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
-                var headerColumns = clsPHRPParserMSAlign.GetColumnHeaderNamesAndIDs();
+                var headerColumns = MSAlignSynFileReader.GetColumnHeaderNamesAndIDs();
 
                 List<string> headerNames;
 
@@ -1636,8 +1638,8 @@ namespace PeptideHitResultsProcessor
                 else
                 {
                     headerNames = (from item in headerColumns
-                                   where item.Key != clsPHRPParserMSAlign.DATA_COLUMN_Species_ID &&
-                                         item.Key != clsPHRPParserMSAlign.DATA_COLUMN_FragMethod
+                                   where item.Key != MSAlignSynFileReader.DATA_COLUMN_Species_ID &&
+                                         item.Key != MSAlignSynFileReader.DATA_COLUMN_FragMethod
                                    orderby item.Value
                                    select item.Key).ToList();
                 }

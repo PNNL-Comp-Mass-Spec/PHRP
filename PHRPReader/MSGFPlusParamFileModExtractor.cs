@@ -34,6 +34,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using PHRPReader.Data;
+using PHRPReader.Reader;
 
 namespace PHRPReader
 {
@@ -41,7 +43,7 @@ namespace PHRPReader
     /// This class reads a DMS-based parameter file for MS-GF+ or MSPathFinder to extract the dynamic and static modification information
     /// </summary>
     /// <remarks>See above for an example parameter file</remarks>
-    public class clsMSGFPlusParamFileModExtractor : PRISM.EventNotifier
+    public class MSGFPlusParamFileModExtractor : PRISM.EventNotifier
     {
         // Ignore Spelling: Carbamidomethyl, Dehydro, Acetyl, Acetylation, Prot, UniMod, defs, Hydroxyproline, nterm, cterm
 
@@ -211,7 +213,7 @@ namespace PHRPReader
         /// Search engine name, typically MS-GF+
         /// This name is only used in log messages
         /// </param>
-        public clsMSGFPlusParamFileModExtractor(string toolName)
+        public MSGFPlusParamFileModExtractor(string toolName)
         {
             mErrorMessage = string.Empty;
             if (string.IsNullOrWhiteSpace(toolName))
@@ -248,11 +250,11 @@ namespace PHRPReader
                 return 203.079376;
             }
 
-            clsEmpiricalFormula empiricalFormulaInstance;
+            EmpiricalFormula empiricalFormulaInstance;
 
             try
             {
-                empiricalFormulaInstance = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalFormula);
+                empiricalFormulaInstance = PeptideMassCalculator.GetEmpiricalFormulaComponents(empiricalFormula);
             }
             catch (Exception ex)
             {
@@ -260,7 +262,7 @@ namespace PHRPReader
                 return 0;
             }
 
-            var monoisotopicMass = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormulaInstance.ElementCounts, out var unknownSymbols);
+            var monoisotopicMass = PeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormulaInstance.ElementCounts, out var unknownSymbols);
 
             if (unknownSymbols?.Count > 0)
             {
@@ -549,7 +551,7 @@ namespace PHRPReader
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
-                            udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                            udtModInfo.Residues = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
                             if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
                                 udtModInfo.ModType = MSGFPlusModType.DynNTermPeptide;
 
@@ -561,7 +563,7 @@ namespace PHRPReader
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
-                            udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                            udtModInfo.Residues = AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
                             if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
                                 udtModInfo.ModType = MSGFPlusModType.DynCTermPeptide;
 
@@ -574,7 +576,7 @@ namespace PHRPReader
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
-                            udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                            udtModInfo.Residues = AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
                             if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
                                 udtModInfo.ModType = MSGFPlusModType.DynNTermProtein;
 
@@ -587,7 +589,7 @@ namespace PHRPReader
                                 // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                                 udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                             }
-                            udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
+                            udtModInfo.Residues = AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS.ToString();
                             if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
                                 udtModInfo.ModType = MSGFPlusModType.DynCTermProtein;
 
@@ -668,7 +670,7 @@ namespace PHRPReader
                             // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                             udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         }
-                        udtModInfo.Residues = clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                        udtModInfo.Residues = AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
                         if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
                             udtModInfo.ModType = MSGFPlusModType.DynNTermPeptide;
 
@@ -680,7 +682,7 @@ namespace PHRPReader
                             // This program does not support static mods at the N or C terminus that only apply to specific residues; switch to a dynamic mod
                             udtModInfo.ModType = MSGFPlusModType.DynamicMod;
                         }
-                        udtModInfo.Residues = clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
+                        udtModInfo.Residues = AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString();
                         if (udtModInfo.ModType == MSGFPlusModType.DynamicMod)
                             udtModInfo.ModType = MSGFPlusModType.DynCTermPeptide;
 
@@ -737,7 +739,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modInfo"></param>
         /// <param name="peptideMods"></param>
-        public void ResolveMSGFPlusModsWithModDefinitions(List<udtModInfoType> modInfo, clsPeptideModificationContainer peptideMods)
+        public void ResolveMSGFPlusModsWithModDefinitions(List<udtModInfoType> modInfo, PeptideModificationContainer peptideMods)
         {
             if (modInfo == null)
                 return;
@@ -777,53 +779,53 @@ namespace PHRPReader
                         chTargetResidue = default;
                     }
 
-                    var modType = clsModificationDefinition.ModificationTypeConstants.DynamicMod;
-                    clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState;
+                    var modType = ModificationDefinition.ModificationTypeConstants.DynamicMod;
+                    AminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState;
 
                     if (udtModInfo.ModType == MSGFPlusModType.DynNTermPeptide)
                     {
-                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                        residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                     }
                     else if (udtModInfo.ModType == MSGFPlusModType.DynCTermPeptide)
                     {
-                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                        residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                     }
                     else if (udtModInfo.ModType == MSGFPlusModType.DynNTermProtein)
                     {
-                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
+                        residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
                     }
                     else if (udtModInfo.ModType == MSGFPlusModType.DynCTermProtein)
                     {
-                        residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
+                        residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
                     }
                     else
                     {
                         switch (chTargetResidue)
                         {
-                            case clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS:
-                                residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                            case AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS:
+                                residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
+                                    modType = ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                                 break;
-                            case clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS:
-                                residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                            case AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS:
+                                residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
+                                    modType = ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                                 break;
-                            case clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS:
-                                residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
+                            case AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS:
+                                residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
+                                    modType = ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
                                 break;
-                            case clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS:
-                                residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
+                            case AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS:
+                                residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
+                                    modType = ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
                                 break;
                             default:
-                                residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
+                                residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.None;
                                 if (udtModInfo.ModType == MSGFPlusModType.StaticMod)
-                                    modType = clsModificationDefinition.ModificationTypeConstants.StaticMod;
+                                    modType = ModificationDefinition.ModificationTypeConstants.StaticMod;
                                 break;
                         }
                     }
@@ -862,7 +864,7 @@ namespace PHRPReader
 
             if (lineIn.StartsWith(modTag, StringComparison.OrdinalIgnoreCase))
             {
-                var kvSetting = clsPHRPParser.ParseKeyValueSetting(lineIn, '=', "#");
+                var kvSetting = SynFileReaderBaseClass.ParseKeyValueSetting(lineIn, '=', "#");
 
                 if (string.IsNullOrEmpty(kvSetting.Value) || string.Equals(kvSetting.Value, "none", StringComparison.OrdinalIgnoreCase))
                 {

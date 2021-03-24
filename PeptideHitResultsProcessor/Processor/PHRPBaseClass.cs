@@ -21,6 +21,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using PeptideToProteinMapEngine;
 using PHRPReader;
+using PHRPReader.Data;
+using PHRPReader.Reader;
 using PRISM.FileProcessor;
 using ProteinCoverageSummarizer;
 
@@ -40,10 +42,10 @@ namespace PeptideHitResultsProcessor
         {
             FileDate = "February 3, 2021";
 
-            mPeptideSeqMassCalculator = new clsPeptideMassCalculator { ChargeCarrierMass = clsPeptideMassCalculator.MASS_PROTON };
+            mPeptideSeqMassCalculator = new PeptideMassCalculator { ChargeCarrierMass = PeptideMassCalculator.MASS_PROTON };
 
             // Initialize mPeptideMods
-            mPeptideMods = new clsPeptideModificationContainer();
+            mPeptideMods = new PeptideModificationContainer();
 
             // Initialize mUniqueSequences
             mUniqueSequences = new clsUniqueSequencesContainer();
@@ -190,7 +192,7 @@ namespace PeptideHitResultsProcessor
             public int SortOrder;
             public double ModificationMass;
             public string TargetResidues;
-            public clsModificationDefinition.ModificationTypeConstants ModificationType;
+            public ModificationDefinition.ModificationTypeConstants ModificationType;
 
             /// <summary>
             /// Duplicate this modification via a deep copy
@@ -248,9 +250,9 @@ namespace PeptideHitResultsProcessor
         protected PHRPErrorCodes mErrorCode = PHRPErrorCodes.NoError;
         protected string mErrorMessage = string.Empty;
 
-        protected readonly clsPeptideMassCalculator mPeptideSeqMassCalculator;
+        protected readonly PeptideMassCalculator mPeptideSeqMassCalculator;
 
-        protected readonly clsPeptideModificationContainer mPeptideMods;
+        protected readonly PeptideModificationContainer mPeptideMods;
         private readonly clsUniqueSequencesContainer mUniqueSequences;
         private readonly SortedSet<string> mSeqToProteinMap;
 
@@ -304,7 +306,7 @@ namespace PeptideHitResultsProcessor
         /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
         public bool CreateProteinModsFile { get; set; }
 
-        public clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType EnzymeMatchSpec { get; set; }
+        public PeptideCleavageStateCalculator.udtEnzymeMatchSpecType EnzymeMatchSpec { get; set; }
 
         public PHRPErrorCodes ErrorCode => mErrorCode;
 
@@ -793,13 +795,13 @@ namespace PeptideHitResultsProcessor
             searchResult.ProteinSeqResidueNumberStart = 1;
             searchResult.ProteinSeqResidueNumberEnd = 10000;
 
-            if (searchResult.PeptidePreResidues.Trim().EndsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST.ToString()))
+            if (searchResult.PeptidePreResidues.Trim().EndsWith(PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST.ToString()))
             {
                 // The peptide is at the N-Terminus of the protein
                 searchResult.PeptideLocInProteinStart = searchResult.ProteinSeqResidueNumberStart;
                 searchResult.PeptideLocInProteinEnd = searchResult.PeptideLocInProteinStart + searchResult.PeptideCleanSequence.Length - 1;
 
-                if (searchResult.PeptidePostResidues.Trim()[0] == clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST)
+                if (searchResult.PeptidePostResidues.Trim()[0] == PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST)
                 {
                     // The peptide spans the entire length of the protein
                     searchResult.ProteinSeqResidueNumberEnd = searchResult.PeptideLocInProteinEnd;
@@ -813,7 +815,7 @@ namespace PeptideHitResultsProcessor
                     }
                 }
             }
-            else if (searchResult.PeptidePostResidues.Trim().StartsWith(clsPeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST.ToString()))
+            else if (searchResult.PeptidePostResidues.Trim().StartsWith(PeptideCleavageStateCalculator.TERMINUS_SYMBOL_SEQUEST.ToString()))
             {
                 // The peptide is at the C-Terminus of the protein
                 searchResult.PeptideLocInProteinEnd = searchResult.ProteinSeqResidueNumberEnd;
@@ -1135,7 +1137,7 @@ namespace PeptideHitResultsProcessor
 
                 if (success)
                 {
-                    success = CreateProteinModDetailsFile(phrpDataFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, clsPHRPReader.PeptideHitResultTypes.Unknown);
+                    success = CreateProteinModDetailsFile(phrpDataFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, PHRPReader.PHRPReader.PeptideHitResultTypes.Unknown);
                 }
             }
             catch (Exception ex)
@@ -1150,7 +1152,7 @@ namespace PeptideHitResultsProcessor
             string phrpDataFilePath,
             string outputDirectoryPath,
             string mtsPepToProteinMapFilePath,
-            clsPHRPReader.PeptideHitResultTypes phrpResultType)
+            PHRPReader.PHRPReader.PeptideHitResultTypes phrpResultType)
         {
             try
             {
@@ -1222,11 +1224,11 @@ namespace PeptideHitResultsProcessor
                                      COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
                                      COLUMN_NAME_MSGF_SPECPROB);
 
-                    var loadMSGFResults = phrpResultType != clsPHRPReader.PeptideHitResultTypes.MSGFPlus;
+                    var loadMSGFResults = phrpResultType != PHRPReader.PHRPReader.PeptideHitResultTypes.MSGFPlus;
 
                     // Update the Mass Calculator to use the one tracked by this class
                     // (since this class's calculator knows about custom amino acids and custom charge carriers)
-                    var startupOptions = new clsPHRPStartupOptions
+                    var startupOptions = new PHRPStartupOptions
                     {
                         LoadModsAndSeqInfo = true,
                         LoadMSGFResults = loadMSGFResults,
@@ -1234,7 +1236,7 @@ namespace PeptideHitResultsProcessor
                         PeptideMassCalculator = mPeptideSeqMassCalculator
                     };
 
-                    using (var reader = new clsPHRPReader(phrpDataFilePath, phrpResultType, startupOptions))
+                    using (var reader = new PHRPReader.PHRPReader(phrpDataFilePath, phrpResultType, startupOptions))
                     {
                         reader.EchoMessagesToConsole = false;
                         reader.SkipDuplicatePSMs = true;
@@ -1396,7 +1398,7 @@ namespace PeptideHitResultsProcessor
 
         protected string GetCleanSequence(string sequenceWithMods, out string prefix, out string suffix)
         {
-            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out prefix, out suffix))
+            if (PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out prefix, out suffix))
             {
                 // Remove any non-letter characters
                 primarySequence = mReplaceSymbols.Replace(primarySequence, string.Empty);
@@ -1549,10 +1551,10 @@ namespace PeptideHitResultsProcessor
             MSGFPlusSynopsisFileEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
             MSGFPlusSynopsisFileSpecEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
-            EnzymeMatchSpec = clsPeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
+            EnzymeMatchSpec = PeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
 
-            PeptideNTerminusMassChange = clsPeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE;
-            PeptideCTerminusMassChange = clsPeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE;
+            PeptideNTerminusMassChange = PeptideMassCalculator.DEFAULT_N_TERMINUS_MASS_CHANGE;
+            PeptideCTerminusMassChange = PeptideMassCalculator.DEFAULT_C_TERMINUS_MASS_CHANGE;
         }
 
         /// <summary>
@@ -1748,7 +1750,7 @@ namespace PeptideHitResultsProcessor
 
                         if (!valueNotPresent)
                         {
-                            EnzymeMatchSpec = new clsPeptideCleavageStateCalculator.udtEnzymeMatchSpecType(leftResidueRegEx, rightResidueRegEx);
+                            EnzymeMatchSpec = new PeptideCleavageStateCalculator.udtEnzymeMatchSpecType(leftResidueRegEx, rightResidueRegEx);
                         }
                     }
 
@@ -2006,12 +2008,12 @@ namespace PeptideHitResultsProcessor
                 // Write the header line
                 var headerNames = new List<string>
                 {
-                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol,
-                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass,
-                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues,
-                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type,
-                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag,
-                    clsPHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol,
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass,
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues,
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type,
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag,
+                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count
                 };
 
                 writer.WriteLine(CollapseList(headerNames));
@@ -2028,7 +2030,7 @@ namespace PeptideHitResultsProcessor
                         searchResult.ModificationSymbol.ToString(),
                         searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture),
                         searchResult.TargetResidues,
-                        clsModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType).ToString(),
+                        ModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType).ToString(),
                         searchResult.MassCorrectionTag,
                         searchResult.OccurrenceCount.ToString()
                     };
@@ -2609,7 +2611,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private void WriteModDetailsEntry(
-            clsPHRPReader reader,
+            PHRPReader.PHRPReader reader,
             TextWriter writer,
             IReadOnlyList<udtPepToProteinMappingType> pepToProteinMapping,
             int pepToProteinMapIndex,

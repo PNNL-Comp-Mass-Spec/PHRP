@@ -16,12 +16,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace PHRPReader
+namespace PHRPReader.Data
 {
     /// <summary>
     /// This class describes an amino acid modification
     /// </summary>
-    public class clsModificationDefinition
+    public class ModificationDefinition
     {
         // Ignore Spelling: UnkMod, Phosph, IodoAcet, Plus1Oxy
 
@@ -228,7 +228,7 @@ namespace PHRPReader
             {
                 if (value == default(char))
                 {
-                    mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
+                    mAffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
                 }
                 else
                 {
@@ -252,7 +252,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsModificationDefinition()
+        public ModificationDefinition()
         {
             Clear();
         }
@@ -262,7 +262,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modificationSymbol"></param>
         /// <param name="modificationMass"></param>
-        public clsModificationDefinition(char modificationSymbol, double modificationMass)
+        public ModificationDefinition(char modificationSymbol, double modificationMass)
         {
             Clear();
 
@@ -276,7 +276,7 @@ namespace PHRPReader
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
         /// <param name="modificationType"></param>
-        public clsModificationDefinition(double modificationMass, string targetResidues, ModificationTypeConstants modificationType)
+        public ModificationDefinition(double modificationMass, string targetResidues, ModificationTypeConstants modificationType)
         {
             Clear();
 
@@ -293,7 +293,7 @@ namespace PHRPReader
         /// <param name="targetResidues"></param>
         /// <param name="modificationType"></param>
         /// <param name="massCorrectionTag"></param>
-        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationTypeConstants modificationType, string massCorrectionTag)
+        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationTypeConstants modificationType, string massCorrectionTag)
         {
             Clear();
 
@@ -314,7 +314,7 @@ namespace PHRPReader
         /// <param name="massCorrectionTag"></param>
         /// <param name="chAffectedAtom"></param>
         /// <param name="unknownModAutoDefined"></param>
-        public clsModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationTypeConstants modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
+        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationTypeConstants modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
         {
             Clear();
 
@@ -338,7 +338,7 @@ namespace PHRPReader
             mTargetResidues = string.Empty;
             ModificationType = ModificationTypeConstants.UnknownType;
             mMassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME;
-            mAffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
+            mAffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
             OccurrenceCount = 0;
             UnknownModAutoDefined = false;
         }
@@ -348,7 +348,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
-        public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition b)
+        public bool EquivalentMassTypeTagAndAtom(ModificationDefinition b)
         {
             return EquivalentMassTypeTagAndAtom(this, b);
         }
@@ -359,10 +359,10 @@ namespace PHRPReader
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
-        public bool EquivalentMassTypeTagAndAtom(clsModificationDefinition a, clsModificationDefinition b)
+        public bool EquivalentMassTypeTagAndAtom(ModificationDefinition a, ModificationDefinition b)
         {
             var equivalent =
-                Math.Abs(Math.Round(a.ModificationMass - b.ModificationMass, clsPeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < float.Epsilon &&
+                Math.Abs(Math.Round(a.ModificationMass - b.ModificationMass, PeptideModificationContainer.MASS_DIGITS_OF_PRECISION) - 0) < float.Epsilon &&
                 a.ModificationType == b.ModificationType &&
                 a.MassCorrectionTag == b.MassCorrectionTag &&
                 a.AffectedAtom == b.AffectedAtom;
@@ -375,7 +375,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
-        public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition b)
+        public bool EquivalentMassTypeTagAtomAndResidues(ModificationDefinition b)
         {
             return EquivalentMassTypeTagAtomAndResidues(this, b);
         }
@@ -386,7 +386,7 @@ namespace PHRPReader
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>True if the items are equivalent</returns>
-        public bool EquivalentMassTypeTagAtomAndResidues(clsModificationDefinition a, clsModificationDefinition b)
+        public bool EquivalentMassTypeTagAtomAndResidues(ModificationDefinition a, ModificationDefinition b)
         {
             // First compare a to b but ignore .ModificationSymbol and .AffectedResidues
             var equivalent = EquivalentMassTypeTagAndAtom(a, b);
@@ -541,10 +541,10 @@ namespace PHRPReader
         {
             var terminalSymbols = new SortedSet<char>
             {
-                clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS,
-                clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS,
-                clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS,
-                clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
+                AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS,
+                AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS,
+                AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS,
+                AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS
             };
 
             return terminalSymbols;

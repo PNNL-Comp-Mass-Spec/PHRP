@@ -14,13 +14,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using PHRPReader.Data;
 
-namespace PHRPReader
+namespace PHRPReader.Reader
 {
     /// <summary>
     /// PHRP parser base class
     /// </summary>
-    public abstract class clsPHRPParser : PRISM.EventNotifier
+    public abstract class SynFileReaderBaseClass : PRISM.EventNotifier
     {
         // Ignore Spelling: MODa, iTraq, Defs
 
@@ -73,22 +74,22 @@ namespace PHRPReader
         /// <summary>
         /// Cleavage state calculator
         /// </summary>
-        protected readonly clsPeptideCleavageStateCalculator mCleavageStateCalculator;
+        protected readonly PeptideCleavageStateCalculator mCleavageStateCalculator;
 
         /// <summary>
         /// Peptide mass calculator
         /// </summary>
-        protected readonly clsPeptideMassCalculator mPeptideMassCalculator;
+        protected readonly PeptideMassCalculator mPeptideMassCalculator;
 
         /// <summary>
         /// PHRP result type
         /// </summary>
-        protected clsPHRPReader.PeptideHitResultTypes mPeptideHitResultType;
+        protected PHRPReader.PeptideHitResultTypes mPeptideHitResultType;
 
         /// <summary>
         /// Modification info
         /// </summary>
-        protected List<clsModificationDefinition> mModInfo;
+        protected List<ModificationDefinition> mModInfo;
 
         /// <summary>
         /// Protein Names for each ResultID
@@ -129,12 +130,12 @@ namespace PHRPReader
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, MSGFPlus, etc.
         /// </summary>
-        public clsPHRPReader.PeptideHitResultTypes PeptideHitResultType => mPeptideHitResultType;
+        public PHRPReader.PeptideHitResultTypes PeptideHitResultType => mPeptideHitResultType;
 
         /// <summary>
         /// Peptide to protein map file name
         /// </summary>
-        public Dictionary<string, clsPepToProteinMapInfo> PepToProteinMap { get; }
+        public Dictionary<string, PepToProteinMapInfo> PepToProteinMap { get; }
 
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
@@ -144,12 +145,12 @@ namespace PHRPReader
         /// <summary>
         /// Returns the cached sequence info, where key is SeqID
         /// </summary>
-        public SortedList<int, clsSeqInfo> SeqInfo { get; }
+        public SortedList<int, SequenceInfo> SeqInfo { get; }
 
         /// <summary>
         /// Returns the cached sequence to protein map information
         /// </summary>
-        public SortedList<int, List<clsProteinInfo>> SeqToProteinMap { get; }
+        public SortedList<int, List<ProteinInfo>> SeqToProteinMap { get; }
 
         /// <summary>
         /// Cached warning messages
@@ -215,7 +216,7 @@ namespace PHRPReader
         /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-        protected clsPHRPParser(string datasetName, string inputFilePath, clsPHRPReader.PeptideHitResultTypes peptideHitResultType,
+        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, PHRPReader.PeptideHitResultTypes peptideHitResultType,
             bool loadModsAndSeqInfo)
         {
             ErrorMessages = new List<string>();
@@ -223,9 +224,9 @@ namespace PHRPReader
 
             mResultIDToProteins = new SortedList<int, List<string>>();
 
-            mCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
+            mCleavageStateCalculator = new PeptideCleavageStateCalculator();
 
-            mPeptideMassCalculator = new clsPeptideMassCalculator();
+            mPeptideMassCalculator = new PeptideMassCalculator();
 
             // Initialize the column mapping object
             // Using a case-insensitive comparer
@@ -234,11 +235,11 @@ namespace PHRPReader
             // Initialize the tracking lists
             // These will get populated via the call to reader.GetProteinMapping
             ResultToSeqMap = new SortedList<int, int>();
-            SeqInfo = new SortedList<int, clsSeqInfo>();
-            SeqToProteinMap = new SortedList<int, List<clsProteinInfo>>();
-            PepToProteinMap = new Dictionary<string, clsPepToProteinMapInfo>();
+            SeqInfo = new SortedList<int, SequenceInfo>();
+            SeqToProteinMap = new SortedList<int, List<ProteinInfo>>();
+            PepToProteinMap = new Dictionary<string, PepToProteinMapInfo>();
 
-            var startupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = loadModsAndSeqInfo };
+            var startupOptions = new PHRPStartupOptions { LoadModsAndSeqInfo = loadModsAndSeqInfo };
 
             InitializeParser(datasetName, inputFilePath, peptideHitResultType, startupOptions);
         }
@@ -251,16 +252,16 @@ namespace PHRPReader
         /// <param name="peptideHitResultType"></param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-        protected clsPHRPParser(string datasetName, string inputFilePath, clsPHRPReader.PeptideHitResultTypes peptideHitResultType, clsPHRPStartupOptions startupOptions)
+        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, PHRPReader.PeptideHitResultTypes peptideHitResultType, PHRPStartupOptions startupOptions)
         {
             ErrorMessages = new List<string>();
             WarningMessages = new List<string>();
 
             mResultIDToProteins = new SortedList<int, List<string>>();
 
-            mCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
+            mCleavageStateCalculator = new PeptideCleavageStateCalculator();
 
-            mPeptideMassCalculator = startupOptions.PeptideMassCalculator ?? new clsPeptideMassCalculator();
+            mPeptideMassCalculator = startupOptions.PeptideMassCalculator ?? new PeptideMassCalculator();
 
             // Initialize the column mapping object
             // Using a case-insensitive comparer
@@ -269,9 +270,9 @@ namespace PHRPReader
             // Initialize the tracking lists
             // These will get populated via the call to reader.GetProteinMapping
             ResultToSeqMap = new SortedList<int, int>();
-            SeqInfo = new SortedList<int, clsSeqInfo>();
-            SeqToProteinMap = new SortedList<int, List<clsProteinInfo>>();
-            PepToProteinMap = new Dictionary<string, clsPepToProteinMapInfo>();
+            SeqInfo = new SortedList<int, SequenceInfo>();
+            SeqToProteinMap = new SortedList<int, List<ProteinInfo>>();
+            PepToProteinMap = new Dictionary<string, PepToProteinMapInfo>();
 
             InitializeParser(datasetName, inputFilePath, peptideHitResultType, startupOptions);
         }
@@ -288,7 +289,7 @@ namespace PHRPReader
         /// startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
         /// Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
         /// </remarks>
-        private void InitializeParser(string datasetName, string inputFilePath, clsPHRPReader.PeptideHitResultTypes peptideHitResultType, clsPHRPStartupOptions startupOptions)
+        private void InitializeParser(string datasetName, string inputFilePath, PHRPReader.PeptideHitResultTypes peptideHitResultType, PHRPStartupOptions startupOptions)
         {
             if (string.IsNullOrWhiteSpace(datasetName))
                 datasetName = "Undefined";
@@ -320,8 +321,8 @@ namespace PHRPReader
                     InputDirectoryPath = inputFile.Directory.FullName;
                 }
 
-                var phrpSynopsisName = clsPHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
-                var expectedSynopsisName = clsPHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
+                var phrpSynopsisName = PHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
+                var expectedSynopsisName = PHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
 
                 isSynopsisFile = string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase) ||
                                  inputFile.Name.EndsWith("_syn.txt", StringComparison.OrdinalIgnoreCase);
@@ -350,13 +351,13 @@ namespace PHRPReader
             {
                 // Read the ResultToSeqMapInfo (if the files exist)
 
-                var resultToSeqMapFilename = clsPHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName);
+                var resultToSeqMapFilename = PHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName);
                 var resultToSeqMapFilePathPreferred = string.Empty;
                 var resultToSeqMapFilePath = string.Empty;
 
                 if (!string.IsNullOrEmpty(resultToSeqMapFilename))
                 {
-                    resultToSeqMapFilePath = clsPHRPReader.FindResultToSeqMapFile(InputDirectoryPath,
+                    resultToSeqMapFilePath = PHRPReader.FindResultToSeqMapFile(InputDirectoryPath,
                                                                                   InputFilePath,
                                                                                   resultToSeqMapFilename,
                                                                                   out resultToSeqMapFilePathPreferred);
@@ -396,7 +397,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
-        public static clsPHRPParser GetParser(string inputFilePath)
+        public static SynFileReaderBaseClass GetParser(string inputFilePath)
         {
             return GetParser(inputFilePath, true);
         }
@@ -407,16 +408,16 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
-        public static clsPHRPParser GetParser(string inputFilePath, bool loadModsAndSeqInfo)
+        public static SynFileReaderBaseClass GetParser(string inputFilePath, bool loadModsAndSeqInfo)
         {
-            var peptideHitResultType = clsPHRPReader.AutoDetermineResultType(inputFilePath);
+            var peptideHitResultType = PHRPReader.AutoDetermineResultType(inputFilePath);
 
-            if (peptideHitResultType == clsPHRPReader.PeptideHitResultTypes.Unknown)
+            if (peptideHitResultType == PHRPReader.PeptideHitResultTypes.Unknown)
             {
                 throw new Exception("Unable to auto-determine the PeptideHitResultType for " + inputFilePath);
             }
 
-            var datasetName = clsPHRPReader.AutoDetermineDatasetName(inputFilePath);
+            var datasetName = PHRPReader.AutoDetermineDatasetName(inputFilePath);
             if (string.IsNullOrEmpty(datasetName))
             {
                 throw new Exception("Unable to auto-determine the Dataset Name for " + inputFilePath);
@@ -432,11 +433,11 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type from inputFilePath</remarks>
-        public static clsPHRPParser GetParser(string inputFilePath, string datasetName, bool loadModsAndSeqInfo)
+        public static SynFileReaderBaseClass GetParser(string inputFilePath, string datasetName, bool loadModsAndSeqInfo)
         {
-            var peptideHitResultType = clsPHRPReader.AutoDetermineResultType(inputFilePath);
+            var peptideHitResultType = PHRPReader.AutoDetermineResultType(inputFilePath);
 
-            if (peptideHitResultType == clsPHRPReader.PeptideHitResultTypes.Unknown)
+            if (peptideHitResultType == PHRPReader.PeptideHitResultTypes.Unknown)
             {
                 throw new Exception("Unable to auto-determine the PeptideHitResultType for " + inputFilePath);
             }
@@ -451,31 +452,31 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-        public static clsPHRPParser GetParser(string inputFilePath, string datasetName, clsPHRPReader.PeptideHitResultTypes peptideHitResultType,
+        public static SynFileReaderBaseClass GetParser(string inputFilePath, string datasetName, PHRPReader.PeptideHitResultTypes peptideHitResultType,
             bool loadModsAndSeqInfo)
         {
             switch (peptideHitResultType)
             {
-                case clsPHRPReader.PeptideHitResultTypes.Inspect:
-                    return new clsPHRPParserInspect(datasetName, inputFilePath, loadModsAndSeqInfo);
+                case PHRPReader.PeptideHitResultTypes.Inspect:
+                    return new InspectSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case clsPHRPReader.PeptideHitResultTypes.MSAlign:
-                    return new clsPHRPParserMSAlign(datasetName, inputFilePath, loadModsAndSeqInfo);
+                case PHRPReader.PeptideHitResultTypes.MSAlign:
+                    return new MSAlignSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case clsPHRPReader.PeptideHitResultTypes.MSGFPlus:
-                    return new clsPHRPParserMSGFPlus(datasetName, inputFilePath, loadModsAndSeqInfo);
+                case PHRPReader.PeptideHitResultTypes.MSGFPlus:
+                    return new MSGFPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case clsPHRPReader.PeptideHitResultTypes.Sequest:
-                    return new clsPHRPParserSequest(datasetName, inputFilePath, loadModsAndSeqInfo);
+                case PHRPReader.PeptideHitResultTypes.Sequest:
+                    return new SequestSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case clsPHRPReader.PeptideHitResultTypes.XTandem:
-                    return new clsPHRPParserXTandem(datasetName, inputFilePath, loadModsAndSeqInfo);
+                case PHRPReader.PeptideHitResultTypes.XTandem:
+                    return new XTandemSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case clsPHRPReader.PeptideHitResultTypes.MODa:
-                    return new clsPHRPParserMODa(datasetName, inputFilePath, loadModsAndSeqInfo);
+                case PHRPReader.PeptideHitResultTypes.MODa:
+                    return new MODaSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case clsPHRPReader.PeptideHitResultTypes.MODPlus:
-                    return new clsPHRPParserMODPlus(datasetName, inputFilePath, loadModsAndSeqInfo);
+                case PHRPReader.PeptideHitResultTypes.MODPlus:
+                    return new MODPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
                 default:
                     throw new Exception("Unrecognized value for PeptideHitResultType: " + peptideHitResultType.ToString());
@@ -512,7 +513,7 @@ namespace PHRPReader
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
         /// <param name="psm">clsPSM object (output)</param>
         /// <returns>True if successful, false if an error</returns>
-        public bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm)
+        public bool ParsePHRPDataLine(string line, int linesRead, out PSM psm)
         {
             return ParsePHRPDataLine(line, linesRead, out psm, fastReadMode: false);
         }
@@ -526,7 +527,7 @@ namespace PHRPReader
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
-        public abstract bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode);
+        public abstract bool ParsePHRPDataLine(string line, int linesRead, out PSM psm, bool fastReadMode);
 
         /// <summary>
         /// Parses the specified parameter file
@@ -535,7 +536,7 @@ namespace PHRPReader
         /// <param name="searchEngineParamFileName">Name of the parameter file to parse (must reside in InputDirectoryPath)</param>
         /// <param name="searchEngineParams">Search engine parameters class (output)</param>
         /// <returns>True if successful, false if an error</returns>
-        public abstract bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams);
+        public abstract bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams);
 
         #endregion
 
@@ -558,11 +559,11 @@ namespace PHRPReader
         /// <param name="psm"></param>
         /// <param name="columns"></param>
         /// <param name="scoreColumnName"></param>
-        protected void AddScore(clsPSM psm, string[] columns, string scoreColumnName)
+        protected void AddScore(PSM psm, string[] columns, string scoreColumnName)
         {
             const string NOT_FOUND = "==SCORE_NOT_FOUND==";
 
-            var value = clsPHRPReader.LookupColumnValue(columns, scoreColumnName, mColumnHeaders, NOT_FOUND);
+            var value = PHRPReader.LookupColumnValue(columns, scoreColumnName, mColumnHeaders, NOT_FOUND);
 
             if (value != NOT_FOUND)
             {
@@ -588,7 +589,7 @@ namespace PHRPReader
 
         private readonly StringBuilder mNewPeptide = new StringBuilder();
 
-        private string ConvertModsToNumericMods(string cleanSequence, IReadOnlyCollection<clsAminoAcidModInfo> modifiedResidues)
+        private string ConvertModsToNumericMods(string cleanSequence, IReadOnlyCollection<AminoAcidModInfo> modifiedResidues)
         {
             mNewPeptide.Length = 0;
 
@@ -621,7 +622,7 @@ namespace PHRPReader
         /// <returns>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</returns>
         private SortedList<int, udtAmbiguousModInfo> ExtractAmbiguousMods(string sequenceWithMods)
         {
-            if (!clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out _, out _))
+            if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out _, out _))
             {
                 primarySequence = string.Copy(sequenceWithMods);
             }
@@ -634,7 +635,7 @@ namespace PHRPReader
 
             for (var charIndex = 0; charIndex <= primarySequence.Length - 1; charIndex++)
             {
-                if (clsPHRPReader.IsLetterAtoZ(primarySequence[charIndex]))
+                if (PHRPReader.IsLetterAtoZ(primarySequence[charIndex]))
                 {
                     // Found a letter
                     residueNumber++;
@@ -686,7 +687,7 @@ namespace PHRPReader
         /// Finalize the PSM by updating the clean sequence, updating mod info, and updating the sequence info
         /// </summary>
         /// <param name="psm"></param>
-        public void FinalizePSM(clsPSM psm)
+        public void FinalizePSM(PSM psm)
         {
             psm.UpdateCleanSequence();
 
@@ -810,14 +811,14 @@ namespace PHRPReader
         {
             try
             {
-                var modSummaryFileName = clsPHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
+                var modSummaryFileName = PHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
                 if (string.IsNullOrEmpty(modSummaryFileName))
                 {
                     ReportWarning("ModSummaryFile name is empty; unable to continue");
                     return;
                 }
 
-                var modSummaryFilePath = clsPHRPReader.FindModSummaryFile(InputDirectoryPath,
+                var modSummaryFilePath = PHRPReader.FindModSummaryFile(InputDirectoryPath,
                                                                           InputFilePath,
                                                                           modSummaryFileName,
                                                                           out var modSummaryFileNamePreferred);
@@ -831,7 +832,7 @@ namespace PHRPReader
 
                 ShowMessage("Reading the PHRP ModSummary file");
 
-                var modSummaryReader = new clsPHRPModSummaryReader(modSummaryFilePath);
+                var modSummaryReader = new PHRPModSummaryReader(modSummaryFilePath);
                 var success = modSummaryReader.Success;
 
                 if (success)
@@ -859,7 +860,7 @@ namespace PHRPReader
 
                 // Instantiate the reader
                 var reader =
-                    new clsPHRPSeqMapReader(mDatasetName, InputDirectoryPath, mPeptideHitResultType, InputFilePath)
+                    new PHRPSeqMapReader(mDatasetName, InputDirectoryPath, mPeptideHitResultType, InputFilePath)
                     {
                         MaxProteinsPerSeqID = MaxProteinsPerPSM
                     };
@@ -962,7 +963,7 @@ namespace PHRPReader
         /// <param name="splitLine"></param>
         public void ParseColumnHeaders(string[] splitLine)
         {
-            clsPHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
+            PHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
         }
 
         /// <summary>
@@ -1031,8 +1032,8 @@ namespace PHRPReader
         protected bool ReadKeyValuePairSearchEngineParamFile(
             string searchEngineName,
             string searchEngineParamFileName,
-            clsPHRPReader.PeptideHitResultTypes peptideHitResultType,
-            clsSearchEngineParameters searchEngineParams)
+            PHRPReader.PeptideHitResultTypes peptideHitResultType,
+            SearchEngineParameters searchEngineParams)
         {
             var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
 
@@ -1065,8 +1066,8 @@ namespace PHRPReader
         public static bool ReadKeyValuePairSearchEngineParamFile(
             string searchEngineName,
             string paramFilePath,
-            clsPHRPReader.PeptideHitResultTypes peptideHitResultType,
-            clsSearchEngineParameters searchEngineParams,
+            PHRPReader.PeptideHitResultTypes peptideHitResultType,
+            SearchEngineParameters searchEngineParams,
             out string errorMessage,
             out string warningMessage)
         {
@@ -1109,7 +1110,7 @@ namespace PHRPReader
                             continue;
                         }
 
-                        if (peptideHitResultType == clsPHRPReader.PeptideHitResultTypes.MODa &&
+                        if (peptideHitResultType == PHRPReader.PeptideHitResultTypes.MODa &&
                             string.Equals(kvSetting.Key, "add", StringComparison.OrdinalIgnoreCase))
                         {
                             // ModA defines all of its static modifications with the ADD keyword
@@ -1149,17 +1150,17 @@ namespace PHRPReader
         /// <param name="searchEngineParams"></param>
         /// <returns>True if successful, false if an error</returns>
         protected bool ReadSearchEngineVersion(
-            clsPHRPReader.PeptideHitResultTypes peptideHitResultType,
-            clsSearchEngineParameters searchEngineParams)
+            PHRPReader.PeptideHitResultTypes peptideHitResultType,
+            SearchEngineParameters searchEngineParams)
         {
             var success = false;
 
             try
             {
                 // Read the Tool_Version_Info file to determine the analysis time and the tool version
-                var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, clsPHRPReader.GetToolVersionInfoFilename(peptideHitResultType));
+                var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, PHRPReader.GetToolVersionInfoFilename(peptideHitResultType));
 
-                if (!File.Exists(toolVersionInfoFilePath) && peptideHitResultType == clsPHRPReader.PeptideHitResultTypes.MSGFPlus)
+                if (!File.Exists(toolVersionInfoFilePath) && peptideHitResultType == PHRPReader.PeptideHitResultTypes.MSGFPlus)
                 {
                     // This could be an older MS-GF+ job; check for a _MSGFDB.txt tool version file
                     var alternativeVersionInfoFilePath = Path.Combine(InputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");
@@ -1276,7 +1277,7 @@ namespace PHRPReader
             OnStatusEvent(message);
         }
 
-        private void StoreModInfo(clsPSM currentPSM, clsSeqInfo seqInfo)
+        private void StoreModInfo(PSM currentPSM, SequenceInfo seqInfo)
         {
             var nTerminalModsAdded = new List<string>();
             var cTerminalModsAdded = new List<string>();
@@ -1318,11 +1319,11 @@ namespace PHRPReader
                 // Thus, if residueLoc = 1 or residueLoc = currentPSM.PeptideCleanSequence.Length, we'll first look for a peptide or protein terminal static mod
 
                 bool favorTerminalMods;
-                clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState;
+                AminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState;
 
                 if (residueLoc == 1)
                 {
-                    residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                    residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                     if (nTerminalModsAdded.Contains(massCorrectionTag))
                     {
                         // We have likely already added this modification as an N-terminal mod, thus, don't favor terminal mods this time
@@ -1338,21 +1339,21 @@ namespace PHRPReader
                 }
                 else if (residueLoc == peptideResidueCount)
                 {
-                    residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                    residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                     favorTerminalMods = !cTerminalModsAdded.Contains(massCorrectionTag);
                 }
                 else
                 {
-                    residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
+                    residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.None;
                     favorTerminalMods = false;
                 }
 
-                clsModificationDefinition matchedModDef;
+                ModificationDefinition matchedModDef;
                 bool matchFound;
 
                 if (mModInfo == null)
                 {
-                    matchedModDef = new clsModificationDefinition { MassCorrectionTag = massCorrectionTag };
+                    matchedModDef = new ModificationDefinition { MassCorrectionTag = massCorrectionTag };
                     matchFound = true;
                 }
                 else
@@ -1402,7 +1403,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="currentPSM"></param>
         /// <returns>True if successful, False if currentPSM.ResultID is not found in mResultToSeqMap</returns>
-        protected bool UpdatePSMUsingSeqInfo(clsPSM currentPSM)
+        protected bool UpdatePSMUsingSeqInfo(PSM currentPSM)
         {
             if (ResultToSeqMap == null || ResultToSeqMap.Count == 0)
             {
@@ -1442,8 +1443,8 @@ namespace PHRPReader
                     break;
                 }
 
-                var proteinInfo = new clsProteinInfo(proteinName, 0, clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific,
-                                                     clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.None);
+                var proteinInfo = new ProteinInfo(proteinName, 0, PeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific,
+                                                     PeptideCleavageStateCalculator.PeptideTerminusStateConstants.None);
                 currentPSM.AddProtein(proteinInfo);
             }
 
@@ -1465,7 +1466,7 @@ namespace PHRPReader
                 }
             }
 
-            if (clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(currentPSM.Peptide, out _, out var prefix, out var suffix))
+            if (PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(currentPSM.Peptide, out _, out var prefix, out var suffix))
             {
                 currentPSM.PeptideWithNumericMods = prefix + "." + ConvertModsToNumericMods(currentPSM.PeptideCleanSequence, currentPSM.ModifiedResidues) + "." + suffix;
             }
@@ -1480,17 +1481,17 @@ namespace PHRPReader
         private bool UpdatePSMFindMatchingModInfo(
             string massCorrectionTag,
             bool favorTerminalMods,
-            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
-            out clsModificationDefinition matchedModDef)
+            AminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
+            out ModificationDefinition matchedModDef)
         {
-            matchedModDef = new clsModificationDefinition();
+            matchedModDef = new ModificationDefinition();
 
             if (mModInfo == null)
             {
                 return false;
             }
 
-            var matchedDefs = new List<clsModificationDefinition>();
+            var matchedDefs = new List<ModificationDefinition>();
 
             foreach (var mod in mModInfo)
             {
@@ -1511,19 +1512,19 @@ namespace PHRPReader
                         // Look for an entry in matchedDefs that is a terminal mod
                         foreach (var mod in matchedDefs)
                         {
-                            if (mod.ModificationType == clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
-                                mod.ModificationType == clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod)
+                            if (mod.ModificationType == ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
+                                mod.ModificationType == ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod)
                             {
-                                if (residueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus &&
-                                    (mod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)))
+                                if (residueTerminusState == AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus &&
+                                    (mod.TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)))
                                 {
                                     matchFound = true;
                                     matchedModDef = mod;
                                     break;
                                 }
 
-                                if (residueTerminusState == clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus &&
-                                    (mod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)))
+                                if (residueTerminusState == AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus &&
+                                    (mod.TargetResiduesContain(AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)))
                                 {
                                     matchFound = true;
                                     matchedModDef = mod;
@@ -1537,8 +1538,8 @@ namespace PHRPReader
                         // Look for an entry in matchedDefs that is not a terminal mod
                         foreach (var mod in matchedDefs)
                         {
-                            if (!(mod.ModificationType == clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
-                                  mod.ModificationType == clsModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod))
+                            if (!(mod.ModificationType == ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
+                                  mod.ModificationType == ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod))
                             {
                                 matchFound = true;
                                 matchedModDef = mod;

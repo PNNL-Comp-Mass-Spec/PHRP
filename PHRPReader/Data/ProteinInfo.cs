@@ -1,9 +1,9 @@
-﻿namespace PHRPReader
+﻿namespace PHRPReader.Data
 {
     /// <summary>
     /// Protein (or peptide) metadata
     /// </summary>
-    public class clsProteinInfo
+    public class ProteinInfo
     {
         /// <summary>
         /// Protein name
@@ -18,7 +18,7 @@
         /// <summary>
         /// Cleavage state of a protein fragment
         /// </summary>
-        public clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants CleavageState { get; }
+        public PeptideCleavageStateCalculator.PeptideCleavageStateConstants CleavageState { get; }
 
         /// <summary>
         /// Residue number in the protein at which this sequence starts
@@ -38,7 +38,7 @@
         /// <summary>
         /// Terminus state of a protein fragment
         /// </summary>
-        public clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants TerminusState { get; }
+        public PeptideCleavageStateCalculator.PeptideTerminusStateConstants TerminusState { get; }
 
         /// <summary>
         /// Constructor
@@ -47,11 +47,11 @@
         /// <param name="seqID"></param>
         /// <param name="cleavageState"></param>
         /// <param name="terminusState"></param>
-        public clsProteinInfo(
+        public ProteinInfo(
             string proteinName,
             int seqID,
-            clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
-            clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState) : this(proteinName, string.Empty, seqID, cleavageState, terminusState)
+            PeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
+            PeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState) : this(proteinName, string.Empty, seqID, cleavageState, terminusState)
         {
         }
 
@@ -63,12 +63,12 @@
         /// <param name="seqID"></param>
         /// <param name="cleavageState"></param>
         /// <param name="terminusState"></param>
-        public clsProteinInfo(
+        public ProteinInfo(
             string proteinName,
             string proteinDescription,
             int seqID,
-            clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
-            clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState) : this(proteinName, proteinDescription, seqID, cleavageState, terminusState, 0, 0)
+            PeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
+            PeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState) : this(proteinName, proteinDescription, seqID, cleavageState, terminusState, 0, 0)
         {
         }
 
@@ -82,12 +82,12 @@
         /// <param name="terminusState"></param>
         /// <param name="proteinResidueStart"></param>
         /// <param name="proteinResidueEnd"></param>
-        public clsProteinInfo(
+        public ProteinInfo(
             string proteinName,
             string proteinDescription,
             int seqID,
-            clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
-            clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState,
+            PeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
+            PeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState,
             int proteinResidueStart,
             int proteinResidueEnd)
         {

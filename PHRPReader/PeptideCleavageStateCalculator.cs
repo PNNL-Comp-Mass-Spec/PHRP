@@ -44,7 +44,7 @@ namespace PHRPReader
     ///   or ..TGMLTQKFARSLGMLAVDNQARV.R   to   .TGMLTQKFARSLGMLAVDNQARV.R
     /// </para>
     /// </remarks>
-    public class clsPeptideCleavageStateCalculator
+    public class PeptideCleavageStateCalculator
     {
         // Ignore Spelling: A-Za-z, udt
 
@@ -214,7 +214,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsPeptideCleavageStateCalculator()
+        public PeptideCleavageStateCalculator()
         {
             TerminusSymbols = new SortedSet<char> {
                 TERMINUS_SYMBOL_SEQUEST,
@@ -349,7 +349,7 @@ namespace PHRPReader
             {
                 var chCurrent = primarySequence[index];
 
-                if (!clsPHRPReader.IsLetterAtoZ(chCurrent))
+                if (!PHRPReader.IsLetterAtoZ(chCurrent))
                     continue;
 
                 if (!string.IsNullOrEmpty(previousLetter))
@@ -485,7 +485,7 @@ namespace PHRPReader
             {
                 var index = text.Length - 1;
                 chMatch = text[index];
-                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index > 0)
+                while (!(PHRPReader.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index > 0)
                 {
                     index--;
                     chMatch = text[index];
@@ -507,7 +507,7 @@ namespace PHRPReader
             {
                 var index = 0;
                 chMatch = text[index];
-                while (!(clsPHRPReader.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index < text.Length - 1)
+                while (!(PHRPReader.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index < text.Length - 1)
                 {
                     index++;
                     chMatch = text[index];

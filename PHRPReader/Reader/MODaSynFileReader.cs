@@ -7,15 +7,17 @@
 // This class parses data lines from moda_syn.txt files
 //
 //*********************************************************************************************************
+
 using System;
 using System.Collections.Generic;
+using PHRPReader.Data;
 
-namespace PHRPReader
+namespace PHRPReader.Reader
 {
     /// <summary>
     /// PHRP parser for MODa
     /// </summary>
-    public class clsPHRPParserMODa : clsPHRPParser
+    public class MODaSynFileReader : SynFileReaderBaseClass
     {
         // Ignore Spelling: MODa
 
@@ -124,7 +126,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
-        public clsPHRPParserMODa(string datasetName, string inputFilePath)
+        public MODaSynFileReader(string datasetName, string inputFilePath)
             : this(datasetName, inputFilePath, loadModsAndSeqInfo: true)
         {
         }
@@ -135,8 +137,8 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
-        public clsPHRPParserMODa(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MODa, loadModsAndSeqInfo)
+        public MODaSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MODa, loadModsAndSeqInfo)
         {
         }
 
@@ -146,8 +148,8 @@ namespace PHRPReader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public clsPHRPParserMODa(string datasetName, string inputFilePath, clsPHRPStartupOptions startupOptions)
-            : base(datasetName, inputFilePath, clsPHRPReader.PeptideHitResultTypes.MODa, startupOptions)
+        public MODaSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
+            : base(datasetName, inputFilePath, PHRPReader.PeptideHitResultTypes.MODa, startupOptions)
         {
         }
 
@@ -157,7 +159,7 @@ namespace PHRPReader
         /// <param name="searchEngineParams"></param>
         /// <param name="tolerancePPM">Precursor mass tolerance, in ppm</param>
         /// <returns>Precursor tolerance, in Da</returns>
-        private double DeterminePrecursorMassTolerance(clsSearchEngineParameters searchEngineParams, out double tolerancePPM)
+        private double DeterminePrecursorMassTolerance(SearchEngineParameters searchEngineParams, out double tolerancePPM)
         {
             double toleranceDa = 0;
             tolerancePPM = 0;
@@ -167,7 +169,7 @@ namespace PHRPReader
                 // Parent mass tolerance, in ppm
                 if (double.TryParse(tolerance, out tolerancePPM))
                 {
-                    toleranceDa = clsPeptideMassCalculator.PPMToMass(tolerancePPM, 2000);
+                    toleranceDa = PeptideMassCalculator.PPMToMass(tolerancePPM, 2000);
                 }
             }
 
@@ -178,7 +180,7 @@ namespace PHRPReader
                 double.TryParse(tolerance, out toleranceDa);
 
                 // Convert from dalton to PPM (assuming a mass of 2000 m/z)
-                tolerancePPM = clsPeptideMassCalculator.MassToPPM(toleranceDa, 2000);
+                tolerancePPM = PeptideMassCalculator.MassToPPM(toleranceDa, 2000);
             }
 
             return toleranceDa;
@@ -331,9 +333,9 @@ namespace PHRPReader
         /// <param name="searchEngineParamFileName"></param>
         /// <param name="searchEngineParams"></param>
         /// <returns>True if successful, false if an error</returns>
-        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out clsSearchEngineParameters searchEngineParams)
+        public override bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams)
         {
-            searchEngineParams = new clsSearchEngineParameters(MODa_SEARCH_ENGINE_NAME);
+            searchEngineParams = new SearchEngineParameters(MODa_SEARCH_ENGINE_NAME);
 
             var success = ReadSearchEngineParamFile(searchEngineParamFileName, searchEngineParams);
 
@@ -342,11 +344,11 @@ namespace PHRPReader
             return success;
         }
 
-        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, clsSearchEngineParameters searchEngineParams)
+        private bool ReadSearchEngineParamFile(string searchEngineParamFileName, SearchEngineParameters searchEngineParams)
         {
             try
             {
-                var success = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, searchEngineParamFileName, clsPHRPReader.PeptideHitResultTypes.MODa, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, searchEngineParamFileName, PHRPReader.PeptideHitResultTypes.MODa, searchEngineParams);
 
                 if (!success)
                 {
@@ -368,8 +370,8 @@ namespace PHRPReader
                     dctResiduesAndSymbols.Add(residueSymbol, residueSymbol);
                 }
 
-                dctResiduesAndSymbols.Add("ADD_NTerm", clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString());
-                dctResiduesAndSymbols.Add("ADD_CTerm", clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString());
+                dctResiduesAndSymbols.Add("ADD_NTerm", AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString());
+                dctResiduesAndSymbols.Add("ADD_CTerm", AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString());
 
                 foreach (var residueSpec in dctResiduesAndSymbols)
                 {
@@ -384,14 +386,14 @@ namespace PHRPReader
                     if (Math.Abs(modMassDa) < float.Epsilon)
                         continue;
 
-                    var modType = clsModificationDefinition.ModificationTypeConstants.StaticMod;
-                    if (residueSpec.Value == clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residueSpec.Value == clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
+                    var modType = ModificationDefinition.ModificationTypeConstants.StaticMod;
+                    if (residueSpec.Value == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residueSpec.Value == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
-                        modType = clsModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
+                        modType = ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
                     }
 
-                    var modDef = new clsModificationDefinition(
-                        clsModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
+                    var modDef = new ModificationDefinition(
+                        ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                         modMassDa,
                         residueSpec.Value,
                         modType,
@@ -422,7 +424,7 @@ namespace PHRPReader
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
-        public override bool ParsePHRPDataLine(string line, int linesRead, out clsPSM psm, bool fastReadMode)
+        public override bool ParsePHRPDataLine(string line, int linesRead, out PSM psm, bool fastReadMode)
         {
             const int SCAN_NOT_FOUND_FLAG = -100;
 
@@ -430,22 +432,22 @@ namespace PHRPReader
 
             var success = false;
 
-            psm = new clsPSM();
+            psm = new PSM();
 
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                    psm.ScoreRank = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Rank_Probability, mColumnHeaders, 1);
+                    psm.ResultID = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+                    psm.ScoreRank = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Rank_Probability, mColumnHeaders, 1);
 
-                    var peptide = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var peptide = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -456,16 +458,16 @@ namespace PHRPReader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
-                    var protein = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var protein = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
                     psm.AddProtein(protein);
 
-                    var precursorMZ = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                    var precursorMZ = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                    psm.MassErrorDa = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
-                    psm.MassErrorPPM = clsPHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorDa = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
+                    psm.MassErrorPPM = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
 
                     success = true;
                 }

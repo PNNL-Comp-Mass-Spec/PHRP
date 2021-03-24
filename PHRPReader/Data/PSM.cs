@@ -9,13 +9,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace PHRPReader
+namespace PHRPReader.Data
 {
     /// <summary>
     /// This class tracks the details for a peptide hit search result
     /// (typically loaded from a tab-delimited text file created by the Peptide File Extractor or by PHRP)
     /// </summary>
-    public class clsPSM
+    public class PSM
     {
         /// <summary>
         /// Unknown collision mode
@@ -43,7 +43,7 @@ namespace PHRPReader
         /// <summary>
         /// Dictionary with info on each protein, including name, description, cleavage state, terminus state, residue start, and residue end
         /// </summary>
-        private readonly Dictionary<string, clsProteinInfo> mProteinDetails;
+        private readonly Dictionary<string, ProteinInfo> mProteinDetails;
 
         /// <summary>
         /// Dictionary tracking additional, tool-specific scores
@@ -70,7 +70,7 @@ namespace PHRPReader
         /// <remarks>
         /// CleavageState, NumMissedCleavages, and NumTrypticTermini are typically populated using UpdateCleavageInfo
         /// </remarks>
-        public clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants CleavageState { get; set; }
+        public PeptideCleavageStateCalculator.PeptideCleavageStateConstants CleavageState { get; set; }
 
         /// <summary>
         /// Collision mode (CID, ETD, HCD)
@@ -116,7 +116,7 @@ namespace PHRPReader
         /// List of modified residues
         /// </summary>
         /// <remarks>A given residue is allowed to have more than one modification</remarks>
-        public List<clsAminoAcidModInfo> ModifiedResidues { get; }
+        public List<AminoAcidModInfo> ModifiedResidues { get; }
 
         /// <summary>
         /// MSGF Spectral E-Value associated with this peptide (aka SpecEValue or SpecProb)
@@ -224,7 +224,7 @@ namespace PHRPReader
         /// <summary>
         /// Dictionary with info on each protein, including name, description, cleavage state, terminus state, residue start, and residue end
         /// </summary>
-        public IReadOnlyDictionary<string, clsProteinInfo> ProteinDetails => mProteinDetails;
+        public IReadOnlyDictionary<string, ProteinInfo> ProteinDetails => mProteinDetails;
 
         /// <summary>
         /// ResultID of this peptide (typically assigned by the search engine)
@@ -282,12 +282,12 @@ namespace PHRPReader
         /// <summary>
         /// Constructor; auto-calls Clear()
         /// </summary>
-        public clsPSM()
+        public PSM()
         {
             ScanList = new SortedSet<int>();
             mProteins = new List<string>();
-            mProteinDetails = new Dictionary<string, clsProteinInfo>(StringComparer.OrdinalIgnoreCase);
-            ModifiedResidues = new List<clsAminoAcidModInfo>();
+            mProteinDetails = new Dictionary<string, ProteinInfo>(StringComparer.OrdinalIgnoreCase);
+            ModifiedResidues = new List<AminoAcidModInfo>();
             mAdditionalScores = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             Clear();
         }
@@ -308,7 +308,7 @@ namespace PHRPReader
         /// Add the details for a modified residue
         /// </summary>
         /// <param name="modInfo">Modification info class</param>
-        public void AddModifiedResidue(clsAminoAcidModInfo modInfo)
+        public void AddModifiedResidue(AminoAcidModInfo modInfo)
         {
             ModifiedResidues.Add(modInfo);
         }
@@ -323,10 +323,10 @@ namespace PHRPReader
         public void AddModifiedResidue(
             char residue,
             int residueLocInPeptide,
-            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
-            clsModificationDefinition modDefinition)
+            AminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
+            ModificationDefinition modDefinition)
         {
-            ModifiedResidues.Add(new clsAminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDefinition));
+            ModifiedResidues.Add(new AminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDefinition));
         }
 
         /// <summary>
@@ -340,11 +340,11 @@ namespace PHRPReader
         public void AddModifiedResidue(
             char residue,
             int residueLocInPeptide,
-            clsAminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
-            clsModificationDefinition modDefinition,
+            AminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
+            ModificationDefinition modDefinition,
             int endResidueLocInPeptide)
         {
-            ModifiedResidues.Add(new clsAminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDefinition, endResidueLocInPeptide));
+            ModifiedResidues.Add(new AminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDefinition, endResidueLocInPeptide));
         }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="proteinInfo"></param>
         /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
-        public void AddProtein(clsProteinInfo proteinInfo)
+        public void AddProtein(ProteinInfo proteinInfo)
         {
             AddProteinDetail(proteinInfo);
         }
@@ -375,7 +375,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="proteinInfo"></param>
         /// <remarks>Updates both the Protein list and the ProteinDetails dictionary</remarks>
-        public void AddProteinDetail(clsProteinInfo proteinInfo)
+        public void AddProteinDetail(ProteinInfo proteinInfo)
         {
             var proteinName = proteinInfo.ProteinName;
 
@@ -409,7 +409,7 @@ namespace PHRPReader
             CollisionMode = UNKNOWN_COLLISION_MODE;
             MSGFSpecEValue = string.Empty;
 
-            CleavageState = clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Unknown;
+            CleavageState = PeptideCleavageStateCalculator.PeptideCleavageStateConstants.Unknown;
             NumMissedCleavages = 0;
             NumTrypticTermini = 0;
 
@@ -438,9 +438,9 @@ namespace PHRPReader
         /// Duplicate this PSM object and return a new one
         /// </summary>
         // ReSharper disable once UnusedMember.Global
-        public clsPSM Clone()
+        public PSM Clone()
         {
-            var newPSM = new clsPSM
+            var newPSM = new PSM
             {
                 ResultID = ResultID,
                 ScoreRank = ScoreRank,
@@ -503,7 +503,7 @@ namespace PHRPReader
             }
             else
             {
-                PeptideCleanSequence = clsPeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(Peptide, true);
+                PeptideCleanSequence = PeptideCleavageStateCalculator.ExtractCleanSequenceFromSequenceWithMods(Peptide, true);
             }
         }
 
@@ -606,7 +606,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="peptide">Peptide sequence (can optionally contain modification symbols; can optionally contain prefix and suffix residues)</param>
         /// <param name="cleavageStateCalculator">Cleavage state calculator object</param>
-        public void SetPeptide(string peptide, clsPeptideCleavageStateCalculator cleavageStateCalculator)
+        public void SetPeptide(string peptide, PeptideCleavageStateCalculator cleavageStateCalculator)
         {
             SetPeptide(peptide);
             UpdateCleavageInfo(cleavageStateCalculator);
@@ -638,17 +638,17 @@ namespace PHRPReader
         /// Auto-determine the number of missed cleavages, cleavage state, and number of tryptic termini based on the peptide sequence
         /// </summary>
         /// <param name="cleavageStateCalculator"></param>
-        public void UpdateCleavageInfo(clsPeptideCleavageStateCalculator cleavageStateCalculator)
+        public void UpdateCleavageInfo(PeptideCleavageStateCalculator cleavageStateCalculator)
         {
             NumMissedCleavages = cleavageStateCalculator.ComputeNumberOfMissedCleavages(Peptide);
 
             CleavageState = cleavageStateCalculator.ComputeCleavageState(Peptide);
 
-            if (CleavageState == clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)
+            if (CleavageState == PeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)
             {
                 NumTrypticTermini = 2;
             }
-            else if (CleavageState == clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)
+            else if (CleavageState == PeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)
             {
                 NumTrypticTermini = 1;
             }

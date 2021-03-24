@@ -12,6 +12,7 @@
 // Copyright 2018 Battelle Memorial Institute
 
 using PHRPReader;
+using PHRPReader.Data;
 
 namespace PeptideHitResultsProcessor
 {
@@ -47,7 +48,7 @@ namespace PeptideHitResultsProcessor
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        public clsSearchResultsMSPathFinder(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+        public clsSearchResultsMSPathFinder(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
         }

@@ -4,7 +4,7 @@
     /// PHRP Startup options
     /// </summary>
     /// <remarks>Use these options to define load behavior to be used when instantiating PHRP reader</remarks>
-    public class clsPHRPStartupOptions
+    public class PHRPStartupOptions
     {
         /// <summary>
         /// If true, load the modification and SeqInfo data
@@ -31,12 +31,12 @@
         /// Use this to override the default peptide mass calculator class;
         /// this is useful if custom amino acids are in use
         /// </summary>
-        public clsPeptideMassCalculator PeptideMassCalculator { get; set; }
+        public PeptideMassCalculator PeptideMassCalculator { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsPHRPStartupOptions()
+        public PHRPStartupOptions()
         {
             LoadModsAndSeqInfo = true;
             LoadMSGFResults = true;

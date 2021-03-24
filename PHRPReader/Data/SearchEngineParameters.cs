@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PHRPReader
+namespace PHRPReader.Data
 {
     /// <summary>
     /// Search engine parameters container
     /// </summary>
-    public class clsSearchEngineParameters
+    public class SearchEngineParameters
     {
         /// <summary>
         /// Monoisotopic mass
@@ -78,7 +78,7 @@ namespace PHRPReader
         /// <summary>
         /// Dynamic and static mods to search for
         /// </summary>
-        public List<clsModificationDefinition> ModInfo { get; }
+        public List<ModificationDefinition> ModInfo { get; }
 
         /// <summary>
         /// Parameter dictionary (key/value pairs)
@@ -136,7 +136,7 @@ namespace PHRPReader
         /// Constructor
         /// </summary>
         /// <param name="searchEngineName"></param>
-        public clsSearchEngineParameters(string searchEngineName) : this(searchEngineName, new List<clsModificationDefinition>(), null)
+        public SearchEngineParameters(string searchEngineName) : this(searchEngineName, new List<ModificationDefinition>(), null)
         {
         }
 
@@ -145,7 +145,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="searchEngineName"></param>
         /// <param name="modInfo"></param>
-        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> modInfo) : this(searchEngineName, modInfo, null)
+        public SearchEngineParameters(string searchEngineName, List<ModificationDefinition> modInfo) : this(searchEngineName, modInfo, null)
         {
         }
 
@@ -155,7 +155,7 @@ namespace PHRPReader
         /// <param name="searchEngineName"></param>
         /// <param name="modInfo"></param>
         /// <param name="parameters"></param>
-        public clsSearchEngineParameters(string searchEngineName, List<clsModificationDefinition> modInfo, Dictionary<string, string> parameters)
+        public SearchEngineParameters(string searchEngineName, List<ModificationDefinition> modInfo, Dictionary<string, string> parameters)
         {
             InitializeDefaults();
 
@@ -164,7 +164,7 @@ namespace PHRPReader
 
             ModInfo = modInfo;
 
-            ModInfo = modInfo ?? new List<clsModificationDefinition>();
+            ModInfo = modInfo ?? new List<ModificationDefinition>();
 
             if (Parameters == null)
             {
@@ -180,7 +180,7 @@ namespace PHRPReader
         /// Add a new dynamic or static modification
         /// </summary>
         /// <param name="modInfo"></param>
-        public void AddModification(clsModificationDefinition modInfo)
+        public void AddModification(ModificationDefinition modInfo)
         {
             ModInfo.Add(modInfo);
         }

@@ -10,12 +10,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace PHRPReader
+namespace PHRPReader.Reader
 {
     /// <summary>
     /// This class reads MSGF scores from a tab-delimited _msgf.txt file
     /// </summary>
-    public class clsMSGFResultsReader
+    public class MSGFResultsReader
     {
         #region "Constants"
 
@@ -63,7 +63,7 @@ namespace PHRPReader
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsMSGFResultsReader()
+        public MSGFResultsReader()
         {
             mColumnHeaders = new SortedDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
@@ -121,10 +121,10 @@ namespace PHRPReader
 
                         if (!headerLineParsed)
                         {
-                            if (!clsPHRPReader.IsNumber(splitLine[0]))
+                            if (!PHRPReader.IsNumber(splitLine[0]))
                             {
                                 // Parse the header line to confirm the column ordering
-                                clsPHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
+                                PHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
                                 skipLine = true;
                             }
 
@@ -133,11 +133,11 @@ namespace PHRPReader
 
                         if (!skipLine && splitLine.Length >= 4)
                         {
-                            var resultID = clsPHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
+                            var resultID = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
 
                             if (resultID >= 0)
                             {
-                                var msgfSpecProb = clsPHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
+                                var msgfSpecProb = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
 
                                 if (!string.IsNullOrEmpty(msgfSpecProb) && !msgfData.ContainsKey(resultID))
                                 {

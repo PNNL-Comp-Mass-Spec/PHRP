@@ -17,6 +17,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using PHRPReader;
+using PHRPReader.Data;
+using PHRPReader.Reader;
 using PRISM.AppSettings;
 
 namespace PeptideHitResultsProcessor
@@ -173,7 +175,7 @@ namespace PeptideHitResultsProcessor
         private void AddModificationsToResidues(
             clsSearchResultsMSPathFinder searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             if (string.IsNullOrWhiteSpace(searchResult.Modifications))
             {
@@ -210,14 +212,14 @@ namespace PeptideHitResultsProcessor
                             continue;
                         }
 
-                        var residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.None;
+                        var residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.None;
                         if (residueLocInPeptide <= 1)
                         {
-                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                            residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
                         }
                         else if (residueLocInPeptide >= finalResidueLoc)
                         {
-                            residueTerminusState = clsAminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                            residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
                         }
 
                         // Now that we know the terminus position, assure that residueLocInPeptide is 1 not 0
@@ -257,7 +259,7 @@ namespace PeptideHitResultsProcessor
         private bool AddModificationsAndComputeMass(
             clsSearchResultsMSPathFinder searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             bool success;
 
@@ -302,7 +304,7 @@ namespace PeptideHitResultsProcessor
         /// <param name="modInfo"></param>
         private double ComputeTotalModMass(
             string modificationList,
-            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             if (string.IsNullOrWhiteSpace(modificationList))
             {
@@ -405,7 +407,7 @@ namespace PeptideHitResultsProcessor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          clsPHRPReader.PeptideHitResultTypes.MSPathFinder);
+                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.MSPathFinder);
                 }
             }
 
@@ -429,7 +431,7 @@ namespace PeptideHitResultsProcessor
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath,
-            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             try
             {
@@ -548,16 +550,16 @@ namespace PeptideHitResultsProcessor
         /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string msPathFinderParamFilePath,
-            out List<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            out List<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
-            var modFileProcessor = new clsMSGFPlusParamFileModExtractor(TOOL_NAME);
+            var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
             RegisterEvents(modFileProcessor);
 
             modFileProcessor.ErrorEvent += ModExtractorErrorHandler;
 
             var success = modFileProcessor.ExtractModInfoFromParamFile(
                 msPathFinderParamFilePath,
-                clsMSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
+                MSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
                 out modInfo);
 
             if (!success || mErrorCode != PHRPErrorCodes.NoError)
@@ -625,7 +627,7 @@ namespace PeptideHitResultsProcessor
             string inputFilePath,
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions,
-            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -633,7 +635,7 @@ namespace PeptideHitResultsProcessor
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
             //  we will keep track of the scan, charge, and peptide information parsed for each unique Probability encountered
 
-            var columnMapping = new Dictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int>();
+            var columnMapping = new Dictionary<MSPathFinderSynFileReader.MSPathFinderSynFileColumns, int>();
 
             try
             {
@@ -846,7 +848,7 @@ namespace PeptideHitResultsProcessor
             ref udtMSPathFinderSearchResultType udtSearchResult,
             ref string errorLog,
             IDictionary<MSPathFinderResultsFileColumns, int> columnMapping,
-            IReadOnlyCollection<clsMSGFPlusParamFileModExtractor.udtModInfoType> modInfo,
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo,
             int rowNumber)
         {
             // Parses an entry from the MSPathFinder results file
@@ -1039,16 +1041,16 @@ namespace PeptideHitResultsProcessor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ParseMSPathFinderSynFileHeaderLine(string lineIn, IDictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int> columnMapping)
+        private bool ParseMSPathFinderSynFileHeaderLine(string lineIn, IDictionary<MSPathFinderSynFileReader.MSPathFinderSynFileColumns, int> columnMapping)
         {
-            var columnNames = clsPHRPParserMSPathFinder.GetColumnHeaderNamesAndIDs();
+            var columnNames = MSPathFinderSynFileReader.GetColumnHeaderNamesAndIDs();
 
             columnMapping.Clear();
 
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns resultColumn in Enum.GetValues(typeof(clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns)))
+                foreach (MSPathFinderSynFileReader.MSPathFinderSynFileColumns resultColumn in Enum.GetValues(typeof(MSPathFinderSynFileReader.MSPathFinderSynFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -1087,7 +1089,7 @@ namespace PeptideHitResultsProcessor
             clsSearchResultsMSPathFinder searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IDictionary<clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns, int> columnMapping,
+            IDictionary<MSPathFinderSynFileReader.MSPathFinderSynFileColumns, int> columnMapping,
             out string peptideSequence)
         {
             string[] splitLine = null;
@@ -1105,7 +1107,7 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ResultID], out string value))
+                if (!GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.ResultID], out string value))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1117,13 +1119,13 @@ namespace PeptideHitResultsProcessor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Sequence], out peptideSequence))
+                if (!GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.Sequence], out peptideSequence))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -1133,7 +1135,7 @@ namespace PeptideHitResultsProcessor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.Protein], out string proteinName);
                 searchResult.ProteinName = proteinName;
                 searchResult.MultipleProteinCount = "0";
 
@@ -1152,23 +1154,23 @@ namespace PeptideHitResultsProcessor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.MostAbundantIsotopeMz], out string mostAbundantIsotopeMz);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.MostAbundantIsotopeMz], out string mostAbundantIsotopeMz);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Modifications], out string modifications);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.Composition], out string composition);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.Modifications], out string modifications);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.Composition], out string composition);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ProteinDesc], out string proteinDesc);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ProteinLength], out string proteinLength);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.ProteinDesc], out string proteinDesc);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.ProteinLength], out string proteinLength);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ResidueStart], out string residueStart);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.ResidueEnd], out string residueEnd);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.MatchedFragments], out string matchedFragments);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.ResidueStart], out string residueStart);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.ResidueEnd], out string residueEnd);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.MatchedFragments], out string matchedFragments);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.SpecEValue], out string specEValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.EValue], out string eValue);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.SpecEValue], out string specEValue);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.EValue], out string eValue);
 
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.QValue], out string qValue);
-                GetColumnValue(splitLine, columnMapping[clsPHRPParserMSPathFinder.MSPathFinderSynFileColumns.PepQValue], out string pepQValue);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.QValue], out string qValue);
+                GetColumnValue(splitLine, columnMapping[MSPathFinderSynFileReader.MSPathFinderSynFileColumns.PepQValue], out string pepQValue);
 
                 searchResult.MostAbundantIsotopeMz = mostAbundantIsotopeMz;
                 searchResult.Modifications = modifications;
@@ -1401,7 +1403,7 @@ namespace PeptideHitResultsProcessor
             {
                 // Get the synopsis file headers
                 // Keys are header name and values are enum IDs
-                var headerColumns = clsPHRPParserMSPathFinder.GetColumnHeaderNamesAndIDs();
+                var headerColumns = MSPathFinderSynFileReader.GetColumnHeaderNamesAndIDs();
 
                 var headerNames = (from item in headerColumns orderby item.Value select item.Key).ToList();
 

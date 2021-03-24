@@ -14,6 +14,8 @@
 
 using System;
 using PHRPReader;
+using PHRPReader.Data;
+using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor
 {
@@ -79,7 +81,7 @@ namespace PeptideHitResultsProcessor
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        public clsSearchResultsXTandem(clsPeptideModificationContainer peptideMods, clsPeptideMassCalculator peptideSeqMassCalculator)
+        public clsSearchResultsXTandem(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
         }
@@ -122,7 +124,7 @@ namespace PeptideHitResultsProcessor
                 // Compute the original value for the precursor monoisotopic mass
                 if (double.TryParse(ParentIonMH, out var parentIonMH))
                 {
-                    precursorMonoMass = parentIonMH - clsPeptideMassCalculator.MASS_PROTON;
+                    precursorMonoMass = parentIonMH - PeptideMassCalculator.MASS_PROTON;
                 }
                 else
                 {
@@ -147,7 +149,7 @@ namespace PeptideHitResultsProcessor
         {
             try
             {
-                if (clsPHRPParser.IsNumber(PeptideHyperscore) && clsPHRPParser.IsNumber(mPeptideNextScore))
+                if (SynFileReaderBaseClass.IsNumber(PeptideHyperscore) && SynFileReaderBaseClass.IsNumber(mPeptideNextScore))
                 {
                     PeptideDeltaCn2 = (Convert.ToSingle(PeptideHyperscore) - Convert.ToSingle(mPeptideNextScore)) / Convert.ToSingle(PeptideHyperscore);
                 }
