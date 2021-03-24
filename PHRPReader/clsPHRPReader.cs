@@ -439,8 +439,8 @@ namespace PHRPReader
         /// <summary>
         /// Get the peptide hit result type for the given result type name
         /// </summary>
-        /// <param name="ResultTypeName"></param>
-        public static Enums.PeptideHitResultTypes GetPeptideHitResultType(string ResultTypeName)
+        /// <param name="resultTypeName"></param>
+        public static Enums.PeptideHitResultTypes GetPeptideHitResultType(string resultTypeName)
         {
             return Enums.PeptideHitResultTypes.Unknown;
         }
