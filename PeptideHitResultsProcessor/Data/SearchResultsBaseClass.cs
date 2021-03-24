@@ -912,7 +912,7 @@ namespace PeptideHitResultsProcessor.Data
             }
         }
 
-        public void UpdateSearchResultEnzymeAndTerminusInfo(PeptideCleavageStateCalculator.udtEnzymeMatchSpecType udtEnzymeMatchSpec, double peptideNTerminusMassChange, double peptideCTerminusMassChange)
+        public void UpdateSearchResultEnzymeAndTerminusInfo(PeptideCleavageStateCalculator.EnzymeMatchSpecInfo udtEnzymeMatchSpec, double peptideNTerminusMassChange, double peptideCTerminusMassChange)
         {
             SetEnzymeMatchSpec(udtEnzymeMatchSpec);
 
@@ -1004,7 +1004,7 @@ namespace PeptideHitResultsProcessor.Data
         /// </summary>
         /// <param name="udtEnzymeMatchSpec"></param>
         /// <remarks>Define standard RegEx values using SetStandardEnzymeMatchSpec</remarks>
-        public void SetEnzymeMatchSpec(PeptideCleavageStateCalculator.udtEnzymeMatchSpecType udtEnzymeMatchSpec)
+        public void SetEnzymeMatchSpec(PeptideCleavageStateCalculator.EnzymeMatchSpecInfo udtEnzymeMatchSpec)
         {
             mPeptideCleavageStateCalculator.SetEnzymeMatchSpec(udtEnzymeMatchSpec.LeftResidueRegEx, udtEnzymeMatchSpec.RightResidueRegEx);
         }
@@ -1076,7 +1076,7 @@ namespace PeptideHitResultsProcessor.Data
 
             if (mSearchResultModifications.Count > 0)
             {
-                var udtModNameAndResidueLoc = new PHRPBaseClass.udtModNameAndResidueLocType[mSearchResultModifications.Count];
+                var udtModNameAndResidueLoc = new PHRPBaseClass.ModNameAndResidueLoc[mSearchResultModifications.Count];
                 var pointerArray = new int[mSearchResultModifications.Count];
 
                 if (mSearchResultModifications.Count == 1)

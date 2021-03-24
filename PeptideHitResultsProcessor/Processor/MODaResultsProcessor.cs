@@ -80,7 +80,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file (_moda.id.txt) created by java file anal_moda.jar
         /// </summary>
-        private struct udtMODaSearchResultType
+        private struct MODaSearchResult
         {
             public string SpectrumFileName;
             public string SpectrumIndex;
@@ -306,7 +306,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
         private void AssignRankAndDeltaNormValues(
-            IList<udtMODaSearchResultType> searchResults,
+            IList<MODaSearchResult> searchResults,
             int startIndex,
             int endIndex)
         {
@@ -315,7 +315,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Duplicate a portion of searchResults so that we can sort by descending Probability
 
-            var resultsSubset = new Dictionary<int, udtMODaSearchResultType>();
+            var resultsSubset = new Dictionary<int, MODaSearchResult>();
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -470,10 +470,10 @@ namespace PeptideHitResultsProcessor.Processor
                     mDeltaMassWarningCount = 0;
 
                     // Initialize the list that will hold all of the records in the MODa result file
-                    var searchResultsUnfiltered = new List<udtMODaSearchResultType>();
+                    var searchResultsUnfiltered = new List<MODaSearchResult>();
 
                     // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<udtMODaSearchResultType>();
+                    var filteredSearchResults = new List<MODaSearchResult>();
 
                     // Parse the input file
                     while (!reader.EndOfStream && !AbortProcessing)
@@ -499,7 +499,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         if (!skipLine)
                         {
-                            var udtSearchResult = new udtMODaSearchResultType();
+                            var udtSearchResult = new MODaSearchResult();
 
                             var validSearchResult = ParseMODaResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
 
@@ -779,7 +779,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMODaSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
-            List<udtPepToProteinMappingType> pepToProteinMapping,
+            List<PepToProteinMapping> pepToProteinMapping,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Note that MODa synopsis files are normally sorted on Probability value, ascending
@@ -991,7 +991,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaResultsFileEntry(
             string lineIn,
-            ref udtMODaSearchResultType udtSearchResult,
+            ref MODaSearchResult udtSearchResult,
             ref string errorLog,
             IDictionary<MODaResultsFileColumns, int> columnMapping)
         {
@@ -1428,7 +1428,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
-                    var pepToProteinMapping = new List<udtPepToProteinMappingType>();
+                    var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the MODa Parameter File to look for any static mods
                     var modInfoExtracted = ExtractModInfoFromMODaParamFile(SearchToolParameterFilePath, out var modaModInfo);
@@ -1603,7 +1603,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            IEnumerable<udtMODaSearchResultType> filteredSearchResults,
+            IEnumerable<MODaSearchResult> filteredSearchResults,
             ref string errorLog)
         {
             // Sort filteredSearchResults by descending probability, ascending scan, ascending charge, ascending peptide, and ascending protein
@@ -1618,10 +1618,10 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void StoreSynMatches(
-            IList<udtMODaSearchResultType> searchResults,
+            IList<MODaSearchResult> searchResults,
             int startIndex,
             int endIndex,
-            ICollection<udtMODaSearchResultType> filteredSearchResults)
+            ICollection<MODaSearchResult> filteredSearchResults)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
 
@@ -1675,7 +1675,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            udtMODaSearchResultType udtSearchResult,
+            MODaSearchResult udtSearchResult,
             ref string errorLog)
         {
             try
@@ -1725,9 +1725,9 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "IComparer Classes"
 
-        private class MODaSearchResultsComparerScanChargeProbabilityPeptide : IComparer<udtMODaSearchResultType>
+        private class MODaSearchResultsComparerScanChargeProbabilityPeptide : IComparer<MODaSearchResult>
         {
-            public int Compare(udtMODaSearchResultType x, udtMODaSearchResultType y)
+            public int Compare(MODaSearchResult x, MODaSearchResult y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {

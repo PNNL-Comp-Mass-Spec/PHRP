@@ -30,7 +30,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Tracks ambiguous modifications
         /// </summary>
-        protected struct udtAmbiguousModInfo
+        protected struct AmbiguousModInfo
         {
             /// <summary>
             /// First residue the mod could apply to
@@ -620,18 +620,18 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <param name="sequenceWithMods"></param>
         /// <returns>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</returns>
-        private SortedList<int, udtAmbiguousModInfo> ExtractAmbiguousMods(string sequenceWithMods)
+        private SortedList<int, AmbiguousModInfo> ExtractAmbiguousMods(string sequenceWithMods)
         {
             if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequenceWithMods, out var primarySequence, out _, out _))
             {
                 primarySequence = string.Copy(sequenceWithMods);
             }
 
-            var ambiguousMods = new SortedList<int, udtAmbiguousModInfo>();
+            var ambiguousMods = new SortedList<int, AmbiguousModInfo>();
 
             var residueNumber = 0;
             var parsingAmbiguousMod = false;
-            var udtCurrentMod = default(udtAmbiguousModInfo);
+            var udtCurrentMod = default(AmbiguousModInfo);
 
             for (var charIndex = 0; charIndex <= primarySequence.Length - 1; charIndex++)
             {

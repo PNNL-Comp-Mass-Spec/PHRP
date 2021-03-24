@@ -149,13 +149,13 @@ namespace PHRPReader
         #region "Structures"
 
         /// <summary>
-        /// Example RegEx match strings for udtEnzymeMatchSpecType:
+        /// Example RegEx match strings for EnzymeMatchSpecInfo:
         /// [KR] means to match K or R
         /// [^P] means the residue cannot be P
         /// [A-Z] means to match anything; empty string also means match anything
         /// </summary>
         /// <remarks>Note, this class will automatically change [X] to [A-Z] (provided GENERIC_RESIDUE_SYMBOL = "X")</remarks>
-        public struct udtEnzymeMatchSpecType
+        public struct EnzymeMatchSpecInfo
         {
             /// <summary>
             /// RegEx match string for matching the residue to the left of the cleavage point
@@ -172,7 +172,7 @@ namespace PHRPReader
             /// </summary>
             /// <param name="leftResidueRegEx"></param>
             /// <param name="rightResidueRegEx"></param>
-            public udtEnzymeMatchSpecType(string leftResidueRegEx, string rightResidueRegEx)
+            public EnzymeMatchSpecInfo(string leftResidueRegEx, string rightResidueRegEx)
             {
                 LeftResidueRegEx = leftResidueRegEx;
                 RightResidueRegEx = rightResidueRegEx;
@@ -182,7 +182,8 @@ namespace PHRPReader
         #endregion
 
         #region "Class wide Variables"
-        private udtEnzymeMatchSpecType mEnzymeMatchSpec;
+
+        private EnzymeMatchSpecInfo mEnzymeMatchSpec;
         private Regex mLeftRegEx;
         private Regex mRightRegEx;
         private bool mUsingStandardTrypsinRules;
@@ -194,7 +195,7 @@ namespace PHRPReader
         /// <summary>
         /// RegEx patterns for matching cleavage site residues
         /// </summary>
-        public udtEnzymeMatchSpecType EnzymeMatchSpec
+        public EnzymeMatchSpecInfo EnzymeMatchSpec
         {
             get => mEnzymeMatchSpec;
             set => SetEnzymeMatchSpec(value.LeftResidueRegEx, value.RightResidueRegEx);
@@ -520,9 +521,9 @@ namespace PHRPReader
         /// <summary>
         /// Returns the default enzyme RegEx match specifications
         /// </summary>
-        public static udtEnzymeMatchSpecType GetDefaultEnzymeMatchSpec()
+        public static EnzymeMatchSpecInfo GetDefaultEnzymeMatchSpec()
         {
-            var udtEnzymeMatchSpec = default(udtEnzymeMatchSpecType);
+            var udtEnzymeMatchSpec = default(EnzymeMatchSpecInfo);
             udtEnzymeMatchSpec.LeftResidueRegEx = TRYPSIN_LEFT_RESIDUE_REGEX;
             udtEnzymeMatchSpec.RightResidueRegEx = TRYPSIN_RIGHT_RESIDUE_REGEX;
             return udtEnzymeMatchSpec;

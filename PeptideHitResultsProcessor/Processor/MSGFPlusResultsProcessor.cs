@@ -121,7 +121,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "Structures"
 
-        private struct udtMSGFPlusSearchResultType
+        private struct MSGFPlusSearchResult
         {
             // ReSharper disable once NotAccessedField.Local
             public string SpectrumFileName;
@@ -183,20 +183,20 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private struct udtScanGroupInfoType
+        private struct ScanGroupInfo
         {
             public int ScanGroupID;
             public short Charge;
             public int Scan;
         }
 
-        private struct udtTerminusCharsType
+        private struct TerminusChars
         {
             public char NTerm;
             public char CTerm;
         }
 
-        private struct udtParentMassToleranceType
+        private struct ParentMassTolerance
         {
             // Given a tolerance of 20ppm, we would have ToleranceLeft=20, ToleranceRight=20, and ToleranceIsPPM=True
             // Given a tolerance of 0.5Da,2.5Da, we would have ToleranceLeft=0.5, ToleranceRight=2.5, and ToleranceIsPPM=False
@@ -244,7 +244,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private readonly PeptideCleavageStateCalculator mPeptideCleavageStateCalculator;
 
-        private udtParentMassToleranceType mParentMassToleranceInfo;
+        private ParentMassTolerance mParentMassToleranceInfo;
 
         private int mPrecursorMassErrorWarningCount;
 
@@ -326,7 +326,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="peptide"></param>
         /// <param name="kvProteinInfo"></param>
         /// <returns>Peptide sequence with N-terminal and C-Terminal residues</returns>
-        private string AddUpdatePrefixAndSuffixResidues(string peptide, KeyValuePair<string, udtTerminusCharsType> kvProteinInfo)
+        private string AddUpdatePrefixAndSuffixResidues(string peptide, KeyValuePair<string, TerminusChars> kvProteinInfo)
         {
             if (peptide.IndexOf('.') < 0)
             {
@@ -379,9 +379,9 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void AppendToScanGroupDetails(
-            ICollection<udtScanGroupInfoType> scanGroupDetails,
+            ICollection<ScanGroupInfo> scanGroupDetails,
             IDictionary<string, bool> scanGroupCombo,
-            udtScanGroupInfoType udtScanGroupInfo,
+            ScanGroupInfo udtScanGroupInfo,
             ref int currentScanGroupID,
             ref int nextScanGroupID)
         {
@@ -403,9 +403,9 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void AppendToSearchResults(
-            ICollection<udtMSGFPlusSearchResultType> searchResults,
-            udtMSGFPlusSearchResultType udtSearchResult,
-            Dictionary<string, udtTerminusCharsType> proteinInfo)
+            ICollection<MSGFPlusSearchResult> searchResults,
+            MSGFPlusSearchResult udtSearchResult,
+            Dictionary<string, TerminusChars> proteinInfo)
         {
             if (proteinInfo.Count == 0)
             {
@@ -430,7 +430,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="startIndex">Start index for data in this scan</param>
         /// <param name="endIndex">End index for data in this scan</param>
         private void AssignRankAndDeltaNormValues(
-            IList<udtMSGFPlusSearchResultType> searchResults,
+            IList<MSGFPlusSearchResult> searchResults,
             int startIndex,
             int endIndex)
         {
@@ -448,7 +448,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Duplicate a portion of searchResults so that we can sort by ascending Spectral Probability
 
-            var resultsSubset = new Dictionary<int, udtMSGFPlusSearchResultType>();
+            var resultsSubset = new Dictionary<int, MSGFPlusSearchResult>();
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -623,7 +623,7 @@ namespace PeptideHitResultsProcessor.Processor
             string modDigits,
             out string modSymbols,
             out string dynModSymbols,
-            IReadOnlyList<MSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
             bool nTerminalMod,
             bool possibleCTerminalMod,
             out double modMassFound,
@@ -780,19 +780,19 @@ namespace PeptideHitResultsProcessor.Processor
             string inputFilePath,
             string outputFilePath,
             string scanGroupFilePath,
-            IReadOnlyList<MSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
             out bool isMsgfPlus,
             IDictionary<string, int> specIdToIndex,
             FilteredOutputFileTypeConstants filteredOutputFileType)
         {
-            var searchResultsCurrentScan = new List<udtMSGFPlusSearchResultType>();
-            var searchResultsPrefiltered = new List<udtMSGFPlusSearchResultType>();
+            var searchResultsCurrentScan = new List<MSGFPlusSearchResult>();
+            var searchResultsPrefiltered = new List<MSGFPlusSearchResult>();
 
             isMsgfPlus = false;
 
             try
             {
-                var scanGroupDetails = new List<udtScanGroupInfoType>();
+                var scanGroupDetails = new List<ScanGroupInfo>();
                 var scanGroupCombo = new Dictionary<string, bool>();
 
                 mPrecursorMassErrorWarningCount = 0;
@@ -841,7 +841,7 @@ namespace PeptideHitResultsProcessor.Processor
                         scanGroupCombo.Clear();
 
                         // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                        var filteredSearchResults = new List<udtMSGFPlusSearchResultType>();
+                        var filteredSearchResults = new List<MSGFPlusSearchResult>();
 
                         // Initialize a dictionary that tracks the peptide sequence for each combo of scan and charge
                         // Keys are Scan_Charge, values track the clean sequence, the associated protein name, and the protein number for that name
@@ -1071,7 +1071,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if success; false if a problem</returns>
         private bool ExtractModInfoFromParamFile(
             string msgfPlusParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
         {
             var modFileProcessor = new MSGFPlusParamFileModExtractor(SEARCH_ENGINE_NAME);
 
@@ -1103,9 +1103,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="searchEngineParams"></param>
         /// <returns>Parent mass tolerance info.  Tolerances will be 0 if an error occurs</returns>
-        private udtParentMassToleranceType ExtractParentMassToleranceFromParamFile(SearchEngineParameters searchEngineParams)
+        private ParentMassTolerance ExtractParentMassToleranceFromParamFile(SearchEngineParameters searchEngineParams)
         {
-            var parentMassToleranceInfo = new udtParentMassToleranceType();
+            var parentMassToleranceInfo = new ParentMassTolerance();
 
             try
             {
@@ -1222,9 +1222,9 @@ namespace PeptideHitResultsProcessor.Processor
         private bool LoadPeptideToProteinMapInfoMSGFPlus(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
-            IReadOnlyList<MSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
             bool isMsgfPlus,
-            List<udtPepToProteinMappingType> pepToProteinMapping,
+            List<PepToProteinMapping> pepToProteinMapping,
             out string mtsPepToProteinMapFilePath)
         {
             mtsPepToProteinMapFilePath = string.Empty;
@@ -1366,7 +1366,7 @@ namespace PeptideHitResultsProcessor.Processor
             SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
         }
 
-        private bool MSGFPlusResultPassesSynFilter(udtMSGFPlusSearchResultType msgfPlusSearchResultType)
+        private bool MSGFPlusResultPassesSynFilter(MSGFPlusSearchResult msgfPlusSearchResultType)
         {
             return msgfPlusSearchResultType.EValueNum <= MSGFPlusSynopsisFileEValueThreshold ||
                    msgfPlusSearchResultType.SpecEValueNum <= MSGFPlusSynopsisFileSpecEValueThreshold ||
@@ -1376,7 +1376,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMSGFPlusSynopsisFile(
             string inputFilePath,
             string outputDirectoryPath,
-            List<udtPepToProteinMappingType> pepToProteinMapping,
+            List<PepToProteinMapping> pepToProteinMapping,
             bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
@@ -1593,25 +1593,25 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseMSGFPlusResultsFileEntry(
             string lineIn,
             bool isMsgfPlus,
-            IReadOnlyList<MSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
-            ICollection<udtMSGFPlusSearchResultType> searchResultsCurrentScan,
+            IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
+            ICollection<MSGFPlusSearchResult> searchResultsCurrentScan,
             ref string errorLog,
             IDictionary<MSGFPlusResultsFileColumns, int> columnMapping,
             ref int nextScanGroupID,
-            ICollection<udtScanGroupInfoType> scanGroupDetails,
+            ICollection<ScanGroupInfo> scanGroupDetails,
             IDictionary<string, bool> scanGroupCombo,
             IDictionary<string, int> specIdToIndex)
         {
             // Parses an entry from the MS-GF+ results file
 
-            var udtSearchResult = new udtMSGFPlusSearchResultType();
+            var udtSearchResult = new MSGFPlusSearchResult();
             string rowIndex = null;
 
-            udtMSGFPlusSearchResultType[] udtMergedScanInfo = null;
+            MSGFPlusSearchResult[] udtMergedScanInfo = null;
 
             try
             {
-                var proteinInfo = new Dictionary<string, udtTerminusCharsType>();
+                var proteinInfo = new Dictionary<string, TerminusChars>();
 
                 // Reset searchResults
                 searchResultsCurrentScan.Clear();
@@ -1681,11 +1681,11 @@ namespace PeptideHitResultsProcessor.Processor
 
                     var splitResult = udtSearchResult.Scan.Split('/');
                     scanCount = splitResult.Length;
-                    udtMergedScanInfo = new udtMSGFPlusSearchResultType[scanCount];
+                    udtMergedScanInfo = new MSGFPlusSearchResult[scanCount];
 
                     for (var index = 0; index <= scanCount - 1; index++)
                     {
-                        udtMergedScanInfo[index] = new udtMSGFPlusSearchResultType();
+                        udtMergedScanInfo[index] = new MSGFPlusSearchResult();
                         udtMergedScanInfo[index].Clear();
                         udtMergedScanInfo[index].Scan = splitResult[index];
                         udtMergedScanInfo[index].ScanNum = CIntSafe(splitResult[index], 0);
@@ -1864,7 +1864,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 udtSearchResult.NTT = ComputeCleavageState(udtSearchResult.Peptide).ToString();
 
-                var udtScanGroupInfo = new udtScanGroupInfoType();
+                var udtScanGroupInfo = new ScanGroupInfo();
                 var currentScanGroupID = -1;
 
                 udtScanGroupInfo.Charge = udtSearchResult.ChargeNum;
@@ -2300,7 +2300,7 @@ namespace PeptideHitResultsProcessor.Processor
                         return false;
                     }
 
-                    var pepToProteinMapping = new List<udtPepToProteinMappingType>();
+                    var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the MS-GF+ Parameter File so that we can determine the modification names and masses
                     // If the MSGFPlus_Mods.txt or MSGFDB_Mods.txt file was defined, the mod symbols in that file will be used to define the mod symbols in msgfPlusModInfo
@@ -2532,7 +2532,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>Updated peptide sequence</returns>
         public string ReplaceMSGFModTextWithSymbol(
             string peptide,
-            IReadOnlyList<MSGFPlusParamFileModExtractor.udtModInfoType> msgfPlusModInfo,
+            IReadOnlyList<MSGFPlusParamFileModExtractor.ModInfo> msgfPlusModInfo,
             bool isMsgfPlus,
             out double totalModMass)
         {
@@ -2784,7 +2784,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="proteinList">Protein list to examine</param>
         /// <param name="proteinInfo">Protein information, if it is of the form ProteinName(pre=X,post=Y)</param>
         /// <returns>The name of the first protein</returns>
-        private string SplitProteinList(string proteinList, IDictionary<string, udtTerminusCharsType> proteinInfo)
+        private string SplitProteinList(string proteinList, IDictionary<string, TerminusChars> proteinInfo)
         {
             proteinInfo.Clear();
 
@@ -2806,7 +2806,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 else
                 {
-                    var terminusChars = new udtTerminusCharsType
+                    var terminusChars = new TerminusChars
                     {
                         NTerm = reMatch.Groups[2].Value[0],
                         CTerm = reMatch.Groups[3].Value[0]
@@ -2821,7 +2821,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            IEnumerable<udtMSGFPlusSearchResultType> filteredSearchResults,
+            IEnumerable<MSGFPlusSearchResult> filteredSearchResults,
             ref string errorLog,
             bool includeFDRandPepFDR,
             bool includeEFDR,
@@ -2839,7 +2839,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private void StoreScanGroupInfo(string scanGroupFilePath, IReadOnlyCollection<udtScanGroupInfoType> scanGroupDetails)
+        private void StoreScanGroupInfo(string scanGroupFilePath, IReadOnlyCollection<ScanGroupInfo> scanGroupDetails)
         {
             try
             {
@@ -2884,10 +2884,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="endIndex">End index for data in this scan</param>
         /// <param name="filteredSearchResults">Filtered search results</param>
         private void StoreTopFHTMatch(
-            IList<udtMSGFPlusSearchResultType> searchResults,
+            IList<MSGFPlusSearchResult> searchResults,
             int startIndex,
             int endIndex,
-            List<udtMSGFPlusSearchResultType> filteredSearchResults)
+            List<MSGFPlusSearchResult> filteredSearchResults)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
 
@@ -2944,10 +2944,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="endIndex">End index for data in this scan</param>
         /// <param name="filteredSearchResults">Filtered search results</param>
         private void StoreSynMatches(
-            IList<udtMSGFPlusSearchResultType> searchResults,
+            IList<MSGFPlusSearchResult> searchResults,
             int startIndex,
             int endIndex,
-            List<udtMSGFPlusSearchResultType> filteredSearchResults)
+            List<MSGFPlusSearchResult> filteredSearchResults)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
 
@@ -3108,7 +3108,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            udtMSGFPlusSearchResultType udtSearchResult,
+            MSGFPlusSearchResult udtSearchResult,
             ref string errorLog,
             bool includeFDRandPepFDR,
             bool includeEFDR,
@@ -3189,9 +3189,9 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "IComparer Classes"
 
-        private class MSGFPlusSearchResultsComparerScanChargeSpecEValuePeptide : IComparer<udtMSGFPlusSearchResultType>
+        private class MSGFPlusSearchResultsComparerScanChargeSpecEValuePeptide : IComparer<MSGFPlusSearchResult>
         {
-            public int Compare(udtMSGFPlusSearchResultType x, udtMSGFPlusSearchResultType y)
+            public int Compare(MSGFPlusSearchResult x, MSGFPlusSearchResult y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {

@@ -105,7 +105,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file created directly by TopPIC
         /// </summary>
-        private struct udtTopPICSearchResultType
+        private struct TopPICSearchResult
         {
             public string SpectrumFileName;
             public string Prsm_ID;
@@ -411,20 +411,20 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="endIndex"></param>
         /// <param name="sortOnPValue"></param>
         private void AssignRankAndDeltaNormValues(
-            IList<udtTopPICSearchResultType> searchResults,
+            IList<TopPICSearchResult> searchResults,
             int startIndex,
             int endIndex,
             bool sortOnPValue)
         {
             // Duplicate a portion of searchResults so that we can sort by PValue
 
-            var resultsSubset = new Dictionary<int, udtTopPICSearchResultType>();
+            var resultsSubset = new Dictionary<int, TopPICSearchResult>();
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
             }
 
-            List<KeyValuePair<int, udtTopPICSearchResultType>> resultsByProbability;
+            List<KeyValuePair<int, TopPICSearchResult>> resultsByProbability;
 
             if (sortOnPValue)
             {
@@ -565,10 +565,10 @@ namespace PeptideHitResultsProcessor.Processor
                     mDeltaMassWarningCount = 0;
 
                     // Initialize array that will hold all of the records in the TopPIC result file
-                    var searchResultsUnfiltered = new List<udtTopPICSearchResultType>();
+                    var searchResultsUnfiltered = new List<TopPICSearchResult>();
 
                     // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<udtTopPICSearchResultType>();
+                    var filteredSearchResults = new List<TopPICSearchResult>();
 
                     // Parse the input file
                     while (!reader.EndOfStream && !AbortProcessing)
@@ -599,7 +599,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var udtSearchResult = new udtTopPICSearchResultType();
+                        var udtSearchResult = new TopPICSearchResult();
                         var validSearchResult = ParseTopPICResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
 
                         if (validSearchResult)
@@ -663,7 +663,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>The DMS-based parameter file for TopPIC uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string topPICParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
         {
             var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
 
@@ -735,7 +735,7 @@ namespace PeptideHitResultsProcessor.Processor
             return false;
         }
 
-        private bool ParseTopPICSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
+        private bool ParseTopPICSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<PepToProteinMapping> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -946,7 +946,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICResultsFileEntry(
             string lineIn,
-            ref udtTopPICSearchResultType udtSearchResult,
+            ref TopPICSearchResult udtSearchResult,
             ref string errorLog,
             IDictionary<TopPICResultsFileColumns, int> columnMapping)
         {
@@ -1472,7 +1472,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
-                    var pepToProteinMapping = new List<udtPepToProteinMappingType>();
+                    var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the TopPIC Parameter File so that we can determine whether Cysteine residues are statically modified
                     var modInfoExtracted = ExtractModInfoFromParamFile(SearchToolParameterFilePath, out var topPicModInfo);
@@ -1626,11 +1626,11 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            IEnumerable<udtTopPICSearchResultType> filteredSearchResults,
+            IEnumerable<TopPICSearchResult> filteredSearchResults,
             ref string errorLog,
             bool dataHasPValues)
         {
-            IOrderedEnumerable<udtTopPICSearchResultType> query;
+            IOrderedEnumerable<TopPICSearchResult> query;
 
             if (dataHasPValues)
             {
@@ -1652,10 +1652,10 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void StoreSynMatches(
-            IList<udtTopPICSearchResultType> searchResults,
+            IList<TopPICSearchResult> searchResults,
             int startIndex,
             int endIndex,
-            ICollection<udtTopPICSearchResultType> filteredSearchResults,
+            ICollection<TopPICSearchResult> filteredSearchResults,
             bool dataHasPValues)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex, dataHasPValues);
@@ -1720,7 +1720,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            udtTopPICSearchResultType udtSearchResult,
+            TopPICSearchResult udtSearchResult,
             bool dataHasPValues,
             ref string errorLog)
         {
@@ -1797,9 +1797,9 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "IComparer Classes"
 
-        private class TopPICSearchResultsComparerScanChargePValuePeptide : IComparer<udtTopPICSearchResultType>
+        private class TopPICSearchResultsComparerScanChargePValuePeptide : IComparer<TopPICSearchResult>
         {
-            public int Compare(udtTopPICSearchResultType x, udtTopPICSearchResultType y)
+            public int Compare(TopPICSearchResult x, TopPICSearchResult y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {

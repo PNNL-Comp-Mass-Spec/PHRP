@@ -83,7 +83,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file (_MODPlus.id.txt) created by MODPlus's tda_plus.jar file
         /// </summary>
-        private struct udtMODPlusSearchResultType
+        private struct MODPlusSearchResult
         {
             public string SpectrumFileName;
             public string SpectrumIndex;
@@ -318,7 +318,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
         private void AssignRankAndDeltaNormValues(
-            IList<udtMODPlusSearchResultType> searchResults,
+            IList<MODPlusSearchResult> searchResults,
             int startIndex,
             int endIndex)
         {
@@ -327,7 +327,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Duplicate a portion of searchResults so that we can sort by descending Probability
 
-            var resultsSubset = new Dictionary<int, udtMODPlusSearchResultType>();
+            var resultsSubset = new Dictionary<int, MODPlusSearchResult>();
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -482,10 +482,10 @@ namespace PeptideHitResultsProcessor.Processor
                     mDeltaMassWarningCount = 0;
 
                     // Initialize the list that will hold all of the records in the MODPlus result file
-                    var searchResultsUnfiltered = new List<udtMODPlusSearchResultType>();
+                    var searchResultsUnfiltered = new List<MODPlusSearchResult>();
 
                     // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<udtMODPlusSearchResultType>();
+                    var filteredSearchResults = new List<MODPlusSearchResult>();
 
                     // Parse the input file
                     while (!reader.EndOfStream && !AbortProcessing)
@@ -519,7 +519,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var udtSearchResult = new udtMODPlusSearchResultType();
+                        var udtSearchResult = new MODPlusSearchResult();
 
                         var validSearchResult = ParseMODPlusResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
 
@@ -844,7 +844,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODPlusResultsFileEntry(
             string lineIn,
-            ref udtMODPlusSearchResultType udtSearchResult,
+            ref MODPlusSearchResult udtSearchResult,
             ref string errorLog,
             IDictionary<MODPlusResultsFileColumns, int> columnMapping)
         {
@@ -1466,7 +1466,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            List<udtMODPlusSearchResultType> filteredSearchResults,
+            List<MODPlusSearchResult> filteredSearchResults,
             ref string errorLog)
         {
             // Sort filteredSearchResults by descending score, ascending scan, ascending charge, ascending peptide, and ascending protein
@@ -1520,7 +1520,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="searchResults"></param>
         /// <remarks>Assumes the data is sorted by descending score using MODPlusSearchResultsComparerScoreScanChargePeptide</remarks>
-        private void ComputeQValues(IList<udtMODPlusSearchResultType> searchResults)
+        private void ComputeQValues(IList<MODPlusSearchResult> searchResults)
         {
             var forwardPeptideCount = 0;
             var reversePeptideCount = 0;
@@ -1609,10 +1609,10 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void StoreSynMatches(
-            IList<udtMODPlusSearchResultType> searchResults,
+            IList<MODPlusSearchResult> searchResults,
             int startIndex,
             int endIndex,
-            ICollection<udtMODPlusSearchResultType> filteredSearchResults)
+            ICollection<MODPlusSearchResult> filteredSearchResults)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
 
@@ -1668,7 +1668,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            udtMODPlusSearchResultType udtSearchResult,
+            MODPlusSearchResult udtSearchResult,
             string proteinName,
             string peptidePosition,
             ref string errorLog)
@@ -1722,9 +1722,9 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "IComparer Classes"
 
-        private class MODPlusSearchResultsComparerScanChargeScorePeptide : IComparer<udtMODPlusSearchResultType>
+        private class MODPlusSearchResultsComparerScanChargeScorePeptide : IComparer<MODPlusSearchResult>
         {
-            public int Compare(udtMODPlusSearchResultType x, udtMODPlusSearchResultType y)
+            public int Compare(MODPlusSearchResult x, MODPlusSearchResult y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {
@@ -1769,9 +1769,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private class MODPlusSearchResultsComparerScoreScanChargePeptide : IComparer<udtMODPlusSearchResultType>
+        private class MODPlusSearchResultsComparerScoreScanChargePeptide : IComparer<MODPlusSearchResult>
         {
-            public int Compare(udtMODPlusSearchResultType x, udtMODPlusSearchResultType y)
+            public int Compare(MODPlusSearchResult x, MODPlusSearchResult y)
             {
                 if (x.ScoreNum < y.ScoreNum)
                 {

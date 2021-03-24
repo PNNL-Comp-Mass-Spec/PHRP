@@ -113,7 +113,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "Structures"
 
-        protected struct udtSearchOptionModificationInfoType
+        protected struct SearchOptionModificationInfo
         {
             public int SortOrder;
             public double ModificationMass;
@@ -123,9 +123,9 @@ namespace PeptideHitResultsProcessor.Processor
             /// <summary>
             /// Duplicate this modification via a deep copy
             /// </summary>
-            public udtSearchOptionModificationInfoType Clone()
+            public SearchOptionModificationInfo Clone()
             {
-                var modInfo = new udtSearchOptionModificationInfoType
+                var modInfo = new SearchOptionModificationInfo
                 {
                     SortOrder = SortOrder,
                     ModificationMass = ModificationMass,
@@ -145,7 +145,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        internal struct udtModNameAndResidueLocType
+        internal struct ModNameAndResidueLoc
         {
             public string ModName;
             public int ResidueLocInPeptide;
@@ -156,7 +156,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        protected struct udtPepToProteinMappingType
+        protected struct PepToProteinMapping
         {
             public string Peptide;
             public string Protein;
@@ -232,7 +232,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>If this is true and the _PepToProtMap.txt file isn't found, it will be created using the Fasta file specified by mFastaFilePath</remarks>
         public bool CreateProteinModsFile { get; set; }
 
-        public PeptideCleavageStateCalculator.udtEnzymeMatchSpecType EnzymeMatchSpec { get; set; }
+        public PeptideCleavageStateCalculator.EnzymeMatchSpecInfo EnzymeMatchSpec { get; set; }
 
         public Enums.PHRPErrorCode ErrorCode => mErrorCode;
 
@@ -1107,7 +1107,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Initialize pepToProteinMapping
-                var pepToProteinMapping = new List<udtPepToProteinMappingType>();
+                var pepToProteinMapping = new List<PepToProteinMapping>();
 
                 // Read the _PepToProtMapMTS file
                 var success = LoadPeptideToProteinMapInfo(mtsPepToProteinMapFilePath, pepToProteinMapping, out _);
@@ -1293,12 +1293,12 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private readonly IComparer<udtPepToProteinMappingType> peptideSearchComparer = new PepToProteinMappingPeptideSearchComparer();
+        private readonly IComparer<PepToProteinMapping> peptideSearchComparer = new PepToProteinMappingPeptideSearchComparer();
 
-        protected int FindFirstMatchInPepToProteinMapping(List<udtPepToProteinMappingType> pepToProteinMapping, string peptideToFind)
+        protected int FindFirstMatchInPepToProteinMapping(List<PepToProteinMapping> pepToProteinMapping, string peptideToFind)
         {
             // Use binary search to find this peptide in pepToProteinMapping
-            var udtItemToFind = new udtPepToProteinMappingType
+            var udtItemToFind = new PepToProteinMapping
             {
                 Peptide = peptideToFind
             };
@@ -1676,7 +1676,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         if (!valueNotPresent)
                         {
-                            EnzymeMatchSpec = new PeptideCleavageStateCalculator.udtEnzymeMatchSpecType(leftResidueRegEx, rightResidueRegEx);
+                            EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(leftResidueRegEx, rightResidueRegEx);
                         }
                     }
 
@@ -1703,7 +1703,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         protected bool LoadPeptideToProteinMapInfo(
             string pepToProteinMapFilePath,
-            List<udtPepToProteinMappingType> pepToProteinMapping,
+            List<PepToProteinMapping> pepToProteinMapping,
             out string headerLine)
         {
             headerLine = string.Empty;
@@ -1758,7 +1758,7 @@ namespace PeptideHitResultsProcessor.Processor
                             }
                             else
                             {
-                                var pepToProteinMappingEntry = new udtPepToProteinMappingType
+                                var pepToProteinMappingEntry = new PepToProteinMapping
                                 {
                                     Peptide = string.Copy(splitLine[0]),
                                     Protein = string.Copy(splitLine[1])
@@ -2002,7 +2002,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (searchResult.SearchResultModificationCount > 0)
                     {
-                        var udtModNameAndResidueLoc = new udtModNameAndResidueLocType[searchResult.SearchResultModificationCount];
+                        var udtModNameAndResidueLoc = new ModNameAndResidueLoc[searchResult.SearchResultModificationCount];
                         var pointerArray = new int[searchResult.SearchResultModificationCount];
 
                         if (searchResult.SearchResultModificationCount == 1)
@@ -2137,7 +2137,7 @@ namespace PeptideHitResultsProcessor.Processor
             return proteinNameAndDescription;
         }
 
-        protected void UpdatePepToProteinMapPeptide(List<udtPepToProteinMappingType> pepToProteinMapping, int index, string peptide)
+        protected void UpdatePepToProteinMapPeptide(List<PepToProteinMapping> pepToProteinMapping, int index, string peptide)
         {
             var udtItem = pepToProteinMapping[index];
             udtItem.Peptide = peptide;
@@ -2539,7 +2539,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void WriteModDetailsEntry(
             PHRPReader.PHRPReader reader,
             TextWriter writer,
-            IReadOnlyList<udtPepToProteinMappingType> pepToProteinMapping,
+            IReadOnlyList<PepToProteinMapping> pepToProteinMapping,
             int pepToProteinMapIndex,
             ref int psmCountSkippedSinceReversedOrScrambledProtein)
         {
@@ -2621,9 +2621,9 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "IComparer classes"
 
-        protected class ISearchOptionModificationInfoComparer : IComparer<udtSearchOptionModificationInfoType>
+        protected class ISearchOptionModificationInfoComparer : IComparer<SearchOptionModificationInfo>
         {
-            public int Compare(udtSearchOptionModificationInfoType x, udtSearchOptionModificationInfoType y)
+            public int Compare(SearchOptionModificationInfo x, SearchOptionModificationInfo y)
             {
                 if (x.SortOrder > y.SortOrder)
                 {
@@ -2649,9 +2649,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        internal class IModNameAndResidueLocComparer : IComparer<udtModNameAndResidueLocType>
+        internal class IModNameAndResidueLocComparer : IComparer<ModNameAndResidueLoc>
         {
-            public int Compare(udtModNameAndResidueLocType x, udtModNameAndResidueLocType y)
+            public int Compare(ModNameAndResidueLoc x, ModNameAndResidueLoc y)
             {
                 if (x.ResidueLocInPeptide > y.ResidueLocInPeptide)
                 {
@@ -2673,9 +2673,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        protected class PepToProteinMappingComparer : IComparer<udtPepToProteinMappingType>
+        protected class PepToProteinMappingComparer : IComparer<PepToProteinMapping>
         {
-            public int Compare(udtPepToProteinMappingType x, udtPepToProteinMappingType y)
+            public int Compare(PepToProteinMapping x, PepToProteinMapping y)
             {
                 var result = string.CompareOrdinal(x.Peptide, y.Peptide);
                 if (result == 0)
@@ -2686,9 +2686,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private class PepToProteinMappingPeptideSearchComparer : IComparer<udtPepToProteinMappingType>
+        private class PepToProteinMappingPeptideSearchComparer : IComparer<PepToProteinMapping>
         {
-            public int Compare(udtPepToProteinMappingType x, udtPepToProteinMappingType y)
+            public int Compare(PepToProteinMapping x, PepToProteinMapping y)
             {
                 return string.CompareOrdinal(x.Peptide, y.Peptide);
             }

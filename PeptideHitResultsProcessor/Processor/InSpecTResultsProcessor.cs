@@ -122,7 +122,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "Structures"
 
-        private struct udtInspectSearchResultType
+        private struct InspectSearchResult
         {
             public string SpectrumFileName;
             public string Scan;
@@ -198,7 +198,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private struct udtModInfoType
+        private struct ModInfo
         {
             public string ModName;              // Mod names must be lower case, and 4 characters in length (or shorter)
             public string ModMass;              // Storing as a string since reading from a text file and writing to a text file
@@ -216,8 +216,8 @@ namespace PeptideHitResultsProcessor.Processor
         #endregion
 
         private void AddCurrentRecordToSearchResults(ref int currentScanResultsCount,
-            udtInspectSearchResultType[] searchResultsCurrentScan,
-            udtInspectSearchResultType udtSearchResult)
+            InspectSearchResult[] searchResultsCurrentScan,
+            InspectSearchResult udtSearchResult)
         {
             if (currentScanResultsCount >= searchResultsCurrentScan.Length)
             {
@@ -286,7 +286,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="searchResultsCurrentScan"></param>
         /// <param name="currentScanResultsCount"></param>
-        private void AssignRankAndDeltaNormValues(ref udtInspectSearchResultType[] searchResultsCurrentScan, int currentScanResultsCount)
+        private void AssignRankAndDeltaNormValues(ref InspectSearchResult[] searchResultsCurrentScan, int currentScanResultsCount)
         {
             const float DeltaNormMQScore_If_Undefined = 0;
             const float DeltaNormTotalPRMScore_If_Undefined = 0;
@@ -418,10 +418,10 @@ namespace PeptideHitResultsProcessor.Processor
         private bool CreateFHTorSYNResultsFile(
             string inputFilePath,
             string outputFilePath,
-            IReadOnlyList<udtModInfoType> inspectModInfo,
+            IReadOnlyList<ModInfo> inspectModInfo,
             FilteredOutputFileTypeConstants filteredOutputFileType)
         {
-            var udtSearchResult = new udtInspectSearchResultType();
+            var udtSearchResult = new InspectSearchResult();
 
             var resultID = 0;
 
@@ -433,7 +433,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 // Initialize variables
                 var previousScan = int.MinValue;
-                IComparer<udtInspectSearchResultType> sortComparer;
+                IComparer<InspectSearchResult> sortComparer;
 
                 if (filteredOutputFileType == FilteredOutputFileTypeConstants.SynFile)
                 {
@@ -470,10 +470,10 @@ namespace PeptideHitResultsProcessor.Processor
 
                         // Initialize array that will hold all of the records for a given scan
                         var currentScanResultsCount = 0;
-                        var searchResultsCurrentScan = new udtInspectSearchResultType[10];
+                        var searchResultsCurrentScan = new InspectSearchResult[10];
 
                         // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                        var filteredSearchResults = new List<udtInspectSearchResultType>();
+                        var filteredSearchResults = new List<InspectSearchResult>();
 
                         // Parse the input file
                         while (!reader.EndOfStream && !AbortProcessing)
@@ -655,9 +655,9 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="inspectParameterFilePath"></param>
         /// <param name="modInfo"></param>
         /// <returns>True on success, false if an error</returns>
-        private bool ExtractModInfoFromInspectParamFile(string inspectParameterFilePath, out List<udtModInfoType> modInfo)
+        private bool ExtractModInfoFromInspectParamFile(string inspectParameterFilePath, out List<ModInfo> modInfo)
         {
-            modInfo = new List<udtModInfoType>();
+            modInfo = new List<ModInfo>();
 
             try
             {
@@ -700,7 +700,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (splitLine.Length < 3 || splitLine[0].ToLower().Trim() != "mod")
                             continue;
 
-                        var modDef = new udtModInfoType()
+                        var modDef = new ModInfo()
                         {
                             ModMass = splitLine[1],
                             Residues = splitLine[2],
@@ -818,8 +818,8 @@ namespace PeptideHitResultsProcessor.Processor
         private bool LoadPeptideToProteinMapInfoInspect(
             string pepToProteinMapFilePath,
             string outputDirectoryPath,
-            IReadOnlyList<udtModInfoType> inspectModInfo,
-            ref List<udtPepToProteinMappingType> pepToProteinMapping,
+            IReadOnlyList<ModInfo> inspectModInfo,
+            ref List<PepToProteinMapping> pepToProteinMapping,
             ref string mtsPepToProteinMapFilePath)
         {
             bool success;
@@ -843,7 +843,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
 
                 // Initialize pepToProteinMapping
-                pepToProteinMapping = new List<udtPepToProteinMappingType>();
+                pepToProteinMapping = new List<PepToProteinMapping>();
 
                 // Read the data in the peptide to protein map file
                 success = LoadPeptideToProteinMapInfo(pepToProteinMapFilePath, pepToProteinMapping, out var headerLine);
@@ -933,7 +933,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="resetMassCorrectionTagsAndModificationDefinitions"></param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function</remarks>
-        private bool ParseInspectSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
+        private bool ParseInspectSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<PepToProteinMapping> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Note that Inspect synopsis files are normally sorted on TotalPRMScore descending
             // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
@@ -1152,8 +1152,8 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseInspectResultsFileEntry(
             string lineIn,
-            IReadOnlyList<udtModInfoType> inspectModInfo,
-            ref udtInspectSearchResultType udtSearchResult,
+            IReadOnlyList<ModInfo> inspectModInfo,
+            ref InspectSearchResult udtSearchResult,
             ref string errorLog,
             int resultsProcessed)
         {
@@ -1482,15 +1482,15 @@ namespace PeptideHitResultsProcessor.Processor
                         return false;
                     }
 
-                    var pepToProteinMapping = new List<udtPepToProteinMappingType>();
+                    var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the Inspect Parameter File so that we can determine the modification names and masses
                     if (!ExtractModInfoFromInspectParamFile(SearchToolParameterFilePath, out var inspectModInfo))
                     {
                         if (inspectModInfo == null || inspectModInfo.Count == 0)
                         {
-                            inspectModInfo = new List<udtModInfoType>();
-                            var modDef = new udtModInfoType()
+                            inspectModInfo = new List<ModInfo>();
+                            var modDef = new ModInfo()
                             {
                                 ModName = PHOS_MOD_NAME.ToLower(),
                                 ModMass = PHOS_MOD_MASS,
@@ -1633,7 +1633,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// </summary>
         /// <param name="peptide"></param>
         /// <param name="inspectModInfo">This function assumes that each entry in inspectModInfo has both .ModName and .ModSymbol defined</param>
-        private string ReplaceInspectModTextWithSymbol(string peptide, IReadOnlyList<udtModInfoType> inspectModInfo)
+        private string ReplaceInspectModTextWithSymbol(string peptide, IReadOnlyList<ModInfo> inspectModInfo)
         {
             var prefix = string.Empty;
             var suffix = string.Empty;
@@ -1749,7 +1749,7 @@ namespace PeptideHitResultsProcessor.Processor
             return peptide;
         }
 
-        private void ResolveInspectModsWithModDefinitions(IList<udtModInfoType> inspectModInfo)
+        private void ResolveInspectModsWithModDefinitions(IList<ModInfo> inspectModInfo)
         {
             if (inspectModInfo == null)
             {
@@ -1821,8 +1821,8 @@ namespace PeptideHitResultsProcessor.Processor
         private void StoreOrWriteSearchResult(
             TextWriter writer,
             ref int resultID,
-            udtInspectSearchResultType udtSearchResult,
-            ICollection<udtInspectSearchResultType> filteredSearchResults,
+            InspectSearchResult udtSearchResult,
+            ICollection<InspectSearchResult> filteredSearchResults,
             ref string errorLog)
         {
             if (SortFHTAndSynFiles)
@@ -1838,7 +1838,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            IEnumerable<udtInspectSearchResultType> filteredSearchResults,
+            IEnumerable<InspectSearchResult> filteredSearchResults,
             ref string errorLog)
         {
             // Sort filteredSearchResults by descending TotalPRMScore, ascending scan, ascending charge, ascending peptide, and ascending protein
@@ -1856,10 +1856,10 @@ namespace PeptideHitResultsProcessor.Processor
             TextWriter writer,
             ref int resultID,
             int currentScanResultsCount,
-            udtInspectSearchResultType[] searchResultsCurrentScan,
-            ICollection<udtInspectSearchResultType> filteredSearchResults,
+            InspectSearchResult[] searchResultsCurrentScan,
+            ICollection<InspectSearchResult> filteredSearchResults,
             ref string errorLog,
-            ref IComparer<udtInspectSearchResultType> sortComparer)
+            ref IComparer<InspectSearchResult> sortComparer)
         {
             var currentCharge = short.MinValue;
 
@@ -1884,10 +1884,10 @@ namespace PeptideHitResultsProcessor.Processor
             TextWriter writer,
             ref int resultID,
             int currentScanResultsCount,
-            udtInspectSearchResultType[] searchResultsCurrentScan,
-            ICollection<udtInspectSearchResultType> filteredSearchResults,
+            InspectSearchResult[] searchResultsCurrentScan,
+            ICollection<InspectSearchResult> filteredSearchResults,
             ref string errorLog,
-            ref IComparer<udtInspectSearchResultType> sortComparer)
+            ref IComparer<InspectSearchResult> sortComparer)
         {
             AssignRankAndDeltaNormValues(ref searchResultsCurrentScan, currentScanResultsCount);
 
@@ -1945,7 +1945,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            udtInspectSearchResultType udtSearchResult,
+            InspectSearchResult udtSearchResult,
             ref string errorLog)
         {
             try
@@ -2003,9 +2003,9 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "IComparer Classes"
 
-        private class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc : IComparer<udtInspectSearchResultType>
+        private class InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc : IComparer<InspectSearchResult>
         {
-            public int Compare(udtInspectSearchResultType x, udtInspectSearchResultType y)
+            public int Compare(InspectSearchResult x, InspectSearchResult y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {
@@ -2053,9 +2053,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc : IComparer<udtInspectSearchResultType>
+        private class InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc : IComparer<InspectSearchResult>
         {
-            public int Compare(udtInspectSearchResultType x, udtInspectSearchResultType y)
+            public int Compare(InspectSearchResult x, InspectSearchResult y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {
@@ -2102,9 +2102,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc : IComparer<udtInspectSearchResultType>
+        private class InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc : IComparer<InspectSearchResult>
         {
-            public int Compare(udtInspectSearchResultType x, udtInspectSearchResultType y)
+            public int Compare(InspectSearchResult x, InspectSearchResult y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {

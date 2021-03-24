@@ -237,7 +237,7 @@ namespace PeptideHitResultsProcessor.Processor
             int sortOrder,
             bool parsingMotifDef,
             string paramValue,
-            ICollection<udtSearchOptionModificationInfoType> modifications)
+            ICollection<SearchOptionModificationInfo> modifications)
         {
             // Parse out the mod information defined in paramValue
             // Add each entry to modInfo
@@ -329,7 +329,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 }
 
                                 // Append the new mod information to the modification list
-                                var modInfo = new udtSearchOptionModificationInfoType
+                                var modInfo = new SearchOptionModificationInfo
                                 {
                                     SortOrder = sortOrder,
                                     ModificationMass = modificationMass,
@@ -356,7 +356,7 @@ namespace PeptideHitResultsProcessor.Processor
             int sortOrder,
             bool nTerminus,
             string paramValue,
-            ICollection<udtSearchOptionModificationInfoType> modifications)
+            ICollection<SearchOptionModificationInfo> modifications)
         {
             // Parse out the mass defined in paramValue
             // Add the entry to modifications if non-zero
@@ -383,7 +383,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (Math.Abs(modificationMass) > float.Epsilon)
                     {
                         // Append the new mod information to modifications
-                        var modInfo = new udtSearchOptionModificationInfoType {
+                        var modInfo = new SearchOptionModificationInfo {
                             SortOrder = sortOrder
                         };
 
@@ -1189,7 +1189,7 @@ namespace PeptideHitResultsProcessor.Processor
             const char XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END = '}';
 
             // Initialize the Mod Info array
-            var modifications = new List<udtSearchOptionModificationInfoType>();
+            var modifications = new List<SearchOptionModificationInfo>();
 
             var staticModsAreResetForRefinement = true;
 
@@ -1318,7 +1318,7 @@ namespace PeptideHitResultsProcessor.Processor
                                                 rightSpec = rightSpec.Replace(XTANDEM_CLEAVAGE_NEGATION_SYMBOL_END.ToString(), "]");
                                             }
 
-                                            EnzymeMatchSpec = new PeptideCleavageStateCalculator.udtEnzymeMatchSpecType(leftSpec, rightSpec);
+                                            EnzymeMatchSpec = new PeptideCleavageStateCalculator.EnzymeMatchSpecInfo(leftSpec, rightSpec);
                                         }
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_ModificationMass]))
@@ -1366,7 +1366,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Additionally, if <note type="input" label="refine, modification mass">none</note> was present in the X!Tandem results file,
                 // auto update all static mods to dynamic mods since they are reset during refinement
 
-                var validatedModifications = new List<udtSearchOptionModificationInfoType>();
+                var validatedModifications = new List<SearchOptionModificationInfo>();
                 var sortedModInfo = (from item in modifications orderby item.SortOrder, item.ModificationMass select item).ToList();
 
                 foreach (var modInfo in sortedModInfo)

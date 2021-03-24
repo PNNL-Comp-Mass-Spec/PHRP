@@ -12,7 +12,7 @@ namespace PHRP_UnitTests
     public class PHRPReaderTests
     {
 
-        private struct udtMSGFPlusInfo
+        private struct MSGFPlusInfo
         {
             public string Peptide;
             public string Protein;
@@ -22,7 +22,7 @@ namespace PHRP_UnitTests
             public double PepQValue;
         }
 
-        private struct udtTopPICInfo
+        private struct TopPICInfo
         {
             public string Peptide;
             public string Protein;
@@ -158,14 +158,14 @@ namespace PHRP_UnitTests
             var peptides = peptidesByResultID.Split('|').ToList();
             var proteins = proteinsByResultID.Split('|').ToList();
 
-            var infoByResultID = new Dictionary<int, udtMSGFPlusInfo>();
+            var infoByResultID = new Dictionary<int, MSGFPlusInfo>();
             var matchedResultIDs = new SortedSet<int>();
 
             for (var i = 0; i < resultIDs.Count; i++)
             {
                 var scoreValues = SplitDelimitedDoubles(scores[i], ',');
 
-                var msgfPlusInfo = new udtMSGFPlusInfo
+                var msgfPlusInfo = new MSGFPlusInfo
                 {
                     Peptide = peptides[i],
                     Protein = proteins[i],
@@ -336,14 +336,14 @@ namespace PHRP_UnitTests
             var peptides = peptidesByResultID.Split('|').ToList();
             var proteins = proteinsByResultID.Split(';').ToList();
 
-            var infoByResultID = new Dictionary<int, udtTopPICInfo>();
+            var infoByResultID = new Dictionary<int, TopPICInfo>();
             var matchedResultIDs = new SortedSet<int>();
 
             for (var i = 0; i < resultIDs.Count; i++)
             {
                 var scoreValues = SplitDelimitedDoubles(scores[i], ',');
 
-                var topPICInfo = new udtTopPICInfo
+                var topPICInfo = new TopPICInfo
                 {
                     Peptide = peptides[i],
                     Protein = proteins[i],

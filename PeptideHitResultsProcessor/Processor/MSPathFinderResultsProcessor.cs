@@ -94,7 +94,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>
         /// These columns correspond to the Synopsis file created by this class
         /// </remarks>
-        private struct udtMSPathFinderSearchResultType
+        private struct MSPathFinderSearchResult
         {
             public string Scan;
             public int ScanNum;
@@ -176,7 +176,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void AddModificationsToResidues(
             MSPathFinderResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
         {
             if (string.IsNullOrWhiteSpace(searchResult.Modifications))
             {
@@ -260,7 +260,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool AddModificationsAndComputeMass(
             MSPathFinderResults searchResult,
             bool updateModOccurrenceCounts,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
         {
             bool success;
 
@@ -305,7 +305,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="modInfo"></param>
         private double ComputeTotalModMass(
             string modificationList,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
         {
             if (string.IsNullOrWhiteSpace(modificationList))
             {
@@ -432,7 +432,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool CreateSynResultsFile(
             string inputFilePath,
             string outputFilePath,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
         {
             try
             {
@@ -448,10 +448,10 @@ namespace PeptideHitResultsProcessor.Processor
                     var rowNumber = 0;
 
                     // Initialize the list that will hold all of the records in the MSPathFinder result file
-                    var searchResultsUnfiltered = new List<udtMSPathFinderSearchResultType>();
+                    var searchResultsUnfiltered = new List<MSPathFinderSearchResult>();
 
                     // Initialize the list that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<udtMSPathFinderSearchResultType>();
+                    var filteredSearchResults = new List<MSPathFinderSearchResult>();
 
                     // Parse the input file
                     while (!reader.EndOfStream && !AbortProcessing)
@@ -485,7 +485,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var udtSearchResult = new udtMSPathFinderSearchResultType();
+                        var udtSearchResult = new MSPathFinderSearchResult();
 
                         var validSearchResult =
                             ParseMSPathFinderResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping, modInfo, rowNumber);
@@ -551,7 +551,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <remarks>The DMS-based parameter file for MSPathFinder uses the same formatting as MS-GF+</remarks>
         private bool ExtractModInfoFromParamFile(
             string msPathFinderParamFilePath,
-            out List<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            out List<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
         {
             var modFileProcessor = new MSGFPlusParamFileModExtractor(TOOL_NAME);
             RegisterEvents(modFileProcessor);
@@ -628,7 +628,7 @@ namespace PeptideHitResultsProcessor.Processor
             string inputFilePath,
             string outputDirectoryPath,
             bool resetMassCorrectionTagsAndModificationDefinitions,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -846,10 +846,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderResultsFileEntry(
             string lineIn,
-            ref udtMSPathFinderSearchResultType udtSearchResult,
+            ref MSPathFinderSearchResult udtSearchResult,
             ref string errorLog,
             IDictionary<MSPathFinderResultsFileColumns, int> columnMapping,
-            IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo,
+            IReadOnlyCollection<MSGFPlusParamFileModExtractor.ModInfo> modInfo,
             int rowNumber)
         {
             // Parses an entry from the MSPathFinder results file
@@ -1345,7 +1345,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            IEnumerable<udtMSPathFinderSearchResultType> filteredSearchResults,
+            IEnumerable<MSPathFinderSearchResult> filteredSearchResults,
             ref string errorLog)
         {
             // Sort filteredSearchResults by ascending SpecEValue, QValue, Scan, Peptide, and Protein
@@ -1367,10 +1367,10 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="endIndex">End index for data in this scan</param>
         /// <param name="filteredSearchResults">Output parameter: the actual filtered search results</param>
         private void StoreSynMatches(
-            IList<udtMSPathFinderSearchResultType> searchResults,
+            IList<MSPathFinderSearchResult> searchResults,
             int startIndex,
             int endIndex,
-            List<udtMSPathFinderSearchResultType> filteredSearchResults)
+            List<MSPathFinderSearchResult> filteredSearchResults)
         {
             // If there was more than one result, we could rank them by score
             // AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex)
@@ -1429,7 +1429,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            udtMSPathFinderSearchResultType udtSearchResult,
+            MSPathFinderSearchResult udtSearchResult,
             ref string errorLog)
         {
             try
@@ -1486,9 +1486,9 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "IComparer Classes"
 
-        private class MSPathFinderSearchResultsComparerScanChargeScorePeptide : IComparer<udtMSPathFinderSearchResultType>
+        private class MSPathFinderSearchResultsComparerScanChargeScorePeptide : IComparer<MSPathFinderSearchResult>
         {
-            public int Compare(udtMSPathFinderSearchResultType x, udtMSPathFinderSearchResultType y)
+            public int Compare(MSPathFinderSearchResult x, MSPathFinderSearchResult y)
             {
                 // First sort on Scan
                 if (x.ScanNum > y.ScanNum)

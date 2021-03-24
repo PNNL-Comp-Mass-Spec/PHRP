@@ -84,7 +84,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// This data structure holds rows read from the tab-delimited file created directly by MSAlign
         /// </summary>
-        private struct udtMSAlignSearchResultType
+        private struct MSAlignSearchResult
         {
             public string SpectrumFileName;
             public string Scans;
@@ -363,7 +363,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="startIndex"></param>
         /// <param name="endIndex"></param>
         private void AssignRankAndDeltaNormValues(
-            IList<udtMSAlignSearchResultType> searchResults,
+            IList<MSAlignSearchResult> searchResults,
             int startIndex,
             int endIndex)
         {
@@ -372,7 +372,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             // Duplicate a portion of searchResults so that we can sort by PValue
 
-            var resultsSubset = new Dictionary<int, udtMSAlignSearchResultType>();
+            var resultsSubset = new Dictionary<int, MSAlignSearchResult>();
             for (var index = startIndex; index <= endIndex; index++)
             {
                 resultsSubset.Add(index, searchResults[index]);
@@ -438,7 +438,7 @@ namespace PeptideHitResultsProcessor.Processor
             return mass;
         }
 
-        private static readonly Regex RegexModMassRegEx = new Regex(MSALIGN_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex RegexModMassRegEx = new(MSALIGN_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Computes the total of all modification masses defined for the peptide
@@ -498,10 +498,10 @@ namespace PeptideHitResultsProcessor.Processor
                     mDeltaMassWarningCount = 0;
 
                     // Initialize array that will hold all of the records in the MSAlign result file
-                    var searchResultsUnfiltered = new List<udtMSAlignSearchResultType>();
+                    var searchResultsUnfiltered = new List<MSAlignSearchResult>();
 
                     // Initialize the array that will hold all of the records that will ultimately be written out to disk
-                    var filteredSearchResults = new List<udtMSAlignSearchResultType>();
+                    var filteredSearchResults = new List<MSAlignSearchResult>();
 
                     // Parse the input file
                     while (!reader.EndOfStream && !AbortProcessing)
@@ -530,7 +530,7 @@ namespace PeptideHitResultsProcessor.Processor
                             continue;
                         }
 
-                        var udtSearchResult = new udtMSAlignSearchResultType();
+                        var udtSearchResult = new MSAlignSearchResult();
                         var validSearchResult = ParseMSAlignResultsFileEntry(lineIn, ref udtSearchResult, ref errorLog, columnMapping);
 
                         if (validSearchResult)
@@ -680,7 +680,7 @@ namespace PeptideHitResultsProcessor.Processor
             // Nothing to do at present
         }
 
-        private bool ParseMSAlignSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<udtPepToProteinMappingType> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
+        private bool ParseMSAlignSynopsisFile(string inputFilePath, string outputDirectoryPath, ref List<PepToProteinMapping> pepToProteinMapping, bool resetMassCorrectionTagsAndModificationDefinitions)
         {
             // Warning: This function does not call LoadParameterFile; you should typically call ProcessFile rather than calling this function
 
@@ -883,7 +883,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool ParseMSAlignResultsFileEntry(
             string lineIn,
-            ref udtMSAlignSearchResultType udtSearchResult,
+            ref MSAlignSearchResult udtSearchResult,
             ref string errorLog,
             IDictionary<MSAlignResultsFileColumns, int> columnMapping)
         {
@@ -1379,7 +1379,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Obtain the full path to the input file
                     var inputFile = new FileInfo(inputFilePath);
 
-                    var pepToProteinMapping = new List<udtPepToProteinMappingType>();
+                    var pepToProteinMapping = new List<PepToProteinMapping>();
 
                     // Load the MSAlign Parameter File so that we can determine whether Cysteine residues are statically modified
                     var modInfoExtracted = ExtractModInfoFromMSAlignParamFile(SearchToolParameterFilePath, out var msAlignModInfo);
@@ -1569,7 +1569,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void SortAndWriteFilteredSearchResults(
             TextWriter writer,
-            IEnumerable<udtMSAlignSearchResultType> filteredSearchResults,
+            IEnumerable<MSAlignSearchResult> filteredSearchResults,
             bool includeSpeciesAndFragMethod,
             ref string errorLog)
         {
@@ -1585,10 +1585,10 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void StoreSynMatches(
-            IList<udtMSAlignSearchResultType> searchResults,
+            IList<MSAlignSearchResult> searchResults,
             int startIndex,
             int endIndex,
-            ICollection<udtMSAlignSearchResultType> filteredSearchResults)
+            ICollection<MSAlignSearchResult> filteredSearchResults)
         {
             AssignRankAndDeltaNormValues(searchResults, startIndex, endIndex);
 
@@ -1667,7 +1667,7 @@ namespace PeptideHitResultsProcessor.Processor
         private void WriteSearchResultToFile(
             int resultID,
             TextWriter writer,
-            udtMSAlignSearchResultType udtSearchResult,
+            MSAlignSearchResult udtSearchResult,
             bool includeSpeciesAndFragMethod,
             ref string errorLog)
         {
@@ -1729,9 +1729,9 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "IComparer Classes"
 
-        private class MSAlignSearchResultsComparerScanChargePValuePeptide : IComparer<udtMSAlignSearchResultType>
+        private class MSAlignSearchResultsComparerScanChargePValuePeptide : IComparer<MSAlignSearchResult>
         {
-            public int Compare(udtMSAlignSearchResultType x, udtMSAlignSearchResultType y)
+            public int Compare(MSAlignSearchResult x, MSAlignSearchResult y)
             {
                 if (x.ScanNum > y.ScanNum)
                 {

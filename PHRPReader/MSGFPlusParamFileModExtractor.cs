@@ -150,7 +150,7 @@ namespace PHRPReader
         ///   ModType:    MSGFPlusModType.CustomAA
         ///   ModSymbol:  ?   (a question mark; not used)
         /// </remarks>
-        public struct udtModInfoType
+        public struct ModInfo
         {
             /// <summary>
             /// Mod name (read from the parameter file) isn't used by MS-GF+, but it is used by MSPathFinder
@@ -289,7 +289,7 @@ namespace PHRPReader
         /// <param name="modSpecFormat"></param>
         /// <param name="modInfo"></param>
         /// <returns>True if success; false if a problem</returns>
-        public bool ExtractModInfoFromParamFile(string paramFilePath, ModSpecFormats modSpecFormat, out List<udtModInfoType> modInfo)
+        public bool ExtractModInfoFromParamFile(string paramFilePath, ModSpecFormats modSpecFormat, out List<ModInfo> modInfo)
         {
             var tagNamesToFind = new List<string> {
                 PARAM_TAG_MOD_STATIC,
@@ -297,7 +297,7 @@ namespace PHRPReader
                 PARAM_TAG_CUSTOM_AA };
 
             // Initialization
-            modInfo = new List<udtModInfoType>();
+            modInfo = new List<ModInfo>();
 
             var unnamedModID = 0;
             mErrorMessage = string.Empty;
@@ -482,7 +482,7 @@ namespace PHRPReader
             string paramFilePath,
             IReadOnlyList<string> splitLine,
             ref int unnamedModID,
-            out udtModInfoType udtModInfo)
+            out ModInfo udtModInfo)
         {
             // Modification definition format:
             //   Mass or EmpiricalFormula:   Mod mass, or empirical formula (like C2H3N1O1 or H-2O-1)
@@ -498,7 +498,7 @@ namespace PHRPReader
             //   Unused:     unused field, but a letter must be present
             //   Name:       Name associated with the custom amino acid
 
-            udtModInfo = new udtModInfoType();
+            udtModInfo = new ModInfo();
 
             try
             {
@@ -631,7 +631,7 @@ namespace PHRPReader
             IReadOnlyList<string> splitLine,
             MSGFPlusModType modType,
             ref int unnamedModID,
-            out udtModInfoType udtModInfo)
+            out ModInfo udtModInfo)
         {
             // Modification definition format:
             //   ModName:   UniMod name or custom name
@@ -640,7 +640,7 @@ namespace PHRPReader
             //   Position:  any, N-term, or C-term
             //   UniModID:  UniMod ID, or -1 if not in UniMod
 
-            udtModInfo = new udtModInfoType();
+            udtModInfo = new ModInfo();
 
             try
             {
@@ -739,7 +739,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="modInfo"></param>
         /// <param name="peptideMods"></param>
-        public void ResolveMSGFPlusModsWithModDefinitions(List<udtModInfoType> modInfo, PeptideModificationContainer peptideMods)
+        public void ResolveMSGFPlusModsWithModDefinitions(List<ModInfo> modInfo, PeptideModificationContainer peptideMods)
         {
             if (modInfo == null)
                 return;

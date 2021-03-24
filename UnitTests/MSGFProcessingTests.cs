@@ -12,9 +12,9 @@ namespace PHRP_UnitTests
         [Test]
         public void TestReplaceMSGFModTextWithSymbol()
         {
-            var modInfo = new List<MSGFPlusParamFileModExtractor.udtModInfoType>
+            var modInfo = new List<MSGFPlusParamFileModExtractor.ModInfo>
             {
-                new MSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.ModInfo
                 {
                     ModMass = "C2H3N1O1",
                     ModMassVal = 57.0214619,
@@ -23,7 +23,7 @@ namespace PHRP_UnitTests
                     ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
                     Residues = "C",
                 },
-                new MSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.ModInfo
                 {
                     ModMass = "229.1629",
                     ModMassVal = 229.1629,
@@ -32,7 +32,7 @@ namespace PHRP_UnitTests
                     ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
                     Residues = "<",
                 },
-                new MSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.ModInfo
                 {
                     ModMass = "229.1629",
                     ModMassVal = 229.1629,
@@ -41,7 +41,7 @@ namespace PHRP_UnitTests
                     ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
                     Residues = "K",
                 },
-                new MSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.ModInfo
                 {
                     ModMass = "O1",
                     ModMassVal = 15.9949141,
@@ -50,7 +50,7 @@ namespace PHRP_UnitTests
                     ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod,
                     Residues = "M",
                 },
-                new MSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.ModInfo
                 {
                     ModMass = "-187.152366",
                     ModMassVal = -187.152366,
@@ -59,7 +59,7 @@ namespace PHRP_UnitTests
                     ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod,
                     Residues = "K",
                 },
-                new MSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.ModInfo
                 {
                     ModMass = "-187.152366",
                     ModMassVal = -187.152366,
