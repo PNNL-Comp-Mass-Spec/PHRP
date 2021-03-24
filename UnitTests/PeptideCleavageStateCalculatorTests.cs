@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using PHRPReader;
+using static PHRPReader.PeptideCleavageStateCalculator;
 
 // ReSharper disable StringLiteralTypo
 namespace PHRP_UnitTests
@@ -7,12 +8,12 @@ namespace PHRP_UnitTests
     [TestFixture]
     public class PeptideCleavageStateCalculatorTests
     {
-        private clsPeptideCleavageStateCalculator mCleavageStateCalculator;
+        private PeptideCleavageStateCalculator mCleavageStateCalculator;
 
         [SetUp]
         public void Init()
         {
-            mCleavageStateCalculator = new clsPeptideCleavageStateCalculator();
+            mCleavageStateCalculator = new PeptideCleavageStateCalculator();
         }
 
         [Test]
@@ -41,7 +42,7 @@ namespace PHRP_UnitTests
         [TestCase("..TGMLTQKFARSLGMLAVDNQARV.R", "TGMLTQKFARSLGMLAVDNQARV", "", "R")]
         public void TestSplitPrefixAndSuffix(string sequence, string expectedPrimarySeq, string expectedPrefix, string expectedSuffix)
         {
-            clsPeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out var primarySequence, out var prefix, out var suffix);
+            PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(sequence, out var primarySequence, out var prefix, out var suffix);
 
             Assert.AreEqual(expectedPrimarySeq, primarySequence);
             Assert.AreEqual(expectedPrefix, prefix);
@@ -49,42 +50,42 @@ namespace PHRP_UnitTests
         }
 
         [Test]
-        [TestCase("A.BCDE.F", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("-.BCDE.F", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("E.TGMLTQKFARSLGMLAVDNQARV..", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("..TGMLTQKFARSLGMLAVDNQARV.R", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("..TGMLTQKFARSLGMLAVDNQAR.F", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("A.BCDEFGHIJK.L", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("A.B*CDEFGHIJK.L", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("A.BCDEFGHIJK.L", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("-.GLMVPVIR.A", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("R.EVSSRPS+79.966T+79.966PGLSVVSGISATSEDIPNKIEDLR.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("K.MSSTFIGNSTAIQELFK.R", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("K.MSSTFIGNSTAIQELFK.P", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("K.MSSTFIGNSTAIQELFR.P", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("K.PSSTFIGNSTAIQELFR.D", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("K.PSSTFIGNSTAIQELFR.P", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("K.RSSTFIGNSTAIQELFK.R", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("K.MSSTFIGNSTAIQELFD.R", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("F.MSSTFIGNSTAIQELFK.R", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("K.ACDEFGR.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("R.ACDEFGR.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("-.ACDEFGR.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("R.ACDEFGH.-", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("-.ACDEFG.-", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("-.ACDEFG.-", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("K.ACDEFGR*.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("-.ACDEFGR*.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Full)]
-        [TestCase("K.ACDEFGH.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("L.ACDEFGR.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("K.ACDEFGR.P", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("K.PCDEFGR.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.Partial)]
-        [TestCase("L.ACDEFGH.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("-.ACDEFGH.S", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("L.ACDEFGH.-", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("L.ACDEFGR.P", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        [TestCase("K.PCDEFGR.P", clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific)]
-        public void TestComputeCleavageState(string sequence, clsPeptideCleavageStateCalculator.PeptideCleavageStateConstants expectedCleavageState)
+        [TestCase("A.BCDE.F", PeptideCleavageState.NonSpecific)]
+        [TestCase("-.BCDE.F", PeptideCleavageState.NonSpecific)]
+        [TestCase("E.TGMLTQKFARSLGMLAVDNQARV..", PeptideCleavageState.NonSpecific)]
+        [TestCase("..TGMLTQKFARSLGMLAVDNQARV.R", PeptideCleavageState.NonSpecific)]
+        [TestCase("..TGMLTQKFARSLGMLAVDNQAR.F", PeptideCleavageState.Full)]
+        [TestCase("A.BCDEFGHIJK.L", PeptideCleavageState.Partial)]
+        [TestCase("A.B*CDEFGHIJK.L", PeptideCleavageState.Partial)]
+        [TestCase("A.BCDEFGHIJK.L", PeptideCleavageState.Partial)]
+        [TestCase("-.GLMVPVIR.A", PeptideCleavageState.Full)]
+        [TestCase("R.EVSSRPS+79.966T+79.966PGLSVVSGISATSEDIPNKIEDLR.S", PeptideCleavageState.Full)]
+        [TestCase("K.MSSTFIGNSTAIQELFK.R", PeptideCleavageState.Full)]
+        [TestCase("K.MSSTFIGNSTAIQELFK.P", PeptideCleavageState.Partial)]
+        [TestCase("K.MSSTFIGNSTAIQELFR.P", PeptideCleavageState.Partial)]
+        [TestCase("K.PSSTFIGNSTAIQELFR.D", PeptideCleavageState.Partial)]
+        [TestCase("K.PSSTFIGNSTAIQELFR.P", PeptideCleavageState.NonSpecific)]
+        [TestCase("K.RSSTFIGNSTAIQELFK.R", PeptideCleavageState.Full)]
+        [TestCase("K.MSSTFIGNSTAIQELFD.R", PeptideCleavageState.Partial)]
+        [TestCase("F.MSSTFIGNSTAIQELFK.R", PeptideCleavageState.Partial)]
+        [TestCase("K.ACDEFGR.S", PeptideCleavageState.Full)]
+        [TestCase("R.ACDEFGR.S", PeptideCleavageState.Full)]
+        [TestCase("-.ACDEFGR.S", PeptideCleavageState.Full)]
+        [TestCase("R.ACDEFGH.-", PeptideCleavageState.Full)]
+        [TestCase("-.ACDEFG.-", PeptideCleavageState.Full)]
+        [TestCase("-.ACDEFG.-", PeptideCleavageState.Full)]
+        [TestCase("K.ACDEFGR*.S", PeptideCleavageState.Full)]
+        [TestCase("-.ACDEFGR*.S", PeptideCleavageState.Full)]
+        [TestCase("K.ACDEFGH.S", PeptideCleavageState.Partial)]
+        [TestCase("L.ACDEFGR.S", PeptideCleavageState.Partial)]
+        [TestCase("K.ACDEFGR.P", PeptideCleavageState.Partial)]
+        [TestCase("K.PCDEFGR.S", PeptideCleavageState.Partial)]
+        [TestCase("L.ACDEFGH.S", PeptideCleavageState.NonSpecific)]
+        [TestCase("-.ACDEFGH.S", PeptideCleavageState.NonSpecific)]
+        [TestCase("L.ACDEFGH.-", PeptideCleavageState.NonSpecific)]
+        [TestCase("L.ACDEFGR.P", PeptideCleavageState.NonSpecific)]
+        [TestCase("K.PCDEFGR.P", PeptideCleavageState.NonSpecific)]
+        public void TestComputeCleavageState(string sequence, PeptideCleavageState expectedCleavageState)
         {
             var cleavageState = mCleavageStateCalculator.ComputeCleavageState(sequence);
 
@@ -115,20 +116,20 @@ namespace PHRP_UnitTests
         }
 
         [Test]
-        [TestCase("A.BCDE.F", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.None)]
-        [TestCase("-.BCDE.F", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNTerminus)]
-        [TestCase("E.TGMLTQKFARSLGMLAVDNQARV..", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinCTerminus)]
-        [TestCase("K.TGMLTQKFARSLGMKLAVDNQARV.R", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.None)]
-        [TestCase("..TGMLTQKFARSLGMKLAVDNQARV.R", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNTerminus)]
-        [TestCase("-.TGMLTQKFARSLGMKLAVDNQARV.R", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNTerminus)]
-        [TestCase("M.TGMLTQKFARSLGMKPLAVDNQARV.R", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.None)]
-        [TestCase("A.BCDEFGHIJK.L", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.None)]
-        [TestCase("A.B*CDEFGHIJK.L", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.None)]
-        [TestCase("-.GLMVPVIR.A", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNTerminus)]
-        [TestCase("F.GLMVPVIR.-", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinCTerminus)]
-        [TestCase("-.GLMVPVIR.-", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.ProteinNandCCTerminus)]
-        [TestCase("R.EVSSRPS+79.966T+79.966PGLSVVSGISATSEDIPNKIEDLR.S", clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants.None)]
-        public void TestComputeTerminusState(string sequence, clsPeptideCleavageStateCalculator.PeptideTerminusStateConstants expectedTerminusState)
+        [TestCase("A.BCDE.F", PeptideTerminusState.None)]
+        [TestCase("-.BCDE.F", PeptideTerminusState.ProteinNTerminus)]
+        [TestCase("E.TGMLTQKFARSLGMLAVDNQARV..", PeptideTerminusState.ProteinCTerminus)]
+        [TestCase("K.TGMLTQKFARSLGMKLAVDNQARV.R", PeptideTerminusState.None)]
+        [TestCase("..TGMLTQKFARSLGMKLAVDNQARV.R", PeptideTerminusState.ProteinNTerminus)]
+        [TestCase("-.TGMLTQKFARSLGMKLAVDNQARV.R", PeptideTerminusState.ProteinNTerminus)]
+        [TestCase("M.TGMLTQKFARSLGMKPLAVDNQARV.R", PeptideTerminusState.None)]
+        [TestCase("A.BCDEFGHIJK.L", PeptideTerminusState.None)]
+        [TestCase("A.B*CDEFGHIJK.L", PeptideTerminusState.None)]
+        [TestCase("-.GLMVPVIR.A", PeptideTerminusState.ProteinNTerminus)]
+        [TestCase("F.GLMVPVIR.-", PeptideTerminusState.ProteinCTerminus)]
+        [TestCase("-.GLMVPVIR.-", PeptideTerminusState.ProteinNandCCTerminus)]
+        [TestCase("R.EVSSRPS+79.966T+79.966PGLSVVSGISATSEDIPNKIEDLR.S", PeptideTerminusState.None)]
+        public void TestComputeTerminusState(string sequence, PeptideTerminusState expectedTerminusState)
         {
             var terminusState = mCleavageStateCalculator.ComputeTerminusState(sequence);
 

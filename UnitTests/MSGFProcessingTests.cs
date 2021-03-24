@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using PeptideHitResultsProcessor;
+using PeptideHitResultsProcessor.Processor;
 using PHRPReader;
 
 namespace PHRP_UnitTests
@@ -12,60 +12,60 @@ namespace PHRP_UnitTests
         [Test]
         public void TestReplaceMSGFModTextWithSymbol()
         {
-            var modInfo = new List<clsMSGFPlusParamFileModExtractor.udtModInfoType>
+            var modInfo = new List<MSGFPlusParamFileModExtractor.udtModInfoType>
             {
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "C2H3N1O1",
                     ModMassVal = 57.0214619,
                     ModName = "Carbamidomethyl",
                     ModSymbol = '-',
-                    ModType = clsMSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
+                    ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
                     Residues = "C",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "229.1629",
                     ModMassVal = 229.1629,
                     ModName = "TMT6plex",
                     ModSymbol = '-',
-                    ModType = clsMSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
+                    ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
                     Residues = "<",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "229.1629",
                     ModMassVal = 229.1629,
                     ModName = "TMT6plex",
                     ModSymbol = '-',
-                    ModType = clsMSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
+                    ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.StaticMod,
                     Residues = "K",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "O1",
                     ModMassVal = 15.9949141,
                     ModName = "Oxidation",
                     ModSymbol = '*',
-                    ModType = clsMSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod,
+                    ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod,
                     Residues = "M",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "-187.152366",
                     ModMassVal = -187.152366,
                     ModName = "AcNoTMT",
                     ModSymbol = '#',
-                    ModType = clsMSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod,
+                    ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynamicMod,
                     Residues = "K",
                 },
-                new clsMSGFPlusParamFileModExtractor.udtModInfoType
+                new MSGFPlusParamFileModExtractor.udtModInfoType
                 {
                     ModMass = "-187.152366",
                     ModMassVal = -187.152366,
                     ModName = "AcNoTMT",
                     ModSymbol = '#',
-                    ModType = clsMSGFPlusParamFileModExtractor.MSGFPlusModType.DynNTermPeptide,
+                    ModType = MSGFPlusParamFileModExtractor.MSGFPlusModType.DynNTermPeptide,
                     Residues = "<",
                 }
             };
@@ -73,7 +73,7 @@ namespace PHRP_UnitTests
             // ReSharper disable StringLiteralTypo
 
             const string peptide = "-187.152+229.163ATK-187.152+229.163QIFDC+57.021K+229.163";
-            var processor = new clsMSGFPlusResultsProcessor();
+            var processor = new MSGFPlusResultsProcessor();
 
             var replaced = processor.ReplaceMSGFModTextWithSymbol(peptide, modInfo, true, out _);
             Console.WriteLine("Original: {0}", peptide);

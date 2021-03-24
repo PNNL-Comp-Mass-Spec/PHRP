@@ -249,7 +249,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != PHRPReader.Enums.ResidueModificationType.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != ModificationDefinition.ResidueModificationType.StaticMod)
                             continue;
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -1565,7 +1565,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                                 // Create the Protein Mods file
                                 success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                                      PHRPReader.PHRPReader.PeptideHitResultTypes.Inspect);
+                                                                      PHRPReader.Enums.PeptideHitResultTypes.Inspect);
                             }
                         }
                     }

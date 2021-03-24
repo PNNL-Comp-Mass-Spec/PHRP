@@ -225,7 +225,7 @@ namespace PeptideHitResultsProcessor.Processor
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
                         // Only add this modification if it is a static mod; dynamic mods are handled later in this method when a ']' is found
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != PHRPReader.Enums.ResidueModificationType.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != ModificationDefinition.ResidueModificationType.StaticMod)
                             continue;
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -642,7 +642,7 @@ namespace PeptideHitResultsProcessor.Processor
                                         case "C57":
                                             modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    57.0215, "C",
-                                                                                   PHRPReader.Enums.ResidueModificationType.StaticMod,
+                                                                                   ModificationDefinition.ResidueModificationType.StaticMod,
                                                                                    "IodoAcet");
                                             modInfo.Add(modDef);
                                             break;
@@ -650,7 +650,7 @@ namespace PeptideHitResultsProcessor.Processor
                                         case "C58":
                                             modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    58.0055, "C",
-                                                                                   PHRPReader.Enums.ResidueModificationType.StaticMod,
+                                                                                   ModificationDefinition.ResidueModificationType.StaticMod,
                                                                                    "IodoAcid");
                                             modInfo.Add(modDef);
                                             break;
@@ -1509,7 +1509,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.MSAlign);
+                                                          PHRPReader.Enums.PeptideHitResultTypes.MSAlign);
                 }
             }
 

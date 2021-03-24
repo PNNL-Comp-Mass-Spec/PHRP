@@ -298,8 +298,8 @@ namespace PeptideHitResultsProcessor.Data
                 for (var index = mSearchResultModifications.Count - 1; index >= 0; index += -1)
                 {
                     var resultMod = mSearchResultModifications[index];
-                    if (resultMod.ModDefinition.ModificationType == PHRPReader.Enums.ResidueModificationType.DynamicMod ||
-                        resultMod.ModDefinition.ModificationType == PHRPReader.Enums.ResidueModificationType.UnknownType)
+                    if (resultMod.ModDefinition.ModificationType == ModificationDefinition.ResidueModificationType.DynamicMod ||
+                        resultMod.ModDefinition.ModificationType == ModificationDefinition.ResidueModificationType.UnknownType)
                     {
                         sequenceWithMods = sequenceWithMods.Insert(resultMod.ResidueLocInPeptide, resultMod.ModDefinition.ModificationSymbol.ToString());
                     }
@@ -713,7 +713,7 @@ namespace PeptideHitResultsProcessor.Data
         {
             var success = false;
 
-            if (residueLocInPeptide < 1 && modificationDefinition.ModificationType != PHRPReader.Enums.ResidueModificationType.IsotopicMod)
+            if (residueLocInPeptide < 1 && modificationDefinition.ModificationType != ModificationDefinition.ResidueModificationType.IsotopicMod)
             {
                 // Invalid position; ignore this modification
                 mErrorMessage = "Invalid value for residueLocInPeptide: " + residueLocInPeptide + " (modificationDefinition.ModificationType = " + modificationDefinition.ModificationType + ")";
@@ -744,7 +744,7 @@ namespace PeptideHitResultsProcessor.Data
 
             for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
             {
-                if (mPeptideMods.GetModificationTypeByIndex(index) == PHRPReader.Enums.ResidueModificationType.IsotopicMod)
+                if (mPeptideMods.GetModificationTypeByIndex(index) == ModificationDefinition.ResidueModificationType.IsotopicMod)
                 {
                     const int residueLocInPeptide = 0;
 
@@ -777,7 +777,7 @@ namespace PeptideHitResultsProcessor.Data
 
                 var residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
 
-                if (mPeptideMods.GetModificationTypeByIndex(modificationIndex) == PHRPReader.Enums.ResidueModificationType.TerminalPeptideStaticMod)
+                if (mPeptideMods.GetModificationTypeByIndex(modificationIndex) == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod)
                 {
                     modificationDefinition = mPeptideMods.GetModificationByIndex(modificationIndex);
                     if (modificationDefinition.TargetResidues == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
@@ -813,7 +813,7 @@ namespace PeptideHitResultsProcessor.Data
                         // Invalid target residue for a peptide terminus static mod; do not add the modification
                     }
                 }
-                else if (mPeptideMods.GetModificationTypeByIndex(modificationIndex) == PHRPReader.Enums.ResidueModificationType.ProteinTerminusStaticMod)
+                else if (mPeptideMods.GetModificationTypeByIndex(modificationIndex) == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod)
                 {
                     modificationDefinition = mPeptideMods.GetModificationByIndex(modificationIndex);
                     if (modificationDefinition.TargetResidues == AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS.ToString())

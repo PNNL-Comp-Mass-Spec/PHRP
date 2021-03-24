@@ -233,7 +233,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private bool ParseXTandemInputParameterModInfo(
-            PHRPReader.Enums.ResidueModificationType modificationType,
+            ModificationDefinition.ResidueModificationType modificationType,
             int sortOrder,
             bool parsingMotifDef,
             string paramValue,
@@ -399,7 +399,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         modInfo.ModificationMass = modificationMass;
                         modInfo.TargetResidues = targetResidues;
-                        modInfo.ModificationType = PHRPReader.Enums.ResidueModificationType.ProteinTerminusStaticMod;
+                        modInfo.ModificationType = ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod;
                         modifications.Add(modInfo);
                     }
                 }
@@ -1245,31 +1245,31 @@ namespace PeptideHitResultsProcessor.Processor
                                     var noteLabelLower = noteLabel.ToLower();
                                     if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_StaticModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.StaticMod, Convert.ToInt32(InputParamLabelNames.Residue_StaticModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ResidueModificationType.StaticMod, Convert.ToInt32(InputParamLabelNames.Residue_StaticModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMotif), true, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMotif), true, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMotif), true, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMotif), true, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialNTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialNTerminusMods), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialNTerminusMods), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialCTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialCTerminusMods), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialCTerminusMods), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Protein_NTerminal_ResidueModMass]))
                                     {
@@ -1371,7 +1371,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 foreach (var modInfo in sortedModInfo)
                 {
-                    if (modInfo.ModificationType != PHRPReader.Enums.ResidueModificationType.StaticMod)
+                    if (modInfo.ModificationType != ModificationDefinition.ResidueModificationType.StaticMod)
                     {
                         validatedModifications.Add(modInfo);
                         continue;
@@ -1383,7 +1383,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (comparisonMod.Equals(modInfo))
                             continue;
 
-                        if (comparisonMod.ModificationType != PHRPReader.Enums.ResidueModificationType.DynamicMod)
+                        if (comparisonMod.ModificationType != ModificationDefinition.ResidueModificationType.DynamicMod)
                             continue;
 
                         // See if the comparison mod (which is a dynamic mod) has a similar mass as the current static mod in modInfo
@@ -1406,11 +1406,11 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    if (modInfo.ModificationType == PHRPReader.Enums.ResidueModificationType.StaticMod && staticModsAreResetForRefinement)
+                    if (modInfo.ModificationType == ModificationDefinition.ResidueModificationType.StaticMod && staticModsAreResetForRefinement)
                     {
                         // Add this static mod as a dynamic mod
                         var updatedModInfo = modInfo.Clone();
-                        updatedModInfo.ModificationType = PHRPReader.Enums.ResidueModificationType.DynamicMod;
+                        updatedModInfo.ModificationType = ModificationDefinition.ResidueModificationType.DynamicMod;
                         validatedModifications.Add(updatedModInfo);
                         continue;
                     }
@@ -1600,7 +1600,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Now create the Protein Mods file
                     success = CreateProteinModDetailsFile(xtandemXTFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.XTandem);
+                                                          PHRPReader.Enums.PeptideHitResultTypes.XTandem);
                 }
             }
 

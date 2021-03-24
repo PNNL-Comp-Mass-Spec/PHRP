@@ -178,7 +178,7 @@ namespace PeptideHitResultsProcessor.Processor
                     // Look for static mods to associate with this residue
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != PHRPReader.Enums.ResidueModificationType.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != ModificationDefinition.ResidueModificationType.StaticMod)
                             continue;
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -408,7 +408,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Look for static mods to associate with this residue
                 for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                 {
-                    if (mPeptideMods.GetModificationTypeByIndex(modIndex) != PHRPReader.Enums.ResidueModificationType.StaticMod)
+                    if (mPeptideMods.GetModificationTypeByIndex(modIndex) != ModificationDefinition.ResidueModificationType.StaticMod)
                         continue;
 
                     var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -638,7 +638,7 @@ namespace PeptideHitResultsProcessor.Processor
                                         var modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    modMass,
                                                                                    residue,
-                                                                                   PHRPReader.Enums.ResidueModificationType.StaticMod,
+                                                                                   ModificationDefinition.ResidueModificationType.StaticMod,
                                                                                    massCorrectionTag);
                                         modInfo.Add(modDef);
                                     }
@@ -1565,7 +1565,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.MODa);
+                                                          PHRPReader.Enums.PeptideHitResultTypes.MODa);
                 }
             }
 

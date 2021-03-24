@@ -408,7 +408,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.MSPathFinder);
+                                                          PHRPReader.Enums.PeptideHitResultTypes.MSPathFinder);
                 }
             }
 

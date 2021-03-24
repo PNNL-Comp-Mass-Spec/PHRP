@@ -118,7 +118,7 @@ namespace PeptideHitResultsProcessor.Processor
             public int SortOrder;
             public double ModificationMass;
             public string TargetResidues;
-            public PHRPReader.Enums.ResidueModificationType ModificationType;
+            public ModificationDefinition.ResidueModificationType ModificationType;
 
             /// <summary>
             /// Duplicate this modification via a deep copy
@@ -1063,7 +1063,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (success)
                 {
-                    success = CreateProteinModDetailsFile(phrpDataFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, PHRPReader.PHRPReader.PeptideHitResultTypes.Unknown);
+                    success = CreateProteinModDetailsFile(phrpDataFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, PHRPReader.Enums.PeptideHitResultTypes.Unknown);
                 }
             }
             catch (Exception ex)
@@ -1078,7 +1078,7 @@ namespace PeptideHitResultsProcessor.Processor
             string phrpDataFilePath,
             string outputDirectoryPath,
             string mtsPepToProteinMapFilePath,
-            PHRPReader.PHRPReader.PeptideHitResultTypes phrpResultType)
+            PHRPReader.Enums.PeptideHitResultTypes phrpResultType)
         {
             try
             {
@@ -1150,7 +1150,7 @@ namespace PeptideHitResultsProcessor.Processor
                                      COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
                                      COLUMN_NAME_MSGF_SPECPROB);
 
-                    var loadMSGFResults = phrpResultType != PHRPReader.PHRPReader.PeptideHitResultTypes.MSGFPlus;
+                    var loadMSGFResults = phrpResultType != PHRPReader.Enums.PeptideHitResultTypes.MSGFPlus;
 
                     // Update the Mass Calculator to use the one tracked by this class
                     // (since this class's calculator knows about custom amino acids and custom charge carriers)

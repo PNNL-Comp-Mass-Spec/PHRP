@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using PHRPReader;
+using PHRPReader.Data;
 
 namespace PHRP_UnitTests
 {
     [TestFixture]
     public class PeptideMassCalculatorUnitTests
     {
-        private clsPeptideMassCalculator mPeptideMassCalculator;
+        private PeptideMassCalculator mPeptideMassCalculator;
+
         [SetUp]
         public void Init()
         {
-            mPeptideMassCalculator = new clsPeptideMassCalculator();
+            mPeptideMassCalculator = new PeptideMassCalculator();
         }
 
         [Test]
@@ -60,7 +62,7 @@ namespace PHRP_UnitTests
         {
             var residueMods = residueModList.Split(';');
 
-            var modifiedResidues = new List<clsPeptideMassCalculator.udtPeptideSequenceModInfoType>();
+            var modifiedResidues = new List<PeptideMassCalculator.PeptideSequenceModInfo>();
 
             foreach (var modifiedResidue in residueMods)
             {
@@ -69,11 +71,11 @@ namespace PHRP_UnitTests
                 var residueLocation = int.Parse(modParts[0]);
                 var modMass = double.Parse(modParts[1]);
 
-                var modInfo = new clsPeptideMassCalculator.udtPeptideSequenceModInfoType
+                var modInfo = new PeptideMassCalculator.PeptideSequenceModInfo
                 {
                     ResidueLocInPeptide = residueLocation,
                     ModificationMass = modMass,
-                    AffectedAtom = clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL
+                    AffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL
                 };
 
                 modifiedResidues.Add(modInfo);
@@ -110,10 +112,10 @@ namespace PHRP_UnitTests
         // ReSharper restore StringLiteralTypo
         public void TestComputeEmpiricalFormulaMassMethod1(string strEmpiricalFormula, double expectedMass)
         {
-            var empiricalFormula = clsPeptideMassCalculator.GetEmpiricalFormulaComponents(strEmpiricalFormula);
-            var computedMass = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula);
+            var empiricalFormula = PeptideMassCalculator.GetEmpiricalFormulaComponents(strEmpiricalFormula);
+            var computedMass = PeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula);
 
-            var computedMassAlt = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula.ElementCounts, out _);
+            var computedMassAlt = PeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula.ElementCounts, out _);
 
             Console.WriteLine("{0,-30} is {1:F5}; expected {2:F5}", strEmpiricalFormula, computedMass, expectedMass);
 
@@ -130,7 +132,7 @@ namespace PHRP_UnitTests
         public void TestConvoluteMass(double massMz, int currentCharge, int newCharge, double expectedMz)
         {
             var newMz = mPeptideMassCalculator.ConvoluteMass(massMz, currentCharge, newCharge);
-            var newMzAlt = mPeptideMassCalculator.ConvoluteMass(massMz, currentCharge, newCharge, clsPeptideMassCalculator.MASS_PROTON);
+            var newMzAlt = mPeptideMassCalculator.ConvoluteMass(massMz, currentCharge, newCharge, PeptideMassCalculator.MASS_PROTON);
 
             Console.WriteLine("{0} from {1}+ to {2}+ is {3:F5}; expected {4:F5}", massMz, currentCharge, newCharge, newMz, expectedMz);
 
@@ -191,10 +193,10 @@ namespace PHRP_UnitTests
         {
             var computedMass = mPeptideMassCalculator.GetAminoAcidMass(aminoAcidSymbol);
 
-            var empiricalFormula = new clsEmpiricalFormula();
+            var empiricalFormula = new EmpiricalFormula();
             empiricalFormula.AddElements(mPeptideMassCalculator.GetAminoAcidEmpiricalFormula(aminoAcidSymbol));
 
-            var computedMassAlt = clsPeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula);
+            var computedMassAlt = PeptideMassCalculator.ComputeMonoisotopicMass(empiricalFormula);
 
             Assert.AreEqual(expectedMass, computedMass, 0.0001, "Amino acid does not match the expected value");
 
@@ -210,9 +212,9 @@ namespace PHRP_UnitTests
         [TestCase(0.0012, 2300, 0.52174)]
         public void TestPPMConversion(double massToConvert, double currentMz, double expectedPPM)
         {
-            var convertedPPM = clsPeptideMassCalculator.MassToPPM(massToConvert, currentMz);
+            var convertedPPM = PeptideMassCalculator.MassToPPM(massToConvert, currentMz);
 
-            var reconvertedMass = clsPeptideMassCalculator.PPMToMass(convertedPPM, currentMz);
+            var reconvertedMass = PeptideMassCalculator.PPMToMass(convertedPPM, currentMz);
 
             Console.WriteLine("DelM of {0} Da converts to {1:F5} ppm at {2:F5} m/z ", massToConvert, convertedPPM, currentMz);
 

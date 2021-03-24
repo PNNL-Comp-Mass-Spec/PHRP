@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using PHRPReader;
+using PHRPReader.Data;
 
 namespace PHRP_UnitTests
 {
@@ -60,7 +61,7 @@ namespace PHRP_UnitTests
         {
             var inputFile = FindFile(inputFilePath);
 
-            var options = new clsPHRPStartupOptions
+            var options = new PHRPStartupOptions
             {
                 LoadMSGFResults = true,
                 LoadModsAndSeqInfo = true,
@@ -72,7 +73,7 @@ namespace PHRP_UnitTests
             var expectedSpecEValues = SplitDelimitedDoubles(initialSpecEValues);
             var expectedDelMPPM = SplitDelimitedDoubles(initialDelMPPM);
 
-            var reader = new clsPHRPReader(inputFile.FullName, options);
+            var reader = new PHRPReader.PHRPReader(inputFile.FullName, options);
             var resultCount = 0;
             var peptideMatchCount = 0;
             var specEValueMatchCount = 0;
@@ -144,7 +145,7 @@ namespace PHRP_UnitTests
         {
             var inputFile = FindFile(inputFilePath);
 
-            var options = new clsPHRPStartupOptions
+            var options = new PHRPStartupOptions
             {
                 LoadMSGFResults = true,
                 LoadModsAndSeqInfo = true,
@@ -178,7 +179,7 @@ namespace PHRP_UnitTests
                 infoByResultID.Add(resultId, msgfPlusInfo);
             }
 
-            var reader = new clsPHRPReader(inputFile.FullName, options);
+            var reader = new PHRPReader.PHRPReader(inputFile.FullName, options);
             var resultCount = 0;
             var resultIDsExamined = 0;
 
@@ -244,7 +245,7 @@ namespace PHRP_UnitTests
         {
             var inputFile = FindFile(inputFilePath);
 
-            var options = new clsPHRPStartupOptions
+            var options = new PHRPStartupOptions
             {
                 LoadMSGFResults = true,
                 LoadModsAndSeqInfo = true,
@@ -256,7 +257,7 @@ namespace PHRP_UnitTests
             var expectedEValues = SplitDelimitedDoubles(initialEValues);
             var expectedDelMPPM = SplitDelimitedDoubles(initialDelMPPM);
 
-            var reader = new clsPHRPReader(inputFile.FullName, options);
+            var reader = new PHRPReader.PHRPReader(inputFile.FullName, options);
             var resultCount = 0;
             var peptideMatchCount = 0;
             var specEValueMatchCount = 0;
@@ -322,7 +323,7 @@ namespace PHRP_UnitTests
         {
             var inputFile = FindFile(inputFilePath);
 
-            var options = new clsPHRPStartupOptions
+            var options = new PHRPStartupOptions
             {
                 LoadMSGFResults = true,
                 LoadModsAndSeqInfo = true,
@@ -357,7 +358,7 @@ namespace PHRP_UnitTests
                 infoByResultID.Add(resultId, topPICInfo);
             }
 
-            var reader = new clsPHRPReader(inputFile.FullName, options);
+            var reader = new PHRPReader.PHRPReader(inputFile.FullName, options);
             var resultCount = 0;
             var resultIDsExamined = 0;
 
@@ -456,7 +457,7 @@ namespace PHRP_UnitTests
             return null;
         }
 
-        private string GetScore(clsPSM currentPSM, string scoreColumnName, string alternativeName = "", string valueIfNotFound = "-1")
+        private string GetScore(PSM currentPSM, string scoreColumnName, string alternativeName = "", string valueIfNotFound = "-1")
         {
             if (currentPSM.TryGetScore(scoreColumnName, out var value))
             {

@@ -283,7 +283,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == PHRPReader.Enums.ResidueModificationType.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == ModificationDefinition.ResidueModificationType.StaticMod)
                         {
                             var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
@@ -1327,7 +1327,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             var searchEngineParams = new SearchEngineParameters(SEARCH_ENGINE_NAME);
 
-            var success = SynFileReaderBaseClass.ReadKeyValuePairSearchEngineParamFile(SEARCH_ENGINE_NAME, msgfPlusParamFilePath, PHRPReader.PHRPReader.PeptideHitResultTypes.MSGFPlus,
+            var success = SynFileReaderBaseClass.ReadKeyValuePairSearchEngineParamFile(SEARCH_ENGINE_NAME, msgfPlusParamFilePath, PHRPReader.Enums.PeptideHitResultTypes.MSGFPlus,
                                                                               searchEngineParams, out var localErrorMessage, out var localWarningMessage);
 
             if (!string.IsNullOrWhiteSpace(localErrorMessage))
@@ -2506,7 +2506,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PHRPReader.PHRPReader.PeptideHitResultTypes.MSGFPlus);
+                                                          PHRPReader.Enums.PeptideHitResultTypes.MSGFPlus);
                 }
             }
 
@@ -2623,7 +2623,7 @@ namespace PeptideHitResultsProcessor.Processor
                             var modificationType = mPeptideMods.GetModificationTypeByIndex(modIndex);
 
                             ModificationDefinition modificationDefinition;
-                            if (modificationType == PHRPReader.Enums.ResidueModificationType.StaticMod)
+                            if (modificationType == ModificationDefinition.ResidueModificationType.StaticMod)
                             {
                                 modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
@@ -2635,13 +2635,13 @@ namespace PeptideHitResultsProcessor.Processor
                             }
                             else if (index == indexFirstResidue)
                             {
-                                if (modificationType == PHRPReader.Enums.ResidueModificationType.ProteinTerminusStaticMod && prefix == "_")
+                                if (modificationType == ModificationDefinition.ResidueModificationType.ProteinTerminusStaticMod && prefix == "_")
                                 {
                                     // N-terminal protein static mod
                                     modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
                                     totalModMass += modificationDefinition.ModificationMass;
                                 }
-                                else if (modificationType == PHRPReader.Enums.ResidueModificationType.TerminalPeptideStaticMod)
+                                else if (modificationType == ModificationDefinition.ResidueModificationType.TerminalPeptideStaticMod)
                                 {
                                     // N-terminal peptide static mod
                                     modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
