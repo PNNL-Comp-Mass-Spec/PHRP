@@ -26,7 +26,7 @@ pause
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\MASICResultsMerger\bin"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\MASICResultsMerger\Lib"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\MTDB_Creator\libs"
-call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\bin"
+call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\bin\Debug"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\PeptideHitResultsProcessor\bin"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\CreateMSGFDBResultsFileFromPHRP\bin\"
 call Distribute_Files_Work.bat "F:\Documents\Projects\DataMining\PeptideHitResultsProcessor\Test_PHRPReader\bin"
