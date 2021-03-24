@@ -35,7 +35,7 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public MSGFDBSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
+        public MSGFDBSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
             : base(datasetName, inputFilePath, startupOptions)
         {
         }

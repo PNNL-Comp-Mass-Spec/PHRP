@@ -1154,7 +1154,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Update the Mass Calculator to use the one tracked by this class
                     // (since this class's calculator knows about custom amino acids and custom charge carriers)
-                    var startupOptions = new PHRPStartupOptions
+                    var startupOptions = new StartupOptions
                     {
                         LoadModsAndSeqInfo = true,
                         LoadMSGFResults = loadMSGFResults,
@@ -1162,7 +1162,7 @@ namespace PeptideHitResultsProcessor.Processor
                         PeptideMassCalculator = mPeptideSeqMassCalculator
                     };
 
-                    using (var reader = new PHRPReader.PHRPReader(phrpDataFilePath, phrpResultType, startupOptions))
+                    using (var reader = new ReaderFactory(phrpDataFilePath, phrpResultType, startupOptions))
                     {
                         reader.EchoMessagesToConsole = false;
                         reader.SkipDuplicatePSMs = true;
@@ -2537,7 +2537,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private void WriteModDetailsEntry(
-            PHRPReader.PHRPReader reader,
+            ReaderFactory reader,
             TextWriter writer,
             IReadOnlyList<PepToProteinMapping> pepToProteinMapping,
             int pepToProteinMapIndex,

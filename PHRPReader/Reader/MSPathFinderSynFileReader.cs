@@ -149,7 +149,7 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public MSPathFinderSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
+        public MSPathFinderSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
             : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSPathFinder, startupOptions)
         {
         }
@@ -363,17 +363,17 @@ namespace PHRPReader.Reader
                 var success = false;
 
                 psm.DataLineText = line;
-                psm.ScanNumber = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
                     psm.ScoreRank = 1;
 
-                    var sequence = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Sequence, mColumnHeaders);
+                    var sequence = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Sequence, mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -384,13 +384,13 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(sequence, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
-                    var protein = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                    var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
                     psm.AddProtein(protein);
 
                     // Store the sequence mass as the "precursor" mass, though MSPathFinderT results are from MS1 spectra, and thus we didn't do MS/MS on a precursor
-                    psm.PrecursorNeutralMass = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Mass, mColumnHeaders, 0.0);
+                    psm.PrecursorNeutralMass = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Mass, mColumnHeaders, 0.0);
 
                     // Collision mode, precursor neutral mass, etc. are not applicable
                     // psm.CollisionMode =

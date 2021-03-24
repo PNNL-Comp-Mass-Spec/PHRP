@@ -121,10 +121,10 @@ namespace PHRPReader.Reader
 
                         if (!headerLineParsed)
                         {
-                            if (!PHRPReader.IsNumber(splitLine[0]))
+                            if (!ReaderFactory.IsNumber(splitLine[0]))
                             {
                                 // Parse the header line to confirm the column ordering
-                                PHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
+                                ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
                                 skipLine = true;
                             }
 
@@ -133,11 +133,11 @@ namespace PHRPReader.Reader
 
                         if (!skipLine && splitLine.Length >= 4)
                         {
-                            var resultID = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
+                            var resultID = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
 
                             if (resultID >= 0)
                             {
-                                var msgfSpecProb = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
+                                var msgfSpecProb = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
 
                                 if (!string.IsNullOrEmpty(msgfSpecProb) && !msgfData.ContainsKey(resultID))
                                 {

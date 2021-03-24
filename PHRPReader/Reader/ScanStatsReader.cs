@@ -122,10 +122,10 @@ namespace PHRPReader.Reader
 
                         if (!headerLineParsed)
                         {
-                            if (!PHRPReader.IsNumber(splitLine[0]))
+                            if (!ReaderFactory.IsNumber(splitLine[0]))
                             {
                                 // Parse the header line to confirm the column ordering
-                                PHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
+                                ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
                                 skipLine = true;
                             }
 
@@ -135,22 +135,22 @@ namespace PHRPReader.Reader
                         if (skipLine || splitLine.Length < 4)
                             continue;
 
-                        var scanNumber = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
-                        var scanTimeMinutes = Convert.ToSingle(PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ScanTime, mColumnHeaders, 0.0));
-                        var scanType = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ScanType, mColumnHeaders, 0);
+                        var scanNumber = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
+                        var scanTimeMinutes = Convert.ToSingle(ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanTime, mColumnHeaders, 0.0));
+                        var scanType = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanType, mColumnHeaders, 0);
 
                         if (scanNumber < 0 || scanStats.ContainsKey(scanNumber))
                             continue;
 
                         var scanStatsInfo = new ScanStatsInfo(scanNumber, scanTimeMinutes, scanType)
                         {
-                            TotalIonIntensity = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_TotalIonIntensity, mColumnHeaders, 0.0),
-                            BasePeakIntensity = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakIntensity, mColumnHeaders, 0.0),
-                            BasePeakMZ = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakMZ, mColumnHeaders, 0.0),
-                            BasePeakSignalToNoiseRatio = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakSignalToNoiseRatio, mColumnHeaders, 0.0),
-                            IonCount = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_IonCount, mColumnHeaders, 0),
-                            IonCountRaw = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_IonCountRaw, mColumnHeaders, 0),
-                            ScanTypeName = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ScanTypeName, mColumnHeaders)
+                            TotalIonIntensity = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_TotalIonIntensity, mColumnHeaders, 0.0),
+                            BasePeakIntensity = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakIntensity, mColumnHeaders, 0.0),
+                            BasePeakMZ = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakMZ, mColumnHeaders, 0.0),
+                            BasePeakSignalToNoiseRatio = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_BasePeakSignalToNoiseRatio, mColumnHeaders, 0.0),
+                            IonCount = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_IonCount, mColumnHeaders, 0),
+                            IonCountRaw = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_IonCountRaw, mColumnHeaders, 0),
+                            ScanTypeName = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanTypeName, mColumnHeaders)
                         };
 
                         scanStats.Add(scanNumber, scanStatsInfo);

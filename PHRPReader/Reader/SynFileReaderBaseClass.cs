@@ -239,7 +239,7 @@ namespace PHRPReader.Reader
             SeqToProteinMap = new SortedList<int, List<ProteinInfo>>();
             PepToProteinMap = new Dictionary<string, PepToProteinMapInfo>();
 
-            var startupOptions = new PHRPStartupOptions { LoadModsAndSeqInfo = loadModsAndSeqInfo };
+            var startupOptions = new StartupOptions { LoadModsAndSeqInfo = loadModsAndSeqInfo };
 
             InitializeParser(datasetName, inputFilePath, peptideHitResultType, startupOptions);
         }
@@ -252,7 +252,7 @@ namespace PHRPReader.Reader
         /// <param name="peptideHitResultType"></param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, Enums.PeptideHitResultTypes peptideHitResultType, PHRPStartupOptions startupOptions)
+        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, Enums.PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
             ErrorMessages = new List<string>();
             WarningMessages = new List<string>();
@@ -289,7 +289,7 @@ namespace PHRPReader.Reader
         /// startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
         /// Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
         /// </remarks>
-        private void InitializeParser(string datasetName, string inputFilePath, Enums.PeptideHitResultTypes peptideHitResultType, PHRPStartupOptions startupOptions)
+        private void InitializeParser(string datasetName, string inputFilePath, Enums.PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
             if (string.IsNullOrWhiteSpace(datasetName))
                 datasetName = "Undefined";
@@ -321,8 +321,8 @@ namespace PHRPReader.Reader
                     InputDirectoryPath = inputFile.Directory.FullName;
                 }
 
-                var phrpSynopsisName = PHRPReader.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
-                var expectedSynopsisName = PHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
+                var phrpSynopsisName = ReaderFactory.GetPHRPSynopsisFileName(mPeptideHitResultType, mDatasetName);
+                var expectedSynopsisName = ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired(phrpSynopsisName, inputFile.Name);
 
                 isSynopsisFile = string.Equals(inputFile.Name, expectedSynopsisName, StringComparison.OrdinalIgnoreCase) ||
                                  inputFile.Name.EndsWith("_syn.txt", StringComparison.OrdinalIgnoreCase);
@@ -351,13 +351,13 @@ namespace PHRPReader.Reader
             {
                 // Read the ResultToSeqMapInfo (if the files exist)
 
-                var resultToSeqMapFilename = PHRPReader.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName);
+                var resultToSeqMapFilename = ReaderFactory.GetPHRPResultToSeqMapFileName(mPeptideHitResultType, mDatasetName);
                 var resultToSeqMapFilePathPreferred = string.Empty;
                 var resultToSeqMapFilePath = string.Empty;
 
                 if (!string.IsNullOrEmpty(resultToSeqMapFilename))
                 {
-                    resultToSeqMapFilePath = PHRPReader.FindResultToSeqMapFile(InputDirectoryPath,
+                    resultToSeqMapFilePath = ReaderFactory.FindResultToSeqMapFile(InputDirectoryPath,
                                                                                   InputFilePath,
                                                                                   resultToSeqMapFilename,
                                                                                   out resultToSeqMapFilePathPreferred);
@@ -377,7 +377,7 @@ namespace PHRPReader.Reader
                     {
                         if (string.IsNullOrEmpty(resultToSeqMapFilePathPreferred))
                         {
-                            ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file and unable to determine the ResultToSeqMapFilename using clsPHRPReader.GetPHRPResultToSeqMapFileName()");
+                            ReportWarning("Unable to load data from the SeqInfo files since reading a first-hits file and unable to determine the ResultToSeqMapFilename using clsReaderFactory.GetPHRPResultToSeqMapFileName()");
                         }
                         else
                         {
@@ -410,14 +410,14 @@ namespace PHRPReader.Reader
         /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
         public static SynFileReaderBaseClass GetParser(string inputFilePath, bool loadModsAndSeqInfo)
         {
-            var peptideHitResultType = PHRPReader.AutoDetermineResultType(inputFilePath);
+            var peptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
 
             if (peptideHitResultType == Enums.PeptideHitResultTypes.Unknown)
             {
                 throw new Exception("Unable to auto-determine the PeptideHitResultType for " + inputFilePath);
             }
 
-            var datasetName = PHRPReader.AutoDetermineDatasetName(inputFilePath);
+            var datasetName = ReaderFactory.AutoDetermineDatasetName(inputFilePath);
             if (string.IsNullOrEmpty(datasetName))
             {
                 throw new Exception("Unable to auto-determine the Dataset Name for " + inputFilePath);
@@ -435,7 +435,7 @@ namespace PHRPReader.Reader
         /// <remarks>Throws an exception if unable to auto-determine the input file type from inputFilePath</remarks>
         public static SynFileReaderBaseClass GetParser(string inputFilePath, string datasetName, bool loadModsAndSeqInfo)
         {
-            var peptideHitResultType = PHRPReader.AutoDetermineResultType(inputFilePath);
+            var peptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
 
             if (peptideHitResultType == Enums.PeptideHitResultTypes.Unknown)
             {
@@ -563,7 +563,7 @@ namespace PHRPReader.Reader
         {
             const string NOT_FOUND = "==SCORE_NOT_FOUND==";
 
-            var value = PHRPReader.LookupColumnValue(columns, scoreColumnName, mColumnHeaders, NOT_FOUND);
+            var value = ReaderFactory.LookupColumnValue(columns, scoreColumnName, mColumnHeaders, NOT_FOUND);
 
             if (value != NOT_FOUND)
             {
@@ -635,7 +635,7 @@ namespace PHRPReader.Reader
 
             for (var charIndex = 0; charIndex <= primarySequence.Length - 1; charIndex++)
             {
-                if (PHRPReader.IsLetterAtoZ(primarySequence[charIndex]))
+                if (ReaderFactory.IsLetterAtoZ(primarySequence[charIndex]))
                 {
                     // Found a letter
                     residueNumber++;
@@ -811,14 +811,14 @@ namespace PHRPReader.Reader
         {
             try
             {
-                var modSummaryFileName = PHRPReader.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
+                var modSummaryFileName = ReaderFactory.GetPHRPModSummaryFileName(mPeptideHitResultType, mDatasetName);
                 if (string.IsNullOrEmpty(modSummaryFileName))
                 {
                     ReportWarning("ModSummaryFile name is empty; unable to continue");
                     return;
                 }
 
-                var modSummaryFilePath = PHRPReader.FindModSummaryFile(InputDirectoryPath,
+                var modSummaryFilePath = ReaderFactory.FindModSummaryFile(InputDirectoryPath,
                                                                           InputFilePath,
                                                                           modSummaryFileName,
                                                                           out var modSummaryFileNamePreferred);
@@ -963,7 +963,7 @@ namespace PHRPReader.Reader
         /// <param name="splitLine"></param>
         public void ParseColumnHeaders(string[] splitLine)
         {
-            PHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
+            ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
         }
 
         /// <summary>
@@ -1158,7 +1158,7 @@ namespace PHRPReader.Reader
             try
             {
                 // Read the Tool_Version_Info file to determine the analysis time and the tool version
-                var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, PHRPReader.GetToolVersionInfoFilename(peptideHitResultType));
+                var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, ReaderFactory.GetToolVersionInfoFilename(peptideHitResultType));
 
                 if (!File.Exists(toolVersionInfoFilePath) && peptideHitResultType == Enums.PeptideHitResultTypes.MSGFPlus)
                 {

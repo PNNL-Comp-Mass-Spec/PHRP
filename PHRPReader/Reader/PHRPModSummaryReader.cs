@@ -126,7 +126,7 @@ namespace PHRPReader.Reader
                                 if (splitLine[index] == "Occurence_Count")
                                     splitLine[index] = MOD_SUMMARY_COLUMN_Occurrence_Count;
                             }
-                            PHRPReader.ParseColumnHeaders(splitLine, columnHeaders);
+                            ReaderFactory.ParseColumnHeaders(splitLine, columnHeaders);
                             skipLine = true;
                         }
 
@@ -136,11 +136,11 @@ namespace PHRPReader.Reader
                     if (skipLine || splitLine.Length < 4)
                         continue;
 
-                    var modSymbolText = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, columnHeaders);
-                    var modMassText = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Mass, columnHeaders);
-                    var targetResidues = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Target_Residues, columnHeaders);
-                    var modType = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Type, columnHeaders);
-                    var massCorrectionTag = PHRPReader.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, columnHeaders);
+                    var modSymbolText = ReaderFactory.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Symbol, columnHeaders);
+                    var modMassText = ReaderFactory.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Mass, columnHeaders);
+                    var targetResidues = ReaderFactory.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Target_Residues, columnHeaders);
+                    var modType = ReaderFactory.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Modification_Type, columnHeaders);
+                    var massCorrectionTag = ReaderFactory.LookupColumnValue(splitLine, MOD_SUMMARY_COLUMN_Mass_Correction_Tag, columnHeaders);
 
                     if (string.IsNullOrWhiteSpace(modSymbolText))
                     {

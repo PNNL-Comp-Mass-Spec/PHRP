@@ -173,7 +173,7 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public TopPICSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
+        public TopPICSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
             : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.TopPIC, startupOptions)
         {
         }
@@ -410,17 +410,17 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                     return false;
                 }
 
-                psm.ResultID = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
-                psm.ScoreRank = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1);
+                psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ResultID, mColumnHeaders, 0);
+                psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Rank_PValue, mColumnHeaders, 1);
 
-                var peptide = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
 
                 if (fastReadMode)
                 {
@@ -431,23 +431,23 @@ namespace PHRPReader.Reader
                     psm.SetPeptide(peptide, mCleavageStateCalculator);
                 }
 
-                psm.Charge = Convert.ToInt16(PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
-                var protein = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
+                var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Protein, mColumnHeaders);
                 psm.AddProtein(protein);
 
-                var precursorMZ = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
+                var precursorMZ = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_PrecursorMZ, mColumnHeaders, 0.0);
                 psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMZ, psm.Charge, 0);
 
-                psm.MassErrorDa = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
-                psm.MassErrorPPM = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
+                psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
 
                 if (!fastReadMode)
                 {
                     UpdatePSMUsingSeqInfo(psm);
                 }
 
-                psm.MSGFSpecEValue = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_EValue, mColumnHeaders);
+                psm.MSGFSpecEValue = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_EValue, mColumnHeaders);
 
                 // Store the remaining scores
                 AddScore(psm, columns, DATA_COLUMN_Prsm_ID);
@@ -471,7 +471,7 @@ namespace PHRPReader.Reader
                 AddScore(psm, columns, DATA_COLUMN_EValue);
                 AddScore(psm, columns, DATA_COLUMN_QValue);
 
-                var proteoformQValue = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Proteoform_QValue, mColumnHeaders, NOT_FOUND);
+                var proteoformQValue = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Proteoform_QValue, mColumnHeaders, NOT_FOUND);
                 if (proteoformQValue != NOT_FOUND)
                 {
                     psm.SetScore(DATA_COLUMN_Proteoform_QValue, proteoformQValue);

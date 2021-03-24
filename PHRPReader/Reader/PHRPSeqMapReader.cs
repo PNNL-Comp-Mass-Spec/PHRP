@@ -98,7 +98,7 @@ namespace PHRPReader.Reader
         /// <param name="inputDirectoryPath">Input file path</param>
         /// <param name="peptideHitResultType">Peptide Hit result type</param>
         public PHRPSeqMapReader(string datasetName, string inputDirectoryPath, Enums.PeptideHitResultTypes peptideHitResultType)
-            : this(datasetName, inputDirectoryPath, peptideHitResultType, PHRPReader.GetPHRPSynopsisFileName(peptideHitResultType, datasetName))
+            : this(datasetName, inputDirectoryPath, peptideHitResultType, ReaderFactory.GetPHRPSynopsisFileName(peptideHitResultType, datasetName))
         {
         }
 
@@ -127,41 +127,41 @@ namespace PHRPReader.Reader
 
             PeptideHitResultType = peptideHitResultType;
 
-            ResultToSeqMapFilename = PHRPReader.GetPHRPResultToSeqMapFileName(peptideHitResultType, DatasetName);
+            ResultToSeqMapFilename = ReaderFactory.GetPHRPResultToSeqMapFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(ResultToSeqMapFilename))
             {
                 ErrorMessage = "Unable to determine ResultToSeqMap filename for peptideHitResultType: " + peptideHitResultType.ToString();
                 throw new Exception(ErrorMessage);
             }
 
-            ResultToSeqMapFilename = PHRPReader.FindPHRPFile(InputDirectoryPath, phrpDataFileName, ResultToSeqMapFilename, out _);
+            ResultToSeqMapFilename = ReaderFactory.FindPHRPFile(InputDirectoryPath, phrpDataFileName, ResultToSeqMapFilename, out _);
 
-            SeqToProteinMapFilename = PHRPReader.GetPHRPSeqToProteinMapFileName(peptideHitResultType, DatasetName);
+            SeqToProteinMapFilename = ReaderFactory.GetPHRPSeqToProteinMapFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(SeqToProteinMapFilename))
             {
                 ErrorMessage = "Unable to determine SeqToProteinMap filename for peptideHitResultType: " + peptideHitResultType.ToString();
                 throw new Exception(ErrorMessage);
             }
 
-            SeqToProteinMapFilename = PHRPReader.FindPHRPFile(InputDirectoryPath, phrpDataFileName, SeqToProteinMapFilename, out _);
+            SeqToProteinMapFilename = ReaderFactory.FindPHRPFile(InputDirectoryPath, phrpDataFileName, SeqToProteinMapFilename, out _);
 
-            mSeqInfoFilename = PHRPReader.GetPHRPSeqInfoFileName(peptideHitResultType, DatasetName);
+            mSeqInfoFilename = ReaderFactory.GetPHRPSeqInfoFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(mSeqInfoFilename))
             {
                 ErrorMessage = "Unable to determine SeqInfo filename for peptideHitResultType: " + peptideHitResultType.ToString();
                 throw new Exception(ErrorMessage);
             }
 
-            mSeqInfoFilename = PHRPReader.FindPHRPFile(InputDirectoryPath, phrpDataFileName, mSeqInfoFilename, out _);
+            mSeqInfoFilename = ReaderFactory.FindPHRPFile(InputDirectoryPath, phrpDataFileName, mSeqInfoFilename, out _);
 
-            PepToProteinMapFilename = PHRPReader.GetPHRPPepToProteinMapFileName(peptideHitResultType, DatasetName);
+            PepToProteinMapFilename = ReaderFactory.GetPHRPPepToProteinMapFileName(peptideHitResultType, DatasetName);
             if (string.IsNullOrEmpty(PepToProteinMapFilename))
             {
                 ErrorMessage = "Unable to determine PepToProtMap filename for PeptideHitResultType: " + peptideHitResultType.ToString();
                 throw new Exception(ErrorMessage);
             }
 
-            PepToProteinMapFilename = PHRPReader.FindPHRPFile(InputDirectoryPath, phrpDataFileName, PepToProteinMapFilename, out _);
+            PepToProteinMapFilename = ReaderFactory.FindPHRPFile(InputDirectoryPath, phrpDataFileName, PepToProteinMapFilename, out _);
 
             MaxProteinsPerSeqID = 0;
         }
@@ -182,14 +182,14 @@ namespace PHRPReader.Reader
                 InputDirectoryPath = string.Empty;
             }
 
-            PeptideHitResultType = PHRPReader.AutoDetermineResultType(resultToSeqMapFilename);
+            PeptideHitResultType = ReaderFactory.AutoDetermineResultType(resultToSeqMapFilename);
             if (PeptideHitResultType == Enums.PeptideHitResultTypes.Unknown)
             {
                 ErrorMessage = "Unable to auto-determine the PeptideHit result type based on filename " + resultToSeqMapFilename;
                 throw new Exception(ErrorMessage);
             }
 
-            DatasetName = PHRPReader.AutoDetermineDatasetName(resultToSeqMapFilename);
+            DatasetName = ReaderFactory.AutoDetermineDatasetName(resultToSeqMapFilename);
             if (string.IsNullOrEmpty(DatasetName))
             {
                 ErrorMessage = "Unable to auto-determine the dataset name using filename '" + resultToSeqMapFilename + "'";
@@ -298,7 +298,7 @@ namespace PHRPReader.Reader
             filePath = Path.Combine(InputDirectoryPath, PepToProteinMapFilename);
             if (!File.Exists(filePath))
             {
-                var filePathAlternate = PHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(filePath, "Dataset_msgfdb.txt");
+                var filePathAlternate = ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired(filePath, "Dataset_msgfdb.txt");
                 if (File.Exists(filePathAlternate))
                 {
                     filePath = filePathAlternate;
@@ -488,7 +488,7 @@ namespace PHRPReader.Reader
                             if (string.Equals(splitLine[0], SEQ_INFO_COLUMN_Unique_Seq_ID, StringComparison.OrdinalIgnoreCase))
                             {
                                 // Parse the header line to confirm the column ordering
-                                PHRPReader.ParseColumnHeaders(splitLine, columnHeaders);
+                                ReaderFactory.ParseColumnHeaders(splitLine, columnHeaders);
                                 skipLine = true;
                             }
 
@@ -499,9 +499,9 @@ namespace PHRPReader.Reader
                         {
                             if (int.TryParse(splitLine[0], out var seqID))
                             {
-                                var modCount = PHRPReader.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Mod_Count, columnHeaders, 0);
-                                var modDescription = PHRPReader.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Mod_Description, columnHeaders, string.Empty);
-                                var monoisotopicMass = PHRPReader.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Monoisotopic_Mass, columnHeaders, 0.0);
+                                var modCount = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Mod_Count, columnHeaders, 0);
+                                var modDescription = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Mod_Description, columnHeaders, string.Empty);
+                                var monoisotopicMass = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Monoisotopic_Mass, columnHeaders, 0.0);
 
                                 if (!seqInfo.ContainsKey(seqID))
                                 {
@@ -562,7 +562,7 @@ namespace PHRPReader.Reader
                             if (string.Equals(splitLine[0], SEQ_PROT_MAP_COLUMN_Unique_Seq_ID, StringComparison.OrdinalIgnoreCase))
                             {
                                 // Parse the header line to confirm the column ordering
-                                PHRPReader.ParseColumnHeaders(splitLine, columnHeaders);
+                                ReaderFactory.ParseColumnHeaders(splitLine, columnHeaders);
                                 skipLine = true;
                             }
 
@@ -579,15 +579,15 @@ namespace PHRPReader.Reader
                             continue;
                         }
 
-                        var proteinName = PHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, columnHeaders, string.Empty);
+                        var proteinName = ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, columnHeaders, string.Empty);
 
                         if (string.IsNullOrEmpty(proteinName))
                         {
                             continue;
                         }
 
-                        var cleavageState = (PeptideCleavageStateCalculator.PeptideCleavageState)PHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, columnHeaders, 0);
-                        var terminusState = (PeptideCleavageStateCalculator.PeptideTerminusState)PHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, columnHeaders, 0);
+                        var cleavageState = (PeptideCleavageStateCalculator.PeptideCleavageState)ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, columnHeaders, 0);
+                        var terminusState = (PeptideCleavageStateCalculator.PeptideTerminusState)ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, columnHeaders, 0);
 
                         var proteinInfo = new ProteinInfo(proteinName, seqID, cleavageState, terminusState);
 

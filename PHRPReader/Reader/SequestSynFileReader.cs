@@ -167,7 +167,7 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public SequestSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
+        public SequestSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
             : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.Sequest, startupOptions)
         {
         }
@@ -647,17 +647,17 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_ScanNum, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ScanNum, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_HitNum, mColumnHeaders, 0);
-                    psm.ScoreRank = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_RankXc, mColumnHeaders, 1);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_HitNum, mColumnHeaders, 0);
+                    psm.ScoreRank = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_RankXc, mColumnHeaders, 1);
 
-                    var peptide = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
+                    var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide, mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -668,25 +668,25 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(PHRPReader.LookupColumnValue(columns, DATA_COLUMN_ChargeState, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_ChargeState, mColumnHeaders, 0));
 
-                    var protein = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Reference, mColumnHeaders);
+                    var protein = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Reference, mColumnHeaders);
                     psm.AddProtein(protein);
 
                     // Note that the MH value listed in Sequest files is not the precursor MH but is instead the theoretical (computed) MH of the peptide
                     // We'll update this value below using massErrorDa
                     // We'll further update this value using the ScanStatsEx data
-                    var precursorMH = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_MH, mColumnHeaders, 0.0);
+                    var precursorMH = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_MH, mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMH, 1, 0);
 
-                    psm.MassErrorDa = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
+                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM, mColumnHeaders);
                     if (Double.TryParse(psm.MassErrorDa, out var massErrorDa))
                     {
                         // Adjust the precursor mass
                         psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(precursorMH - massErrorDa, 1, 0);
                     }
 
-                    psm.MassErrorPPM = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
 
                     success = true;
                 }

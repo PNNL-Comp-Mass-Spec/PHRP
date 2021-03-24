@@ -1240,7 +1240,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (!File.Exists(pepToProteinMapFilePath))
                 {
-                    var pepToProteinMapAlternate = PHRPReader.PHRPReader.AutoSwitchToLegacyMSGFDBIfRequired(pepToProteinMapFilePath, "Dataset_msgfdb.txt");
+                    var pepToProteinMapAlternate = ReaderFactory.AutoSwitchToLegacyMSGFDBIfRequired(pepToProteinMapFilePath, "Dataset_msgfdb.txt");
                     if (File.Exists(pepToProteinMapAlternate))
                     {
                         pepToProteinMapFilePath = pepToProteinMapAlternate;

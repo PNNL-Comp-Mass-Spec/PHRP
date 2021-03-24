@@ -158,7 +158,7 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset name</param>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
-        public XTandemSynFileReader(string datasetName, string inputFilePath, PHRPStartupOptions startupOptions)
+        public XTandemSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
             : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.XTandem, startupOptions)
         {
         }
@@ -714,19 +714,19 @@ namespace PHRPReader.Reader
             try
             {
                 psm.DataLineText = line;
-                psm.ScanNumber = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
+                psm.ScanNumber = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Scan, mColumnHeaders, SCAN_NOT_FOUND_FLAG);
                 if (psm.ScanNumber == SCAN_NOT_FOUND_FLAG)
                 {
                     // Data line is not valid
                 }
                 else
                 {
-                    psm.ResultID = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Result_ID, mColumnHeaders, 0);
+                    psm.ResultID = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Result_ID, mColumnHeaders, 0);
 
                     // X!Tandem only tracks the top-ranked peptide for each spectrum
                     psm.ScoreRank = 1;
 
-                    var peptide = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders);
+                    var peptide = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide_Sequence, mColumnHeaders);
 
                     if (fastReadMode)
                     {
@@ -737,7 +737,7 @@ namespace PHRPReader.Reader
                         psm.SetPeptide(peptide, mCleavageStateCalculator);
                     }
 
-                    psm.Charge = Convert.ToInt16(PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
+                    psm.Charge = Convert.ToInt16(ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Charge, mColumnHeaders, 0));
 
                     // Lookup the protein name(s) using mResultIDToProteins
                     if (mResultIDToProteins.TryGetValue(psm.ResultID, out var proteinsForResultID))
@@ -751,17 +751,17 @@ namespace PHRPReader.Reader
                     // The Peptide_MH value listed in X!Tandem files is the theoretical (computed) MH of the peptide
                     // We'll update this value below using massErrorDa
                     // We'll further update this value using the ScanStatsEx data
-                    var peptideMH = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0);
+                    var peptideMH = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Peptide_MH, mColumnHeaders, 0.0);
                     psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH, 1, 0);
 
-                    psm.MassErrorDa = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_Delta_Mass, mColumnHeaders);
+                    psm.MassErrorDa = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_Delta_Mass, mColumnHeaders);
                     if (double.TryParse(psm.MassErrorDa, out var massErrorDa))
                     {
                         // Adjust the precursor mass
                         psm.PrecursorNeutralMass = mPeptideMassCalculator.ConvoluteMass(peptideMH - massErrorDa, 1, 0);
                     }
 
-                    psm.MassErrorPPM = PHRPReader.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
+                    psm.MassErrorPPM = ReaderFactory.LookupColumnValue(columns, DATA_COLUMN_DelM_PPM, mColumnHeaders);
 
                     success = true;
                 }

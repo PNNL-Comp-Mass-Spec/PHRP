@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using PeptideHitResultsProcessor.Processor;
+using PHRPReader;
 using PRISM;
 using Enums = PeptideHitResultsProcessor.Enums;
 
@@ -624,7 +625,7 @@ namespace PeptideHitResultsProcRunner
 
                     default:
                         // Includes PeptideHitResultsFileFormatConstants.AutoDetermine
-                        PeptideHitResultType = PHRPReader.PHRPReader.AutoDetermineResultType(inputFilePath);
+                        PeptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
                         break;
                 }
 

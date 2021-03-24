@@ -350,7 +350,7 @@ namespace PHRPReader
             {
                 var chCurrent = primarySequence[index];
 
-                if (!PHRPReader.IsLetterAtoZ(chCurrent))
+                if (!ReaderFactory.IsLetterAtoZ(chCurrent))
                     continue;
 
                 if (!string.IsNullOrEmpty(previousLetter))
@@ -486,7 +486,7 @@ namespace PHRPReader
             {
                 var index = text.Length - 1;
                 chMatch = text[index];
-                while (!(PHRPReader.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index > 0)
+                while (!(ReaderFactory.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index > 0)
                 {
                     index--;
                     chMatch = text[index];
@@ -508,7 +508,7 @@ namespace PHRPReader
             {
                 var index = 0;
                 chMatch = text[index];
-                while (!(PHRPReader.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index < text.Length - 1)
+                while (!(ReaderFactory.IsLetterAtoZ(chMatch) || TerminusSymbols.Contains(chMatch)) && index < text.Length - 1)
                 {
                     index++;
                     chMatch = text[index];

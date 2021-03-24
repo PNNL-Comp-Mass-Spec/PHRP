@@ -146,10 +146,10 @@ namespace PHRPReader.Reader
 
                         if (!headerLineParsed)
                         {
-                            if (!PHRPReader.IsNumber(splitLine[0]))
+                            if (!ReaderFactory.IsNumber(splitLine[0]))
                             {
                                 // Parse the header line to confirm the column ordering
-                                PHRPReader.ParseColumnHeaders(splitLine, mColumnHeaders);
+                                ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
                                 skipLine = true;
                             }
 
@@ -159,31 +159,31 @@ namespace PHRPReader.Reader
                         if (skipLine || splitLine.Length < 4)
                             continue;
 
-                        var scanNumber = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
+                        var scanNumber = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
 
                         if (scanNumber < 0 || scanStats.ContainsKey(scanNumber))
                             continue;
 
                         var scanStatsInfo = new ScanStatsExInfo(scanNumber)
                         {
-                            IonInjectionTime = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_IonInjectionTime, mColumnHeaders, 0.0),
-                            ScanEvent = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ScanEvent, mColumnHeaders, 0),
-                            MasterIndex = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_MasterIndex, mColumnHeaders, 0),
-                            ElapsedScanTime = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ElapsedScanTime, mColumnHeaders, 0.0),
-                            ChargeState = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ChargeState, mColumnHeaders, 0),
-                            MonoisotopicMZ = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_MonoisotopicMZ, mColumnHeaders, 0.0),
-                            MS2IsolationWidth = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_MS2IsolationWidth, mColumnHeaders, 0.0),
-                            FTAnalyzerSettings = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerSettings, mColumnHeaders),
-                            FTAnalyzerMessage = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerMessage, mColumnHeaders),
-                            FTResolution = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_FTResolution, mColumnHeaders, 0.0),
-                            ConversionParameterB = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterB, mColumnHeaders, 0.0),
-                            ConversionParameterC = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterC, mColumnHeaders, 0.0),
-                            ConversionParameterD = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterD, mColumnHeaders, 0.0),
-                            ConversionParameterE = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterE, mColumnHeaders, 0.0),
-                            CollisionMode = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_CollisionMode, mColumnHeaders),
-                            ScanFilterText = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_ScanFilterText, mColumnHeaders),
-                            SourceVoltage = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_SourceVoltage, mColumnHeaders, 0.0),
-                            Source_Current = PHRPReader.LookupColumnValue(splitLine, DATA_COLUMN_Source_Current, mColumnHeaders, 0.0)
+                            IonInjectionTime = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_IonInjectionTime, mColumnHeaders, 0.0),
+                            ScanEvent = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanEvent, mColumnHeaders, 0),
+                            MasterIndex = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MasterIndex, mColumnHeaders, 0),
+                            ElapsedScanTime = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ElapsedScanTime, mColumnHeaders, 0.0),
+                            ChargeState = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ChargeState, mColumnHeaders, 0),
+                            MonoisotopicMZ = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MonoisotopicMZ, mColumnHeaders, 0.0),
+                            MS2IsolationWidth = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MS2IsolationWidth, mColumnHeaders, 0.0),
+                            FTAnalyzerSettings = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerSettings, mColumnHeaders),
+                            FTAnalyzerMessage = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerMessage, mColumnHeaders),
+                            FTResolution = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTResolution, mColumnHeaders, 0.0),
+                            ConversionParameterB = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterB, mColumnHeaders, 0.0),
+                            ConversionParameterC = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterC, mColumnHeaders, 0.0),
+                            ConversionParameterD = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterD, mColumnHeaders, 0.0),
+                            ConversionParameterE = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterE, mColumnHeaders, 0.0),
+                            CollisionMode = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_CollisionMode, mColumnHeaders),
+                            ScanFilterText = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanFilterText, mColumnHeaders),
+                            SourceVoltage = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_SourceVoltage, mColumnHeaders, 0.0),
+                            Source_Current = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_Source_Current, mColumnHeaders, 0.0)
                         };
 
                         scanStats.Add(scanNumber, scanStatsInfo);
