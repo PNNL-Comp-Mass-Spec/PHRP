@@ -181,12 +181,12 @@ namespace PHRPReader
         {
             get
             {
-                if (mPSMCurrent == null || PHRPParser.SeqInfo == null)
+                if (mPSMCurrent == null || SynFileReader.SeqInfo == null)
                 {
                     return null;
                 }
 
-                PHRPParser.SeqInfo.TryGetValue(mPSMCurrent.SeqID, out var seqInfo);
+                SynFileReader.SeqInfo.TryGetValue(mPSMCurrent.SeqID, out var seqInfo);
                 return seqInfo;
             }
         }
@@ -265,7 +265,7 @@ namespace PHRPReader
         {
             get
             {
-                return (PHRPParser?.PeptideHitResultType) ?? Enums.PeptideHitResultTypes.Unknown;
+                return (SynFileReader?.PeptideHitResultType) ?? Enums.PeptideHitResultTypes.Unknown;
             }
         }
 
@@ -281,9 +281,9 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Returns the PHRP Parser object
+        /// Returns the PHRP SynFileReader object
         /// </summary>
-        public SynFileReaderBaseClass PHRPParser { get; private set; }
+        public SynFileReaderBaseClass SynFileReader { get; private set; }
 
         /// <summary>
         /// Returns the cached mapping between ResultID and SeqID
@@ -292,7 +292,7 @@ namespace PHRPReader
         {
             get
             {
-                return PHRPParser == null ? new SortedList<int, int>() : PHRPParser.ResultToSeqMap;
+                return SynFileReader == null ? new SortedList<int, int>() : SynFileReader.ResultToSeqMap;
             }
         }
 
@@ -303,7 +303,7 @@ namespace PHRPReader
         {
             get
             {
-                return PHRPParser == null ? new SortedList<int, SequenceInfo>() : PHRPParser.SeqInfo;
+                return SynFileReader == null ? new SortedList<int, SequenceInfo>() : SynFileReader.SeqInfo;
             }
         }
 
@@ -314,7 +314,7 @@ namespace PHRPReader
         {
             get
             {
-                return PHRPParser == null ? new SortedList<int, List<ProteinInfo>>() : PHRPParser.SeqToProteinMap;
+                return SynFileReader == null ? new SortedList<int, List<ProteinInfo>>() : SynFileReader.SeqToProteinMap;
             }
         }
 
@@ -525,7 +525,7 @@ namespace PHRPReader
         public void ClearErrors()
         {
             ErrorMessages.Clear();
-            PHRPParser?.ClearErrors();
+            SynFileReader?.ClearErrors();
         }
 
         private int CountLines(string textFilePath)
@@ -558,7 +558,7 @@ namespace PHRPReader
         public void ClearWarnings()
         {
             WarningMessages.Clear();
-            PHRPParser?.ClearWarnings();
+            SynFileReader?.ClearWarnings();
         }
 
         /// <summary>
@@ -736,41 +736,41 @@ namespace PHRPReader
                 switch (resultType)
                 {
                     case Enums.PeptideHitResultTypes.Sequest:
-                        PHRPParser = new SequestSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new SequestSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case Enums.PeptideHitResultTypes.XTandem:
                         // Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
-                        PHRPParser = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case Enums.PeptideHitResultTypes.Inspect:
-                        PHRPParser = new InspectSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new InspectSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case Enums.PeptideHitResultTypes.MSGFPlus:
                         // MS-GF+
-                        PHRPParser = new MSGFPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new MSGFPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case Enums.PeptideHitResultTypes.MSAlign:
-                        PHRPParser = new MSAlignSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new MSAlignSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case Enums.PeptideHitResultTypes.MODa:
-                        PHRPParser = new MODaSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new MODaSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case Enums.PeptideHitResultTypes.MODPlus:
-                        PHRPParser = new MODPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new MODPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case Enums.PeptideHitResultTypes.MSPathFinder:
-                        PHRPParser = new MSPathFinderSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new MSPathFinderSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     case Enums.PeptideHitResultTypes.TopPIC:
-                        PHRPParser = new TopPICSynFileReader(datasetName, mInputFilePath, mStartupOptions);
+                        SynFileReader = new TopPICSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
                     default:
@@ -786,22 +786,22 @@ namespace PHRPReader
                 }
 
                 // Attach the event handlers
-                RegisterEvents(PHRPParser);
+                RegisterEvents(SynFileReader);
 
                 // Report any errors cached during instantiation of mPHRPParser
-                foreach (var message in PHRPParser.ErrorMessages)
+                foreach (var message in SynFileReader.ErrorMessages)
                 {
                     ReportError(message);
                 }
 
                 // Report any warnings cached during instantiation of mPHRPParser
-                foreach (var message in PHRPParser.WarningMessages)
+                foreach (var message in SynFileReader.WarningMessages)
                 {
                     ReportWarning(message);
                 }
 
-                PHRPParser.ClearErrors();
-                PHRPParser.ClearWarnings();
+                SynFileReader.ClearErrors();
+                SynFileReader.ClearWarnings();
 
                 // Open the data file and count the number of lines so that we can compute progress
                 mSourceFileLineCount = CountLines(mInputFilePath);
@@ -2282,7 +2282,7 @@ namespace PHRPReader
                 if (!IsNumber(splitLine[0]))
                 {
                     // Parse the header line to confirm the column ordering
-                    PHRPParser.ParseColumnHeaders(splitLine);
+                    SynFileReader.ParseColumnHeaders(splitLine);
 
                     mHeaderLineParsed = true;
                     return MoveNext();
@@ -2295,7 +2295,7 @@ namespace PHRPReader
             {
                 mPSMCurrent = null;
 
-                success = PHRPParser.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out mPSMCurrent, mFastReadMode);
+                success = SynFileReader.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out mPSMCurrent, mFastReadMode);
 
                 if (mPSMCurrent == null)
                     mPSMCurrent = new PSM();
@@ -2351,7 +2351,7 @@ namespace PHRPReader
 
             if (!mFastReadMode)
             {
-                if (PHRPParser.PeptideHitResultType == Enums.PeptideHitResultTypes.Sequest || PHRPParser.PeptideHitResultType == Enums.PeptideHitResultTypes.XTandem)
+                if (SynFileReader.PeptideHitResultType == Enums.PeptideHitResultTypes.Sequest || SynFileReader.PeptideHitResultType == Enums.PeptideHitResultTypes.XTandem)
                 {
                     ComputePrecursorNeutralMass();
                 }
@@ -2385,7 +2385,7 @@ namespace PHRPReader
                     if (string.IsNullOrEmpty(lineIn))
                         continue;
 
-                    PHRPParser.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out var newPSM, mFastReadMode);
+                    SynFileReader.ParsePHRPDataLine(lineIn, mSourceFileLinesRead, out var newPSM, mFastReadMode);
 
                     // Check for duplicate lines
                     // If this line is a duplicate of the previous line, skip it
@@ -2536,7 +2536,7 @@ namespace PHRPReader
                 return;
 
             // Determine the clean sequence and cleavage state, and update the Seq_ID fields
-            PHRPParser.FinalizePSM(mPSMCurrent);
+            SynFileReader.FinalizePSM(mPSMCurrent);
 
             MarkupPeptideWithMods();
 
@@ -2811,7 +2811,7 @@ namespace PHRPReader
                 else
                 {
                     // Note: we do not need to raise a warning for MSGFDB results since the extended scan stats file isn't needed
-                    if (PHRPParser.PeptideHitResultType != Enums.PeptideHitResultTypes.MSGFPlus)
+                    if (SynFileReader.PeptideHitResultType != Enums.PeptideHitResultTypes.MSGFPlus)
                     {
                         ReportWarning("Extended ScanStats file not found: " + extendedScanStatsFilePath);
                     }
