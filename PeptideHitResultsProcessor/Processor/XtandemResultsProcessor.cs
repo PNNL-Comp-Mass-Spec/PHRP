@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// definition information is determined from the X!Tandem Input Parameters section at
     /// the end of the X!Tandem results file.
     /// </summary>
-    public class XtandemResultsProcessor : PHRPBaseClass
+    public class XTandemResultsProcessor : PHRPBaseClass
     {
         // ReSharper disable CommentTypo
 
@@ -120,7 +120,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        public XtandemResultsProcessor()
+        public XTandemResultsProcessor()
         {
             FileDate = "July 10, 2019";
 

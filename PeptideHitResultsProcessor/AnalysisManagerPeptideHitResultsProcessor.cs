@@ -138,7 +138,7 @@ namespace PeptideHitResultsProcessor
                 switch (m_PeptideHitResultsFileFormat)
                 {
                     case Enums.ResultsFileFormat.XTandemXMLFile:
-                        m_PeptideHitResultsProcessor = new XtandemResultsProcessor();
+                        m_PeptideHitResultsProcessor = new XTandemResultsProcessor();
                         break;
 
                     case Enums.ResultsFileFormat.SequestFirstHitsFile:
@@ -312,7 +312,7 @@ namespace PeptideHitResultsProcessor
             m_SettingsFilePath = Path.Combine(SourceDirectoryPath, SettingsFileName);
 
             // Define the peptide hit results format based on the analysis tool name
-            if (AnalysisToolName.IndexOf(XtandemResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            if (AnalysisToolName.IndexOf(XTandemResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 m_PeptideHitResultsFileFormat = Enums.ResultsFileFormat.XTandemXMLFile;
             }
