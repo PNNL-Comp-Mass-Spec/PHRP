@@ -1,5 +1,5 @@
 @echo off
-echo Be sure to build PHRPReader.dll in Release mode
+echo Be sure to build PHRPReader.dll in Debug mode
 pause
 
 @echo on
