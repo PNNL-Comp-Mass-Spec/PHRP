@@ -77,9 +77,7 @@ namespace PHRPReader.Reader
 
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
-        /// <summary>
-        /// These columns correspond to the Synopsis file created by MSGFPlusResultsProcessor
-        /// </summary>
+        [Obsolete("Superseded by DataColumn.MSGFPlusSynFile")]
         public enum MSGFPlusSynFileColumns
         {
             ResultID = 0,
@@ -325,36 +323,36 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <returns>Dictionary of header names and enum values</returns>
         /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
-        public static SortedDictionary<string, MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
+        public static SortedDictionary<string, DataColumn.Enums.MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            var headerColumns = new SortedDictionary<string, DataColumn.Enums.MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, MSGFPlusSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, MSGFPlusSynFileColumns.Scan},
-                {DATA_COLUMN_FragMethod, MSGFPlusSynFileColumns.FragMethod},
-                {DATA_COLUMN_SpecIndex, MSGFPlusSynFileColumns.SpecIndex},
-                {DATA_COLUMN_Charge, MSGFPlusSynFileColumns.Charge},
-                {DATA_COLUMN_PrecursorMZ, MSGFPlusSynFileColumns.PrecursorMZ},
-                {DATA_COLUMN_DelM, MSGFPlusSynFileColumns.DelM},
-                {DATA_COLUMN_DelM_PPM, MSGFPlusSynFileColumns.DelMPPM},
-                {DATA_COLUMN_MH, MSGFPlusSynFileColumns.MH},
-                {DATA_COLUMN_Peptide, MSGFPlusSynFileColumns.Peptide},
-                {DATA_COLUMN_Protein, MSGFPlusSynFileColumns.Protein},
-                {DATA_COLUMN_NTT, MSGFPlusSynFileColumns.NTT},
-                {DATA_COLUMN_DeNovoScore, MSGFPlusSynFileColumns.DeNovoScore},
-                {DATA_COLUMN_MSGFScore, MSGFPlusSynFileColumns.MSGFScore},
-                {DATA_COLUMN_MSGFDB_SpecProb, MSGFPlusSynFileColumns.SpecProb_EValue},
-                {DATA_COLUMN_MSGFPlus_SpecEValue, MSGFPlusSynFileColumns.SpecProb_EValue},
-                {DATA_COLUMN_Rank_MSGFDB_SpecProb, MSGFPlusSynFileColumns.RankSpecProb},
-                {DATA_COLUMN_Rank_MSGFPlus_SpecEValue, MSGFPlusSynFileColumns.RankSpecProb},
-                {DATA_COLUMN_PValue, MSGFPlusSynFileColumns.PValue_EValue},
-                {DATA_COLUMN_EValue, MSGFPlusSynFileColumns.PValue_EValue},
-                {DATA_COLUMN_FDR, MSGFPlusSynFileColumns.FDR_QValue},
-                {DATA_COLUMN_QValue, MSGFPlusSynFileColumns.FDR_QValue},
-                {DATA_COLUMN_PepFDR, MSGFPlusSynFileColumns.PepFDR_PepQValue},
-                {DATA_COLUMN_PepQValue, MSGFPlusSynFileColumns.PepFDR_PepQValue},
-                {DATA_COLUMN_EFDR, MSGFPlusSynFileColumns.EFDR},
-                {DATA_COLUMN_Isotope_Error, MSGFPlusSynFileColumns.IsotopeError}
+                {DATA_COLUMN_ResultID, DataColumn.Enums.MSGFPlusSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, DataColumn.Enums.MSGFPlusSynFileColumns.Scan},
+                {DATA_COLUMN_FragMethod, DataColumn.Enums.MSGFPlusSynFileColumns.FragMethod},
+                {DATA_COLUMN_SpecIndex, DataColumn.Enums.MSGFPlusSynFileColumns.SpecIndex},
+                {DATA_COLUMN_Charge, DataColumn.Enums.MSGFPlusSynFileColumns.Charge},
+                {DATA_COLUMN_PrecursorMZ, DataColumn.Enums.MSGFPlusSynFileColumns.PrecursorMZ},
+                {DATA_COLUMN_DelM, DataColumn.Enums.MSGFPlusSynFileColumns.DelM},
+                {DATA_COLUMN_DelM_PPM, DataColumn.Enums.MSGFPlusSynFileColumns.DelMPPM},
+                {DATA_COLUMN_MH, DataColumn.Enums.MSGFPlusSynFileColumns.MH},
+                {DATA_COLUMN_Peptide, DataColumn.Enums.MSGFPlusSynFileColumns.Peptide},
+                {DATA_COLUMN_Protein, DataColumn.Enums.MSGFPlusSynFileColumns.Protein},
+                {DATA_COLUMN_NTT, DataColumn.Enums.MSGFPlusSynFileColumns.NTT},
+                {DATA_COLUMN_DeNovoScore, DataColumn.Enums.MSGFPlusSynFileColumns.DeNovoScore},
+                {DATA_COLUMN_MSGFScore, DataColumn.Enums.MSGFPlusSynFileColumns.MSGFScore},
+                {DATA_COLUMN_MSGFDB_SpecProb, DataColumn.Enums.MSGFPlusSynFileColumns.SpecProb_EValue},
+                {DATA_COLUMN_MSGFPlus_SpecEValue, DataColumn.Enums.MSGFPlusSynFileColumns.SpecProb_EValue},
+                {DATA_COLUMN_Rank_MSGFDB_SpecProb, DataColumn.Enums.MSGFPlusSynFileColumns.RankSpecProb},
+                {DATA_COLUMN_Rank_MSGFPlus_SpecEValue, DataColumn.Enums.MSGFPlusSynFileColumns.RankSpecProb},
+                {DATA_COLUMN_PValue, DataColumn.Enums.MSGFPlusSynFileColumns.PValue_EValue},
+                {DATA_COLUMN_EValue, DataColumn.Enums.MSGFPlusSynFileColumns.PValue_EValue},
+                {DATA_COLUMN_FDR, DataColumn.Enums.MSGFPlusSynFileColumns.FDR_QValue},
+                {DATA_COLUMN_QValue, DataColumn.Enums.MSGFPlusSynFileColumns.FDR_QValue},
+                {DATA_COLUMN_PepFDR, DataColumn.Enums.MSGFPlusSynFileColumns.PepFDR_PepQValue},
+                {DATA_COLUMN_PepQValue, DataColumn.Enums.MSGFPlusSynFileColumns.PepFDR_PepQValue},
+                {DATA_COLUMN_EFDR, DataColumn.Enums.MSGFPlusSynFileColumns.EFDR},
+                {DATA_COLUMN_Isotope_Error, DataColumn.Enums.MSGFPlusSynFileColumns.IsotopeError}
             };
 
             return headerColumns;
@@ -367,7 +365,7 @@ namespace PHRPReader.Reader
         /// <param name="headerNames"></param>
         /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
         // ReSharper disable once UnusedMember.Global
-        public static Dictionary<MSGFPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        public static Dictionary<DataColumn.Enums.MSGFPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);

@@ -30,7 +30,7 @@
         /// <summary>
         /// Terminus state enum
         /// </summary>
-        public enum ResidueTerminusStateConstants
+        public enum ResidueTerminusState
         {
             /// <summary>
             /// The residue is in the middle of the peptide
@@ -94,7 +94,7 @@
         /// <summary>
         /// Residue terminus state
         /// </summary>
-        public ResidueTerminusStateConstants ResidueTerminusState { get; }
+        public ResidueTerminusState TerminusState { get; }
 
         /// <summary>
         /// Constructor
@@ -103,13 +103,13 @@
         /// <param name="residueLocInPeptide"></param>
         /// <param name="residueTerminusState"></param>
         /// <param name="modDefinition"></param>
-        public AminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusStateConstants residueTerminusState, ModificationDefinition modDefinition)
+        public AminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusState residueTerminusState, ModificationDefinition modDefinition)
         {
             ModDefinition = modDefinition;
             Residue = residue;
             ResidueLocInPeptide = residueLocInPeptide;
             EndResidueLocInPeptide = ResidueLocInPeptide;
-            ResidueTerminusState = residueTerminusState;
+            TerminusState = residueTerminusState;
         }
 
         /// <summary>
@@ -120,13 +120,13 @@
         /// <param name="residueTerminusState"></param>
         /// <param name="modDefinition"></param>
         /// <param name="endResidueLocInPeptide"></param>
-        public AminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusStateConstants residueTerminusState, ModificationDefinition modDefinition, int endResidueLocInPeptide)
+        public AminoAcidModInfo(char residue, int residueLocInPeptide, ResidueTerminusState residueTerminusState, ModificationDefinition modDefinition, int endResidueLocInPeptide)
         {
             ModDefinition = modDefinition;
             Residue = residue;
             ResidueLocInPeptide = residueLocInPeptide;
             EndResidueLocInPeptide = endResidueLocInPeptide;
-            ResidueTerminusState = residueTerminusState;
+            TerminusState = residueTerminusState;
         }
     }
 }

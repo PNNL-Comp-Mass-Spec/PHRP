@@ -423,10 +423,10 @@ namespace PHRPReader.Reader
                     if (Math.Abs(modMassDa - 0) < float.Epsilon)
                         continue;
 
-                    var modType = ModificationDefinition.ModificationTypeConstants.StaticMod;
+                    var modType = Enums.ResidueModificationType.StaticMod;
                     if (residue == AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString() || residue == AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS.ToString())
                     {
-                        modType = ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod;
+                        modType = Enums.ResidueModificationType.TerminalPeptideStaticMod;
                     }
 
                     var modDef = new ModificationDefinition(

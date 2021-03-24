@@ -586,8 +586,8 @@ namespace PHRPReader.Reader
                             continue;
                         }
 
-                        var cleavageState = (PeptideCleavageStateCalculator.PeptideCleavageStateConstants)PHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, columnHeaders, 0);
-                        var terminusState = (PeptideCleavageStateCalculator.PeptideTerminusStateConstants)PHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, columnHeaders, 0);
+                        var cleavageState = (PeptideCleavageStateCalculator.PeptideCleavageState)PHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, columnHeaders, 0);
+                        var terminusState = (PeptideCleavageStateCalculator.PeptideTerminusState)PHRPReader.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, columnHeaders, 0);
 
                         var proteinInfo = new ProteinInfo(proteinName, seqID, cleavageState, terminusState);
 

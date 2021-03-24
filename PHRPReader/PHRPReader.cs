@@ -74,26 +74,6 @@ namespace PHRPReader
         /// <summary>
         /// Peptide hit results type
         /// </summary>
-        [Obsolete("Superseded by enum PeptideHitResultTypes")]
-        public enum ePeptideHitResultType
-        {
-            Unknown = 0,
-            Sequest = 1,
-            XTandem = 2,
-            Inspect = 3,
-            [Obsolete("Use MSGFPlus")]
-            MSGFDB = 4,
-            MSGFPlus = 4,      // Aka MS-GF+
-            MSAlign = 5,
-            MODa = 6,
-            MODPlus = 7,
-            MSPathFinder = 8,
-            TopPIC = 9
-        }
-
-        /// <summary>
-        /// Peptide hit results type
-        /// </summary>
         public enum PeptideHitResultTypes
         {
             Unknown = 0,
@@ -1483,7 +1463,7 @@ namespace PHRPReader
                     }
                     else
                     {
-                        var residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.None;
+                        var residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
 
                         if (IsLetterAtoZ(peptide[index]))
                         {
@@ -1492,15 +1472,15 @@ namespace PHRPReader
 
                             if (residueLocInPeptide == 1)
                             {
-                                residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                                residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
                             }
                             else if (residueLocInPeptide == peptideLength)
                             {
-                                residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                                residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
                             }
                             else
                             {
-                                residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.None;
+                                residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
                             }
 
                             // Character is a letter; append it
@@ -1515,13 +1495,13 @@ namespace PHRPReader
                                 {
                                     // We're at the N-terminus of the peptide
                                     // Possibly add a static N-terminal peptide mod (for example, iTRAQ8, which is 304.2022 Da)
-                                    AddStaticModIfPresent(mStaticMods, AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS, residueLocInPeptide, AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus, mNewPeptide, peptideMods);
+                                    AddStaticModIfPresent(mStaticMods, AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS, residueLocInPeptide, AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus, mNewPeptide, peptideMods);
 
                                     if (peptide.StartsWith(PROTEIN_TERMINUS_SYMBOL_PHRP.ToString()))
                                     {
                                         // We're at the N-terminus of the protein
                                         // Possibly add a static N-terminal protein mod
-                                        AddStaticModIfPresent(mStaticMods, AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS, residueLocInPeptide, AminoAcidModInfo.ResidueTerminusStateConstants.ProteinNTerminus, mNewPeptide, peptideMods);
+                                        AddStaticModIfPresent(mStaticMods, AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS, residueLocInPeptide, AminoAcidModInfo.ResidueTerminusState.ProteinNTerminus, mNewPeptide, peptideMods);
                                     }
                                 }
                             }
@@ -1535,13 +1515,13 @@ namespace PHRPReader
                         if (index == indexEnd && mStaticMods.Count > 0)
                         {
                             // Possibly add a static C-terminal peptide mod
-                            AddStaticModIfPresent(mStaticMods, AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS, residueLocInPeptide, AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus, mNewPeptide, peptideMods);
+                            AddStaticModIfPresent(mStaticMods, AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS, residueLocInPeptide, AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus, mNewPeptide, peptideMods);
 
                             if (peptide.EndsWith(PROTEIN_TERMINUS_SYMBOL_PHRP.ToString()))
                             {
                                 // We're at the C-terminus of the protein
                                 // Possibly add a static C-terminal protein mod
-                                AddStaticModIfPresent(mStaticMods, AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS, residueLocInPeptide, AminoAcidModInfo.ResidueTerminusStateConstants.ProteinCTerminus, mNewPeptide, peptideMods);
+                                AddStaticModIfPresent(mStaticMods, AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS, residueLocInPeptide, AminoAcidModInfo.ResidueTerminusState.ProteinCTerminus, mNewPeptide, peptideMods);
                             }
                         }
                     }
@@ -1563,8 +1543,8 @@ namespace PHRPReader
             IReadOnlyDictionary<char, ModificationDefinition> mods,
             char residue,
             char modSymbol,
-            int ResidueLocInPeptide,
-            AminoAcidModInfo.ResidueTerminusStateConstants ResidueTerminusState,
+            int residueLocInPeptide,
+            AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             StringBuilder sbNewPeptide,
             ICollection<AminoAcidModInfo> peptideMods)
         {
@@ -1572,15 +1552,15 @@ namespace PHRPReader
             {
                 // Mod mass found for dynamic mod symbol; append the mod
                 sbNewPeptide.Append(SynFileReaderBaseClass.NumToStringPlusMinus(modDef.ModificationMass, 4));
-                peptideMods.Add(new AminoAcidModInfo(residue, ResidueLocInPeptide, ResidueTerminusState, modDef));
+                peptideMods.Add(new AminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDef));
             }
         }
 
         private void AddStaticModIfPresent(
             IReadOnlyDictionary<string, List<ModificationDefinition>> mods,
             char residue,
-            int ResidueLocInPeptide,
-            AminoAcidModInfo.ResidueTerminusStateConstants ResidueTerminusState,
+            int residueLocInPeptide,
+            AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             StringBuilder sbNewPeptide,
             ICollection<AminoAcidModInfo> peptideMods)
         {
@@ -1591,7 +1571,7 @@ namespace PHRPReader
                 foreach (var modDef in modDefs)
                 {
                     sbNewPeptide.Append(SynFileReaderBaseClass.NumToStringPlusMinus(modDef.ModificationMass, 4));
-                    peptideMods.Add(new AminoAcidModInfo(residue, ResidueLocInPeptide, ResidueTerminusState, modDef));
+                    peptideMods.Add(new AminoAcidModInfo(residue, residueLocInPeptide, residueTerminusState, modDef));
                 }
             }
         }
@@ -2693,9 +2673,9 @@ namespace PHRPReader
 
                     switch (modDef.ModificationType)
                     {
-                        case ModificationDefinition.ModificationTypeConstants.StaticMod:
-                        case ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod:
-                        case ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod:
+                        case Enums.ResidueModificationType.StaticMod:
+                        case Enums.ResidueModificationType.TerminalPeptideStaticMod:
+                        case Enums.ResidueModificationType.ProteinTerminusStaticMod:
 
                             // "S", "T", or "P"
                             // Static residue mod, peptide terminus static mod, or protein terminus static mod
@@ -2734,7 +2714,7 @@ namespace PHRPReader
                             }
 
                             break;
-                        case ModificationDefinition.ModificationTypeConstants.DynamicMod:
+                        case Enums.ResidueModificationType.DynamicMod:
                             // Dynamic residue mod (Includes mod type "D")
                             // Note that < and > mean peptide N and C terminus (AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
 
@@ -2768,12 +2748,12 @@ namespace PHRPReader
 
                             break;
 
-                        case ModificationDefinition.ModificationTypeConstants.IsotopicMod:
+                        case Enums.ResidueModificationType.IsotopicMod:
                             // Isotopic mods are not supported by this class
                             // However, do not log a warning since these are rarely used
                             break;
 
-                        case ModificationDefinition.ModificationTypeConstants.UnknownType:
+                        case Enums.ResidueModificationType.UnknownType:
                             // Unknown type; just ignore it
                             break;
                     }

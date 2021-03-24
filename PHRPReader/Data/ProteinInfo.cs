@@ -18,7 +18,7 @@
         /// <summary>
         /// Cleavage state of a protein fragment
         /// </summary>
-        public PeptideCleavageStateCalculator.PeptideCleavageStateConstants CleavageState { get; }
+        public PeptideCleavageStateCalculator.PeptideCleavageState CleavageState { get; }
 
         /// <summary>
         /// Residue number in the protein at which this sequence starts
@@ -38,7 +38,7 @@
         /// <summary>
         /// Terminus state of a protein fragment
         /// </summary>
-        public PeptideCleavageStateCalculator.PeptideTerminusStateConstants TerminusState { get; }
+        public PeptideCleavageStateCalculator.PeptideTerminusState TerminusState { get; }
 
         /// <summary>
         /// Constructor
@@ -50,8 +50,8 @@
         public ProteinInfo(
             string proteinName,
             int seqID,
-            PeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
-            PeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState) : this(proteinName, string.Empty, seqID, cleavageState, terminusState)
+            PeptideCleavageStateCalculator.PeptideCleavageState cleavageState,
+            PeptideCleavageStateCalculator.PeptideTerminusState terminusState) : this(proteinName, string.Empty, seqID, cleavageState, terminusState)
         {
         }
 
@@ -67,8 +67,8 @@
             string proteinName,
             string proteinDescription,
             int seqID,
-            PeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
-            PeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState) : this(proteinName, proteinDescription, seqID, cleavageState, terminusState, 0, 0)
+            PeptideCleavageStateCalculator.PeptideCleavageState cleavageState,
+            PeptideCleavageStateCalculator.PeptideTerminusState terminusState) : this(proteinName, proteinDescription, seqID, cleavageState, terminusState, 0, 0)
         {
         }
 
@@ -86,8 +86,8 @@
             string proteinName,
             string proteinDescription,
             int seqID,
-            PeptideCleavageStateCalculator.PeptideCleavageStateConstants cleavageState,
-            PeptideCleavageStateCalculator.PeptideTerminusStateConstants terminusState,
+            PeptideCleavageStateCalculator.PeptideCleavageState cleavageState,
+            PeptideCleavageStateCalculator.PeptideTerminusState terminusState,
             int proteinResidueStart,
             int proteinResidueEnd)
         {

@@ -154,10 +154,10 @@ namespace PHRPReader.Reader
                         throw new Exception("Modification mass is not numeric for MassCorrectionTag: " + massCorrectionTag + ": " + modMassText);
                     }
 
-                    ModificationDefinition.ModificationTypeConstants modificationType;
+                    Enums.ResidueModificationType modificationType;
                     if (string.IsNullOrWhiteSpace(modType))
                     {
-                        modificationType = ModificationDefinition.ModificationTypeConstants.UnknownType;
+                        modificationType = Enums.ResidueModificationType.UnknownType;
                     }
                     else
                     {

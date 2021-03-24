@@ -225,7 +225,7 @@ namespace PeptideHitResultsProcessor.Processor
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
                         // Only add this modification if it is a static mod; dynamic mods are handled later in this method when a ']' is found
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != ModificationDefinition.ModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != PHRPReader.Enums.ResidueModificationType.StaticMod)
                             continue;
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -518,7 +518,7 @@ namespace PeptideHitResultsProcessor.Processor
                             if (!validHeader)
                             {
                                 // Error parsing header
-                                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                                 return false;
                             }
 
@@ -580,7 +580,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -602,7 +602,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrEmpty(msAlignParamFilePath))
                 {
                     SetErrorMessage("MSAlign Parameter File name not defined; unable to extract mod info");
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                     return false;
                 }
 
@@ -642,7 +642,7 @@ namespace PeptideHitResultsProcessor.Processor
                                         case "C57":
                                             modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    57.0215, "C",
-                                                                                   ModificationDefinition.ModificationTypeConstants.StaticMod,
+                                                                                   PHRPReader.Enums.ResidueModificationType.StaticMod,
                                                                                    "IodoAcet");
                                             modInfo.Add(modDef);
                                             break;
@@ -650,7 +650,7 @@ namespace PeptideHitResultsProcessor.Processor
                                         case "C58":
                                             modDef = new ModificationDefinition(ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                                                                    58.0055, "C",
-                                                                                   ModificationDefinition.ModificationTypeConstants.StaticMod,
+                                                                                   PHRPReader.Enums.ResidueModificationType.StaticMod,
                                                                                    "IodoAcid");
                                             modInfo.Add(modDef);
                                             break;
@@ -668,7 +668,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error reading the MSAlign parameter file (" + Path.GetFileName(msAlignParamFilePath) + "): " + ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 success = false;
             }
 
@@ -750,7 +750,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 if (!validHeader)
                                 {
                                     // Error parsing header
-                                    SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                                     return false;
                                 }
                                 headerParsed = true;
@@ -865,7 +865,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -876,7 +876,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -1348,7 +1348,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1357,7 +1357,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1433,13 +1433,13 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in MSAlignResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in ProcessFile (1):" + ex.Message, ex);
-                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
             }
 
             return success;
@@ -1470,7 +1470,7 @@ namespace PeptideHitResultsProcessor.Processor
             if (sourcePHRPDataFiles.Count == 0)
             {
                 SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
             else
@@ -1553,7 +1553,7 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     mPeptideMods.LookupModificationDefinitionByMassAndModType(
                         modInfo.ModificationMass, modInfo.ModificationType, default,
-                        AminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
+                        AminoAcidModInfo.ResidueTerminusState.None, out _, true);
                 }
                 else
                 {
@@ -1561,7 +1561,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         mPeptideMods.LookupModificationDefinitionByMassAndModType(
                             modInfo.ModificationMass, modInfo.ModificationType, chTargetResidue,
-                            AminoAcidModInfo.ResidueTerminusStateConstants.None, out _, true);
+                            AminoAcidModInfo.ResidueTerminusState.None, out _, true);
                     }
                 }
             }

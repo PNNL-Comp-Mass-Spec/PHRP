@@ -376,7 +376,7 @@ namespace PHRPReader.Reader
                                 modDef = new ModificationDefinition(
                                     ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                     57.0215, "C",
-                                    ModificationDefinition.ModificationTypeConstants.StaticMod,
+                                    Enums.ResidueModificationType.StaticMod,
                                     "IodoAcet");
 
                                 searchEngineParams.AddModification(modDef);
@@ -386,7 +386,7 @@ namespace PHRPReader.Reader
                                 modDef = new ModificationDefinition(
                                     ModificationDefinition.NO_SYMBOL_MODIFICATION_SYMBOL,
                                     58.0055, "C",
-                                    ModificationDefinition.ModificationTypeConstants.StaticMod,
+                                    Enums.ResidueModificationType.StaticMod,
                                     "IodoAcid");
 
                                 searchEngineParams.AddModification(modDef);

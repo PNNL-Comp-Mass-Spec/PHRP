@@ -1319,11 +1319,11 @@ namespace PHRPReader.Reader
                 // Thus, if residueLoc = 1 or residueLoc = currentPSM.PeptideCleanSequence.Length, we'll first look for a peptide or protein terminal static mod
 
                 bool favorTerminalMods;
-                AminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState;
+                AminoAcidModInfo.ResidueTerminusState residueTerminusState;
 
                 if (residueLoc == 1)
                 {
-                    residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                    residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
                     if (nTerminalModsAdded.Contains(massCorrectionTag))
                     {
                         // We have likely already added this modification as an N-terminal mod, thus, don't favor terminal mods this time
@@ -1339,12 +1339,12 @@ namespace PHRPReader.Reader
                 }
                 else if (residueLoc == peptideResidueCount)
                 {
-                    residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                    residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
                     favorTerminalMods = !cTerminalModsAdded.Contains(massCorrectionTag);
                 }
                 else
                 {
-                    residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.None;
+                    residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
                     favorTerminalMods = false;
                 }
 
@@ -1443,8 +1443,8 @@ namespace PHRPReader.Reader
                     break;
                 }
 
-                var proteinInfo = new ProteinInfo(proteinName, 0, PeptideCleavageStateCalculator.PeptideCleavageStateConstants.NonSpecific,
-                                                     PeptideCleavageStateCalculator.PeptideTerminusStateConstants.None);
+                var proteinInfo = new ProteinInfo(proteinName, 0, PeptideCleavageStateCalculator.PeptideCleavageState.NonSpecific,
+                                                     PeptideCleavageStateCalculator.PeptideTerminusState.None);
                 currentPSM.AddProtein(proteinInfo);
             }
 
@@ -1481,7 +1481,7 @@ namespace PHRPReader.Reader
         private bool UpdatePSMFindMatchingModInfo(
             string massCorrectionTag,
             bool favorTerminalMods,
-            AminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState,
+            AminoAcidModInfo.ResidueTerminusState residueTerminusState,
             out ModificationDefinition matchedModDef)
         {
             matchedModDef = new ModificationDefinition();
@@ -1512,10 +1512,10 @@ namespace PHRPReader.Reader
                         // Look for an entry in matchedDefs that is a terminal mod
                         foreach (var mod in matchedDefs)
                         {
-                            if (mod.ModificationType == ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
-                                mod.ModificationType == ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod)
+                            if (mod.ModificationType == Enums.ResidueModificationType.TerminalPeptideStaticMod ||
+                                mod.ModificationType == Enums.ResidueModificationType.ProteinTerminusStaticMod)
                             {
-                                if (residueTerminusState == AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus &&
+                                if (residueTerminusState == AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus &&
                                     (mod.TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS)))
                                 {
                                     matchFound = true;
@@ -1523,7 +1523,7 @@ namespace PHRPReader.Reader
                                     break;
                                 }
 
-                                if (residueTerminusState == AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus &&
+                                if (residueTerminusState == AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus &&
                                     (mod.TargetResiduesContain(AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS) || mod.TargetResiduesContain(AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)))
                                 {
                                     matchFound = true;
@@ -1538,8 +1538,8 @@ namespace PHRPReader.Reader
                         // Look for an entry in matchedDefs that is not a terminal mod
                         foreach (var mod in matchedDefs)
                         {
-                            if (!(mod.ModificationType == ModificationDefinition.ModificationTypeConstants.TerminalPeptideStaticMod ||
-                                  mod.ModificationType == ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod))
+                            if (!(mod.ModificationType == Enums.ResidueModificationType.TerminalPeptideStaticMod ||
+                                  mod.ModificationType == Enums.ResidueModificationType.ProteinTerminusStaticMod))
                             {
                                 matchFound = true;
                                 matchedModDef = mod;

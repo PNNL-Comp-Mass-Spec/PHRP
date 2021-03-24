@@ -249,7 +249,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != ModificationDefinition.ModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) != PHRPReader.Enums.ResidueModificationType.StaticMod)
                             continue;
 
                         var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
@@ -556,14 +556,14 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                     success = false;
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
 
@@ -666,7 +666,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(inspectParameterFilePath))
                 {
                     SetErrorMessage("Inspect Parameter File name not defined; unable to extract mod info");
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                     return false;
                 }
 
@@ -769,7 +769,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error reading the Inspect parameter file (" + Path.GetFileName(inspectParameterFilePath) + "): " + ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
         }
@@ -882,7 +882,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" + Path.GetFileName(mtsPepToProteinMapFilePath) + "): " + ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
 
@@ -1125,7 +1125,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -1136,7 +1136,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -1445,7 +1445,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1454,7 +1454,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1578,13 +1578,13 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error calling CreateFHTorSYNResultsFile: " + ex.Message, ex);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in ProcessFile:" + ex.Message, ex);
-                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
             }
 
             return success;
@@ -1792,18 +1792,18 @@ namespace PeptideHitResultsProcessor.Processor
                         targetResidue = default;
                     }
 
-                    AminoAcidModInfo.ResidueTerminusStateConstants residueTerminusState;
+                    AminoAcidModInfo.ResidueTerminusState residueTerminusState;
                     if (modDef.ModType == InspectModType.DynNTermPeptide)
                     {
-                        residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideNTerminus;
+                        residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideNTerminus;
                     }
                     else if (modDef.ModType == InspectModType.DynCTermPeptide)
                     {
-                        residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.PeptideCTerminus;
+                        residueTerminusState = AminoAcidModInfo.ResidueTerminusState.PeptideCTerminus;
                     }
                     else
                     {
-                        residueTerminusState = AminoAcidModInfo.ResidueTerminusStateConstants.None;
+                        residueTerminusState = AminoAcidModInfo.ResidueTerminusState.None;
                     }
 
                     var modificationDefinition = mPeptideMods.LookupModificationDefinitionByMass(modMass, targetResidue, residueTerminusState, out _, true);

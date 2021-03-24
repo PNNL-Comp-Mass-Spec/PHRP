@@ -233,7 +233,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private bool ParseXTandemInputParameterModInfo(
-            ModificationDefinition.ModificationTypeConstants modificationType,
+            PHRPReader.Enums.ResidueModificationType modificationType,
             int sortOrder,
             bool parsingMotifDef,
             string paramValue,
@@ -399,7 +399,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                         modInfo.ModificationMass = modificationMass;
                         modInfo.TargetResidues = targetResidues;
-                        modInfo.ModificationType = ModificationDefinition.ModificationTypeConstants.ProteinTerminusStaticMod;
+                        modInfo.ModificationType = PHRPReader.Enums.ResidueModificationType.ProteinTerminusStaticMod;
                         modifications.Add(modInfo);
                     }
                 }
@@ -443,7 +443,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var success = ParseXTandemResultsFileInputParameters(inputFilePath);
                     if (!success)
                     {
-                        SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile, true);
+                        SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile, true);
                         return false;
                     }
 
@@ -558,7 +558,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -569,7 +569,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -1170,7 +1170,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                 success = false;
             }
 
@@ -1245,31 +1245,31 @@ namespace PeptideHitResultsProcessor.Processor
                                     var noteLabelLower = noteLabel.ToLower();
                                     if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_StaticModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.StaticMod, Convert.ToInt32(InputParamLabelNames.Residue_StaticModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.StaticMod, Convert.ToInt32(InputParamLabelNames.Residue_StaticModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Residue_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMotif), true, value, modifications);
+                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Residue_PotentialModMotif), true, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialModMass]))
                                     {
-                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMass), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMass), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialModMotif]))
                                     {
-                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMotif), true, value, modifications);
+                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialModMotif), true, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialNTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialNTerminusMods), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialNTerminusMods), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Refine_PotentialCTerminusMods]))
                                     {
-                                        ParseXTandemInputParameterModInfo(ModificationDefinition.ModificationTypeConstants.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialCTerminusMods), false, value, modifications);
+                                        ParseXTandemInputParameterModInfo(PHRPReader.Enums.ResidueModificationType.DynamicMod, Convert.ToInt32(InputParamLabelNames.Refine_PotentialCTerminusMods), false, value, modifications);
                                     }
                                     else if (noteLabelLower.Equals(paramLabels[(int)InputParamLabelNames.Protein_NTerminal_ResidueModMass]))
                                     {
@@ -1371,7 +1371,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 foreach (var modInfo in sortedModInfo)
                 {
-                    if (modInfo.ModificationType != ModificationDefinition.ModificationTypeConstants.StaticMod)
+                    if (modInfo.ModificationType != PHRPReader.Enums.ResidueModificationType.StaticMod)
                     {
                         validatedModifications.Add(modInfo);
                         continue;
@@ -1383,7 +1383,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (comparisonMod.Equals(modInfo))
                             continue;
 
-                        if (comparisonMod.ModificationType != ModificationDefinition.ModificationTypeConstants.DynamicMod)
+                        if (comparisonMod.ModificationType != PHRPReader.Enums.ResidueModificationType.DynamicMod)
                             continue;
 
                         // See if the comparison mod (which is a dynamic mod) has a similar mass as the current static mod in modInfo
@@ -1406,11 +1406,11 @@ namespace PeptideHitResultsProcessor.Processor
                         continue;
                     }
 
-                    if (modInfo.ModificationType == ModificationDefinition.ModificationTypeConstants.StaticMod && staticModsAreResetForRefinement)
+                    if (modInfo.ModificationType == PHRPReader.Enums.ResidueModificationType.StaticMod && staticModsAreResetForRefinement)
                     {
                         // Add this static mod as a dynamic mod
                         var updatedModInfo = modInfo.Clone();
-                        updatedModInfo.ModificationType = ModificationDefinition.ModificationTypeConstants.DynamicMod;
+                        updatedModInfo.ModificationType = PHRPReader.Enums.ResidueModificationType.DynamicMod;
                         validatedModifications.Add(updatedModInfo);
                         continue;
                     }
@@ -1496,7 +1496,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1505,7 +1505,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1547,13 +1547,13 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (2): " + ex.Message);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (1):" + ex.Message);
-                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
             }
 
             return success;

@@ -48,39 +48,14 @@ namespace PHRPReader.Data
         /// </summary>
         public const string INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME = UNKNOWN_MOD_BASE_NAME + "00";
 
-        /// <summary>
-        /// Modification types
-        /// </summary>
+        [Obsolete("Superseded by ResidueModificationType")]
         public enum ModificationTypeConstants
         {
-            /// <summary>
-            /// Unknown mod type on a residue; essentially treated as a dynamic mod
-            /// </summary>
             UnknownType = 0,
-
-            /// <summary>
-            /// Dynamic mod on a residue or peptide terminus; supported by Sequest and notated via a modification symbol; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
-            /// </summary>
             DynamicMod = 1,
-
-            /// <summary>
-            /// Static mod on a residue or peptide terminus; supported by Sequest but not explicitly notated; this mod is explicitly notated by X!Tandem; if a terminus mod, the mod symbol is associated with the first or last residue in the peptide
-            /// </summary>
             StaticMod = 2,
-
-            /// <summary>
-            /// Peptide terminus static mod (DMS Symbol is T); used by Sequest and MSGFDB; note that terminal mods are always dynamic in X!Tandem
-            /// </summary>
             TerminalPeptideStaticMod = 3,
-
-            /// <summary>
-            /// Isotopic mod, e.g. N15, or C13; supported by Sequest; most likely not supported by XTandem
-            /// </summary>
             IsotopicMod = 4,
-
-            /// <summary>
-            /// Protein terminus static mod; supported by Sequest; this mod is also supported by X!Tandem but modified residues are not explicitly notated; instead, all peptides have their mass implicitly modified by this amount
-            /// </summary>
             ProteinTerminusStaticMod = 5
         }
 
@@ -192,7 +167,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Modification type
         /// </summary>
-        public ModificationTypeConstants ModificationType { get; set; }
+        public Enums.ResidueModificationType ModificationType { get; set; }
 
         /// <summary>
         /// Modification name, for example Phosph, IodoAcet, Plus1Oxy, or Methyl
@@ -276,7 +251,7 @@ namespace PHRPReader.Data
         /// <param name="modificationMass"></param>
         /// <param name="targetResidues"></param>
         /// <param name="modificationType"></param>
-        public ModificationDefinition(double modificationMass, string targetResidues, ModificationTypeConstants modificationType)
+        public ModificationDefinition(double modificationMass, string targetResidues, Enums.ResidueModificationType modificationType)
         {
             Clear();
 
@@ -293,7 +268,7 @@ namespace PHRPReader.Data
         /// <param name="targetResidues"></param>
         /// <param name="modificationType"></param>
         /// <param name="massCorrectionTag"></param>
-        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationTypeConstants modificationType, string massCorrectionTag)
+        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, Enums.ResidueModificationType modificationType, string massCorrectionTag)
         {
             Clear();
 
@@ -314,7 +289,7 @@ namespace PHRPReader.Data
         /// <param name="massCorrectionTag"></param>
         /// <param name="chAffectedAtom"></param>
         /// <param name="unknownModAutoDefined"></param>
-        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, ModificationTypeConstants modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
+        public ModificationDefinition(char modificationSymbol, double modificationMass, string targetResidues, Enums.ResidueModificationType modificationType, string massCorrectionTag, char chAffectedAtom, bool unknownModAutoDefined)
         {
             Clear();
 
@@ -336,7 +311,7 @@ namespace PHRPReader.Data
             mModificationMass = 0;
             ModificationMassAsText = "0";
             mTargetResidues = string.Empty;
-            ModificationType = ModificationTypeConstants.UnknownType;
+            ModificationType = Enums.ResidueModificationType.UnknownType;
             mMassCorrectionTag = INITIAL_UNKNOWN_MASS_CORRECTION_TAG_NAME;
             mAffectedAtom = PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL;
             OccurrenceCount = 0;
@@ -403,8 +378,8 @@ namespace PHRPReader.Data
                 }
                 else if (a.TargetResidues != null && b.TargetResidues != null)
                 {
-                    if (a.ModificationType == ModificationTypeConstants.DynamicMod ||
-                        a.ModificationType == ModificationTypeConstants.StaticMod)
+                    if (a.ModificationType == Enums.ResidueModificationType.DynamicMod ||
+                        a.ModificationType == Enums.ResidueModificationType.StaticMod)
                     {
                         // Matching dynamic or static modification definitions
                         // Make sure each of the residues in b.TargetResidues is present in .TargetResidues
@@ -491,7 +466,7 @@ namespace PHRPReader.Data
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (ModificationType == ModificationTypeConstants.ProteinTerminusStaticMod || ModificationType == ModificationTypeConstants.TerminalPeptideStaticMod)
+            if (ModificationType == Enums.ResidueModificationType.ProteinTerminusStaticMod || ModificationType == Enums.ResidueModificationType.TerminalPeptideStaticMod)
             {
                 return true;
             }
@@ -513,7 +488,7 @@ namespace PHRPReader.Data
         {
             var terminalSymbols = GetTerminalSymbols();
 
-            if (ModificationType == ModificationTypeConstants.ProteinTerminusStaticMod || ModificationType == ModificationTypeConstants.TerminalPeptideStaticMod)
+            if (ModificationType == Enums.ResidueModificationType.ProteinTerminusStaticMod || ModificationType == Enums.ResidueModificationType.TerminalPeptideStaticMod)
             {
                 return false;
             }
@@ -554,27 +529,27 @@ namespace PHRPReader.Data
         /// Retrieve the modification type for the given modification type symbol
         /// </summary>
         /// <param name="modificationTypeSymbol">D, S, T, I, or P</param>
-        public static ModificationTypeConstants ModificationSymbolToModificationType(char modificationTypeSymbol)
+        public static Enums.ResidueModificationType ModificationSymbolToModificationType(char modificationTypeSymbol)
         {
             if (modificationTypeSymbol == default(char))
             {
-                return ModificationTypeConstants.UnknownType;
+                return Enums.ResidueModificationType.UnknownType;
             }
 
             switch (modificationTypeSymbol)
             {
                 case 'D':
-                    return ModificationTypeConstants.DynamicMod;
+                    return Enums.ResidueModificationType.DynamicMod;
                 case 'S':
-                    return ModificationTypeConstants.StaticMod;
+                    return Enums.ResidueModificationType.StaticMod;
                 case 'T':
-                    return ModificationTypeConstants.TerminalPeptideStaticMod;
+                    return Enums.ResidueModificationType.TerminalPeptideStaticMod;
                 case 'I':
-                    return ModificationTypeConstants.IsotopicMod;
+                    return Enums.ResidueModificationType.IsotopicMod;
                 case 'P':
-                    return ModificationTypeConstants.ProteinTerminusStaticMod;
+                    return Enums.ResidueModificationType.ProteinTerminusStaticMod;
                 default:
-                    return ModificationTypeConstants.UnknownType;
+                    return Enums.ResidueModificationType.UnknownType;
             }
         }
 
@@ -583,19 +558,19 @@ namespace PHRPReader.Data
         /// </summary>
         /// <param name="modificationType"></param>
         /// <returns>D, S, T, I, or P</returns>
-        public static char ModificationTypeToModificationSymbol(ModificationTypeConstants modificationType)
+        public static char ModificationTypeToModificationSymbol(Enums.ResidueModificationType modificationType)
         {
             switch (modificationType)
             {
-                case ModificationTypeConstants.DynamicMod:
+                case Enums.ResidueModificationType.DynamicMod:
                     return 'D';
-                case ModificationTypeConstants.StaticMod:
+                case Enums.ResidueModificationType.StaticMod:
                     return 'S';
-                case ModificationTypeConstants.TerminalPeptideStaticMod:
+                case Enums.ResidueModificationType.TerminalPeptideStaticMod:
                     return 'T';
-                case ModificationTypeConstants.IsotopicMod:
+                case Enums.ResidueModificationType.IsotopicMod:
                     return 'I';
-                case ModificationTypeConstants.ProteinTerminusStaticMod:
+                case Enums.ResidueModificationType.ProteinTerminusStaticMod:
                     return 'P';
                 default:
                     return '?';

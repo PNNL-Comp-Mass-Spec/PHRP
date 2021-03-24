@@ -240,7 +240,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == ModificationDefinition.ModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == PHRPReader.Enums.ResidueModificationType.StaticMod)
                         {
                             var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
@@ -585,7 +585,7 @@ namespace PeptideHitResultsProcessor.Processor
                             if (!validHeader)
                             {
                                 // Error parsing header
-                                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                                 return false;
                             }
 
@@ -649,7 +649,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -675,12 +675,12 @@ namespace PeptideHitResultsProcessor.Processor
                 MSGFPlusParamFileModExtractor.ModSpecFormats.TopPIC,
                 out modInfo);
 
-            if (!success || mErrorCode != PHRPErrorCodes.NoError)
+            if (!success || mErrorCode != Enums.PHRPErrorCode.NoError)
             {
-                if (mErrorCode == PHRPErrorCodes.NoError)
+                if (mErrorCode == Enums.PHRPErrorCode.NoError)
                 {
                     SetErrorMessage("Unknown error extracting the modification definitions from the TopPIC parameter file");
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 }
                 return false;
             }
@@ -805,7 +805,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 if (!validHeader)
                                 {
                                     // Error parsing header
-                                    SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                                     return false;
                                 }
                                 headerParsed = true;
@@ -920,7 +920,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -931,7 +931,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -1441,7 +1441,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1450,7 +1450,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1526,13 +1526,13 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in TopPICResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in TopPICResultsProcessor.ProcessFile (1):" + ex.Message, ex);
-                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
             }
 
             return success;
@@ -1557,7 +1557,7 @@ namespace PeptideHitResultsProcessor.Processor
             if (sourcePHRPDataFiles.Count == 0)
             {
                 SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
             else
@@ -1790,7 +1790,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void ModExtractorErrorHandler(string message, Exception ex)
         {
-            SetErrorCode(PHRPErrorCodes.ErrorReadingModificationDefinitionsFile);
+            SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
         }
 
         #endregion

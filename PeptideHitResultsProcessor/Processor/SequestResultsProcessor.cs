@@ -78,7 +78,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     for (var modIndex = 0; modIndex <= mPeptideMods.ModificationCount - 1; modIndex++)
                     {
-                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == ModificationDefinition.ModificationTypeConstants.StaticMod)
+                        if (mPeptideMods.GetModificationTypeByIndex(modIndex) == PHRPReader.Enums.ResidueModificationType.StaticMod)
                         {
                             var modificationDefinition = mPeptideMods.GetModificationByIndex(modIndex);
 
@@ -94,7 +94,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 if (!success)
                                 {
                                     // Error adding this static mod
-                                    SetErrorCode(PHRPErrorCodes.UnspecifiedError);
+                                    SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
                                     mErrorMessage = "Error calling searchResult.SearchResultAddModification for peptide '" + sequenceWithMods + "': " + searchResult.ErrorMessage;
                                     break;
                                 }
@@ -109,7 +109,7 @@ namespace PeptideHitResultsProcessor.Processor
                     if (!success)
                     {
                         // Error adding this dynamic mod
-                        SetErrorCode(PHRPErrorCodes.UnspecifiedError);
+                        SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
                         mErrorMessage = "Error calling searchResult.SearchResultAddDynamicModification for peptide '" + sequenceWithMods + "': " + searchResult.ErrorMessage;
                         break;
                     }
@@ -359,7 +359,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -370,7 +370,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(PHRPErrorCodes.ErrorCreatingOutputFiles);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -496,7 +496,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(PHRPErrorCodes.ErrorReadingParameterFile, true);
+                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -505,7 +505,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(PHRPErrorCodes.InvalidInputFilePath);
+                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -535,7 +535,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error calling ParseSynopsisOrFirstHitsFile" + ex.Message);
-                    SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
+                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
                     success = false;
                 }
 
@@ -552,7 +552,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error in SequestResultsProcessor.ProcessFile:  " + ex.Message);
-                SetErrorCode(PHRPErrorCodes.UnspecifiedError);
+                SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
             }
 
             return success;
