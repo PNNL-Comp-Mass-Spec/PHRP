@@ -43,6 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clsPHRPReader.cs" />
+    <Compile Include="DataColumn\Enums.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="MSGFPlusParamFileModExtractor.cs" />
     <Compile Include="PeptideCleavageStateCalculator.cs" />
     <Compile Include="PeptideMassCalculator.cs" />
@@ -82,5 +85,6 @@
       <Version>2.6.26</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
