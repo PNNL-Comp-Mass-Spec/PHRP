@@ -206,9 +206,9 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Load the mapping between ResultID and Protein Name
         /// </summary>
-        /// <param name="resultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
-        /// <param name="seqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
-        /// <param name="seqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
+        /// <param name="resultToSeqMap">Output: ResultToSeqMap list; keys are ResultID, Values as SeqID</param>
+        /// <param name="seqToProteinMap">Output: SeqToProteinMap list; keys are SeqID, Values are list of ProteinInfo objects</param>
+        /// <param name="seqInfo">Output: SeqInfo list; keys are SeqID, Values are seq details stored in SeqInfo objects</param>
         /// <returns>True if successful, false if an error</returns>
         public bool GetProteinMapping(
             SortedList<int, int> resultToSeqMap,
@@ -222,10 +222,10 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Load the mapping between ResultID and Protein Name
         /// </summary>
-        /// <param name="resultToSeqMap">ResultToSeqMap list (output); keys are ResultID, Values as SeqID</param>
-        /// <param name="seqToProteinMap">SeqToProteinMap list (output); keys are SeqID, Values are list of clsProteinInfo objects</param>
-        /// <param name="seqInfo">SeqInfo list (output); keys are SeqID, Values are seq details stored in clsSeqInfo objects</param>
-        /// <param name="pepToProteinMap">PepToProteinMap list (output); keys are clean peptide sequences (no mods), Values are Protein name and residue start/end locations for the peptide</param>
+        /// <param name="resultToSeqMap">Output: ResultToSeqMap list; keys are ResultID, Values as SeqID</param>
+        /// <param name="seqToProteinMap">Output: SeqToProteinMap list; keys are SeqID, Values are list of ProteinInfo objects</param>
+        /// <param name="seqInfo">Output: SeqInfo list; keys are SeqID, Values are seq details stored in SeqInfo objects</param>
+        /// <param name="pepToProteinMap">Output: PepToProteinMap list; keys are clean peptide sequences (no mods), Values are Protein name and residue start/end locations for the peptide</param>
         /// <returns>True if successful, false if an error</returns>
         public bool GetProteinMapping(
             SortedList<int, int> resultToSeqMap,

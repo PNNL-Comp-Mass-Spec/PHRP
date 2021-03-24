@@ -28,14 +28,14 @@ namespace PeptideHitResultsProcessor.Processor
     /// This class reads in a MSPathFinder results file (_IcTda.tsv) and creates
     /// a tab-delimited text file with the data.
     /// </summary>
-    public class clsMSPathFinderResultsProcessor : clsPHRPBaseClass
+    public class MSPathFinderResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: IcTda, Dehydro, Desc, mspath
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsMSPathFinderResultsProcessor()
+        public MSPathFinderResultsProcessor()
         {
             FileDate = "September 28, 2020";
 
@@ -174,7 +174,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="updateModOccurrenceCounts"></param>
         /// <param name="modInfo"></param>
         private void AddModificationsToResidues(
-            clsSearchResultsMSPathFinder searchResult,
+            MSPathFinderResults searchResult,
             bool updateModOccurrenceCounts,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
@@ -258,7 +258,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         private bool AddModificationsAndComputeMass(
-            clsSearchResultsMSPathFinder searchResult,
+            MSPathFinderResults searchResult,
             bool updateModOccurrenceCounts,
             IReadOnlyCollection<MSGFPlusParamFileModExtractor.udtModInfoType> modInfo)
         {
@@ -650,7 +650,7 @@ namespace PeptideHitResultsProcessor.Processor
                 mPeptideMods.ResetOccurrenceCountStats();
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsMSPathFinder(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new MSPathFinderResults(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize two SortedSets
                 var peptidesFoundForSpecEValue = new SortedSet<string>();
@@ -1087,7 +1087,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSPathFinderSynFileEntry(
             string lineIn,
-            clsSearchResultsMSPathFinder searchResult,
+            MSPathFinderResults searchResult,
             ref string errorLog,
             int resultsProcessed,
             IDictionary<MSPathFinderSynFileReader.MSPathFinderSynFileColumns, int> columnMapping,
@@ -1330,7 +1330,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in clsMSPathFinderResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
+                    SetErrorMessage("Error in MSPathFinderResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
                     SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }

@@ -24,14 +24,14 @@ using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor.Processor
 {
-    public class clsMSGFPlusResultsProcessor : clsPHRPBaseClass
+    public class MSGFPlusResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: tsv, da, tda, kv, msgfdb, fht, structs, methylation, udt, frag, novo, Prefiltered
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsMSGFPlusResultsProcessor()
+        public MSGFPlusResultsProcessor()
         {
             FileDate = "February 3, 2021";
             mModMassRegEx = new Regex(MSGFPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
@@ -1397,7 +1397,7 @@ namespace PeptideHitResultsProcessor.Processor
                 mNumericModErrors = 0;
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsMSGFPlus(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new MSGFPlusResults(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Note that MS-GF+ synopsis files are normally sorted on SpecEValue, ascending
                 // In order to prevent duplicate entries from being made to the ResultToSeqMap file (for the same peptide in the same scan),
@@ -2057,7 +2057,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMSGFPlusSynFileEntry(
             string lineIn,
-            clsSearchResultsMSGFPlus searchResult,
+            MSGFPlusResults searchResult,
             ref string errorLog,
             int resultsProcessed,
             IDictionary<MSGFPlusSynFileReader.MSGFPlusSynFileColumns, int> columnMapping,
@@ -2184,11 +2184,11 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileReader.MSGFPlusSynFileColumns.IsotopeError], out string isotopeError);
                     searchResult.IsotopeError = isotopeError;
-                    searchResult.MSGFPlusResults = true;
+                    searchResult.UsedMSGFPlus = true;
                 }
                 else
                 {
-                    searchResult.MSGFPlusResults = false;
+                    searchResult.UsedMSGFPlus = false;
                 }
 
                 // Compute PrecursorMH using PrecursorMZ and charge
@@ -2418,13 +2418,13 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in clsMSGFPlusResultsProcessor.ProcessFile (2):  " + ex.Message);
+                    SetErrorMessage("Error in MSGFPlusResultsProcessor.ProcessFile (2):  " + ex.Message);
                     SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in clsMSGFPlusResultsProcessor.ProcessFile (1):" + ex.Message);
+                SetErrorMessage("Error in MSGFPlusResultsProcessor.ProcessFile (1):" + ex.Message);
                 SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 

@@ -22,11 +22,11 @@ using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor.Processor
 {
-    public class clsMODPlusResultsProcessor : clsPHRPBaseClass
+    public class MODPlusResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: MODa, tda, methylation, udt, fht, modp, ModDefs, massdiff
 
-        public clsMODPlusResultsProcessor()
+        public MODPlusResultsProcessor()
         {
             FileDate = "July 10, 2019";
         }
@@ -690,7 +690,7 @@ namespace PeptideHitResultsProcessor.Processor
                 mPeptideMods.ResetOccurrenceCountStats();
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsMODPlus(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new MODPlusResults(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize peptidesFoundForProbabilityLevel
                 var peptidesFoundForProbabilityLevel = new SortedSet<string>();
@@ -1131,7 +1131,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool ParseMODPlusSynFileEntry(
             string lineIn,
-            clsSearchResultsMODPlus searchResult,
+            MODPlusResults searchResult,
             ref string errorLog,
             int resultsProcessed,
             IDictionary<MODPlusSynFileReader.MODPlusSynFileColumns, int> columnMapping,
@@ -1346,7 +1346,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in clsMODPlusResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
+                    SetErrorMessage("Error in MODPlusResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
                     SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }

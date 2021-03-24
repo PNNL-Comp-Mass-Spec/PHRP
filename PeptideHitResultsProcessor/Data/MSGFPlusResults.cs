@@ -18,9 +18,9 @@ namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for an MS-GF+ search result
-    /// See clsSearchResultsBaseClass for additional information
+    /// See SearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsMSGFPlus : SearchResultsBaseClass
+    public class MSGFPlusResults : SearchResultsBaseClass
     {
         // Ignore Spelling: tda
 
@@ -67,7 +67,11 @@ namespace PeptideHitResultsProcessor.Data
         /// <remarks>Only reported by MS-GF+</remarks>
         public string IsotopeError { get; set; }
 
-        public bool MSGFPlusResults { get; set; }
+        /// <summary>
+        /// True if the loaded data is from MS-GF+
+        /// False if from MSGFDB
+        /// </summary>
+        public bool UsedMSGFPlus { get; set; }
 
         #endregion
 
@@ -80,7 +84,7 @@ namespace PeptideHitResultsProcessor.Data
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        public clsSearchResultsMSGFPlus(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
+        public MSGFPlusResults(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
         }
@@ -106,7 +110,7 @@ namespace PeptideHitResultsProcessor.Data
             MSGFPlusComputedDelMPPM = string.Empty;
 
             IsotopeError = string.Empty;
-            MSGFPlusResults = false;
+            UsedMSGFPlus = false;
         }
     }
 }

@@ -21,11 +21,11 @@ using PHRPReader.Reader;
 
 namespace PeptideHitResultsProcessor.Processor
 {
-    public class clsMODaResultsProcessor : clsPHRPBaseClass
+    public class MODaResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: moda, MODa, txt, fht, mgf, methylation, ModDefs
 
-        public clsMODaResultsProcessor()
+        public MODaResultsProcessor()
         {
             FileDate = "July 10, 2019";
             InitializeLocalVariables();
@@ -44,7 +44,7 @@ namespace PeptideHitResultsProcessor.Processor
         public const string C_TERMINUS_SYMBOL_MODA = "-";
 
         // ReSharper disable once UnusedMember.Global
-        public const float DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
+        public const float DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD = MODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
         private const int MAX_ERROR_LOG_LENGTH = 4096;
 
@@ -800,7 +800,7 @@ namespace PeptideHitResultsProcessor.Processor
                 mPeptideMods.ResetOccurrenceCountStats();
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsMODa(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new MODaResults(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize peptidesFoundForProbabilityLevel
                 var peptidesFoundForProbabilityLevel = new SortedSet<string>();
@@ -1262,7 +1262,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseMODaSynFileEntry(
             string lineIn,
-            clsSearchResultsMODa searchResult,
+            MODaResults searchResult,
             ref string errorLog,
             int resultsProcessed,
             IDictionary<MODaSynFileReader.MODaSynFileColumns, int> columnMapping,
@@ -1488,7 +1488,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in clsMODaResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
+                    SetErrorMessage("Error in MODaResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
                     SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }

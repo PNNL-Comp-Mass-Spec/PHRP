@@ -78,7 +78,7 @@ namespace PHRPReader.Reader
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
         /// <summary>
-        /// These columns correspond to the Synopsis file created by clsMSGFPlusResultsProcessor
+        /// These columns correspond to the Synopsis file created by MSGFPlusResultsProcessor
         /// </summary>
         public enum MSGFPlusSynFileColumns
         {
@@ -294,7 +294,7 @@ namespace PHRPReader.Reader
         /// <param name="searchEngineParams"></param>
         /// <param name="chargeCarrierMass"></param>
         /// <returns>True if successful, false if an error</returns>
-        /// <remarks>This function is used by clsPHRPMassErrorValidator in the Analysis Manager</remarks>
+        /// <remarks>This function is used by PHRPMassErrorValidator in the Analysis Manager</remarks>
         public static bool GetCustomChargeCarrierMass(SearchEngineParameters searchEngineParams, out double chargeCarrierMass)
         {
             if (searchEngineParams.Parameters.TryGetValue(CHARGE_CARRIER_MASS_PARAM_NAME, out var value))
@@ -626,7 +626,7 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
-        /// <param name="psm">clsPSM object (output)</param>
+        /// <param name="psm">Output: PSM details</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>

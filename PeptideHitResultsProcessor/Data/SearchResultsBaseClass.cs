@@ -96,7 +96,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Group ID assigned by X!Tandem
         /// </summary>
-        /// <remarks>MaxQuant protein group IDs are tracked by clsSearchResultsMaxQuant.ProteinGroupIDs</remarks>
+        /// <remarks>MaxQuant protein group IDs are tracked by MaxQuantResults.ProteinGroupIDs</remarks>
         public int GroupID { get; set; }
 
         /// <summary>
@@ -1076,7 +1076,7 @@ namespace PeptideHitResultsProcessor.Data
 
             if (mSearchResultModifications.Count > 0)
             {
-                var udtModNameAndResidueLoc = new clsPHRPBaseClass.udtModNameAndResidueLocType[mSearchResultModifications.Count];
+                var udtModNameAndResidueLoc = new PHRPBaseClass.udtModNameAndResidueLocType[mSearchResultModifications.Count];
                 var pointerArray = new int[mSearchResultModifications.Count];
 
                 if (mSearchResultModifications.Count == 1)
@@ -1093,7 +1093,7 @@ namespace PeptideHitResultsProcessor.Data
                         pointerArray[index] = index;
                     }
 
-                    Array.Sort(udtModNameAndResidueLoc, pointerArray, new clsPHRPBaseClass.IModNameAndResidueLocComparer());
+                    Array.Sort(udtModNameAndResidueLoc, pointerArray, new PHRPBaseClass.IModNameAndResidueLocComparer());
                 }
 
                 // Step through the modifications and add the modification name and residue position to mPeptideModDescription

@@ -78,7 +78,7 @@ namespace PHRPReader
         public struct PeptideSequenceModInfo
         {
             /// <summary>
-            /// Position that the modification occurs; not used by clsPeptideMassCalculator
+            /// Position that the modification occurs; not used by PeptideMassCalculator
             /// </summary>
             public int ResidueLocInPeptide;
 
@@ -639,7 +639,7 @@ namespace PHRPReader
         }
 
         /// <summary>
-        /// Create a new clsEmpiricalFormula instance with the specified number of atoms
+        /// Create a new EmpiricalFormula instance with the specified number of atoms
         /// </summary>
         /// <param name="countC"></param>
         /// <param name="countH"></param>

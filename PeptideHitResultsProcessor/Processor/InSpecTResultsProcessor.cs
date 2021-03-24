@@ -31,11 +31,11 @@ namespace PeptideHitResultsProcessor.Processor
     /// into the peptide sequences for modified peptides.
     /// </summary>
     /// <remarks>The modification definition information is determined from the InSpecT parameter file</remarks>
-    public class clsInSpecTResultsProcessor : clsPHRPBaseClass
+    public class InSpecTResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: fht, txt, phos, methylation, nterminal, cterminal, Pos, ModDefs, Da
 
-        public clsInSpecTResultsProcessor()
+        public InSpecTResultsProcessor()
         {
             FileDate = "April 17, 2019";
             InitializeLocalVariables();
@@ -1478,7 +1478,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     if (inputFile.Directory == null)
                     {
-                        ReportWarning("clsInSpecTResultsProcessor.ProcessFile: Could not determine the parent directory of " + inputFile.FullName);
+                        ReportWarning("InSpecTResultsProcessor.ProcessFile: Could not determine the parent directory of " + inputFile.FullName);
                         return false;
                     }
 
@@ -1555,7 +1555,7 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             if (string.IsNullOrWhiteSpace(synOutputFilePath))
                             {
-                                ReportWarning("clsInSpecTResultsProcessor.ProcessFile: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
+                                ReportWarning("InSpecTResultsProcessor.ProcessFile: synOutputFilePath is null; cannot call CreateProteinModDetailsFile");
                             }
                             else
                             {

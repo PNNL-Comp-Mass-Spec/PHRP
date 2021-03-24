@@ -21,7 +21,7 @@ namespace PeptideHitResultsProcessor.Data
     /// This class is used to track peptide sequences and their modification descriptors
     /// It assigns a unique integer ID to each combination of sequence and modification description
     /// </summary>
-    public class clsUniqueSequencesContainer
+    public class UniqueSequencesContainer
     {
         #region "Constants and Enums"
         private const int DEFAULT_INITIAL_SEQ_ID = 1;
@@ -46,7 +46,7 @@ namespace PeptideHitResultsProcessor.Data
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsUniqueSequencesContainer()
+        public UniqueSequencesContainer()
         {
             mMasterSequences = new Dictionary<string, int>();
             Clear();

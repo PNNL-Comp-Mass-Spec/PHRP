@@ -113,7 +113,7 @@ namespace PHRPReader.Data
         private string mMassCorrectionTag;
 
         /// <summary>
-        /// Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications)
+        /// Set to Nothing or to PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL for positional modifications (including terminus modifications)
         /// For Isotopic modifications, indicate the atom affected (e.g. C, H, N, O, or S)
         /// </summary>
         private char mAffectedAtom;
@@ -218,7 +218,7 @@ namespace PHRPReader.Data
         /// Only used with Isotopic modifications, indicating the atom affected (e.g. C, H, N, O, or S)
         /// </summary>
         /// <remarks>
-        /// Set to Nothing or to clsPeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL (a dash) for positional modifications
+        /// Set to Nothing or to PeptideMassCalculator.NO_AFFECTED_ATOM_SYMBOL (a dash) for positional modifications
         /// (including terminus modifications)
         /// </remarks>
         public char AffectedAtom

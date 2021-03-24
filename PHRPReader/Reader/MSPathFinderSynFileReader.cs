@@ -48,7 +48,7 @@ namespace PHRPReader.Reader
         private const string MSPathFinder_SEARCH_ENGINE_NAME = "MSPathFinder";
 
         /// <summary>
-        /// These columns correspond to the Synopsis file created by clsMSPathFinderResultsProcessor
+        /// These columns correspond to the Synopsis file created by MSPathFinderResultsProcessor
         /// </summary>
         public enum MSPathFinderSynFileColumns
         {
@@ -350,7 +350,7 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
-        /// <param name="psm">clsPSM object (output)</param>
+        /// <param name="psm">Output: PSM details</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>

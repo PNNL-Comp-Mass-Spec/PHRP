@@ -95,7 +95,7 @@ namespace PHRPReader.Reader
         /// Open a tab-delimited _ScanStats.txt file and read the data
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
-        /// <returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
+        /// <returns>A Dictionary where keys are ScanNumber and values are instances of ScanStatsInfo</returns>
         public Dictionary<int, ScanStatsInfo> ReadScanStatsData(string inputFilePath)
         {
             var scanStats = new Dictionary<int, ScanStatsInfo>();

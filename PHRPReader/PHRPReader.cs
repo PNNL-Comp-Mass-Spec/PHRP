@@ -152,22 +152,43 @@ namespace PHRPReader
 
         private readonly PeptideMassCalculator mPeptideMassCalculator;
 
-        // This dictionary contains mod symbols as the key and modification definition as the values
+        /// <summary>
+        /// Keys in this dictionary are mod symbols
+        /// Values are the corresponding modification definition
+        /// </summary>
         private readonly SortedDictionary<char, ModificationDefinition> mDynamicMods;
 
-        // This dictionary contains amino acid names as the key and the corresponding mod modification (or mod modifications)
+        /// <summary>
+        /// Keys in this dictionary are amino acid names
+        /// Values are a list of modification definitions
+        /// </summary>
         private readonly SortedDictionary<string, List<ModificationDefinition>> mStaticMods;
 
-        // This dictionary tracks the MSGFSpecEvalue values for each entry in the source file
-        // The keys are Result_ID and the string is MSGFSpecEValue (stored as string to preserve formatting)
+        /// <summary>
+        /// Dictionary of cached MSGF values
+        /// </summary>
+        /// <remarks>
+        /// Keys are Result_ID
+        /// Values are MSGFSpecEValue (stored as string to preserve formatting)
+        /// </remarks>
         private Dictionary<int, string> mMSGFCachedResults;
 
-        // This dictionary tracks scan stats values, in particular elution time
-        //The keys are ScanNumber and values are clsScanStatsInfo objects
+        /// <summary>
+        /// Dictionary of cached scan stats data, in particular elution time
+        /// </summary>
+        /// <remarks>
+        /// Keys are ScanNumber
+        /// Values are ScanStatsInfo objects
+        /// </remarks>
         private Dictionary<int, ScanStatsInfo> mScanStats;
 
-        // This dictionary tracks extended scan stats values, including parent ion mz (via MonoisotopicMZ)and collision mode
-        //The keys are ScanNumber and values are clsScanStatsExInfo objects
+        /// <summary>
+        /// Dictionary of cached extended scan stats date, including  parent ion mz (via MonoisotopicMZ) and collision mode
+        /// </summary>
+        /// <remarks>
+        /// Keys are ScanNumber
+        /// Values are ScanStatsExInfo objects
+        /// </remarks>
         private Dictionary<int, ScanStatsExInfo> mScanStatsEx;
 
         private PSM mPSMCurrent;
@@ -850,7 +871,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                HandleException("Error in clsPHRPReader.InitializeParser", ex);
+                HandleException("Error in PHRPReader.InitializeParser", ex);
                 if (!mInitialized)
                     throw new Exception(ErrorMessage, ex);
 
@@ -1406,8 +1427,8 @@ namespace PHRPReader
         /// Note that if the _SeqInfo.txt file is available, this function will not be used
         /// </summary>
         /// <param name="peptide"></param>
-        /// <param name="peptideWithNumericMods">Peptide with numeric mods (output)</param>
-        /// <param name="peptideMods">List of modified amino acids (output)</param>
+        /// <param name="peptideWithNumericMods">Output: Peptide with numeric mods</param>
+        /// <param name="peptideMods">Output: List of modified amino acids</param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>peptideWithNumericMods will look like R.TDM+15.9949ESALPVTVLSAEDIAK.T</remarks>
         private bool ConvertModsToNumericMods(string peptide,
@@ -2678,8 +2699,8 @@ namespace PHRPReader
 
                             // "S", "T", or "P"
                             // Static residue mod, peptide terminus static mod, or protein terminus static mod
-                            // Note that < and > mean peptide N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
-                            // Note that [ and ] mean protein N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
+                            // Note that < and > mean peptide N and C terminus (AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                            // Note that [ and ] mean protein N and C terminus (AminoAcidModInfo.N_TERMINAL_PROTEIN_SYMBOL_DMS and AminoAcidModInfo.C_TERMINAL_PROTEIN_SYMBOL_DMS)
 
                             // This mod could apply to multiple residues, so need to process each character in targetResidues
                             foreach (var chChar in modDef.TargetResidues)
@@ -2715,7 +2736,7 @@ namespace PHRPReader
                             break;
                         case ModificationDefinition.ModificationTypeConstants.DynamicMod:
                             // Dynamic residue mod (Includes mod type "D")
-                            // Note that < and > mean peptide N and C terminus (clsAminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and clsAminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
+                            // Note that < and > mean peptide N and C terminus (AminoAcidModInfo.N_TERMINAL_PEPTIDE_SYMBOL_DMS and AminoAcidModInfo.C_TERMINAL_PEPTIDE_SYMBOL_DMS)
 
                             try
                             {

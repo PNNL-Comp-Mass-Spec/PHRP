@@ -19,11 +19,11 @@ namespace PeptideHitResultsProcessor.Processor
     /// Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
     /// Started 11/28/2012
     /// </remarks>
-    public class clsMSAlignResultsProcessor : clsPHRPBaseClass
+    public class MSAlignResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: monoisotopic, enums, txt, histone, methylation, fht, Da, Prsm, IodoAcet, IodoAcid, Frag, pvalue, Defs
 
-        public clsMSAlignResultsProcessor()
+        public MSAlignResultsProcessor()
         {
             FileDate = "January 27, 2021";
             InitializeLocalVariables();
@@ -704,7 +704,7 @@ namespace PeptideHitResultsProcessor.Processor
                 mPeptideMods.ResetOccurrenceCountStats();
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsMSAlign(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new MSAlignResults(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize peptidesFoundForPValueLevel
                 var peptidesFoundForPValueLevel = new SortedSet<string>();
@@ -1190,7 +1190,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private bool ParseMSAlignSynFileEntry(
             string lineIn,
-            clsSearchResultsMSAlign searchResult,
+            MSAlignResults searchResult,
             ref string errorLog,
             int resultsProcessed,
             IDictionary<MSAlignSynFileReader.MSAlignSynFileColumns, int> columnMapping,
@@ -1432,7 +1432,7 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in clsMSAlignResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
+                    SetErrorMessage("Error in MSAlignResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
                     SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }

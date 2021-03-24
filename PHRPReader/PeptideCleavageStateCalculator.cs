@@ -644,9 +644,9 @@ namespace PHRPReader
         /// Examines sequenceIn and splits apart into prefix, primary sequence, and suffix
         /// </summary>
         /// <param name="sequenceIn">Peptide sequence to examine</param>
-        /// <param name="primarySequence">Primary sequence (output)</param>
-        /// <param name="prefix">Prefix residue (output)</param>
-        /// <param name="suffix">Suffix residue (output)</param>
+        /// <param name="primarySequence">Output: Primary sequence</param>
+        /// <param name="prefix">Output: Prefix residue</param>
+        /// <param name="suffix">Output: Suffix residue</param>
         /// <returns> Returns True if success, False if prefix and suffix residues were not found</returns>
         /// <remarks>If more than one character is present before the first period or after the last period, all characters are returned
         /// If the peptide starts with ".." it is auto-changed to start with "."

@@ -1,6 +1,6 @@
 // This class implements the IPeptideHitResultsProcessor interface
-// It uses class clsXTandemResultsProcessor to read an XTandem search results XML file
-//  or class clsSequestResultsProcessor to read a Sequest Synopsis or First Hits file
+// It uses class XTandemResultsProcessor to read an XTandem search results XML file
+//  or class SequestResultsProcessor to read a Sequest Synopsis or First Hits file
 //
 // Written by Matthew Monroe for the Department of Energy (PNNL, Richland, WA)
 // Copyright 2006, Battelle Memorial Institute
@@ -25,7 +25,7 @@ namespace PeptideHitResultsProcessor
 
         #region "Class wide Variables"
 
-        private clsPHRPBaseClass.PeptideHitResultsFileFormatConstants m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine;
+        private PHRPBaseClass.PeptideHitResultsFileFormatConstants m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine;
 
         private string m_ParameterFilePath = string.Empty;      // Peptide search tool parameter file path
         private string m_SettingsFilePath = string.Empty;       // XML settings file with section PeptideHitResultsProcessorOptions
@@ -39,7 +39,7 @@ namespace PeptideHitResultsProcessor
         private ProcessStatus m_Status;
         private ProcessResults m_Results;
 
-        private clsPHRPBaseClass m_PeptideHitResultsProcessor;
+        private PHRPBaseClass m_PeptideHitResultsProcessor;
 
         private Thread m_thThread;
 
@@ -137,41 +137,41 @@ namespace PeptideHitResultsProcessor
                 // Initialize m_PeptideHitResultsProcessor
                 switch (m_PeptideHitResultsFileFormat)
                 {
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.XTandemXMLFile:
-                        m_PeptideHitResultsProcessor = new clsXTandemResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.XTandemXMLFile:
+                        m_PeptideHitResultsProcessor = new XtandemResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestSynopsisFile:
-                        m_PeptideHitResultsProcessor = new clsSequestResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestFirstHitsFile:
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestSynopsisFile:
+                        m_PeptideHitResultsProcessor = new SequestResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.InspectTXTFile:
-                        m_PeptideHitResultsProcessor = new clsInSpecTResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.InspectTXTFile:
+                        m_PeptideHitResultsProcessor = new InSpecTResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
-                        m_PeptideHitResultsProcessor = new clsMSGFPlusResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile:
+                        m_PeptideHitResultsProcessor = new MSGFPlusResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSAlignTXTFile:
-                        m_PeptideHitResultsProcessor = new clsMSAlignResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.MSAlignTXTFile:
+                        m_PeptideHitResultsProcessor = new MSAlignResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MODaTXTFile:
-                        m_PeptideHitResultsProcessor = new clsMODaResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.MODaTXTFile:
+                        m_PeptideHitResultsProcessor = new MODaResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MODPlusTXTFile:
-                        m_PeptideHitResultsProcessor = new clsMODaResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.MODPlusTXTFile:
+                        m_PeptideHitResultsProcessor = new MODaResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
-                        m_PeptideHitResultsProcessor = new clsMSPathFinderResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile:
+                        m_PeptideHitResultsProcessor = new MSPathFinderResultsProcessor();
                         break;
 
-                    case clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.TopPICTXTFile:
-                        m_PeptideHitResultsProcessor = new clsTopPICResultsProcessor();
+                    case PHRPBaseClass.PeptideHitResultsFileFormatConstants.TopPICTXTFile:
+                        m_PeptideHitResultsProcessor = new TopPICResultsProcessor();
                         break;
 
                     default:
@@ -190,7 +190,7 @@ namespace PeptideHitResultsProcessor
                 m_PeptideHitResultsProcessor.MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath;
                 m_PeptideHitResultsProcessor.ModificationDefinitionsFilePath = m_ModificationDefinitionsFilePath;
                 m_PeptideHitResultsProcessor.SearchToolParameterFilePath = m_ParameterFilePath;
-                m_PeptideHitResultsProcessor.InspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
+                m_PeptideHitResultsProcessor.InspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
                 m_PeptideHitResultsProcessor.CreateFirstHitsFile = CreateFirstHitsFile;
                 m_PeptideHitResultsProcessor.CreateSynopsisFile = CreateSynopsisFile;
@@ -312,55 +312,55 @@ namespace PeptideHitResultsProcessor
             m_SettingsFilePath = Path.Combine(SourceDirectoryPath, SettingsFileName);
 
             // Define the peptide hit results format based on the analysis tool name
-            if (AnalysisToolName.IndexOf(clsXTandemResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            if (AnalysisToolName.IndexOf(XtandemResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.XTandemXMLFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.XTandemXMLFile;
             }
-            else if (AnalysisToolName.IndexOf(clsSequestResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(SequestResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestSynopsisFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.SequestSynopsisFile;
             }
-            else if (AnalysisToolName.IndexOf(clsInSpecTResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(InSpecTResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.InspectTXTFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.InspectTXTFile;
             }
             else if (AnalysisToolName.IndexOf("msgfdb", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
-            else if (AnalysisToolName.IndexOf(clsMSGFPlusResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(MSGFPlusResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
-            else if (AnalysisToolName.IndexOf(clsMSAlignResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(MSAlignResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSAlignTXTFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.MSAlignTXTFile;
             }
-            else if (AnalysisToolName.IndexOf(clsMODaResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(MODaResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MODaTXTFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.MODaTXTFile;
             }
-            else if (AnalysisToolName.IndexOf(clsMODPlusResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(MODPlusResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MODPlusTXTFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.MODPlusTXTFile;
             }
-            else if (AnalysisToolName.IndexOf(clsMSPathFinderResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(MSPathFinderResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
             }
-            else if (AnalysisToolName.IndexOf(clsTopPICResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (AnalysisToolName.IndexOf(TopPICResultsProcessor.TOOL_NAME, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.TopPICTXTFile;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.TopPICTXTFile;
             }
             else if (AnalysisToolName.IndexOf("DataExtractor", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 // Data Extractor step-tool; we'll need to auto-determine the results format
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine;
             }
             else
             {
                 // Unrecognized analysis tool name
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine;
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine;
             }
 
             if (DebugLevel >= 3)
@@ -376,7 +376,7 @@ namespace PeptideHitResultsProcessor
             // Define the peptide hit results file name
             if (string.IsNullOrWhiteSpace(PeptideHitResultsFileName))
             {
-                m_PeptideHitResultsFilePath = clsPHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, SourceDirectoryPath, DatasetName);
+                m_PeptideHitResultsFilePath = PHRPBaseClass.AutoDefinePeptideHitResultsFilePath(m_PeptideHitResultsFileFormat, SourceDirectoryPath, DatasetName);
             }
             else
             {
@@ -389,9 +389,9 @@ namespace PeptideHitResultsProcessor
             }
 
             // Now that m_PeptideHitResultsFilePath has been determined, if m_PeptideHitResultsFileFormat is .AutoDetermine, try to determine the correct format
-            if (m_PeptideHitResultsFileFormat == clsPHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine)
+            if (m_PeptideHitResultsFileFormat == PHRPBaseClass.PeptideHitResultsFileFormatConstants.AutoDetermine)
             {
-                m_PeptideHitResultsFileFormat = clsPHRPBaseClass.DetermineResultsFileFormat(m_PeptideHitResultsFilePath);
+                m_PeptideHitResultsFileFormat = PHRPBaseClass.DetermineResultsFileFormat(m_PeptideHitResultsFilePath);
             }
 
             // Define the mass correction tags file path

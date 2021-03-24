@@ -28,11 +28,11 @@ namespace PeptideHitResultsProcessor.Processor
     /// This class reads in a TopPIC results file (txt format) and creates
     /// a tab-delimited text file with the data.
     /// </summary>
-    public class clsTopPICResultsProcessor : clsPHRPBaseClass
+    public class TopPICResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: monoisotopic, Battelle, txt, enums, acetyl, methylation, toppic, syn, fht, Prsm, Da, Pvalue, Frag
 
-        public clsTopPICResultsProcessor()
+        public TopPICResultsProcessor()
         {
             FileDate = "July 10, 2019";
             InitializeLocalVariables();
@@ -759,7 +759,7 @@ namespace PeptideHitResultsProcessor.Processor
                 mPeptideMods.ResetOccurrenceCountStats();
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsTopPIC(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new TopPICResults(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize peptidesFoundForPValueLevel
                 var peptidesFoundForPValueLevel = new SortedSet<string>();
@@ -1277,7 +1277,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <returns>True if successful, false if an error</returns>
         private bool ParseTopPICSynFileEntry(
             string lineIn,
-            clsSearchResultsTopPIC searchResult,
+            TopPICResults searchResult,
             ref string errorLog,
             int resultsProcessed,
             IDictionary<TopPICSynFileReader.TopPICSynFileColumns, int> columnMapping,
@@ -1525,13 +1525,13 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in clsTopPICResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
+                    SetErrorMessage("Error in TopPICResultsProcessor.ProcessFile (2):  " + ex.Message, ex);
                     SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in clsTopPICResultsProcessor.ProcessFile (1):" + ex.Message, ex);
+                SetErrorMessage("Error in TopPICResultsProcessor.ProcessFile (1):" + ex.Message, ex);
                 SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 

@@ -30,11 +30,11 @@ namespace PeptideHitResultsProcessor.Processor
     /// modification definition file that specifies the dynamic and/or static modifications
     /// used in the search.
     /// </summary>
-    public class clsSequestResultsProcessor : clsPHRPBaseClass
+    public class SequestResultsProcessor : PHRPBaseClass
     {
         // Ignore Spelling: fht, methylation
 
-        public clsSequestResultsProcessor()
+        public SequestResultsProcessor()
         {
             FileDate = "April 17, 2019";
             InitializeLocalVariables();
@@ -209,7 +209,7 @@ namespace PeptideHitResultsProcessor.Processor
                 mPeptideMods.ResetOccurrenceCountStats();
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsSequest(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new SequestResults(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize peptidesFoundForXCorrLevel
                 var peptidesFoundForXCorrLevel = new SortedSet<string>();
@@ -378,7 +378,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseSequestResultsFileEntry(
             string lineIn,
             IDictionary<SequestSynFileReader.SequestSynopsisFileColumns, int> columnMapping,
-            clsSearchResultsSequest searchResult,
+            SequestResults searchResult,
             ref string errorLog)
         {
             string[] splitLine = null;
@@ -551,7 +551,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in clsSequestResultsProcessor.ProcessFile:  " + ex.Message);
+                SetErrorMessage("Error in SequestResultsProcessor.ProcessFile:  " + ex.Message);
                 SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 

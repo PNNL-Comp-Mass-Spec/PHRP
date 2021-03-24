@@ -32,16 +32,16 @@ namespace PeptideHitResultsProcessor.Processor
     /// <summary>
     /// This class can be used as a base class for peptide hit results processor classes
     /// </summary>
-    public abstract class clsPHRPBaseClass : PRISM.EventNotifier
+    public abstract class PHRPBaseClass : PRISM.EventNotifier
     {
         // Ignore Spelling: Da, A-Za-z, Fscore, prot, mts, MSFragger, xxx
 
         /// <summary>
         /// Constructor
         /// </summary>
-        protected clsPHRPBaseClass()
+        protected PHRPBaseClass()
         {
-            FileDate = "February 3, 2021";
+            FileDate = "March 23, 2021";
 
             mPeptideSeqMassCalculator = new PeptideMassCalculator { ChargeCarrierMass = PeptideMassCalculator.MASS_PROTON };
 
@@ -49,7 +49,7 @@ namespace PeptideHitResultsProcessor.Processor
             mPeptideMods = new PeptideModificationContainer();
 
             // Initialize mUniqueSequences
-            mUniqueSequences = new clsUniqueSequencesContainer();
+            mUniqueSequences = new UniqueSequencesContainer();
 
             // Initialize mSeqToProteinMap
             mSeqToProteinMap = new SortedSet<string>();
@@ -254,7 +254,7 @@ namespace PeptideHitResultsProcessor.Processor
         protected readonly PeptideMassCalculator mPeptideSeqMassCalculator;
 
         protected readonly PeptideModificationContainer mPeptideMods;
-        private readonly clsUniqueSequencesContainer mUniqueSequences;
+        private readonly UniqueSequencesContainer mUniqueSequences;
         private readonly SortedSet<string> mSeqToProteinMap;
 
         private StreamWriter mResultToSeqMapFile;
@@ -332,7 +332,7 @@ namespace PeptideHitResultsProcessor.Processor
         public string ModificationDefinitionsFilePath { get; set; }
 
         /// <summary>
-        /// Used by clsMODaResultsProcessor and clsMODPlusResultsProcessor
+        /// Used by MODaResultsProcessor and MODPlusResultsProcessor
         /// </summary>
         /// <remarks>Higher probability are higher confidence results</remarks>
         public float MODaMODPlusSynopsisFileProbabilityThreshold { get; set; }
@@ -344,13 +344,13 @@ namespace PeptideHitResultsProcessor.Processor
         public float MSAlignAndTopPICSynopsisFilePValueThreshold { get; set; }
 
         /// <summary>
-        /// Used by clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
+        /// Used by MSGFPlusResultsProcessor and MSPathFinderResultsProcessor
         /// </summary>
         /// <remarks>Lower E-values are higher confidence results</remarks>
         public float MSGFPlusSynopsisFileEValueThreshold { get; set; }
 
         /// <summary>
-        /// clsMSGFPlusResultsProcessor and clsMSPathFinderResultsProcessor
+        /// MSGFPlusResultsProcessor and MSPathFinderResultsProcessor
         /// </summary>
         /// <remarks>Lower SpecEValue values are higher confidence results</remarks>
         public float MSGFPlusSynopsisFileSpecEValueThreshold { get; set; }
@@ -377,7 +377,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Search tool parameter file path
         /// </summary>
-        /// <remarks>Used by clsInSpecTResultsProcessor and clsMSGFPlusResultsProcessor (aka SearchEngineParamFileName)</remarks>
+        /// <remarks>Used by InSpecTResultsProcessor and MSGFPlusResultsProcessor (aka SearchEngineParamFileName)</remarks>
         public string SearchToolParameterFilePath { get; set; }
 
         public bool UseExistingMTSPepToProteinMapFile { get; set; }
@@ -675,51 +675,51 @@ namespace PeptideHitResultsProcessor.Processor
                 return PeptideHitResultsFileFormatConstants.XTandemXMLFile;
             }
 
-            if (baseFileName.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(SequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.SequestFirstHitsFile;
             }
 
-            if (baseFileName.EndsWith(clsSequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(SequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.SequestSynopsisFile;
             }
 
-            if (baseFileName.EndsWith(clsInSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(InSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.InspectTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(MSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(MSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.MSGFPlusTXTFile;
             }
-            if (baseFileName.EndsWith(clsMSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(MSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.MSAlignTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(MODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.MODaTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(MODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.MODPlusTXTFile;
             }
 
-            if (baseFileName.EndsWith(clsMSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(MSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.MSPathFinderTSVFile;
             }
 
-            if (baseFileName.EndsWith(clsTopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE, StringComparison.OrdinalIgnoreCase))
+            if (baseFileName.EndsWith(TopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE, StringComparison.OrdinalIgnoreCase))
             {
                 return PeptideHitResultsFileFormatConstants.TopPICTXTFile;
             }
@@ -1543,14 +1543,14 @@ namespace PeptideHitResultsProcessor.Processor
             ModificationDefinitionsFilePath = string.Empty;
             SearchToolParameterFilePath = string.Empty;
 
-            InspectSynopsisFilePValueThreshold = clsInSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
+            InspectSynopsisFilePValueThreshold = InSpecTResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
-            MODaMODPlusSynopsisFileProbabilityThreshold = clsMODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
+            MODaMODPlusSynopsisFileProbabilityThreshold = MODPlusResultsProcessor.DEFAULT_SYN_FILE_PROBABILITY_THRESHOLD;
 
-            MSAlignAndTopPICSynopsisFilePValueThreshold = clsMSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
+            MSAlignAndTopPICSynopsisFilePValueThreshold = MSAlignResultsProcessor.DEFAULT_SYN_FILE_PVALUE_THRESHOLD;
 
-            MSGFPlusSynopsisFileEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
-            MSGFPlusSynopsisFileSpecEValueThreshold = clsMSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
+            MSGFPlusSynopsisFileEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_EVALUE_THRESHOLD;
+            MSGFPlusSynopsisFileSpecEValueThreshold = MSGFPlusResultsProcessor.DEFAULT_SYN_FILE_MSGF_SPEC_EVALUE_THRESHOLD;
 
             EnzymeMatchSpec = PeptideCleavageStateCalculator.GetDefaultEnzymeMatchSpec();
 

@@ -21,15 +21,15 @@ namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for an XTandem search result
-    /// See clsSearchResultsBaseClass for additional information
+    /// See SearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsXTandem : SearchResultsBaseClass
+    public class XTandemResults : SearchResultsBaseClass
     {
         // Ignore Spelling: delM
 
         #region "Class wide Variables"
 
-        // Note: ProteinExpectationValue and ProteinIntensity are defined in clsSearchResultsBaseClass
+        // Note: ProteinExpectationValue and ProteinIntensity are defined in SearchResultsBaseClass
         // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
         private string mPeptideNextScore;
 
@@ -81,7 +81,7 @@ namespace PeptideHitResultsProcessor.Data
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        public clsSearchResultsXTandem(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
+        public XTandemResults(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
         }
@@ -115,7 +115,7 @@ namespace PeptideHitResultsProcessor.Data
             var parseError = false;
 
             // Note that mPeptideDeltaMass is the DeltaMass value reported by X!Tandem
-            // (though clsXtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
+            // (though XtandemResultsProcessor took the negative of the value in the results file so it currently represents "theoretical - observed")
             if (double.TryParse(PeptideDeltaMass, out var delM))
             {
                 // Negate delM so that it represents observed - theoretical

@@ -1296,7 +1296,7 @@ namespace PHRPReader.Data
                 // Column 3, which is optional, is the residues and/or termini that can be modified; if omitted, the modification can apply to any residues or termini
                 //   For column 3, use 1 letter amino acid abbreviations; the residues can be a continuous string, or can be separated by commas and/or spaces
                 //   For column 3, use the *_SYMBOL_DMS constants for the termini (< and > for the peptide termini; [ and ] for the protein termini)
-                // Column 4, which is optional, specifies the type of modification: D, S, T, I, or P (corresponding to clsModificationDefinition.ModificationTypeConstants)
+                // Column 4, which is optional, specifies the type of modification: D, S, T, I, or P (corresponding to ModificationDefinition.ModificationTypeConstants)
                 // Column 5, which is optional, specifies the mass correction tag associated with the given modification
 
                 if (string.IsNullOrWhiteSpace(filePath))

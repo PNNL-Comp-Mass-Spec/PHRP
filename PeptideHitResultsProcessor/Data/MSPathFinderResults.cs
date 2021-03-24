@@ -18,9 +18,9 @@ namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for a MSPathFinder search result
-    /// See clsSearchResultsBaseClass for additional information
+    /// See SearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsMSPathFinder : SearchResultsBaseClass
+    public class MSPathFinderResults : SearchResultsBaseClass
     {
         #region "Properties"
 
@@ -48,7 +48,7 @@ namespace PeptideHitResultsProcessor.Data
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        public clsSearchResultsMSPathFinder(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
+        public MSPathFinderResults(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
         }

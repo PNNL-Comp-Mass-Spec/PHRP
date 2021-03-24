@@ -35,7 +35,7 @@ namespace PeptideHitResultsProcessor.Processor
     /// definition information is determined from the X!Tandem Input Parameters section at
     /// the end of the X!Tandem results file.
     /// </summary>
-    public class clsXTandemResultsProcessor : clsPHRPBaseClass
+    public class XtandemResultsProcessor : PHRPBaseClass
     {
         // ReSharper disable CommentTypo
 
@@ -45,7 +45,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "Constants and Enums"
 
-        // Note: TOOL_NAME is used by clsAnalysisManagerPeptideHitResultsProcessor.InitSetup
+        // Note: TOOL_NAME is used by AnalysisManagerPeptideHitResultsProcessor.InitSetup
         //       Do not add an exclamation mark
 
         public const string TOOL_NAME = "XTandem";
@@ -120,7 +120,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <summary>
         /// Constructor
         /// </summary>
-        public clsXTandemResultsProcessor()
+        public XtandemResultsProcessor()
         {
             FileDate = "July 10, 2019";
 
@@ -130,7 +130,7 @@ namespace PeptideHitResultsProcessor.Processor
             InitializeLocalVariables();
         }
 
-        private bool AddModificationsAndComputeMass(clsSearchResultsXTandem searchResult, bool updateModOccurrenceCounts)
+        private bool AddModificationsAndComputeMass(XTandemResults searchResult, bool updateModOccurrenceCounts)
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = false;
             bool success;
@@ -432,7 +432,7 @@ namespace PeptideHitResultsProcessor.Processor
                 // Initialize the searchResults list
                 // There is a separate entry in searchResults for each protein encountered
 
-                var searchResults = new List<clsSearchResultsXTandem>();
+                var searchResults = new List<XTandemResults>();
 
                 // Reset mNextResultID and mLookForReverseSequenceTag
                 InitializeLocalVariables();
@@ -577,7 +577,7 @@ namespace PeptideHitResultsProcessor.Processor
         private bool ParseXTandemResultsFileEntry(
             XmlReader xmlReader,
             StreamWriter writer,
-            IList<clsSearchResultsXTandem> searchResults,
+            IList<XTandemResults> searchResults,
             ref string errorLog,
             int groupElementReaderDepth)
         {
@@ -623,7 +623,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 groupIDInXMLFile = XMLTextReaderGetAttributeValue(xmlReader, "id", string.Empty);
 
-                var firstResult = new clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator);
+                var firstResult = new XTandemResults(mPeptideMods, mPeptideSeqMassCalculator);
                 firstResult.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange, PeptideCTerminusMassChange);
 
                 // Initially set .ResultID to groupIDInXMLFile
@@ -663,7 +663,7 @@ namespace PeptideHitResultsProcessor.Processor
                         {
                             case XTANDEM_XML_ELEMENT_NAME_PROTEIN:
 
-                                clsSearchResultsXTandem result;
+                                XTandemResults result;
                                 if (searchResults.Count == 0)
                                 {
                                     result = firstResult;
@@ -671,7 +671,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 }
                                 else
                                 {
-                                    result = new clsSearchResultsXTandem(mPeptideMods, mPeptideSeqMassCalculator);
+                                    result = new XTandemResults(mPeptideMods, mPeptideSeqMassCalculator);
                                     result.UpdateSearchResultEnzymeAndTerminusInfo(EnzymeMatchSpec, PeptideNTerminusMassChange,
                                         PeptideCTerminusMassChange);
 
@@ -1546,13 +1546,13 @@ namespace PeptideHitResultsProcessor.Processor
                 }
                 catch (Exception ex)
                 {
-                    SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (2): " + ex.Message);
+                    SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (2): " + ex.Message);
                     SetErrorCode(PHRPErrorCodes.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
-                SetErrorMessage("Error in clsXTandemResultsProcessor.ProcessFile (1):" + ex.Message);
+                SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (1):" + ex.Message);
                 SetErrorCode(PHRPErrorCodes.UnspecifiedError);
             }
 
@@ -1612,7 +1612,7 @@ namespace PeptideHitResultsProcessor.Processor
             return true;
         }
 
-        private void SaveXTandemResultsFileEntry(clsSearchResultsXTandem searchResult, ref StreamWriter writer)
+        private void SaveXTandemResultsFileEntry(XTandemResults searchResult, ref StreamWriter writer)
         {
             // Update .ResultID to the next available number
             searchResult.ResultID = mNextResultID;

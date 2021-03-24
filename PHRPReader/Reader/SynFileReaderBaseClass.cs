@@ -511,7 +511,7 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
-        /// <param name="psm">clsPSM object (output)</param>
+        /// <param name="psm">Output: PSM info</param>
         /// <returns>True if successful, false if an error</returns>
         public bool ParsePHRPDataLine(string line, int linesRead, out PSM psm)
         {
@@ -523,7 +523,7 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <param name="line">Data line</param>
         /// <param name="linesRead">Number of lines read so far (used for error reporting)</param>
-        /// <param name="psm">clsPSM object (output)</param>
+        /// <param name="psm">Output: PSM info</param>
         /// <param name="fastReadMode">When set to true, reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
         /// <returns>True if successful, false if an error</returns>
         /// <remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
@@ -534,7 +534,7 @@ namespace PHRPReader.Reader
         /// Also reads the Tool_Version_Info file in the same directory (if present)
         /// </summary>
         /// <param name="searchEngineParamFileName">Name of the parameter file to parse (must reside in InputDirectoryPath)</param>
-        /// <param name="searchEngineParams">Search engine parameters class (output)</param>
+        /// <param name="searchEngineParams">Output: Search engine parameters class</param>
         /// <returns>True if successful, false if an error</returns>
         public abstract bool LoadSearchEngineParameters(string searchEngineParamFileName, out SearchEngineParameters searchEngineParams);
 

@@ -316,7 +316,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein termini (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein termini (see the SYMBOL_DMS constants in AminoAcidModInfo)</param>
         /// <param name="residueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
         /// <param name="residueTerminusState">Terminus state of residue</param>
         /// <param name="modDefinition">Modification details</param>
@@ -332,7 +332,7 @@ namespace PHRPReader.Data
         /// <summary>
         /// Add the details for a modified residue
         /// </summary>
-        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein termini (see the SYMBOL_DMS constants in clsAminoAcidModInfo)</param>
+        /// <param name="residue">Amino acid letter; use angle brackets or square brackets for peptide or protein termini (see the SYMBOL_DMS constants in AminoAcidModInfo)</param>
         /// <param name="residueLocInPeptide">Location of the residue in the peptide; use 1 for an N-terminal mod</param>
         /// <param name="residueTerminusState">Terminus state of residue</param>
         /// <param name="modDefinition">Modification details</param>

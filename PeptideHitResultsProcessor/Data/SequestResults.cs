@@ -20,9 +20,9 @@ namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for a Sequest search result
-    /// See clsSearchResultsBaseClass for additional information
+    /// See SearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsSequest : SearchResultsBaseClass
+    public class SequestResults : SearchResultsBaseClass
     {
         #region "Properties"
 
@@ -57,7 +57,7 @@ namespace PeptideHitResultsProcessor.Data
         /// The base class constructor calls InitializeLocalVariables,
         /// which calls both the base class's Clear method and this class's Clear method
         /// </remarks>
-        public clsSearchResultsSequest(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
+        public SequestResults(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
             : base(peptideMods, peptideSeqMassCalculator)
         {
         }

@@ -19,7 +19,7 @@ namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for an InSpecT search result
-    /// See clsSearchResultsBaseClass for additional information
+    /// See SearchResultsBaseClass for additional information
     /// </summary>
     public class InSpecTResults : SearchResultsBaseClass
     {
