@@ -14,13 +14,13 @@
 using PHRPReader;
 using PHRPReader.Data;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for an MS-GF+ search result
     /// See clsSearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsMSGFPlus : clsSearchResultsBaseClass
+    public class clsSearchResultsMSGFPlus : SearchResultsBaseClass
     {
         // Ignore Spelling: tda
 

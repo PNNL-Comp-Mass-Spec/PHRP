@@ -7,17 +7,19 @@
 //
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // -------------------------------------------------------------------------------
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using PeptideHitResultsProcessor.Data;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Processor
 {
     public class clsMODaResultsProcessor : clsPHRPBaseClass
     {
@@ -145,7 +147,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
+        private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const char NO_RESIDUE = '-';
 
@@ -223,7 +225,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private bool AddModificationsAndComputeMass(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
+        private bool AddModificationsAndComputeMass(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = true;
 
@@ -261,7 +263,7 @@ namespace PeptideHitResultsProcessor
         }
 
         private void AssociateDynamicModWithResidue(
-            clsSearchResultsBaseClass searchResult,
+            SearchResultsBaseClass searchResult,
             char mostRecentResidue,
             int residueLocInPeptide,
             string modMassDigits,
@@ -1086,7 +1088,7 @@ namespace PeptideHitResultsProcessor
                     udtSearchResult.DelM = MassErrorToString(delM);
 
                     var peptideDeltaMassCorrectedPpm =
-                        clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, true, peptideMonoMassMODa);
+                        SearchResultsBaseClass.ComputeDelMCorrectedPPM(delM, precursorMonoMass, true, peptideMonoMassMODa);
 
                     udtSearchResult.DelM_PPM = PRISM.StringUtilities.DblToString(peptideDeltaMassCorrectedPpm, 5, 0.00005);
                 }
@@ -1336,7 +1338,7 @@ namespace PeptideHitResultsProcessor
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
-                var searchResultBase = searchResult as clsSearchResultsBaseClass;
+                var searchResultBase = searchResult as SearchResultsBaseClass;
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 

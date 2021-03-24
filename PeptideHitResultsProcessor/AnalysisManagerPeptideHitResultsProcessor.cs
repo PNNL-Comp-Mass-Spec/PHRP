@@ -9,11 +9,12 @@
 using System;
 using System.IO;
 using System.Threading;
+using PeptideHitResultsProcessor.Processor;
 
 namespace PeptideHitResultsProcessor
 {
     [Obsolete("This class is unused")]
-    public class clsAnalysisManagerPeptideHitResultsProcessor : IPeptideHitResultsProcessor
+    public class AnalysisManagerPeptideHitResultsProcessor : IPeptideHitResultsProcessor
     {
         // Ignore Spelling: msgfdb
 

@@ -14,13 +14,13 @@
 using PHRPReader;
 using PHRPReader.Data;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for a TopPIC search result
     /// See clsSearchResultsBaseClass for additional information
     /// </summary>
-    internal class clsSearchResultsTopPIC : clsSearchResultsBaseClass
+    internal class clsSearchResultsTopPIC : SearchResultsBaseClass
     {
         #region "Properties"
 

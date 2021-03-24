@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track peptide sequences and their modification descriptors

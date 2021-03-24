@@ -15,11 +15,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using PHRPReader;
+using PeptideHitResultsProcessor.Data;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
     /// This class reads in a synopsis or first hits file (tab-delimited representation
@@ -53,7 +53,7 @@ namespace PeptideHitResultsProcessor
         #endregion
 
         private bool AddDynamicAndStaticResidueMods(
-            clsSearchResultsBaseClass searchResult,
+            SearchResultsBaseClass searchResult,
             bool updateModOccurrenceCounts)
         {
             // Step through .PeptideSequenceWithMods
@@ -124,7 +124,7 @@ namespace PeptideHitResultsProcessor
             return success;
         }
 
-        private bool AddModificationsAndComputeMass(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
+        private bool AddModificationsAndComputeMass(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = true;
 
@@ -429,7 +429,7 @@ namespace PeptideHitResultsProcessor
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
-                var searchResultBase = (clsSearchResultsBaseClass)searchResult;
+                var searchResultBase = (SearchResultsBaseClass)searchResult;
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 

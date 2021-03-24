@@ -1,9 +1,9 @@
 ﻿using System;
 using PHRPReader;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
-    public class clsFirstHitInfo
+    public class FirstHitInfo
     {
         // Ignore Spelling: Readonly
 
@@ -26,7 +26,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="peptideSeqWithModsAndContext"></param>
         /// <param name="peptideCleanSeq"></param>
-        public clsFirstHitInfo(string peptideSeqWithModsAndContext, string peptideCleanSeq)
+        public FirstHitInfo(string peptideSeqWithModsAndContext, string peptideCleanSeq)
         {
             if (!PeptideCleavageStateCalculator.SplitPrefixAndSuffixFromSequence(peptideSeqWithModsAndContext, out mPrimarySequence, out mPrefix, out mSuffix))
             {

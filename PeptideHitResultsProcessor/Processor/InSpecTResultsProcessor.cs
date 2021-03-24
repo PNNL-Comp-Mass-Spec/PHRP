@@ -18,11 +18,12 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using PeptideHitResultsProcessor.Data;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
     /// This class reads in an InSpecT results file (txt format) and creates
@@ -227,7 +228,7 @@ namespace PeptideHitResultsProcessor
             currentScanResultsCount++;
         }
 
-        private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
+        private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             // Step through .PeptideSequenceWithMods
             // For each residue, check if a static mod is defined that affects that residue
@@ -369,7 +370,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private bool AddModificationsAndComputeMass(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
+        private bool AddModificationsAndComputeMass(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = true;
 
@@ -575,7 +576,7 @@ namespace PeptideHitResultsProcessor
             double peptideMonoisotopicMass,
             bool adjustPrecursorMassForC13)
         {
-            var peptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, adjustPrecursorMassForC13, peptideMonoisotopicMass);
+            var peptideDeltaMassCorrectedPpm = SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, adjustPrecursorMassForC13, peptideMonoisotopicMass);
 
             return peptideDeltaMassCorrectedPpm;
         }
@@ -954,7 +955,7 @@ namespace PeptideHitResultsProcessor
                 mPeptideMods.ResetOccurrenceCountStats();
 
                 // Initialize searchResult
-                var searchResult = new clsSearchResultsInSpecT(mPeptideMods, mPeptideSeqMassCalculator);
+                var searchResult = new InSpecTResults(mPeptideMods, mPeptideSeqMassCalculator);
 
                 // Initialize peptidesFoundForTotalPRMScoreLevel
                 var peptidesFoundForTotalPRMScoreLevel = new SortedSet<string>();
@@ -1292,7 +1293,7 @@ namespace PeptideHitResultsProcessor
         private bool ParseInspectSynFileEntry(
             string lineIn,
             IDictionary<InspectSynFileReader.InspectSynFileColumns, int> columnMapping,
-            clsSearchResultsInSpecT searchResult,
+            InSpecTResults searchResult,
             ref string errorLog,
             out string peptideSequenceWithMods)
         {
@@ -1333,7 +1334,7 @@ namespace PeptideHitResultsProcessor
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
-                var searchResultBase = (clsSearchResultsBaseClass)searchResult;
+                var searchResultBase = (SearchResultsBaseClass)searchResult;
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 

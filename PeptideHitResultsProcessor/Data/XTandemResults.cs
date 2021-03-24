@@ -17,13 +17,13 @@ using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for an XTandem search result
     /// See clsSearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsXTandem : clsSearchResultsBaseClass
+    public class clsSearchResultsXTandem : SearchResultsBaseClass
     {
         // Ignore Spelling: delM
 

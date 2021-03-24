@@ -19,6 +19,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using PeptideHitResultsProcessor.Data;
 using PeptideToProteinMapEngine;
 using PHRPReader;
 using PHRPReader.Data;
@@ -26,7 +27,7 @@ using PHRPReader.Reader;
 using PRISM.FileProcessor;
 using ProteinCoverageSummarizer;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
     /// This class can be used as a base class for peptide hit results processor classes
@@ -788,7 +789,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected void ComputePseudoPeptideLocInProtein(clsSearchResultsBaseClass searchResult)
+        protected void ComputePseudoPeptideLocInProtein(SearchResultsBaseClass searchResult)
         {
             // Set these to 1 and 10000 since MSGFDB, Sequest, and Inspect results files do not contain protein sequence information
             // If we find later that the peptide sequence spans the length of the protein, we'll revise .ProteinSeqResidueNumberEnd as needed
@@ -2039,7 +2040,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        protected void SaveResultsFileEntrySeqInfo(clsSearchResultsBaseClass searchResult, bool updateResultToSeqMapFile)
+        protected void SaveResultsFileEntrySeqInfo(SearchResultsBaseClass searchResult, bool updateResultToSeqMapFile)
         {
             // Note: Be sure to call Me.InitializeOutputFiles before calling this function
             // updateResultToSeqMapFile should be set to True only for the first protein of each peptide in each group

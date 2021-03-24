@@ -16,13 +16,13 @@ using System;
 using PHRPReader;
 using PHRPReader.Data;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for a Sequest search result
     /// See clsSearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsSequest : clsSearchResultsBaseClass
+    public class clsSearchResultsSequest : SearchResultsBaseClass
     {
         #region "Properties"
 

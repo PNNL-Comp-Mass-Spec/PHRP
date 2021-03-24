@@ -17,11 +17,12 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using PeptideHitResultsProcessor.Data;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Processor
 {
     public class clsMSGFPlusResultsProcessor : clsPHRPBaseClass
     {
@@ -264,7 +265,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="searchResult"></param>
         /// <param name="updateModOccurrenceCounts"></param>
-        private void AddDynamicAndStaticResidueMods(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
+        private void AddDynamicAndStaticResidueMods(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             var chMostRecentLetter = '-';
             var residueLocInPeptide = 0;
@@ -483,7 +484,7 @@ namespace PeptideHitResultsProcessor
             }
         }
 
-        private bool AddModificationsAndComputeMass(clsSearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
+        private bool AddModificationsAndComputeMass(SearchResultsBaseClass searchResult, bool updateModOccurrenceCounts)
         {
             const bool ALLOW_DUPLICATE_MOD_ON_TERMINUS = true;
 
@@ -570,7 +571,7 @@ namespace PeptideHitResultsProcessor
             // Compute the original value for the precursor monoisotopic mass
             var precursorMonoMass = mPeptideSeqMassCalculator.ConvoluteMass(precursorMZ, charge, 0);
 
-            var peptideDeltaMassCorrectedPpm = clsSearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, adjustPrecursorMassForC13, peptideMonoisotopicMass);
+            var peptideDeltaMassCorrectedPpm = SearchResultsBaseClass.ComputeDelMCorrectedPPM(precursorErrorDa, precursorMonoMass, adjustPrecursorMassForC13, peptideMonoisotopicMass);
 
             return peptideDeltaMassCorrectedPpm;
         }
@@ -845,7 +846,7 @@ namespace PeptideHitResultsProcessor
                         // Initialize a dictionary that tracks the peptide sequence for each combo of scan and charge
                         // Keys are Scan_Charge, values track the clean sequence, the associated protein name, and the protein number for that name
                         // Note that we can only track protein numbers if the FASTA file path was provided at the command line
-                        var scanChargeFirstHit = new Dictionary<string, clsFirstHitInfo>();
+                        var scanChargeFirstHit = new Dictionary<string, FirstHitInfo>();
 
                         var columnMapping = new Dictionary<MSGFPlusResultsFileColumns, int>();
 
@@ -937,7 +938,7 @@ namespace PeptideHitResultsProcessor
                                 }
                                 else
                                 {
-                                    firstHitPeptide = new clsFirstHitInfo(searchResultsCurrentScan[0].Peptide,
+                                    firstHitPeptide = new FirstHitInfo(searchResultsCurrentScan[0].Peptide,
                                                                           GetCleanSequence(searchResultsCurrentScan[0].Peptide))
                                     {
                                         ProteinName = searchResultsCurrentScan[0].Protein,
@@ -2134,7 +2135,7 @@ namespace PeptideHitResultsProcessor
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequenceWithMods, true, true);
 
-                var searchResultBase = (clsSearchResultsBaseClass)searchResult;
+                var searchResultBase = (SearchResultsBaseClass)searchResult;
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 

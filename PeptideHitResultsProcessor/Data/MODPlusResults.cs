@@ -14,13 +14,13 @@
 using PHRPReader;
 using PHRPReader.Data;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for a MODPlus search result
     /// See clsSearchResultsBaseClass for additional information
     /// </summary>
-    public class clsSearchResultsMODPlus : clsSearchResultsBaseClass
+    public class clsSearchResultsMODPlus : SearchResultsBaseClass
     {
         #region "Properties"
 

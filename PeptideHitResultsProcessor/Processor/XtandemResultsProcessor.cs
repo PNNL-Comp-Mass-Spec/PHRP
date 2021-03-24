@@ -19,11 +19,12 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using PeptideHitResultsProcessor.Data;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
     /// This class reads in an X!Tandem results file (XML format) and creates
@@ -1428,7 +1429,7 @@ namespace PeptideHitResultsProcessor
             mPeptideMods.AppendStandardRefinementModifications();
         }
 
-        private void ParseXTandemResultsFileReadDomainMods(XmlReader xmlReader, clsSearchResultsBaseClass searchResult, int domainElementReaderDepth, bool updateModOccurrenceCounts)
+        private void ParseXTandemResultsFileReadDomainMods(XmlReader xmlReader, SearchResultsBaseClass searchResult, int domainElementReaderDepth, bool updateModOccurrenceCounts)
         {
             // Continue reading the XML file, loading the information
 

@@ -16,12 +16,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using PeptideHitResultsProcessor.Data;
 using PHRPReader;
 using PHRPReader.Data;
 using PHRPReader.Reader;
 using PRISM.AppSettings;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Processor
 {
     /// <summary>
     /// This class reads in a MSPathFinder results file (_IcTda.tsv) and creates
@@ -1146,7 +1147,7 @@ namespace PeptideHitResultsProcessor
                 // Calling this function will set .PeptidePreResidues, .PeptidePostResidues, .PeptideSequenceWithMods, and .PeptideCleanSequence
                 searchResult.SetPeptideSequenceWithMods(peptideSequence, true, true);
 
-                var searchResultBase = (clsSearchResultsBaseClass)searchResult;
+                var searchResultBase = (SearchResultsBaseClass)searchResult;
 
                 ComputePseudoPeptideLocInProtein(searchResultBase);
 

@@ -14,10 +14,11 @@
 
 using System;
 using System.Collections.Generic;
+using PeptideHitResultsProcessor.Processor;
 using PHRPReader;
 using PHRPReader.Data;
 
-namespace PeptideHitResultsProcessor
+namespace PeptideHitResultsProcessor.Data
 {
     /// <summary>
     /// This class is used to track the peptide details for a given MS/MS search result.
@@ -27,7 +28,7 @@ namespace PeptideHitResultsProcessor
     /// Use SearchResultClearModifications() and SearchResultAddModification()
     /// to track specific modifications for a given peptide
     /// </remarks>
-    public abstract class clsSearchResultsBaseClass
+    public abstract class SearchResultsBaseClass
     {
         // Ignore Spelling: Da, MaxQuant, MODa, acetyl, delM, Oxy
 
@@ -260,7 +261,7 @@ namespace PeptideHitResultsProcessor
         /// </summary>
         /// <param name="peptideMods"></param>
         /// <param name="peptideSeqMassCalculator"></param>
-        protected clsSearchResultsBaseClass(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
+        protected SearchResultsBaseClass(PeptideModificationContainer peptideMods, PeptideMassCalculator peptideSeqMassCalculator)
         {
             mSearchResultModifications = new List<AminoAcidModInfo>();
 
