@@ -30,7 +30,7 @@ namespace PHRPReader
     /// And, it integrates scan stats values (to determine elution time)
     /// </para>
     /// </summary>
-    public class PHRPReader : PRISM.EventNotifier, IDisposable
+    public class ReaderFactory : PRISM.EventNotifier, IDisposable
     {
         // Ignore Spelling: xt, msx, fht, Ss, Za, msgfdb, MODa, moda, modp, kv, toppic, mspath, msa, modplus, msp, prot, tpc
 
@@ -77,7 +77,7 @@ namespace PHRPReader
 
         private string mInputDirectoryPath;
 
-        private readonly PHRPStartupOptions mStartupOptions;
+        private readonly StartupOptions mStartupOptions;
 
         private bool mInitialized;
 
@@ -335,7 +335,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
-        public PHRPReader(string inputFilePath)
+        public ReaderFactory(string inputFilePath)
             : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
         }
@@ -346,7 +346,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
-        public PHRPReader(string inputFilePath, Enums.PeptideHitResultTypes resultType)
+        public ReaderFactory(string inputFilePath, Enums.PeptideHitResultTypes resultType)
             : this(inputFilePath, resultType, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
         }
@@ -357,7 +357,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        public PHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
+        public ReaderFactory(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
         }
@@ -369,7 +369,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
-        public PHRPReader(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
+        public ReaderFactory(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
             : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
         {
         }
@@ -379,7 +379,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="startupOptions">Startup options</param>
-        public PHRPReader(string inputFilePath, PHRPStartupOptions startupOptions)
+        public ReaderFactory(string inputFilePath, StartupOptions startupOptions)
             : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, startupOptions)
         {
         }
@@ -391,7 +391,7 @@ namespace PHRPReader
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        public PHRPReader(string inputFilePath, Enums.PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
+        public ReaderFactory(string inputFilePath, Enums.PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, resultType, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
         }
@@ -404,9 +404,9 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
-        public PHRPReader(string inputFilePath, Enums.PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
+        public ReaderFactory(string inputFilePath, Enums.PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
         {
-            var startupOptions = new PHRPStartupOptions
+            var startupOptions = new StartupOptions
             {
                 LoadModsAndSeqInfo = loadModsAndSeqInfo,
                 LoadMSGFResults = loadMSGFResults,
@@ -434,7 +434,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <param name="startupOptions">Startup options</param>
-        public PHRPReader(string inputFilePath, Enums.PeptideHitResultTypes resultType, PHRPStartupOptions startupOptions)
+        public ReaderFactory(string inputFilePath, Enums.PeptideHitResultTypes resultType, StartupOptions startupOptions)
         {
             mStartupOptions = startupOptions ?? throw new ArgumentNullException(nameof(startupOptions));
 
@@ -814,7 +814,7 @@ namespace PHRPReader
             }
             catch (Exception ex)
             {
-                HandleException("Error in PHRPReader.InitializeParser", ex);
+                HandleException("Error in ReaderFactory.InitializeParser", ex);
                 if (!mInitialized)
                     throw new Exception(ErrorMessage, ex);
 

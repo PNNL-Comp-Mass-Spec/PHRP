@@ -4,7 +4,7 @@
     /// PHRP Startup options
     /// </summary>
     /// <remarks>Use these options to define load behavior to be used when instantiating PHRP reader</remarks>
-    public class PHRPStartupOptions
+    public class StartupOptions
     {
         /// <summary>
         /// If true, load the modification and SeqInfo data
@@ -36,7 +36,7 @@
         /// <summary>
         /// Constructor
         /// </summary>
-        public PHRPStartupOptions()
+        public StartupOptions()
         {
             LoadModsAndSeqInfo = true;
             LoadMSGFResults = true;

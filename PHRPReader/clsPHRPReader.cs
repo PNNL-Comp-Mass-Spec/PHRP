@@ -721,7 +721,7 @@ namespace PHRPReader
         #endregion
     }
 
-    [Obsolete("Legacy Startup Options; superseded by PHRPStartupOptions")]
+    [Obsolete("Legacy Startup Options; superseded by StartupOptions")]
     public class clsPHRPStartupOptions
     {
         /// <summary>
