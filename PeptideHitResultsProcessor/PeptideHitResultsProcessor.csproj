@@ -49,31 +49,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="clsAnalysisManagerPeptideHitResultsProcessor.cs" />
-    <Compile Include="clsFirstHitInfo.cs" />
-    <Compile Include="clsInSpecTResultsProcessor.cs" />
-    <Compile Include="clsMODaResultsProcessor.cs" />
-    <Compile Include="clsMODPlusResultsProcessor.cs" />
-    <Compile Include="clsMSAlignResultsProcessor.cs" />
-    <Compile Include="clsMSGFPlusResultsProcessor.cs" />
-    <Compile Include="clsMSPathFinderResultsProcessor.cs" />
-    <Compile Include="clsPHRPBaseClass.cs" />
-    <Compile Include="clsSearchResultsBaseClass.cs" />
-    <Compile Include="clsSearchResultsInSpecT.cs" />
-    <Compile Include="clsSearchResultsMODa.cs" />
-    <Compile Include="clsSearchResultsMODPlus.cs" />
-    <Compile Include="clsSearchResultsMSAlign.cs" />
-    <Compile Include="clsSearchResultsMSGFPlus.cs" />
-    <Compile Include="clsSearchResultsMSPathFinder.cs" />
-    <Compile Include="clsSearchResultsSequest.cs" />
-    <Compile Include="clsSearchResultsTopPIC.cs" />
-    <Compile Include="clsSearchResultsXTandem.cs" />
-    <Compile Include="clsSequestResultsProcessor.cs" />
-    <Compile Include="clsTopPICResultsProcessor.cs" />
-    <Compile Include="clsUniqueSequencesContainer.cs" />
-    <Compile Include="clsXTandemResultsProcessor.cs" />
+    <Compile Include="AnalysisManagerPeptideHitResultsProcessor.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPeptideHitResultsProcessor.cs" />
+    <Compile Include="Data\FirstHitInfo.cs" />
+    <Compile Include="Data\InSpecTResults.cs" />
+    <Compile Include="Data\MODaResults.cs" />
+    <Compile Include="Data\MODPlusResults.cs" />
+    <Compile Include="Data\MSAlignResults.cs" />
+    <Compile Include="Data\MSGFPlusResults.cs" />
+    <Compile Include="Data\MSPathFinderResults.cs" />
+    <Compile Include="Data\SearchResultsBaseClass.cs" />
+    <Compile Include="Data\SequestResults.cs" />
+    <Compile Include="Data\TopPICResults.cs" />
+    <Compile Include="Data\XTandemResults.cs" />
+    <Compile Include="Data\UniqueSequencesContainer.cs" />
+    <Compile Include="Processor\InSpecTResultsProcessor.cs" />
+    <Compile Include="Processor\MaxQuantResultsProcessor.cs" />
+    <Compile Include="Processor\MODaResultsProcessor.cs" />
+    <Compile Include="Processor\MODPlusResultsProcessor.cs" />
+    <Compile Include="Processor\MSAlignResultsProcessor.cs" />
+    <Compile Include="Processor\MSGFPlusResultsProcessor.cs" />
+    <Compile Include="Processor\MSPathFinderResultsProcessor.cs" />
+    <Compile Include="Processor\PHRPBaseClass.cs" />
+    <Compile Include="Processor\SequestResultsProcessor.cs" />
+    <Compile Include="Processor\TopPICResultsProcessor.cs" />
+    <Compile Include="Processor\XtandemResultsProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

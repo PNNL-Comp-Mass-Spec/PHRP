@@ -56,8 +56,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="clsPeptideHitResultsProcRunner.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="PeptideHitResultsProcRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
