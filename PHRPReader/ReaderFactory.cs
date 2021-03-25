@@ -657,7 +657,7 @@ namespace PHRPReader
                 if (success && mStartupOptions.LoadModsAndSeqInfo)
                 {
                     // Read the PHRP Mod Summary File to populate mDynamicMods and mStaticMods
-                    // Note that the PHRPParser also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo.txt file is not found
+                    // Note that the SynFileReader also loads the ModSummary file, and that mDynamicMods and mStaticMods are only used if the _SeqInfo.txt file is not found
                     success = ReadModSummaryFile(modSummaryFilePath, mDynamicMods, mStaticMods);
                     if (!success)
                     {
@@ -740,7 +740,7 @@ namespace PHRPReader
                         break;
 
                     case PeptideHitResultTypes.XTandem:
-                        // Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
+                        // Note that Result to Protein mapping will be auto-loaded during instantiation of the SynFileReader
                         SynFileReader = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
@@ -788,13 +788,13 @@ namespace PHRPReader
                 // Attach the event handlers
                 RegisterEvents(SynFileReader);
 
-                // Report any errors cached during instantiation of mPHRPParser
+                // Report any errors cached during instantiation of the SynFileReader
                 foreach (var message in SynFileReader.ErrorMessages)
                 {
                     ReportError(message);
                 }
 
-                // Report any warnings cached during instantiation of mPHRPParser
+                // Report any warnings cached during instantiation of the SynFileReader
                 foreach (var message in SynFileReader.WarningMessages)
                 {
                     ReportWarning(message);
@@ -2242,7 +2242,7 @@ namespace PHRPReader
                 return false;
             }
 
-            // The PHRPParser will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
+            // The SynFileReader will update .PeptideWithNumericMods if the _SeqInfo.txt file is loaded
             // If it wasn't loaded, this class can update .PeptideWithNumericMods and .PeptideMods
             // by inferring the mods using mDynamicMods and mStaticMods (which were populated using the PHRP ModSummary file)
             if (!mFastReadMode && mStartupOptions.LoadModsAndSeqInfo && string.IsNullOrEmpty(mPSMCurrent.PeptideWithNumericMods))

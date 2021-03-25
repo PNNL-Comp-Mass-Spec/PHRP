@@ -393,7 +393,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Returns the appropriate PHRPParser class based on the input file name; assumes loadModsAndSeqInfo=True
+        /// Returns the appropriate SynFileReader class based on the input file name; assumes loadModsAndSeqInfo=True
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
         /// <remarks>Throws an exception if unable to auto-determine the input file type or dataset name from inputFilePath</remarks>
@@ -403,7 +403,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Returns the appropriate PHRPParser class based on the input file name
+        /// Returns the appropriate SynFileReader class based on the input file name
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
@@ -427,7 +427,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Returns the appropriate PHRPParser class based on the input file name
+        /// Returns the appropriate SynFileReader class based on the input file name
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="datasetName">Dataset Name</param>
@@ -446,7 +446,7 @@ namespace PHRPReader.Reader
         }
 
         /// <summary>
-        /// Returns the appropriate PHRPParser class based on PeptideHitResultType
+        /// Returns the appropriate SynFileReader class based on PeptideHitResultType
         /// </summary>
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="datasetName">Dataset Name</param>

@@ -19,7 +19,8 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MODaSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: MODa
+        // ReSharper disable once CommentTypo
+        // Ignore Spelling: moda, MODa, PeptTolerance, PepToProtMap
 
         #region "Constants"
 
@@ -179,7 +180,7 @@ namespace PHRPReader.Reader
                 // Parent mass tolerance, in Da
                 double.TryParse(tolerance, out toleranceDa);
 
-                // Convert from dalton to PPM (assuming a mass of 2000 m/z)
+                // Convert from Dalton to PPM (assuming a mass of 2000 m/z)
                 tolerancePPM = PeptideMassCalculator.MassToPPM(toleranceDa, 2000);
             }
 

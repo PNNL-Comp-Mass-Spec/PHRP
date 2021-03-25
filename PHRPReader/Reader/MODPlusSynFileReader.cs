@@ -21,7 +21,8 @@ namespace PHRPReader.Reader
     /// </summary>
     public class MODPlusSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: MODp, modp, prot
+        // ReSharper disable once CommentTypo
+        // Ignore Spelling: da, massdiff, MODp, modp, prot, tol
 
         #region "Constants"
 
