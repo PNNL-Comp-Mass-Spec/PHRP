@@ -1137,123 +1137,122 @@ namespace PeptideHitResultsProcessor.Processor
                 var psmCountSkippedSinceReversedOrScrambledProtein = 0;
 
                 // Create a ProteinMods file parallel to the PHRP file
-                using (var writer = new StreamWriter(new FileStream(proteinModsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                using var writer = new StreamWriter(new FileStream(proteinModsFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                // Write the header line
+                writer.WriteLine(COLUMN_NAME_RESULTID + "\t" +
+                                 COLUMN_NAME_PEPTIDE + "\t" +
+                                 COLUMN_NAME_UNIQUE_SEQ_ID + "\t" +
+                                 COLUMN_NAME_PROTEIN_NAME + "\t" +
+                                 COLUMN_NAME_RESIDUE + "\t" +
+                                 COLUMN_NAME_PROTEIN_RESIDUE_NUMBER + "\t" +
+                                 COLUMN_NAME_RESIDUE_MOD_NAME + "\t" +
+                                 COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
+                                 COLUMN_NAME_MSGF_SPECPROB);
+
+                var loadMSGFResults = phrpResultType != PeptideHitResultTypes.MSGFPlus;
+
+                // Update the Mass Calculator to use the one tracked by this class
+                // (since this class's calculator knows about custom amino acids and custom charge carriers)
+                var startupOptions = new StartupOptions
                 {
-                    // Write the header line
-                    writer.WriteLine(COLUMN_NAME_RESULTID + "\t" +
-                                     COLUMN_NAME_PEPTIDE + "\t" +
-                                     COLUMN_NAME_UNIQUE_SEQ_ID + "\t" +
-                                     COLUMN_NAME_PROTEIN_NAME + "\t" +
-                                     COLUMN_NAME_RESIDUE + "\t" +
-                                     COLUMN_NAME_PROTEIN_RESIDUE_NUMBER + "\t" +
-                                     COLUMN_NAME_RESIDUE_MOD_NAME + "\t" +
-                                     COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
-                                     COLUMN_NAME_MSGF_SPECPROB);
+                    LoadModsAndSeqInfo = true,
+                    LoadMSGFResults = loadMSGFResults,
+                    LoadScanStatsData = false,
+                    PeptideMassCalculator = mPeptideSeqMassCalculator
+                };
 
-                    var loadMSGFResults = phrpResultType != PeptideHitResultTypes.MSGFPlus;
+                using (var reader = new ReaderFactory(phrpDataFilePath, phrpResultType, startupOptions))
+                {
+                    reader.EchoMessagesToConsole = false;
+                    reader.SkipDuplicatePSMs = true;
 
-                    // Update the Mass Calculator to use the one tracked by this class
-                    // (since this class's calculator knows about custom amino acids and custom charge carriers)
-                    var startupOptions = new StartupOptions
+                    foreach (var errorMessage in reader.ErrorMessages)
                     {
-                        LoadModsAndSeqInfo = true,
-                        LoadMSGFResults = loadMSGFResults,
-                        LoadScanStatsData = false,
-                        PeptideMassCalculator = mPeptideSeqMassCalculator
-                    };
+                        OnErrorEvent(errorMessage);
+                    }
+                    RegisterEvents(reader);
 
-                    using (var reader = new ReaderFactory(phrpDataFilePath, phrpResultType, startupOptions))
+                    foreach (var warningMessage in reader.WarningMessages)
                     {
-                        reader.EchoMessagesToConsole = false;
-                        reader.SkipDuplicatePSMs = true;
-
-                        foreach (var errorMessage in reader.ErrorMessages)
+                        var msg = warningMessage;
+                        if (warningMessage.StartsWith("MSGF file not found", StringComparison.OrdinalIgnoreCase))
                         {
-                            OnErrorEvent(errorMessage);
+                            msg = "MSGF file not found; column " + COLUMN_NAME_MSGF_SPECPROB + " will not have any data";
                         }
-                        RegisterEvents(reader);
+                        ReportWarning(msg);
+                    }
 
-                        foreach (var warningMessage in reader.WarningMessages)
+                    reader.ClearErrors();
+                    reader.ClearWarnings();
+
+                    var peptidesNotFoundInPepToProtMapping = 0;
+                    while (reader.MoveNext())
+                    {
+                        // Use binary search to find this peptide in pepToProteinMapping
+                        var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, reader.CurrentPSM.Peptide);
+
+                        if (pepToProteinMapIndex >= 0)
                         {
-                            var msg = warningMessage;
-                            if (warningMessage.StartsWith("MSGF file not found", StringComparison.OrdinalIgnoreCase))
+                            do
                             {
-                                msg = "MSGF file not found; column " + COLUMN_NAME_MSGF_SPECPROB + " will not have any data";
-                            }
-                            ReportWarning(msg);
-                        }
+                                psmCount++;
 
-                        reader.ClearErrors();
-                        reader.ClearWarnings();
-
-                        var peptidesNotFoundInPepToProtMapping = 0;
-                        while (reader.MoveNext())
-                        {
-                            // Use binary search to find this peptide in pepToProteinMapping
-                            var pepToProteinMapIndex = FindFirstMatchInPepToProteinMapping(pepToProteinMapping, reader.CurrentPSM.Peptide);
-
-                            if (pepToProteinMapIndex >= 0)
-                            {
-                                do
+                                var skipProtein = false;
+                                if (!ProteinModsFileIncludesReversedProteins)
                                 {
-                                    psmCount++;
-
-                                    var skipProtein = false;
-                                    if (!ProteinModsFileIncludesReversedProteins)
+                                    skipProtein = IsReversedProtein(pepToProteinMapping[pepToProteinMapIndex].Protein);
+                                    if (skipProtein)
                                     {
-                                        skipProtein = IsReversedProtein(pepToProteinMapping[pepToProteinMapIndex].Protein);
-                                        if (skipProtein)
-                                        {
-                                            psmCountSkippedSinceReversedOrScrambledProtein++;
-                                        }
+                                        psmCountSkippedSinceReversedOrScrambledProtein++;
                                     }
+                                }
 
-                                    if (!skipProtein)
-                                    {
-                                        WriteModDetailsEntry(reader,
-                                                             writer,
-                                                             pepToProteinMapping,
-                                                             pepToProteinMapIndex,
-                                                             ref psmCountSkippedSinceReversedOrScrambledProtein);
-                                    }
+                                if (!skipProtein)
+                                {
+                                    WriteModDetailsEntry(reader,
+                                        writer,
+                                        pepToProteinMapping,
+                                        pepToProteinMapIndex,
+                                        ref psmCountSkippedSinceReversedOrScrambledProtein);
+                                }
 
-                                    pepToProteinMapIndex++;
-                                } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
-                                         reader.CurrentPSM.Peptide == pepToProteinMapping[pepToProteinMapIndex].Peptide);
-                            }
-                            else
-                            {
-                                peptidesNotFoundInPepToProtMapping++;
-                                ShowPeriodicWarning(peptidesNotFoundInPepToProtMapping, 10,
-                                                    "Peptide not found in pepToProteinMapping: " + reader.CurrentPSM.Peptide);
-                            }
-
-                            var overallProgress = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
-                                progressAtStart, 100, reader.PercentComplete);
-
-                            UpdateProgress(overallProgress);
+                                pepToProteinMapIndex++;
+                            } while (pepToProteinMapIndex < pepToProteinMapping.Count &&
+                                     reader.CurrentPSM.Peptide == pepToProteinMapping[pepToProteinMapIndex].Peptide);
                         }
-
-                        if (psmCount > 0)
+                        else
                         {
-                            if (psmCountSkippedSinceReversedOrScrambledProtein == psmCount)
-                            {
-                                Console.WriteLine();
-                                ReportWarning("All PSMs map to reversed or scrambled proteins; the _ProteinMods.txt file is empty");
-                            }
-                            else if (psmCountSkippedSinceReversedOrScrambledProtein > 0)
-                            {
-                                Console.WriteLine();
-                                Console.WriteLine("Note: skipped {0:N0} / {1:N0} PSMs that map to reversed or scrambled proteins " +
-                                                  "while creating the _ProteinMods.txt file",
-                                                  psmCountSkippedSinceReversedOrScrambledProtein, psmCount);
-                            }
+                            peptidesNotFoundInPepToProtMapping++;
+                            ShowPeriodicWarning(peptidesNotFoundInPepToProtMapping, 10,
+                                "Peptide not found in pepToProteinMapping: " + reader.CurrentPSM.Peptide);
                         }
 
-                        if (peptidesNotFoundInPepToProtMapping > 10)
+                        var overallProgress = ProcessFilesOrDirectoriesBase.ComputeIncrementalProgress(
+                            progressAtStart, 100, reader.PercentComplete);
+
+                        UpdateProgress(overallProgress);
+                    }
+
+                    if (psmCount > 0)
+                    {
+                        if (psmCountSkippedSinceReversedOrScrambledProtein == psmCount)
                         {
-                            Console.WriteLine("Note: {0:N0} peptides were not found in pepToProteinMapping", peptidesNotFoundInPepToProtMapping);
+                            Console.WriteLine();
+                            ReportWarning("All PSMs map to reversed or scrambled proteins; the _ProteinMods.txt file is empty");
                         }
+                        else if (psmCountSkippedSinceReversedOrScrambledProtein > 0)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine("Note: skipped {0:N0} / {1:N0} PSMs that map to reversed or scrambled proteins " +
+                                              "while creating the _ProteinMods.txt file",
+                                psmCountSkippedSinceReversedOrScrambledProtein, psmCount);
+                        }
+                    }
+
+                    if (peptidesNotFoundInPepToProtMapping > 10)
+                    {
+                        Console.WriteLine("Note: {0:N0} peptides were not found in pepToProteinMapping", peptidesNotFoundInPepToProtMapping);
                     }
                 }
 
@@ -1929,39 +1928,38 @@ namespace PeptideHitResultsProcessor.Processor
 
         protected void SaveModificationSummaryFile(string modificationSummaryFilePath)
         {
-            using (var writer = new StreamWriter(modificationSummaryFilePath, false))
+            using var writer = new StreamWriter(modificationSummaryFilePath, false);
+
+            // Write the header line
+            var headerNames = new List<string>
             {
-                // Write the header line
-                var headerNames = new List<string>
+                PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol,
+                PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass,
+                PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues,
+                PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type,
+                PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag,
+                PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count
+            };
+
+            writer.WriteLine(CollapseList(headerNames));
+
+            for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
+            {
+                var modInfo = mPeptideMods.GetModificationByIndex(index);
+                var searchResult = modInfo;
+                if (searchResult.OccurrenceCount <= 0 && searchResult.UnknownModAutoDefined)
+                    continue;
+
+                var data = new List<string>
                 {
-                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Symbol,
-                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Mass,
-                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Target_Residues,
-                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Modification_Type,
-                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Mass_Correction_Tag,
-                    PHRPModSummaryReader.MOD_SUMMARY_COLUMN_Occurrence_Count
+                    searchResult.ModificationSymbol.ToString(),
+                    searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture),
+                    searchResult.TargetResidues,
+                    ModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType).ToString(),
+                    searchResult.MassCorrectionTag,
+                    searchResult.OccurrenceCount.ToString()
                 };
-
-                writer.WriteLine(CollapseList(headerNames));
-
-                for (var index = 0; index <= mPeptideMods.ModificationCount - 1; index++)
-                {
-                    var modInfo = mPeptideMods.GetModificationByIndex(index);
-                    var searchResult = modInfo;
-                    if (searchResult.OccurrenceCount <= 0 && searchResult.UnknownModAutoDefined)
-                        continue;
-
-                    var data = new List<string>
-                    {
-                        searchResult.ModificationSymbol.ToString(),
-                        searchResult.ModificationMass.ToString(CultureInfo.InvariantCulture),
-                        searchResult.TargetResidues,
-                        ModificationDefinition.ModificationTypeToModificationSymbol(searchResult.ModificationType).ToString(),
-                        searchResult.MassCorrectionTag,
-                        searchResult.OccurrenceCount.ToString()
-                    };
-                    writer.WriteLine(CollapseList(data));
-                }
+                writer.WriteLine(CollapseList(data));
             }
         }
 

@@ -412,30 +412,29 @@ namespace PHRPReader.Reader
             try
             {
                 // Read the data from the result to sequence map file
-                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+
+                    if (string.IsNullOrEmpty(lineIn))
+                        continue;
+
+                    var splitLine = lineIn.Split('\t');
+
+                    if (splitLine.Length < 2)
+                        continue;
+
+                    // Parse out the numbers from the first two columns
+                    // (the first line of the file is the header line, and it will get skipped)
+                    if (int.TryParse(splitLine[0], out var resultID))
                     {
-                        var lineIn = reader.ReadLine();
-
-                        if (string.IsNullOrEmpty(lineIn))
-                            continue;
-
-                        var splitLine = lineIn.Split('\t');
-
-                        if (splitLine.Length < 2)
-                            continue;
-
-                        // Parse out the numbers from the first two columns
-                        // (the first line of the file is the header line, and it will get skipped)
-                        if (int.TryParse(splitLine[0], out var resultID))
+                        if (int.TryParse(splitLine[1], out var seqID))
                         {
-                            if (int.TryParse(splitLine[1], out var seqID))
+                            if (!resultToSeqMap.ContainsKey(resultID))
                             {
-                                if (!resultToSeqMap.ContainsKey(resultID))
-                                {
-                                    resultToSeqMap.Add(resultID, seqID);
-                                }
+                                resultToSeqMap.Add(resultID, seqID);
                             }
                         }
                     }
@@ -471,42 +470,41 @@ namespace PHRPReader.Reader
                 };
 
                 // Read the data from the sequence info file
-                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+                    var skipLine = false;
+
+                    if (string.IsNullOrEmpty(lineIn))
+                        continue;
+
+                    var splitLine = lineIn.Split('\t');
+
+                    if (!headerLineParsed)
                     {
-                        var lineIn = reader.ReadLine();
-                        var skipLine = false;
-
-                        if (string.IsNullOrEmpty(lineIn))
-                            continue;
-
-                        var splitLine = lineIn.Split('\t');
-
-                        if (!headerLineParsed)
+                        if (string.Equals(splitLine[0], SEQ_INFO_COLUMN_Unique_Seq_ID, StringComparison.OrdinalIgnoreCase))
                         {
-                            if (string.Equals(splitLine[0], SEQ_INFO_COLUMN_Unique_Seq_ID, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Parse the header line to confirm the column ordering
-                                ReaderFactory.ParseColumnHeaders(splitLine, columnHeaders);
-                                skipLine = true;
-                            }
-
-                            headerLineParsed = true;
+                            // Parse the header line to confirm the column ordering
+                            ReaderFactory.ParseColumnHeaders(splitLine, columnHeaders);
+                            skipLine = true;
                         }
 
-                        if (!skipLine && splitLine.Length >= 3)
-                        {
-                            if (int.TryParse(splitLine[0], out var seqID))
-                            {
-                                var modCount = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Mod_Count, columnHeaders, 0);
-                                var modDescription = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Mod_Description, columnHeaders, string.Empty);
-                                var monoisotopicMass = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Monoisotopic_Mass, columnHeaders, 0.0);
+                        headerLineParsed = true;
+                    }
 
-                                if (!seqInfo.ContainsKey(seqID))
-                                {
-                                    seqInfo.Add(seqID, new SequenceInfo(seqID, monoisotopicMass, modCount, modDescription));
-                                }
+                    if (!skipLine && splitLine.Length >= 3)
+                    {
+                        if (int.TryParse(splitLine[0], out var seqID))
+                        {
+                            var modCount = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Mod_Count, columnHeaders, 0);
+                            var modDescription = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Mod_Description, columnHeaders, string.Empty);
+                            var monoisotopicMass = ReaderFactory.LookupColumnValue(splitLine, SEQ_INFO_COLUMN_Monoisotopic_Mass, columnHeaders, 0.0);
+
+                            if (!seqInfo.ContainsKey(seqID))
+                            {
+                                seqInfo.Add(seqID, new SequenceInfo(seqID, monoisotopicMass, modCount, modDescription));
                             }
                         }
                     }
@@ -543,70 +541,69 @@ namespace PHRPReader.Reader
                 };
 
                 // Read the data from the sequence to protein map file
-                using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+                    var skipLine = false;
+
+                    if (string.IsNullOrEmpty(lineIn))
                     {
-                        var lineIn = reader.ReadLine();
-                        var skipLine = false;
+                        continue;
+                    }
 
-                        if (string.IsNullOrEmpty(lineIn))
+                    var splitLine = lineIn.Split('\t');
+
+                    if (!headerLineParsed)
+                    {
+                        if (string.Equals(splitLine[0], SEQ_PROT_MAP_COLUMN_Unique_Seq_ID, StringComparison.OrdinalIgnoreCase))
                         {
-                            continue;
+                            // Parse the header line to confirm the column ordering
+                            ReaderFactory.ParseColumnHeaders(splitLine, columnHeaders);
+                            skipLine = true;
                         }
 
-                        var splitLine = lineIn.Split('\t');
+                        headerLineParsed = true;
+                    }
 
-                        if (!headerLineParsed)
+                    if (skipLine || splitLine.Length < 3)
+                    {
+                        continue;
+                    }
+
+                    if (!int.TryParse(splitLine[0], out var seqID))
+                    {
+                        continue;
+                    }
+
+                    var proteinName = ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, columnHeaders, string.Empty);
+
+                    if (string.IsNullOrEmpty(proteinName))
+                    {
+                        continue;
+                    }
+
+                    var cleavageState = (PeptideCleavageStateCalculator.PeptideCleavageState)ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, columnHeaders, 0);
+                    var terminusState = (PeptideCleavageStateCalculator.PeptideTerminusState)ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, columnHeaders, 0);
+
+                    var proteinInfo = new ProteinInfo(proteinName, seqID, cleavageState, terminusState);
+
+                    if (seqToProteinMap.TryGetValue(seqID, out var proteins))
+                    {
+                        // Sequence already exists in seqToProteinMap; add the new protein info
+                        if (MaxProteinsPerSeqID == 0 || proteins.Count < MaxProteinsPerSeqID)
                         {
-                            if (string.Equals(splitLine[0], SEQ_PROT_MAP_COLUMN_Unique_Seq_ID, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Parse the header line to confirm the column ordering
-                                ReaderFactory.ParseColumnHeaders(splitLine, columnHeaders);
-                                skipLine = true;
-                            }
-
-                            headerLineParsed = true;
+                            proteins.Add(proteinInfo);
                         }
-
-                        if (skipLine || splitLine.Length < 3)
-                        {
-                            continue;
-                        }
-
-                        if (!int.TryParse(splitLine[0], out var seqID))
-                        {
-                            continue;
-                        }
-
-                        var proteinName = ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Protein_Name, columnHeaders, string.Empty);
-
-                        if (string.IsNullOrEmpty(proteinName))
-                        {
-                            continue;
-                        }
-
-                        var cleavageState = (PeptideCleavageStateCalculator.PeptideCleavageState)ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Cleavage_State, columnHeaders, 0);
-                        var terminusState = (PeptideCleavageStateCalculator.PeptideTerminusState)ReaderFactory.LookupColumnValue(splitLine, SEQ_PROT_MAP_COLUMN_Terminus_State, columnHeaders, 0);
-
-                        var proteinInfo = new ProteinInfo(proteinName, seqID, cleavageState, terminusState);
-
-                        if (seqToProteinMap.TryGetValue(seqID, out var proteins))
-                        {
-                            // Sequence already exists in seqToProteinMap; add the new protein info
-                            if (MaxProteinsPerSeqID == 0 || proteins.Count < MaxProteinsPerSeqID)
-                            {
-                                proteins.Add(proteinInfo);
-                            }
-                        }
-                        else
-                        {
-                            // New Sequence ID
-                            proteins = new List<ProteinInfo> {
-                                proteinInfo
-                            };
-                            seqToProteinMap.Add(seqID, proteins);
-                        }
+                    }
+                    else
+                    {
+                        // New Sequence ID
+                        proteins = new List<ProteinInfo> {
+                            proteinInfo
+                        };
+                        seqToProteinMap.Add(seqID, proteins);
                     }
                 }
             }

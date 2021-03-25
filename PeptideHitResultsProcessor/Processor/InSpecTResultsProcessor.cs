@@ -852,30 +852,29 @@ namespace PeptideHitResultsProcessor.Processor
                 {
                     mtsPepToProteinMapFilePath = Path.Combine(outputDirectoryPath, Path.GetFileNameWithoutExtension(pepToProteinMapFilePath) + "MTS.txt");
 
-                    using (var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                    using var writer = new StreamWriter(new FileStream(mtsPepToProteinMapFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
+
+                    if (!string.IsNullOrEmpty(headerLine))
                     {
-                        if (!string.IsNullOrEmpty(headerLine))
+                        // Header line
+                        writer.WriteLine(headerLine);
+                    }
+
+                    for (var index = 0; index <= pepToProteinMapping.Count - 1; index++)
+                    {
+                        // Replace any mod text names in the peptide sequence with the appropriate mod symbols
+                        // In addition, replace the * terminus symbols with dashes
+                        var mtsCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(pepToProteinMapping[index].Peptide), inspectModInfo);
+
+                        if (pepToProteinMapping[index].Peptide != mtsCompatiblePeptide)
                         {
-                            // Header line
-                            writer.WriteLine(headerLine);
+                            UpdatePepToProteinMapPeptide(pepToProteinMapping, index, mtsCompatiblePeptide);
                         }
 
-                        for (var index = 0; index <= pepToProteinMapping.Count - 1; index++)
-                        {
-                            // Replace any mod text names in the peptide sequence with the appropriate mod symbols
-                            // In addition, replace the * terminus symbols with dashes
-                            var mtsCompatiblePeptide = ReplaceInspectModTextWithSymbol(ReplaceTerminus(pepToProteinMapping[index].Peptide), inspectModInfo);
-
-                            if (pepToProteinMapping[index].Peptide != mtsCompatiblePeptide)
-                            {
-                                UpdatePepToProteinMapPeptide(pepToProteinMapping, index, mtsCompatiblePeptide);
-                            }
-
-                            writer.WriteLine(pepToProteinMapping[index].Peptide + "\t" +
-                                             pepToProteinMapping[index].Protein + "\t" +
-                                             pepToProteinMapping[index].ResidueStart + "\t" +
-                                             pepToProteinMapping[index].ResidueEnd);
-                        }
+                        writer.WriteLine(pepToProteinMapping[index].Peptide + "\t" +
+                                         pepToProteinMapping[index].Protein + "\t" +
+                                         pepToProteinMapping[index].ResidueStart + "\t" +
+                                         pepToProteinMapping[index].ResidueEnd);
                     }
                 }
             }

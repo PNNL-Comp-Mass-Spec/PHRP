@@ -105,44 +105,43 @@ namespace PHRPReader.Reader
 
                 mErrorMessage = string.Empty;
 
-                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                var headerLineParsed = false;
+
+                while (!reader.EndOfStream)
                 {
-                    var headerLineParsed = false;
+                    var lineIn = reader.ReadLine();
+                    var skipLine = false;
 
-                    while (!reader.EndOfStream)
+                    if (string.IsNullOrWhiteSpace(lineIn))
+                        continue;
+
+                    var splitLine = lineIn.Split('\t');
+
+                    if (!headerLineParsed)
                     {
-                        var lineIn = reader.ReadLine();
-                        var skipLine = false;
-
-                        if (string.IsNullOrWhiteSpace(lineIn))
-                            continue;
-
-                        var splitLine = lineIn.Split('\t');
-
-                        if (!headerLineParsed)
+                        if (!ReaderFactory.IsNumber(splitLine[0]))
                         {
-                            if (!ReaderFactory.IsNumber(splitLine[0]))
-                            {
-                                // Parse the header line to confirm the column ordering
-                                ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
-                                skipLine = true;
-                            }
-
-                            headerLineParsed = true;
+                            // Parse the header line to confirm the column ordering
+                            ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
+                            skipLine = true;
                         }
 
-                        if (!skipLine && splitLine.Length >= 4)
+                        headerLineParsed = true;
+                    }
+
+                    if (!skipLine && splitLine.Length >= 4)
+                    {
+                        var resultID = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
+
+                        if (resultID >= 0)
                         {
-                            var resultID = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ResultID, mColumnHeaders, -1);
+                            var msgfSpecProb = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
 
-                            if (resultID >= 0)
+                            if (!string.IsNullOrEmpty(msgfSpecProb) && !msgfData.ContainsKey(resultID))
                             {
-                                var msgfSpecProb = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_SpecProb, mColumnHeaders);
-
-                                if (!string.IsNullOrEmpty(msgfSpecProb) && !msgfData.ContainsKey(resultID))
-                                {
-                                    msgfData.Add(resultID, msgfSpecProb);
-                                }
+                                msgfData.Add(resultID, msgfSpecProb);
                             }
                         }
                     }

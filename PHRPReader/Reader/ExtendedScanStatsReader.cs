@@ -130,64 +130,63 @@ namespace PHRPReader.Reader
                 DefineColumnHeaders();
                 mErrorMessage = string.Empty;
 
-                using (var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(inputFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                var headerLineParsed = false;
+
+                while (!reader.EndOfStream)
                 {
-                    var headerLineParsed = false;
+                    var lineIn = reader.ReadLine();
+                    var skipLine = false;
 
-                    while (!reader.EndOfStream)
+                    if (string.IsNullOrWhiteSpace(lineIn))
+                        continue;
+
+                    var splitLine = lineIn.Split('\t');
+
+                    if (!headerLineParsed)
                     {
-                        var lineIn = reader.ReadLine();
-                        var skipLine = false;
-
-                        if (string.IsNullOrWhiteSpace(lineIn))
-                            continue;
-
-                        var splitLine = lineIn.Split('\t');
-
-                        if (!headerLineParsed)
+                        if (!ReaderFactory.IsNumber(splitLine[0]))
                         {
-                            if (!ReaderFactory.IsNumber(splitLine[0]))
-                            {
-                                // Parse the header line to confirm the column ordering
-                                ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
-                                skipLine = true;
-                            }
-
-                            headerLineParsed = true;
+                            // Parse the header line to confirm the column ordering
+                            ReaderFactory.ParseColumnHeaders(splitLine, mColumnHeaders);
+                            skipLine = true;
                         }
 
-                        if (skipLine || splitLine.Length < 4)
-                            continue;
-
-                        var scanNumber = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
-
-                        if (scanNumber < 0 || scanStats.ContainsKey(scanNumber))
-                            continue;
-
-                        var scanStatsInfo = new ScanStatsExInfo(scanNumber)
-                        {
-                            IonInjectionTime = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_IonInjectionTime, mColumnHeaders, 0.0),
-                            ScanEvent = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanEvent, mColumnHeaders, 0),
-                            MasterIndex = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MasterIndex, mColumnHeaders, 0),
-                            ElapsedScanTime = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ElapsedScanTime, mColumnHeaders, 0.0),
-                            ChargeState = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ChargeState, mColumnHeaders, 0),
-                            MonoisotopicMZ = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MonoisotopicMZ, mColumnHeaders, 0.0),
-                            MS2IsolationWidth = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MS2IsolationWidth, mColumnHeaders, 0.0),
-                            FTAnalyzerSettings = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerSettings, mColumnHeaders),
-                            FTAnalyzerMessage = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerMessage, mColumnHeaders),
-                            FTResolution = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTResolution, mColumnHeaders, 0.0),
-                            ConversionParameterB = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterB, mColumnHeaders, 0.0),
-                            ConversionParameterC = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterC, mColumnHeaders, 0.0),
-                            ConversionParameterD = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterD, mColumnHeaders, 0.0),
-                            ConversionParameterE = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterE, mColumnHeaders, 0.0),
-                            CollisionMode = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_CollisionMode, mColumnHeaders),
-                            ScanFilterText = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanFilterText, mColumnHeaders),
-                            SourceVoltage = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_SourceVoltage, mColumnHeaders, 0.0),
-                            Source_Current = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_Source_Current, mColumnHeaders, 0.0)
-                        };
-
-                        scanStats.Add(scanNumber, scanStatsInfo);
+                        headerLineParsed = true;
                     }
+
+                    if (skipLine || splitLine.Length < 4)
+                        continue;
+
+                    var scanNumber = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanNumber, mColumnHeaders, -1);
+
+                    if (scanNumber < 0 || scanStats.ContainsKey(scanNumber))
+                        continue;
+
+                    var scanStatsInfo = new ScanStatsExInfo(scanNumber)
+                    {
+                        IonInjectionTime = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_IonInjectionTime, mColumnHeaders, 0.0),
+                        ScanEvent = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanEvent, mColumnHeaders, 0),
+                        MasterIndex = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MasterIndex, mColumnHeaders, 0),
+                        ElapsedScanTime = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ElapsedScanTime, mColumnHeaders, 0.0),
+                        ChargeState = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ChargeState, mColumnHeaders, 0),
+                        MonoisotopicMZ = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MonoisotopicMZ, mColumnHeaders, 0.0),
+                        MS2IsolationWidth = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_MS2IsolationWidth, mColumnHeaders, 0.0),
+                        FTAnalyzerSettings = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerSettings, mColumnHeaders),
+                        FTAnalyzerMessage = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTAnalyzerMessage, mColumnHeaders),
+                        FTResolution = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_FTResolution, mColumnHeaders, 0.0),
+                        ConversionParameterB = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterB, mColumnHeaders, 0.0),
+                        ConversionParameterC = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterC, mColumnHeaders, 0.0),
+                        ConversionParameterD = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterD, mColumnHeaders, 0.0),
+                        ConversionParameterE = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ConversionParameterE, mColumnHeaders, 0.0),
+                        CollisionMode = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_CollisionMode, mColumnHeaders),
+                        ScanFilterText = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_ScanFilterText, mColumnHeaders),
+                        SourceVoltage = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_SourceVoltage, mColumnHeaders, 0.0),
+                        Source_Current = ReaderFactory.LookupColumnValue(splitLine, DATA_COLUMN_Source_Current, mColumnHeaders, 0.0)
+                    };
+
+                    scanStats.Add(scanNumber, scanStatsInfo);
                 }
             }
             catch (Exception ex)

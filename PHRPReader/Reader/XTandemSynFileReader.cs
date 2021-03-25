@@ -426,8 +426,6 @@ namespace PHRPReader.Reader
 
         private static string GetFastaFileFromTaxonomyFile(string inputDirectoryPath, string taxonomyFilename, out string errorMessage)
         {
-            var fastaFile = string.Empty;
-
             errorMessage = string.Empty;
 
             try
@@ -436,41 +434,39 @@ namespace PHRPReader.Reader
                 if (!File.Exists(taxonomyFilePath))
                 {
                     errorMessage = AppendToString(errorMessage, "Warning, taxonomy file not found: " + taxonomyFilePath);
+                    return string.Empty;
                 }
-                else
+
+                // Open the XML file and look for the "file" element with attribute "peptide"
+                using var xmlReader = new XmlTextReader(taxonomyFilePath);
+
+                while (xmlReader.Read())
                 {
-                    // Open the XML file and look for the "file" element with attribute "peptide"
-                    using (var xmlReader = new XmlTextReader(taxonomyFilePath))
+                    XMLTextReaderSkipWhitespace(xmlReader);
+                    if (xmlReader.ReadState != ReadState.Interactive)
+                        break;
+
+                    if (xmlReader.NodeType == XmlNodeType.Element)
                     {
-                        while (xmlReader.Read())
+                        if (string.Equals(xmlReader.Name, "file", StringComparison.OrdinalIgnoreCase))
                         {
-                            XMLTextReaderSkipWhitespace(xmlReader);
-                            if (xmlReader.ReadState != ReadState.Interactive)
-                                break;
+                            var fileFormat = XMLTextReaderGetAttributeValue(xmlReader, "format", string.Empty);
 
-                            if (xmlReader.NodeType == XmlNodeType.Element)
+                            if (fileFormat == "peptide")
                             {
-                                if (string.Equals(xmlReader.Name, "file", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    var fileFormat = XMLTextReaderGetAttributeValue(xmlReader, "format", string.Empty);
-
-                                    if (fileFormat == "peptide")
-                                    {
-                                        fastaFile = XMLTextReaderGetAttributeValue(xmlReader, "URL", string.Empty);
-                                        break;
-                                    }
-                                }
+                                return XMLTextReaderGetAttributeValue(xmlReader, "URL", string.Empty);
                             }
                         }
                     }
                 }
+
+                return string.Empty;
             }
             catch (Exception ex)
             {
                 errorMessage = AppendToString(errorMessage, "Error in GetFastaFileFromTaxonomyFile: " + ex.Message);
+                return string.Empty;
             }
-
-            return fastaFile;
         }
 
         /// <summary>

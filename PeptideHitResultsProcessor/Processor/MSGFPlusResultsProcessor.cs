@@ -2859,14 +2859,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (createFile)
                 {
-                    using (var writer = new StreamWriter(new FileStream(scanGroupFilePath, FileMode.Create, FileAccess.Write, FileShare.Read)))
-                    {
-                        writer.WriteLine("Scan_Group_ID\tCharge\tScan");
+                    using var writer = new StreamWriter(new FileStream(scanGroupFilePath, FileMode.Create, FileAccess.Write, FileShare.Read));
 
-                        foreach (var udtScanGroupInfo in scanGroupDetails)
-                        {
-                            writer.WriteLine(udtScanGroupInfo.ScanGroupID + "\t" + udtScanGroupInfo.Charge + "\t" + udtScanGroupInfo.Scan);
-                        }
+                    writer.WriteLine("Scan_Group_ID\tCharge\tScan");
+
+                    foreach (var udtScanGroupInfo in scanGroupDetails)
+                    {
+                        writer.WriteLine(udtScanGroupInfo.ScanGroupID + "\t" + udtScanGroupInfo.Charge + "\t" + udtScanGroupInfo.Scan);
                     }
                 }
             }

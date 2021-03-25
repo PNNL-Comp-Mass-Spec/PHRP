@@ -535,13 +535,13 @@ namespace PHRPReader
             try
             {
                 totalLines = 0;
-                using (var reader = new StreamReader(new FileStream(textFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+
+                using var reader = new StreamReader(new FileStream(textFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
-                    {
-                        reader.ReadLine();
-                        totalLines++;
-                    }
+                    reader.ReadLine();
+                    totalLines++;
                 }
             }
             catch (Exception ex)

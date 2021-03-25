@@ -723,25 +723,24 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                using (var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using var reader = new StreamReader(new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    var lineIn = reader.ReadLine();
+                    if (string.IsNullOrEmpty(lineIn))
+                        continue;
+
+                    var splitLine = lineIn.Split('\t');
+                    if (splitLine.Length >= 3)
                     {
-                        var lineIn = reader.ReadLine();
-                        if (string.IsNullOrEmpty(lineIn))
-                            continue;
-
-                        var splitLine = lineIn.Split('\t');
-                        if (splitLine.Length >= 3)
+                        if (int.TryParse(splitLine[0], out var spectrumIndex))
                         {
-                            if (int.TryParse(splitLine[0], out var spectrumIndex))
+                            if (int.TryParse(splitLine[1], out var scanStart))
                             {
-                                if (int.TryParse(splitLine[1], out var scanStart))
-                                {
-                                    // int.TryParse(splitLine[2], out scanEnd);
+                                // int.TryParse(splitLine[2], out scanEnd);
 
-                                    mSpectrumIndexToScanMap.Add(spectrumIndex, scanStart);
-                                }
+                                mSpectrumIndexToScanMap.Add(spectrumIndex, scanStart);
                             }
                         }
                     }
