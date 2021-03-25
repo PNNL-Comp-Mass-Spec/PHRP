@@ -36,7 +36,7 @@ namespace PeptideHitResultsProcessor.Data
         public string FractionB { get; set; }
         public string Intensity { get; set; }
         public string NTT { get; set; }
-        public string pValue { get; set; }
+        public string PValue { get; set; }
         public string FScore { get; set; }
         public string DeltaScore { get; set; }
         public string DeltaScoreOther { get; set; }
@@ -77,7 +77,7 @@ namespace PeptideHitResultsProcessor.Data
             FractionB = string.Empty;
             Intensity = string.Empty;
             NTT = string.Empty;
-            pValue = string.Empty;
+            PValue = string.Empty;
             FScore = string.Empty;
             DeltaScore = string.Empty;
             DeltaScoreOther = string.Empty;

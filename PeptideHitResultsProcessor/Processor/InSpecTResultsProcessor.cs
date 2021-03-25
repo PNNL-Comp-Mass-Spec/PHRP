@@ -1383,7 +1383,7 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.FractionB = fractionB;
                 searchResult.Intensity = intensity;
                 searchResult.NTT = ntt;
-                searchResult.pValue = pValue;
+                searchResult.PValue = pValue;
                 searchResult.FScore = fScore;
                 searchResult.DeltaScore = deltaScore;
                 searchResult.DeltaScoreOther = deltaScoreOther;
