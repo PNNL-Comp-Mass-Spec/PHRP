@@ -148,7 +148,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public XTandemSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.XTandem, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.XTandem, loadModsAndSeqInfo)
         {
         }
 
@@ -159,7 +159,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public XTandemSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.XTandem, startupOptions)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.XTandem, startupOptions)
         {
         }
 

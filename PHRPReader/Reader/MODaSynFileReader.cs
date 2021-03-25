@@ -138,7 +138,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public MODaSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MODa, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.MODa, loadModsAndSeqInfo)
         {
         }
 
@@ -149,7 +149,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public MODaSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MODa, startupOptions)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.MODa, startupOptions)
         {
         }
 
@@ -348,7 +348,7 @@ namespace PHRPReader.Reader
         {
             try
             {
-                var success = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, searchEngineParamFileName, Enums.PeptideHitResultTypes.MODa, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MODa_SEARCH_ENGINE_NAME, searchEngineParamFileName, PeptideHitResultTypes.MODa, searchEngineParams);
 
                 if (!success)
                 {

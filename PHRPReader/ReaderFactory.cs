@@ -145,7 +145,7 @@ namespace PHRPReader
         private string mCachedLine;
         private PSM mCachedPSM;
 
-        private Enums.PHRPReaderErrorCodes mLocalErrorCode;
+        private PHRPReaderErrorCodes mLocalErrorCode;
 
         /// <summary>
         /// RegEx to extract parent ions from filter strings that do not have Full msx
@@ -261,11 +261,11 @@ namespace PHRPReader
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, MSGFPlus, etc.
         /// </summary>
-        public Enums.PeptideHitResultTypes PeptideHitResultType
+        public PeptideHitResultTypes PeptideHitResultType
         {
             get
             {
-                return (SynFileReader?.PeptideHitResultType) ?? Enums.PeptideHitResultTypes.Unknown;
+                return (SynFileReader?.PeptideHitResultType) ?? PeptideHitResultTypes.Unknown;
             }
         }
 
@@ -336,7 +336,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
         public ReaderFactory(string inputFilePath)
-            : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
+            : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
         }
 
@@ -346,7 +346,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <remarks>Sets LoadModSummaryFile to True and LoadMSGFResults to true</remarks>
-        public ReaderFactory(string inputFilePath, Enums.PeptideHitResultTypes resultType)
+        public ReaderFactory(string inputFilePath, PeptideHitResultTypes resultType)
             : this(inputFilePath, resultType, loadModsAndSeqInfo: true, loadMSGFResults: true, loadScanStats: false)
         {
         }
@@ -358,7 +358,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         public ReaderFactory(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults)
-            : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
+            : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
         }
 
@@ -370,7 +370,7 @@ namespace PHRPReader
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
         public ReaderFactory(string inputFilePath, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
-            : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
+            : this(inputFilePath, PeptideHitResultTypes.Unknown, loadModsAndSeqInfo, loadMSGFResults, loadScanStats)
         {
         }
 
@@ -380,7 +380,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="startupOptions">Startup options</param>
         public ReaderFactory(string inputFilePath, StartupOptions startupOptions)
-            : this(inputFilePath, Enums.PeptideHitResultTypes.Unknown, startupOptions)
+            : this(inputFilePath, PeptideHitResultTypes.Unknown, startupOptions)
         {
         }
 
@@ -391,7 +391,7 @@ namespace PHRPReader
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
-        public ReaderFactory(string inputFilePath, Enums.PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
+        public ReaderFactory(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults)
             : this(inputFilePath, resultType, loadModsAndSeqInfo, loadMSGFResults, loadScanStats: false)
         {
         }
@@ -404,7 +404,7 @@ namespace PHRPReader
         /// <param name="loadModsAndSeqInfo">If True, looks for and auto-loads the modification definitions from the _ModSummary.txt file</param>
         /// <param name="loadMSGFResults">If True, looks for and auto-loads the MSGF results from the _msg.txt file</param>
         /// <param name="loadScanStats">If True, looks for and auto-loads the MASIC scan stats files (used to determine collision mode and to refine the precursor m/z values)</param>
-        public ReaderFactory(string inputFilePath, Enums.PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
+        public ReaderFactory(string inputFilePath, PeptideHitResultTypes resultType, bool loadModsAndSeqInfo, bool loadMSGFResults, bool loadScanStats)
         {
             var startupOptions = new StartupOptions
             {
@@ -434,7 +434,7 @@ namespace PHRPReader
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
         /// <param name="startupOptions">Startup options</param>
-        public ReaderFactory(string inputFilePath, Enums.PeptideHitResultTypes resultType, StartupOptions startupOptions)
+        public ReaderFactory(string inputFilePath, PeptideHitResultTypes resultType, StartupOptions startupOptions)
         {
             mStartupOptions = startupOptions ?? throw new ArgumentNullException(nameof(startupOptions));
 
@@ -566,7 +566,7 @@ namespace PHRPReader
         /// </summary>
         /// <param name="inputFilePath">Input file to read</param>
         /// <param name="resultType">Source file PeptideHit result type</param>
-        private void InitializeClass(string inputFilePath, Enums.PeptideHitResultTypes resultType)
+        private void InitializeClass(string inputFilePath, PeptideHitResultTypes resultType)
         {
             mInitialized = false;
 
@@ -591,12 +591,12 @@ namespace PHRPReader
             EchoMessagesToConsole = false;
 
             ErrorMessage = string.Empty;
-            mLocalErrorCode = Enums.PHRPReaderErrorCodes.NoError;
+            mLocalErrorCode = PHRPReaderErrorCodes.NoError;
 
             mSourceFileLineCount = 0;
         }
 
-        private void InitializeReader(string inputFilePath, Enums.PeptideHitResultTypes resultType)
+        private void InitializeReader(string inputFilePath, PeptideHitResultTypes resultType)
         {
             var modSummaryFilePath = string.Empty;
 
@@ -605,7 +605,7 @@ namespace PHRPReader
                 if (string.IsNullOrEmpty(inputFilePath))
                 {
                     ReportError("Input file name is empty");
-                    SetLocalErrorCode(Enums.PHRPReaderErrorCodes.InvalidInputFilePath);
+                    SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
                     if (!mInitialized)
                         throw new FileNotFoundException(ErrorMessage);
                     return;
@@ -618,7 +618,7 @@ namespace PHRPReader
                 if (inputFile.Directory == null)
                 {
                     ReportError("Unable to determine the parent directory of " + inputFile.FullName);
-                    SetLocalErrorCode(Enums.PHRPReaderErrorCodes.InvalidInputFilePath);
+                    SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
                     if (!mInitialized)
                         throw new FileNotFoundException(ErrorMessage);
                     return;
@@ -634,7 +634,7 @@ namespace PHRPReader
                     {
                         ReportWarning("Absolute path: " + inputFile.DirectoryName);
                     }
-                    SetLocalErrorCode(Enums.PHRPReaderErrorCodes.InvalidInputFilePath);
+                    SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
                     if (!mInitialized)
                         throw new FileNotFoundException(ErrorMessage);
                     return;
@@ -644,7 +644,7 @@ namespace PHRPReader
                 var success = ValidateInputFiles(inputFilePath, ref resultType, ref modSummaryFilePath);
                 if (!success)
                 {
-                    SetLocalErrorCode(Enums.PHRPReaderErrorCodes.RequiredInputFileNotFound, true);
+                    SetLocalErrorCode(PHRPReaderErrorCodes.RequiredInputFileNotFound, true);
                     if (!mInitialized)
                         throw new FileNotFoundException(ErrorMessage);
                     return;
@@ -691,7 +691,7 @@ namespace PHRPReader
             }
         }
 
-        private bool InitializeParser(Enums.PeptideHitResultTypes resultType)
+        private bool InitializeParser(PeptideHitResultTypes resultType)
         {
             var success = true;
             var datasetName = string.Copy(DatasetName);
@@ -735,41 +735,41 @@ namespace PHRPReader
                 // Instantiate the appropriate PHRP Parser
                 switch (resultType)
                 {
-                    case Enums.PeptideHitResultTypes.Sequest:
+                    case PeptideHitResultTypes.Sequest:
                         SynFileReader = new SequestSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case Enums.PeptideHitResultTypes.XTandem:
+                    case PeptideHitResultTypes.XTandem:
                         // Note that Result to Protein mapping will be auto-loaded during instantiation of mPHRPParser
                         SynFileReader = new XTandemSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case Enums.PeptideHitResultTypes.Inspect:
+                    case PeptideHitResultTypes.Inspect:
                         SynFileReader = new InspectSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case Enums.PeptideHitResultTypes.MSGFPlus:
+                    case PeptideHitResultTypes.MSGFPlus:
                         // MS-GF+
                         SynFileReader = new MSGFPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case Enums.PeptideHitResultTypes.MSAlign:
+                    case PeptideHitResultTypes.MSAlign:
                         SynFileReader = new MSAlignSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case Enums.PeptideHitResultTypes.MODa:
+                    case PeptideHitResultTypes.MODa:
                         SynFileReader = new MODaSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case Enums.PeptideHitResultTypes.MODPlus:
+                    case PeptideHitResultTypes.MODPlus:
                         SynFileReader = new MODPlusSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case Enums.PeptideHitResultTypes.MSPathFinder:
+                    case PeptideHitResultTypes.MSPathFinder:
                         SynFileReader = new MSPathFinderSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
-                    case Enums.PeptideHitResultTypes.TopPIC:
+                    case PeptideHitResultTypes.TopPIC:
                         SynFileReader = new TopPICSynFileReader(datasetName, mInputFilePath, mStartupOptions);
                         break;
 
@@ -830,13 +830,13 @@ namespace PHRPReader
         /// <param name="getPhrpFilenameMethod"></param>
         /// <param name="datasetName"></param>
         private static void AddFileToFind(
-            ICollection<KeyValuePair<string, Enums.PeptideHitResultTypes>> filesToFind,
-            Enums.PeptideHitResultTypes resultType,
+            ICollection<KeyValuePair<string, PeptideHitResultTypes>> filesToFind,
+            PeptideHitResultTypes resultType,
             Func<string, string> getPhrpFilenameMethod,
             string datasetName)
         {
             var phrpFilename = getPhrpFilenameMethod(datasetName);
-            filesToFind.Add(new KeyValuePair<string, Enums.PeptideHitResultTypes>(phrpFilename, resultType));
+            filesToFind.Add(new KeyValuePair<string, PeptideHitResultTypes>(phrpFilename, resultType));
         }
 
         /// <summary>
@@ -846,11 +846,11 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="phrpFilename"></param>
         private static void AddFileToFind(
-            ICollection<KeyValuePair<string, Enums.PeptideHitResultTypes>> filesToFind,
-            Enums.PeptideHitResultTypes resultType,
+            ICollection<KeyValuePair<string, PeptideHitResultTypes>> filesToFind,
+            PeptideHitResultTypes resultType,
             string phrpFilename)
         {
-            filesToFind.Add(new KeyValuePair<string, Enums.PeptideHitResultTypes>(phrpFilename, resultType));
+            filesToFind.Add(new KeyValuePair<string, PeptideHitResultTypes>(phrpFilename, resultType));
         }
 
         /// <summary>
@@ -860,11 +860,11 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="suffix"></param>
         private static void AddSuffixToCheck(
-            ICollection<KeyValuePair<string, Enums.PeptideHitResultTypes>> suffixesToCheck,
-            Enums.PeptideHitResultTypes resultType,
+            ICollection<KeyValuePair<string, PeptideHitResultTypes>> suffixesToCheck,
+            PeptideHitResultTypes resultType,
             string suffix)
         {
-            suffixesToCheck.Add(new KeyValuePair<string, Enums.PeptideHitResultTypes>(suffix, resultType));
+            suffixesToCheck.Add(new KeyValuePair<string, PeptideHitResultTypes>(suffix, resultType));
         }
 
         /// <summary>
@@ -885,7 +885,7 @@ namespace PHRPReader
         /// <param name="inputDirectoryPath">Input directory path</param>
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
-        public static string AutoDetermineBestInputFile(string inputDirectoryPath, out Enums.PeptideHitResultTypes matchedResultType)
+        public static string AutoDetermineBestInputFile(string inputDirectoryPath, out PeptideHitResultTypes matchedResultType)
         {
             // Find candidate dataset names in inputDirectoryPath
 
@@ -972,7 +972,7 @@ namespace PHRPReader
                 {
                     Console.WriteLine("  " + fileSpec);
                 }
-                matchedResultType = Enums.PeptideHitResultTypes.Unknown;
+                matchedResultType = PeptideHitResultTypes.Unknown;
                 return string.Empty;
             }
 
@@ -1000,7 +1000,7 @@ namespace PHRPReader
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, string datasetName,
-            out Enums.PeptideHitResultTypes matchedResultType)
+            out PeptideHitResultTypes matchedResultType)
         {
             var datasetNames = new List<string> {
                 datasetName
@@ -1018,7 +1018,7 @@ namespace PHRPReader
         /// <param name="matchedResultType">Output parameter: the result type of the best result file found</param>
         /// <returns>The full path to the most appropriate Synopsis or First hits file</returns>
         public static string AutoDetermineBestInputFile(string inputDirectoryPath, List<string> datasetNames,
-            out Enums.PeptideHitResultTypes matchedResultType)
+            out PeptideHitResultTypes matchedResultType)
         {
             // This list contains the standard PHRP file suffixes
             var auxiliaryFileSuffixes = GetPHRPAuxiliaryFileSuffixes();
@@ -1027,7 +1027,7 @@ namespace PHRPReader
             var kvBestSynOrFHTFile = new KeyValuePair<string, int>(string.Empty, 0);
 
             // Set the matched result type to Unknown for now
-            matchedResultType = Enums.PeptideHitResultTypes.Unknown;
+            matchedResultType = PeptideHitResultTypes.Unknown;
 
             if (string.IsNullOrWhiteSpace(inputDirectoryPath))
             {
@@ -1047,36 +1047,36 @@ namespace PHRPReader
 
             // Construct a list of the files to search for
             // Items in this list are KeyValuePairs where the key is a filename to look for and the value is a PeptideHitResultTypes
-            var filesToFind = new List<KeyValuePair<string, Enums.PeptideHitResultTypes>>();
+            var filesToFind = new List<KeyValuePair<string, PeptideHitResultTypes>>();
 
             foreach (var dataset in datasetNames)
             {
                 // MS-GF+
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.GetPHRPFirstHitsFileName, dataset);
 
                 // MS-GF+ prior to November 2016
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MSGFPlus, GetLegacyMSGFPlusName(MSGFPlusSynFileReader.GetPHRPSynopsisFileName(dataset)));
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MSGFPlus, GetLegacyMSGFPlusName(MSGFPlusSynFileReader.GetPHRPFirstHitsFileName(dataset)));
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MSGFPlus, GetLegacyMSGFPlusName(MSGFPlusSynFileReader.GetPHRPSynopsisFileName(dataset)));
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MSGFPlus, GetLegacyMSGFPlusName(MSGFPlusSynFileReader.GetPHRPFirstHitsFileName(dataset)));
 
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPFirstHitsFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPFirstHitsFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MODa, MODaSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MODa, MODaSynFileReader.GetPHRPFirstHitsFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.GetPHRPFirstHitsFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.GetPHRPFirstHitsFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.TopPIC, TopPICSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.TopPIC, TopPICSynFileReader.GetPHRPFirstHitsFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.Inspect, InspectSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.Inspect, InspectSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.XTandem, XTandemSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MODa, MODaSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MODa, MODaSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.Inspect, InspectSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.Inspect, InspectSynFileReader.GetPHRPFirstHitsFileName, dataset);
 
                 // Sequest (needs to be added last since files simply end in _syn.txt or _fht.txt)
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.Sequest, SequestSynFileReader.GetPHRPSynopsisFileName, dataset);
-                AddFileToFind(filesToFind, Enums.PeptideHitResultTypes.Sequest, SequestSynFileReader.GetPHRPFirstHitsFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.Sequest, SequestSynFileReader.GetPHRPSynopsisFileName, dataset);
+                AddFileToFind(filesToFind, PeptideHitResultTypes.Sequest, SequestSynFileReader.GetPHRPFirstHitsFileName, dataset);
             }
 
             foreach (var kvFileToFind in filesToFind)
@@ -1153,7 +1153,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <returns>Dataset name</returns>
         /// <remarks>Returns an empty string if unable to determine the dataset name</remarks>
-        public static string AutoDetermineDatasetName(string filePath, Enums.PeptideHitResultTypes resultType)
+        public static string AutoDetermineDatasetName(string filePath, PeptideHitResultTypes resultType)
         {
             var datasetName = string.Empty;
 
@@ -1164,28 +1164,28 @@ namespace PHRPReader
 
             switch (resultType)
             {
-                case Enums.PeptideHitResultTypes.Sequest:
-                case Enums.PeptideHitResultTypes.Inspect:
-                case Enums.PeptideHitResultTypes.MSGFPlus:
-                case Enums.PeptideHitResultTypes.MSAlign:
-                case Enums.PeptideHitResultTypes.MODa:
-                case Enums.PeptideHitResultTypes.MODPlus:
-                case Enums.PeptideHitResultTypes.MSPathFinder:
-                case Enums.PeptideHitResultTypes.TopPIC:
+                case PeptideHitResultTypes.Sequest:
+                case PeptideHitResultTypes.Inspect:
+                case PeptideHitResultTypes.MSGFPlus:
+                case PeptideHitResultTypes.MSAlign:
+                case PeptideHitResultTypes.MODa:
+                case PeptideHitResultTypes.MODPlus:
+                case PeptideHitResultTypes.MSPathFinder:
+                case PeptideHitResultTypes.TopPIC:
 
                     if (inputFileName.EndsWith("_fht", StringComparison.OrdinalIgnoreCase) ||
                         inputFileName.EndsWith("_syn", StringComparison.OrdinalIgnoreCase))
                     {
                         datasetName = inputFileName.Substring(0, inputFileName.Length - 4);
 
-                        if (resultType == Enums.PeptideHitResultTypes.Inspect)
+                        if (resultType == PeptideHitResultTypes.Inspect)
                         {
                             if (datasetName.EndsWith("_inspect", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_inspect".Length);
                             }
                         }
-                        else if (resultType == Enums.PeptideHitResultTypes.MSGFPlus)
+                        else if (resultType == PeptideHitResultTypes.MSGFPlus)
                         {
                             if (datasetName.EndsWith("_msgfplus", StringComparison.OrdinalIgnoreCase))
                             {
@@ -1196,35 +1196,35 @@ namespace PHRPReader
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_msgfdb".Length);
                             }
                         }
-                        else if (resultType == Enums.PeptideHitResultTypes.MSAlign)
+                        else if (resultType == PeptideHitResultTypes.MSAlign)
                         {
                             if (datasetName.EndsWith("_msalign", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_msalign".Length);
                             }
                         }
-                        else if (resultType == Enums.PeptideHitResultTypes.MODa)
+                        else if (resultType == PeptideHitResultTypes.MODa)
                         {
                             if (datasetName.EndsWith("_moda", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_moda".Length);
                             }
                         }
-                        else if (resultType == Enums.PeptideHitResultTypes.MODPlus)
+                        else if (resultType == PeptideHitResultTypes.MODPlus)
                         {
                             if (datasetName.EndsWith("_modp", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_modp".Length);
                             }
                         }
-                        else if (resultType == Enums.PeptideHitResultTypes.MSPathFinder)
+                        else if (resultType == PeptideHitResultTypes.MSPathFinder)
                         {
                             if (datasetName.EndsWith("_mspath", StringComparison.OrdinalIgnoreCase))
                             {
                                 datasetName = datasetName.Substring(0, datasetName.Length - "_mspath".Length);
                             }
                         }
-                        else if (resultType == Enums.PeptideHitResultTypes.TopPIC)
+                        else if (resultType == PeptideHitResultTypes.TopPIC)
                         {
                             if (datasetName.EndsWith("_toppic", StringComparison.OrdinalIgnoreCase))
                             {
@@ -1234,7 +1234,7 @@ namespace PHRPReader
                     }
                     break;
 
-                case Enums.PeptideHitResultTypes.XTandem:
+                case PeptideHitResultTypes.XTandem:
                     if (inputFileName.EndsWith("_xt", StringComparison.OrdinalIgnoreCase))
                     {
                         datasetName = inputFileName.Substring(0, inputFileName.Length - 3);
@@ -1257,33 +1257,33 @@ namespace PHRPReader
         /// Determine the PeptideHit result type given the input file path
         /// </summary>
         /// <param name="filePath"></param>
-        public static Enums.PeptideHitResultTypes AutoDetermineResultType(string filePath)
+        public static PeptideHitResultTypes AutoDetermineResultType(string filePath)
         {
             const string LEGACY_MSGFPLUS_SUFFIX_SYN = "_msgfdb_syn.txt";
             const string LEGACY_MSGFPLUS_SUFFIX_FHT = "_msgfdb_fht.txt";
 
-            var resultType = Enums.PeptideHitResultTypes.Unknown;
+            var resultType = PeptideHitResultTypes.Unknown;
 
             var filePathLCase = filePath.ToLower();
 
-            var suffixesToCheck = new List<KeyValuePair<string, Enums.PeptideHitResultTypes>>();
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.XTandem, XTandemSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_FHT);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_SYN);
-            AddSuffixToCheck(suffixesToCheck, Enums.PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_FHT);
+            var suffixesToCheck = new List<KeyValuePair<string, PeptideHitResultTypes>>();
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.XTandem, XTandemSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, MSGFPlusSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSGFPlus, LEGACY_MSGFPLUS_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSAlign, MSAlignSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODa, MODaSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MODPlus, MODPlusSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.MSPathFinder, MSPathFinderSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.TopPIC, TopPICSynFileReader.FILENAME_SUFFIX_FHT);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_SYN);
+            AddSuffixToCheck(suffixesToCheck, PeptideHitResultTypes.Inspect, InspectSynFileReader.FILENAME_SUFFIX_FHT);
 
             foreach (var item in suffixesToCheck)
             {
@@ -1294,7 +1294,7 @@ namespace PHRPReader
                 }
             }
 
-            if (resultType != Enums.PeptideHitResultTypes.Unknown)
+            if (resultType != PeptideHitResultTypes.Unknown)
             {
                 return resultType;
             }
@@ -1303,7 +1303,7 @@ namespace PHRPReader
             if (!File.Exists(filePath))
             {
                 // File doesn't exist; assume MSGFPlus
-                return Enums.PeptideHitResultTypes.MSGFPlus;
+                return PeptideHitResultTypes.MSGFPlus;
             }
 
             using (var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
@@ -1315,7 +1315,7 @@ namespace PHRPReader
                     if (LineContainsValues(headerLine, InspectSynFileReader.DATA_COLUMN_MQScore,
                                            InspectSynFileReader.DATA_COLUMN_TotalPRMScore))
                     {
-                        resultType = Enums.PeptideHitResultTypes.Inspect;
+                        resultType = PeptideHitResultTypes.Inspect;
                     }
                     else if (LineContainsValues(headerLine, MSGFPlusSynFileReader.DATA_COLUMN_MSGFScore,
                                                 MSGFPlusSynFileReader.DATA_COLUMN_MSGFDB_SpecProb) ||
@@ -1324,16 +1324,16 @@ namespace PHRPReader
                              LineContainsValues(headerLine, MSGFPlusSynFileReader.DATA_COLUMN_MSGFScore,
                                                 MSGFPlusSynFileReader.DATA_COLUMN_DeNovoScore))
                     {
-                        resultType = Enums.PeptideHitResultTypes.MSGFPlus;
+                        resultType = PeptideHitResultTypes.MSGFPlus;
                     }
                     else if (LineContainsValues(headerLine, SequestSynFileReader.DATA_COLUMN_XCorr, SequestSynFileReader.DATA_COLUMN_DelCn))
                     {
-                        resultType = Enums.PeptideHitResultTypes.Sequest;
+                        resultType = PeptideHitResultTypes.Sequest;
                     }
                 }
             }
 
-            if (resultType != Enums.PeptideHitResultTypes.Unknown)
+            if (resultType != PeptideHitResultTypes.Unknown)
                 return resultType;
 
             if (AutoTrimExtraSuffix(filePath, out var filePathTrimmed))
@@ -1548,7 +1548,7 @@ namespace PHRPReader
         /// <param name="inputFileName">Name or path of the input file, e.g. Dataset_msgfplus_syn.txt or Dataset_syn.txt</param>
         /// <param name="modSummaryFileNamePreferred">Output: preferred mod summary filename (based on whether a _syn.txt or _fht.txt file is present)</param>
         public static string FindModSummaryFile(
-            Enums.PeptideHitResultTypes peptideHitResultType,
+            PeptideHitResultTypes peptideHitResultType,
             string datasetName,
             string inputDirectoryPath,
             string inputFileName,
@@ -1744,39 +1744,39 @@ namespace PHRPReader
         /// Get the peptide hit result type for the given result type name
         /// </summary>
         /// <param name="resultTypeName"></param>
-        public static Enums.PeptideHitResultTypes GetPeptideHitResultType(string resultTypeName)
+        public static PeptideHitResultTypes GetPeptideHitResultType(string resultTypeName)
         {
             switch (resultTypeName.ToLower())
             {
                 case "peptide_hit":
-                    return Enums.PeptideHitResultTypes.Sequest;
+                    return PeptideHitResultTypes.Sequest;
 
                 case "xt_peptide_hit":
-                    return Enums.PeptideHitResultTypes.XTandem;
+                    return PeptideHitResultTypes.XTandem;
 
                 case "in_peptide_hit":
-                    return Enums.PeptideHitResultTypes.Inspect;
+                    return PeptideHitResultTypes.Inspect;
 
                 case "msg_peptide_hit":
-                    return Enums.PeptideHitResultTypes.MSGFPlus;
+                    return PeptideHitResultTypes.MSGFPlus;
 
                 case "msa_peptide_hit":
-                    return Enums.PeptideHitResultTypes.MSAlign;
+                    return PeptideHitResultTypes.MSAlign;
 
                 case "moda_peptide_hit":
-                    return Enums.PeptideHitResultTypes.MODa;
+                    return PeptideHitResultTypes.MODa;
 
                 case "modplus_peptide_hit":
-                    return Enums.PeptideHitResultTypes.MODPlus;
+                    return PeptideHitResultTypes.MODPlus;
 
                 case "msp_peptide_hit":
-                    return Enums.PeptideHitResultTypes.MSPathFinder;
+                    return PeptideHitResultTypes.MSPathFinder;
 
                 case "tpc_peptide_hit":
-                    return Enums.PeptideHitResultTypes.TopPIC;
+                    return PeptideHitResultTypes.TopPIC;
 
                 default:
-                    return Enums.PeptideHitResultTypes.Unknown;
+                    return PeptideHitResultTypes.Unknown;
             }
         }
 
@@ -1801,51 +1801,51 @@ namespace PHRPReader
         }
 
         private static SynFileReaderBaseClass mCachedParser;
-        private static Enums.PeptideHitResultTypes mCachedParserType = Enums.PeptideHitResultTypes.Unknown;
+        private static PeptideHitResultTypes mCachedParserType = PeptideHitResultTypes.Unknown;
         private static string mCachedDataset = string.Empty;
 
-        private static SynFileReaderBaseClass GetPHRPFileFreeParser(Enums.PeptideHitResultTypes resultType, string datasetName)
+        private static SynFileReaderBaseClass GetPHRPFileFreeParser(PeptideHitResultTypes resultType, string datasetName)
         {
-            if (mCachedParserType != Enums.PeptideHitResultTypes.Unknown && mCachedParserType == resultType && mCachedDataset == datasetName)
+            if (mCachedParserType != PeptideHitResultTypes.Unknown && mCachedParserType == resultType && mCachedDataset == datasetName)
             {
                 return mCachedParser;
             }
 
             switch (resultType)
             {
-                case Enums.PeptideHitResultTypes.Sequest:
+                case PeptideHitResultTypes.Sequest:
                     mCachedParser = new SequestSynFileReader(datasetName, string.Empty);
                     break;
 
-                case Enums.PeptideHitResultTypes.XTandem:
+                case PeptideHitResultTypes.XTandem:
                     mCachedParser = new XTandemSynFileReader(datasetName, string.Empty);
                     break;
 
-                case Enums.PeptideHitResultTypes.Inspect:
+                case PeptideHitResultTypes.Inspect:
                     mCachedParser = new InspectSynFileReader(datasetName, string.Empty);
                     break;
 
-                case Enums.PeptideHitResultTypes.MSGFPlus:
+                case PeptideHitResultTypes.MSGFPlus:
                     mCachedParser = new MSGFPlusSynFileReader(datasetName, string.Empty);
                     break;
 
-                case Enums.PeptideHitResultTypes.MSAlign:
+                case PeptideHitResultTypes.MSAlign:
                     mCachedParser = new MSAlignSynFileReader(datasetName, string.Empty);
                     break;
 
-                case Enums.PeptideHitResultTypes.MODa:
+                case PeptideHitResultTypes.MODa:
                     mCachedParser = new MODaSynFileReader(datasetName, string.Empty);
                     break;
 
-                case Enums.PeptideHitResultTypes.MODPlus:
+                case PeptideHitResultTypes.MODPlus:
                     mCachedParser = new MODPlusSynFileReader(datasetName, string.Empty);
                     break;
 
-                case Enums.PeptideHitResultTypes.MSPathFinder:
+                case PeptideHitResultTypes.MSPathFinder:
                     mCachedParser = new MSPathFinderSynFileReader(datasetName, string.Empty);
                     break;
 
-                case Enums.PeptideHitResultTypes.TopPIC:
+                case PeptideHitResultTypes.TopPIC:
                     mCachedParser = new TopPICSynFileReader(datasetName, string.Empty);
                     break;
 
@@ -1865,7 +1865,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPFirstHitsFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPFirstHitsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var parser = GetPHRPFileFreeParser(resultType, datasetName);
             var phrpResultsFileName = parser.PHRPFirstHitsFileName;
@@ -1879,7 +1879,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPModSummaryFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPModSummaryFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var parser = GetPHRPFileFreeParser(resultType, datasetName);
             var phrpModSummaryFileName = parser.PHRPModSummaryFileName;
@@ -1893,7 +1893,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPPepToProteinMapFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPPepToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var parser = GetPHRPFileFreeParser(resultType, datasetName);
             var pepToProteinMapFileName = parser.PHRPPepToProteinMapFileName;
@@ -1907,7 +1907,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPProteinModsFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPProteinModsFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var parser = GetPHRPFileFreeParser(resultType, datasetName);
             var proteinModsFileName = parser.PHRPProteinModsFileName;
@@ -1921,7 +1921,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPSynopsisFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPSynopsisFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var parser = GetPHRPFileFreeParser(resultType, datasetName);
             var phrpResultsFileName = parser.PHRPSynopsisFileName;
@@ -1935,7 +1935,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPResultToSeqMapFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPResultToSeqMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var parser = GetPHRPFileFreeParser(resultType, datasetName);
             var resultToSeqMapFilename = parser.PHRPResultToSeqMapFileName;
@@ -1949,7 +1949,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPSeqInfoFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPSeqInfoFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var parser = GetPHRPFileFreeParser(resultType, datasetName);
             var seqInfoFilename = parser.PHRPSeqInfoFileName;
@@ -1963,7 +1963,7 @@ namespace PHRPReader
         /// <param name="resultType"></param>
         /// <param name="datasetName"></param>
         /// <returns>Filename</returns>
-        public static string GetPHRPSeqToProteinMapFileName(Enums.PeptideHitResultTypes resultType, string datasetName)
+        public static string GetPHRPSeqToProteinMapFileName(PeptideHitResultTypes resultType, string datasetName)
         {
             var parser = GetPHRPFileFreeParser(resultType, datasetName);
             var seqToProteinMapFileName = parser.PHRPSeqToProteinMapFileName;
@@ -1996,36 +1996,36 @@ namespace PHRPReader
         /// </summary>
         /// <param name="resultType"></param>
         /// <returns>Filename</returns>
-        public static string GetToolVersionInfoFilename(Enums.PeptideHitResultTypes resultType)
+        public static string GetToolVersionInfoFilename(PeptideHitResultTypes resultType)
         {
             switch (resultType)
             {
-                case Enums.PeptideHitResultTypes.Sequest:
+                case PeptideHitResultTypes.Sequest:
                     return "Tool_Version_Info_Sequest.txt";
 
-                case Enums.PeptideHitResultTypes.XTandem:
+                case PeptideHitResultTypes.XTandem:
                     return "Tool_Version_Info_XTandem.txt";
 
-                case Enums.PeptideHitResultTypes.Inspect:
+                case PeptideHitResultTypes.Inspect:
                     return "Tool_Version_Info_Inspect.txt";
 
-                case Enums.PeptideHitResultTypes.MSGFPlus:
+                case PeptideHitResultTypes.MSGFPlus:
                     // Changed from "Tool_Version_Info_MSGFDB.txt" to "Tool_Version_Info_MSGFPlus.txt" in November 2016
                     return "Tool_Version_Info_MSGFPlus.txt";
 
-                case Enums.PeptideHitResultTypes.MSAlign:
+                case PeptideHitResultTypes.MSAlign:
                     return "Tool_Version_Info_MSAlign.txt";
 
-                case Enums.PeptideHitResultTypes.MODa:
+                case PeptideHitResultTypes.MODa:
                     return "Tool_Version_Info_MODa.txt";
 
-                case Enums.PeptideHitResultTypes.MODPlus:
+                case PeptideHitResultTypes.MODPlus:
                     return "Tool_Version_Info_MODPlus.txt";
 
-                case Enums.PeptideHitResultTypes.MSPathFinder:
+                case PeptideHitResultTypes.MSPathFinder:
                     return "Tool_Version_Info_MSPathFinder.txt";
 
-                case Enums.PeptideHitResultTypes.TopPIC:
+                case PeptideHitResultTypes.TopPIC:
                     return "Tool_Version_Info_TopPIC.txt";
 
                 default:
@@ -2351,7 +2351,7 @@ namespace PHRPReader
 
             if (!mFastReadMode)
             {
-                if (SynFileReader.PeptideHitResultType == Enums.PeptideHitResultTypes.Sequest || SynFileReader.PeptideHitResultType == Enums.PeptideHitResultTypes.XTandem)
+                if (SynFileReader.PeptideHitResultType == PeptideHitResultTypes.Sequest || SynFileReader.PeptideHitResultType == PeptideHitResultTypes.XTandem)
                 {
                     ComputePrecursorNeutralMass();
                 }
@@ -2811,7 +2811,7 @@ namespace PHRPReader
                 else
                 {
                     // Note: we do not need to raise a warning for MSGFDB results since the extended scan stats file isn't needed
-                    if (SynFileReader.PeptideHitResultType != Enums.PeptideHitResultTypes.MSGFPlus)
+                    if (SynFileReader.PeptideHitResultType != PeptideHitResultTypes.MSGFPlus)
                     {
                         ReportWarning("Extended ScanStats file not found: " + extendedScanStatsFilePath);
                     }
@@ -2842,9 +2842,9 @@ namespace PHRPReader
             OnWarningEvent(message);
         }
 
-        private void SetLocalErrorCode(Enums.PHRPReaderErrorCodes newErrorCode, bool leaveExistingErrorCodeUnchanged = false)
+        private void SetLocalErrorCode(PHRPReaderErrorCodes newErrorCode, bool leaveExistingErrorCodeUnchanged = false)
         {
-            if (leaveExistingErrorCodeUnchanged && mLocalErrorCode != Enums.PHRPReaderErrorCodes.NoError)
+            if (leaveExistingErrorCodeUnchanged && mLocalErrorCode != PHRPReaderErrorCodes.NoError)
             {
                 // An error code is already defined; do not change it
             }
@@ -2890,12 +2890,12 @@ namespace PHRPReader
             return false;
         }
 
-        private bool ValidateInputFiles(string inputFilePath, ref Enums.PeptideHitResultTypes resultType, ref string modSummaryFilePath)
+        private bool ValidateInputFiles(string inputFilePath, ref PeptideHitResultTypes resultType, ref string modSummaryFilePath)
         {
             var inputFile = new FileInfo(inputFilePath);
             if (!inputFile.Exists)
             {
-                SetLocalErrorCode(Enums.PHRPReaderErrorCodes.InvalidInputFilePath);
+                SetLocalErrorCode(PHRPReaderErrorCodes.InvalidInputFilePath);
                 ReportError("Input file not found: " + inputFilePath);
                 if (inputFilePath.Contains(".."))
                 {
@@ -2906,14 +2906,14 @@ namespace PHRPReader
             }
 
             // Try to auto-determine the result type if it is not specified
-            if (resultType == Enums.PeptideHitResultTypes.Unknown)
+            if (resultType == PeptideHitResultTypes.Unknown)
             {
                 resultType = AutoDetermineResultType(inputFilePath);
             }
 
-            if (resultType == Enums.PeptideHitResultTypes.Unknown)
+            if (resultType == PeptideHitResultTypes.Unknown)
             {
-                SetLocalErrorCode(Enums.PHRPReaderErrorCodes.InputFileFormatNotRecognized);
+                SetLocalErrorCode(PHRPReaderErrorCodes.InputFileFormatNotRecognized);
                 ReportError("Error: Unable to auto-determine file format for " + inputFilePath);
                 return false;
             }
@@ -2925,7 +2925,7 @@ namespace PHRPReader
                 if (mStartupOptions.LoadModsAndSeqInfo || mStartupOptions.LoadMSGFResults || mStartupOptions.LoadScanStatsData)
                 {
                     ReportError("Error: Unable to auto-determine the dataset name from the input file name: " + inputFilePath);
-                    SetLocalErrorCode(Enums.PHRPReaderErrorCodes.InputFileFormatNotRecognized);
+                    SetLocalErrorCode(PHRPReaderErrorCodes.InputFileFormatNotRecognized);
                     return false;
                 }
 
@@ -2940,7 +2940,7 @@ namespace PHRPReader
                     ReportError(string.Format("Could not determine the ModSummaryFile name for dataset {0} " +
                                               "given the PHRP result type {1}",
                                               DatasetName, resultType.ToString()));
-                    SetLocalErrorCode(Enums.PHRPReaderErrorCodes.RequiredInputFileNotFound);
+                    SetLocalErrorCode(PHRPReaderErrorCodes.RequiredInputFileNotFound);
                     return false;
                 }
 
@@ -2951,7 +2951,7 @@ namespace PHRPReader
 
                 if (!ValidateRequiredFileExists("ModSummary file", modSummaryFilePath) && inputFile.Name.IndexOf("_fht", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    SetLocalErrorCode(Enums.PHRPReaderErrorCodes.RequiredInputFileNotFound);
+                    SetLocalErrorCode(PHRPReaderErrorCodes.RequiredInputFileNotFound);
                     return false;
                 }
             }

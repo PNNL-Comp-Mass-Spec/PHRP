@@ -443,7 +443,7 @@ namespace PeptideHitResultsProcessor.Processor
                     var success = ParseXTandemResultsFileInputParameters(inputFilePath);
                     if (!success)
                     {
-                        SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile, true);
+                        SetErrorCode(PHRPErrorCode.ErrorReadingInputFile, true);
                         return false;
                     }
 
@@ -558,7 +558,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -569,7 +569,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -1170,7 +1170,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 success = false;
             }
 
@@ -1496,7 +1496,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile, true);
+                SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -1505,7 +1505,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1547,13 +1547,13 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (2): " + ex.Message);
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in XTandemResultsProcessor.ProcessFile (1):" + ex.Message);
-                SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
+                SetErrorCode(PHRPErrorCode.UnspecifiedError);
             }
 
             return success;
@@ -1600,7 +1600,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Now create the Protein Mods file
                     success = CreateProteinModDetailsFile(xtandemXTFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PHRPReader.Enums.PeptideHitResultTypes.XTandem);
+                                                          PeptideHitResultTypes.XTandem);
                 }
             }
 

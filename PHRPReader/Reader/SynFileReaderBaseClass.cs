@@ -84,7 +84,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// PHRP result type
         /// </summary>
-        protected Enums.PeptideHitResultTypes mPeptideHitResultType;
+        protected PeptideHitResultTypes mPeptideHitResultType;
 
         /// <summary>
         /// Modification info
@@ -130,7 +130,7 @@ namespace PHRPReader.Reader
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, MSGFPlus, etc.
         /// </summary>
-        public Enums.PeptideHitResultTypes PeptideHitResultType => mPeptideHitResultType;
+        public PeptideHitResultTypes PeptideHitResultType => mPeptideHitResultType;
 
         /// <summary>
         /// Peptide to protein map file name
@@ -216,7 +216,7 @@ namespace PHRPReader.Reader
         /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
         /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, Enums.PeptideHitResultTypes peptideHitResultType,
+        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType,
             bool loadModsAndSeqInfo)
         {
             ErrorMessages = new List<string>();
@@ -252,7 +252,7 @@ namespace PHRPReader.Reader
         /// <param name="peptideHitResultType"></param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         /// <remarks>If inputFilePath is an empty string, the functions that solely depend on dataset name will be callable, but data related functions will not be callable</remarks>
-        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, Enums.PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
+        protected SynFileReaderBaseClass(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
             ErrorMessages = new List<string>();
             WarningMessages = new List<string>();
@@ -289,7 +289,7 @@ namespace PHRPReader.Reader
         /// startupOptions.LoadModsAndSeqInfo controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read
         /// Setting startupOptions.MaxProteinsPerPSM to a non-zero value will limit the number of proteins that are tracked
         /// </remarks>
-        private void InitializeParser(string datasetName, string inputFilePath, Enums.PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
+        private void InitializeParser(string datasetName, string inputFilePath, PeptideHitResultTypes peptideHitResultType, StartupOptions startupOptions)
         {
             if (string.IsNullOrWhiteSpace(datasetName))
                 datasetName = "Undefined";
@@ -412,7 +412,7 @@ namespace PHRPReader.Reader
         {
             var peptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
 
-            if (peptideHitResultType == Enums.PeptideHitResultTypes.Unknown)
+            if (peptideHitResultType == PeptideHitResultTypes.Unknown)
             {
                 throw new Exception("Unable to auto-determine the PeptideHitResultType for " + inputFilePath);
             }
@@ -437,7 +437,7 @@ namespace PHRPReader.Reader
         {
             var peptideHitResultType = ReaderFactory.AutoDetermineResultType(inputFilePath);
 
-            if (peptideHitResultType == Enums.PeptideHitResultTypes.Unknown)
+            if (peptideHitResultType == PeptideHitResultTypes.Unknown)
             {
                 throw new Exception("Unable to auto-determine the PeptideHitResultType for " + inputFilePath);
             }
@@ -452,30 +452,30 @@ namespace PHRPReader.Reader
         /// <param name="datasetName">Dataset Name</param>
         /// <param name="peptideHitResultType">Peptide Hit Results file type</param>
         /// <param name="loadModsAndSeqInfo">Controls whether or not the _SeqInfo.txt and _SeqToProteinMap.txt files should be read</param>
-        public static SynFileReaderBaseClass GetParser(string inputFilePath, string datasetName, Enums.PeptideHitResultTypes peptideHitResultType,
+        public static SynFileReaderBaseClass GetParser(string inputFilePath, string datasetName, PeptideHitResultTypes peptideHitResultType,
             bool loadModsAndSeqInfo)
         {
             switch (peptideHitResultType)
             {
-                case Enums.PeptideHitResultTypes.Inspect:
+                case PeptideHitResultTypes.Inspect:
                     return new InspectSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case Enums.PeptideHitResultTypes.MSAlign:
+                case PeptideHitResultTypes.MSAlign:
                     return new MSAlignSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case Enums.PeptideHitResultTypes.MSGFPlus:
+                case PeptideHitResultTypes.MSGFPlus:
                     return new MSGFPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case Enums.PeptideHitResultTypes.Sequest:
+                case PeptideHitResultTypes.Sequest:
                     return new SequestSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case Enums.PeptideHitResultTypes.XTandem:
+                case PeptideHitResultTypes.XTandem:
                     return new XTandemSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case Enums.PeptideHitResultTypes.MODa:
+                case PeptideHitResultTypes.MODa:
                     return new MODaSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
-                case Enums.PeptideHitResultTypes.MODPlus:
+                case PeptideHitResultTypes.MODPlus:
                     return new MODPlusSynFileReader(datasetName, inputFilePath, loadModsAndSeqInfo);
 
                 default:
@@ -1032,7 +1032,7 @@ namespace PHRPReader.Reader
         protected bool ReadKeyValuePairSearchEngineParamFile(
             string searchEngineName,
             string searchEngineParamFileName,
-            Enums.PeptideHitResultTypes peptideHitResultType,
+            PeptideHitResultTypes peptideHitResultType,
             SearchEngineParameters searchEngineParams)
         {
             var paramFilePath = Path.Combine(InputDirectoryPath, searchEngineParamFileName);
@@ -1066,7 +1066,7 @@ namespace PHRPReader.Reader
         public static bool ReadKeyValuePairSearchEngineParamFile(
             string searchEngineName,
             string paramFilePath,
-            Enums.PeptideHitResultTypes peptideHitResultType,
+            PeptideHitResultTypes peptideHitResultType,
             SearchEngineParameters searchEngineParams,
             out string errorMessage,
             out string warningMessage)
@@ -1110,7 +1110,7 @@ namespace PHRPReader.Reader
                             continue;
                         }
 
-                        if (peptideHitResultType == Enums.PeptideHitResultTypes.MODa &&
+                        if (peptideHitResultType == PeptideHitResultTypes.MODa &&
                             string.Equals(kvSetting.Key, "add", StringComparison.OrdinalIgnoreCase))
                         {
                             // ModA defines all of its static modifications with the ADD keyword
@@ -1150,7 +1150,7 @@ namespace PHRPReader.Reader
         /// <param name="searchEngineParams"></param>
         /// <returns>True if successful, false if an error</returns>
         protected bool ReadSearchEngineVersion(
-            Enums.PeptideHitResultTypes peptideHitResultType,
+            PeptideHitResultTypes peptideHitResultType,
             SearchEngineParameters searchEngineParams)
         {
             var success = false;
@@ -1160,7 +1160,7 @@ namespace PHRPReader.Reader
                 // Read the Tool_Version_Info file to determine the analysis time and the tool version
                 var toolVersionInfoFilePath = Path.Combine(InputDirectoryPath, ReaderFactory.GetToolVersionInfoFilename(peptideHitResultType));
 
-                if (!File.Exists(toolVersionInfoFilePath) && peptideHitResultType == Enums.PeptideHitResultTypes.MSGFPlus)
+                if (!File.Exists(toolVersionInfoFilePath) && peptideHitResultType == PeptideHitResultTypes.MSGFPlus)
                 {
                     // This could be an older MS-GF+ job; check for a _MSGFDB.txt tool version file
                     var alternativeVersionInfoFilePath = Path.Combine(InputDirectoryPath, "Tool_Version_Info_MSGFDB.txt");

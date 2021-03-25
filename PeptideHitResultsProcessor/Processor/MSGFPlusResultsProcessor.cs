@@ -865,7 +865,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 if (!validHeader)
                                 {
                                     // Error parsing header
-                                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                                     return false;
                                 }
 
@@ -1051,14 +1051,14 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -1083,12 +1083,12 @@ namespace PeptideHitResultsProcessor.Processor
                 MSGFPlusParamFileModExtractor.ModSpecFormats.MSGFPlusAndMSPathFinder,
                 out modInfo);
 
-            if (!success || mErrorCode != Enums.PHRPErrorCode.NoError)
+            if (!success || mErrorCode != PHRPErrorCode.NoError)
             {
-                if (mErrorCode == Enums.PHRPErrorCode.NoError)
+                if (mErrorCode == PHRPErrorCode.NoError)
                 {
                     SetErrorMessage("Unknown error extracting the modification definitions from the MS-GF+ parameter file");
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
+                    SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 }
                 return false;
             }
@@ -1168,7 +1168,7 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 SetErrorMessage(string.Format("Error parsing the ParentMass tolerance from the MS-GF+ parameter file ({0}): {1}",
                     Path.GetFileName(searchEngineParams.SearchEngineParamFilePath), ex.Message), ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
+                SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return parentMassToleranceInfo;
             }
         }
@@ -1304,7 +1304,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error writing MTS-compatible Peptide to Protein Map File (" + Path.GetFileName(mtsPepToProteinMapFilePath) + "): " + ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -1327,7 +1327,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             var searchEngineParams = new SearchEngineParameters(SEARCH_ENGINE_NAME);
 
-            var success = SynFileReaderBaseClass.ReadKeyValuePairSearchEngineParamFile(SEARCH_ENGINE_NAME, msgfPlusParamFilePath, PHRPReader.Enums.PeptideHitResultTypes.MSGFPlus,
+            var success = SynFileReaderBaseClass.ReadKeyValuePairSearchEngineParamFile(SEARCH_ENGINE_NAME, msgfPlusParamFilePath, PeptideHitResultTypes.MSGFPlus,
                                                                               searchEngineParams, out var localErrorMessage, out var localWarningMessage);
 
             if (!string.IsNullOrWhiteSpace(localErrorMessage))
@@ -1344,7 +1344,7 @@ namespace PeptideHitResultsProcessor.Processor
             if (searchEngineParams.Parameters.Count == 0)
             {
                 SetErrorMessage("MS-GF+ parameter file is empty; unable to extract parent mass tolerance info");
-                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
+                SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 return false;
             }
 
@@ -1363,7 +1363,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void ModExtractorErrorHandler(string message, Exception ex)
         {
-            SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
+            SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
         }
 
         private bool MSGFPlusResultPassesSynFilter(MSGFPlusSearchResult msgfPlusSearchResultType)
@@ -1434,7 +1434,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (!filesInitialized)
                             return false;
 
-                        var columnMapping = new Dictionary<PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns, int>();
+                        var columnMapping = new Dictionary<MSGFPlusSynFileColumns, int>();
 
                         var peptidesNotFoundInPepToProtMapping = 0;
 
@@ -1453,7 +1453,7 @@ namespace PeptideHitResultsProcessor.Processor
                                 if (!validHeader)
                                 {
                                     // Error parsing header
-                                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                                     return false;
                                 }
                                 headerParsed = true;
@@ -1574,7 +1574,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage(ex.Message);
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                     return false;
                 }
                 finally
@@ -1585,7 +1585,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage(ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -2012,7 +2012,7 @@ namespace PeptideHitResultsProcessor.Processor
         /// <param name="lineIn"></param>
         /// <param name="columnMapping"></param>
         /// <returns>True if successful, false if an error</returns>
-        private bool ParseMSGFPlusSynFileHeaderLine(string lineIn, IDictionary<PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns, int> columnMapping)
+        private bool ParseMSGFPlusSynFileHeaderLine(string lineIn, IDictionary<MSGFPlusSynFileColumns, int> columnMapping)
         {
             var columnNames = MSGFPlusSynFileReader.GetColumnHeaderNamesAndIDs();
 
@@ -2021,7 +2021,7 @@ namespace PeptideHitResultsProcessor.Processor
             try
             {
                 // Initialize each entry in columnMapping to -1
-                foreach (PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns resultColumn in Enum.GetValues(typeof(PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns)))
+                foreach (MSGFPlusSynFileColumns resultColumn in Enum.GetValues(typeof(MSGFPlusSynFileColumns)))
                 {
                     columnMapping.Add(resultColumn, -1);
                 }
@@ -2060,7 +2060,7 @@ namespace PeptideHitResultsProcessor.Processor
             MSGFPlusResults searchResult,
             ref string errorLog,
             int resultsProcessed,
-            IDictionary<PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns, int> columnMapping,
+            IDictionary<MSGFPlusSynFileColumns, int> columnMapping,
             out string peptideSequenceWithMods)
         {
             string[] splitLine = null;
@@ -2078,7 +2078,7 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                if (!GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.ResultID], out string value))
+                if (!GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.ResultID], out string value))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -2091,13 +2091,13 @@ namespace PeptideHitResultsProcessor.Processor
 
                 searchResult.ResultID = int.Parse(value);
 
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.Scan], out string scan);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.Charge], out string charge);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Scan], out string scan);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Charge], out string charge);
 
                 searchResult.Scan = scan;
                 searchResult.Charge = charge;
 
-                if (!GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
+                if (!GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Peptide], out peptideSequenceWithMods))
                 {
                     if (errorLog.Length < MAX_ERROR_LOG_LENGTH)
                     {
@@ -2108,11 +2108,11 @@ namespace PeptideHitResultsProcessor.Processor
                     return false;
                 }
 
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.Protein], out string proteinName);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.Protein], out string proteinName);
                 searchResult.MultipleProteinCount = "0";
 
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.DelM], out string msgfPlusComputedDelM);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.DelMPPM], out string msgfPlusComputedDelMppm);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DelM], out string msgfPlusComputedDelM);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DelMPPM], out string msgfPlusComputedDelMppm);
 
                 searchResult.ProteinName = proteinName;
                 searchResult.MSGFPlusComputedDelM = msgfPlusComputedDelM;
@@ -2145,18 +2145,18 @@ namespace PeptideHitResultsProcessor.Processor
                 searchResult.ComputePeptideCleavageStateInProtein();
 
                 // Read the remaining data values
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.FragMethod], out string fragMethod);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.PrecursorMZ], out string precursorMz);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.FragMethod], out string fragMethod);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PrecursorMZ], out string precursorMz);
 
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.MH], out string peptideMh);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.NTT], out string ntt);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.DeNovoScore], out string deNovoScore);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.MSGFScore], out string msgfScore);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.SpecProb_EValue], out string specEValue);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.RankSpecProb], out string rankSpecEValue);
-                GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.PValue_EValue], out string eValue);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.MH], out string peptideMh);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.NTT], out string ntt);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.DeNovoScore], out string deNovoScore);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.MSGFScore], out string msgfScore);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.SpecProb_EValue], out string specEValue);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.RankSpecProb], out string rankSpecEValue);
+                GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PValue_EValue], out string eValue);
 
-                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.FDR_QValue], out string qValue);
+                var targetDecoyFDRValid = GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.FDR_QValue], out string qValue);
 
                 searchResult.FragMethod = fragMethod;
                 searchResult.PrecursorMZ = precursorMz;
@@ -2171,18 +2171,18 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (targetDecoyFDRValid)
                 {
-                    GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.PepFDR_PepQValue], out string pepQValue);
+                    GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.PepFDR_PepQValue], out string pepQValue);
                     searchResult.PepQValue = pepQValue;
                 }
                 else
                 {
-                    GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.EFDR], out string efdr);
+                    GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.EFDR], out string efdr);
                     searchResult.QValue = efdr;
                 }
 
-                if (columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.IsotopeError] >= 0)
+                if (columnMapping[MSGFPlusSynFileColumns.IsotopeError] >= 0)
                 {
-                    GetColumnValue(splitLine, columnMapping[PHRPReader.DataColumn.Enums.MSGFPlusSynFileColumns.IsotopeError], out string isotopeError);
+                    GetColumnValue(splitLine, columnMapping[MSGFPlusSynFileColumns.IsotopeError], out string isotopeError);
                     searchResult.IsotopeError = isotopeError;
                     searchResult.UsedMSGFPlus = true;
                 }
@@ -2260,7 +2260,7 @@ namespace PeptideHitResultsProcessor.Processor
 
             if (!LoadParameterFileSettings(parameterFilePath))
             {
-                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile, true);
+                SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile, true);
                 return false;
             }
 
@@ -2269,7 +2269,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(inputFilePath))
                 {
                     SetErrorMessage("Input file name is empty");
-                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -2419,13 +2419,13 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex)
                 {
                     SetErrorMessage("Error in MSGFPlusResultsProcessor.ProcessFile (2):  " + ex.Message);
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
+                    SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 }
             }
             catch (Exception ex)
             {
                 SetErrorMessage("Error in MSGFPlusResultsProcessor.ProcessFile (1):" + ex.Message);
-                SetErrorCode(Enums.PHRPErrorCode.UnspecifiedError);
+                SetErrorCode(PHRPErrorCode.UnspecifiedError);
             }
 
             return success;
@@ -2466,7 +2466,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (sourcePHRPDataFiles.Count == 0)
                 {
                     SetErrorMessage("Cannot call CreatePepToProteinMapFile since sourcePHRPDataFiles is empty");
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     success = false;
                 }
                 else
@@ -2506,7 +2506,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                     // Create the Protein Mods file
                     success = CreateProteinModDetailsFile(synOutputFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath,
-                                                          PHRPReader.Enums.PeptideHitResultTypes.MSGFPlus);
+                                                          PeptideHitResultTypes.MSGFPlus);
                 }
             }
 

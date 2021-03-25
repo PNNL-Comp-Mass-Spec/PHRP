@@ -47,7 +47,7 @@ namespace PHRPReader.Reader
 
         private const string MSPathFinder_SEARCH_ENGINE_NAME = "MSPathFinder";
 
-        [Obsolete("Superseded by DataColumn.MSPathFinderSynFile")]
+        [Obsolete("Superseded by Data.MSPathFinderSynFile")]
         public enum MSPathFinderSynFileColumns
         {
             ResultID = 0,
@@ -139,7 +139,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public MSPathFinderSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSPathFinder, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.MSPathFinder, loadModsAndSeqInfo)
         {
         }
 
@@ -150,7 +150,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public MSPathFinderSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSPathFinder, startupOptions)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.MSPathFinder, startupOptions)
         {
         }
 
@@ -169,28 +169,28 @@ namespace PHRPReader.Reader
         /// Header names and enums for the PHRP synopsis file for this tool
         /// </summary>
         /// <returns>Dictionary of header names and enum values</returns>
-        public static SortedDictionary<string, DataColumn.Enums.MSPathFinderSynFile> GetColumnHeaderNamesAndIDs()
+        public static SortedDictionary<string, MSPathFinderSynFile> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, DataColumn.Enums.MSPathFinderSynFile>(StringComparer.OrdinalIgnoreCase)
+            var headerColumns = new SortedDictionary<string, MSPathFinderSynFile>(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, DataColumn.Enums.MSPathFinderSynFile.ResultID},
-                {DATA_COLUMN_Scan, DataColumn.Enums.MSPathFinderSynFile.Scan},
-                {DATA_COLUMN_Charge, DataColumn.Enums.MSPathFinderSynFile.Charge},
-                {DATA_COLUMN_MostAbundantIsotopeMz, DataColumn.Enums.MSPathFinderSynFile.MostAbundantIsotopeMz},
-                {DATA_COLUMN_Mass, DataColumn.Enums.MSPathFinderSynFile.Mass},
-                {DATA_COLUMN_Sequence, DataColumn.Enums.MSPathFinderSynFile.Sequence},
-                {DATA_COLUMN_Modifications, DataColumn.Enums.MSPathFinderSynFile.Modifications},
-                {DATA_COLUMN_Composition, DataColumn.Enums.MSPathFinderSynFile.Composition},
-                {DATA_COLUMN_Protein, DataColumn.Enums.MSPathFinderSynFile.Protein},
-                {DATA_COLUMN_ProteinDesc, DataColumn.Enums.MSPathFinderSynFile.ProteinDesc},
-                {DATA_COLUMN_ProteinLength, DataColumn.Enums.MSPathFinderSynFile.ProteinLength},
-                {DATA_COLUMN_ResidueStart, DataColumn.Enums.MSPathFinderSynFile.ResidueStart},
-                {DATA_COLUMN_ResidueEnd, DataColumn.Enums.MSPathFinderSynFile.ResidueEnd},
-                {DATA_COLUMN_MatchedFragments, DataColumn.Enums.MSPathFinderSynFile.MatchedFragments},
-                {DATA_COLUMN_SpecEValue, DataColumn.Enums.MSPathFinderSynFile.SpecEValue},
-                {DATA_COLUMN_EValue, DataColumn.Enums.MSPathFinderSynFile.EValue},
-                {DATA_COLUMN_QValue, DataColumn.Enums.MSPathFinderSynFile.QValue},
-                {DATA_COLUMN_PepQValue, DataColumn.Enums.MSPathFinderSynFile.PepQValue}
+                {DATA_COLUMN_ResultID, MSPathFinderSynFile.ResultID},
+                {DATA_COLUMN_Scan, MSPathFinderSynFile.Scan},
+                {DATA_COLUMN_Charge, MSPathFinderSynFile.Charge},
+                {DATA_COLUMN_MostAbundantIsotopeMz, MSPathFinderSynFile.MostAbundantIsotopeMz},
+                {DATA_COLUMN_Mass, MSPathFinderSynFile.Mass},
+                {DATA_COLUMN_Sequence, MSPathFinderSynFile.Sequence},
+                {DATA_COLUMN_Modifications, MSPathFinderSynFile.Modifications},
+                {DATA_COLUMN_Composition, MSPathFinderSynFile.Composition},
+                {DATA_COLUMN_Protein, MSPathFinderSynFile.Protein},
+                {DATA_COLUMN_ProteinDesc, MSPathFinderSynFile.ProteinDesc},
+                {DATA_COLUMN_ProteinLength, MSPathFinderSynFile.ProteinLength},
+                {DATA_COLUMN_ResidueStart, MSPathFinderSynFile.ResidueStart},
+                {DATA_COLUMN_ResidueEnd, MSPathFinderSynFile.ResidueEnd},
+                {DATA_COLUMN_MatchedFragments, MSPathFinderSynFile.MatchedFragments},
+                {DATA_COLUMN_SpecEValue, MSPathFinderSynFile.SpecEValue},
+                {DATA_COLUMN_EValue, MSPathFinderSynFile.EValue},
+                {DATA_COLUMN_QValue, MSPathFinderSynFile.QValue},
+                {DATA_COLUMN_PepQValue, MSPathFinderSynFile.PepQValue}
             };
 
             return headerColumns;
@@ -203,7 +203,7 @@ namespace PHRPReader.Reader
         /// <param name="headerNames"></param>
         /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
         // ReSharper disable once UnusedMember.Global
-        public static Dictionary<DataColumn.Enums.MSPathFinderSynFile, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        public static Dictionary<MSPathFinderSynFile, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
@@ -318,7 +318,7 @@ namespace PHRPReader.Reader
         {
             try
             {
-                const Enums.PeptideHitResultTypes resultType = Enums.PeptideHitResultTypes.MSPathFinder;
+                const PeptideHitResultTypes resultType = PeptideHitResultTypes.MSPathFinder;
                 var success = ReadKeyValuePairSearchEngineParamFile(MSPathFinder_SEARCH_ENGINE_NAME, searchEngineParamFileName, resultType, searchEngineParams);
 
                 if (!success)

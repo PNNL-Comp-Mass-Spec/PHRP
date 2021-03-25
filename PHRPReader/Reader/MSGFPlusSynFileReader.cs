@@ -77,7 +77,7 @@ namespace PHRPReader.Reader
 
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
-        [Obsolete("Superseded by DataColumn.MSGFPlusSynFile")]
+        [Obsolete("Superseded by Data.MSGFPlusSynFile")]
         public enum MSGFPlusSynFileColumns
         {
             ResultID = 0,
@@ -177,7 +177,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public MSGFPlusSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSGFPlus, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.MSGFPlus, loadModsAndSeqInfo)
         {
         }
 
@@ -188,7 +188,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public MSGFPlusSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSGFPlus, startupOptions)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.MSGFPlus, startupOptions)
         {
         }
 
@@ -202,7 +202,7 @@ namespace PHRPReader.Reader
         public static double DeterminePrecursorMassTolerance(
             SearchEngineParameters searchEngineParams,
             out double tolerancePPM,
-            Enums.PeptideHitResultTypes resultType)
+            PeptideHitResultTypes resultType)
         {
             var reExtraToleranceWithUnits = new Regex("([0-9.]+)([A-Za-z]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var reExtraToleranceNoUnits = new Regex("([0-9.]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -212,7 +212,7 @@ namespace PHRPReader.Reader
 
             tolerancePPM = 0;
 
-            if (resultType == Enums.PeptideHitResultTypes.TopPIC)
+            if (resultType == PeptideHitResultTypes.TopPIC)
             {
                 // TopPIC
                 if (!searchEngineParams.Parameters.TryGetValue("ErrorTolerance", out tolerance))
@@ -242,8 +242,8 @@ namespace PHRPReader.Reader
                     continue;
 
                 Match reMatch;
-                if (resultType == Enums.PeptideHitResultTypes.MSPathFinder ||
-                    resultType == Enums.PeptideHitResultTypes.TopPIC)
+                if (resultType == PeptideHitResultTypes.MSPathFinder ||
+                    resultType == PeptideHitResultTypes.TopPIC)
                 {
                     reMatch = reExtraToleranceNoUnits.Match(item);
                 }
@@ -258,8 +258,8 @@ namespace PHRPReader.Reader
                 if (!double.TryParse(reMatch.Groups[1].Value, out var toleranceCurrent))
                     continue;
 
-                if (resultType == Enums.PeptideHitResultTypes.MSPathFinder ||
-                    resultType == Enums.PeptideHitResultTypes.TopPIC)
+                if (resultType == PeptideHitResultTypes.MSPathFinder ||
+                    resultType == PeptideHitResultTypes.TopPIC)
                 {
                     // Units are always ppm
                     tolerancePPM = toleranceCurrent;
@@ -323,36 +323,36 @@ namespace PHRPReader.Reader
         /// </summary>
         /// <returns>Dictionary of header names and enum values</returns>
         /// <remarks>This includes headers for synopsis files from both MSGFDB and MS-GF+</remarks>
-        public static SortedDictionary<string, DataColumn.Enums.MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
+        public static SortedDictionary<string, Data.MSGFPlusSynFileColumns> GetColumnHeaderNamesAndIDs()
         {
-            var headerColumns = new SortedDictionary<string, DataColumn.Enums.MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
+            var headerColumns = new SortedDictionary<string, Data.MSGFPlusSynFileColumns>(StringComparer.OrdinalIgnoreCase)
             {
-                {DATA_COLUMN_ResultID, DataColumn.Enums.MSGFPlusSynFileColumns.ResultID},
-                {DATA_COLUMN_Scan, DataColumn.Enums.MSGFPlusSynFileColumns.Scan},
-                {DATA_COLUMN_FragMethod, DataColumn.Enums.MSGFPlusSynFileColumns.FragMethod},
-                {DATA_COLUMN_SpecIndex, DataColumn.Enums.MSGFPlusSynFileColumns.SpecIndex},
-                {DATA_COLUMN_Charge, DataColumn.Enums.MSGFPlusSynFileColumns.Charge},
-                {DATA_COLUMN_PrecursorMZ, DataColumn.Enums.MSGFPlusSynFileColumns.PrecursorMZ},
-                {DATA_COLUMN_DelM, DataColumn.Enums.MSGFPlusSynFileColumns.DelM},
-                {DATA_COLUMN_DelM_PPM, DataColumn.Enums.MSGFPlusSynFileColumns.DelMPPM},
-                {DATA_COLUMN_MH, DataColumn.Enums.MSGFPlusSynFileColumns.MH},
-                {DATA_COLUMN_Peptide, DataColumn.Enums.MSGFPlusSynFileColumns.Peptide},
-                {DATA_COLUMN_Protein, DataColumn.Enums.MSGFPlusSynFileColumns.Protein},
-                {DATA_COLUMN_NTT, DataColumn.Enums.MSGFPlusSynFileColumns.NTT},
-                {DATA_COLUMN_DeNovoScore, DataColumn.Enums.MSGFPlusSynFileColumns.DeNovoScore},
-                {DATA_COLUMN_MSGFScore, DataColumn.Enums.MSGFPlusSynFileColumns.MSGFScore},
-                {DATA_COLUMN_MSGFDB_SpecProb, DataColumn.Enums.MSGFPlusSynFileColumns.SpecProb_EValue},
-                {DATA_COLUMN_MSGFPlus_SpecEValue, DataColumn.Enums.MSGFPlusSynFileColumns.SpecProb_EValue},
-                {DATA_COLUMN_Rank_MSGFDB_SpecProb, DataColumn.Enums.MSGFPlusSynFileColumns.RankSpecProb},
-                {DATA_COLUMN_Rank_MSGFPlus_SpecEValue, DataColumn.Enums.MSGFPlusSynFileColumns.RankSpecProb},
-                {DATA_COLUMN_PValue, DataColumn.Enums.MSGFPlusSynFileColumns.PValue_EValue},
-                {DATA_COLUMN_EValue, DataColumn.Enums.MSGFPlusSynFileColumns.PValue_EValue},
-                {DATA_COLUMN_FDR, DataColumn.Enums.MSGFPlusSynFileColumns.FDR_QValue},
-                {DATA_COLUMN_QValue, DataColumn.Enums.MSGFPlusSynFileColumns.FDR_QValue},
-                {DATA_COLUMN_PepFDR, DataColumn.Enums.MSGFPlusSynFileColumns.PepFDR_PepQValue},
-                {DATA_COLUMN_PepQValue, DataColumn.Enums.MSGFPlusSynFileColumns.PepFDR_PepQValue},
-                {DATA_COLUMN_EFDR, DataColumn.Enums.MSGFPlusSynFileColumns.EFDR},
-                {DATA_COLUMN_Isotope_Error, DataColumn.Enums.MSGFPlusSynFileColumns.IsotopeError}
+                {DATA_COLUMN_ResultID, Data.MSGFPlusSynFileColumns.ResultID},
+                {DATA_COLUMN_Scan, Data.MSGFPlusSynFileColumns.Scan},
+                {DATA_COLUMN_FragMethod, Data.MSGFPlusSynFileColumns.FragMethod},
+                {DATA_COLUMN_SpecIndex, Data.MSGFPlusSynFileColumns.SpecIndex},
+                {DATA_COLUMN_Charge, Data.MSGFPlusSynFileColumns.Charge},
+                {DATA_COLUMN_PrecursorMZ, Data.MSGFPlusSynFileColumns.PrecursorMZ},
+                {DATA_COLUMN_DelM, Data.MSGFPlusSynFileColumns.DelM},
+                {DATA_COLUMN_DelM_PPM, Data.MSGFPlusSynFileColumns.DelMPPM},
+                {DATA_COLUMN_MH, Data.MSGFPlusSynFileColumns.MH},
+                {DATA_COLUMN_Peptide, Data.MSGFPlusSynFileColumns.Peptide},
+                {DATA_COLUMN_Protein, Data.MSGFPlusSynFileColumns.Protein},
+                {DATA_COLUMN_NTT, Data.MSGFPlusSynFileColumns.NTT},
+                {DATA_COLUMN_DeNovoScore, Data.MSGFPlusSynFileColumns.DeNovoScore},
+                {DATA_COLUMN_MSGFScore, Data.MSGFPlusSynFileColumns.MSGFScore},
+                {DATA_COLUMN_MSGFDB_SpecProb, Data.MSGFPlusSynFileColumns.SpecProb_EValue},
+                {DATA_COLUMN_MSGFPlus_SpecEValue, Data.MSGFPlusSynFileColumns.SpecProb_EValue},
+                {DATA_COLUMN_Rank_MSGFDB_SpecProb, Data.MSGFPlusSynFileColumns.RankSpecProb},
+                {DATA_COLUMN_Rank_MSGFPlus_SpecEValue, Data.MSGFPlusSynFileColumns.RankSpecProb},
+                {DATA_COLUMN_PValue, Data.MSGFPlusSynFileColumns.PValue_EValue},
+                {DATA_COLUMN_EValue, Data.MSGFPlusSynFileColumns.PValue_EValue},
+                {DATA_COLUMN_FDR, Data.MSGFPlusSynFileColumns.FDR_QValue},
+                {DATA_COLUMN_QValue, Data.MSGFPlusSynFileColumns.FDR_QValue},
+                {DATA_COLUMN_PepFDR, Data.MSGFPlusSynFileColumns.PepFDR_PepQValue},
+                {DATA_COLUMN_PepQValue, Data.MSGFPlusSynFileColumns.PepFDR_PepQValue},
+                {DATA_COLUMN_EFDR, Data.MSGFPlusSynFileColumns.EFDR},
+                {DATA_COLUMN_Isotope_Error, Data.MSGFPlusSynFileColumns.IsotopeError}
             };
 
             return headerColumns;
@@ -365,7 +365,7 @@ namespace PHRPReader.Reader
         /// <param name="headerNames"></param>
         /// <returns>Dictionary mapping the enum value to the column index in headerNames (0-based column index)</returns>
         // ReSharper disable once UnusedMember.Global
-        public static Dictionary<DataColumn.Enums.MSGFPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
+        public static Dictionary<Data.MSGFPlusSynFileColumns, int> GetColumnMapFromHeaderLine(List<string> headerNames)
         {
             var headerColumns = GetColumnHeaderNamesAndIDs();
             return GetColumnMapFromHeaderLine(headerNames, headerColumns);
@@ -482,7 +482,7 @@ namespace PHRPReader.Reader
             {
                 mPeptideMassCalculator.ResetAminoAcidMasses();
 
-                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFilePath, Enums.PeptideHitResultTypes.MSGFPlus, searchEngineParams);
+                var success = ReadKeyValuePairSearchEngineParamFile(MSGFPLUS_SEARCH_ENGINE_NAME, searchEngineParamFilePath, PeptideHitResultTypes.MSGFPlus, searchEngineParams);
 
                 if (!success)
                 {
@@ -589,7 +589,7 @@ namespace PHRPReader.Reader
                 }
 
                 // Determine the precursor mass tolerance (will store 0 if a problem or not found)
-                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, Enums.PeptideHitResultTypes.MSGFPlus);
+                searchEngineParams.PrecursorMassToleranceDa = DeterminePrecursorMassTolerance(searchEngineParams, out var tolerancePPM, PeptideHitResultTypes.MSGFPlus);
                 searchEngineParams.PrecursorMassTolerancePpm = tolerancePPM;
 
                 // Look for Custom Amino Acid definitions

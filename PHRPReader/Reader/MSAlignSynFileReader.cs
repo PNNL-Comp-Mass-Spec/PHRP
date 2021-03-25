@@ -150,7 +150,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="loadModsAndSeqInfo">If True, load the ModSummary file and SeqInfo files</param>
         public MSAlignSynFileReader(string datasetName, string inputFilePath, bool loadModsAndSeqInfo)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSAlign, loadModsAndSeqInfo)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.MSAlign, loadModsAndSeqInfo)
         {
         }
 
@@ -161,7 +161,7 @@ namespace PHRPReader.Reader
         /// <param name="inputFilePath">Input file path</param>
         /// <param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and MaxProteinsPerPSM</param>
         public MSAlignSynFileReader(string datasetName, string inputFilePath, StartupOptions startupOptions)
-            : base(datasetName, inputFilePath, Enums.PeptideHitResultTypes.MSAlign, startupOptions)
+            : base(datasetName, inputFilePath, PeptideHitResultTypes.MSAlign, startupOptions)
         {
         }
 
@@ -359,7 +359,7 @@ namespace PHRPReader.Reader
 
             try
             {
-                success = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, searchEngineParamFileName, Enums.PeptideHitResultTypes.MSAlign, searchEngineParams);
+                success = ReadKeyValuePairSearchEngineParamFile(MSAlign_SEARCH_ENGINE_NAME, searchEngineParamFileName, PeptideHitResultTypes.MSAlign, searchEngineParams);
 
                 if (success)
                 {

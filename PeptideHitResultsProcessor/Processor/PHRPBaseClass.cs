@@ -173,7 +173,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         #region "Class wide Variables"
 
-        protected Enums.PHRPErrorCode mErrorCode = Enums.PHRPErrorCode.NoError;
+        protected PHRPErrorCode mErrorCode = PHRPErrorCode.NoError;
         protected string mErrorMessage = string.Empty;
 
         protected readonly PeptideMassCalculator mPeptideSeqMassCalculator;
@@ -234,7 +234,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         public PeptideCleavageStateCalculator.EnzymeMatchSpecInfo EnzymeMatchSpec { get; set; }
 
-        public Enums.PHRPErrorCode ErrorCode => mErrorCode;
+        public PHRPErrorCode ErrorCode => mErrorCode;
 
         public string ErrorMessage => GetErrorMessage();
 
@@ -317,7 +317,7 @@ namespace PeptideHitResultsProcessor.Processor
         }
 
         public static string AutoDefinePeptideHitResultsFilePath(
-            Enums.ResultsFileFormat peptideHitResultFileFormat,
+            ResultsFileFormat peptideHitResultFileFormat,
             string sourceDirectoryPath,
             string baseName)
         {
@@ -326,16 +326,16 @@ namespace PeptideHitResultsProcessor.Processor
 
             return peptideHitResultFileFormat switch
             {
-                Enums.ResultsFileFormat.SequestFirstHitsFile => Path.Combine(sourceDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.SequestSynopsisFile => Path.Combine(sourceDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.XTandemXMLFile => Path.Combine(sourceDirectoryPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.InspectTXTFile => Path.Combine(sourceDirectoryPath, baseName + INSPECT_RESULTS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.MSGFPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.MSAlignTXTFile => Path.Combine(sourceDirectoryPath, baseName + MSALIGN_RESULTS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.MODaTXTFile => Path.Combine(sourceDirectoryPath, baseName + MODa_RESULTS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.MODPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MODPlus_RESULTS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.MSPathFinderTSVFile => Path.Combine(sourceDirectoryPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX),
-                Enums.ResultsFileFormat.TopPICTXTFile => Path.Combine(sourceDirectoryPath, baseName + TopPIC_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.SequestFirstHitsFile => Path.Combine(sourceDirectoryPath, baseName + SEQUEST_FIRST_HITS_FILE_SUFFIX),
+                ResultsFileFormat.SequestSynopsisFile => Path.Combine(sourceDirectoryPath, baseName + SEQUEST_SYNOPSIS_FILE_SUFFIX),
+                ResultsFileFormat.XTandemXMLFile => Path.Combine(sourceDirectoryPath, baseName + XTANDEM_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.InspectTXTFile => Path.Combine(sourceDirectoryPath, baseName + INSPECT_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.MSGFPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MSGFDB_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.MSAlignTXTFile => Path.Combine(sourceDirectoryPath, baseName + MSALIGN_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.MODaTXTFile => Path.Combine(sourceDirectoryPath, baseName + MODa_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.MODPlusTXTFile => Path.Combine(sourceDirectoryPath, baseName + MODPlus_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.MSPathFinderTSVFile => Path.Combine(sourceDirectoryPath, baseName + MSPathFinder_RESULTS_FILE_SUFFIX),
+                ResultsFileFormat.TopPICTXTFile => Path.Combine(sourceDirectoryPath, baseName + TopPIC_RESULTS_FILE_SUFFIX),
                 _ => AutoDefinePeptideHitResultsFilePath(sourceDirectoryPath)
             };
         }
@@ -521,7 +521,7 @@ namespace PeptideHitResultsProcessor.Processor
                     {
                         ReportWarning("Absolute path: " + inputFile.DirectoryName);
                     }
-                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -560,7 +560,7 @@ namespace PeptideHitResultsProcessor.Processor
                 catch (Exception ex2)
                 {
                     SetErrorMessage("Invalid output directory: " + outputDirectoryPath, ex2);
-                    SetErrorCode(Enums.PHRPErrorCode.InvalidOutputDirectoryPath);
+                    SetErrorCode(PHRPErrorCode.InvalidOutputDirectoryPath);
                     return false;
                 }
 
@@ -569,7 +569,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error cleaning up the file paths: " + ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.FilePathError);
+                SetErrorCode(PHRPErrorCode.FilePathError);
                 return false;
             }
         }
@@ -587,76 +587,76 @@ namespace PeptideHitResultsProcessor.Processor
         /// Examine the extension on filePath to determine the file format
         /// </summary>
         /// <param name="filePath"></param>
-        public static Enums.ResultsFileFormat DetermineResultsFileFormat(string filePath)
+        public static ResultsFileFormat DetermineResultsFileFormat(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
-                return Enums.ResultsFileFormat.AutoDetermine;
+                return ResultsFileFormat.AutoDetermine;
 
             var extensionLCase = Path.GetExtension(filePath).ToLower();
             var baseFileName = Path.GetFileNameWithoutExtension(filePath).ToLower();
 
             if (extensionLCase == ".xml")
             {
-                return Enums.ResultsFileFormat.XTandemXMLFile;
+                return ResultsFileFormat.XTandemXMLFile;
             }
 
             if (baseFileName.EndsWith(SequestResultsProcessor.FILENAME_SUFFIX_FIRST_HITS_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.SequestFirstHitsFile;
+                return ResultsFileFormat.SequestFirstHitsFile;
             }
 
             if (baseFileName.EndsWith(SequestResultsProcessor.FILENAME_SUFFIX_SYNOPSIS_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.SequestSynopsisFile;
+                return ResultsFileFormat.SequestSynopsisFile;
             }
 
             if (baseFileName.EndsWith(InSpecTResultsProcessor.FILENAME_SUFFIX_INSPECT_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.InspectTXTFile;
+                return ResultsFileFormat.InspectTXTFile;
             }
 
             if (baseFileName.EndsWith(MSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFDB_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.MSGFPlusTXTFile;
+                return ResultsFileFormat.MSGFPlusTXTFile;
             }
 
             if (baseFileName.EndsWith(MSGFPlusResultsProcessor.FILENAME_SUFFIX_MSGFPLUS_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.MSGFPlusTXTFile;
+                return ResultsFileFormat.MSGFPlusTXTFile;
             }
             if (baseFileName.EndsWith(MSAlignResultsProcessor.FILENAME_SUFFIX_MSALIGN_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.MSAlignTXTFile;
+                return ResultsFileFormat.MSAlignTXTFile;
             }
 
             if (baseFileName.EndsWith(MODaResultsProcessor.FILENAME_SUFFIX_MODA_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.MODaTXTFile;
+                return ResultsFileFormat.MODaTXTFile;
             }
 
             if (baseFileName.EndsWith(MODPlusResultsProcessor.FILENAME_SUFFIX_MODPlus_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.MODPlusTXTFile;
+                return ResultsFileFormat.MODPlusTXTFile;
             }
 
             if (baseFileName.EndsWith(MSPathFinderResultsProcessor.FILENAME_SUFFIX_MSPathFinder_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.MSPathFinderTSVFile;
+                return ResultsFileFormat.MSPathFinderTSVFile;
             }
 
             if (baseFileName.EndsWith(TopPICResultsProcessor.FILENAME_SUFFIX_TopPIC_PRSMs_FILE, StringComparison.OrdinalIgnoreCase))
             {
-                return Enums.ResultsFileFormat.TopPICTXTFile;
+                return ResultsFileFormat.TopPICTXTFile;
             }
 
             if (extensionLCase == ".tsv")
             {
                 // Assume this is an MS-GF+ TSV file
-                return Enums.ResultsFileFormat.MSGFPlusTXTFile;
+                return ResultsFileFormat.MSGFPlusTXTFile;
             }
 
             // Unknown extension
-            return Enums.ResultsFileFormat.AutoDetermine;
+            return ResultsFileFormat.AutoDetermine;
         }
 
         protected void CloseSequenceOutputFiles()
@@ -860,21 +860,21 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrEmpty(mtsPepToProteinMapFilePath))
                 {
                     SetErrorMessage("Cannot create the PepToProtein map file because mtsPepToProteinMapFilePath is empty; likely a programming bug");
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
                 if (string.IsNullOrEmpty(FastaFilePath))
                 {
                     SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File Path is not defined");
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
                 if (!File.Exists(FastaFilePath))
                 {
                     SetErrorMessage("Cannot create the PepToProtein map file because the Fasta File was not found: " + FastaFilePath);
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
@@ -952,7 +952,7 @@ namespace PeptideHitResultsProcessor.Processor
                             if (!File.Exists(resultsFilePath))
                             {
                                 SetErrorMessage("Peptide to protein mapping file was not created for " + inputFilePath);
-                                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                                 success = false;
                                 break;
                             }
@@ -984,14 +984,14 @@ namespace PeptideHitResultsProcessor.Processor
                                 else
                                 {
                                     mErrorMessage = string.Empty;
-                                    mErrorCode = Enums.PHRPErrorCode.NoError;
+                                    mErrorCode = PHRPErrorCode.NoError;
                                     success = true;
                                 }
                             }
                             else
                             {
                                 SetErrorMessage("Error in CreatePepToProteinMapFile");
-                                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                             }
                         }
 
@@ -1034,7 +1034,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error in CreatePepToProteinMapFile: " + ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
             }
 
             return success;
@@ -1063,7 +1063,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                 if (success)
                 {
-                    success = CreateProteinModDetailsFile(phrpDataFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, PHRPReader.Enums.PeptideHitResultTypes.Unknown);
+                    success = CreateProteinModDetailsFile(phrpDataFilePath, outputDirectoryPath, mtsPepToProteinMapFilePath, PeptideHitResultTypes.Unknown);
                 }
             }
             catch (Exception ex)
@@ -1078,7 +1078,7 @@ namespace PeptideHitResultsProcessor.Processor
             string phrpDataFilePath,
             string outputDirectoryPath,
             string mtsPepToProteinMapFilePath,
-            PHRPReader.Enums.PeptideHitResultTypes phrpResultType)
+            PeptideHitResultTypes phrpResultType)
         {
             try
             {
@@ -1094,7 +1094,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (!phrpDataFile.Exists)
                 {
                     SetErrorMessage("PHRP data file not found in CreateProteinModDetailsFile: " + phrpDataFilePath);
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
@@ -1102,7 +1102,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrEmpty(mtsPepToProteinMapFilePath))
                 {
                     SetErrorMessage("Cannot create the ProteinMods file because mtsPepToProteinMapFilePath is empty");
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     return false;
                 }
 
@@ -1150,7 +1150,7 @@ namespace PeptideHitResultsProcessor.Processor
                                      COLUMN_NAME_PEPTIDE_RESIDUE_NUMBER + "\t" +
                                      COLUMN_NAME_MSGF_SPECPROB);
 
-                    var loadMSGFResults = phrpResultType != PHRPReader.Enums.PeptideHitResultTypes.MSGFPlus;
+                    var loadMSGFResults = phrpResultType != PeptideHitResultTypes.MSGFPlus;
 
                     // Update the Mass Calculator to use the one tracked by this class
                     // (since this class's calculator knows about custom amino acids and custom charge carriers)
@@ -1262,7 +1262,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error in CreateProteinModDetailsFile:" + ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 return false;
             }
         }
@@ -1404,19 +1404,19 @@ namespace PeptideHitResultsProcessor.Processor
         {
             var message = ErrorCode switch
             {
-                Enums.PHRPErrorCode.NoError => string.Empty,
-                Enums.PHRPErrorCode.InvalidInputFilePath => "Invalid input file path",
-                Enums.PHRPErrorCode.InvalidOutputDirectoryPath => "Invalid output directory path",
-                Enums.PHRPErrorCode.ParameterFileNotFound => "Parameter file not found",
-                Enums.PHRPErrorCode.MassCorrectionTagsFileNotFound => "Mass correction tags file not found",
-                Enums.PHRPErrorCode.ModificationDefinitionFileNotFound => "Modification definition file not found",
-                Enums.PHRPErrorCode.ErrorReadingInputFile => "Error reading input file",
-                Enums.PHRPErrorCode.ErrorCreatingOutputFiles => "Error creating output files",
-                Enums.PHRPErrorCode.ErrorReadingParameterFile => "Invalid parameter file",
-                Enums.PHRPErrorCode.ErrorReadingMassCorrectionTagsFile => "Error reading mass correction tags file",
-                Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile => "Error reading modification definitions file",
-                Enums.PHRPErrorCode.FilePathError => "General file path error",
-                Enums.PHRPErrorCode.UnspecifiedError => "Unspecified error",
+                PHRPErrorCode.NoError => string.Empty,
+                PHRPErrorCode.InvalidInputFilePath => "Invalid input file path",
+                PHRPErrorCode.InvalidOutputDirectoryPath => "Invalid output directory path",
+                PHRPErrorCode.ParameterFileNotFound => "Parameter file not found",
+                PHRPErrorCode.MassCorrectionTagsFileNotFound => "Mass correction tags file not found",
+                PHRPErrorCode.ModificationDefinitionFileNotFound => "Modification definition file not found",
+                PHRPErrorCode.ErrorReadingInputFile => "Error reading input file",
+                PHRPErrorCode.ErrorCreatingOutputFiles => "Error creating output files",
+                PHRPErrorCode.ErrorReadingParameterFile => "Invalid parameter file",
+                PHRPErrorCode.ErrorReadingMassCorrectionTagsFile => "Error reading mass correction tags file",
+                PHRPErrorCode.ErrorReadingModificationDefinitionsFile => "Error reading modification definitions file",
+                PHRPErrorCode.FilePathError => "General file path error",
+                PHRPErrorCode.UnspecifiedError => "Unspecified error",
                 _ => "Unknown error state"
             };
 
@@ -1450,7 +1450,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private void InitializeLocalVariables()
         {
-            mErrorCode = Enums.PHRPErrorCode.NoError;
+            mErrorCode = PHRPErrorCode.NoError;
             mErrorMessage = string.Empty;
             WarnMissingParameterFileSection = false;
 
@@ -1629,14 +1629,14 @@ namespace PeptideHitResultsProcessor.Processor
                     var appDirPath = PRISM.FileProcessor.ProcessFilesOrDirectoriesBase.GetAppDirectoryPath();
                     if (string.IsNullOrWhiteSpace(appDirPath))
                     {
-                        SetErrorCode(Enums.PHRPErrorCode.ParameterFileNotFound);
+                        SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
                         return false;
                     }
 
                     parameterFilePath = Path.Combine(appDirPath, Path.GetFileName(parameterFilePath));
                     if (!File.Exists(parameterFilePath))
                     {
-                        SetErrorCode(Enums.PHRPErrorCode.ParameterFileNotFound);
+                        SetErrorCode(PHRPErrorCode.ParameterFileNotFound);
                         return false;
                     }
                 }
@@ -1649,7 +1649,7 @@ namespace PeptideHitResultsProcessor.Processor
                         if (WarnMissingParameterFileSection)
                         {
                             SetErrorMessage("The node '<section name=\"" + OPTIONS_SECTION + "\"> was not found in the parameter file: " + parameterFilePath);
-                            SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile);
+                            SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
                             return false;
                         }
                         return true;
@@ -1687,7 +1687,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error in LoadParameterFileSettings:" + ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingParameterFile);
+                SetErrorCode(PHRPErrorCode.ErrorReadingParameterFile);
                 return false;
             }
 
@@ -1719,14 +1719,14 @@ namespace PeptideHitResultsProcessor.Processor
                 if (string.IsNullOrWhiteSpace(pepToProteinMapFilePath))
                 {
                     SetErrorMessage("Warning: PepToProteinMap file is not defined");
-                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
                 if (!File.Exists(pepToProteinMapFilePath))
                 {
                     SetErrorMessage("Warning: PepToProteinMap file does not exist: " + pepToProteinMapFilePath);
-                    SetErrorCode(Enums.PHRPErrorCode.InvalidInputFilePath);
+                    SetErrorCode(PHRPErrorCode.InvalidInputFilePath);
                     return false;
                 }
 
@@ -1779,7 +1779,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error reading the Peptide to Protein Map File (" + Path.GetFileName(pepToProteinMapFilePath) + "): " + ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorReadingInputFile);
+                SetErrorCode(PHRPErrorCode.ErrorReadingInputFile);
                 success = false;
             }
 
@@ -1882,11 +1882,11 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (fileNotFound)
                 {
-                    SetErrorCode(Enums.PHRPErrorCode.MassCorrectionTagsFileNotFound);
+                    SetErrorCode(PHRPErrorCode.MassCorrectionTagsFileNotFound);
                 }
                 else
                 {
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingMassCorrectionTagsFile);
+                    SetErrorCode(PHRPErrorCode.ErrorReadingMassCorrectionTagsFile);
                 }
             }
 
@@ -1896,12 +1896,12 @@ namespace PeptideHitResultsProcessor.Processor
             {
                 if (fileNotFound)
                 {
-                    SetErrorCode(Enums.PHRPErrorCode.ModificationDefinitionFileNotFound);
+                    SetErrorCode(PHRPErrorCode.ModificationDefinitionFileNotFound);
                     ReportWarning("File not found: " + ModificationDefinitionsFilePath);
                 }
                 else
                 {
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
+                    SetErrorCode(PHRPErrorCode.ErrorReadingModificationDefinitionsFile);
                 }
             }
 
@@ -2059,14 +2059,14 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        protected void SetErrorCode(Enums.PHRPErrorCode newErrorCode)
+        protected void SetErrorCode(PHRPErrorCode newErrorCode)
         {
             SetErrorCode(newErrorCode, false);
         }
 
-        protected void SetErrorCode(Enums.PHRPErrorCode newErrorCode, bool leaveExistingErrorCodeUnchanged)
+        protected void SetErrorCode(PHRPErrorCode newErrorCode, bool leaveExistingErrorCodeUnchanged)
         {
-            if (leaveExistingErrorCodeUnchanged && mErrorCode != Enums.PHRPErrorCode.NoError)
+            if (leaveExistingErrorCodeUnchanged && mErrorCode != PHRPErrorCode.NoError)
             {
                 // An error code is already defined; do not change it
             }
@@ -2367,7 +2367,7 @@ namespace PeptideHitResultsProcessor.Processor
                 if (peptideCount == 0)
                 {
                     SetErrorMessage("Peptide to protein mapping file is empty: " + peptideToProteinMapFilePath);
-                    SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                    SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                     success = false;
                 }
                 else if (peptideCountNoMatch == 0)
@@ -2400,7 +2400,7 @@ namespace PeptideHitResultsProcessor.Processor
             catch (Exception ex)
             {
                 SetErrorMessage("Error in ValidatePeptideToProteinMapResults:" + ex.Message, ex);
-                SetErrorCode(Enums.PHRPErrorCode.ErrorCreatingOutputFiles);
+                SetErrorCode(PHRPErrorCode.ErrorCreatingOutputFiles);
                 success = false;
             }
 
