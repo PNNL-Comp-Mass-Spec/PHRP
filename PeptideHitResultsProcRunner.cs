@@ -29,6 +29,7 @@ namespace PeptideHitResultsProcRunner
     /// </summary>
     public class PeptideHitResultsProcRunner : PRISM.FileProcessor.ProcessFilesBase
     {
+        // ReSharper disable once CommentTypo
         // Ignore Spelling: Battelle, parm, proc, MODa, enums, fasta
 
         /// <summary>
@@ -39,7 +40,6 @@ namespace PeptideHitResultsProcRunner
             mFileDate = Program.PROGRAM_DATE;
             InitializeLocalVariables();
         }
-
 
         /// <summary>
         /// Error codes specialized for this class

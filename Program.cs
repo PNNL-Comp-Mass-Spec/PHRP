@@ -11,7 +11,6 @@
 // E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov
 // Website: https://omics.pnl.gov/ or http://www.sysbio.org/resources/staff/ or https://panomics.pnnl.gov/
 // -------------------------------------------------------------------------------
-//
 
 using System;
 using System.Collections.Generic;
@@ -28,7 +27,7 @@ namespace PeptideHitResultsProcRunner
     {
         // Ignore Spelling: Prot, MaxQuant, MODa
 
-        public const string PROGRAM_DATE = "March 23, 2021";
+        public const string PROGRAM_DATE = "March 25, 2021";
 
         private static string mInputFilePath;
         private static string mOutputDirectoryPath;                      // Optional
