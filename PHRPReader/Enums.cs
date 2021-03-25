@@ -69,16 +69,18 @@ namespace PHRPReader
         Inspect = 3,
 
         /// <summary>
-        /// MSGFDB
-        /// </summary>
-        [Obsolete("Use MSGFPlus")]
-        MSGFDB = 4,
-
-        /// <summary>
         /// MSGFPlus
         /// </summary>
         /// <remarks>Aka MS-GF+</remarks>
         MSGFPlus = 4,
+
+#pragma warning disable RCS1234 // Duplicate enum value.
+        /// <summary>
+        /// MSGFDB
+        /// </summary>
+        [Obsolete("Use MSGFPlus")]
+        MSGFDB = 4,
+#pragma warning restore RCS1234 // Duplicate enum value.
 
         /// <summary>
         /// MSAlign

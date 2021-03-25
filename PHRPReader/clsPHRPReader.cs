@@ -4,6 +4,10 @@ using System.IO;
 
 namespace PHRPReader
 {
+    // ReSharper disable UnusedMember.Global
+#pragma warning disable RCS1163 // Unused parameter.
+#pragma warning disable IDE0060 // Remove unused parameter
+
     /// <summary>
     /// Legacy PHRP Reader
     /// </summary>
@@ -45,7 +49,7 @@ namespace PHRPReader
         /// Returns True if the input file was successfully opened and data remains to be read
         /// </summary>
         /// <returns>True if the file is readable</returns>
-        public bool CanRead { get; }
+        public bool CanRead { get; } = false;
 
         // public clsPSM CurrentPSM => mPSMCurrent;
 
@@ -54,7 +58,7 @@ namespace PHRPReader
         /// <summary>
         /// Dataset name (auto-determined based on the input filename)
         /// </summary>
-        public string DatasetName { get; }
+        public string DatasetName { get; } = string.Empty;
 
         /// <summary>
         /// If True, will display messages at the console
@@ -102,7 +106,7 @@ namespace PHRPReader
         /// <summary>
         /// Returns True if the ModSummary file was successfully loaded
         /// </summary>
-        public bool ModSummaryFileLoaded { get; }
+        public bool ModSummaryFileLoaded { get; } = false;
 
         /// <summary>
         /// Peptide hit result type; Sequest, XTandem, Inspect, MSGFPlus, etc.
@@ -769,4 +773,7 @@ namespace PHRPReader
             MaxProteinsPerPSM = 0;      // 0 means to load all proteins
         }
     }
+
+#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore RCS1163 // Unused parameter.
 }
