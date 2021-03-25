@@ -490,42 +490,20 @@ namespace PHRPReader.Reader
                 {
                     if (int.TryParse(settingValue, out value))
                     {
-                        switch (value)
+                        searchEngineParams.Enzyme = value switch
                         {
-                            case 0:
-                                searchEngineParams.Enzyme = "no_enzyme";
-                                break;
-                            case 1:
-                                searchEngineParams.Enzyme = "trypsin";
-                                break;
-                            case 2:
-                                searchEngineParams.Enzyme = "Chymotrypsin";
-                                break;
-                            case 3:
-                                searchEngineParams.Enzyme = "Lys-C";
-                                break;
-                            case 4:
-                                searchEngineParams.Enzyme = "Lys-N";
-                                break;
-                            case 5:
-                                searchEngineParams.Enzyme = "Glu-C";
-                                break;
-                            case 6:
-                                searchEngineParams.Enzyme = "Arg-C";
-                                break;
-                            case 7:
-                                searchEngineParams.Enzyme = "Asp-N";
-                                break;
-                            case 8:
-                                searchEngineParams.Enzyme = "alphaLP";
-                                break;
-                            case 9:
-                                searchEngineParams.Enzyme = "no_enzyme_peptidomics";
-                                break;
-                            default:
-                                searchEngineParams.Enzyme = "unknown_enzyme";
-                                break;
-                        }
+                            0 => "no_enzyme",
+                            1 => "trypsin",
+                            2 => "Chymotrypsin",
+                            3 => "Lys-C",
+                            4 => "Lys-N",
+                            5 => "Glu-C",
+                            6 => "Arg-C",
+                            7 => "Asp-N",
+                            8 => "alphaLP",
+                            9 => "no_enzyme_peptidomics",
+                            _ => "unknown_enzyme",
+                        };
                     }
                 }
 
@@ -536,21 +514,12 @@ namespace PHRPReader.Reader
 
                     if (int.TryParse(settingValue, out value))
                     {
-                        switch (value)
+                        searchEngineParams.MinNumberTermini = value switch
                         {
-                            case 0:
-                                // Fully-tryptic
-                                searchEngineParams.MinNumberTermini = 2;
-                                break;
-                            case 1:
-                                // Partially-tryptic
-                                searchEngineParams.MinNumberTermini = 1;
-                                break;
-                            default:
-                                // No-enzyme search
-                                searchEngineParams.MinNumberTermini = 0;
-                                break;
-                        }
+                            0 => 2, // Fully-tryptic
+                            1 => 1, // Partially-tryptic
+                            _ => 0, // No-enzyme search
+                        };
                     }
                 }
                 else
@@ -563,21 +532,12 @@ namespace PHRPReader.Reader
 
                         if (int.TryParse(settingValue, out value))
                         {
-                            switch (value)
+                            searchEngineParams.MinNumberTermini = value switch
                             {
-                                case 0:
-                                    // No-enzyme search
-                                    searchEngineParams.MinNumberTermini = 0;
-                                    break;
-                                case 1:
-                                    // Partially-tryptic
-                                    searchEngineParams.MinNumberTermini = 1;
-                                    break;
-                                default:
-                                    // Fully-tryptic
-                                    searchEngineParams.MinNumberTermini = 2;
-                                    break;
-                            }
+                                0 => 0, // No-enzyme search
+                                1 => 1, // Partially-tryptic
+                                _ => 2, // Fully-tryptic
+                            };
                         }
                     }
                 }
