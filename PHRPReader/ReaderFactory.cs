@@ -151,13 +151,13 @@ namespace PHRPReader
         /// RegEx to extract parent ions from filter strings that do not have Full msx
         /// </summary>
         /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
-        private static readonly Regex mFindParentIonOnlyNonMsx = new Regex(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex mFindParentIonOnlyNonMsx = new(PARENT_ION_ONLY_NON_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// RegEx to extract parent ions from filter strings that have Full msx
         /// </summary>
         /// <remarks>Shared (aka static) only to speed up unit tests</remarks>
-        private static readonly Regex mFindParentIonOnlyMsx = new Regex(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex mFindParentIonOnlyMsx = new(PARENT_ION_ONLY_MSX_REGEX, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         #endregion
 
@@ -1363,7 +1363,7 @@ namespace PHRPReader
             return false;
         }
 
-        private readonly StringBuilder mNewPeptide = new StringBuilder();
+        private readonly StringBuilder mNewPeptide = new();
 
         /// <summary>
         /// Look for dynamic mod symbols in the peptide sequence; replace with the corresponding mod masses
@@ -2043,7 +2043,7 @@ namespace PHRPReader
             ReportError(baseMessage + ": " + ex.Message);
         }
 
-        private static readonly Regex RegexIsLetter = new Regex("[A-Za-z]", RegexOptions.Compiled);
+        private static readonly Regex RegexIsLetter = new("[A-Za-z]", RegexOptions.Compiled);
 
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z

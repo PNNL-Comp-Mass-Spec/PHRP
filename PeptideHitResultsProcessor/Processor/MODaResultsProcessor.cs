@@ -363,7 +363,7 @@ namespace PeptideHitResultsProcessor.Processor
             return mass;
         }
 
-        private static readonly Regex RegexModMassRegEx = new Regex(MODA_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex RegexModMassRegEx = new(MODA_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Computes the total of all modification masses defined for the peptide

@@ -453,7 +453,7 @@ namespace PHRPReader
         /// </summary>
         public static List<string> GetPHRPAuxiliaryFileSuffixes()
         {
-            return new List<string>();
+            return new();
         }
 
         /// <summary>

@@ -189,7 +189,7 @@ namespace PeptideHitResultsProcessor.Processor
 
         private int mDeltaMassWarningCount;
 
-        private readonly SortedSet<string> mUnknownNamedMods = new SortedSet<string>();
+        private readonly SortedSet<string> mUnknownNamedMods = new();
 
         #endregion
 
@@ -501,7 +501,7 @@ namespace PeptideHitResultsProcessor.Processor
             return mass;
         }
 
-        private static readonly Regex ModMatcher = new Regex(TopPIC_MOD_MASS_OR_NAME_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ModMatcher = new(TopPIC_MOD_MASS_OR_NAME_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Computes the total of all modification masses defined for the peptide

@@ -445,7 +445,7 @@ namespace PHRPReader
             return ComputeTerminusState(prefix, suffix);
         }
 
-        private static readonly Regex RegexNotLetter = new Regex("[^A-Za-z]", RegexOptions.Compiled);
+        private static readonly Regex RegexNotLetter = new("[^A-Za-z]", RegexOptions.Compiled);
 
         /// <summary>
         /// Removes all modification symbols (*, #, +, 8, etc.) from the peptide; optionally removes prefix and suffix letters

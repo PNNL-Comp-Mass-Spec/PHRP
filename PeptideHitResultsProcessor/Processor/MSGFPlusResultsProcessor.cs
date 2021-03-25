@@ -2519,8 +2519,8 @@ namespace PeptideHitResultsProcessor.Processor
             return true;
         }
 
-        private static readonly Regex NTerminalModMassMatcher = new Regex(MSGFPlus_N_TERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
-        private static readonly Regex ModMassMatcher = new Regex(MSGFPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex NTerminalModMassMatcher = new(MSGFPlus_N_TERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ModMassMatcher = new(MSGFPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Replaces modification masses in peptide sequences with modification symbols (uses case-sensitive comparisons)
@@ -2775,7 +2775,7 @@ namespace PeptideHitResultsProcessor.Processor
             return peptide;
         }
 
-        private static readonly Regex ProteinInfoMatcher = new Regex(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ProteinInfoMatcher = new(PROTEIN_AND_TERM_SYMBOLS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Examines proteinList to look for a semi-colon separated list of proteins and terminus symbols, for example

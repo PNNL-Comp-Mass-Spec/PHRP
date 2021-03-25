@@ -1554,7 +1554,7 @@ namespace PeptideHitResultsProcessor.Processor
             return true;
         }
 
-        private static readonly Regex RegexIsLetter = new Regex("[A-Za-z]", RegexOptions.Compiled);
+        private static readonly Regex RegexIsLetter = new("[A-Za-z]", RegexOptions.Compiled);
 
         /// <summary>
         /// Returns true if the character is a letter between A and Z or a and z

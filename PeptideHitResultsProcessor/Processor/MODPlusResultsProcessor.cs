@@ -375,7 +375,7 @@ namespace PeptideHitResultsProcessor.Processor
             return mass;
         }
 
-        private static readonly Regex ModMassMatcher = new Regex(MODPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex ModMassMatcher = new(MODPlus_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Computes the total of all modification masses defined for the peptide

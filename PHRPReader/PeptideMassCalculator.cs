@@ -404,7 +404,7 @@ namespace PHRPReader
             return mass;
         }
 
-        private static readonly Regex RegexModMasses = new Regex("[+-][0-9.]+", RegexOptions.Compiled);
+        private static readonly Regex RegexModMasses = new("[+-][0-9.]+", RegexOptions.Compiled);
 
         /// <summary>
         /// Compute the mass of the peptide sequence.  Supports peptide sequences with numeric mod masses

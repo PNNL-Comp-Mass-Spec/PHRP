@@ -277,9 +277,9 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private readonly InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc sortScanChargeFScore = new InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc();
-        private readonly InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc sortScanChargeMQScore = new InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc();
-        private readonly InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc sortScanChargeTotalPRMDesc = new InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc();
+        private readonly InspectSearchResultsComparerScanChargeFScoreDescTotalPRMDesc sortScanChargeFScore = new();
+        private readonly InspectSearchResultsComparerScanChargeMQScoreDescTotalPRMDesc sortScanChargeMQScore = new();
+        private readonly InspectSearchResultsComparerScanChargeTotalPRMDescFScoreDesc sortScanChargeTotalPRMDesc = new();
 
         /// <summary>
         /// Sorts the data by descending TotalPRMScore, than ranks each entry; in addition, computes normalized delta score (DeltaNorm) values
@@ -774,7 +774,7 @@ namespace PeptideHitResultsProcessor.Processor
             }
         }
 
-        private static readonly Regex RegexScanNumberRegEx = new Regex(DTA_FILENAME_SCAN_NUMBER_REGEX, REGEX_OPTIONS);
+        private static readonly Regex RegexScanNumberRegEx = new(DTA_FILENAME_SCAN_NUMBER_REGEX, REGEX_OPTIONS);
 
         private string ExtractScanNumFromDTAName(string spectrumFile)
         {
@@ -1590,8 +1590,8 @@ namespace PeptideHitResultsProcessor.Processor
             return success;
         }
 
-        private static readonly Regex RegexNumPlusZeroes = new Regex(@"(\.\d*[1-9])0+$", RegexOptions.Compiled);
-        private static readonly Regex RegexAllZeroes = new Regex(@"\.0+$", RegexOptions.Compiled);
+        private static readonly Regex RegexNumPlusZeroes = new(@"(\.\d*[1-9])0+$", RegexOptions.Compiled);
+        private static readonly Regex RegexAllZeroes = new(@"\.0+$", RegexOptions.Compiled);
 
         /// <summary>
         /// If value ends in .0000, remove the .0000 portion
@@ -1625,8 +1625,8 @@ namespace PeptideHitResultsProcessor.Processor
             return value;
         }
 
-        private static readonly Regex NTerminalModMassMatcher = new Regex(INSPECT_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
-        private static readonly Regex CTerminalModMassMatcher = new Regex(INSPECT_CTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex NTerminalModMassMatcher = new(INSPECT_NTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
+        private static readonly Regex CTerminalModMassMatcher = new(INSPECT_CTERMINAL_MOD_MASS_REGEX, REGEX_OPTIONS);
 
         /// <summary>
         /// Replaces modification name text in peptide sequences with modification symbols (uses case-sensitive comparisons)
