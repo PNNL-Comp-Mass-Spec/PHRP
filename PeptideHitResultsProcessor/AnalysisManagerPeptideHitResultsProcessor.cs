@@ -183,8 +183,8 @@ namespace PeptideHitResultsProcessor
 
                 RegisterEvents(m_PeptideHitResultsProcessor);
 
-                m_PeptideHitResultsProcessor.ProgressComplete += mPeptideHitResultsProcessor_ProgressComplete;
-                m_PeptideHitResultsProcessor.ProgressReset += mPeptideHitResultsProcessor_ProgressReset;
+                m_PeptideHitResultsProcessor.ProgressComplete += PeptideHitResultsProcessor_ProgressComplete;
+                m_PeptideHitResultsProcessor.ProgressReset += PeptideHitResultsProcessor_ProgressReset;
 
                 // Define the auxiliary file paths
                 m_PeptideHitResultsProcessor.MassCorrectionTagsFilePath = m_MassCorrectionTagsFilePath;
@@ -493,12 +493,12 @@ namespace PeptideHitResultsProcessor
             return false;
         }
 
-        private void mPeptideHitResultsProcessor_ProgressComplete()
+        private void PeptideHitResultsProcessor_ProgressComplete()
         {
             // OperationComplete()
         }
 
-        private void mPeptideHitResultsProcessor_ProgressReset()
+        private void PeptideHitResultsProcessor_ProgressReset()
         {
             // ResetProgress()
         }
