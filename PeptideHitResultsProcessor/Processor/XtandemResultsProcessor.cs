@@ -642,7 +642,9 @@ namespace PeptideHitResultsProcessor.Processor
 
                 firstResult.PeptideIntensity = XMLTextReaderGetAttributeValue(xmlReader, "sumI", string.Empty);
                 firstResult.PeptideIntensityMax = XMLTextReaderGetAttributeValue(xmlReader, "maxI", string.Empty);
-                firstResult.fI = XMLTextReaderGetAttributeValue(xmlReader, "fI", string.Empty);
+
+                // fI: multiplier to convert the normalized spectrum contained in a group back to the original intensity values
+                firstResult.IntensityMultiplier = XMLTextReaderGetAttributeValue(xmlReader, "fI", string.Empty);
 
                 // Continue reading the XML file, loading the information
 
@@ -681,7 +683,7 @@ namespace PeptideHitResultsProcessor.Processor
 
                                     result.PeptideIntensity = firstResult.PeptideIntensity;
                                     result.PeptideIntensityMax = firstResult.PeptideIntensityMax;
-                                    result.fI = firstResult.fI;
+                                    result.IntensityMultiplier = firstResult.IntensityMultiplier;
 
                                     searchResults.Add(result);
                                 }

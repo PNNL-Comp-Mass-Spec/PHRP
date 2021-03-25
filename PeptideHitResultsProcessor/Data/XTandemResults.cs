@@ -31,8 +31,10 @@ namespace PeptideHitResultsProcessor.Data
         // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
         private string mPeptideNextScore;
 
-
-        public string fI { get; set; }
+        /// <summary>
+        /// A multiplier to convert the normalized spectrum contained in a group back to the original intensity values
+        /// </summary>
+        public string IntensityMultiplier { get; set; }
 
         // The raw expectation value from the results file is converted to the Base-10 Log form when read into this program
         public string PeptideExpectationValue { get; set; }
@@ -83,7 +85,7 @@ namespace PeptideHitResultsProcessor.Data
         {
             base.Clear();
 
-            fI = string.Empty;
+            IntensityMultiplier = string.Empty;
 
             PeptideExpectationValue = string.Empty;
             PeptideHyperscore = string.Empty;
