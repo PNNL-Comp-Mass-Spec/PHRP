@@ -46,6 +46,7 @@
     <Compile Include="clsPHRPReader.cs" />
     <Compile Include="Data\Enums.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MSGFPlusParamFileModExtractor.cs" />
     <Compile Include="PeptideCleavageStateCalculator.cs" />
     <Compile Include="PeptideMassCalculator.cs" />
