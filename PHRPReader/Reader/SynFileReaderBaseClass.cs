@@ -19,7 +19,7 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser base class
+    /// PHRP synopsis file reader base class
     /// </summary>
     public abstract class SynFileReaderBaseClass : PRISM.EventNotifier
     {

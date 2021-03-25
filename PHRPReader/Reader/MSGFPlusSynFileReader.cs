@@ -17,11 +17,12 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser for MS-GF+
+    /// PHRP SynFileReader for MS-GF+
     /// </summary>
     public class MSGFPlusSynFileReader : SynFileReaderBaseClass
     {
-        // Ignore Spelling: Frag, novo, msgfdb, Da, tda, Za, Validator, prot, nnet, ntt
+        // Ignore Spelling: enzymeid, Da, Frag, novo, msgfdb, peptidomics, prot, nnet, ntt, tda, Za, Validator
+        // Ignore Spelling: Arg, Chymotrypsin, Glu, Lys
 
 #pragma warning disable 1591
 
@@ -77,6 +78,7 @@ namespace PHRPReader.Reader
         public const string CHARGE_CARRIER_MASS_PARAM_NAME = "ChargeCarrierMass";
 
         [Obsolete("Superseded by Data.MSGFPlusSynFile")]
+        // ReSharper disable UnusedMember.Global
         public enum MSGFPlusSynFileColumns
         {
             ResultID = 0,
@@ -99,12 +101,11 @@ namespace PHRPReader.Reader
             FDR_QValue = 17,                     // Only present if searched using -tda 1
             PepFDR_PepQValue = 18,               // Only present if searched using -tda 1
             EFDR = 19,                           // Only present if did not search using -tda 1
-            // ReSharper disable UnusedMember.Global
             IMSScan = 20,                        // Only present for MSGFDB_IMS results
             IMSDriftTime = 21,                   // Only present for MSGFDB_IMS results
-            // ReSharper restore UnusedMember.Global
             IsotopeError = 22
         }
+        // ReSharper restore UnusedMember.Global
 
 #pragma warning restore 1591
 

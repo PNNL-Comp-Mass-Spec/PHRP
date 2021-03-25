@@ -15,10 +15,11 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser for Inspect
+    /// PHRP SynFileReader for Inspect
     /// </summary>
     public class InspectSynFileReader : SynFileReaderBaseClass
     {
+        // Ignore Spelling: chymotrypsin, Da, FilePos, PepToProt
 
 #pragma warning disable 1591
 

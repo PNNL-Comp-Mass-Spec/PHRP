@@ -17,7 +17,7 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser for MOD+
+    /// PHRP SynFileReader for MOD+
     /// </summary>
     public class MODPlusSynFileReader : SynFileReaderBaseClass
     {

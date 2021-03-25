@@ -15,7 +15,7 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser for TopPIC
+    /// PHRP SynFileReader for TopPIC
     /// </summary>
     public class TopPICSynFileReader : SynFileReaderBaseClass
     {

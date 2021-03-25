@@ -15,10 +15,11 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser for MSPathfinder
+    /// PHRP SynFileReader for MSPathfinder
     /// </summary>
     public class MSPathFinderSynFileReader : SynFileReaderBaseClass
     {
+        // Ignore Spelling: mspath, ProteinDesc, PepToProt
 
 #pragma warning disable 1591
 
@@ -47,6 +48,7 @@ namespace PHRPReader.Reader
         private const string MSPathFinder_SEARCH_ENGINE_NAME = "MSPathFinder";
 
         [Obsolete("Superseded by Data.MSPathFinderSynFile")]
+        // ReSharper disable UnusedMember.Global
         public enum MSPathFinderSynFileColumns
         {
             ResultID = 0,
@@ -68,6 +70,7 @@ namespace PHRPReader.Reader
             QValue = 16,
             PepQValue = 17
         }
+        // ReSharper restore UnusedMember.Global
 #pragma warning restore 1591
 
         /// <summary>

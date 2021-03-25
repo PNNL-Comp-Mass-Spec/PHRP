@@ -17,7 +17,7 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser for SEQUEST
+    /// PHRP SynFileReader for SEQUEST
     /// </summary>
     public class SequestSynFileReader : SynFileReaderBaseClass
     {

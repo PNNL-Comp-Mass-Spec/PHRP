@@ -22,7 +22,7 @@ using PRISM;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser for X!Tandem
+    /// PHRP SynFileReader for X!Tandem
     /// </summary>
     public class XTandemSynFileReader : SynFileReaderBaseClass
     {

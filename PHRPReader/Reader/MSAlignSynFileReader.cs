@@ -15,10 +15,11 @@ using PHRPReader.Data;
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// PHRP parser for MSAlign
+    /// PHRP SynFileReader for MSAlign
     /// </summary>
     public class MSAlignSynFileReader : SynFileReaderBaseClass
     {
+        // Ignore Spelling: Da, FragMethod, histone, Iodo, IodoAcet, PepToProt, Prsm
 
 #pragma warning disable 1591
 

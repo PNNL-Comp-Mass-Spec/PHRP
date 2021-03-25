@@ -41,13 +41,10 @@ namespace PeptideHitResultsProcessor.Processor
 
         // Ignore Spelling: bioml, aa, hyperscore, nextscore, mh, Seqs
 
-        // ReSharper restore CommentTypo
-
-        #region "Constants and Enums"
-
-        // Note: TOOL_NAME is used by AnalysisManagerPeptideHitResultsProcessor.InitSetup
-        //       Do not add an exclamation mark
-
+        /// <summary>
+        /// This constant is used by AnalysisManagerPeptideHitResultsProcessor.InitSetup
+        /// Do not add an exclamation mark
+        /// </summary>
         public const string TOOL_NAME = "XTandem";
 
         // Note: These names must all be lowercase
@@ -378,7 +375,8 @@ namespace PeptideHitResultsProcessor.Processor
                     if (Math.Abs(modificationMass) > float.Epsilon)
                     {
                         // Append the new mod information to modifications
-                        var modInfo = new SearchOptionModificationInfo {
+                        var modInfo = new SearchOptionModificationInfo
+                        {
                             SortOrder = sortOrder
                         };
 
@@ -629,7 +627,8 @@ namespace PeptideHitResultsProcessor.Processor
                 firstResult.ParentIonMH = XMLTextReaderGetAttributeValue(xmlReader, "mh", string.Empty);
                 firstResult.Charge = XMLTextReaderGetAttributeValue(xmlReader, "z", string.Empty);
 
-                // Note: This will get updated for each protein encountered
+                // expect: the expectation value for the top ranked protein identified for a spectrum.
+                // Note: gets updated for each protein encountered
                 firstResult.PeptideExpectationValue = ConvertEValueToBase10Log(XMLTextReaderGetAttributeValue(xmlReader, "expect", string.Empty));
 
                 // Note: we truncate .ProteinName at the first space
@@ -640,7 +639,10 @@ namespace PeptideHitResultsProcessor.Processor
                     firstResult.ProteinName = firstResult.ProteinName.Substring(0, index);
                 }
 
+                // sumI: log10 value of the sum of all of the fragment ion intensities
                 firstResult.PeptideIntensity = XMLTextReaderGetAttributeValue(xmlReader, "sumI", string.Empty);
+
+                // maxI: maximum fragment ion intensity
                 firstResult.PeptideIntensityMax = XMLTextReaderGetAttributeValue(xmlReader, "maxI", string.Empty);
 
                 // fI: multiplier to convert the normalized spectrum contained in a group back to the original intensity values

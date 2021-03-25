@@ -3,7 +3,7 @@
 namespace PHRPReader.Reader
 {
     /// <summary>
-    /// Old PHRP parser for MS-GF+
+    /// Old PHRP SynFileReader for MS-GF+
     /// </summary>
     [Obsolete("Use MSGFPlusSynFileReader")]
     public class MSGFDBSynFileReader : MSGFPlusSynFileReader
